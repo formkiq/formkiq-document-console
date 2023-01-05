@@ -1,0 +1,50 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Build
+
+# Controls when the workflow will run
+on: 
+  push:
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Build project
+        run: cd formkiq && npm install
+
+      - name: Build project
+        run: cd formkiq && npx nx build formkiq-document-console-react
+
+      - name: Zip project
+        run: cd formkiq/dist/apps/formkiq-document-console-react && zip -r formkiq-console.zip *
+
+      - uses: nyaa8/package-version@v1
+        with:
+         path: 'formkiq/package.json'
+         follow-symlinks: 'false' # Optional
+
+      # Runs a single command using the runners shell
+      - name: Set AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      # Runs a set of commands using the runners shell
+      - name: Deploy to S3
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          VERSION: ${{ env.PACKAGE_VERSION }}
+        run: |
+          aws s3 cp formkiq/dist/apps/formkiq-document-console-react/formkiq-console.zip s3://${S3_BUCKET}/formkiq-console/v${VERSION}/formkiq-console.zip

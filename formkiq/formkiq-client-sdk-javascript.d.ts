@@ -1,0 +1,1 @@
+declare module 'formkiq-client-sdk-javascript'

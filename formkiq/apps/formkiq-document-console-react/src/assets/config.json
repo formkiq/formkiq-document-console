@@ -1,0 +1,10 @@
+{
+  "documentApi": "https://xjkc363jt2.execute-api.us-east-2.amazonaws.com",
+  "userPoolId": "us-east-2_blGeBpyLg",
+  "clientId": "74k0f5sm2pfgf34qnfokb2po2l",
+  "consoleVersion": "v3.0.0",
+  "brand": "formkiq",
+  "userAuthentication": "cognito",
+  "authApi": "https://wm06t63vl1.execute-api.us-east-2.amazonaws.com",
+  "cognitoHostedUi": "https://formkiq-enterprise-regan-622653865277.auth.us-east-2.amazoncognito.com"
+}

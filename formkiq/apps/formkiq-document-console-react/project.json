@@ -1,0 +1,86 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/formkiq-document-console-react/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "dist/apps/formkiq-document-console-react",
+        "index": "apps/formkiq-document-console-react/src/index.html",
+        "baseHref": "/",
+        "main": "apps/formkiq-document-console-react/src/main.tsx",
+        "polyfills": "apps/formkiq-document-console-react/src/polyfills.ts",
+        "tsConfig": "apps/formkiq-document-console-react/tsconfig.app.json",
+        "assets": [
+          "apps/formkiq-document-console-react/src/favicon.ico",
+          "apps/formkiq-document-console-react/src/assets"
+        ],
+        "styles": ["apps/formkiq-document-console-react/src/styles.scss"],
+        "scripts": [],
+        "webpackConfig": "@nrwl/react/plugins/webpack",
+        "postcssConfig": "apps/formkiq-document-console-react/postcss.config.js"
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/formkiq-document-console-react/src/environments/environment.ts",
+              "with": "apps/formkiq-document-console-react/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/web:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "formkiq-document-console-react:build",
+        "hmr": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "formkiq-document-console-react:build:development"
+        },
+        "production": {
+          "buildTarget": "formkiq-document-console-react:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/formkiq-document-console-react/**/*.{ts,tsx,js,jsx}"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/formkiq-document-console-react"],
+      "options": {
+        "jestConfig": "apps/formkiq-document-console-react/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
