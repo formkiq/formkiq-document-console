@@ -1,0 +1,10 @@
+{
+  "documentApi": "{DOCUMENT_API_URL}",
+  "userPoolId": "{USER_POOL_ID}",
+  "clientId": "{CLIENT_ID}",
+  "consoleVersion": "v3.0.0",
+  "brand": "formkiq",
+  "userAuthentication": "cognito",
+  "authApi": "{FORMKIQ_AUTH_URL}",
+  "cognitoHostedUi": "{FORMKIQ_HOSTED_UI_URL}"
+}
