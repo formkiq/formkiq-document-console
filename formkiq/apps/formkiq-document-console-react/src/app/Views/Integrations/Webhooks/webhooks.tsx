@@ -151,7 +151,7 @@ export function Webhooks({ user }: any) {
               <div className="pl-1 uppercase text-base">
                 { userSite ? (
                   <span>
-                    Webhooks: Shared Documents
+                    Webhooks: Team Documents
                   </span>
                 ) : (
                   <span>

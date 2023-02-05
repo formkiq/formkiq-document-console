@@ -41,7 +41,7 @@ export const fetchDocuments = createAsyncThunk("documentsList/fetchDocuments", a
       // NOTE: not yet implemented on backend
       DocumentsService.searchDocumentsInFolder(siteId, tagParam, searchWord, searchFolder, page).then((response: any) => {
         if (response) {
-          const data = { documents: response.documents, user: user, page, isLoadingMore: false, isLastSearchPageLoaded: false }
+          const data = { siteId, documents: response.documents, user: user, page, isLoadingMore: false, isLastSearchPageLoaded: false }
           if(page > 1){
             data.isLoadingMore = true
           }
@@ -62,7 +62,7 @@ export const fetchDocuments = createAsyncThunk("documentsList/fetchDocuments", a
               temp.push(el)
             }
           })
-          const data = { documents: temp, user: user, page, isLoadingMore: false, isLastSearchPageLoaded: false }
+          const data = { siteId, documents: temp, user: user, page, isLoadingMore: false, isLastSearchPageLoaded: false }
           if(page > 1){
             data.isLoadingMore = true
           }
@@ -78,7 +78,7 @@ export const fetchDocuments = createAsyncThunk("documentsList/fetchDocuments", a
       if (subfolderUri === 'shared') {
         DocumentsService.getDocumentsSharedWithMe(siteId, tagParam, null, nextToken).then((response: any) => {
           if (response) {
-            const data = { documents: response.documents, user: user, tag: filterTag, folder: subfolderUri, next: response.next, isLoadingMore: false, isLastSearchPageLoaded: false }
+            const data = { siteId, documents: response.documents, user: user, tag: filterTag, folder: subfolderUri, next: response.next, isLoadingMore: false, isLastSearchPageLoaded: false }
             if(nextToken){
               data.isLoadingMore = true
             }
@@ -91,7 +91,7 @@ export const fetchDocuments = createAsyncThunk("documentsList/fetchDocuments", a
       } else if (subfolderUri === 'favorites') {
         DocumentsService.getDocumentsFavoritedByMe(siteId, tagParam, null, nextToken).then((response: any) => {
           if (response) {
-            const data = { documents: response.documents, user: user, tag: filterTag, folder: subfolderUri, next: response.next, isLoadingMore: false, isLastSearchPageLoaded: false }
+            const data = { siteId, documents: response.documents, user: user, tag: filterTag, folder: subfolderUri, next: response.next, isLoadingMore: false, isLastSearchPageLoaded: false }
             if(nextToken){
               data.isLoadingMore = true
             }
@@ -104,7 +104,7 @@ export const fetchDocuments = createAsyncThunk("documentsList/fetchDocuments", a
       } else if (subfolderUri === 'deleted') {
         DocumentsService.getDeletedDocuments(siteId, tagParam, null, nextToken).then((response: any) => {
           if (response) {
-            const data = { documents: response.documents, user: user, tag: filterTag, folder: subfolderUri, next: response.next, isLoadingMore: false, isLastSearchPageLoaded: false }
+            const data = { siteId, documents: response.documents, user: user, tag: filterTag, folder: subfolderUri, next: response.next, isLoadingMore: false, isLastSearchPageLoaded: false }
             if(nextToken){
               data.isLoadingMore = true
             }
@@ -117,7 +117,7 @@ export const fetchDocuments = createAsyncThunk("documentsList/fetchDocuments", a
       } else if (subfolderUri === 'all') {
         DocumentsService.getAllDocuments(siteId, tagParam, null, nextToken).then((response: any) => {
           if (response) {
-            const data = { documents: response.documents, user: user, tag: filterTag, folder: subfolderUri, next: response.next, isLoadingMore: false, isLastSearchPageLoaded: false }
+            const data = { siteId, documents: response.documents, user: user, tag: filterTag, folder: subfolderUri, next: response.next, isLoadingMore: false, isLastSearchPageLoaded: false }
             if(nextToken){
               data.isLoadingMore = true
             }
@@ -131,7 +131,7 @@ export const fetchDocuments = createAsyncThunk("documentsList/fetchDocuments", a
         const dataCache = (thunkAPI.getState() as any)?.dataCacheReducer
         DocumentsService.getDocumentsInFolder(subfolderUri, siteId, tagParam, null, nextToken, 20, dataCache.allTags).then((response: any) => {
           if (response) {
-            const data = { documents: response.documents, user: user, tag: filterTag, folder: subfolderUri, next: response.next, isLoadingMore: false, isLastSearchPageLoaded: false }
+            const data = { siteId, documents: response.documents, user: user, tag: filterTag, folder: subfolderUri, next: response.next, isLoadingMore: false, isLastSearchPageLoaded: false }
             if(nextToken){
               data.isLoadingMore = true
             }
@@ -146,7 +146,7 @@ export const fetchDocuments = createAsyncThunk("documentsList/fetchDocuments", a
       const dataCache = (thunkAPI.getState() as any)?.dataCacheReducer
       DocumentsService.getDocumentsInFolder('', siteId, tagParam, null, nextToken, 20, dataCache.allTags).then((response: any) => {
         if (response) {
-          const data = { documents: response.documents, user: user, folder: '', tag: filterTag, next: response.next, isLoadingMore: false }
+          const data = { siteId, documents: response.documents, user: user, folder: '', tag: filterTag, next: response.next, isLoadingMore: false }
           if(nextToken){
             data.isLoadingMore = true
           }
@@ -201,12 +201,16 @@ export const toggleExpandFolder = createAsyncThunk("documentsList/toggleExpandFo
           if (folder && folder.lastModifiedDate) {
             lastModifiedDate = folder.lastModifiedDate
           }
-          const childFolders = response.documents.filter( (val: any) => val.folder === true)
+          const childFolders = response.documents.filter( (val: any) => val.folder === true).map((val: any) => {
+            val.siteId = siteId
+            return val
+          })
           const childDocs = response.documents.filter( (val: any) => val.folder !== true)
             .filter((val: IDocument) => !(val.tags as any)['sysDeletedBy'])
           const path = folderPath.substring(folderPath.lastIndexOf('/') + 1)
           const newValue: IFolder = {
             ...folder,
+            siteId: siteId,
             documentId: folder.documentId,
             path,
             insertedDate,
@@ -293,6 +297,7 @@ export const documentsListSlice = createSlice({
     setDocuments: (state, action: any) => {
       if (action.payload) {
         let { 
+          siteId,
           documents,
           user, 
           folder,
@@ -315,6 +320,9 @@ export const documentsListSlice = createSlice({
         if (documents) {
           let folders = documents.filter((doc: any) => {
             return doc.folder
+          }).map((val: any) => {
+            val.siteId = siteId
+            return val
           })
           // format date, filter deleted
           const actualDocuments: IDocument [] = documents.filter((doc: any) => {

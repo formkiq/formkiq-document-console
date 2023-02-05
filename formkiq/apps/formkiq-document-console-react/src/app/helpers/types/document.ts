@@ -29,7 +29,7 @@ export const specialFolders = {
     },
     deleted: {
         name: 'deleted',
-        diaplayName: 'Deleted files',
+        diaplayName: 'Trash',
         key: 'sysDeletedBy'
     },
     shared: {

@@ -134,7 +134,7 @@ export function getCurrentSiteInfo(pathname: string, user: any, hasUserSite: boo
       currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`
       currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`
     }
-  } else if (!hasUserSite && pathname.indexOf('/shared-documents') === 0) {
+  } else if (!hasUserSite && pathname.indexOf('/team-documents') === 0) {
     if (hasDefaultSite || !hasSharedFolders || !sharedFolderSites.length) {
       currentSiteInfo.siteId = 'default'
       currentSiteInfo.siteRedirectUrl = '/documents'
@@ -151,10 +151,10 @@ export function getCurrentSiteInfo(pathname: string, user: any, hasUserSite: boo
     currentSiteInfo.siteId = user.email
     currentSiteInfo.siteDocumentsRootUri = '/my-documents'
     currentSiteInfo.siteDocumentsRootName = 'My Documents'
-  } else if (pathname.indexOf('/shared-documents') === 0) {
+  } else if (pathname.indexOf('/team-documents') === 0) {
     currentSiteInfo.siteId = 'default'
-    currentSiteInfo.siteDocumentsRootUri = '/shared-documents'
-    currentSiteInfo.siteDocumentsRootName = 'Shared Documents'
+    currentSiteInfo.siteDocumentsRootUri = '/team-documents'
+    currentSiteInfo.siteDocumentsRootName = 'Team Documents'
   } else if (pathname.indexOf('/shared-folders') === 0) {
     const pathAfterSharedFolders = pathname.substring(pathname.indexOf('/', 1) + 1)
     if (pathAfterSharedFolders.indexOf('/') > -1) {

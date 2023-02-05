@@ -335,9 +335,9 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
       case 'favorites':
         return 'Favorites'
       case 'recent':
-        return 'Recent files'
+        return 'Recent'
       case 'deleted':
-        return 'Deleted files'
+        return 'Trash'
       default:
         return ''
     }
@@ -361,7 +361,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
     if (newSiteId === props.user.email) {
       newDocumentsRootUri = '/my-documents'
     } else if (newSiteId === 'default' && hasUserSite) {
-      newDocumentsRootUri = '/shared-documents'
+      newDocumentsRootUri = '/team-documents'
     } else {
       newDocumentsRootUri = '/shared-folders/' + newSiteId
     }
@@ -447,7 +447,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                               )}
                               { hasUserSite && hasDefaultSite && (
                                 <option value='default'>
-                                  Shared Documents
+                                  Team Documents
                                 </option>
                               )}
                               { !hasUserSite && hasDefaultSite && (
