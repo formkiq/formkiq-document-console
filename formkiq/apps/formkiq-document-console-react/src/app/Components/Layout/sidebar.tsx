@@ -385,9 +385,8 @@ export function Sidebar(props: {
                     {sharedFoldersExpanded &&
                       sharedFolderSites.map((site: any, i: number) => {
                         return (
-                          <>
+                          <span key={i}>
                             <li
-                              key={i}
                               className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap"
                             >
                               <NavLink
@@ -423,7 +422,7 @@ export function Sidebar(props: {
                               </NavLink>
                             </li>
                             { QuickFolderList(site.siteId, currentSiteId === site.siteId && subfolderUri.length ? subfolderUri.split('/') : [], props.folders) }
-                          </>
+                          </span>
                         );
                       })}
                   </>
