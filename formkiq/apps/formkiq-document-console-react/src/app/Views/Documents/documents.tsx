@@ -788,9 +788,9 @@ function Documents(props: {
                 onMoveModalClick={onMoveModalClick}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onESignaturesModalClick={onESignaturesModalClick}
-                restoreDocument={restoreDocument}
                 onTagChange={onTagChange}
                 filterTag={filterTag}
+                onRestoreDocument={restoreDocument}
                 onDeleteDocument={deleteDocument}
               />
             )

@@ -183,7 +183,7 @@ export const toggleExpandFolder = createAsyncThunk("documentsList/toggleExpandFo
     })
   }
   const folderPath = subfolderUri
-  if(folder.isExpanded) {
+  if (folder.isExpanded) {
     const newValue = { ...folder, isExpanded: false }
     thunkAPI.dispatch(updateFolderValue({folderToUpdate: folder, newValue}))
   } else {
@@ -201,18 +201,19 @@ export const toggleExpandFolder = createAsyncThunk("documentsList/toggleExpandFo
           if (folder && folder.lastModifiedDate) {
             lastModifiedDate = folder.lastModifiedDate
           }
+          // NOTE: adding siteId and FULL path on expanding folder, but FULL path is not added to folders when loading a folder page (vs. expanding)
           const childFolders = response.documents.filter( (val: any) => val.folder === true).map((val: any) => {
             val.siteId = siteId
+            val.path = folderPath + '/' + val.path
             return val
           })
           const childDocs = response.documents.filter( (val: any) => val.folder !== true)
             .filter((val: IDocument) => !(val.tags as any)['sysDeletedBy'])
-          const path = folderPath.substring(folderPath.lastIndexOf('/') + 1)
           const newValue: IFolder = {
             ...folder,
             siteId: siteId,
             documentId: folder.documentId,
-            path,
+            path: folderPath,
             insertedDate,
             lastModifiedDate,
             isExpanded: true,

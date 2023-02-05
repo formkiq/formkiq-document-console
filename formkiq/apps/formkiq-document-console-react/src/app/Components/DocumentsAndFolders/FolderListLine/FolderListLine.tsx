@@ -23,7 +23,7 @@ interface IProps {
   folderInstance: IFolder
   currentSiteId: string
   onDeleteClick: (folder: IFolder) => () => void
-  restoreDocument: any
+  onRestoreDocument: (file: IDocument, siteId: string, searchDocuments: any) => () => void
   onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void
   user: User
   currentDocumentsRootUri: string
@@ -60,12 +60,15 @@ function FolderListLine({
   onDocumentVersionsModalClick,
   onESignaturesModalClick,
   brand,
-  restoreDocument,
+  onRestoreDocument,
   onDeleteDocument,
   onTagChange,
   filterTag
 }: IProps) {
-  const folderPath = subfolder + (subfolder.length ? '/' : '') + folderInstance.path
+  let folderPath = folderInstance.path
+  if (folderInstance.path.indexOf('/') === -1) {
+    folderPath = subfolder + (subfolder.length ? '/' : '') + folderInstance.path
+  }
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1)
   const trElem = React.forwardRef((props: any, ref) => (
     <tr {...props} ref={ref}>
@@ -113,7 +116,8 @@ function FolderListLine({
                       onRenameModalClick={onRenameModalClick}
                       onMoveModalClick={onMoveModalClick}
                       onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                      onESignaturesModalClick={onESignaturesModalClick} restoreDocument={undefined}
+                      onESignaturesModalClick={onESignaturesModalClick}
+                      onRestoreDocument={onRestoreDocument}
                       onDeleteDocument={onDeleteDocument}
                       useIndividualSharing={useIndividualSharing}
                       formkiqVersion={formkiqVersion}
@@ -138,7 +142,7 @@ function FolderListLine({
                   onShareClick={onShareClick}
                   searchDocuments={folderInstance.documents}
                   onDeleteClick={onDeleteDocument(file, null)}
-                  onRestoreClick={restoreDocument(file, currentSiteId, null)}
+                  onRestoreClick={onRestoreDocument(file, currentSiteId, null)}
                   onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
                   onRenameModalClick={onRenameModalClick}
                   onMoveModalClick={onMoveModalClick}
