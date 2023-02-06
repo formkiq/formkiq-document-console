@@ -129,89 +129,6 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName)
   }, [pathname])
 
-  /*
-  const foldersPath = (uri: string, isDocument = false) => {
-    if (uri) {
-      const folderLevels = uri.split('/');
-      if (folderLevels.length > 3) {
-        const previousFolderLevel = uri.substring(0, uri.lastIndexOf('/'))
-        return (
-          <span className={'text-sm font-medium flex pr-1 py-4.1 text-gray-500 bg-whitetext-gray-500'}>
-            <p className={'text-sm font-medium flex px-1'}> / </p>
-              <FolderDropWrapper folder={folderLevels[0]} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'flex items-start'}>
-                <Link to={`${currentDocumentsRootUri}/folders/` + folderLevels[0]}>{folderLevels[0]}</Link>
-              </FolderDropWrapper>
-            <p className={'text-sm font-medium flex px-1'}> / </p>
-            <span>..</span>
-            <p className={'text-sm font-medium flex px-1'}> / </p>
-            <FolderDropWrapper folder={previousFolderLevel} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'flex items-start'}>
-              <Link to={`${currentDocumentsRootUri}/folders/` + uri.replace("/" + folderLevels[folderLevels.length - 1], "/") }>{folderLevels[folderLevels.length - 2]}</Link>
-            </FolderDropWrapper>
-            { !isDocument && (
-              <>
-                <p className={'text-sm font-medium flex px-1'}> / </p>
-                <span className={'flex items-center mr-1.5'}>
-                  <FolderOutline /> 
-                </span>
-                <span>{folderLevels[folderLevels.length - 1]}</span>
-              </>
-            )}
-          </span>
-        )
-      } else {
-        return(
-          <span className={'text-sm font-medium flex pr-2 py-4.1 text-gray-500 bg-whitetext-gray-500'}>
-            { folderLevels.length > 1 && (
-              <>
-                <p className={'text-sm font-medium flex px-1'}> / </p>
-                <FolderDropWrapper folder={folderLevels[0]} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'flex items-start'}>
-                  <Link to={`${currentDocumentsRootUri}/folders/` + folderLevels[0]}>{folderLevels[0]}</Link>
-                </FolderDropWrapper>
-              </>
-            )}
-            { folderLevels.length > 2 && (
-              <>
-                <p className={'text-sm font-medium flex px-1'}> / </p>
-                <FolderDropWrapper folder={folderLevels[0] + '/' + folderLevels[1]} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'flex items-start'}>
-                  <Link to={`${currentDocumentsRootUri}/folders/` + folderLevels[0] + "/" + folderLevels[folderLevels.length - 2]}>{folderLevels[folderLevels.length - 2]}</Link>
-                </FolderDropWrapper>
-              </>
-            )}
-            { !isDocument && (
-              <>
-                <p className={'text-sm font-medium flex px-1'}> / </p>
-                <FolderDropWrapper folder={uri} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'flex items-start'}>
-                  <span className={'flex items-center mt-1 mr-1.5'}>
-                    <FolderOutline /> 
-                  </span>
-                  <span>{folderLevels[folderLevels.length - 1]}</span>
-                </FolderDropWrapper>
-              </>
-            )}  
-          </span>
-        )
-      }
-    }
-    return <></>
-  }
-  const documentPath = (document: IDocument | null, showSlash = true) => {
-    if (document) {
-      return (
-        <span className={'w-full text-sm font-medium flex pr-2 py-4 text-gray-500 bg-whitetext-gray-500'}>
-          { showSlash && (
-            <p className={'text-sm font-medium flex pr-2'}> / </p>
-          )}
-          <span className={'flex items-center mr-2'}>
-            <img src={getFileIcon((document as IDocument).path)} alt="File Icon" className="mr-0.5 inline-block h-6" />
-          </span>
-          <span>{document.filename ? document.filename : document.path}</span>
-        </span>
-      )
-    }
-    return <></>
-  }
-  */
-
   const documentSubpaths: string[] = [
     'folders',
     'settings',
@@ -494,8 +411,11 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                                 <span className="px-2">|</span>
                                 {props.currentDocumentPath}
                                 <span className="pl-8">
-                                  <a href={ siteDocumentsRootUri + '/folders/' + props.currentDocumentPath.substring(0, props.currentDocumentPath.lastIndexOf('/')) + '#id=' + documentId} className="text-sm text-gray-500 hover:text-coreOrange-600 cursor-pointer">
-                                    view in document list
+                                  <a
+                                    href={ siteDocumentsRootUri + '/folders/' + props.currentDocumentPath.substring(0, props.currentDocumentPath.lastIndexOf('/')) + '#id=' + documentId}
+                                    className="text-sm text-gray-500 hover:text-coreOrange-600 cursor-pointer whitespace-nowrap"
+                                    >
+                                    view folder
                                   </a>
                                 </span>
                               </span>

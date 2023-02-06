@@ -8,7 +8,7 @@ import { Link, useLocation, useParams, useNavigate } from "react-router-dom"
 import { RootState } from '../../Store/store';
 import { connect, useDispatch } from "react-redux";
 import { SubfolderUri, User } from '../../Store/reducers/auth';
-import { Plus, Spinner, Upload, Share, Star, ArrowRight, ArrowBottom, View, Edit, Download, Trash, Undo } from "../../Components/Icons/icons"
+import { Plus, Spinner, Upload, Share, Star, ArrowRight, ArrowBottom, FolderOutline, View, Edit, Download, Trash, Undo } from "../../Components/Icons/icons"
 import ShareModal from "../../Components/Share/share"
 import EditTagsAndMetadataModal from "../../Components/DocumentsAndFolders/EditTagsAndMetadataModal/editTagsAndMetadataModal"
 import DocumentVersionsModal from "../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal"
@@ -338,7 +338,7 @@ function Documents(props: {
 
   useEffect(() => {
     // TODO: create a refresh required status to prevent "Cancel" on modal from trigerring refresh?
-    if (isUploadModalOpened === false && isNewModalOpened === false && isMoveModalOpened === false && isRenameModalOpened === false) {
+    if (isUploadModalOpened === false && isFolderUploadModalOpened === false && isNewModalOpened === false && isMoveModalOpened === false && isRenameModalOpened === false) {
       dispatch(setDocuments({ documents: null, nextLoadingStatus: requestStatusTypes.pending }));
       setTimeout(() => {
         dispatch(
@@ -353,7 +353,7 @@ function Documents(props: {
         );
       }, 300)
     }
-  }, [currentSiteId, search, subfolderUri, filterTag, isUploadModalOpened, isNewModalOpened, isMoveModalOpened, isRenameModalOpened]);
+  }, [currentSiteId, search, subfolderUri, filterTag, isUploadModalOpened, isFolderUploadModalOpened, isNewModalOpened, isMoveModalOpened, isRenameModalOpened]);
 
   useEffect(() => {
     if (documentsWrapperRef.current) {
@@ -641,6 +641,96 @@ function Documents(props: {
       }
     }
   };
+
+  const foldersPath = (uri: string) => {
+    if (uri) {
+      const folderLevels = uri.split('/');
+      if (folderLevels.length > 3) {
+        const previousFolderLevel = uri.substring(0, uri.lastIndexOf('/'))
+        return (
+          <span className={'flex pr-1 py-2 text-gray-500 bg-white text-gray-500'}>
+            <span className="pr-1">
+              <Link
+                to={`${currentDocumentsRootUri}`}
+                className="hover:text-coreOrange-600"
+                >
+                { siteDocumentsRootName.replace('Shared Folder: ', '') }:
+              </Link>
+            </span>
+            <p className={'flex px-1'}> / </p>
+              <FolderDropWrapper folder={folderLevels[0]} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'flex items-start'}>
+                <Link to={`${currentDocumentsRootUri}/folders/` + folderLevels[0]}>{folderLevels[0]}</Link>
+              </FolderDropWrapper>
+            <p className={'flex px-1'}> / </p>
+            <span>..</span>
+            <p className={'flex px-1'}> / </p>
+            <FolderDropWrapper folder={previousFolderLevel} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'flex items-start'}>
+              <Link to={`${currentDocumentsRootUri}/folders/` + uri.replace("/" + folderLevels[folderLevels.length - 1], "/") }>{folderLevels[folderLevels.length - 2]}</Link>
+            </FolderDropWrapper>
+            <p className={'flex px-1'}> / </p>
+            <span className={'flex items-center mt-1 mr-1.5 w-5'}>
+              <FolderOutline /> 
+            </span>
+            <span>{folderLevels[folderLevels.length - 1]}</span>
+          </span>
+        )
+      } else {
+        return(
+          <span className={'flex pr-2 py-2 text-gray-500 bg-white text-gray-500'}>
+            <span className="pr-1">
+              <Link
+                to={`${currentDocumentsRootUri}`}
+                className="hover:text-coreOrange-600"
+                >
+                { siteDocumentsRootName.replace('Shared Folder: ', '') }:
+              </Link>
+            </span>
+            { folderLevels.length > 1 && (
+              <>
+                <p className={'flex px-1'}> / </p>
+                <FolderDropWrapper folder={folderLevels[0]} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'flex items-start'}>
+                  <Link
+                    to={`${currentDocumentsRootUri}/folders/` + folderLevels[0]}
+                    className="hover:text-coreOrange-600"
+                    >
+                    {folderLevels[0]}
+                  </Link>
+                </FolderDropWrapper>
+              </>
+            )}
+            { folderLevels.length > 2 && (
+              <>
+                <p className={'flex px-1'}> / </p>
+                <FolderDropWrapper folder={folderLevels[0] + '/' + folderLevels[1]} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'flex items-start'}>
+                  <Link
+                    to={`${currentDocumentsRootUri}/folders/` + folderLevels[0] + "/" + folderLevels[folderLevels.length - 2]}
+                    className="hover:text-coreOrange-600"
+                    >
+                    {folderLevels[folderLevels.length - 2]}
+                  </Link>
+                </FolderDropWrapper>
+              </>
+            )}
+            <p className={'flex px-1'}> / </p>
+            <FolderDropWrapper folder={uri} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'flex items-start'}>
+              <span className={'flex items-center mt-1 mr-1.5 w-5'}>
+                <FolderOutline /> 
+              </span>
+              <span>{folderLevels[folderLevels.length - 1]}</span>
+            </FolderDropWrapper>
+          </span>
+        )
+      }
+    }
+    return (
+      <span className={'hidden flex pr-1 py-2 text-gray-500 bg-white text-gray-500'}>
+        <span className="pr-1">
+          { siteDocumentsRootName.replace('Shared Folder: ', '') }
+        </span>
+      </span>
+    )
+  }
+
   const filtersAndTags = () => {
     let tagsToCheck: string[] = [];
     tagsToCheck = tagsToCheck.concat(TagsForFilterAndDisplay);
@@ -1167,12 +1257,17 @@ function Documents(props: {
           </div>
         </div>
       ) : (
-        <div className="flex flex-row">
-          <div className="flex-1 inline-block mt-6">
-            {filtersAndTags()}
-            {documentsTable(props.documents, props.folders)}
+        <>
+          <div className="flex">
+            { foldersPath(subfolderUri) }
           </div>
-        </div>
+          <div className="flex flex-row">
+            <div className="flex-1 inline-block">
+              {filtersAndTags()}
+              {documentsTable(props.documents, props.folders)}
+            </div>
+          </div>
+        </>
       )}
       <ShareModal
         isOpened={isShareModalOpened}
