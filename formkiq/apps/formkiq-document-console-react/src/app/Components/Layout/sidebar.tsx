@@ -4,14 +4,14 @@ import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { connect, useDispatch } from "react-redux";
 import { Section, User } from '../../Store/reducers/auth';
 import { RootState } from '../../Store/store';
-import { ChevronLeft, ChevronRight, Documents, FolderOutline, ShareHand, Workflow, Api, Webhook, UserIcon, Star, Trash, Settings, ArrowRight, ArrowBottom, ComingSoon, DoublePerson, Recent, Help, Collection, CollectionAdd } from '../Icons/icons';
+import { ChevronLeft, ChevronRight, Plus, Upload, Documents, FolderOutline, ShareHand, Workflow, Api, Webhook, UserIcon, Star, Trash, Settings, ArrowRight, ArrowBottom, ComingSoon, DoublePerson, Recent, Help, Collection, CollectionAdd } from '../Icons/icons';
 import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import SharedFoldersModal from './sharedFoldersModal';
 import { requestStatusTypes } from "../../helpers/types/document"
 import { IFolder } from "../../helpers/types/folder"
 import { getUserSites, getCurrentSiteInfo, parseSubfoldersFromUrl } from '../../helpers/services/toolService'
 import { DocumentsAndFoldersPrefixes, WorkflowsAndIntegrationsPrefixes, AccountAndSettingsPrefixes } from '../../helpers/constants/pagePrefixes';
-import { setIsSidebarExpanded, setIsSharedFoldersExpanded } from '../../Store/reducers/config'
+import { setIsSidebarExpanded, setCurrentActionEvent, setIsSharedFoldersExpanded } from '../../Store/reducers/config'
 
 export function Sidebar(props: {
   user: User;
@@ -886,7 +886,7 @@ export function Sidebar(props: {
       >
         <div
           className={
-            (sidebarExpanded ? 'w-62' : 'w-10') +
+            (sidebarExpanded ? 'w-64' : 'w-10') +
             ' flex fixed z-30 justify-between mt-2'
           }
         >
@@ -916,12 +916,12 @@ export function Sidebar(props: {
           </Link>
           <div
             className={
-              (sidebarExpanded ? 'justify-end mr-6 ' : 'justify-end mr-2') +
-              ' text-gray-600 hover:text-gray-700 flex mt-2 cursor-pointer '
+              (sidebarExpanded ? 'justify-end mr-2 ' : 'justify-end mr-2') +
+              ' text-gray-600 hover:text-coreOrange-500 flex mt-2 cursor-pointer '
             }
             onClick={toggleSidebarExpand}
           >
-            <div className={(!sidebarExpanded ? 'mt-2' : '-mt-1.5') + ' w-3'}>
+            <div className={(!sidebarExpanded ? 'mt-2' : '-mt-1.5') + ' w-4'}>
               {sidebarExpanded ? <ChevronRight /> : <ChevronLeft />}
             </div>
           </div>
@@ -937,6 +937,42 @@ export function Sidebar(props: {
         {props.user && (
           <>
             <nav className="grow mt-16">
+              <div className="flex flex-wrap w-full justify-center mb-4">
+                <button
+                  className={ (props.isSidebarExpanded ? ' mr-1 ' : 'mb-1 ' ) + ' bg-coreOrange-500 hover:bg-coreOrange-700 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'}
+                  onClick={(event) => {
+                      // TODO: create more consistent check on site location
+                      if (pathname.indexOf('/workflows') > -1 || pathname.indexOf('/integrations') > -1) {
+                        window.location.href = `${currentDocumentsRootUri}?actionEvent=new`
+                      } else {
+                        dispatch(setCurrentActionEvent('new')) 
+                      }
+                    }
+                  }
+                >
+                  {props.isSidebarExpanded && (
+                    <span>New</span>
+                  )}
+                  <div className={(props.isSidebarExpanded ? 'ml-2 mt-1 ' : 'ml-0 mt-0 ' ) + ' w-3 h-3'}>{Plus()}</div>
+                </button>
+                <button
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm py-2 px-4 rounded-2xl flex cursor-pointer"
+                  onClick={(event) => {
+                    // TODO: create more consistent check on site location
+                    if (pathname.indexOf('/workflows') > -1 || pathname.indexOf('/integrations') > -1) {
+                      window.location.href = `${currentDocumentsRootUri}?actionEvent=upload`
+                    } else {
+                      dispatch(setCurrentActionEvent('upload'))
+                    }
+                  }
+                }
+                >
+                  {props.isSidebarExpanded && (
+                    <span>Upload</span>
+                  )}
+                  <div className={(props.isSidebarExpanded ? 'ml-2 mt-1 ' : 'ml-0 mt-0 ' ) + ' w-3 h-3'}>{Upload()}</div>
+                </button>
+              </div>
               <ul className="flex lg:flex-col gap-1">
                 <SidebarItems />
               </ul>

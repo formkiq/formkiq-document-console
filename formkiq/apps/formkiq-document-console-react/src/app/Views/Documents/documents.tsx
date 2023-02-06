@@ -22,6 +22,7 @@ import AllTagsPopover from "../../Components/DocumentsAndFolders/AllTagsPopover/
 import DocumentListLine from "../../Components/DocumentsAndFolders/DocumentListLine/documentListLine"
 import FolderDropWrapper from "../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper"
 import { fetchDocuments, fetchDeleteDocument, fetchDeleteFolder, setDocuments, toggleExpandFolder, updateDocumentsList } from "../../Store/reducers/documentsList"
+import { setCurrentActionEvent } from '../../Store/reducers/config'
 import { setAllTags } from "../../Store/reducers/data"
 import CustomDragLayer from "../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer"
 import { ILine } from '../../helpers/types/line'
@@ -45,6 +46,7 @@ function Documents(props: {
   currentSearchPage: number;
   isLastSearchPageLoaded: boolean;
   isSidebarExpanded: boolean;
+  currentActionEvent: string;
   brand: string;
   formkiqVersion: any;
   tagColors: any[];
@@ -87,6 +89,7 @@ function Documents(props: {
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
   const filterTag = new URLSearchParams(search).get('filterTag');
+  const actionEvent = new URLSearchParams(search).get('actionEvent');
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } = getUserSites(user);
   const pathname = useLocation().pathname
   const { siteId, siteRedirectUrl, siteDocumentsRootUri, siteDocumentsRootName } = getCurrentSiteInfo(pathname, user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
@@ -112,7 +115,9 @@ function Documents(props: {
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
   const [isUploadModalOpened, setUploadModalOpened] = useState(false);
+  const [isFolderUploadModalOpened, setFolderUploadModalOpened] = useState(false);
   const [uploadModalDocumentId, setUploadModalDocumentId] = useState('');
+  const [folderUploadModalDocumentId, setFolderUploadModalDocumentId] = useState('');
   const [shareModalValue, setShareModalValue] = useState<ILine | null>(null);
   const [isShareModalOpened, setShareModalOpened] = useState(false);
   const [editTagsAndMetadataModalValue, setEditTagsAndMetadataModalValue] = useState<ILine | null>(
@@ -232,6 +237,54 @@ function Documents(props: {
       }
     }
   }, [id]);
+
+  useEffect(() => {
+    if (props.currentActionEvent && props.currentActionEvent.length) {
+      switch (props.currentActionEvent) {
+        case 'upload':
+          if (currentDocument) {
+            onUploadClick({}, (currentDocument as IDocument).documentId)
+          } else {
+            onUploadClick({}, '')
+          }
+          break
+        case 'new':
+          onNewClick({}, {
+            lineType: 'folder',
+            folder: subfolderUri,
+            documentId: '',
+            documentInstance: null,
+            folderInstance: null,
+          })
+          break
+        case 'folderUpload':
+          onFolderUploadClick({})
+          break
+      }
+    } else if (actionEvent && actionEvent.length > 0) {
+      switch (actionEvent) {
+        case 'upload':
+          if (currentDocument) {
+            onUploadClick({}, (currentDocument as IDocument).documentId)
+          } else {
+            onUploadClick({}, '')
+          }
+          break
+        case 'new':
+          onNewClick({}, {
+            lineType: 'folder',
+            folder: subfolderUri,
+            documentId: '',
+            documentInstance: null,
+            folderInstance: null,
+          })
+          break
+        case 'folderUpload':
+          onFolderUploadClick({})
+          break
+      }
+    }
+  }, [props.currentActionEvent, actionEvent]);
 
   const updateTags = () => {
     if (id) {
@@ -432,11 +485,20 @@ function Documents(props: {
     return shareModalValue;
   };
   const onUploadClick = (event: any, documentId: string) => {
+    dispatch(setCurrentActionEvent(''))
     setUploadModalOpened(true);
     setUploadModalDocumentId(documentId);
   };
   const onUploadClose = () => {
     setUploadModalOpened(false);
+  };
+  const onFolderUploadClick = (event: any) => {
+    dispatch(setCurrentActionEvent(''))
+    setFolderUploadModalOpened(true);
+    setFolderUploadModalDocumentId('');
+  };
+  const onFolderUploadClose = () => {
+    setFolderUploadModalOpened(false);
   };
   const onEditTagsAndMetadataModalClick = (event: any, value: ILine | null) => {
     setEditTagsAndMetadataModalValue(value);
@@ -478,6 +540,17 @@ function Documents(props: {
     );
   };
   const onNewClick = (event: any, value: ILine | null) => {
+    dispatch(setCurrentActionEvent(''))
+    if (TopLevelFolders.indexOf(subfolderUri) !== -1) {
+      // TODO: add redirect or messaging of location of new file, as it won't be in the TopLevelFolder
+      value = {
+        lineType: 'folder',
+        folder: '',
+        documentId: '',
+        documentInstance: null,
+        folderInstance: null,
+      }
+    }
     setNewModalValue(value);
     setNewModalOpened(true);
   };
@@ -1085,32 +1158,6 @@ function Documents(props: {
       ) : (
         <div className="flex flex-row">
           <div className="flex-1 inline-block mt-6">
-            { TopLevelFolders.indexOf(subfolderUri) === -1 && (
-              <div className="ml-3 flex gap-4 pb-6">
-                <button
-                  className="bg-coreOrange-500 hover:bg-coreOrange-700 text-white font-bold py-2 px-4 rounded flex cursor-pointer"
-                  onClick={(event) =>
-                    onNewClick(event, {
-                      lineType: 'folder',
-                      folder: subfolderUri,
-                      documentId: '',
-                      documentInstance: null,
-                      folderInstance: null,
-                    })
-                  }
-                >
-                  <span>Create new</span>
-                  <div className="w-4 h-4 ml-2 mt-1">{Plus()}</div>
-                </button>
-                <button
-                  onClick={(event) => onUploadClick(event, '')}
-                  className="w-38 flex bg-gray-100 justify-center px-4 py-1.5 text-base text-gray-900 rounded-md cursor-pointer"
-                >
-                  <span className="pt-0.5"> Upload </span>
-                  <div className="w-4 h-4 ml-3 mt-1">{Upload()}</div>
-                </button>
-              </div>
-            )}
             {filtersAndTags()}
             {documentsTable(props.documents, props.folders)}
           </div>
@@ -1172,6 +1219,16 @@ function Documents(props: {
         formkiqVersion={props.formkiqVersion}
         folder={subfolderUri}
         documentId={uploadModalDocumentId}
+        isFolderUpload={false}
+      />
+      <UploadModal
+        isOpened={isFolderUploadModalOpened}
+        onClose={onFolderUploadClose}
+        siteId={currentSiteId}
+        formkiqVersion={props.formkiqVersion}
+        folder={subfolderUri}
+        documentId={folderUploadModalDocumentId}
+        isFolderUpload={true}
       />
     </>
   );
@@ -1180,7 +1237,7 @@ function Documents(props: {
 const mapStateToProps = (state: RootState) => {
   const { subfolderUri, user } = state.authReducer
   const { documents, folders, nextToken, nextLoadingStatus, currentSearchPage, isLastSearchPageLoaded } = state.documentsReducer
-  const { isSidebarExpanded, brand, formkiqVersion, tagColors, useIndividualSharing, useFileFilter, useCollections, useSoftDelete } = state.configReducer
+  const { isSidebarExpanded, currentActionEvent, brand, formkiqVersion, tagColors, useIndividualSharing, useFileFilter, useCollections, useSoftDelete } = state.configReducer
   const { allTags } = state.dataCacheReducer
   return {
     subfolderUri,
@@ -1192,6 +1249,7 @@ const mapStateToProps = (state: RootState) => {
     currentSearchPage,
     isLastSearchPageLoaded,
     isSidebarExpanded,
+    currentActionEvent,
     brand,
     formkiqVersion,
     tagColors,

@@ -15,6 +15,7 @@ export interface Config {
   formkiqVersion: string,
   tagColors: string[],
   isSidebarExpanded: boolean,
+  currentActionEvent: string,
   isSharedFoldersExpanded: boolean,
   useIndividualSharing: boolean,
   useNotifications: boolean,
@@ -79,6 +80,7 @@ export const configInitialState = {
   formkiqVersion: '',
   tagColors,
   isSidebarExpanded: true,
+  currentActionEvent: '',
   isSharedFoldersExpanded: false,
   useIndividualSharing: false,
   useNotifications: false,
@@ -165,6 +167,12 @@ export const configSlice = createSlice({
         isSidebarExpanded: action.payload
       }
     },
+    setCurrentActionEvent(state, action: PayloadAction<string>) {
+      return {
+        ...state,
+        currentActionEvent: action.payload
+      }
+    },
     setIsSharedFoldersExpanded(state, action: PayloadAction<boolean>) {
       return {
         ...state,
@@ -185,6 +193,7 @@ export const {
   setFormkiqVersion,
   setTagColors,
   setIsSidebarExpanded,
+  setCurrentActionEvent,
   setIsSharedFoldersExpanded
 } = configSlice.actions
 

@@ -16,6 +16,7 @@ import {
 import { formatDate } from '../../../helpers/services/toolService';
 import { openDialog } from "../../../Store/reducers/globalNotificationControls"
 import { OcrContentTypes } from "../../../helpers/constants/contentTypes"
+import { setCurrentActionEvent } from '../../../Store/reducers/config'
 
 const foldersWithNoUpload = [
   'favorites',
@@ -83,6 +84,7 @@ export default function UploadModal({
   formkiqVersion,
   folder,
   documentId,
+  isFolderUpload,
 }: {
   isOpened: boolean;
   onClose: any;
@@ -90,6 +92,7 @@ export default function UploadModal({
   formkiqVersion: any;
   folder: string;
   documentId: string;
+  isFolderUpload: boolean;
 }) {
   const dispatch = useDispatch()
   const cancelButtonRef = useRef(null);
@@ -372,7 +375,19 @@ export default function UploadModal({
                       {documentId.length ? (
                         <span>Upload New Version</span>
                       ) : (
-                        <span>Add Documents</span>
+                        // eslint-disable-next-line react/jsx-no-useless-fragment
+                        <>
+                          {isFolderUpload ? (
+                            <>
+                              <span>Add All Documents from Within a Folder</span>
+                              <span className="block text-sm pb-4">
+                                NOTE: these will add the documents as files within the current folder; if you want to add these files into their own subfolder, please create that subfolder first, and then upload from inside that new folder.
+                              </span>
+                            </>
+                          ) : (
+                            <span>Add Documents</span>
+                          )}
+                        </>
                       )}
                     </div>
                     <div className={'overflow-auto max-h-64 mb-4'}>
@@ -385,6 +400,7 @@ export default function UploadModal({
                         beforeUpload={onBeforeUpload}
                         selected={onFilesSelected}
                         multiple={allowMultipleFiles}
+                        directoryUpload={isFolderUpload}
                       />
                     </div>
                     <div>{uploadProcessTable(uploadProcessDocs)}</div>
@@ -437,6 +453,33 @@ export default function UploadModal({
                         >
                         Clear
                       </button>
+                      { isFolderUpload ? (
+                        <button
+                          type="button"
+                          className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                          onClick={event => {
+                              closeDialog();
+                              dispatch(setCurrentActionEvent('upload'))
+                            }
+                          }
+                          ref={cancelButtonRef}
+                        >
+                          Upload Files Instead...
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                          onClick={event => {
+                              closeDialog();
+                              dispatch(setCurrentActionEvent('folderUpload'))
+                            }
+                          }
+                          ref={cancelButtonRef}
+                        >
+                          Upload the Contents of an Entire Folder Instead...
+                        </button>
+                      )}
                     </div>
                     <button
                       type="button"
