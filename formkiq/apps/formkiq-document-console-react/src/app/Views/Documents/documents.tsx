@@ -35,6 +35,7 @@ import { InlineViewableContentTypes, OnlyOfficeContentTypes } from "../../helper
 import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import { TopLevelFolders } from "../../helpers/constants/folders"
 import FolderListLine from "../../Components/DocumentsAndFolders/FolderListLine/FolderListLine"
+import { setCurrentDocumentPath } from '../../Store/reducers/data'
 
 function Documents(props: {
   subfolderUri: SubfolderUri;
@@ -90,6 +91,7 @@ function Documents(props: {
   const searchFolder = new URLSearchParams(search).get('searchFolder');
   const filterTag = new URLSearchParams(search).get('filterTag');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
+  const { hash } = useLocation();
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } = getUserSites(user);
   const pathname = useLocation().pathname
   const { siteId, siteRedirectUrl, siteDocumentsRootUri, siteDocumentsRootName } = getCurrentSiteInfo(pathname, user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
@@ -225,6 +227,7 @@ function Documents(props: {
         updateTags();
       });
     } else {
+      dispatch(setCurrentDocumentPath(''))
       if (documentsWrapperRef.current) {
         (documentsWrapperRef.current as HTMLDivElement).style.height =
           ((window.innerHeight - documentListOffsetTop) + 400) + 'px';
@@ -237,6 +240,14 @@ function Documents(props: {
       }
     }
   }, [id]);
+
+  useEffect(() => {
+    if (hash.indexOf('#id=') > -1) {
+      const infoDocumentId = hash.substring(4);
+      // TODO: open document info pane  
+      console.log('open doc pane for id ' + infoDocumentId)
+    }
+  }, [hash]);
 
   useEffect(() => {
     if (props.currentActionEvent && props.currentActionEvent.length) {

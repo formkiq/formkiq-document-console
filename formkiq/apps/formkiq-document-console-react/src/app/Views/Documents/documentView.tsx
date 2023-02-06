@@ -1,10 +1,11 @@
 import { Helmet } from "react-helmet-async"
 import { useEffect, useRef, useState } from 'react'
 import { RootState } from '../../Store/store';
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import { InlineViewableContentTypes, OnlyOfficeContentTypes } from "../../helpers/constants/contentTypes";
 import { DocumentsService } from '../../helpers/services/documentsService'
 import { getUserSites, getCurrentSiteInfo } from '../../helpers/services/toolService'
+import { setCurrentDocumentPath } from '../../Store/reducers/data'
 import { IDocument } from "../../helpers/types/document"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { Spinner } from "../../Components/Icons/icons"
@@ -14,6 +15,7 @@ export function DocumentView(props: { user: User, formkiqVersion: any }) {
   const { id } = useParams()
   const versionKey = new URLSearchParams(useLocation().search).get('versionKey')
   const { user } = props
+  const dispatch = useDispatch()
   const navigate = useNavigate()
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } = getUserSites(user);
   const pathname = useLocation().pathname
@@ -43,6 +45,7 @@ export function DocumentView(props: { user: User, formkiqVersion: any }) {
       };
       DocumentsService.getDocumentById(id, currentSiteId).then((response: IDocument) => {
         setDocument(response);
+        dispatch(setCurrentDocumentPath(response.path))
         if (
           props.formkiqVersion.modules.indexOf('onlyoffice') > -1 &&
           OnlyOfficeContentTypes.indexOf((response as IDocument).contentType) > -1

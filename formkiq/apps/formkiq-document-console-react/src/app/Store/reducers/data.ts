@@ -4,14 +4,16 @@ export interface DataCache {
   tagsLastRefreshed: Date,
   allTags: any[],
   tagsSiteId: string,
-  formkiqClient: any
+  formkiqClient: any,
+  currentDocumentPath: string,
 }
 
 const initialState = {
   tagsLastRefreshed: new Date(),
   allTags: ([] as any),
   tagsSiteId: 'default',
-  formkiqClient: {}
+  formkiqClient: {},
+  currentDocumentPath: ''
 } as DataCache
 
 export const dataCacheSlice = createSlice({
@@ -34,18 +36,25 @@ export const dataCacheSlice = createSlice({
         tagsSiteId: newSiteId
       }
     },
-    setFormkiqClient(state, action: PayloadAction<any>){
+    setFormkiqClient(state, action: PayloadAction<any>) {
       return {
         ...state,
         formkiqClient: action.payload
       }
     },
+    setCurrentDocumentPath(state, action: PayloadAction<string>) {
+      return {
+        ...state,
+        currentDocumentPath: action.payload
+      }
+    }
   },
 })
 
 export const {
   setAllTags,
-  setFormkiqClient
+  setFormkiqClient,
+  setCurrentDocumentPath
 } = dataCacheSlice.actions
 
 export default dataCacheSlice.reducer

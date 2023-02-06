@@ -241,8 +241,8 @@ export function Sidebar(props: {
                     const paddingLeft = initialPaddingLeft + (i * 2)
                     folderBreadcrumbUrl += '/' + folderSnippet
                     return (
-                      <div key={i} className={ (i === folderLevels.length - 1 ? 'text-coreOrange-500 bg-gray-100 ' : 'text-gray-500 bg-white ' ) + ' p-1 pl-' + paddingLeft + ' flex justify-start'}>
-                        <div className="pt-1">
+                      <div key={i} className={ (i === folderLevels.length - 1 ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 ' : 'text-gray-500 bg-white ' ) + ' p-1 pl-' + paddingLeft + ' flex justify-start'}>
+                        <div className="w-4">
                           <FolderOutline />
                         </div>
                         <Link
@@ -294,7 +294,7 @@ export function Sidebar(props: {
                         end
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-500 bg-gray-100 '
+                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                             : 'text-gray-500 bg-white ') +
                           ' w-full text-sm font-medium flex'
                         }
@@ -325,7 +325,7 @@ export function Sidebar(props: {
                         end
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-500 bg-gray-100 '
+                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                             : 'text-gray-500 bg-white ') +
                           ' w-full text-sm font-medium flex'
                         }
@@ -394,7 +394,7 @@ export function Sidebar(props: {
                                 end
                                 className={({ isActive }) =>
                                   (isActive
-                                    ? 'text-coreOrange-500 bg-gray-100 '
+                                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                                     : 'text-gray-500 bg-white ') +
                                   ' w-full text-sm font-medium flex'
                                 }
@@ -407,8 +407,8 @@ export function Sidebar(props: {
                                     'w-full text-sm font-medium flex pl-5 py-2 '
                                   }
                                 >
-                                  <div className="w-4 flex flex-wrap items-center mr-2">
-                                    <div>
+                                  <div className="w-5 flex flex-wrap items-center mr-2">
+                                    <div className="w-4">
                                       <FolderOutline />
                                     </div>
                                     <div className="-mt-3 -ml-0.5">
@@ -432,7 +432,7 @@ export function Sidebar(props: {
                     to={`${currentDocumentsRootUri}/folders/favorites`}
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -455,7 +455,7 @@ export function Sidebar(props: {
                       to={`${currentDocumentsRootUri}/folders/deleted`}
                       className={({ isActive }) =>
                         (isActive
-                          ? 'text-coreOrange-500 bg-gray-100 '
+                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                           : 'text-gray-500 bg-white ') +
                         ' w-full text-sm font-medium flex '
                       }
@@ -474,12 +474,12 @@ export function Sidebar(props: {
                   </li>
                 )}
                 <div className="flex w-full">
-                  <div className="w-full mt-2 mx-6 border-b"></div>
+                  <div className="w-full mt-2 border-b"></div>
                 </div>
               </>
             )}
             <li
-              className="mt-4 w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              className="mt-2 w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
               onClick={toggleIntegrationsExpand}
             >
               <div className="flex justify-end mt-2 mr-1">
@@ -496,7 +496,7 @@ export function Sidebar(props: {
                     to="/workflows"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -523,7 +523,7 @@ export function Sidebar(props: {
                     to="/integrations/api"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -545,7 +545,7 @@ export function Sidebar(props: {
                     to="/integrations/webhooks"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -587,7 +587,7 @@ export function Sidebar(props: {
                         to="/account"
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-500 bg-gray-100 '
+                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                             : 'text-gray-500 bg-white ') +
                           ' w-full text-sm font-medium flex '
                         }
@@ -609,7 +609,7 @@ export function Sidebar(props: {
                         to="/settings"
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-500 bg-gray-100 '
+                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                             : 'text-gray-500 bg-white ') +
                           ' w-full text-sm font-medium flex '
                         }
@@ -640,7 +640,7 @@ export function Sidebar(props: {
                   end
                   className={({ isActive }) =>
                     (isActive
-                      ? 'text-coreOrange-500 bg-gray-100 '
+                      ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                       : 'text-gray-500 bg-white ') +
                     ' w-full text-sm font-medium flex '
                   }
@@ -667,7 +667,7 @@ export function Sidebar(props: {
                   end
                   className={({ isActive }) =>
                     (isActive
-                      ? 'text-coreOrange-500 bg-gray-100 '
+                      ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                       : 'text-gray-500 bg-white ') +
                     ' w-full text-sm font-medium flex '
                   }
@@ -718,7 +718,7 @@ export function Sidebar(props: {
                 to={`${currentDocumentsRootUri}/folders/favorites`}
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-500 bg-gray-100 '
+                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                     : 'text-gray-500 bg-white ') +
                   ' w-full text-sm font-medium flex '
                 }
@@ -739,7 +739,7 @@ export function Sidebar(props: {
                 to={`${currentDocumentsRootUri}/folders/deleted`}
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-500 bg-gray-100 '
+                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                     : 'text-gray-500 bg-white ') +
                   ' w-full text-sm font-medium flex '
                 }
@@ -763,7 +763,7 @@ export function Sidebar(props: {
                 to="/workflows"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-500 bg-gray-100 '
+                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                     : 'text-gray-500 bg-white ') +
                   ' w-full text-sm font-medium flex '
                 }
@@ -784,7 +784,7 @@ export function Sidebar(props: {
                 to="/integrations/api"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-500 bg-gray-100 '
+                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                     : 'text-gray-500 bg-white ') +
                   ' w-full text-sm font-medium flex '
                 }
@@ -805,7 +805,7 @@ export function Sidebar(props: {
                 to="/integrations/webhooks"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-500 bg-gray-100 '
+                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                     : 'text-gray-500 bg-white ') +
                   ' w-full text-sm font-medium flex '
                 }
@@ -831,7 +831,7 @@ export function Sidebar(props: {
                     to="/account"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -852,7 +852,7 @@ export function Sidebar(props: {
                     to="/settings"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -887,7 +887,7 @@ export function Sidebar(props: {
         <div
           className={
             (sidebarExpanded ? 'w-64' : 'w-10') +
-            ' flex fixed z-30 justify-between mt-2'
+            ' flex fixed z-30 justify-between mt-2.5'
           }
         >
           <Link to="/">
@@ -939,7 +939,7 @@ export function Sidebar(props: {
             <nav className="grow mt-16">
               <div className="flex flex-wrap w-full justify-center mb-4">
                 <button
-                  className={ (props.isSidebarExpanded ? ' mr-1 ' : 'mb-1 ' ) + ' bg-coreOrange-500 hover:bg-coreOrange-700 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'}
+                  className={ (props.isSidebarExpanded ? ' mr-1 ' : 'mb-1 ' ) + ' bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 hover:from-coreOrange-600 hover:via-red-600 hover:to-coreOrange-700 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'}
                   onClick={(event) => {
                       // TODO: create more consistent check on site location
                       if (pathname.indexOf('/workflows') > -1 || pathname.indexOf('/integrations') > -1) {
@@ -956,7 +956,7 @@ export function Sidebar(props: {
                   <div className={(props.isSidebarExpanded ? 'ml-2 mt-1 ' : 'ml-0 mt-0 ' ) + ' w-3 h-3'}>{Plus()}</div>
                 </button>
                 <button
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm py-2 px-4 rounded-2xl flex cursor-pointer"
+                  className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
                   onClick={(event) => {
                     // TODO: create more consistent check on site location
                     if (pathname.indexOf('/workflows') > -1 || pathname.indexOf('/integrations') > -1) {

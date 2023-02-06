@@ -4,7 +4,7 @@ import { connect, useDispatch } from 'react-redux'
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout, User } from '../../Store/reducers/auth';
 import { RootState } from '../../Store/store';
-import { Bell, FolderOutline } from '../Icons/icons';
+import { Bell, FolderOutline, Documents, ShareHand, Share, Star, Recent, Trash, Workflow, Api, Webhook } from '../Icons/icons';
 import { getFileIcon, getUserSites, getCurrentSiteInfo, parseSubfoldersFromUrl } from "../../helpers/services/toolService"
 import { DocumentsService } from '../../helpers/services/documentsService'
 import Notifications from './notifications';
@@ -16,7 +16,7 @@ import { DocumentsAndFoldersPrefixes, WorkflowsAndIntegrationsPrefixes, AccountA
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import moment from "moment"
 
-function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, formkiqVersion: any, useAdvancedSearch: boolean, useNotifications: boolean, allTags: any[] }) {
+function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, formkiqVersion: any, useAdvancedSearch: boolean, useNotifications: boolean, allTags: any[], currentDocumentPath: string }) {
   const search = useLocation().search
   const searchWord = new URLSearchParams(search).get('searchWord')
   const dispatch = useDispatch()
@@ -129,6 +129,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName)
   }, [pathname])
 
+  /*
   const foldersPath = (uri: string, isDocument = false) => {
     if (uri) {
       const folderLevels = uri.split('/');
@@ -209,6 +210,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
     }
     return <></>
   }
+  */
 
   const documentSubpaths: string[] = [
     'folders',
@@ -251,38 +253,6 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
   useEffect(() => {
     setInput(searchWord ? searchWord : '')
   }, [search])
-
-  useEffect(() => {
-    if (documentId.length) {
-      
-      // TODO: use Redux / LocalStorage to keep track of the currently selected document (from doc info or doc view pages)
-      // NOTE: this is instead of making a redundant API call here
-  
-      if ((document && documentId !== (document as IDocument).documentId) || !document) {
-        DocumentsService.getDocumentById(documentId, currentSiteId).then((response: any) => {
-          let filename = response.path
-          if (filename.lastIndexOf('/') > -1) {
-            filename = filename.substring(filename.lastIndexOf('/') + 1)
-          }
-          response.filename = filename
-          setDocument(response);
-          DocumentsService.getDocumentTags(documentId, currentSiteId).then((response:any) => {
-            if (response) {  
-              setDocumentTags(response.tags?.map((el: IDocumentTag) => {
-                if (el.key === 'folder') {
-                  if (el.value === '') {
-                    el.value = '/';
-                  }
-                }
-                el.insertedDate = moment(el.insertedDate).format('YYYY-MM-DD HH:mm')
-                return el
-              }))
-            }
-          });
-        })
-      }
-    }
-  }, [documentId])
 
   const redirectToSearchPage = () => {
     if (inputValue) {
@@ -343,18 +313,6 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
     }
   }
 
-  const renderCurrentPage = () => {
-    switch (window.location.pathname) {
-      case '/workflows':
-        return 'Workflows'
-      case '/integrations/webhooks':
-        return 'Inbound Webhooks'
-      case '/integrations/api':
-        return 'API Explorer'
-    }
-    return currentDocumentsRootName
-  }
-
   const changeSystemSubfolder = (event: any, systemSubfolderUri: string) => {
     const newSiteId = event.target.options[event.target.selectedIndex].value
     let newDocumentsRootUri = '/documents'
@@ -383,127 +341,175 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
             {Notifications(ToggleNotifications)}
           </>
         )}
-        <div className="flex grow relative flex-wrap items-center">
+        <div className="flex grow relative flex-wrap items-start">
           <div className={ (props.isSidebarExpanded ? 'left-64' : 'left-16') + ' flex fixed top-0 right-0 z-20 h-14.5 items-center justify-between bg-white' }>
             <div className="w-7/8 flex">
               <div className={'flex ' + (documentId.length ? 'w-full' : 'w-2/3') }>
                 { !props.isSidebarExpanded && (
-                  <div className="w-40 pt-3">
-                    <picture>
-                      <source srcSet="/assets/img/png/formkiq-wordmark.webp" type="image/webp" />
-                      <source srcSet="/assets/img/png/formkiq-wordmark.png" type="image/png" /> 
-                      <img src="/assets/img/png/formkiq-wordmark.png" className="ml-6 mt-2 w-28 mb-2.5" alt="FormKiQ" />
-                    </picture>
+                  <div className="w-40">
+                    <div className="absolute top-0 pt-2.5">
+                      <picture>
+                        <source srcSet="/assets/img/png/formkiq-wordmark.webp" type="image/webp" />
+                        <source srcSet="/assets/img/png/formkiq-wordmark.png" type="image/png" /> 
+                        <img src="/assets/img/png/formkiq-wordmark.png" className="ml-6 mt-2 w-28 mb-2.5" alt="FormKiQ" />
+                      </picture>
+                    </div>
                   </div>
                 )}
-                <div className={ (props.isSidebarExpanded ? 'w-full' : 'grow') + ' flex items-center tracking-tight'}>
-                  { documentSettingsPath || documentHelpPath ? (
+                <div className={ (props.isSidebarExpanded ? 'w-full' : 'grow') + ' flex items-center pl-5'}>
+                  { subfolderUri && TopLevelFolders.indexOf(subfolderUri) > -1 ? (
                     <>
-                      {documentSettingsPath && (
-                        <Link to={`${currentDocumentsRootUri}`} className="flex font-semibold text-base cursor-pointer hover:text-coreOrange-500 pl-4">
-                          <FolderDropWrapper folder={''} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'pt-3 px-2'}>
-                            Documents
-                          </FolderDropWrapper>
-                          <span className="font-normal text-base pt-3">
-                            - Settings
-                          </span>
-                        </Link>
-                      )}
-                      {documentHelpPath && (
-                        <div className="flex font-semibold text-base cursor-pointer hover:text-coreOrange-500 pl-6 pt-3">
-                          Help Center
-                        </div>
-                      )}
-                    </>                      
+                      <div className="w-6 mr-1 text-coreOrange-600">
+                        { subfolderUri === 'shared' && (
+                          <div className="w-6">
+                            <Share />
+                          </div>
+                        )}
+                        { subfolderUri === 'favorites' && (
+                          <div className="w-5">
+                            <Star />
+                          </div>
+                        )}
+                        { subfolderUri === 'recent' && (
+                          <div className="w-6">
+                            <Recent />
+                          </div>
+                        )}
+                        { subfolderUri === 'deleted' && (
+                          <div className="w-4">
+                            <Trash />
+                          </div>
+                        )}
+                      </div>
+                      <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
+                        { getTopLevelFolderName(subfolderUri) }
+                      </div>
+                      { ((hasUserSite && hasDefaultSite) || (hasUserSite && hasSharedFolders) || (hasDefaultSite && hasSharedFolders) || (hasSharedFolders && sharedFolderSites.length > 1)) && (
+                          <select
+                            className="ml-4 text-xs bg-gray-100 px-2 py-1 rounded-md"
+                            value={currentSiteId}
+                            onChange={event => {changeSystemSubfolder(event, subfolderUri)}}
+                            >
+                            { hasUserSite && (
+                              <option value={props.user.email}>
+                                My Documents
+                              </option>
+                            )}
+                            { hasUserSite && hasDefaultSite && (
+                              <option value='default'>
+                                Team Documents
+                              </option>
+                            )}
+                            { !hasUserSite && hasDefaultSite && (
+                              <option value='default'>
+                                Documents
+                              </option>
+                            )}
+                            { hasSharedFolders && sharedFolderSites.length > 0 && (
+                              <>
+                                { sharedFolderSites.map((sharedFolderSite, i: number) => {
+                                  return (
+                                    <option key={i} value={sharedFolderSite.siteId}>
+                                      {sharedFolderSite.siteId}
+                                    </option>
+                                  )
+                                })}
+                              </>
+                            )}
+                          </select>
+                        )}
+                    </>
                   ) : (
+                    // eslint-disable-next-line react/jsx-no-useless-fragment
                     <>
-                      { subfolderUri && TopLevelFolders.indexOf(subfolderUri) === -1 &&
-                        <div className="flex w-full items-top">
-                          <div className="flex items-top pt-0.5">
-                            <Link to={currentDocumentsRootUri} className="font-semibold text-base cursor-pointer hover:text-coreOrange-500 pl-4">
-                              <FolderDropWrapper folder={''} sourceSiteId={currentSiteId} targetSiteId={currentSiteId} className={'pt-3 pl-1'}>
-                                { currentDocumentsRootName }
-                              </FolderDropWrapper>
-                            </Link>
-                          </div>
-                          <div className="grow flex items-top">
-                            { foldersPath(subfolderUri) }
-                          </div>
-                        </div>
-                      }
-                      { subfolderUri && TopLevelFolders.indexOf(subfolderUri) !== -1 &&
-                        <div className="font-semibold text-base pl-6 pt-3">
-                          { getTopLevelFolderName(subfolderUri) }
-                          { ((hasUserSite && hasDefaultSite) || (hasUserSite && hasSharedFolders) || (hasDefaultSite && hasSharedFolders) || (hasSharedFolders && sharedFolderSites.length > 1)) && (
-                            <select
-                              className="ml-4 text-xs bg-gray-100 px-2 py-1 rounded-md"
-                              value={currentSiteId}
-                              onChange={event => {changeSystemSubfolder(event, subfolderUri)}}
-                              >
-                              { hasUserSite && (
-                                <option value={props.user.email}>
-                                  My Documents
-                                </option>
-                              )}
-                              { hasUserSite && hasDefaultSite && (
-                                <option value='default'>
-                                  Team Documents
-                                </option>
-                              )}
-                              { !hasUserSite && hasDefaultSite && (
-                                <option value='default'>
-                                  Documents
-                                </option>
-                              )}
-                              { hasSharedFolders && sharedFolderSites.length > 0 && (
-                                <>
-                                  { sharedFolderSites.map((sharedFolderSite, i: number) => {
-                                    return (
-                                      <option key={i} value={sharedFolderSite.siteId}>
-                                        {sharedFolderSite.siteId}
-                                      </option>
-                                    )
-                                  })}
-                                </>
-                              )}
-                            </select>
-                          )}
-                        </div>
-                      }
-                      { !subfolderUri && documentId.length > 0 && (
-                        // eslint-disable-next-line react/jsx-no-useless-fragment
+                      { (locationPrefix === '/workflows' || locationPrefix === '/integrations') ? (
                         <>
-                          { document && (
-                            <>
-                              <Link to={currentDocumentsRootUri} className="font-semibold text-base cursor-pointer hover:text-coreOrange-500 pl-6 -mt-1 pr-1">
-                                { currentDocumentsRootName }
-                              </Link>
-                              { (document as IDocument).filename !== (document as IDocument).path && (
-                                <>
-                                  { foldersPath((document as IDocument).path.replace((document as IDocument).filename, ''), true) }
-                                </>
-                              )}
+                          <div className="w-6 mr-1 text-coreOrange-600">
+                            { pathname.indexOf('/workflows') > -1 && (
+                              <div className="w-5">
+                                <Workflow />
+                              </div>
+                            )}
+                            { pathname.indexOf('/integrations/api') > -1 && (
+                              <div className="w-5">
+                                <Api />
+                              </div>
+                            )}
+                            { pathname.indexOf('/integrations/webhooks') > -1 && (
+                              <div className="w-5">
+                                <Webhook />
+                              </div>
+                            )}
+                          </div>
+                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
+                            { pathname.indexOf('/workflows') > -1 && (
+                              <span>Workflows</span>
+                            )}
+                            { pathname.indexOf('/integrations/api') > -1 && (
+                              <span>API Explorer</span>
+                            )}
+                            { pathname.indexOf('/integrations/webhooks') > -1 && (
+                              <span>Inbound Webhooks</span>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-6 mr-1 text-coreOrange-600">
+                            { siteDocumentsRootUri.indexOf('/documents') > -1 && (
+                              <div className="w-6">
+                                <Documents />
+                              </div>
+                            )}
+                            { siteDocumentsRootUri.indexOf('/my-documents') > -1 && (
+                              <div className="w-5">
+                                <Documents />
+                              </div>
+                            )}
+                            { siteDocumentsRootUri.indexOf('/team-documents') > -1 && (
+                              <div className="w-6 flex flex-wrap items-center mr-2">
+                                <div className="w-4">
+                                  <Documents />
+                                </div>
+                                <div className="w-5 -mt-3 -ml-0.5">
+                                  <ShareHand />
+                                </div>
+                              </div>
+                            )}
+                            { siteDocumentsRootUri.indexOf('/shared-folders/') > -1 && (
+                              <div className="w-6 flex flex-wrap items-center mr-2">
+                                <div className="w-4">
+                                  <FolderOutline />
+                                </div>
+                                <div className="w-6 -mt-3.5 -ml-1">
+                                  <ShareHand />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
+                            { siteDocumentsRootName }
+                            { documentId && props.currentDocumentPath.length ? (
                               <span>
-                                { documentPath(document) }
+                                <span className="px-2">|</span>
+                                {props.currentDocumentPath}
+                                <span className="pl-8">
+                                  <a href={ siteDocumentsRootUri + '/folders/' + props.currentDocumentPath.substring(0, props.currentDocumentPath.lastIndexOf('/')) + '#id=' + documentId} className="text-sm text-gray-500 hover:text-coreOrange-600 cursor-pointer">
+                                    view in document list
+                                  </a>
+                                </span>
                               </span>
-                            </>
-                          )}
+                            ) : (
+                              <span></span>
+                            )}
+                            { searchWord && (
+                              <span>
+                                <span className="px-2">-</span>
+                                Search Results
+                              </span>
+                            )}
+                          </div>
                         </>
-                      )}
-                      { !subfolderUri && searchWord &&
-                        <>
-                          <Link to={currentDocumentsRootUri} className="font-semibold text-base cursor-pointer hover:text-coreOrange-500 pl-6 pt-3 pr-1">
-                            { currentDocumentsRootName }
-                          </Link>
-                          <span className="font-normal text-base pt-3">
-                            - Search Results
-                          </span>
-                        </>
-                      }
-                      { !subfolderUri && !documentId.length && !searchWord && (
-                        <span className="font-semibold pt-3 pl-6 text-base">
-                          { renderCurrentPage() }
-                        </span>
                       )}
                     </>
                   )}
@@ -580,7 +586,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
             </div>
           </div>
           <div className={ (props.isSidebarExpanded ? 'left-64' : 'left-16') + ' flex fixed top-43px left-64 right-0 z-20 h-4 items-center justify-between'}>
-            <div className="w-full mt-2 mx-6 border-b"></div>
+            <div className="w-full mt-2 border-b"></div>
           </div>
         </div>
       </div>
@@ -590,8 +596,8 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
 const mapStateToProps = (state: RootState) => {
   const { user } = state.authReducer;
   const { isSidebarExpanded, brand, formkiqVersion, useNotifications, useAdvancedSearch } = state.configReducer
-  const { allTags } = state.dataCacheReducer
-  return { user, isSidebarExpanded, brand, formkiqVersion, useNotifications, useAdvancedSearch, allTags }
+  const { allTags, currentDocumentPath } = state.dataCacheReducer
+  return { user, isSidebarExpanded, brand, formkiqVersion, useNotifications, useAdvancedSearch, allTags, currentDocumentPath }
 };
 
 export default connect(mapStateToProps)(Navbar as any);
