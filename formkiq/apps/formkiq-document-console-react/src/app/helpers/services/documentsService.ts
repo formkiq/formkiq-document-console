@@ -210,7 +210,8 @@ export class DocumentsService {
       const searchBody = {
         query: {
           "meta": {
-            "folder": folderValue
+            "indexType": "folder",
+            "eq": folderValue
           }
         },
         "responseFields": {
@@ -338,7 +339,8 @@ export class DocumentsService {
       const searchBody = {
         query: {
           "meta": {
-            "folder": ""
+            "indexType": "folder",
+            "eq": ""
           }
         },
         "responseFields": {
@@ -463,7 +465,8 @@ export class DocumentsService {
         query: {
           "text": searchText + "*",
           "meta": {
-            "folder": folder
+            "indexType": "folder",
+            "eq": folder
           },
           page: page,
           "responseFields": {
