@@ -8,7 +8,7 @@ import { Link, useLocation, useParams, useNavigate } from "react-router-dom"
 import { RootState } from '../../Store/store';
 import { connect, useDispatch } from "react-redux";
 import { SubfolderUri, User } from '../../Store/reducers/auth';
-import { Plus, Spinner, Upload, Share, Star, ArrowRight, ArrowBottom, FolderOutline, View, Edit, Download, Trash, Undo, ChevronLeft, ChevronRight } from "../../Components/Icons/icons"
+import { Spinner, FolderOutline, View, Edit, Download, Trash, Undo, ChevronLeft, ChevronRight } from "../../Components/Icons/icons"
 import ShareModal from "../../Components/Share/share"
 import EditTagsAndMetadataModal from "../../Components/DocumentsAndFolders/EditTagsAndMetadataModal/editTagsAndMetadataModal"
 import DocumentVersionsModal from "../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal"
@@ -21,7 +21,7 @@ import DocumentActionsPopover from "../../Components/DocumentsAndFolders/Documen
 import AllTagsPopover from "../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover"
 import DocumentListLine from "../../Components/DocumentsAndFolders/DocumentListLine/documentListLine"
 import FolderDropWrapper from "../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper"
-import { fetchDocuments, fetchDeleteDocument, fetchDeleteFolder, setDocuments, toggleExpandFolder, updateDocumentsList } from "../../Store/reducers/documentsList"
+import { fetchDocuments, fetchDeleteDocument, fetchDeleteFolder, setDocuments, updateDocumentsList } from "../../Store/reducers/documentsList"
 import { setCurrentActionEvent } from '../../Store/reducers/config'
 import { setAllTags } from "../../Store/reducers/data"
 import CustomDragLayer from "../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer"
@@ -116,6 +116,7 @@ function Documents(props: {
     IDocumentTag[] | null,
     any
   ] = useState([]);
+  const [currentDocumentVersions, setCurrentDocumentVersions] = useState(null);
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
   const [isUploadModalOpened, setUploadModalOpened] = useState(false);
@@ -321,6 +322,13 @@ function Documents(props: {
           setIsCurrentDocumentSoftDeleted(isDeleted);
         }
       });
+      if (props.formkiqVersion.type !== 'core') {
+        DocumentsService.getDocumentVersions(infoDocumentId, currentSiteId).then((response: any) => {
+          if (response) {
+            setCurrentDocumentVersions(response.documents)
+          }
+        });
+      }
     }
   };
 
@@ -967,6 +975,16 @@ function Documents(props: {
     );
   };
 
+  const viewDocumentVersion = (versionKey: string) => {
+    if (infoDocumentId) {
+      if (versionKey !== undefined) {
+        window.open(`${window.location.origin}${currentDocumentsRootUri}/${infoDocumentId}/view?versionKey=${versionKey}`)
+      } else {
+        window.open(`${window.location.origin}${currentDocumentsRootUri}/${infoDocumentId}/view`)
+      }
+    }
+  }
+
   return (
     <>
       <Helmet>
@@ -991,7 +1009,7 @@ function Documents(props: {
             <div className="flex-1 inline-block">
               {currentDocument ? (
                 <div className="flex flex-wrap justify-center">
-                  <div className="w-full flex grow-0 pl-2 pt-2 items-center">
+                  <div className="w-full flex grow-0 pl-2 pt-3 items-center">
                     <div className="w-12">
                       <img
                         alt="File Icon"
@@ -1256,7 +1274,81 @@ function Documents(props: {
                   </div>
                   <div className={(infoDocumentView === 'history' ? 'block ' : 'hidden ') + ' w-full'}>
                     <span className="p-4 text-sm">
-                      (coming soon)
+                      <dl className="p-4 pt-2 max-w-md text-medsmall text-gray-600">
+                        <div className="flex flex-col pb-3">
+                          <dt className="mb-1">
+                            {formatDate((currentDocument as IDocument).lastModifiedDate)}
+                          </dt>
+                          <dd className="font-semibold text-sm">
+                            Current version added
+                            <div
+                              className="font-medium pt-1 ml-12 flex text-coreOrange-500 cursor-pointer"
+                              onClick={(event) => {
+                                viewDocumentVersion('')
+                              }}
+                              >
+                              <span>
+                                view this version
+                              </span>
+                              <div className="w-4 pt-0.5">
+                                < ChevronRight />
+                              </div>
+                            </div>
+                          </dd>
+                        </div>
+                        {currentDocumentVersions && (currentDocumentVersions as []).map(
+                          (version: any, i: number) => {
+                            return (
+                              <div key={i} className="flex flex-col pb-3">
+                                <dt className="mb-1">
+                                  {formatDate(version.lastModifiedDate)}
+                                </dt>
+                                <dd className="font-semibold text-sm">
+                                  { version.version === '1' ? (
+                                      <span>
+                                        Document added (initial version)
+                                      </span>
+                                    ) : (
+                                      <span>
+                                        Version added (version #{version.version})
+                                      </span>
+                                  )}
+                                  <div
+                                    className="font-medium pt-1 ml-12 flex text-coreOrange-500 cursor-pointer"
+                                    onClick={(event) => {
+                                      viewDocumentVersion(version.versionKey)
+                                    }}
+                                    >
+                                    <span>
+                                      view this version
+                                    </span>
+                                    <div className="w-4 pt-0.5">
+                                      < ChevronRight />
+                                    </div>
+                                  </div>
+                                </dd>
+                              </div>
+                            )
+                          })
+                        }
+                      </dl>
+                      <div className="mt-2 flex justify-center">
+                        <button
+                          className="bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 hover:from-coreOrange-600 hover:via-red-600 hover:to-coreOrange-700 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                          onClick={(event) => {
+                            const documentLine: ILine = {
+                              lineType: 'document',
+                              folder: '',
+                              documentId: infoDocumentId,
+                              documentInstance: currentDocument,
+                              folderInstance: null
+                            }
+                            onDocumentVersionsModalClick(event,  documentLine)
+                          }}
+                          >
+                            View / Edit Versions
+                        </button>
+                      </div>
                     </span>
                   </div>
                   <div className="hidden overflow-x-auto relative">
