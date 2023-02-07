@@ -563,7 +563,7 @@ export function Sidebar(props: {
                   </NavLink>
                 </li>
                 <div className="flex w-full">
-                  <div className="w-full mt-4 mx-6 border-b"></div>
+                  <div className="w-full mt-4 border-b"></div>
                 </div>
               </>
             )}
@@ -704,10 +704,10 @@ export function Sidebar(props: {
                   className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
                   onClick={onSharedFoldersClick}
                 >
-                  <div>
+                  <div className="w-3.5 text-gray-700">
                     <FolderOutline />
                   </div>
-                  <div className="-mt-3 -ml-0.5">
+                  <div className="-mt-2.5 -ml-0.5">
                     <ShareHand />
                   </div>
                 </div>

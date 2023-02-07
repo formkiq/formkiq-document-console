@@ -77,7 +77,7 @@ export function Star() {
 
 export function StarFilled() {
   return (
-    <svg width="100%" height="100%" viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg" className="fill-current"><path d="M20.0625 7.24L12.8725 6.63L10.0625 0L7.2525 6.63L0.0625 7.24L5.5125 11.97L3.8825 19L10.0625 15.27L16.2425 19L14.6025 11.97L20.0625 7.24Z" fill="#0065FF"/></svg>
+    <svg width="100%" height="100%" viewBox="0 0 21 19" xmlns="http://www.w3.org/2000/svg" className="fill-current"><path d="M20.0625 7.24L12.8725 6.63L10.0625 0L7.2525 6.63L0.0625 7.24L5.5125 11.97L3.8825 19L10.0625 15.27L16.2425 19L14.6025 11.97L20.0625 7.24Z" fill="#F2994A"/></svg>
   );
 }
 
