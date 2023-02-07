@@ -8,7 +8,7 @@ import { Link, useLocation, useParams, useNavigate } from "react-router-dom"
 import { RootState } from '../../Store/store';
 import { connect, useDispatch } from "react-redux";
 import { SubfolderUri, User } from '../../Store/reducers/auth';
-import { Spinner, FolderOutline, View, Edit, Download, Trash, Undo, ChevronLeft, ChevronRight } from "../../Components/Icons/icons"
+import { Spinner, FolderOutline, View, Edit, Download, Trash, Undo, ChevronLeft, ChevronRight, Close, Tag } from "../../Components/Icons/icons"
 import ShareModal from "../../Components/Share/share"
 import EditTagsAndMetadataModal from "../../Components/DocumentsAndFolders/EditTagsAndMetadataModal/editTagsAndMetadataModal"
 import DocumentVersionsModal from "../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal"
@@ -107,9 +107,12 @@ function Documents(props: {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] = useState(siteDocumentsRootUri);
   const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(siteDocumentsRootName);
+  const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
   const [infoTagEditMode, setInfoTagEditMode] = useState(false);
+  // NOTE: not fully implemented;
+  // using the edit metadata modal for now, to be replaced with new system to indicate diff between tag, metadata, and versioned metadata
   const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
   const [currentDocument, setCurrentDocument]: [IDocument | null, any] = useState(null);
   const [currentDocumentTags, setCurrentDocumentTags]: [
@@ -746,6 +749,8 @@ function Documents(props: {
 
   const filtersAndTags = () => {
     let tagsToCheck: string[] = [];
+    let showAllTagsPopover = true
+    let minTagsToShowForFilter = 3;
     tagsToCheck = tagsToCheck.concat(TagsForFilterAndDisplay);
     if (
       filterTag &&
@@ -753,6 +758,18 @@ function Documents(props: {
       tagsToCheck.indexOf(filterTag) === -1
     ) {
       tagsToCheck.push(filterTag);
+    }
+    if (tagsToCheck.length === 0) {
+      const tagsToConsider = props.allTags.filter((tag: any) => {
+        return tag.value.indexOf('sys') !== 0 && tag.value.indexOf('path') && tag.value.indexOf('untagged') !== 0
+      });
+      const numberOfTagsToAdd = tagsToConsider.length > minTagsToShowForFilter ? minTagsToShowForFilter : tagsToConsider.length
+      if (numberOfTagsToAdd < minTagsToShowForFilter) {
+        showAllTagsPopover = false
+      }
+      for (let i = 0; i < numberOfTagsToAdd; i++) {
+        tagsToCheck.push(tagsToConsider[i].value)
+      }
     }
     return (
       <div className="flex items-center justify-start">
@@ -769,37 +786,45 @@ function Documents(props: {
           )}
         </div>
         <div className="w-2/3 flex items-center justify-end">
-          <div className="mr-4">
-            <span className="font-medium text-sm text-gray-500">Tags:</span>
-          </div>
-          <ul className="flex flex-wrap justify-end mt-1">
-            {tagsToCheck.map((primaryTag, i) => {
-              let tagColor = 'gray'
-              if (props.tagColors) {
-                props.tagColors.forEach((color: any) => {
-                  if (color.tagKeys.indexOf(primaryTag) > -1) {
-                    tagColor = color.colorUri
-                    return;
+          { tagsToCheck.length ? (
+            <>
+              <ul className="flex flex-wrap justify-end mt-1">            
+                {tagsToCheck.map((primaryTag, i) => {
+                  let tagColor = 'gray'
+                  if (props.tagColors) {
+                    props.tagColors.forEach((color: any) => {
+                      if (color.tagKeys.indexOf(primaryTag) > -1) {
+                        tagColor = color.colorUri
+                        return;
+                      }
+                    })
                   }
-                })
-              }
-              return (
-                <li
-                  key={i}
-                  className={
-                    (filterTag === primaryTag
-                      ? 'bg-coreOrange-500 text-white'
-                      : `bg-${tagColor}-200 text-black`) +
-                    ' text-xs p-1 px-2 mx-1 cursor-pointer'
-                  }
-                  onClick={(event) => onFilterTag(event, primaryTag)}
-                >
-                  {primaryTag}
-                </li>
-              );
-            })}
-          </ul>
-          <AllTagsPopover siteId={currentSiteId} tagColors={props.tagColors} onFilterTag={onFilterTag} filterTag={filterTag} />
+                  return (
+                    <li
+                      key={i}
+                      className={
+                        (filterTag === primaryTag
+                          ? 'bg-coreOrange-500 text-white'
+                          : `bg-${tagColor}-200 text-black`) +
+                        ' text-xs p-1 px-2 mx-1 cursor-pointer'
+                      }
+                      onClick={(event) => onFilterTag(event, primaryTag)}
+                    >
+                      {primaryTag}
+                    </li>
+                  );
+                })}
+              </ul>
+              { showAllTagsPopover && (
+                <AllTagsPopover siteId={currentSiteId} tagColors={props.tagColors} onFilterTag={onFilterTag} filterTag={filterTag} />
+              )}
+            </>
+          ) : (
+            <span className="text-xs mr-2">
+              (no documents have been tagged)
+            </span>
+          )}
+          
         </div>
       </div>
     );
@@ -992,14 +1017,32 @@ function Documents(props: {
       </Helmet>
       <div className="h-[calc(100vh-3.68rem)] flex">
         <div className="grow">
-          <div className="flex mt-2">
-            { foldersPath(subfolderUri) }
+          <div className="flex mt-2 h-8">
+            <div className="grow">
+              { foldersPath(subfolderUri) }
+            </div>
+            <div className="flex w-20 items-end">
+              <div
+                className={(isTagFilterExpanded ? 'text-coreOrange-500 ' : 'text-gray-400 ') + ' w-5 cursor-pointer'}
+                onClick={event => {
+                  if (filterTag && filterTag.length) {
+                    setIsTagFilterExpanded(true)
+                  } else {
+                    setIsTagFilterExpanded(!isTagFilterExpanded)
+                  }
+                }}
+                >
+                <Tag />
+              </div>
+            </div>
           </div>
           <div className="flex flex-row">
             <div className="flex-1 inline-block">
-              <span className="hidden">
-                {filtersAndTags()}
-              </span>
+              { isTagFilterExpanded && (
+                <div className="pt-2 pr-8">
+                  {filtersAndTags()}
+                </div>
+              )}
               {documentsTable(props.documents, props.folders)}
             </div>
           </div>
@@ -1009,7 +1052,7 @@ function Documents(props: {
             <div className="flex-1 inline-block">
               {currentDocument ? (
                 <div className="flex flex-wrap justify-center">
-                  <div className="w-full flex grow-0 pl-2 pt-3 items-center">
+                  <div className="w-full flex grow-0 pl-2 pt-3 justify-start">
                     <div className="w-12">
                       <img
                         alt="File Icon"
@@ -1017,7 +1060,7 @@ function Documents(props: {
                         className="w-12 h-12"
                       />
                     </div>
-                    <div className="grow-0 w-60 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+                    <div className="grow-0 w-52 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
                       {(currentDocument as IDocument).path}
                       {isCurrentDocumentSoftDeleted && (
                         <small className="block text-red-500 uppercase">
@@ -1025,8 +1068,19 @@ function Documents(props: {
                         </small>
                       )}
                     </div>
+                    <div className="w-8 grow-0 flex justify-start">
+                      <div
+                        className="w-4 mt-0.5 h-4 cursor-pointer text-gray-400"
+                        onClick={event => {
+                          setInfoDocumentId('')
+                          window.location.hash = ''
+                        }}
+                      >
+                        <Close />
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-68 flex mt-4 mr-3 mb-2 border-b">
+                  <div className="w-64 flex mt-4 mr-12 mb-2 border-b">
                     <div
                       className="w-1/3 text-sm font-semibold cursor-pointer"
                       onClick={(event) => {
@@ -1056,8 +1110,8 @@ function Documents(props: {
                       </div>
                     )}
                   </div>
-                  <div className={(infoDocumentView === 'info' ? 'block ' : 'hidden ') + ' w-full'}>
-                    <dl className="p-4 pt-2 max-w-md text-medsmall text-gray-600">
+                  <div className={(infoDocumentView === 'info' ? 'block ' : 'hidden ') + ' w-64 mr-12'}>
+                    <dl className="p-4 pr-6 pt-2 text-medsmall text-gray-600">
                       <div className="flex flex-col pb-3">
                         <dt className="mb-1">Location</dt>
                         <dd className="font-semibold text-sm text-coreOrange-600 hover:text-coreOrange-400">
@@ -1272,9 +1326,9 @@ function Documents(props: {
                       )}
                     </dl>
                   </div>
-                  <div className={(infoDocumentView === 'history' ? 'block ' : 'hidden ') + ' w-full'}>
+                  <div className={(infoDocumentView === 'history' ? 'block ' : 'hidden ') + ' w-64 mr-12'}>
                     <span className="p-4 text-sm">
-                      <dl className="p-4 pt-2 max-w-md text-medsmall text-gray-600">
+                      <dl className="p-4 pt-2 text-medsmall text-gray-600">
                         <div className="flex flex-col pb-3">
                           <dt className="mb-1">
                             {formatDate((currentDocument as IDocument).lastModifiedDate)}
@@ -1353,28 +1407,6 @@ function Documents(props: {
                   </div>
                   <div className="hidden overflow-x-auto relative">
                     <div className="-mr-[4.625rem] p-4 text-[0.8125rem] leading-6 text-slate-900">                     
-                      <div className="mt-4 flex items-start border-t border-slate-400/20 py-3">
-                        <span className="w-2/5 flex-none">Metadata</span>
-                        <div className="w-3/5">
-                          <div className="mt-2 flex justify-start">
-                            <button
-                              className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white text-sm font-semibold py-1 px-2 rounded"
-                              onClick={(event) =>
-                                onEditTagsAndMetadataModalClick(event, {
-                                  lineType: 'document',
-                                  folder: subfolderUri,
-                                  documentId: (currentDocument as IDocument)
-                                    .documentId,
-                                  documentInstance: currentDocument as IDocument,
-                                  folderInstance: null,
-                                })
-                              }
-                            >
-                              Add/Edit Metadata
-                            </button>
-                          </div>
-                        </div>
-                      </div>
                       <div className="flex gap-4 pb-10 border-t border-slate-400/20 justify-center items-center py-6">
                         {document &&
                           props.formkiqVersion.modules.indexOf('onlyoffice') > -1 &&

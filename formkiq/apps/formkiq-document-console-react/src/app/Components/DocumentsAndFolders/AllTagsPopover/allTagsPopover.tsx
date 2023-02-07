@@ -70,18 +70,18 @@ export default function AllTagsPopover({onChange, onKeyDown, siteId, tagColors, 
   }
   return (
     <div className="relative" ref={wrapperRef}>
-      <div ref={setReferenceRef as any} onClick={handleDropdownClick} className="bg-white border text-xs p-1 px-2 mx-1 mt-1 cursor-pointer hover:bg-gray-100">
+      <button ref={setReferenceRef as any} onClick={handleDropdownClick} className="mt-0.5 ml-1 bg-gradient-to-l from-gray-50 via-stone-100 to-gray-100 hover:from-gray-200 hover:via-stone-200 hover:to-gray-300 text-gray-900 border border-gray-200 text-xs font-semibold py-1 px-2 rounded-2xl flex cursor-pointer">
         <span className="font-semibold">
-          View All
+          View All Tags
         </span>
-      </div>
+      </button>
       { visible && (
         <div ref={setPopperRef as any} style={styles['popper']} {...attributes['popper']}
-          className={`bg-white text-gray-900 z-30 border w-132 text-sm pb-2`}
+          className={`bg-white text-gray-900 z-30 border w-96 text-sm p-2`}
           >
           <div className="flex">
             { allTagKeys && (allTagKeys as []).length ? (
-              <ul className="flex flex-wrap grow mt-1 justify-end">
+              <ul className="flex flex-wrap grow mt-1 justify-center">
                 { allTagKeys && (allTagKeys as any).map((tagKey: any, i: number) => {
                   let tagColor = 'gray'
                   if (tagColors) {
@@ -96,7 +96,10 @@ export default function AllTagsPopover({onChange, onKeyDown, siteId, tagColors, 
                     <li
                       key={i}
                       className={(filterTag === tagKey.value ? "bg-coreOrange-500 text-white" : `bg-${tagColor}-200 text-black`) + " text-xs p-1 px-2 mx-1 mb-0.5 cursor-pointer"}
-                      onClick={event => onFilterTag(event, tagKey.value)}
+                      onClick={event => {
+                        onFilterTag(event, tagKey.value)
+                        handleDropdownClick(event)
+                      }}
                       >
                       {tagKey.value}
                     </li>
