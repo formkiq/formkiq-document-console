@@ -146,6 +146,7 @@ function FolderListLine({
                   onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
                   onRenameModalClick={onRenameModalClick}
                   onMoveModalClick={onMoveModalClick}
+                  onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                   onESignaturesModalClick={onESignaturesModalClick}
                   onTagChange={onTagChange}
                   filterTag={filterTag}
