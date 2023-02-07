@@ -190,7 +190,7 @@ export function ApiExplorer({ user }: any) {
       <Helmet>
         <title>API Explorer</title>
       </Helmet>
-      <div className="flex w-full flex-col lg:flex-row max-w-screen-xl">
+      <div className="p-4 flex w-full flex-col lg:flex-row max-w-screen-xl">
         <div className="w-full inline-block">
           <div
             className="w-full flex self-start text-gray-400 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap py-4 cursor-pointer"

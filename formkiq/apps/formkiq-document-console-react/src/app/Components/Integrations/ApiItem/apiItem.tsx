@@ -1185,14 +1185,14 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
         </li>
         <li className="relative mt-10 sm:mt-2 md:mt-0">
           <div className="flex flex-rows w-full">
-            <div className="flex-grow-0">
+            <div className="grow-0">
               <h6
                 className="ml-4 mr-4 mb-4 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none"
                 >
                 Request
               </h6>
             </div>
-            <div className="flex-grow text-right mt-2 mb-2 relative">
+            <div className="grow text-right mt-2 mb-2 relative">
               
             </div>
           </div>

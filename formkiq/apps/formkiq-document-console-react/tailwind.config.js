@@ -35,15 +35,16 @@ module.exports = {
         },
         coreOrange: {
           default: "#DF6C20",
-          100: "#F9E2D2",
-          200: "#F2C4A6",
-          300: "#ECA779",
-          400: "#E68A4C",
-          500: "#DF6C20",
-          600: "#B35719",
-          700: "#864113",
-          800: "#592B0D",
-          900: "#2D1606",
+          50: '#FEF9F6',
+          100: '#F3CAAF',
+          200: '#EEB38B',
+          300: '#E99B67',
+          400: '#E48444',
+          500: '#DF6C20',
+          600: '#AE5419',
+          700: '#7D3C12',
+          800: '#4C250B',
+          900: '#1B0D04'
         },
         proTeal: {
           default: "#007F80",
@@ -203,6 +204,7 @@ module.exports = {
       fontSize: {
         "smaller": "0.8125rem",
         "xxs": "0.625rem",
+        "medsmall": "0.75rem",
       },
       letterSpacing: {
         "tightest": '-.075em'
@@ -260,6 +262,7 @@ module.exports = {
         56: "14rem",
         62: "15.5rem",
         64: "16rem",
+        68: "17rem",
         72: "18rem",
         100: "24rem",
         116: "28rem",

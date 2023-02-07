@@ -127,7 +127,11 @@ export default function AddTag({line, onTagChange, updateTags, siteId, tagColors
           />
         </div>
         <div>
-          <input type="submit" value="Add" className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white text-sm font-semibold py-1 px-2 rounded" />
+          <input
+            type="submit"
+            value="Add"
+            className="bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 hover:from-coreOrange-600 hover:via-red-600 hover:to-coreOrange-700 text-white text-xs font-semibold py-1.5 px-3 rounded-2xl flex cursor-pointer"
+            />
         </div>
       </div>
       <div className={'mx-2 mt-1 w-56 ' + (typeaheadVisible ? '' : 'hidden')}>

@@ -8,7 +8,7 @@ import { Link, useLocation, useParams, useNavigate } from "react-router-dom"
 import { RootState } from '../../Store/store';
 import { connect, useDispatch } from "react-redux";
 import { SubfolderUri, User } from '../../Store/reducers/auth';
-import { Plus, Spinner, Upload, Share, Star, ArrowRight, ArrowBottom, FolderOutline, View, Edit, Download, Trash, Undo } from "../../Components/Icons/icons"
+import { Plus, Spinner, Upload, Share, Star, ArrowRight, ArrowBottom, FolderOutline, View, Edit, Download, Trash, Undo, ChevronLeft, ChevronRight } from "../../Components/Icons/icons"
 import ShareModal from "../../Components/Share/share"
 import EditTagsAndMetadataModal from "../../Components/DocumentsAndFolders/EditTagsAndMetadataModal/editTagsAndMetadataModal"
 import DocumentVersionsModal from "../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal"
@@ -62,7 +62,6 @@ function Documents(props: {
   const navigate = useNavigate();
   const { user } = props;
   const {
-    id,
     subfolderLevel01,
     subfolderLevel02,
     subfolderLevel03,
@@ -108,8 +107,11 @@ function Documents(props: {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] = useState(siteDocumentsRootUri);
   const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(siteDocumentsRootName);
-  const [currentDocument, setCurrentDocument]: [IDocument | null, any] =
-    useState(null);
+  const [infoDocumentId, setInfoDocumentId] = useState('');
+  const [infoDocumentView, setInfoDocumentView] = useState('info');
+  const [infoTagEditMode, setInfoTagEditMode] = useState(false);
+  const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
+  const [currentDocument, setCurrentDocument]: [IDocument | null, any] = useState(null);
   const [currentDocumentTags, setCurrentDocumentTags]: [
     IDocumentTag[] | null,
     any
@@ -140,7 +142,10 @@ function Documents(props: {
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useDispatch();
-  const documentListOffsetTop = 200;
+  let documentListOffsetTop = 140;
+  if (!subfolderUri.length) {
+    documentListOffsetTop = 110;
+  }
 
   // TODO: improve on this check / determine why setting modules is not happening in time or without reload
   if (props.formkiqVersion.modules === undefined) {
@@ -221,31 +226,31 @@ function Documents(props: {
       }
       dispatch(setAllTags(allTagData))
     })
-    if (id) {
-      DocumentsService.getDocumentById(id, currentSiteId).then((response: any) => {
+    if (infoDocumentId.length) {
+      DocumentsService.getDocumentById(infoDocumentId, currentSiteId).then((response: any) => {
         setCurrentDocument(response);
+        // TODO: set folder to selected document path?
         updateTags();
       });
-    } else {
-      dispatch(setCurrentDocumentPath(''))
-      if (documentsWrapperRef.current) {
-        (documentsWrapperRef.current as HTMLDivElement).style.height =
-          ((window.innerHeight - documentListOffsetTop) + 400) + 'px';
-      }
-      if (documentsScrollpaneRef.current) {
-        (documentsScrollpaneRef.current as HTMLDivElement).addEventListener(
-          'scroll',
-          trackScrolling
-        );
-      }
     }
-  }, [id]);
+    dispatch(setCurrentDocumentPath(''))
+    if (documentsWrapperRef.current) {
+      (documentsWrapperRef.current as HTMLDivElement).style.height =
+        ((window.innerHeight - documentListOffsetTop) + 400) + 'px';
+    }
+    if (documentsScrollpaneRef.current) {
+      (documentsScrollpaneRef.current as HTMLDivElement).addEventListener(
+        'scroll',
+        trackScrolling
+      );
+    }
+  }, [infoDocumentId]);
 
   useEffect(() => {
     if (hash.indexOf('#id=') > -1) {
-      const infoDocumentId = hash.substring(4);
-      // TODO: open document info pane  
-      console.log('open doc pane for id ' + infoDocumentId)
+      setInfoDocumentId(hash.substring(4));
+    } else {
+      setInfoDocumentId('')
     }
   }, [hash]);
 
@@ -298,8 +303,8 @@ function Documents(props: {
   }, [props.currentActionEvent, actionEvent]);
 
   const updateTags = () => {
-    if (id) {
-      DocumentsService.getDocumentTags(id, currentSiteId).then((response: any) => {
+    if (infoDocumentId.length) {
+      DocumentsService.getDocumentTags(infoDocumentId, currentSiteId).then((response: any) => {
         if (response) {
           let isDeleted = false;
           setCurrentDocumentTags(
@@ -408,7 +413,7 @@ function Documents(props: {
   const deleteDocument = (file: IDocument, searchDocuments: any) => () => {
     const deleteFunc = () => {
       let isDocumentInfoPage = false;
-      if (id) {
+      if (infoDocumentId.length) {
         isDocumentInfoPage = true;
         setIsCurrentDocumentSoftDeleted(true);
       }
@@ -454,7 +459,7 @@ function Documents(props: {
           });
         }
         setIsCurrentDocumentSoftDeleted(false);
-        if (!id) {
+        if (!infoDocumentId.length) {
           dispatch(
             updateDocumentsList({
               documents: newDocs,
@@ -467,10 +472,10 @@ function Documents(props: {
     );
   };
   const onTagDelete = (tagKey: string) => {
-    if (id) {
+    if (infoDocumentId.length) {
       const deleteFunc = () => {
         updateTags();
-        DocumentsService.deleteDocumentTag(id, currentSiteId, tagKey).then(() => {
+        DocumentsService.deleteDocumentTag(infoDocumentId, currentSiteId, tagKey).then(() => {
           updateTags();
         });
         setTimeout(() => {
@@ -583,8 +588,8 @@ function Documents(props: {
     setMoveModalOpened(false);
   };
   const DownloadDocument = () => {
-    if (id) {
-      DocumentsService.getDocumentUrl(id, currentSiteId, '', false).then((urlResponse: any) => {
+    if (infoDocumentId.length) {
+      DocumentsService.getDocumentUrl(infoDocumentId, currentSiteId, '', false).then((urlResponse: any) => {
         if (urlResponse.url) {
           window.location.href = urlResponse.url;
         }
@@ -592,8 +597,8 @@ function Documents(props: {
     }
   };
   const ViewDocument = () => {
-    if (id) {
-      navigate(`${currentDocumentsRootUri}/${id}/view`);
+    if (infoDocumentId.length) {
+      navigate(`${currentDocumentsRootUri}/${infoDocumentId}/view`);
     }
   };
   const onFilterTag = (event: any, tag: string) => {
@@ -648,7 +653,7 @@ function Documents(props: {
       if (folderLevels.length > 3) {
         const previousFolderLevel = uri.substring(0, uri.lastIndexOf('/'))
         return (
-          <span className={'flex pr-1 py-2 text-gray-500 bg-white text-gray-500'}>
+          <span className={'flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}>
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
@@ -676,7 +681,7 @@ function Documents(props: {
         )
       } else {
         return(
-          <span className={'flex pr-2 py-2 text-gray-500 bg-white text-gray-500'}>
+          <span className={'flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}>
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
@@ -723,7 +728,7 @@ function Documents(props: {
       }
     }
     return (
-      <span className={'hidden flex pr-1 py-2 text-gray-500 bg-white text-gray-500'}>
+      <span className={'hidden flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}>
         <span className="pr-1">
           { siteDocumentsRootName.replace('Shared Folder: ', '') }
         </span>
@@ -791,6 +796,7 @@ function Documents(props: {
       </div>
     );
   };
+
   const documentsTable = (
     documents: any[] | null,
     subfolders: any[] | null
@@ -809,39 +815,33 @@ function Documents(props: {
             id="documentsScrollpane"
           >
             <table
-              className="border-collapse table-auto w-full"
+              className="border-separate border-spacing-0 table-auto w-full"
               id="documentsTable"
             >
               <thead className="sticky top-0 bg-white z-10">
-                <tr className="pt-5 rounded-t-md rounded">
+                <tr>
                   <th
                     scope="col"
-                    className="px-4 py-2 text-left font-medium text-sm text-gray-500 rounded-tl-md"
+                    className="px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
                   >
                     Name
                   </th>
                   <th
                     scope="col"
-                    className="w-32 px-4 py-2 text-left font-medium text-sm text-gray-500 rounded-tr-md"
-                  >
-                    Created
-                  </th>
-                  <th
-                    scope="col"
-                    className="w-38 px-4 py-2 text-left font-medium text-sm text-gray-500 rounded-tr-md"
+                    className="w-38 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
                   >
                     Last modified
                   </th>
                   <th
                     scope="col"
-                    className="w-24 px-4 py-2 text-left font-medium text-sm text-gray-500 rounded-tr-md"
+                    className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
                   >
                     Filesize
                   </th>
                   {props.useIndividualSharing && (
                     <th
                       scope="col"
-                      className="w-24 px-4 py-2 text-left font-medium text-sm text-gray-500 rounded-tr-md"
+                      className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
                       >
                       {subfolderUri === 'shared' && <span>Shared by</span>}
                       {subfolderUri !== 'shared' && <span>Access</span>}
@@ -849,13 +849,16 @@ function Documents(props: {
                   )}
                   <th
                     scope="col"
-                    className="w-28 px-4 py-2 text-left font-medium text-sm text-gray-500 rounded-tr-md"
+                    className="w-28 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
                   >
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody>
+                <tr>
+                  <td colSpan={6} className="h-2"></td>
+                </tr>
                 {folders && folderDocumentsTable(folders, subfolderUri)}
                 {docs.map((file, i) => (
                   <DocumentListLine
@@ -883,16 +886,6 @@ function Documents(props: {
                 ))}
               </tbody>
             </table>
-            {
-              subfolderUri !== 'deleted' &&
-              subfolderUri !== 'shared' &&
-              subfolderUri !== 'recent' &&
-              subfolderUri !== 'favorites' && (
-                <div className="absolute top-0 h-full ml-2.1 pb-8">
-                  <div className="h-full border-l border-coreOrange-50"></div>
-                </div>
-              )
-            }
             <FolderDropWrapper
               className="absolute w-full h-full"
               folder={subfolderUri}
@@ -919,7 +912,7 @@ function Documents(props: {
                   No subfolders or files have been found in this folder
                 </span>
               ) : (
-                <div className="mt-4 w-2/3 p-2 border border-gray-400 rounded-md bg-coreOrange-200 text-gray-900 font-semibold">
+                <div className="mt-4 w-2/3 p-2 border border-gray-400 rounded-md text-gray-900 font-semibold bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300">
                   <h3 className="text-lg mb-4">
                     No documents or folders found
                   </h3>
@@ -974,80 +967,163 @@ function Documents(props: {
     );
   };
 
-  const metadata = (tag: IDocumentTag, i: number) => {
-    return (
-      <div className="flex">
-        <div className="w-64 font-semibold">{tag.key}</div>
-        <div className="grow">
-          {tag.value && <span>{tag.value}</span>}
-          {tag.values !== undefined &&
-            tag.values.map((value, j) => {
-              return <span className="block">{value}</span>;
-            })}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <>
       <Helmet>
         <title>Documents</title>
       </Helmet>
-      {id ? (
-        <div className="flex flex-col lg:flex-row">
-          <div className="h-screen flex-1 bg-white p-10 inline-block">
-            {currentDocument ? (
-              <div>
-                <div className="flex">
-                  <div className="overflow-x-auto relative">
-                    <img
-                      alt="File Icon"
-                      src={getFileIcon((currentDocument as IDocument).path)}
-                      className="mr-2 inline-block h-20"
-                    />
+      <div className="h-[calc(100vh-3.68rem)] flex">
+        <div className="grow">
+          <div className="flex mt-2">
+            { foldersPath(subfolderUri) }
+          </div>
+          <div className="flex flex-row">
+            <div className="flex-1 inline-block">
+              <span className="hidden">
+                {filtersAndTags()}
+              </span>
+              {documentsTable(props.documents, props.folders)}
+            </div>
+          </div>
+        </div>
+        { infoDocumentId.length ? (
+          <div className="h-[calc(100vh-3.68rem)] flex w-72 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 border-l border-gray-300">
+            <div className="flex-1 inline-block">
+              {currentDocument ? (
+                <div className="flex flex-wrap justify-center">
+                  <div className="w-full flex grow-0 pl-2 pt-2 items-center">
+                    <div className="w-12">
+                      <img
+                        alt="File Icon"
+                        src={getFileIcon((currentDocument as IDocument).path)}
+                        className="w-12 h-12"
+                      />
+                    </div>
+                    <div className="grow-0 w-60 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+                      {(currentDocument as IDocument).path}
+                      {isCurrentDocumentSoftDeleted && (
+                        <small className="block text-red-500 uppercase">
+                          (deleted)
+                        </small>
+                      )}
+                    </div>
                   </div>
-                  <div className="font-bold text-lg inline-block pl-6">
-                    {(currentDocument as IDocument).path}
-                    {isCurrentDocumentSoftDeleted && (
-                      <small className="block text-red-500 uppercase">
-                        (deleted)
-                      </small>
+                  <div className="w-68 flex mt-4 mr-3 mb-2 border-b">
+                    <div
+                      className="w-1/3 text-sm font-semibold cursor-pointer"
+                      onClick={(event) => {
+                        setInfoDocumentView('info')
+                      }}
+                      >
+                      <div className={(infoDocumentView === 'info' ? 'text-coreOrange-500 ' : 'text-gray-400 ') + ' text-center'}>
+                        Info
+                      </div>
+                      <div className="flex justify-center">
+                        <hr className={(infoDocumentView === 'info' ? 'border-coreOrange-500 ' : 'border-transparent ') + ' w-1/2 rounded-xl border-b border'} />
+                      </div>
+                    </div>
+                    { props.formkiqVersion.type !== 'core' && (
+                      <div
+                        className="w-1/3 text-sm font-semibold cursor-pointer"
+                        onClick={(event) => {
+                          setInfoDocumentView('history')
+                        }}
+                        >
+                        <div className={(infoDocumentView === 'history' ? 'text-coreOrange-500 ' : 'text-gray-400 ') + ' text-center'}>
+                          History
+                        </div>
+                        <div className="flex justify-center">
+                          <hr className={(infoDocumentView === 'history' ? 'border-coreOrange-500 ' : 'border-transparent ') + ' w-1/2 rounded-xl border-b border'} />
+                        </div>
+                      </div>
                     )}
                   </div>
-                </div>
-                <div className="overflow-x-auto relative">
-                  <div className="-mr-[4.625rem] p-4 text-[0.8125rem] leading-6 text-slate-900">
-                    <div className="mt-4 flex items-center border-t border-slate-400/20 py-3">
-                      <span className="w-2/5 flex-none">Content Type</span>
-                      <span className="">
-                        {(currentDocument as IDocument).contentType}
-                      </span>
-                    </div>
-                    <div className="mt-4 flex items-center border-t border-slate-400/20 py-3">
-                      <span className="w-2/5 flex-none">Added by</span>
-                      <span className="">
-                        {(currentDocument as IDocument).userId}
-                      </span>
-                    </div>
-                    <div className="mt-4 flex items-center border-t border-slate-400/20 py-3">
-                      <span className="w-2/5 flex-none">Date added</span>
-                      <span className="">
-                        {formatDate((currentDocument as IDocument).insertedDate)}
-                      </span>
-                    </div>
-                    <div className="mt-4 flex items-center border-t border-slate-400/20 py-3">
-                      <span className="w-2/5 flex-none">Last modified</span>
-                      <span className="">
-                        {formatDate((currentDocument as IDocument).lastModifiedDate)}
-                      </span>
-                    </div>
-                    <div className="mt-4 flex items-start border-t border-slate-400/20 py-3">
-                      <div className="w-2/5">
-                        Tags
+                  <div className={(infoDocumentView === 'info' ? 'block ' : 'hidden ') + ' w-full'}>
+                    <dl className="p-4 pt-2 max-w-md text-medsmall text-gray-600">
+                      <div className="flex flex-col pb-3">
+                        <dt className="mb-1">Location</dt>
+                        <dd className="font-semibold text-sm text-coreOrange-600 hover:text-coreOrange-400">
+                          { (currentDocument as IDocument).path.substring(0, (currentDocument as IDocument).path.lastIndexOf('/')).length ? (
+                            <Link
+                              to={siteDocumentsRootUri + '/folders/' + (currentDocument as IDocument).path.substring(0, (currentDocument as IDocument).path.lastIndexOf('/'))}
+                              className="flex"
+                              >
+                              <span className="pr-1">
+                                { siteDocumentsRootName.replace('Shared Folder: ', '') }: 
+                              </span>
+                              <span>
+                                { (currentDocument as IDocument).path.substring(0, (currentDocument as IDocument).path.lastIndexOf('/')) }
+                              </span>
+                              <div className="w-4 pt-0.5">
+                                < ChevronRight />
+                              </div>
+                            </Link>
+                          ) : (
+                            <Link
+                              to={siteDocumentsRootUri}
+                              className="flex"
+                              >
+                              { siteDocumentsRootName.replace('Shared Folder: ', '') }
+                              <div className="w-4 pt-0.5">
+                                < ChevronRight />
+                              </div>
+                            </Link>
+                          )}
+                        </dd>
                       </div>
-                      <div className="grow flex flex-wrap">
-                        {currentDocumentTags &&
+                      <div className="flex flex-col pb-3">
+                        <dt className="mb-1">Added by</dt>
+                        <dd className="font-semibold text-sm">
+                          { (currentDocument as IDocument).userId }
+                        </dd>
+                      </div>
+                      <div className="flex flex-col pb-3">
+                        <dt className="mb-1">Date added</dt>
+                        <dd className="font-semibold text-sm">
+                          {formatDate((currentDocument as IDocument).insertedDate)}
+                        </dd>
+                      </div>
+                      <div className="flex flex-col pb-3">
+                        <dt className="mb-1">Last modified</dt>
+                        <dd className="font-semibold text-sm">
+                          {formatDate((currentDocument as IDocument).lastModifiedDate)}
+                        </dd>
+                      </div>
+                      <div className="w-68 flex mr-3 border-b"></div>
+                      <div className="flex flex-col pt-3">
+                        <dt className="mb-1 flex justify-between">
+                          <span className="text-sm font-semibold text-coreOrange-500">
+                            Tags
+                          </span>
+                          <div
+                            className="w-3/5 flex font-semibold text-coreOrange-500 cursor-pointer"
+                            onClick={(event) =>
+                              setInfoTagEditMode(!infoTagEditMode)
+                            }
+                            >
+                            { infoTagEditMode ? (
+                              <>
+                                <div className="w-4 pt-0.5">
+                                  < ChevronLeft />
+                                </div>
+                                <span>
+                                  cancel edit
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <span>
+                                  edit tags
+                                </span>
+                                <div className="w-4 pt-0.5">
+                                  < ChevronRight />
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </dt>
+                        <dd className="text-sm">
+                          {currentDocumentTags &&
                           (currentDocumentTags as []).map(
                             (tag: any, i: number) => {
                               let isKeyOnlyTag = false;
@@ -1074,14 +1150,16 @@ function Documents(props: {
                                     <div className="pt-0.5 pr-1 flex items-center">
                                       <div className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}>
                                         {tag.key}
-                                        <button
-                                          className="pl-2 font-semibold hover:text-red-600"
-                                          onClick={(event) =>
-                                            onTagDelete(tag.key)
-                                          }
-                                        >
-                                          x
-                                        </button>
+                                        { infoTagEditMode && (
+                                          <button
+                                            className="pl-2 font-semibold hover:text-red-600"
+                                            onClick={(event) =>
+                                              onTagDelete(tag.key)
+                                            }
+                                          >
+                                            x
+                                          </button>
+                                        )}
                                       </div>
                                       <div className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}></div>
                                     </div>
@@ -1090,185 +1168,220 @@ function Documents(props: {
                               );
                             }
                           )}
-                        </div>
-                    </div>
-                    <div className="flex">
-                      <div className="w-2/5"></div>
-                      <div className="w-3/5">
-                        <AddTag
-                          line={{
-                            lineType: 'document',
-                            folder: subfolderUri,
-                            documentId: (currentDocument as IDocument)
-                              .documentId,
-                            documentInstance: currentDocument as IDocument,
-                            folderInstance: null,
-                          }}
-                          onTagChange={onTagChange}
-                          updateTags={updateTags}
-                          siteId={currentSiteId}
-                          tagColors={props.tagColors}
-                        />
+                        </dd>
                       </div>
-                    </div>
-                    <div className="mt-4 flex items-start border-t border-slate-400/20 py-3">
-                      <span className="w-2/5 flex-none">Metadata</span>
-                      <div className="w-3/5">
-                        <div>
-                          {currentDocumentTags &&
-                            (currentDocumentTags as []).map(
-                              (tag: any, i: number) => {
-                                let isKeyOnlyTag = false;
-                                if (
-                                  (tag.value !== undefined &&
-                                    tag.value.length === 0) ||
-                                  (tag.values !== undefined &&
-                                    tag.values.length === 0)
-                                ) {
-                                  isKeyOnlyTag = true;
-                                }
-                                return (
-                                  <div
-                                    key={i}
-                                    className={
-                                      isKeyOnlyTag
-                                        ? 'inline'
-                                        : 'block border-b border-dotted'
-                                    }
-                                  >
-                                    {!isKeyOnlyTag && metadata(tag, i)}
-                                  </div>
-                                );
+                      { infoTagEditMode && (
+                        <div className="flex mt-2">
+                          <AddTag
+                            line={{
+                              lineType: 'document',
+                              folder: subfolderUri,
+                              documentId: (currentDocument as IDocument)
+                                .documentId,
+                              documentInstance: currentDocument as IDocument,
+                              folderInstance: null,
+                            }}
+                            onTagChange={onTagChange}
+                            updateTags={updateTags}
+                            siteId={currentSiteId}
+                            tagColors={props.tagColors}
+                          />
+                        </div>
+                      )}
+                      <div className="w-68 flex mt-3 mr-3 border-b"></div>
+                      <div className="pt-3 flex justify-between text-sm font-semibold text-coreOrange-500"> 
+                        Metadata
+                        <div
+                          className="w-3/5 flex text-medsmall font-semibold text-coreOrange-500 cursor-pointer"
+                          onClick={(event) =>
+                            onEditTagsAndMetadataModalClick(event, {
+                              lineType: 'document',
+                              folder: subfolderUri,
+                              documentId: (currentDocument as IDocument)
+                                .documentId,
+                              documentInstance: currentDocument as IDocument,
+                              folderInstance: null,
+                            })
+                          }
+                          >
+                          { infoMetadataEditMode ? (
+                            <>
+                              <div className="w-4 pt-0.5">
+                                < ChevronLeft />
+                              </div>
+                              <span>
+                                cancel edit
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span>
+                                add/edit metadata
+                              </span>
+                              <div className="w-4 pt-0.5">
+                                < ChevronRight />
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {currentDocumentTags && (currentDocumentTags as []).map(
+                        (tag: any, i: number) => {
+                          let isKeyOnlyTag = false;
+                          if (
+                            (tag.value !== undefined &&
+                              tag.value.length === 0) ||
+                            (tag.values !== undefined &&
+                              tag.values.length === 0)
+                          ) {
+                            isKeyOnlyTag = true;
+                          }
+                          return (
+                            <div key={i} className={(isKeyOnlyTag ? 'hidden' : 'inline') + ' flex flex-col pt-3'}>
+                              <dt className="mb-1">
+                                {tag.key}
+                              </dt>
+                              <dd className="font-semibold text-sm">
+                                {tag.value && <span>{tag.value}</span>}
+                                {tag.values !== undefined &&
+                                  tag.values.map((value: any, j: number) => {
+                                    return <span className="block">{value}</span>;
+                                  })}
+                              </dd>
+                            </div>
+                          );
+                        }
+                      )}
+                    </dl>
+                  </div>
+                  <div className={(infoDocumentView === 'history' ? 'block ' : 'hidden ') + ' w-full'}>
+                    <span className="p-4 text-sm">
+                      (coming soon)
+                    </span>
+                  </div>
+                  <div className="hidden overflow-x-auto relative">
+                    <div className="-mr-[4.625rem] p-4 text-[0.8125rem] leading-6 text-slate-900">                     
+                      <div className="mt-4 flex items-start border-t border-slate-400/20 py-3">
+                        <span className="w-2/5 flex-none">Metadata</span>
+                        <div className="w-3/5">
+                          <div className="mt-2 flex justify-start">
+                            <button
+                              className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white text-sm font-semibold py-1 px-2 rounded"
+                              onClick={(event) =>
+                                onEditTagsAndMetadataModalClick(event, {
+                                  lineType: 'document',
+                                  folder: subfolderUri,
+                                  documentId: (currentDocument as IDocument)
+                                    .documentId,
+                                  documentInstance: currentDocument as IDocument,
+                                  folderInstance: null,
+                                })
                               }
-                            )}
-                        </div>
-                        <div className="mt-2 flex justify-start">
-                          <button
-                            className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white text-sm font-semibold py-1 px-2 rounded"
-                            onClick={(event) =>
-                              onEditTagsAndMetadataModalClick(event, {
-                                lineType: 'document',
-                                folder: subfolderUri,
-                                documentId: (currentDocument as IDocument)
-                                  .documentId,
-                                documentInstance: currentDocument as IDocument,
-                                folderInstance: null,
-                              })
-                            }
-                          >
-                            Add/Edit Metadata
-                          </button>
+                            >
+                              Add/Edit Metadata
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex gap-4 pb-10 border-t border-slate-400/20 justify-center items-center py-6">
-                      {document &&
-                        props.formkiqVersion.modules.indexOf('onlyoffice') > -1 &&
-                        OnlyOfficeContentTypes.indexOf(
-                          (currentDocument as IDocument).contentType
-                        ) > -1 && (
-                          <button
-                            className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                            onClick={ViewDocument}
-                          >
-                            <span className="">Edit</span>
-                            <span className="pl-4 pt-1 w-8">{Edit()}</span>
-                          </button>
-                        )}
-                      {document &&
-                        InlineViewableContentTypes.indexOf(
-                          (currentDocument as IDocument).contentType
-                        ) > -1 && (
-                          <button
-                            className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                            onClick={ViewDocument}
-                          >
-                            <span className="">View</span>
-                            <span className="pl-4 pt-0.5 w-9">{View()}</span>
-                          </button>
-                        )}
-                      <button
-                        className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md cursor-pointer"
-                        onClick={DownloadDocument}
-                      >
-                        <span className="">Download</span>
-                        <span className="w-7 pl-1">{Download()}</span>
-                      </button>
-                      {isCurrentDocumentSoftDeleted ? (
-                        <button
-                          className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                          onClick={restoreDocument(currentDocument, currentSiteId, null)}
-                        >
-                          <span className="">Restore</span>
-                          <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
-                            <Undo />
-                          </div>
-                        </button>
-                      ) : (
-                        // eslint-disable-next-line react/jsx-no-useless-fragment
-                        <>
-                          { props.useSoftDelete && (
+                      <div className="flex gap-4 pb-10 border-t border-slate-400/20 justify-center items-center py-6">
+                        {document &&
+                          props.formkiqVersion.modules.indexOf('onlyoffice') > -1 &&
+                          OnlyOfficeContentTypes.indexOf(
+                            (currentDocument as IDocument).contentType
+                          ) > -1 && (
                             <button
                               className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                              onClick={deleteDocument(currentDocument, null)}
+                              onClick={ViewDocument}
                             >
-                              <span className="">Delete</span>
-                              <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
-                                <Trash />
-                              </div>
+                              <span className="">Edit</span>
+                              <span className="pl-4 pt-1 w-8">{Edit()}</span>
                             </button>
                           )}
-                        </>
-                      )}
-                      <div className="w-5 h-auto text-gray-400">
-                        <DocumentActionsPopover
-                          value={{
-                            lineType: 'document',
-                            folder: subfolderUri,
-                            documentId: (currentDocument as IDocument)
-                              .documentId,
-                            documentInstance: currentDocument as IDocument,
-                          }}
-                          siteId={currentSiteId}
-                          formkiqVersion={props.formkiqVersion}
-                          onDeleteClick={deleteFolder(currentDocument)}
-                          onShareClick={onShareClick}
-                          onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
-                          onRenameModalClick={onRenameModalClick}
-                          onMoveModalClick={onMoveModalClick}
-                          onDocumentVersionsModalClick={
-                            onDocumentVersionsModalClick
-                          }
-                          onESignaturesModalClick={onESignaturesModalClick}
-                          onInfoPage={true}
-                          user={user}
-                          useIndividualSharing={props.useIndividualSharing}
-                          useCollections={props.useCollections}
-                          useSoftDelete={props.useSoftDelete}
-                        />
+                        {document &&
+                          InlineViewableContentTypes.indexOf(
+                            (currentDocument as IDocument).contentType
+                          ) > -1 && (
+                            <button
+                              className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                              onClick={ViewDocument}
+                            >
+                              <span className="">View</span>
+                              <span className="pl-4 pt-0.5 w-9">{View()}</span>
+                            </button>
+                          )}
+                        <button
+                          className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md cursor-pointer"
+                          onClick={DownloadDocument}
+                        >
+                          <span className="">Download</span>
+                          <span className="w-7 pl-1">{Download()}</span>
+                        </button>
+                        {isCurrentDocumentSoftDeleted ? (
+                          <button
+                            className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                            onClick={restoreDocument(currentDocument, currentSiteId, null)}
+                          >
+                            <span className="">Restore</span>
+                            <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
+                              <Undo />
+                            </div>
+                          </button>
+                        ) : (
+                          // eslint-disable-next-line react/jsx-no-useless-fragment
+                          <>
+                            { props.useSoftDelete && (
+                              <button
+                                className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                                onClick={deleteDocument(currentDocument, null)}
+                              >
+                                <span className="">Delete</span>
+                                <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
+                                  <Trash />
+                                </div>
+                              </button>
+                            )}
+                          </>
+                        )}
+                        <div className="w-5 h-auto text-gray-400">
+                          <DocumentActionsPopover
+                            value={{
+                              lineType: 'document',
+                              folder: subfolderUri,
+                              documentId: (currentDocument as IDocument)
+                                .documentId,
+                              documentInstance: currentDocument as IDocument,
+                            }}
+                            siteId={currentSiteId}
+                            formkiqVersion={props.formkiqVersion}
+                            onDeleteClick={deleteFolder(currentDocument)}
+                            onShareClick={onShareClick}
+                            onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
+                            onRenameModalClick={onRenameModalClick}
+                            onMoveModalClick={onMoveModalClick}
+                            onDocumentVersionsModalClick={
+                              onDocumentVersionsModalClick
+                            }
+                            onESignaturesModalClick={onESignaturesModalClick}
+                            onInfoPage={true}
+                            user={user}
+                            useIndividualSharing={props.useIndividualSharing}
+                            useCollections={props.useCollections}
+                            useSoftDelete={props.useSoftDelete}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <Spinner />
-            )}
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="flex">
-            { foldersPath(subfolderUri) }
-          </div>
-          <div className="flex flex-row">
-            <div className="flex-1 inline-block">
-              {filtersAndTags()}
-              {documentsTable(props.documents, props.folders)}
+              ) : (
+                <Spinner />
+              )}
             </div>
           </div>
-        </>
-      )}
+        ) : (
+          <></>
+        )}
+      </div>
       <ShareModal
         isOpened={isShareModalOpened}
         onClose={onShareClose}

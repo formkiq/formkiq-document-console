@@ -922,7 +922,7 @@ export function Sidebar(props: {
             onClick={toggleSidebarExpand}
           >
             <div className={(!sidebarExpanded ? 'mt-2' : '-mt-1.5') + ' w-4'}>
-              {sidebarExpanded ? <ChevronRight /> : <ChevronLeft />}
+              {sidebarExpanded ? <ChevronLeft /> : <ChevronRight />}
             </div>
           </div>
         </div>

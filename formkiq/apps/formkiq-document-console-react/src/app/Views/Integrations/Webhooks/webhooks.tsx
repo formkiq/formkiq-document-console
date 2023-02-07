@@ -114,13 +114,13 @@ export function Webhooks({ user }: any) {
       <Helmet>
         <title>Webhooks</title>
       </Helmet>
-      <div className="max-w-screen-lg font-semibold mb-4">
+      <div className="p-4 max-w-screen-lg font-semibold mb-4">
         By posting an HTML web form or any other data to a webhook URL, FormKiQ will process that data and add it as a new document.
         <span className="block mt-2">
           Note: for outbound webhooks, please see <a href="/integrations/workflows" className="underline hover:text-coreOrange-500">Workflows</a>.
         </span>
       </div>
-      <div>
+      <div className="p-4">
         { userSite && (
           <>
             <div

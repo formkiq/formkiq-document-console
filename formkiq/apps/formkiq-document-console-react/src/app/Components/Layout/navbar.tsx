@@ -259,7 +259,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
           </>
         )}
         <div className="flex grow relative flex-wrap items-start">
-          <div className={ (props.isSidebarExpanded ? 'left-64' : 'left-16') + ' flex fixed top-0 right-0 z-20 h-14.5 items-center justify-between bg-white' }>
+          <div className={ (props.isSidebarExpanded ? 'left-64' : 'left-16') + ' flex fixed top-0 right-0 z-20 h-14.5 items-center justify-between bg-white border-b' }>
             <div className="w-7/8 flex">
               <div className={'flex ' + (documentId.length ? 'w-full' : 'w-2/3') }>
                 { !props.isSidebarExpanded && (
@@ -298,7 +298,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                           </div>
                         )}
                       </div>
-                      <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
+                      <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
                         { getTopLevelFolderName(subfolderUri) }
                       </div>
                       { ((hasUserSite && hasDefaultSite) || (hasUserSite && hasSharedFolders) || (hasDefaultSite && hasSharedFolders) || (hasSharedFolders && sharedFolderSites.length > 1)) && (
@@ -504,9 +504,6 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                 </div>
               </button>
             </div>
-          </div>
-          <div className={ (props.isSidebarExpanded ? 'left-64' : 'left-16') + ' flex fixed top-43px left-64 right-0 z-20 h-4 items-center justify-between'}>
-            <div className="w-full mt-2 border-b"></div>
           </div>
         </div>
       </div>

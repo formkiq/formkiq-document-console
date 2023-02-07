@@ -160,7 +160,7 @@ function FolderListLine({
             { folderInstance.documents.length === 25 && (
               <tr>
                 <td colSpan={6} className="text-sm">
-                  <div className="-mx-1 pl-12 font-semibold py-2 border-b hover:text-coreOrange-500">
+                  <div className="-mx-1 pl-12 font-semibold py-2 hover:text-coreOrange-500">
                     <a href={`${currentDocumentsRootUri}/folders/${subfolderPath}`}>
                       view all documents in folder...
                     </a>
@@ -186,7 +186,7 @@ function FolderListLine({
 
   return (
     <div className="flex">
-      <table className={'w-full relative ' + tableLeftMargin}>
+      <table className={'w-full border-spacing-0 border-collapse table-auto relative ' + tableLeftMargin}>
         <tbody>
           <FolderDropWrapper
             className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-tight"
@@ -242,9 +242,6 @@ function FolderListLine({
                   </div>
                 </div>
               </div>
-            </td>
-            <td className="w-38 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
-              {formatDate(folderInstance.insertedDate)}
             </td>
             <td className="w-38 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
               {formatDate(folderInstance.lastModifiedDate)}
@@ -303,11 +300,15 @@ function FolderListLine({
             </td>
           </FolderDropWrapper>
           {folderContent(folderInstance, folderPath)}
+          {!folderInstance.isExpanded && (
+            <tr>
+              <td colSpan={6} className="p-0 m-0">
+                <div className="w-full border-t h-0 -m-b"></div>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
-      <div className="absolute h-full ml-2 pb-10">
-        <div className="h-full border-l border-coreOrange-50"></div>
-      </div>
     </div>
   )
 }
