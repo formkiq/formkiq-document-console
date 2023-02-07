@@ -70,7 +70,7 @@ export default function AllTagsPopover({onChange, onKeyDown, siteId, tagColors, 
   }
   return (
     <div className="relative" ref={wrapperRef}>
-      <button ref={setReferenceRef as any} onClick={handleDropdownClick} className="mt-0.5 ml-1 bg-gradient-to-l from-gray-50 via-stone-100 to-gray-100 hover:from-gray-200 hover:via-stone-200 hover:to-gray-300 text-gray-900 border border-gray-200 text-xs font-semibold py-1 px-2 rounded-2xl flex cursor-pointer">
+      <button ref={setReferenceRef as any} onClick={handleDropdownClick} className="mt-0.5 ml-1 bg-gradient-to-l from-gray-50 via-stone-100 to-gray-100 hover:from-gray-200 hover:via-stone-200 hover:to-gray-300 text-gray-900 border border-gray-200 text-xs font-semibold py-1 px-2 rounded-2xl flex cursor-pointer focus:outline-none">
         <span className="font-semibold">
           View All Tags
         </span>

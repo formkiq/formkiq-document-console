@@ -147,8 +147,8 @@ function Documents(props: {
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useDispatch();
   let documentListOffsetTop = 140;
-  if (!subfolderUri.length) {
-    documentListOffsetTop = 110;
+  if (isTagFilterExpanded) {
+    documentListOffsetTop = 170;
   }
 
   // TODO: improve on this check / determine why setting modules is not happening in time or without reload
@@ -839,7 +839,7 @@ function Documents(props: {
       const folders = subfolders as [];
       return docs.length > 0 || folders.length > 0 ? (
         <div
-          className="relative mt-5 h-132 overflow-hidden"
+          className="relative mt-5 overflow-hidden"
           ref={documentsWrapperRef}
         >
           <div
@@ -1388,7 +1388,7 @@ function Documents(props: {
                       </dl>
                       <div className="mt-2 flex justify-center">
                         <button
-                          className="bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 hover:from-coreOrange-600 hover:via-red-600 hover:to-coreOrange-700 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                          className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
                           onClick={(event) => {
                             const documentLine: ILine = {
                               lineType: 'document',

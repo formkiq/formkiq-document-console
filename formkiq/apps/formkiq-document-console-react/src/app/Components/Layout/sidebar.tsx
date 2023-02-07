@@ -227,12 +227,14 @@ export function Sidebar(props: {
       initialPaddingLeft = 10
     }
     if (subfolderUri !== 'deleted' &&
-    subfolderUri !== 'shared' &&
-    subfolderUri !== 'recent' &&
-    subfolderUri !== 'favorites') {
+      subfolderUri !== 'shared' &&
+      subfolderUri !== 'recent' &&
+      subfolderUri !== 'favorites') 
+      {
       return (
         // eslint-disable-next-line react/jsx-no-useless-fragment
         <>
+          <span className="hidden pl-6 pl-8 pl-10 pl-12 pl-14 pl-16 pl-18 pl-20 pl-22 pl-24 pl-26"></span>
           { currentSiteId === folderSiteId  && (
             <div className="text-sm text-gray-500">
               { folderLevels.length ? (
@@ -939,7 +941,7 @@ export function Sidebar(props: {
             <nav className="grow mt-16">
               <div className="flex flex-wrap w-full justify-center mb-4">
                 <button
-                  className={ (props.isSidebarExpanded ? ' mr-1 ' : 'mb-1 ' ) + ' bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 hover:from-coreOrange-600 hover:via-red-600 hover:to-coreOrange-700 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'}
+                  className={ (props.isSidebarExpanded ? ' mr-1 ' : 'mb-1 ' ) + ' bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'}
                   onClick={(event) => {
                       // TODO: create more consistent check on site location
                       if (pathname.indexOf('/workflows') > -1 || pathname.indexOf('/integrations') > -1) {
