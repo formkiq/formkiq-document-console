@@ -54,7 +54,7 @@ export class DocumentsService {
 
     public static determineSiteId = () => {
       const { user } = store.getState().authReducer
-      let siteId = 'default'
+      let siteId = ''
       if (user) {
         if (user.currentSiteId) {
           siteId = user.currentSiteId
