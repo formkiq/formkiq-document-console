@@ -112,7 +112,7 @@ export interface ICurrentSiteInfo {
 
 export function getCurrentSiteInfo(pathname: string, user: any, hasUserSite: boolean, hasDefaultSite: boolean, hasSharedFolders: boolean, sharedFolderSites: any[]): ICurrentSiteInfo {
   const currentSiteInfo = {
-    siteId: 'default',
+    siteId: '',
     siteRedirectUrl: '',
     siteDocumentsRootUri: '/documents',
     siteDocumentsRootName: 'Documents'
@@ -168,8 +168,13 @@ export function getCurrentSiteInfo(pathname: string, user: any, hasUserSite: boo
         currentSiteInfo.siteRedirectUrl = '/my-documents'
         currentSiteInfo.siteDocumentsRootUri = '/my-documents'
         currentSiteInfo.siteDocumentsRootName = 'My Documents'
+      } else if (hasDefaultSite) {
+          currentSiteInfo.siteId = user.email
+          currentSiteInfo.siteRedirectUrl = '/my-documents'
+          currentSiteInfo.siteDocumentsRootUri = '/my-documents'
+          currentSiteInfo.siteDocumentsRootName = 'My Documents'
       } else {
-        currentSiteInfo.siteId = 'default'
+        currentSiteInfo.siteId = ''
         currentSiteInfo.siteRedirectUrl = '/documents'
         currentSiteInfo.siteDocumentsRootUri = '/documents'
         currentSiteInfo.siteDocumentsRootName = 'Documents'
@@ -178,6 +183,7 @@ export function getCurrentSiteInfo(pathname: string, user: any, hasUserSite: boo
     currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${currentSiteInfo.siteId}`
     currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${currentSiteInfo.siteId}`
   }
+  console.log(currentSiteInfo)
   return currentSiteInfo
 }
 

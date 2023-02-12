@@ -81,7 +81,7 @@ function DocumentListLine({
 
   const onPermanentDeleteClick = () => {
     const deleteFunc = () => {
-      DocumentsService.deleteDocument(file.documentId).then(() => {
+      DocumentsService.deleteDocument(file.documentId, siteId).then(() => {
         dispatch(openProgressDialog({ dialogTitle: 'Deleting...'}))
         setTimeout(() => {
           closeProgressDialog()
