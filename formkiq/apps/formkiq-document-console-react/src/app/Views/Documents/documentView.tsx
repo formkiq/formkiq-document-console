@@ -68,12 +68,12 @@ export function DocumentView(props: { user: User, formkiqVersion: any }) {
           if (versionKey && versionKey.length) {
             viewVersionKey = versionKey
           }
-          // console.log(viewVersionKey)
           DocumentsService.getDocumentUrl(id, currentSiteId, viewVersionKey).then((urlResponse: any) => {
             setDocumentContent(urlResponse.url)
           })
         } else {
-          navigate(`${currentDocumentsRootUri}/${id}`)
+          const url = currentDocumentsRootUri + '/folders/' + (response as IDocument).path.substring(0, (response as IDocument).path.lastIndexOf('/')) + '#id=' + id
+          navigate(url)
         }
       })
     }

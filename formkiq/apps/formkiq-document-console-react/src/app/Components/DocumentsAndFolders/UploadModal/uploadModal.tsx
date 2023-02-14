@@ -224,6 +224,9 @@ export default function UploadModal({
             uploadedDocuments.forEach((doc: any) => {
               const matchingFiles = filesData.filter((file: any) => {
                 let filename = doc.path
+                if (!filename) {
+                  return false
+                }
                 if (filename.lastIndexOf('/') > -1) {
                   filename = filename.substring(filename.lastIndexOf('/') + 1)
                 }
