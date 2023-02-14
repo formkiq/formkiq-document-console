@@ -183,7 +183,6 @@ export function getCurrentSiteInfo(pathname: string, user: any, hasUserSite: boo
     currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${currentSiteInfo.siteId}`
     currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${currentSiteInfo.siteId}`
   }
-  console.log(currentSiteInfo)
   return currentSiteInfo
 }
 

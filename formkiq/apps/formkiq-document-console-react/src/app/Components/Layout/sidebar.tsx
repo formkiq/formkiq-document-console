@@ -488,12 +488,12 @@ export function Sidebar(props: {
                 {integrationsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="uppercase font-semibold text-xs">
-                Workflows & Integrations
+                Integrations
               </div>
             </li>
             {integrationsExpanded && (
               <>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="hidden w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/workflows"
                     className={({ isActive }) =>
@@ -760,7 +760,7 @@ export function Sidebar(props: {
             <div className="flex w-full">
               <div className="w-full mt-2 mx-2 border-b"></div>
             </div>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+            <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/workflows"
                 className={({ isActive }) =>

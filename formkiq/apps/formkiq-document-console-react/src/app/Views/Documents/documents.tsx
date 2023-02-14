@@ -1325,6 +1325,15 @@ function Documents(props: {
                         }
                       )}
                     </dl>
+                    <div className="mt-4 w-full flex justify-center">
+                      <button
+                        className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                        onClick={DownloadDocument}
+                      >
+                        <span className="">Download</span>
+                        <span className="w-7 pl-1 -mt-0.5">{Download()}</span>
+                      </button>
+                    </div>
                   </div>
                   <div className={(infoDocumentView === 'history' ? 'block ' : 'hidden ') + ' w-64 mr-12'}>
                     <span className="p-4 text-sm">
