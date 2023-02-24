@@ -10,7 +10,8 @@ import { openDialog } from "../../../Store/reducers/globalConfirmControls";
 
 type HookItem = {
   siteId: string,
-  hooks: [] | null
+  readonly: boolean,
+  hooks: [] | null,
 }
 export function Webhooks({ user }: any) {
 
@@ -29,7 +30,11 @@ export function Webhooks({ user }: any) {
       }
     })
   }
-  const currentSite = userSite ? userSite : defaultSite
+  const currentSite = userSite ? userSite : (defaultSite ? defaultSite : sharedFolderSites[0] )
+  if (currentSite === null) {
+    alert('No site configured for this user')
+    window.location.href='/'
+  }
 
   const [userSiteExpanded, setUserSiteExpanded] = useState(true)
   const [userSiteWebhooks, setUserSiteWebhooks] = useState(null)
@@ -65,16 +70,18 @@ export function Webhooks({ user }: any) {
     updateWebhooks()
   }, [user])
 
-  const setWebhooks = (webhooks: [], siteId: string) => {
+  const setWebhooks = (webhooks: [], siteId: string, readonly: boolean) => {
     if (siteId === user.email) {
+      // NOTE: does not allow for a readonly user site
       setUserSiteWebhooks(webhooks as any)
     } else if (siteId === 'default') {
+      // NOTE: does not allow for a readonly default site
       setDefaultSiteWebhooks(webhooks as any)
     } else {
       const index = sharedFolderHooks.findIndex((val: HookItem) => { return val.siteId === siteId})
       const newArr = [...sharedFolderHooks]
       if(index < 0) {
-        newArr.push({hooks: webhooks, siteId: siteId})
+        newArr.push({hooks: webhooks, siteId: siteId, readonly})
       } else {
         const item = { ...(newArr[index]) }
         item.hooks = webhooks
@@ -85,15 +92,23 @@ export function Webhooks({ user }: any) {
   }
   
   const updateWebhooks = () => {
-    if(currentSite.siteId) {
+    if (currentSite.siteId) {
+      let readonly = false
+      if (currentSite.permission && currentSite.permission === 'READ_ONLY') {
+        readonly = true
+      }
       DocumentsService.getWebhooks(currentSite.siteId).then((webhooksResponse: any) => {
-        setWebhooks(webhooksResponse.webhooks, currentSite.siteId)
+        setWebhooks(webhooksResponse.webhooks, currentSite.siteId, readonly)
       })
     }
     if(sharedFolderSites.length > 0) {
       for(const item of sharedFolderSites) {
+        let readonly = false
+        if (item.permission && item.permission === 'READ_ONLY') {
+          readonly = true
+        }
         DocumentsService.getWebhooks(item.siteId).then((webhooksResponse: any) => {
-          setWebhooks(webhooksResponse.webhooks, item.siteId)
+          setWebhooks(webhooksResponse.webhooks, item.siteId, readonly)
         })
       }
     }
@@ -135,7 +150,7 @@ export function Webhooks({ user }: any) {
               </div>
             </div>
             {userSiteExpanded && (
-              <WebhookList siteId={userSite.siteId} webhooks={userSiteWebhooks} onDelete={deleteWebhook} onNewClick={onNewClick}></WebhookList>
+              <WebhookList siteId={userSite.siteId} webhooks={userSiteWebhooks} isSiteReadOnly={userSite.readonly} onDelete={deleteWebhook} onNewClick={onNewClick}></WebhookList>
             )}
           </>
         )}
@@ -161,7 +176,7 @@ export function Webhooks({ user }: any) {
               </div>
             </div>
             {defaultSiteExpanded && (
-              <WebhookList webhooks={deaultSiteWebhooks} onDelete={deleteWebhook} siteId={defaultSite.siteId} onNewClick={onNewClick}></WebhookList>
+              <WebhookList webhooks={deaultSiteWebhooks} onDelete={deleteWebhook} siteId={defaultSite.siteId} isSiteReadOnly={defaultSite.readonly} onNewClick={onNewClick}></WebhookList>
             )}
           </>
         )}
@@ -187,7 +202,7 @@ export function Webhooks({ user }: any) {
                     </div>
                   </div>
                   <div className="mt-4 ml-4">
-                    <WebhookList webhooks={item.hooks} siteId={item.siteId} onDelete={deleteWebhook} onNewClick={onNewClick}></WebhookList>
+                    <WebhookList webhooks={item.hooks} siteId={item.siteId} isSiteReadOnly={item.readonly}  onDelete={deleteWebhook} onNewClick={onNewClick}></WebhookList>
                   </div>
                 </div>
               )

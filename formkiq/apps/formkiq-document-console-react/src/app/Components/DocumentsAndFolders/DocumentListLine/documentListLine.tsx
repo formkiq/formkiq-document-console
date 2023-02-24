@@ -19,6 +19,7 @@ function DocumentListLine({
   file,
   folder,
   siteId,
+  isSiteReadOnly,
   documentsRootUri,
   onShareClick,
   onDeleteClick,
@@ -42,6 +43,7 @@ function DocumentListLine({
   file: any;
   folder: any;
   siteId: string;
+  isSiteReadOnly: boolean;
   documentsRootUri: string;
   onShareClick: any;
   onDeleteClick: any;
@@ -124,6 +126,7 @@ function DocumentListLine({
     );
   };
 
+  
   const [{ opacity, isDragging }, drag, preview] = useDrag(
     () => ({
       type: 'file',
@@ -132,6 +135,7 @@ function DocumentListLine({
         opacity: monitor.isDragging() ? 0.4 : 1,
         isDragging: monitor.isDragging(),
       }),
+      canDrag: !isSiteReadOnly
     }),
     [file]
   );
@@ -324,6 +328,7 @@ function DocumentListLine({
                       }}
                       onTagChange={onTagChange}
                       siteId={siteId}
+                      isSiteReadOnly={isSiteReadOnly}
                       tagColors={tagColors}
                     />
                   </div>
@@ -335,11 +340,11 @@ function DocumentListLine({
               className="w-5 pt-0.5 text-gray-400 mr-1 cursor-pointer hover:text-coreOrange-500"
             >
               <Info />
-            </Link>
-            {folder !== 'deleted' && (
+            </Link>            
+            {folder !== 'deleted' && !isSiteReadOnly && (
               <div
                 onClick={toggleFavorite}
-                className="w-5 text-gray-400 mr-4 cursor-pointer px-2 box-content"
+                className="w-3 text-gray-400 mr-4 cursor-pointer px-2 box-content"
               >
                 {isFavorited ? StarFilled() : Star()}
               </div>
@@ -389,20 +394,25 @@ function DocumentListLine({
                     <Share />
                   </div>
                 )}
-                { useSoftDelete ? (
-                  <div
-                    className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
-                    onClick={onDeleteClick}
-                    >
-                    <Trash />
-                  </div>
-                ) : (
-                  <div
-                    className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
-                    onClick={onPermanentDeleteClick}
-                    >
-                    <Trash />
-                  </div>
+                { !isSiteReadOnly && (
+                  // eslint-disable-next-line react/jsx-no-useless-fragment
+                  <>
+                    { useSoftDelete ? (
+                      <div
+                        className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
+                        onClick={onDeleteClick}
+                        >
+                        <Trash />
+                      </div>
+                    ) : (
+                      <div
+                        className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
+                        onClick={onPermanentDeleteClick}
+                        >
+                        <Trash />
+                      </div>
+                    )}
+                  </>
                 )}
                 <div className="w-5 pt-0.5 h-auto text-gray-400 cursor-pointer">
                   <DocumentActionsPopover
@@ -413,6 +423,7 @@ function DocumentListLine({
                       documentInstance: file,
                     }}
                     siteId={siteId}
+                    isSiteReadOnly={isSiteReadOnly}
                     formkiqVersion={formkiqVersion}
                     onDeleteClick={deleteDocument}
                     onShareClick={onShareClick}

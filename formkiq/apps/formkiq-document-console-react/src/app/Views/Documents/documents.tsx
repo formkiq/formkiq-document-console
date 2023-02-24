@@ -93,7 +93,7 @@ function Documents(props: {
   const { hash } = useLocation();
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } = getUserSites(user);
   const pathname = useLocation().pathname
-  const { siteId, siteRedirectUrl, siteDocumentsRootUri, siteDocumentsRootName } = getCurrentSiteInfo(pathname, user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
+  const { siteId, siteRedirectUrl, siteDocumentsRootUri, siteDocumentsRootName, isSiteReadOnly } = getCurrentSiteInfo(pathname, user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
   if (siteRedirectUrl.length) {
     navigate(
       {
@@ -262,11 +262,7 @@ function Documents(props: {
     if (props.currentActionEvent && props.currentActionEvent.length) {
       switch (props.currentActionEvent) {
         case 'upload':
-          if (currentDocument) {
-            onUploadClick({}, (currentDocument as IDocument).documentId)
-          } else {
-            onUploadClick({}, '')
-          }
+          onUploadClick({}, '')
           break
         case 'new':
           onNewClick({}, {
@@ -899,6 +895,7 @@ function Documents(props: {
                     file={file}
                     folder={subfolderUri}
                     siteId={currentSiteId}
+                    isSiteReadOnly={isSiteReadOnly}
                     documentsRootUri={currentDocumentsRootUri}
                     onShareClick={onShareClick}
                     searchDocuments={documents}
@@ -980,6 +977,7 @@ function Documents(props: {
                 folderInstance={folder}
                 key={j}
                 currentSiteId={currentSiteId}
+                isSiteReadOnly={isSiteReadOnly}
                 onDeleteClick={deleteFolder}
                 currentDocumentsRootUri={currentDocumentsRootUri}
                 onShareClick={onShareClick}
@@ -1167,32 +1165,34 @@ function Documents(props: {
                           <span className="text-sm font-semibold text-coreOrange-500">
                             Tags
                           </span>
-                          <div
-                            className="w-3/5 flex font-semibold text-coreOrange-500 cursor-pointer"
-                            onClick={(event) =>
-                              setInfoTagEditMode(!infoTagEditMode)
-                            }
-                            >
-                            { infoTagEditMode ? (
-                              <>
-                                <div className="w-4 pt-0.5">
-                                  < ChevronLeft />
-                                </div>
-                                <span>
-                                  cancel edit
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <span>
-                                  edit tags
-                                </span>
-                                <div className="w-4 pt-0.5">
-                                  < ChevronRight />
-                                </div>
-                              </>
-                            )}
-                          </div>
+                          { !isSiteReadOnly && (
+                            <div
+                              className="w-3/5 flex font-semibold text-coreOrange-500 cursor-pointer"
+                              onClick={(event) =>
+                                setInfoTagEditMode(!infoTagEditMode)
+                              }
+                              >
+                              { infoTagEditMode ? (
+                                <>
+                                  <div className="w-4 pt-0.5">
+                                    < ChevronLeft />
+                                  </div>
+                                  <span>
+                                    cancel edit
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span>
+                                    edit tags
+                                  </span>
+                                  <div className="w-4 pt-0.5">
+                                    < ChevronRight />
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
                         </dt>
                         <dd className="text-sm">
                           {currentDocumentTags &&
@@ -1263,39 +1263,41 @@ function Documents(props: {
                       <div className="w-68 flex mt-3 mr-3 border-b"></div>
                       <div className="pt-3 flex justify-between text-sm font-semibold text-coreOrange-500"> 
                         Metadata
-                        <div
-                          className="w-3/5 flex text-medsmall font-semibold text-coreOrange-500 cursor-pointer"
-                          onClick={(event) =>
-                            onEditTagsAndMetadataModalClick(event, {
-                              lineType: 'document',
-                              folder: subfolderUri,
-                              documentId: (currentDocument as IDocument)
-                                .documentId,
-                              documentInstance: currentDocument as IDocument,
-                              folderInstance: null,
-                            })
-                          }
-                          >
-                          { infoMetadataEditMode ? (
-                            <>
-                              <div className="w-4 pt-0.5">
-                                < ChevronLeft />
-                              </div>
-                              <span>
-                                cancel edit
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <span>
-                                add/edit metadata
-                              </span>
-                              <div className="w-4 pt-0.5">
-                                < ChevronRight />
-                              </div>
-                            </>
-                          )}
-                        </div>
+                        { !isSiteReadOnly && (
+                          <div
+                            className="w-3/5 flex text-medsmall font-semibold text-coreOrange-500 cursor-pointer"
+                            onClick={(event) =>
+                              onEditTagsAndMetadataModalClick(event, {
+                                lineType: 'document',
+                                folder: subfolderUri,
+                                documentId: (currentDocument as IDocument)
+                                  .documentId,
+                                documentInstance: currentDocument as IDocument,
+                                folderInstance: null,
+                              })
+                            }
+                            >
+                            { infoMetadataEditMode ? (
+                              <>
+                                <div className="w-4 pt-0.5">
+                                  < ChevronLeft />
+                                </div>
+                                <span>
+                                  cancel edit
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <span>
+                                  add/edit metadata
+                                </span>
+                                <div className="w-4 pt-0.5">
+                                  < ChevronRight />
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                       {currentDocumentTags && (currentDocumentTags as []).map(
                         (tag: any, i: number) => {
@@ -1409,7 +1411,13 @@ function Documents(props: {
                             onDocumentVersionsModalClick(event,  documentLine)
                           }}
                           >
-                            View / Edit Versions
+                            View
+                            { isSiteReadOnly ? (
+                              <span>&nbsp;</span>
+                            ) : (
+                              <span>&nbsp;/ Edit&nbsp;</span>
+                            )}
+                            Versions
                         </button>
                       </div>
                     </span>
@@ -1485,6 +1493,7 @@ function Documents(props: {
                               documentInstance: currentDocument as IDocument,
                             }}
                             siteId={currentSiteId}
+                            isSiteReadOnly={isSiteReadOnly}
                             formkiqVersion={props.formkiqVersion}
                             onDeleteClick={deleteFolder(currentDocument)}
                             onShareClick={onShareClick}
@@ -1535,6 +1544,7 @@ function Documents(props: {
         onUploadClick={onUploadClick}
         isUploadModalOpened={isUploadModalOpened}
         siteId={currentSiteId}
+        isSiteReadOnly={isSiteReadOnly}
         documentsRootUri={currentDocumentsRootUri}
         value={documentVersionsModalValue}
       />
