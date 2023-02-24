@@ -19,7 +19,7 @@ export function DocumentView(props: { user: User, formkiqVersion: any }) {
   const navigate = useNavigate()
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } = getUserSites(user);
   const pathname = useLocation().pathname
-  const { siteId, siteRedirectUrl, siteDocumentsRootUri, siteDocumentsRootName } = getCurrentSiteInfo(pathname, user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
+  const { siteId, siteRedirectUrl, siteDocumentsRootUri, siteDocumentsRootName, isSiteReadOnly } = getCurrentSiteInfo(pathname, user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
   if (siteRedirectUrl.length) {
     navigate(
       {
@@ -94,6 +94,8 @@ export function DocumentView(props: { user: User, formkiqVersion: any }) {
     setCurrentSiteId(recheckSiteInfo.siteId)
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri)
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName)
+    // TODO: determine if readonly check required here
+    //setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly)
   }, [pathname])
 
   const [document, setDocument] : [IDocument | null, any] = useState(null)

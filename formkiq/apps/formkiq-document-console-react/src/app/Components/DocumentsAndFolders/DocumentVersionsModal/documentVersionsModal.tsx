@@ -9,7 +9,7 @@ import { InlineViewableContentTypes } from "../../../helpers/constants/contentTy
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import moment from "moment"
 
-export default function DocumentVersionsModal({isOpened, onClose, onUploadClick, isUploadModalOpened, siteId, documentsRootUri, value}: {isOpened: boolean, onClose: any, onUploadClick: any, isUploadModalOpened: boolean, siteId: string, documentsRootUri: string, value: ILine | null}) {
+export default function DocumentVersionsModal({isOpened, onClose, onUploadClick, isUploadModalOpened, siteId, isSiteReadOnly, documentsRootUri, value}: {isOpened: boolean, onClose: any, onUploadClick: any, isUploadModalOpened: boolean, siteId: string, isSiteReadOnly: boolean, documentsRootUri: string, value: ILine | null}) {
 
   const [versions, setVersions] = useState(null)
   const dispatch = useDispatch()
@@ -133,14 +133,16 @@ export default function DocumentVersionsModal({isOpened, onClose, onUploadClick,
                       <span className="block">
 
                       </span>
-                    </div>
+                    </div>                   
                     <div className="w-100">
-                      <button onClick={event => onUploadClick(event, (value as any).documentId)} className="w-64 flex bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-sm text-gray-900 font-semibold py-2 px-4 rounded-2xl flex cursor-pointer focus:outline-none" >
-                        <div className="mx-4">Upload New Version</div>
-                        <div className="w-4 h-4 ml-2 mt-1">
-                          {Upload()}
-                        </div>
-                      </button>
+                      { !isSiteReadOnly && (                      
+                        <button onClick={event => onUploadClick(event, (value as any).documentId)} className="w-64 flex bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-sm text-gray-900 font-semibold py-2 px-4 rounded-2xl flex cursor-pointer focus:outline-none" >
+                          <div className="mx-4">Upload New Version</div>
+                          <div className="w-4 h-4 ml-2 mt-1">
+                            {Upload()}
+                          </div>
+                        </button>
+                      )}
                     </div>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
@@ -208,7 +210,7 @@ export default function DocumentVersionsModal({isOpened, onClose, onUploadClick,
                                     >
                                     Download
                                   </button>
-                                  {version.version && (
+                                  {version.version && !isSiteReadOnly && (
                                     <button
                                       className="flex items-center bg-gradient-to-l from-yellow-200 via-amber-200 to-yellow-300 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 text-gray-900 text-smaller font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
                                       onClick={event => revertDocumentVersion(event, version.versionKey)}

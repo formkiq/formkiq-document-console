@@ -23,7 +23,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
   const navigate = useNavigate()
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } = getUserSites(props.user);
   const pathname = useLocation().pathname
-  const { siteId, siteDocumentsRootUri, siteDocumentsRootName } = getCurrentSiteInfo(pathname, props.user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
+  const { siteId, siteDocumentsRootUri, siteDocumentsRootName, isSiteReadOnly } = getCurrentSiteInfo(pathname, props.user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] = useState(siteDocumentsRootUri);
   const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(siteDocumentsRootName);
@@ -250,6 +250,16 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
     );
   }
 
+  const DownloadDocument = () => {
+    if (documentId.length) {
+      DocumentsService.getDocumentUrl(documentId, currentSiteId, '', false).then((urlResponse: any) => {
+        if (urlResponse.url) {
+          window.location.href = urlResponse.url;
+        }
+      });
+    }
+  };
+
   return (
     props.user && 
       <div className="flex w-full h-14.5">
@@ -417,6 +427,14 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                                     >
                                     view folder
                                   </a>
+                                </span>
+                                <span className="pl-6">
+                                  <span
+                                    className="text-sm text-gray-500 hover:text-coreOrange-600 cursor-pointer whitespace-nowrap"
+                                    onClick={DownloadDocument}
+                                    >
+                                    download
+                                  </span>
                                 </span>
                               </span>
                             ) : (

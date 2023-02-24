@@ -25,7 +25,7 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
   }, [ref])
 }
 
-export default function DocumentTagsPopover({onChange, onKeyDown, siteId, value, tagColors, onTagChange}: any) {
+export default function DocumentTagsPopover({onChange, onKeyDown, siteId, isSiteReadOnly, value, tagColors, onTagChange}: any) {
 
   const line: ILine = value
   const [visible, setVisibility] = useState(false);
@@ -154,20 +154,22 @@ export default function DocumentTagsPopover({onChange, onKeyDown, siteId, value,
           >
           <div className="mb-2 flex items-center">
             <h2 className="grow text-base font-semibold">Tags</h2>
-            <button
-              className="bg-white border text-xs p-1 px-2 mx-1 mt-1 cursor-pointer hover:bg-gray-100"
-              onClick={toggleTagColorEdit}
-              >
-              { isTagColorEditMode ? (
-                <>
-                  End Tag Color Edit
-                </>
-              ) : (
-                <>
-                  Edit Tag Colors
-                </>
-              )}
-            </button>
+            { !isSiteReadOnly && (
+              <button
+                className="bg-white border text-xs p-1 px-2 mx-1 mt-1 cursor-pointer hover:bg-gray-100"
+                onClick={toggleTagColorEdit}
+                >
+                { isTagColorEditMode ? (
+                  <>
+                    End Tag Color Edit
+                  </>
+                ) : (
+                  <>
+                    Edit Tag Colors
+                  </>
+                )}
+              </button>
+            )}
           </div>
           <div className="flex flex-wrap">
             { isLoading && (
@@ -200,14 +202,16 @@ export default function DocumentTagsPopover({onChange, onKeyDown, siteId, value,
                         <span className="p-2">
                           {tag.key}
                         </span>
-                        <button
-                          className="pl-1 font-semibold hover:text-red-600"
-                          onClick={event => onTagDelete(tag.key)}
-                          >
-                          <div className="w-3.5 text-gray-600">
-                            <Close />
-                          </div>
-                        </button>
+                        { !isSiteReadOnly && (
+                          <button
+                            className="pl-1 font-semibold hover:text-red-600"
+                            onClick={event => onTagDelete(tag.key)}
+                            >
+                            <div className="w-3.5 text-gray-600">
+                              <Close />
+                            </div>
+                          </button>
+                        )}
                       </div>
                       <div className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}></div>
                     </div> 
@@ -217,7 +221,7 @@ export default function DocumentTagsPopover({onChange, onKeyDown, siteId, value,
             })
             }
           </div>
-          { !isLoading && (
+          { !isLoading && !isSiteReadOnly && (
             <div className="mt-4 flex justify-center items-center w-full">
               <AddTag line={line} onTagChange={onTagChange} updateTags={updateTags} siteId={siteId} tagColors={tagColors}/>
             </div>

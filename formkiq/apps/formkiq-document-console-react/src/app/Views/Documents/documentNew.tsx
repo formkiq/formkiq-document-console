@@ -20,7 +20,7 @@ export function DocumentNew(props: { user: User }) {
   }
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } = getUserSites(user);
   const pathname = useLocation().pathname
-  const { siteId, siteRedirectUrl, siteDocumentsRootUri, siteDocumentsRootName } = getCurrentSiteInfo(pathname, user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
+  const { siteId, siteRedirectUrl, siteDocumentsRootUri, siteDocumentsRootName, isSiteReadOnly } = getCurrentSiteInfo(pathname, user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
   if (siteRedirectUrl.length) {
     navigate(
       {

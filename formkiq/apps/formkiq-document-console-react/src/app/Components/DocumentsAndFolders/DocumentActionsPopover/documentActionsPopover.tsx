@@ -28,6 +28,7 @@ export default function DocumentActionsPopover({
   onKeyDown,
   value,
   siteId,
+  isSiteReadOnly,
   formkiqVersion,
   onShareClick,
   onDeleteClick,
@@ -128,7 +129,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {line.lineType === 'document' && (
+            {line.lineType === 'document' && !isSiteReadOnly && (
               <li className="py-1 px-2 hover:bg-gray-100 cursor-pointer">
                 <span className={'flex items-baseline'}>
                   <span className="mr-2 w-4 text-gray-400">{Star()}</span>
@@ -152,7 +153,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {line.lineType === 'document' && (
+            {line.lineType === 'document' && !isSiteReadOnly && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
@@ -181,7 +182,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {line.lineType === 'document' && (
+            {line.lineType === 'document' && !isSiteReadOnly && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
@@ -222,10 +223,10 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            { line.lineType === 'document' && (
+            { line.lineType === 'document' && !isSiteReadOnly && (
               <div className="w-4/5 my-2 mx-6 border-b"></div>
             )}
-            { line.lineType === 'document' &&
+            { line.lineType === 'document' && !isSiteReadOnly &&
               line.documentInstance &&
               formkiqVersion.modules.indexOf('esignature') > -1 &&
               ESignatureContentTypes.indexOf(
@@ -261,7 +262,7 @@ export default function DocumentActionsPopover({
                   </li>
                 </>
               )}
-            {line.lineType === 'document' && (
+            {line.lineType === 'document' && !isSiteReadOnly && (
               <>
                 {useCollections && (
                   <li className="py-1 px-2 hover:bg-gray-100 cursor-pointer">
@@ -310,7 +311,7 @@ export default function DocumentActionsPopover({
                 </li>
               </>
             )}
-            {!onInfoPage && (
+            {!onInfoPage && !isSiteReadOnly && (
               <>
                 {line.lineType === 'document' && (
                   <div className="w-4/5 my-2 mx-6 border-b"></div>

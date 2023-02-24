@@ -22,6 +22,7 @@ interface IProps {
   subfolder: string
   folderInstance: IFolder
   currentSiteId: string
+  isSiteReadOnly: boolean
   onDeleteClick: (folder: IFolder) => () => void
   onRestoreDocument: (file: IDocument, siteId: string, searchDocuments: any) => () => void
   onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void
@@ -46,6 +47,7 @@ function FolderListLine({
   subfolder,
   folderInstance,
   currentSiteId,
+  isSiteReadOnly,
   onDeleteClick,
   user,
   currentDocumentsRootUri,
@@ -109,6 +111,7 @@ function FolderListLine({
                       key={j}
                       user={user}
                       currentSiteId={currentSiteId}
+                      isSiteReadOnly={isSiteReadOnly}
                       onDeleteClick={onDeleteClick}
                       currentDocumentsRootUri={currentDocumentsRootUri}
                       onShareClick={onShareClick}
@@ -138,6 +141,7 @@ function FolderListLine({
                   file={file}
                   folder={subfolder}
                   siteId={currentSiteId}
+                  isSiteReadOnly={isSiteReadOnly}
                   documentsRootUri={currentDocumentsRootUri}
                   onShareClick={onShareClick}
                   searchDocuments={folderInstance.documents}
@@ -273,30 +277,35 @@ function FolderListLine({
                     <Share />
                   </div>
                 )}
-                <div
-                  className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
-                  onClick={onDeleteClick(folderInstance)}
-                  >
-                  <Trash />
-                </div>
-                <div className="w-5 pt-0.5 h-auto text-gray-400">
-                  <DocumentActionsPopover
-                    value={{ lineType: 'folder', folder: folderPath }}
-                    siteId={currentSiteId}
-                    formkiqVersion={formkiqVersion}
-                    onDeleteClick={onDeleteClick(folderInstance)}
-                    onShareClick={onShareClick}
-                    onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
-                    onRenameModalClick={onRenameModalClick}
-                    onMoveModalClick={onMoveModalClick}
-                    onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                    onESignaturesModalClick={onESignaturesModalClick}
-                    user={user}
-                    useIndividualSharing={useIndividualSharing}
-                    useCollections={useCollections}
-                    useSoftDelete={useSoftDelete}
-                  />
-                </div>
+                { !isSiteReadOnly && (
+                  <>
+                    <div
+                      className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
+                      onClick={onDeleteClick(folderInstance)}
+                      >
+                      <Trash />
+                    </div>
+                    <div className="w-5 pt-0.5 h-auto text-gray-400">
+                      <DocumentActionsPopover
+                        value={{ lineType: 'folder', folder: folderPath }}
+                        siteId={currentSiteId}
+                        isSiteReadOnly={isSiteReadOnly}
+                        formkiqVersion={formkiqVersion}
+                        onDeleteClick={onDeleteClick(folderInstance)}
+                        onShareClick={onShareClick}
+                        onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
+                        onRenameModalClick={onRenameModalClick}
+                        onMoveModalClick={onMoveModalClick}
+                        onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                        onESignaturesModalClick={onESignaturesModalClick}
+                        user={user}
+                        useIndividualSharing={useIndividualSharing}
+                        useCollections={useCollections}
+                        useSoftDelete={useSoftDelete}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </td>
           </FolderDropWrapper>

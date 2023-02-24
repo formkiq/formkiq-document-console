@@ -108,6 +108,7 @@ export interface ICurrentSiteInfo {
   siteRedirectUrl: string
   siteDocumentsRootUri: string
   siteDocumentsRootName: string
+  isSiteReadOnly: boolean
 }
 
 export function getCurrentSiteInfo(pathname: string, user: any, hasUserSite: boolean, hasDefaultSite: boolean, hasSharedFolders: boolean, sharedFolderSites: any[]): ICurrentSiteInfo {
@@ -115,7 +116,8 @@ export function getCurrentSiteInfo(pathname: string, user: any, hasUserSite: boo
     siteId: '',
     siteRedirectUrl: '',
     siteDocumentsRootUri: '/documents',
-    siteDocumentsRootName: 'Documents'
+    siteDocumentsRootName: 'Documents',
+    isSiteReadOnly: false
   }
   if (hasUserSite && pathname.indexOf('/documents') === 0) {
     currentSiteInfo.siteId = user.email
@@ -182,6 +184,28 @@ export function getCurrentSiteInfo(pathname: string, user: any, hasUserSite: boo
     }
     currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${currentSiteInfo.siteId}`
     currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${currentSiteInfo.siteId}`
+  }
+  if (currentSiteInfo.siteId === '' && user) {
+    user.sites.forEach((site: any) => {
+      currentSiteInfo.siteId = site.siteId
+      if (site.siteId !== 'default' && site.siteId !== user.email) {
+        currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${site.siteId}`
+        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${site.siteId}`
+      }
+      return;
+    })
+  }
+  if (user) {
+    user.sites.forEach((site: any) => {
+      if (site.siteId === currentSiteInfo.siteId) {
+        if (site.permission && site.permission === 'READ_ONLY') {
+          currentSiteInfo.isSiteReadOnly = true
+        } else {
+          currentSiteInfo.isSiteReadOnly = false
+        }
+        return
+      }
+    })
   }
   return currentSiteInfo
 }

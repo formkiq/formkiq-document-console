@@ -7,12 +7,13 @@ import { DocumentsService } from '../../../helpers/services/documentsService'
 
 type Props = { 
   siteId: string, 
+  isSiteReadOnly: boolean,
   onNewClick: any,
   webhooks: null | [],
   onDelete: (webhookId: string, siteId: string) => void
 }
 
-export function WebhookList( { siteId, onNewClick, webhooks, onDelete }: Props) {
+export function WebhookList( { siteId, isSiteReadOnly, onNewClick, webhooks, onDelete }: Props) {
 
   const onDeleteClick = (webhookId: string, siteId: string) => () => {
     onDelete(webhookId, siteId)
@@ -20,19 +21,21 @@ export function WebhookList( { siteId, onNewClick, webhooks, onDelete }: Props) 
 
   return (
     <>
-      <div className="mt-4 flex px-4">
-        <button
-          className="flex bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
-          onClick={event => onNewClick(event, siteId)}
-          >
-          <span > 
-            Create new 
-          </span>
-          <div className="w-3 h-3 ml-1.5 mt-1">
-            {Plus()}
-          </div>
-        </button>
-      </div>
+      { !isSiteReadOnly && (
+        <div className="mt-4 flex px-4">
+          <button
+            className="flex bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
+            onClick={event => onNewClick(event, siteId)}
+            >
+            <span > 
+              Create new 
+            </span>
+            <div className="w-3 h-3 ml-1.5 mt-1">
+              {Plus()}
+            </div>
+          </button>
+        </div>
+      )}
       <div className="mt-4 mb-8">
         <table className="w-full border-collapse text-sm">
           <thead>
