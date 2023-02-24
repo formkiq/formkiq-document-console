@@ -110,7 +110,7 @@ export function DocumentView(props: { user: User, formkiqVersion: any }) {
       { document && InlineViewableContentTypes.indexOf((document as IDocument).contentType) > -1 && (
           <>
             { documentContent && ( 
-              <iframe title="Document Viewer" className="w-full h-full" src={documentContent} />
+              <iframe title="Document Viewer" className="mt-4 w-full h-full" src={documentContent} />
               )
             }
           </>
