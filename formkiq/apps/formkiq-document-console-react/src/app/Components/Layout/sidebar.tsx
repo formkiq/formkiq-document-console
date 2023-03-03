@@ -387,7 +387,7 @@ export function Sidebar(props: {
                         </div>
                       </li>
                     )}
-                    {sharedFoldersExpanded &&
+                    {(sharedFoldersExpanded || (!hasUserSite && !hasDefaultSite)) &&
                       sharedFolderSites.map((site: any, i: number) => {
                         return (
                           <span key={i}>

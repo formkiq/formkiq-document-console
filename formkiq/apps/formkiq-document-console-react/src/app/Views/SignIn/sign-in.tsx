@@ -1,11 +1,12 @@
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
+import { useLocation } from 'react-router-dom';
 import { RootState } from '../../Store/store';
 import { connect, useDispatch } from "react-redux";
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { login } from '../../Store/reducers/auth';
 import { configInitialState, setFormkiqVersion } from '../../Store/reducers/config';
-import { Windows } from '../../Components/Icons/icons';
+import { Windows, Spinner } from '../../Components/Icons/icons';
 import { LocalStorage } from '../../helpers/tools/useLocalStorage';
 import { ConfigService } from "../../helpers/services/configService";
 import { setDocumentApi, setUserPoolId, setClientId, setUserAuthenticationType, setAuthApi, setCustomAuthorizerUrl, setBrand } from '../../Store/reducers/config'
@@ -21,7 +22,16 @@ export function SignIn(props: {
 }) {
   const { register, formState: { errors }, handleSubmit } = useForm();
   const dispatch = useDispatch()
-
+  const { search } = useLocation();  
+  const searchParams = search.replace('?', '').split('&') as any[]
+  let isDemo = false
+  searchParams.forEach((param: string) => {
+    if (param === 'demo=tryformkiq') {
+      isDemo = true
+      return
+    }
+  })
+  
   const onSubmit = async (data: any) => {
     storage.setConfig(configInitialState)
     let formkiqClient: any = null
@@ -107,6 +117,14 @@ export function SignIn(props: {
     window.location.href = url;
   }
 
+  if (isDemo) {
+    const signInData = {
+      email: 'demo@formkiq.com',
+      password: 'tryformkiq'
+    }
+    onSubmit(signInData)
+  }
+
   return (
     <>
       <Helmet>
@@ -135,7 +153,7 @@ export function SignIn(props: {
               <span> using External Provider</span>
             )}
           </div>
-          { props.userAuthenticationType === "cognito" ? (
+          { props.userAuthenticationType === "cognito" && !isDemo ? (
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="md:w-1/3">
@@ -193,13 +211,16 @@ export function SignIn(props: {
             </form>
           ) : (
             <div className="w-full flex justify-center">
-              { props.customAuthorizerUrl.length && (
+              { props.customAuthorizerUrl.length && !isDemo && (
                 <button
                   className="w-48 flex bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                   onClick={event => {signInWithCustomAuthorizer(event, props.customAuthorizerUrl)}}
                   >
                   <span className="">Sign In</span>
                 </button>
+              )}
+              { isDemo && (
+                <Spinner />
               )}
             </div>
           )}
