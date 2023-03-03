@@ -20,7 +20,7 @@ const ProtectedRoute = (props: {children:any, user: User}) => {
     const searchParams = search.replace('?', '').split('&') as any[]
     let isRegistrationConfirmation = false;
     searchParams.forEach((param: string) => {
-      if (param === 'userStatus=NEW_PASSWORD_REQUIRED') {
+      if (param === 'userStatus=NEW_PASSWORD_REQUIRED' || param === 'userStatus=FORCE_CHANGE_PASSWORD') {
         isRegistrationConfirmation = true;
         return
       }
