@@ -22,6 +22,7 @@ function DocumentListLine({
   isSiteReadOnly,
   documentsRootUri,
   onShareClick,
+  searchDocuments,
   onDeleteClick,
   onRestoreClick,
   onEditTagsAndMetadataModalClick,
@@ -46,6 +47,7 @@ function DocumentListLine({
   isSiteReadOnly: boolean;
   documentsRootUri: string;
   onShareClick: any;
+  searchDocuments: any;
   onDeleteClick: any;
   onRestoreClick: any;
   onEditTagsAndMetadataModalClick: any;

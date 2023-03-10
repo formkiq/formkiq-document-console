@@ -11,8 +11,6 @@ import { connect, useDispatch } from 'react-redux'
 import { User } from '../../../Store/reducers/auth'
 import { addDocumentTag, removeDocumentTag, toggleExpandFolder } from '../../../Store/reducers/documentsList'
 import { IDocument } from '../../../helpers/types/document'
-import { openDialog } from '../../../Store/reducers/globalConfirmControls';
-import { openDialog as openProgressDialog, closeDialog as closeProgressDialog } from '../../../Store/reducers/globalProgressControls';
 import { IFolder } from '../../../helpers/types/folder'
 import FolderDropWrapper from '../FolderDropWrapper/folderDropWrapper'
 import { ILine } from '../../../helpers/types/line'
