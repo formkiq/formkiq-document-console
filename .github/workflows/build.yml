@@ -9,7 +9,6 @@ on:
  pull_request:
    branches: [ main ]
 
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -50,4 +49,4 @@ jobs:
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
           VERSION: ${{ env.PACKAGE_VERSION }}
         run: |
-          aws s3 cp formkiq/dist/apps/formkiq-document-console-react/formkiq-console.zip s3://${S3_BUCKET}/formkiq-console/v${VERSION}/formkiq-console.zip
+          aws s3 cp formkiq/dist/apps/formkiq-document-console-react/formkiq-console.zip s3://${S3_BUCKET}/formkiq-console/v${VERSION}/formkiq-console.zip --acl public-read
