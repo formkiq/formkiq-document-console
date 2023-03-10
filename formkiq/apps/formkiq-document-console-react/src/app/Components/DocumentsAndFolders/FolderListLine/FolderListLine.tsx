@@ -11,8 +11,6 @@ import { connect, useDispatch } from 'react-redux'
 import { User } from '../../../Store/reducers/auth'
 import { addDocumentTag, removeDocumentTag, toggleExpandFolder } from '../../../Store/reducers/documentsList'
 import { IDocument } from '../../../helpers/types/document'
-import { openDialog } from '../../../Store/reducers/globalConfirmControls';
-import { openDialog as openProgressDialog, closeDialog as closeProgressDialog } from '../../../Store/reducers/globalProgressControls';
 import { IFolder } from '../../../helpers/types/folder'
 import FolderDropWrapper from '../FolderDropWrapper/folderDropWrapper'
 import { ILine } from '../../../helpers/types/line'
@@ -22,8 +20,9 @@ interface IProps {
   subfolder: string
   folderInstance: IFolder
   currentSiteId: string
+  isSiteReadOnly: boolean
   onDeleteClick: (folder: IFolder) => () => void
-  restoreDocument: any
+  onRestoreDocument: (file: IDocument, siteId: string, searchDocuments: any) => () => void
   onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void
   user: User
   currentDocumentsRootUri: string
@@ -46,6 +45,7 @@ function FolderListLine({
   subfolder,
   folderInstance,
   currentSiteId,
+  isSiteReadOnly,
   onDeleteClick,
   user,
   currentDocumentsRootUri,
@@ -60,12 +60,15 @@ function FolderListLine({
   onDocumentVersionsModalClick,
   onESignaturesModalClick,
   brand,
-  restoreDocument,
+  onRestoreDocument,
   onDeleteDocument,
   onTagChange,
   filterTag
 }: IProps) {
-  const folderPath = subfolder + (subfolder.length ? '/' : '') + folderInstance.path
+  let folderPath = folderInstance.path
+  if (folderInstance.path.indexOf('/') === -1) {
+    folderPath = subfolder + (subfolder.length ? '/' : '') + folderInstance.path
+  }
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1)
   const trElem = React.forwardRef((props: any, ref) => (
     <tr {...props} ref={ref}>
@@ -106,6 +109,7 @@ function FolderListLine({
                       key={j}
                       user={user}
                       currentSiteId={currentSiteId}
+                      isSiteReadOnly={isSiteReadOnly}
                       onDeleteClick={onDeleteClick}
                       currentDocumentsRootUri={currentDocumentsRootUri}
                       onShareClick={onShareClick}
@@ -113,7 +117,8 @@ function FolderListLine({
                       onRenameModalClick={onRenameModalClick}
                       onMoveModalClick={onMoveModalClick}
                       onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                      onESignaturesModalClick={onESignaturesModalClick} restoreDocument={undefined}
+                      onESignaturesModalClick={onESignaturesModalClick}
+                      onRestoreDocument={onRestoreDocument}
                       onDeleteDocument={onDeleteDocument}
                       useIndividualSharing={useIndividualSharing}
                       formkiqVersion={formkiqVersion}
@@ -134,14 +139,16 @@ function FolderListLine({
                   file={file}
                   folder={subfolder}
                   siteId={currentSiteId}
+                  isSiteReadOnly={isSiteReadOnly}
                   documentsRootUri={currentDocumentsRootUri}
                   onShareClick={onShareClick}
                   searchDocuments={folderInstance.documents}
                   onDeleteClick={onDeleteDocument(file, null)}
-                  onRestoreClick={restoreDocument(file, currentSiteId, null)}
+                  onRestoreClick={onRestoreDocument(file, currentSiteId, null)}
                   onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
                   onRenameModalClick={onRenameModalClick}
                   onMoveModalClick={onMoveModalClick}
+                  onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                   onESignaturesModalClick={onESignaturesModalClick}
                   onTagChange={onTagChange}
                   filterTag={filterTag}
@@ -156,7 +163,7 @@ function FolderListLine({
             { folderInstance.documents.length === 25 && (
               <tr>
                 <td colSpan={6} className="text-sm">
-                  <div className="-mx-1 pl-12 font-semibold py-2 border-b hover:text-coreOrange-500">
+                  <div className="-mx-1 pl-12 font-semibold py-2 hover:text-coreOrange-500">
                     <a href={`${currentDocumentsRootUri}/folders/${subfolderPath}`}>
                       view all documents in folder...
                     </a>
@@ -182,7 +189,7 @@ function FolderListLine({
 
   return (
     <div className="flex">
-      <table className={'w-full relative ' + tableLeftMargin}>
+      <table className={'w-full border-spacing-0 border-collapse table-auto relative ' + tableLeftMargin}>
         <tbody>
           <FolderDropWrapper
             className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-tight"
@@ -240,9 +247,6 @@ function FolderListLine({
               </div>
             </td>
             <td className="w-38 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
-              {formatDate(folderInstance.insertedDate)}
-            </td>
-            <td className="w-38 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
               {formatDate(folderInstance.lastModifiedDate)}
             </td>
             <td className="w-24 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
@@ -271,39 +275,48 @@ function FolderListLine({
                     <Share />
                   </div>
                 )}
-                <div
-                  className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
-                  onClick={onDeleteClick(folderInstance)}
-                  >
-                  <Trash />
-                </div>
-                <div className="w-5 pt-0.5 h-auto text-gray-400">
-                  <DocumentActionsPopover
-                    value={{ lineType: 'folder', folder: folderPath }}
-                    siteId={currentSiteId}
-                    formkiqVersion={formkiqVersion}
-                    onDeleteClick={onDeleteClick(folderInstance)}
-                    onShareClick={onShareClick}
-                    onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
-                    onRenameModalClick={onRenameModalClick}
-                    onMoveModalClick={onMoveModalClick}
-                    onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                    onESignaturesModalClick={onESignaturesModalClick}
-                    user={user}
-                    useIndividualSharing={useIndividualSharing}
-                    useCollections={useCollections}
-                    useSoftDelete={useSoftDelete}
-                  />
-                </div>
+                { !isSiteReadOnly && (
+                  <>
+                    <div
+                      className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
+                      onClick={onDeleteClick(folderInstance)}
+                      >
+                      <Trash />
+                    </div>
+                    <div className="w-5 pt-0.5 h-auto text-gray-400">
+                      <DocumentActionsPopover
+                        value={{ lineType: 'folder', folder: folderPath }}
+                        siteId={currentSiteId}
+                        isSiteReadOnly={isSiteReadOnly}
+                        formkiqVersion={formkiqVersion}
+                        onDeleteClick={onDeleteClick(folderInstance)}
+                        onShareClick={onShareClick}
+                        onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
+                        onRenameModalClick={onRenameModalClick}
+                        onMoveModalClick={onMoveModalClick}
+                        onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                        onESignaturesModalClick={onESignaturesModalClick}
+                        user={user}
+                        useIndividualSharing={useIndividualSharing}
+                        useCollections={useCollections}
+                        useSoftDelete={useSoftDelete}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </td>
           </FolderDropWrapper>
           {folderContent(folderInstance, folderPath)}
+          {!folderInstance.isExpanded && (
+            <tr>
+              <td colSpan={6} className="p-0 m-0">
+                <div className="w-full border-t h-0 -m-b"></div>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
-      <div className="absolute h-full ml-2 pb-10">
-        <div className="h-full border-l border-coreOrange-50"></div>
-      </div>
     </div>
   )
 }

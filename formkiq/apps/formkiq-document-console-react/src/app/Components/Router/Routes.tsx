@@ -73,28 +73,28 @@ const RoutesMapper = () => {
       <Route path='/my-documents/:id' element={<Documents />}></Route>
       <Route path='/my-documents/:id/view' element={<DocumentView />}></Route>
 
-      <Route path='/shared-documents' element={<Documents />}></Route>
+      <Route path='/team-documents' element={<Documents />}></Route>
       <Route
-        path="/shared-documents/folders"
-        element={ <Navigate to="/shared-documents" /> }
+        path="/team-documents/folders"
+        element={ <Navigate to="/team-documents" /> }
       />
-      <Route path='/shared-documents/folders/' element={<Documents />}></Route>
-      <Route path='/shared-documents/folders/:subfolderLevel01' element={<Documents />}></Route>
-      <Route path='/shared-documents/folders/:subfolderLevel01/:subfolderLevel02' element={<Documents />}></Route>
-      <Route path='/shared-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03' element={<Documents />}></Route>
-      <Route path='/shared-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04' element={<Documents />}></Route>
-      <Route path='/shared-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05' element={<Documents />}></Route>
-      <Route path='/shared-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06' element={<Documents />}></Route>
-      <Route path='/shared-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07' element={<Documents />}></Route>
-      <Route path='/shared-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08' element={<Documents />}></Route>
-      <Route path='/shared-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08/:subfolderLevel09' element={<Documents />}></Route>
-      <Route path='/shared-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08/:subfolderLevel09/:subfolderLevel10' element={<Documents />}></Route>
-      <Route path='/shared-documents/settings' element={<DocumentSettings />}></Route>
-      <Route path='/shared-documents/help' element={<DocumentHelp />}></Route>
-      <Route path='/shared-documents/new/:extension' element={<DocumentNew />}></Route>
-      <Route path='/shared-documents/:id' element={<Documents />}></Route>
-      <Route path='/shared-documents/:id/view' element={<DocumentView />}></Route>
-      <Route path='/shared-documents' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/:subfolderLevel01' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/:subfolderLevel01/:subfolderLevel02' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08/:subfolderLevel09' element={<Documents />}></Route>
+      <Route path='/team-documents/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08/:subfolderLevel09/:subfolderLevel10' element={<Documents />}></Route>
+      <Route path='/team-documents/settings' element={<DocumentSettings />}></Route>
+      <Route path='/team-documents/help' element={<DocumentHelp />}></Route>
+      <Route path='/team-documents/new/:extension' element={<DocumentNew />}></Route>
+      <Route path='/team-documents/:id' element={<Documents />}></Route>
+      <Route path='/team-documents/:id/view' element={<DocumentView />}></Route>
+      <Route path='/team-documents' element={<Documents />}></Route>
 
       <Route path='/shared-folders/' element={<Documents />}></Route>
       <Route path='/shared-folders/:siteId' element={<Documents />}></Route>

@@ -1185,14 +1185,14 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
         </li>
         <li className="relative mt-10 sm:mt-2 md:mt-0">
           <div className="flex flex-rows w-full">
-            <div className="flex-grow-0">
+            <div className="grow-0">
               <h6
                 className="ml-4 mr-4 mb-4 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none"
                 >
                 Request
               </h6>
             </div>
-            <div className="flex-grow text-right mt-2 mb-2 relative">
+            <div className="grow text-right mt-2 mb-2 relative">
               
             </div>
           </div>
@@ -1244,10 +1244,8 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
             </div>
             <div className="ml-4">
               <button
-                className={`px-2 md:px-4 py-1 border border-transparent text-base leading-6 font-medium rounded-md shadow
-                  text-white focus:outline-none focus:shadow-outline
-                  transition duration-150 ease-in-out 
-                  ${state.isValidForm ? 'bg-coreOrange-500 hover:bg-coreOrange-700' : 'bg-gray-500 hover:bg-gray-500' }`}
+                className={`px-2 md:px-4 font-semibold px-4 py-1 rounded-2xl
+                  ${state.isValidForm ? 'cursor-pointer bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white' : 'cursor-default bg-gray-200 text-gray-400' }`}
                   onClick={onFetchClick(state)}
                 >
                 Fetch

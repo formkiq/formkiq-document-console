@@ -9,15 +9,16 @@ import { InlineViewableContentTypes } from "../../../helpers/constants/contentTy
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import moment from "moment"
 
-export default function DocumentVersionsModal({isOpened, onClose, onUploadClick, isUploadModalOpened, siteId, documentsRootUri, value}: {isOpened: boolean, onClose: any, onUploadClick: any, isUploadModalOpened: boolean, siteId: string, documentsRootUri: string, value: ILine | null}) {
+export default function DocumentVersionsModal({isOpened, onClose, onUploadClick, isUploadModalOpened, siteId, isSiteReadOnly, documentsRootUri, value}: {isOpened: boolean, onClose: any, onUploadClick: any, isUploadModalOpened: boolean, siteId: string, isSiteReadOnly: boolean, documentsRootUri: string, value: ILine | null}) {
 
   const [versions, setVersions] = useState(null)
-  const cancelButtonRef = useRef(null)
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const closeDialog = () => {
       onClose();
   }
+
+  const doneButtonRef = useRef() as React.MutableRefObject<HTMLButtonElement>;
 
   useEffect(() => {
     updateVersions()
@@ -93,25 +94,12 @@ export default function DocumentVersionsModal({isOpened, onClose, onUploadClick,
     }
   }
 
-  /*
-  const onTagDelete = (tagKey: string) => {
-    const deleteFunc = () => {
-      setAlltags(null)
-      // TODO: add site id
-      DocumentsService.deleteDocumentTag(value?.documentId as string, tagKey).then(() => {
-        updateTags()
-      })
-    }
-    dispatch(openDialog({ callback: deleteFunc, dialogTitle: 'Are you sure you want to delete this tag?'}))
-  }
-  */
-  
   return (
     <Transition.Root show={isOpened} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-20"
-        initialFocus={cancelButtonRef}
+        initialFocus={doneButtonRef}
         onClose={onClose}
       >
         <Transition.Child
@@ -137,22 +125,24 @@ export default function DocumentVersionsModal({isOpened, onClose, onUploadClick,
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-3/4">
+              <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-4/5">
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="flex w-full items-center">
-                    <div className="font-semibold grow text-lg inline-block pr-6">
+                    <div className="font-semibold grow text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 inline-block pr-6">
                       Document Versions
                       <span className="block">
 
                       </span>
-                    </div>
+                    </div>                   
                     <div className="w-100">
-                      <button onClick={event => onUploadClick(event, (value as any).documentId)} className="w-64 flex bg-gray-100 justify-center px-4 py-1 text-base text-gray-900 rounded-md cursor-pointer" >
-                        <span>Upload New Version</span>
-                        <div className="w-4 h-4 ml-2 mt-1">
-                          {Upload()}
-                        </div>
-                      </button>
+                      { !isSiteReadOnly && (                      
+                        <button onClick={event => onUploadClick(event, (value as any).documentId)} className="w-64 flex bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-sm text-gray-900 font-semibold py-2 px-4 rounded-2xl flex cursor-pointer focus:outline-none" >
+                          <div className="mx-4">Upload New Version</div>
+                          <div className="w-4 h-4 ml-2 mt-1">
+                            {Upload()}
+                          </div>
+                        </button>
+                      )}
                     </div>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
@@ -162,15 +152,15 @@ export default function DocumentVersionsModal({isOpened, onClose, onUploadClick,
                     </div>
                   </div>
                   <div className="mt-6 max-h-100 overflow-y-scroll">
-                    <table className="border-collapse table-fixed w-full text-sm">
+                    <table className="border-collapse table-auto w-full text-sm">
                       <thead>
                           <tr>
-                          <th className="w-20 border-b nodark:border-slate-600 font-medium p-2 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">Version</th>
-                          <th className="w-48 border-b nodark:border-slate-600 font-medium p-2 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">Path</th>
-                          <th className="w-32 border-b nodark:border-slate-600 font-medium p-2 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">Created</th>
-                          <th className="w-32 border-b nodark:border-slate-600 font-medium p-2 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">Last modified</th>
-                          <th className="w-64 border-b nodark:border-slate-600 font-medium p-2 pr-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">Content Type</th>
-                          <th className="border-b nodark:border-slate-600 font-medium p-2 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">Actions</th>
+                          <th className="w-20 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">Version</th>
+                          <th className="w-48 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">Path</th>
+                          <th className="w-32 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">Created</th>
+                          <th className="w-32 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">Last modified</th>
+                          <th className="w-64 border-b font-medium p-2 pr-4 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">Content Type</th>
+                          <th className="border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">Actions</th>
                           </tr>
                       </thead>
                       <tbody>
@@ -205,33 +195,28 @@ export default function DocumentVersionsModal({isOpened, onClose, onUploadClick,
                                 { version.contentType }
                               </td>
                               <td className="border-b border-slate-100 nodark:border-slate-700 p-2 pr-2 text-slate-500 nodark:text-slate-400">
-                                <div className='flex gap-4'>
+                                <div className='flex flex-wrap justify-center gap-4'>
                                   { InlineViewableContentTypes.indexOf(version.contentType) > -1 && (
                                     <button
-                                      className="bg-coreOrange-500 hover:bg-coreOrange-600 text-smaller text-white font-semibold py-1 px-2 rounded"
+                                      className="flex items-center bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-smaller font-semibold py-2 px-7 rounded-2xl flex cursor-pointer focus:outline-none"
                                       onClick={event => viewDocumentVersion(event, version.versionKey)}
                                       >
                                       View
                                     </button>
                                   )}
                                   <button
-                                    className="bg-coreOrange-500 hover:bg-coreOrange-600 text-smaller text-white font-semibold py-1 px-2 rounded"
+                                    className="flex items-center bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-smaller font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
                                     onClick={event => downloadDocumentVersion(event, version.versionKey)}
                                     >
                                     Download
                                   </button>
-                                  {version.version && (
-                                    <>
-                                      <button
-                                        className="bg-coreOrange-500 hover:bg-coreOrange-600 text-smaller text-white font-semibold py-1 px-2 rounded"
-                                        onClick={event => revertDocumentVersion(event, version.versionKey)}
-                                        >
-                                        Set as Current Version
-                                      </button>
-                                      <button className='hidden bg-red-400 hover:bg-red-700 text-smaller text-white font-semibold py-1 px-2 rounded'>
-                                        Delete
-                                      </button>
-                                    </>
+                                  {version.version && !isSiteReadOnly && (
+                                    <button
+                                      className="flex items-center bg-gradient-to-l from-yellow-200 via-amber-200 to-yellow-300 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 text-gray-900 text-smaller font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                                      onClick={event => revertDocumentVersion(event, version.versionKey)}
+                                      >
+                                      Set as Current Version
+                                    </button>
                                   )}
                                 </div>
                               </td>
@@ -240,6 +225,15 @@ export default function DocumentVersionsModal({isOpened, onClose, onUploadClick,
                         })}
                       </tbody>
                     </table>
+                  </div>
+                  <div className="w-full flex justify-center mt-4">
+                    <button
+                      ref={doneButtonRef}
+                      className="flex items-center bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                      onClick={closeDialog}
+                      >
+                      Done
+                    </button>
                   </div>
                 </div>
               </Dialog.Panel>

@@ -22,11 +22,23 @@ export const OnlyOfficeNewFileExtensions: string[] = [
 ]
 
 export const InlineViewableContentTypes: string[] = [
+  'application/json',
   'application/pdf',
+  'audio/mpeg',
+  'audio/mp4',
+  'audio/ogg',
+  'audio/wav',
   'image/png',
   'image/gif',
   'image/jpg',
-  'image/jpeg'
+  'image/jpeg',
+  'image/svg+xml',
+  'image/vnd.microsoft.icon',
+  'image/webp',
+  'text/plain',
+  'video/mp4',
+  'video/ogg',
+  'video/webm',
 ]
 
 export const OcrContentTypes: string[] = [

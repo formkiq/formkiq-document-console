@@ -48,7 +48,7 @@ function GlobalNotificationDialog({ notificationDialog }: any) {
                   <button
                     onClick={onClose}
                     type="button"
-                    className="mr-2 inline-flex justify-center rounded-md border border-transparent bg-coreOrange-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    className="mr-2 bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                   >
                     OK
                   </button>

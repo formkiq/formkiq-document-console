@@ -19,14 +19,14 @@ const Router = (props: {
   return (
     <HelmetProvider>
       <DndProvider backend={HTML5Backend}>
-        <div className="flex">
-          <div className={props.isSidebarExpanded ? 'w-64' : 'w-14'}>
+        <div className="flex overflow-x-hidden">
+          <div className={(props.isSidebarExpanded ? 'w-64' : 'w-14') + ' grow-0'}>
             <Sidebar />
           </div>
-          <div className="grow">
+          <div className="grow overflow-y-hidden">
             <Navbar />
-            <div className="w-full flex grow flex-row">
-              <div className="main-content flex-1 p-3 pb-0">
+            <div className="flex grow flex-row">
+              <div className="main-content flex-1">
               <ProtectedRoute>
                 <Suspense fallback={<LoadingPage/>}>
                   <RoutesMapper/>
