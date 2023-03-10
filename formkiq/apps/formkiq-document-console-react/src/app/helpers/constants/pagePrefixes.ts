@@ -1,7 +1,7 @@
 export const DocumentsAndFoldersPrefixes: string[] = [
   '/documents',
   '/my-documents',
-  '/shared-documents',
+  '/team-documents',
   '/shared-folders'
 ]
 

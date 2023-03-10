@@ -5,8 +5,9 @@ import { Dialog, Transition } from '@headlessui/react'
 import { useForm } from "react-hook-form";
 import { DocumentsService } from '../../../helpers/services/documentsService'
 import { ILine } from '../../../helpers/types/line'
-import { FolderSolid, Close } from '../../Icons/icons'
+import { FolderSolid, Close, Upload, External, Webhook } from '../../Icons/icons'
 import { openDialog } from "../../../Store/reducers/globalNotificationControls"
+import { setCurrentActionEvent } from '../../../Store/reducers/config'
 
 export default function NewModal({isOpened, onClose, siteId, formkiqVersion, value}: {isOpened: boolean, onClose: any, siteId: string, formkiqVersion: any, value: ILine | null}) {
 
@@ -16,6 +17,13 @@ export default function NewModal({isOpened, onClose, siteId, formkiqVersion, val
     const dispatch = useDispatch()
     const [formActive, setFormActive] = useState(true)
     const [itemToCreate, setItemToCreate] = useState('')
+
+    const itemsRequiringNameField = [
+      'folder',
+      'docx',
+      'xlsx',
+      'pptx'
+    ]
 
     useEffect(() => {
       if (isOpened) {
@@ -37,13 +45,17 @@ export default function NewModal({isOpened, onClose, siteId, formkiqVersion, val
           dispatch(openDialog({ dialogTitle: 'You have reached the maximum folder depth available.'}))
         } else {
           setItemToCreate('folder')
-          setFocus('name')
+          setTimeout(() => {
+            setFocus('name')
+          }, 50)
         }
       }
     }
     const onNewDocumentClick = (event: any, extension: string) => {
       setItemToCreate(extension)
-      setFocus('name')
+      setTimeout(() => {
+        setFocus('name')
+      }, 50)
     }
     const onNewFormSubmit = (event: any, value: ILine | null) => {
       if (formActive && value && newFormRef.current) {
@@ -116,46 +128,76 @@ export default function NewModal({isOpened, onClose, siteId, formkiqVersion, val
                         </div>
                         <div className="flex flex-wrap mt-4">
                           <div
-                            className={`${itemToCreate === 'folder' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-32 border-2 rounded-md flex flex-wrap justify-center`}
+                            className={`${itemToCreate === 'folder' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
                             onClick={event => onNewFolderClick(event, value)}
                             >
-                            <div className="w-12">
+                            <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                               <FolderSolid />
                             </div>
                             <div className="w-full text-sm text-center mb-2">
-                              Folder
+                              Create a New Document Folder
+                            </div>
+                          </div>
+                          <div
+                            className={`${itemToCreate === 'upload-file' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                            onClick={event => {
+                              closeDialog();
+                              dispatch(setCurrentActionEvent('upload'))
+                            }
+                            }
+                            >
+                            <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
+                              <Upload />
+                            </div>
+                            <div className="w-full tracking-tight text-sm text-center mb-2">
+                              Upload a New File
+                            </div>
+                          </div>
+                          <div
+                            className={`${itemToCreate === 'upload-folder' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                            onClick={event => {
+                              closeDialog();
+                              dispatch(setCurrentActionEvent('folderUpload'))
+                            }
+                            }
+                            >
+                            <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
+                              <Upload />
+                            </div>
+                            <div className="w-full tracking-tight text-sm text-center mb-2">
+                              Upload a New Folder
                             </div>
                           </div>
                           { formkiqVersion.modules.indexOf('onlyoffice') > -1 && (
                             <>
                               <div
-                                className={`${itemToCreate === 'docx' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-32 border-2 rounded-md flex flex-wrap justify-center`}
+                                className={`${itemToCreate === 'docx' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
                                 onClick={event => onNewDocumentClick(event, 'docx')}
                                 >
-                                <div className="w-full h-16 flex justify-center">
-                                  <img src="/assets/img/svg/icon-docx.svg" className="w-10" alt="docx icon" />
+                                <div className="w-full h-16 my-3 flex justify-center">
+                                  <img src="/assets/img/svg/icon-docx.svg" className="w-16" alt="docx icon" />
                                 </div>
                                 <div className="w-full text-sm text-center mb-2">
                                   MS Word Document
                                 </div>
                               </div>
                               <div
-                                className={`${itemToCreate === 'xlsx' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-32 border-2 rounded-md flex flex-wrap justify-center`}
+                                className={`${itemToCreate === 'xlsx' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
                                 onClick={event => onNewDocumentClick(event, 'xlsx')}
                                 >
-                                <div className="w-full h-16 flex justify-center">
-                                  <img src="/assets/img/svg/icon-xlsx.svg" className="w-10" alt="xlsx icon" />
+                                <div className="w-full h-16 my-3 flex justify-center">
+                                  <img src="/assets/img/svg/icon-xlsx.svg" className="w-16" alt="xlsx icon" />
                                 </div>
                                 <div className="w-full text-sm text-center mb-2">
                                   MS Excel Document
                                 </div>
                               </div>
                               <div
-                                className={`${itemToCreate === 'pptx' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-32 border-2 rounded-md flex flex-wrap justify-center`}
+                                className={`${itemToCreate === 'pptx' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
                                 onClick={event => onNewDocumentClick(event, 'pptx')}
                                 >
-                                <div className="w-full h-16 flex justify-center">
-                                  <img src="/assets/img/svg/icon-pptx.svg" className="w-10" alt="pptx icon" />
+                                <div className="w-full h-16 my-3 flex justify-center">
+                                  <img src="/assets/img/svg/icon-pptx.svg" className="w-16" alt="pptx icon" />
                                 </div>
                                 <div className="w-full tracking-tight text-sm text-center mb-2">
                                   MS PowerPoint Document
@@ -163,8 +205,30 @@ export default function NewModal({isOpened, onClose, siteId, formkiqVersion, val
                               </div>
                             </>
                           )}
+                          <div
+                            className={`${itemToCreate === 'inbound-webhook' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                            onClick={event => window.location.href='/integrations/webhooks'}
+                            >
+                            <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
+                              <Webhook />
+                            </div>
+                            <div className="w-full tracking-tight text-sm text-center mb-2">
+                              Inbound Webhook (Receive Documents)
+                            </div>
+                          </div>
+                          <div
+                            className={`${itemToCreate === 'outbound-webhook' ? 'bg-gray-100 font-semibold border-gray-600' : 'cursor-pointer hover:bg-gray-100'} mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                            onClick={event => window.location.href='/workflows'}
+                            >
+                            <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
+                              <External />
+                            </div>
+                            <div className="w-full tracking-tight text-sm text-center mb-2">
+                              Outbound Webhook (Workflow Action)
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex flext-wrap mt-4">
+                        <div className="flex flex-wrap mt-4">
                           <form
                             className="w-full"
                             ref={newFormRef}
@@ -173,13 +237,13 @@ export default function NewModal({isOpened, onClose, siteId, formkiqVersion, val
                             <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
                               { value  && (
                                 <div className="w-full mr-12 text-sm font-semibold pb-2">
-                                  Documents/
+                                  Location: /
                                   { value.folder && value.folder.length && (
                                     <span>{ value.folder }/</span>
                                   )}
                                 </div>
                               )}
-                              <div className="w-full mr-12">
+                              <div className={ (itemsRequiringNameField.indexOf(itemToCreate) > -1 ? '' : 'hidden ' ) + ' w-full mr-12'}>
                                 <input
                                   aria-label="Name"
                                   type="text"

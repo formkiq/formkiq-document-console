@@ -175,7 +175,7 @@ export default function MoveModal({isOpened, onClose, siteId, value, allTags}: {
                   <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-1/2 h-1/2">
                     <div className="bg-white p-4 rounded-lg bg-white shadow-xl border h-full">
                       <div className="flex w-full items-center">
-                        <div className="font-semibold grow text-lg inline-block pr-6">
+                        <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 pr-6">
                             Move
                             {value && value.lineType === 'folder' ? (
                               <>
@@ -220,7 +220,7 @@ export default function MoveModal({isOpened, onClose, siteId, value, allTags}: {
                             })}
                             <div className="w-full flex justify-center mt-4">
                               <button
-                                className={'font-semibold py-2 px-4 rounded ' + (selectedFolderIndexKey.length ? 'cursor-pointer bg-coreOrange-500 hover:bg-coreOrange-600 text-white' : 'cursor-default bg-gray-200 text-gray-400') }
+                                className={'font-semibold py-2 px-4 mr-2 rounded-2xl ' + (selectedFolderIndexKey.length ? 'cursor-pointer bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white' : 'cursor-default bg-gray-200 text-gray-400') }
                                 onClick={event => executeMove(event)}>
                                 Move 
                                 {value && value.lineType === 'folder' ? (
@@ -228,6 +228,9 @@ export default function MoveModal({isOpened, onClose, siteId, value, allTags}: {
                                 ) : (
                                   <span> Document</span>
                                 )}
+                              </button>
+                              <button onClick={closeDialog} className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none">
+                                Cancel
                               </button>
                             </div>
                           </>

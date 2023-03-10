@@ -13,7 +13,7 @@ export default function EditTagsAndMetadataModal({isOpened, onClose, siteId, get
 
   const [allTags, setAlltags] = useState(null)
   const { register, formState: { errors }, handleSubmit, reset } = useForm();
-  const cancelButtonRef = useRef(null)
+  const doneButtonRef = useRef(null)
   const dispatch = useDispatch()
   const addTagFormRef = useRef<HTMLFormElement>(null)
   const closeDialog = () => {
@@ -73,7 +73,7 @@ export default function EditTagsAndMetadataModal({isOpened, onClose, siteId, get
       <Dialog
         as="div"
         className="relative z-20"
-        initialFocus={cancelButtonRef}
+        initialFocus={doneButtonRef}
         onClose={onClose}
       >
         <Transition.Child
@@ -102,12 +102,14 @@ export default function EditTagsAndMetadataModal({isOpened, onClose, siteId, get
               <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-3/4">
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="flex w-full items-center">
-                    <div className="font-semibold grow text-lg inline-block pr-6">
-                      Add Metadata (or Add a Tag)
+                    <div className="font-semibold grow text-lg pr-6">
+                      <span className="inline-block text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+                        Add Metadata (or Add a Tag)
+                      </span>
                       <span className="block text-sm">
                         NOTE: <strong className="font-bold">Tags</strong> are key-only metadata, for quick tagging of documents, while <strong className="font-bold">Metadata</strong> has a key and includes one or more values.
                       </span>
-                  </div>
+                    </div>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
                       onClick={closeDialog}
@@ -151,13 +153,11 @@ export default function EditTagsAndMetadataModal({isOpened, onClose, siteId, get
                             })}
                           />
                         </div>
-                        <div className="flex w-48 justify-center">
+                        <div className="flex w-48 justify-start ml-2">
                           <input
                               type="submit"
-                              value="Save"
-                              className="px-8 cursor-pointer py-2 mx-1 text-base leading-6 font-medium rounded-md shadow
-                                              bg-coreOrange-500 hover:bg-coreOrange-600 text-white focus:outline-none focus:shadow-outline
-                                              transition duration-150 ease-in-out text-base"
+                              value="Add"
+                              className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                           />
                         </div>
                       </div>
@@ -171,27 +171,24 @@ export default function EditTagsAndMetadataModal({isOpened, onClose, siteId, get
                 </div>
                 <div className="bg-white mt-1 p-4 rounded-lg bg-white shadow-xl border h-full">
                   <div className="flex w-full items-center">
-                      <div className="font-semibold grow text-lg inline-block pr-6">
+                      <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 pr-6">
                           Edit Metadata/Tags
                       </div>
                   </div>
-                  <div className="flex w-full">
+                  <div className="flex w-full mt-4">
                     <div className="w-full mt-2 mx-6 border-b">
                       <EditTagsAndMetadataList tags={allTags} onEdit={onTagEdit} onDelete={onTagDelete} />
                     </div>
                   </div>
-                  <div className="flex mt-2">
-                    <div className="w-32 mr-8">
-                      <button
-                        type="button"
-                        className="inline-flex w-full justify-center rounded-md border border-gray-300 cursor-pointer
-                                          bg-coreOrange-500 px-4 py-2 text-base font-medium text-white focus:outline-none"
-                        onClick={closeDialog}
-                        ref={cancelButtonRef}
-                      >
-                        Done
-                      </button>
-                    </div>
+                  <div className="w-full flex mt-4 justify-center">
+                    <button
+                      type="button"
+                      className="flex items-center bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                      onClick={closeDialog}
+                      ref={doneButtonRef}
+                    >
+                      Done
+                    </button>
                   </div>
                 </div>
               </Dialog.Panel>

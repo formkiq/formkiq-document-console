@@ -38,13 +38,13 @@ function tagListIem(tag: IDocumentTag, index: number, tags: IDocumentTag [], edi
     if(editingTags[index]?.isOpened) {
       return (
         <div className='flex gap-4'>
-          <button onClick={onSave} className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white font-semibold py-2 px-4 rounded">
+          <button onClick={onSave} className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none">
             Save
           </button>
-          <button onClick={closeEdit} className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded">
+          <button onClick={closeEdit} className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none">
             Cancel
           </button>
-          <button onClick={onRemove} className='bg-red-400 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded'>
+          <button onClick={onRemove} className='bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none'>
             Remove
           </button>
         </div>
@@ -52,8 +52,8 @@ function tagListIem(tag: IDocumentTag, index: number, tags: IDocumentTag [], edi
     }
     return (
       <div className='flex gap-4'>
-        <button className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white font-semibold py-2 px-4 rounded" onClick={toggleEdit}>Edit</button>
-        <button onClick={onRemove} className='bg-red-400 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded'>
+        <button className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none" onClick={toggleEdit}>Edit</button>
+        <button onClick={onRemove} className='bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none'>
           Remove
         </button>
       </div>
@@ -116,12 +116,12 @@ export default function EditTagsAndMetadataList({ tags, onEdit, onDelete }: { ta
   if(tags){
     return tags.length > 0 ? (
         <div className="overflow-auto max-h-64 overflow-y-scroll">
-        <table className="border-collapse table-fixed w-full text-sm">
+        <table className="border-collapse table-auto w-full text-sm">
           <thead>
               <tr>
-              <th className="border-b nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">Key</th>
-              <th className="border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">Value</th>
-              <th className="border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">Actions</th>
+              <th className="w-52 border-b font-medium p-4 pl-8 pt-0 pb-3 text-left text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">Key</th>
+              <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-left text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">Value</th>
+              <th className="w-100 border-b font-medium p-4 pr-8 pt-0 pb-3 text-left text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">Actions</th>
               </tr>
           </thead>
           {tagsPrors && (

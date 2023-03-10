@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
+import { matchPath } from "react-router"
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { connect, useDispatch } from "react-redux";
 import { Section, User } from '../../Store/reducers/auth';
 import { RootState } from '../../Store/store';
-import { DoubleChevronLeft, DoubleChevronRight, Documents, FolderOutline, ShareHand, Workflow, Api, Webhook, UserIcon, Star, Trash, Settings, ArrowRight, ArrowBottom, ComingSoon, DoublePerson, Recent, Help, Collection, CollectionAdd } from '../Icons/icons';
+import { ChevronLeft, ChevronRight, Plus, Upload, Documents, FolderOutline, ShareHand, Workflow, Api, Webhook, UserIcon, Star, Trash, Settings, ArrowRight, ArrowBottom, ComingSoon, DoublePerson, Recent, Help, Collection, CollectionAdd } from '../Icons/icons';
 import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import SharedFoldersModal from './sharedFoldersModal';
-import { getUserSites, getCurrentSiteInfo } from '../../helpers/services/toolService'
+import { requestStatusTypes } from "../../helpers/types/document"
+import { IFolder } from "../../helpers/types/folder"
+import { getUserSites, getCurrentSiteInfo, parseSubfoldersFromUrl } from '../../helpers/services/toolService'
 import { DocumentsAndFoldersPrefixes, WorkflowsAndIntegrationsPrefixes, AccountAndSettingsPrefixes } from '../../helpers/constants/pagePrefixes';
-import { setIsSidebarExpanded, setIsSharedFoldersExpanded } from '../../Store/reducers/config'
+import { setIsSidebarExpanded, setCurrentActionEvent, setIsSharedFoldersExpanded } from '../../Store/reducers/config'
 
 export function Sidebar(props: {
   user: User;
   section: Section;
+  nextLoadingStatus: requestStatusTypes;
+  folders: IFolder[];
   isSidebarExpanded: boolean;
   isSharedFoldersExpanded: boolean;
   brand: string;
@@ -30,6 +35,7 @@ export function Sidebar(props: {
     siteRedirectUrl,
     siteDocumentsRootUri,
     siteDocumentsRootName,
+    isSiteReadOnly,
   } = getCurrentSiteInfo(
     pathname,
     props.user,
@@ -49,7 +55,7 @@ export function Sidebar(props: {
   );
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
   let expandSharedFoldersInitially = props.isSharedFoldersExpanded;
-  if (currentDocumentsRootUri.indexOf('/shared-folders') === 0) {
+  if ((currentDocumentsRootUri.indexOf('/shared-folders') === 0) || (!hasUserSite && !hasDefaultSite && hasSharedFolders)) {
     expandSharedFoldersInitially = true;
   }
   const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(
@@ -64,6 +70,100 @@ export function Sidebar(props: {
     0,
     window.location.pathname.indexOf('/', 1)
   );
+  let subfolderLevelPath = matchPath(
+    {
+      path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08/:subfolderLevel09/:subfolderLevel10`,
+    },
+    window.location.pathname
+  ) as any;
+  if (!subfolderLevelPath) {
+    subfolderLevelPath = matchPath(
+      {
+        path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08/:subfolderLevel09`,
+      },
+      window.location.pathname
+    ) as any;
+    if (!subfolderLevelPath) {
+      subfolderLevelPath = matchPath(
+        {
+          path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08`,
+        },
+        window.location.pathname
+      ) as any;
+      if (!subfolderLevelPath) {
+        subfolderLevelPath = matchPath(
+          {
+            path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07`,
+          },
+          window.location.pathname
+        ) as any;
+        if (!subfolderLevelPath) {
+          subfolderLevelPath = matchPath(
+            {
+              path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06`,
+            },
+            window.location.pathname
+          ) as any;
+          if (!subfolderLevelPath) {
+            subfolderLevelPath = matchPath(
+              {
+                path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05`,
+              },
+              window.location.pathname
+            ) as any;
+            if (!subfolderLevelPath) {
+              subfolderLevelPath = matchPath(
+                {
+                  path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04`,
+                },
+                window.location.pathname
+              ) as any;
+              if (!subfolderLevelPath) {
+                subfolderLevelPath = matchPath(
+                  {
+                    path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03`,
+                  },
+                  window.location.pathname
+                ) as any;
+                if (!subfolderLevelPath) {
+                  subfolderLevelPath = matchPath(
+                    {
+                      path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02`,
+                    },
+                    window.location.pathname
+                  ) as any;
+                  if (!subfolderLevelPath) {
+                    subfolderLevelPath = matchPath(
+                      {
+                        path: `${currentDocumentsRootUri}/folders/:subfolderLevel01`,
+                      },
+                      window.location.pathname
+                    ) as any;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  let subfolderUri = ''
+  if (subfolderLevelPath) {
+    subfolderUri = parseSubfoldersFromUrl(
+      subfolderLevelPath.params.subfolderLevel01,
+      subfolderLevelPath.params.subfolderLevel02,
+      subfolderLevelPath.params.subfolderLevel03,
+      subfolderLevelPath.params.subfolderLevel04,
+      subfolderLevelPath.params.subfolderLevel05,
+      subfolderLevelPath.params.subfolderLevel06,
+      subfolderLevelPath.params.subfolderLevel07,
+      subfolderLevelPath.params.subfolderLevel08,
+      subfolderLevelPath.params.subfolderLevel09,
+      subfolderLevelPath.params.subfolderLevel10
+    )
+  }
+
   useEffect(() => {
     if (DocumentsAndFoldersPrefixes.indexOf(locationPrefix) > -1) {
       setDocumentsExpanded(true);
@@ -121,17 +221,59 @@ export function Sidebar(props: {
     setSharedFoldersModalOpened(false);
   };
 
+  const QuickFolderList = (folderSiteId: string, folderLevels: string[], subfoldersToList: IFolder[]) => {
+    let folderBreadcrumbUrl = `${currentDocumentsRootUri}/folders`
+    let initialPaddingLeft = 8
+    if (currentDocumentsRootUri.indexOf('shared-folders') > 0) {
+      initialPaddingLeft = 10
+    }
+    if (subfolderUri !== 'deleted' &&
+      subfolderUri !== 'shared' &&
+      subfolderUri !== 'recent' &&
+      subfolderUri !== 'favorites') 
+      {
+      return (
+        // eslint-disable-next-line react/jsx-no-useless-fragment
+        <>
+          <span className="hidden pl-6 pl-8 pl-10 pl-12 pl-14 pl-16 pl-18 pl-20 pl-22 pl-24 pl-26"></span>
+          { currentSiteId === folderSiteId  && (
+            <div className="text-sm text-gray-500">
+              { folderLevels.length ? (
+                  <>
+                  { folderLevels.map((folderSnippet: string, i: number) => {
+                    const paddingLeft = initialPaddingLeft + (i * 2)
+                    folderBreadcrumbUrl += '/' + folderSnippet
+                    return (
+                      <div key={i} className={ (i === folderLevels.length - 1 ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 ' : 'text-gray-500 bg-white ' ) + ' p-1 pl-' + paddingLeft + ' flex justify-start'}>
+                        <div className="w-4">
+                          <FolderOutline />
+                        </div>
+                        <Link
+                          to={`${folderBreadcrumbUrl}`}
+                          className="cursor-pointer grow pl-2"
+                        >
+                          {folderSnippet}
+                        </Link>
+                      </div>
+                    )
+                  }
+                  )}
+                  </>
+              ) : (
+                <></>
+              )}
+            </div>
+          )}
+        </>
+      )
+    } else {
+      return <></>
+    }
+  }
+
   const SidebarItems = () => {
     return (
       <div>
-        {props.formkiqVersion &&
-          props.formkiqVersion.type &&
-          props.isSidebarExpanded && (
-            <li className="text-xxs flex justify-center -mt-1 mb-4">
-              {props.formkiqVersion.type.toUpperCase()} v
-              {props.formkiqVersion.version}
-            </li>
-          )}
         {props.isSidebarExpanded ? (
           <>
             <li
@@ -148,215 +290,229 @@ export function Sidebar(props: {
             {documentsExpanded && (
               <>
                 {hasUserSite && (
-                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                    <NavLink
-                      to="/my-documents"
-                      end
-                      className={({ isActive }) =>
-                        (isActive
-                          ? 'text-coreOrange-500 bg-gray-100 '
-                          : 'text-gray-500') +
-                        ' w-full text-sm font-medium flex bg-white'
-                      }
-                    >
-                      <FolderDropWrapper
-                        folder={''}
-                        sourceSiteId={currentSiteId}
-                        targetSiteId={props.user.email}
-                        className={
-                          'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                  <>
+                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                      <NavLink
+                        to="/my-documents"
+                        end
+                        className={({ isActive }) =>
+                          (isActive
+                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            : 'text-gray-500 bg-white ') +
+                          ' w-full text-sm font-medium flex'
                         }
                       >
-                        <div className="w-4 flex items-center mr-2">
-                          <Documents />
-                        </div>
-                        <div>My Documents</div>
-                      </FolderDropWrapper>
-                    </NavLink>
-                  </li>
-                )}
-                {hasDefaultSite && (
-                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                    <NavLink
-                      to={hasUserSite ? '/shared-documents' : '/documents'}
-                      end
-                      className={({ isActive }) =>
-                        (isActive
-                          ? 'text-coreOrange-500 bg-gray-100 '
-                          : 'text-gray-500') +
-                        ' w-full text-sm font-medium flex bg-white'
-                      }
-                    >
-                      <FolderDropWrapper
-                        folder={''}
-                        sourceSiteId={currentSiteId}
-                        targetSiteId={'default'}
-                        className={
-                          'w-full text-sm font-medium flex pl-5 py-4 bg-white'
-                        }
-                      >
-                        {hasUserSite ? (
-                          <div className="w-4 flex flex-wrap items-center mr-2">
-                            <div className="-mt-0.5">
-                              <Documents />
-                            </div>
-                            <div className="-mt-2.5 -ml-0.5">
-                              <ShareHand />
-                            </div>
-                          </div>
-                        ) : (
+                        <FolderDropWrapper
+                          folder={''}
+                          sourceSiteId={currentSiteId}
+                          targetSiteId={props.user.email}
+                          className={
+                            'w-full text-sm font-medium flex pl-5 py-2'
+                          }
+                        >
                           <div className="w-4 flex items-center mr-2">
                             <Documents />
                           </div>
-                        )}
-                        <div>
+                          <div>My Documents</div>
+                        </FolderDropWrapper>
+                      </NavLink>
+                    </li>
+                    { QuickFolderList(props.user.email, currentSiteId === props.user.email && subfolderUri.length ? subfolderUri.split('/') : [], props.folders) }
+                  </>
+                )}
+                {hasDefaultSite && (
+                  <>
+                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                      <NavLink
+                        to={hasUserSite ? '/team-documents' : '/documents'}
+                        end
+                        className={({ isActive }) =>
+                          (isActive
+                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            : 'text-gray-500 bg-white ') +
+                          ' w-full text-sm font-medium flex'
+                        }
+                      >
+                        <FolderDropWrapper
+                          folder={''}
+                          sourceSiteId={currentSiteId}
+                          targetSiteId={'default'}
+                          className={
+                            'w-full text-sm font-medium flex pl-5 py-2 '
+                          }
+                        >
                           {hasUserSite ? (
-                            <span>Shared Documents</span>
+                            <div className="w-4 flex flex-wrap items-center mr-2">
+                              <div className="-mt-0.5">
+                                <Documents />
+                              </div>
+                              <div className="-mt-2.5 -ml-0.5">
+                                <ShareHand />
+                              </div>
+                            </div>
                           ) : (
-                            <span>Documents</span>
+                            <div className="w-4 flex items-center mr-2">
+                              <Documents />
+                            </div>
                           )}
-                        </div>
-                      </FolderDropWrapper>
-                    </NavLink>
-                  </li>
+                          <div>
+                            {hasUserSite ? (
+                              <span>Team Documents</span>
+                            ) : (
+                              <span>Documents</span>
+                            )}
+                          </div>
+                        </FolderDropWrapper>
+                      </NavLink>
+                    </li>
+                    { QuickFolderList('default', currentSiteId === 'default' && subfolderUri.length ? subfolderUri.split('/') : [], props.folders) }
+                  </>
                 )}
                 {hasSharedFolders && (
                   <>
-                    <li
-                      className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
-                      onClick={toggleSharedFoldersExpand}
-                    >
-                      <div className="flex justify-end mt-2 mr-1">
-                        {sharedFoldersExpanded ? (
-                          <ArrowBottom />
-                        ) : (
-                          <ArrowRight />
-                        )}
-                      </div>
-                      <div className="pl-1 uppercase text-xs">
-                        Shared Folders
-                      </div>
-                    </li>
-                    {sharedFoldersExpanded &&
+                    { (hasUserSite || hasDefaultSite) && (
+                      <li
+                        className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+                        onClick={toggleSharedFoldersExpand}
+                      >
+                        <div className="flex justify-end mt-2 mr-1">
+                          {sharedFoldersExpanded ? (
+                            <ArrowBottom />
+                          ) : (
+                            <ArrowRight />
+                          )}
+                        </div>
+                        <div className="pl-1 uppercase text-xs">
+                          Shared Folders
+                        </div>
+                      </li>
+                    )}
+                    {(sharedFoldersExpanded || (!hasUserSite && !hasDefaultSite)) &&
                       sharedFolderSites.map((site: any, i: number) => {
                         return (
-                          <li
-                            key={i}
-                            className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap"
-                          >
-                            <NavLink
-                              to={'/shared-folders/' + site.siteId}
-                              end
-                              className={({ isActive }) =>
-                                (isActive
-                                  ? 'text-coreOrange-500 bg-gray-100 '
-                                  : 'text-gray-500') +
-                                ' w-full text-sm font-medium flex bg-white'
-                              }
+                          <span key={i}>
+                            <li
+                              className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap"
                             >
-                              <FolderDropWrapper
-                                folder={''}
-                                sourceSiteId={currentSiteId}
-                                targetSiteId={site.siteId}
-                                className={
-                                  'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                              <NavLink
+                                to={'/shared-folders/' + site.siteId}
+                                end
+                                className={({ isActive }) =>
+                                  (isActive
+                                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                    : 'text-gray-500 bg-white ') +
+                                  ' w-full text-sm font-medium flex'
                                 }
                               >
-                                <div className="w-4 flex flex-wrap items-center mr-2">
+                                <FolderDropWrapper
+                                  folder={''}
+                                  sourceSiteId={currentSiteId}
+                                  targetSiteId={site.siteId}
+                                  className={
+                                    'w-full text-sm font-medium flex pl-5 py-2 '
+                                  }
+                                >
+                                  <div className="w-5 flex flex-wrap items-center mr-2">
+                                    <div className="w-4">
+                                      <FolderOutline />
+                                    </div>
+                                    <div className="-mt-3 -ml-0.5">
+                                      <ShareHand />
+                                    </div>
+                                  </div>
                                   <div>
-                                    <FolderOutline />
+                                    <span>{site.siteId.replace('_', ' ')}</span>
                                   </div>
-                                  <div className="-mt-3 -ml-0.5">
-                                    <ShareHand />
-                                  </div>
-                                </div>
-                                <div>
-                                  <span>{site.siteId.replace('_', ' ')}</span>
-                                </div>
-                              </FolderDropWrapper>
-                            </NavLink>
-                          </li>
+                                </FolderDropWrapper>
+                              </NavLink>
+                            </li>
+                            { QuickFolderList(site.siteId, currentSiteId === site.siteId && subfolderUri.length ? subfolderUri.split('/') : [], props.folders) }
+                          </span>
                         );
                       })}
                   </>
                 )}
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to={`${currentDocumentsRootUri}/folders/favorites`}
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
-                        : 'text-gray-500') +
-                      ' w-full text-sm font-medium flex bg-white'
-                    }
-                  >
-                    <div
-                      className={
-                        'w-full text-sm font-medium flex pl-5 py-4 bg-white'
-                      }
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <Star />
-                      </div>
-                      <div>Favorites</div>
-                    </div>
-                  </NavLink>
-                </li>
-                {props.useSoftDelete && (
-                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                    <NavLink
-                      to={`${currentDocumentsRootUri}/folders/deleted`}
-                      className={({ isActive }) =>
-                        (isActive
-                          ? 'text-coreOrange-500 bg-gray-100 '
-                          : 'text-gray-500') +
-                        ' w-full text-sm font-medium flex bg-white'
-                      }
-                    >
-                      <div
-                        className={
-                          'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                { !isSiteReadOnly && (
+                  <>
+                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                      <NavLink
+                        to={`${currentDocumentsRootUri}/folders/favorites`}
+                        className={({ isActive }) =>
+                          (isActive
+                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            : 'text-gray-500 bg-white ') +
+                          ' w-full text-sm font-medium flex '
                         }
                       >
-                        <div className="w-4 h-4 flex items-center mr-2">
-                          <Trash />
+                        <div
+                          className={
+                            'w-full text-sm font-medium flex pl-5 py-2 '
+                          }
+                        >
+                          <div className="w-4 flex items-center mr-2">
+                            <Star />
+                          </div>
+                          <div>Favorites</div>
                         </div>
-                        <div>Deleted Documents</div>
-                      </div>
-                    </NavLink>
-                  </li>
+                      </NavLink>
+                    </li>
+                    {props.useSoftDelete && (
+                      <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                        <NavLink
+                          to={`${currentDocumentsRootUri}/folders/deleted`}
+                          className={({ isActive }) =>
+                            (isActive
+                              ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                              : 'text-gray-500 bg-white ') +
+                            ' w-full text-sm font-medium flex '
+                          }
+                        >
+                          <div
+                            className={
+                              'w-full text-sm font-medium flex pl-5 py-2 '
+                            }
+                          >
+                            <div className="w-4 h-4 flex items-center mr-2">
+                              <Trash />
+                            </div>
+                            <div>Trash</div>
+                          </div>
+                        </NavLink>
+                      </li>
+                    )}
+                  </>
                 )}
                 <div className="flex w-full">
-                  <div className="w-full mt-2 mx-6 border-b"></div>
+                  <div className="w-full mt-2 border-b"></div>
                 </div>
               </>
             )}
             <li
-              className="mt-4 w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              className="mt-2 w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
               onClick={toggleIntegrationsExpand}
             >
               <div className="flex justify-end mt-2 mr-1">
                 {integrationsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="uppercase font-semibold text-xs">
-                Workflows & Integrations
+                Integrations
               </div>
             </li>
             {integrationsExpanded && (
               <>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="hidden w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/workflows"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
-                        : 'text-gray-500') +
-                      ' w-full text-sm font-medium flex bg-white'
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
                     }
                   >
                     <div
                       className={
-                        'w-full text-sm font-medium flex items-center pl-5 py-4 bg-white'
+                        'w-full text-sm font-medium flex items-center pl-5 '
                       }
                     >
                       <div className="w-4 flex items-center mr-2">
@@ -376,14 +532,14 @@ export function Sidebar(props: {
                     to="/integrations/api"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
-                        : 'text-gray-500') +
-                      ' w-full text-sm font-medium flex bg-white'
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
                     }
                   >
                     <div
                       className={
-                        'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                        'w-full text-sm font-medium flex pl-5 py-4 '
                       }
                     >
                       <div className="w-4 flex items-center mr-2">
@@ -393,19 +549,19 @@ export function Sidebar(props: {
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/webhooks"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
-                        : 'text-gray-500') +
-                      ' w-full text-sm font-medium flex bg-white'
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
                     }
                   >
                     <div
                       className={
-                        'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                        'w-full text-sm font-medium flex pl-5 '
                       }
                     >
                       <div className="w-4 flex items-center mr-2">
@@ -416,7 +572,7 @@ export function Sidebar(props: {
                   </NavLink>
                 </li>
                 <div className="flex w-full">
-                  <div className="w-full mt-2 mx-6 border-b"></div>
+                  <div className="w-full mt-4 border-b"></div>
                 </div>
               </>
             )}
@@ -435,19 +591,19 @@ export function Sidebar(props: {
                 </li>
                 {settingsExpanded && (
                   <>
-                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
                         to="/account"
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-500 bg-gray-100 '
-                            : 'text-gray-500') +
-                          ' w-full text-sm font-medium flex bg-white'
+                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            : 'text-gray-500 bg-white ') +
+                          ' w-full text-sm font-medium flex '
                         }
                       >
                         <div
                           className={
-                            'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                            'w-full text-sm font-medium flex pl-5 '
                           }
                         >
                           <div className="w-4 flex items-center mr-2">
@@ -457,19 +613,19 @@ export function Sidebar(props: {
                         </div>
                       </NavLink>
                     </li>
-                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
                         to="/settings"
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-500 bg-gray-100 '
-                            : 'text-gray-500') +
-                          ' w-full text-sm font-medium flex bg-white'
+                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            : 'text-gray-500 bg-white ') +
+                          ' w-full text-sm font-medium flex '
                         }
                       >
                         <div
                           className={
-                            'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                            'w-full text-sm font-medium flex pl-5 '
                           }
                         >
                           <div className="w-4 flex items-center mr-2">
@@ -493,9 +649,9 @@ export function Sidebar(props: {
                   end
                   className={({ isActive }) =>
                     (isActive
-                      ? 'text-coreOrange-500 bg-gray-100 '
-                      : 'text-gray-500') +
-                    ' w-full text-sm font-medium flex bg-white'
+                      ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                      : 'text-gray-500 bg-white ') +
+                    ' w-full text-sm font-medium flex '
                   }
                 >
                   <FolderDropWrapper
@@ -503,7 +659,7 @@ export function Sidebar(props: {
                     sourceSiteId={currentSiteId}
                     targetSiteId={props.user.email}
                     className={
-                      'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                      'w-full text-sm font-medium flex pl-5 py-4 '
                     }
                   >
                     <div className="w-4 flex items-center mr-2">
@@ -516,13 +672,13 @@ export function Sidebar(props: {
             {hasDefaultSite && (
               <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                 <NavLink
-                  to={hasUserSite ? '/shared-documents' : '/documents'}
+                  to={hasUserSite ? '/team-documents' : '/documents'}
                   end
                   className={({ isActive }) =>
                     (isActive
-                      ? 'text-coreOrange-500 bg-gray-100 '
-                      : 'text-gray-500') +
-                    ' w-full text-sm font-medium flex bg-white'
+                      ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                      : 'text-gray-500 bg-white ') +
+                    ' w-full text-sm font-medium flex '
                   }
                 >
                   <FolderDropWrapper
@@ -530,7 +686,7 @@ export function Sidebar(props: {
                     sourceSiteId={currentSiteId}
                     targetSiteId={'default'}
                     className={
-                      'w-full text-sm font-medium flex pl-5 py-3 bg-white'
+                      'w-full text-sm font-medium flex pl-5 py-3 '
                     }
                   >
                     {hasUserSite ? (
@@ -557,73 +713,79 @@ export function Sidebar(props: {
                   className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
                   onClick={onSharedFoldersClick}
                 >
-                  <div>
+                  <div className="w-3.5 text-gray-700">
                     <FolderOutline />
                   </div>
-                  <div className="-mt-3 -ml-0.5">
+                  <div className="-mt-2.5 -ml-0.5">
                     <ShareHand />
                   </div>
                 </div>
               </div>
             )}
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to={`${currentDocumentsRootUri}/folders/favorites`}
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-coreOrange-500 bg-gray-100 '
-                    : 'text-gray-500') +
-                  ' w-full text-sm font-medium flex bg-white'
-                }
-              >
-                <div
-                  className={
-                    'w-full text-sm font-medium flex pl-5 py-4 bg-white'
-                  }
-                >
-                  <div className="w-4 flex items-center mr-2">
-                    <Star />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to={`${currentDocumentsRootUri}/folders/deleted`}
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-coreOrange-500 bg-gray-100 '
-                    : 'text-gray-500') +
-                  ' w-full text-sm font-medium flex bg-white'
-                }
-              >
-                <div
-                  className={
-                    'w-full text-sm font-medium flex pl-5 py-4 bg-white'
-                  }
-                >
-                  <div className="w-4 h-4 flex items-center mr-2">
-                    <Trash />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
+            { !isSiteReadOnly && (
+              <>
+                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                  <NavLink
+                    to={`${currentDocumentsRootUri}/folders/favorites`}
+                    className={({ isActive }) =>
+                      (isActive
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
+                    }
+                  >
+                    <div
+                      className={
+                        'w-full text-sm font-medium flex pl-5 py-4 '
+                      }
+                    >
+                      <div className="w-4 flex items-center mr-2">
+                        <Star />
+                      </div>
+                    </div>
+                  </NavLink>
+                </li>
+                {props.useSoftDelete && (
+                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to={`${currentDocumentsRootUri}/folders/deleted`}
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                          : 'text-gray-500 bg-white ') +
+                        ' w-full text-sm font-medium flex '
+                      }
+                    >
+                      <div
+                        className={
+                          'w-full text-sm font-medium flex pl-5 py-4 '
+                        }
+                      >
+                        <div className="w-4 h-4 flex items-center mr-2">
+                          <Trash />
+                        </div>
+                      </div>
+                    </NavLink>
+                  </li>
+                )}
+              </>
+            )}
             <div className="flex w-full">
               <div className="w-full mt-2 mx-2 border-b"></div>
             </div>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+            <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/workflows"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-500 bg-gray-100 '
-                    : 'text-gray-500') +
-                  ' w-full text-sm font-medium flex bg-white'
+                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                    : 'text-gray-500 bg-white ') +
+                  ' w-full text-sm font-medium flex '
                 }
               >
                 <div
                   className={
-                    'w-full text-sm font-medium flex items-center pl-5 py-4 bg-white'
+                    'w-full text-sm font-medium flex items-center pl-5 py-4 '
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
@@ -637,14 +799,14 @@ export function Sidebar(props: {
                 to="/integrations/api"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-500 bg-gray-100 '
-                    : 'text-gray-500') +
-                  ' w-full text-sm font-medium flex bg-white'
+                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                    : 'text-gray-500 bg-white ') +
+                  ' w-full text-sm font-medium flex '
                 }
               >
                 <div
                   className={
-                    'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                    'w-full text-sm font-medium flex pl-5 py-4 '
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
@@ -658,14 +820,14 @@ export function Sidebar(props: {
                 to="/integrations/webhooks"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-500 bg-gray-100 '
-                    : 'text-gray-500') +
-                  ' w-full text-sm font-medium flex bg-white'
+                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                    : 'text-gray-500 bg-white ') +
+                  ' w-full text-sm font-medium flex '
                 }
               >
                 <div
                   className={
-                    'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                    'w-full text-sm font-medium flex pl-5 py-4 '
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
@@ -684,14 +846,14 @@ export function Sidebar(props: {
                     to="/account"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
-                        : 'text-gray-500') +
-                      ' w-full text-sm font-medium flex bg-white'
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
                     }
                   >
                     <div
                       className={
-                        'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                        'w-full text-sm font-medium flex pl-5 py-4 '
                       }
                     >
                       <div className="w-4 flex items-center mr-2">
@@ -705,14 +867,14 @@ export function Sidebar(props: {
                     to="/settings"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-500 bg-gray-100 '
-                        : 'text-gray-500') +
-                      ' w-full text-sm font-medium flex bg-white'
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
                     }
                   >
                     <div
                       className={
-                        'w-full text-sm font-medium flex pl-5 py-4 bg-white'
+                        'w-full text-sm font-medium flex pl-5 py-4 '
                       }
                     >
                       <div className="w-4 flex items-center mr-2">
@@ -728,6 +890,7 @@ export function Sidebar(props: {
       </div>
     );
   };
+  
   return (
     <div className={(sidebarExpanded ? 'w-64' : 'w-14') + ' h-screen relative'}>
       <div
@@ -738,8 +901,8 @@ export function Sidebar(props: {
       >
         <div
           className={
-            (sidebarExpanded ? 'w-62' : 'w-10') +
-            ' flex fixed z-30 justify-between mt-2'
+            (sidebarExpanded ? 'w-64' : 'w-10') +
+            ' flex fixed z-30 justify-between mt-2.5'
           }
         >
           <Link to="/">
@@ -768,13 +931,13 @@ export function Sidebar(props: {
           </Link>
           <div
             className={
-              (sidebarExpanded ? 'justify-end mr-6 ' : 'justify-end') +
-              ' text-gray-400 flex mt-2 cursor-pointer '
+              (sidebarExpanded ? 'justify-end mr-2 ' : 'justify-end mr-2') +
+              ' text-gray-600 hover:text-coreOrange-500 flex mt-2 cursor-pointer '
             }
             onClick={toggleSidebarExpand}
           >
-            <div className={(!sidebarExpanded ? '' : '-mt-1.5') + ' w-5'}>
-              {sidebarExpanded ? <DoubleChevronRight /> : <DoubleChevronLeft />}
+            <div className={(!sidebarExpanded ? 'mt-2' : '-mt-1.5') + ' w-4'}>
+              {sidebarExpanded ? <ChevronLeft /> : <ChevronRight />}
             </div>
           </div>
         </div>
@@ -784,19 +947,62 @@ export function Sidebar(props: {
             ' flex flex-wrap fixed bg-white '
           }
         >
-          <div
-            className={
-              (sidebarExpanded ? 'w-52 mx-6' : 'w-12 ml-2') +
-              ' pt-10.5 mt-3 border-b '
-            }
-          ></div>
+         
         </div>
         {props.user && (
-          <nav className="grow mt-16">
-            <ul className="flex lg:flex-col gap-1">
-              <SidebarItems />
-            </ul>
-          </nav>
+          <>
+            <nav className="grow mt-16">
+              { !isSiteReadOnly && (
+                <div className="flex flex-wrap w-full justify-center mb-4">
+                  <button
+                    className={ (props.isSidebarExpanded ? ' mr-1 ' : 'mb-1 ' ) + ' bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'}
+                    onClick={(event) => {
+                        // TODO: create more consistent check on site location
+                        if (pathname.indexOf('/workflows') > -1 || pathname.indexOf('/integrations') > -1) {
+                          window.location.href = `${currentDocumentsRootUri}?actionEvent=new`
+                        } else {
+                          dispatch(setCurrentActionEvent('new')) 
+                        }
+                      }
+                    }
+                  >
+                    {props.isSidebarExpanded && (
+                      <span>New</span>
+                    )}
+                    <div className={(props.isSidebarExpanded ? 'ml-2 mt-1 ' : 'ml-0 mt-0 ' ) + ' w-3 h-3'}>{Plus()}</div>
+                  </button>
+                  <button
+                    className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                    onClick={(event) => {
+                      // TODO: create more consistent check on site location
+                      if (pathname.indexOf('/workflows') > -1 || pathname.indexOf('/integrations') > -1) {
+                        window.location.href = `${currentDocumentsRootUri}?actionEvent=upload`
+                      } else {
+                        dispatch(setCurrentActionEvent('upload'))
+                      }
+                    }
+                  }
+                  >
+                    {props.isSidebarExpanded && (
+                      <span>Upload</span>
+                    )}
+                    <div className={(props.isSidebarExpanded ? 'ml-2 mt-1 ' : 'ml-0 mt-0 ' ) + ' w-3 h-3'}>{Upload()}</div>
+                  </button>
+                </div>
+              )}
+              <ul className="flex lg:flex-col gap-1">
+                <SidebarItems />
+              </ul>
+            </nav>
+            {props.formkiqVersion &&
+              props.formkiqVersion.type &&
+              props.isSidebarExpanded && (
+                <div className="text-xxs absolute bottom-0 w-full flex justify-center items-end -mt-1 mb-4">
+                  {props.formkiqVersion.type.toUpperCase()} v
+                  {props.formkiqVersion.version}
+                </div>
+            )}
+          </>
         )}
       </div>
       <SharedFoldersModal
@@ -810,8 +1016,9 @@ export function Sidebar(props: {
 
 const mapStateToProps = (state: RootState) => {
   const { user, section } = state.authReducer;
+  const { nextLoadingStatus, folders } = state.documentsReducer
   const { isSidebarExpanded, isSharedFoldersExpanded, brand, formkiqVersion, useAccountAndSettings, useSoftDelete } = state.configReducer
-  return { user, section, isSidebarExpanded, isSharedFoldersExpanded, brand, formkiqVersion, useAccountAndSettings, useSoftDelete }
+  return { user, section, nextLoadingStatus, folders, isSidebarExpanded, isSharedFoldersExpanded, brand, formkiqVersion, useAccountAndSettings, useSoftDelete }
 };
 
   

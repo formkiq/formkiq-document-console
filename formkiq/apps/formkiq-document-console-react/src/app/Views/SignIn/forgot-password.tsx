@@ -38,7 +38,9 @@ export function ForgotPassword({ authApi }: { authApi: string }) {
       <div className="flex flex-col lg:flex-row">
         <div className="mt-8 h-screen flex-1 bg-white p-5">
           <div className="font-bold text-lg text-center mb-8">
-            Forgot Your Password?
+            <span className="text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+              Forgot Your Password?
+            </span>
             <small className="block">
               Enter your email address to receive a link to reset your password
             </small>
@@ -70,14 +72,12 @@ export function ForgotPassword({ authApi }: { authApi: string }) {
               <input
                 type="submit"
                 value="Reset Password"
-                className="px-8 cursor-pointer py-3 mx-1 border border-transparent text-base leading-6 font-medium rounded-md shadow
-                  text-white bg-coreOrange-500 hover:bg-coreOrange-400 focus:outline-none focus:shadow-outline
-                  transition duration-150 ease-in-out md:py-4 md:text-lg md:px-10"
+                className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
               />
               
             </div>
             <div  className="mt-8 w-full text-center">
-                <a className="underline"  href="/sign-in"> 
+                <a className="underline hover:text-coreOrange-500"  href="/sign-in"> 
                   Back to Sign In
                 </a>
             </div>
