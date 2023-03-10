@@ -22,6 +22,9 @@ export function getFileIcon(filename: string) {
       case 'svg':
         fileIcon = '/assets/img/svg/icon-svg.svg';
         break;
+      case 'webm':
+        fileIcon = '/assets/img/svg/icon-webm.svg';
+        break;
       case 'webp':
         fileIcon = '/assets/img/svg/icon-webp.svg';
         break;
@@ -52,6 +55,9 @@ export function getFileIcon(filename: string) {
       case 'pptx':
         fileIcon = '/assets/img/svg/icon-pptx.svg';
         break;
+      case 'rtf':
+        fileIcon = '/assets/img/svg/icon-rtf.svg';
+        break;
       case 'txt':
         fileIcon = '/assets/img/svg/icon-txt.svg';
         break;
@@ -60,6 +66,18 @@ export function getFileIcon(filename: string) {
       case 'xhtml':
       case 'whtml':
         fileIcon = '/assets/img/svg/icon-html.svg';
+        break;
+      case 'ico':
+        fileIcon = '/assets/img/svg/icon-ico.svg';
+        break;
+      case 'mp3':
+        fileIcon = '/assets/img/svg/icon-mp3.svg';
+        break;
+      case 'ogg':
+        fileIcon = '/assets/img/svg/icon-ogg.svg';
+        break;
+      case 'wav':
+        fileIcon = '/assets/img/svg/icon-wav.svg';
         break;
       case 'dwg':
         fileIcon = '/assets/img/svg/icon-dwg.svg';
