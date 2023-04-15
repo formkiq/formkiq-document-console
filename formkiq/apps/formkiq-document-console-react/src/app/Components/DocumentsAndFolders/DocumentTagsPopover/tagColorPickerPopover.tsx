@@ -1,23 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { ColorPicker } from '../../Icons/icons'
-import { usePopper } from 'react-popper'
-import { openDialog } from "../../../Store/reducers/globalNotificationControls"
-import { useDispatch } from "react-redux";
+import { useEffect, useRef, useState } from 'react';
+import { usePopper } from 'react-popper';
+import { useDispatch } from 'react-redux';
+import { ColorPicker } from '../../Icons/icons';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
-      function handleClickOutside(event: any) {
-          if (ref.current && !ref.current.contains(event.target)) {
-              setExpanded(false)
-          }
+    function handleClickOutside(event: any) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setExpanded(false);
       }
-      // Bind the event listener
-      document.addEventListener("mousedown", handleClickOutside)
-      return () => {
-          // Unbind the event listener on clean up
-          document.removeEventListener("mousedown", handleClickOutside)
-      }
-  }, [ref])
+    }
+    // Bind the event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
 }
 
 export default function TagColorPickerPopover({
@@ -25,9 +24,9 @@ export default function TagColorPickerPopover({
   onKeyDown,
   onColorChange,
   tagKey,
-  tagColors
+  tagColors,
 }: any) {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [visible, setVisibility] = useState(false);
   const [referenceRef, setReferenceRef] = useState(null);
   const [popperRef, setPopperRef] = useState(null);
@@ -46,12 +45,12 @@ export default function TagColorPickerPopover({
     ],
   });
 
-  function handleDropdownClick(event: any) {    
-    setVisibility(!visible)
+  function handleDropdownClick(event: any) {
+    setVisibility(!visible);
   }
   function handleColorChange(color: string) {
-    onColorChange(tagKey, color)
-    setVisibility(!visible)
+    onColorChange(tagKey, color);
+    setVisibility(!visible);
   }
   return (
     <div className="relative" ref={wrapperRef}>
@@ -59,7 +58,7 @@ export default function TagColorPickerPopover({
         className="pl-1 pt-0.5 font-semibold"
         ref={setReferenceRef as any}
         onClick={handleDropdownClick}
-        >
+      >
         <div className="w-4 text-gray-600">
           <ColorPicker />
         </div>
@@ -72,7 +71,8 @@ export default function TagColorPickerPopover({
           className={`bg-white border-gray-100 border shadow-xl z-10 rounded-xl w-48 text-sm p-2`}
         >
           {tagColors.map((tagColor: any, i: number) => {
-            const pickerClasses = 'mx-0.5 w-5 h-5 inline-flex rounded-full cursor-pointer border-2 border-gray-600 focus:outline-none focus:shadow-outline'
+            const pickerClasses =
+              'mx-0.5 w-5 h-5 inline-flex rounded-full cursor-pointer border-2 border-gray-600 focus:outline-none focus:shadow-outline';
             // NOTE: in order to be included in the compressed Tailwind CSS, we need to reference the full color as a class for bg and border-l
             switch (tagColor.colorUri) {
               case 'flamingo':
@@ -176,12 +176,10 @@ export default function TagColorPickerPopover({
                   </div>
                 );
               default:
-                console.log(tagColor.colorUri)
+                console.log(tagColor.colorUri);
                 return <div key={i}></div>;
             }
-            return (
-              <></>
-            )
+            return <></>;
           })}
         </div>
       )}

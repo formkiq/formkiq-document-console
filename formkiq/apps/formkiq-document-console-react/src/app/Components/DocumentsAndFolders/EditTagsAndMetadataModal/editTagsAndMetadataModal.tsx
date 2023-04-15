@@ -1,72 +1,118 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
-import { useForm } from "react-hook-form";
-import { DocumentsService } from '../../../helpers/services/documentsService'
-import { ILine } from '../../../helpers/types/line'
-import { Close } from '../../Icons/icons'
-import EditTagsAndMetadataList from './editTagsAndMetadataList';
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
-import { openDialog as openNotificationDialog } from "../../../Store/reducers/globalNotificationControls"
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { ILine } from '../../../helpers/types/line';
+import { Close } from '../../Icons/icons';
+import EditTagsAndMetadataList from './editTagsAndMetadataList';
 
-export default function EditTagsAndMetadataModal({isOpened, onClose, siteId, getValue, value, onTagChange}: {isOpened: boolean, onClose: any, siteId: string, getValue: any, value: ILine | null, onTagChange: any}) {
-
-  const [allTags, setAlltags] = useState(null)
-  const { register, formState: { errors }, handleSubmit, reset } = useForm();
-  const doneButtonRef = useRef(null)
-  const dispatch = useDispatch()
-  const addTagFormRef = useRef<HTMLFormElement>(null)
+export default function EditTagsAndMetadataModal({
+  isOpened,
+  onClose,
+  siteId,
+  getValue,
+  value,
+  onTagChange,
+}: {
+  isOpened: boolean;
+  onClose: any;
+  siteId: string;
+  getValue: any;
+  value: ILine | null;
+  onTagChange: any;
+}) {
+  const [allTags, setAlltags] = useState(null);
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+    reset,
+  } = useForm();
+  const doneButtonRef = useRef(null);
+  const dispatch = useDispatch();
+  const addTagFormRef = useRef<HTMLFormElement>(null);
   const closeDialog = () => {
-      reset();
-      onClose();
-  }
+    reset();
+    onClose();
+  };
   useEffect(() => {
-    updateTags()
-  }, [value])
+    updateTags();
+  }, [value]);
 
   const updateTags = () => {
-    if(value) {
-      setAlltags(null)
-      DocumentsService.getDocumentTags(value.documentId as string, siteId, 50).then((data) => {
-        setAlltags(data?.tags)
-      })
+    if (value) {
+      setAlltags(null);
+      DocumentsService.getDocumentTags(
+        value.documentId as string,
+        siteId,
+        50
+      ).then((data) => {
+        setAlltags(data?.tags);
+      });
     }
-  }
+  };
 
   const onTagDelete = (tagKey: string) => {
     const deleteFunc = () => {
-      setAlltags(null)
-      DocumentsService.deleteDocumentTag(value?.documentId as string, siteId, tagKey).then(() => {
-        updateTags()
+      setAlltags(null);
+      DocumentsService.deleteDocumentTag(
+        value?.documentId as string,
+        siteId,
+        tagKey
+      ).then(() => {
+        updateTags();
         setTimeout(() => {
           onTagChange(value);
-        }, 500)
+        }, 500);
+      });
+    };
+    dispatch(
+      openDialog({
+        callback: deleteFunc,
+        dialogTitle: 'Are you sure you want to delete this tag?',
       })
-    }
-    dispatch(openDialog({ callback: deleteFunc, dialogTitle: 'Are you sure you want to delete this tag?'}))
-  }
+    );
+  };
   const onAddTagSubmit = async (data: any) => {
-    if (data.key.indexOf('/') > -1 || (data.value && data.value.indexOf('/') > -1)) {
-      dispatch(openNotificationDialog({ dialogTitle: 'Neither Tags nor Metadata cannot contain forward slashes.'}))
-      return
+    if (
+      data.key.indexOf('/') > -1 ||
+      (data.value && data.value.indexOf('/') > -1)
+    ) {
+      dispatch(
+        openNotificationDialog({
+          dialogTitle:
+            'Neither Tags nor Metadata cannot contain forward slashes.',
+        })
+      );
+      return;
     }
-    DocumentsService.addTag(getValue().documentId, siteId, data).then((response) => {
-      updateTags()
-      setTimeout(() => {
-        onTagChange(value);
-      }, 500)
-    })
+    DocumentsService.addTag(getValue().documentId, siteId, data).then(
+      (response) => {
+        updateTags();
+        setTimeout(() => {
+          onTagChange(value);
+        }, 500);
+      }
+    );
     reset();
   };
   const onTagEdit = (tagKey: string, newValue: string) => {
-    setAlltags(null)
-    DocumentsService.updateDocumentTag(value?.documentId as string, tagKey, newValue, siteId).then(() => {
-      updateTags()
+    setAlltags(null);
+    DocumentsService.updateDocumentTag(
+      value?.documentId as string,
+      tagKey,
+      newValue,
+      siteId
+    ).then(() => {
+      updateTags();
       setTimeout(() => {
         onTagChange(value);
-      }, 500)
-    })
-  }
+      }, 500);
+    });
+  };
 
   return (
     <Transition.Root show={isOpened} as={Fragment}>
@@ -107,7 +153,10 @@ export default function EditTagsAndMetadataModal({isOpened, onClose, siteId, get
                         Add Metadata (or Add a Tag)
                       </span>
                       <span className="block text-sm">
-                        NOTE: <strong className="font-bold">Tags</strong> are key-only metadata, for quick tagging of documents, while <strong className="font-bold">Metadata</strong> has a key and includes one or more values.
+                        NOTE: <strong className="font-bold">Tags</strong> are
+                        key-only metadata, for quick tagging of documents, while{' '}
+                        <strong className="font-bold">Metadata</strong> has a
+                        key and includes one or more values.
                       </span>
                     </div>
                     <div
@@ -122,7 +171,7 @@ export default function EditTagsAndMetadataModal({isOpened, onClose, siteId, get
                       onSubmit={handleSubmit(onAddTagSubmit)}
                       className="w-full"
                       ref={addTagFormRef}
-                      >
+                    >
                       <div className="flex items-start mx-4 mb-4 relative w-full">
                         <div className="w-48 mr-2">
                           <input
@@ -135,7 +184,7 @@ export default function EditTagsAndMetadataModal({isOpened, onClose, siteId, get
                                               focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
                             placeholder="key"
                             {...register('key', {
-                              required: true
+                              required: true,
                             })}
                           />
                         </div>
@@ -149,35 +198,40 @@ export default function EditTagsAndMetadataModal({isOpened, onClose, siteId, get
                                               focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
                             placeholder="value (optional)"
                             {...register('value', {
-                              required: false
+                              required: false,
                             })}
                           />
                         </div>
                         <div className="flex w-48 justify-start ml-2">
                           <input
-                              type="submit"
-                              value="Add"
-                              className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                            type="submit"
+                            value="Add"
+                            className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                           />
                         </div>
                       </div>
                       <div className="flex justify-center w-full">
-                          <div className="text-sm text-gray-400">
-                            You can add multiple values by separating each value with a comma
-                          </div>
+                        <div className="text-sm text-gray-400">
+                          You can add multiple values by separating each value
+                          with a comma
+                        </div>
                       </div>
                     </form>
                   </div>
                 </div>
                 <div className="bg-white mt-1 p-4 rounded-lg bg-white shadow-xl border h-full">
                   <div className="flex w-full items-center">
-                      <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 pr-6">
-                          Edit Metadata/Tags
-                      </div>
+                    <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 pr-6">
+                      Edit Metadata/Tags
+                    </div>
                   </div>
                   <div className="flex w-full mt-4">
                     <div className="w-full mt-2 mx-6 border-b">
-                      <EditTagsAndMetadataList tags={allTags} onEdit={onTagEdit} onDelete={onTagDelete} />
+                      <EditTagsAndMetadataList
+                        tags={allTags}
+                        onEdit={onTagEdit}
+                        onDelete={onTagDelete}
+                      />
                     </div>
                   </div>
                   <div className="w-full flex mt-4 justify-center">

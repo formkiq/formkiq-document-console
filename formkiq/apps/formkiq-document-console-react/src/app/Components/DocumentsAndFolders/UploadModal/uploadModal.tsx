@@ -1,28 +1,24 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { useDispatch } from "react-redux";
-import { Spinner, Checkmark } from '../../Icons/icons'
 import {
-  DocumentsService,
+  BeforeUploadEventArgs,
+  SelectedEventArgs,
+  UploaderComponent,
+  UploadingEventArgs,
+} from '@syncfusion/ej2-react-inputs';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setCurrentActionEvent } from '../../../Store/reducers/config';
+import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+import { OcrContentTypes } from '../../../helpers/constants/contentTypes';
+import {
   DocumentUploadedInfo,
+  DocumentsService,
   IFileUploadData,
 } from '../../../helpers/services/documentsService';
-import {
-  SelectedEventArgs,
-  BeforeUploadEventArgs,
-  UploadingEventArgs,
-  UploaderComponent,
-} from '@syncfusion/ej2-react-inputs';
 import { formatDate } from '../../../helpers/services/toolService';
-import { openDialog } from "../../../Store/reducers/globalNotificationControls"
-import { OcrContentTypes } from "../../../helpers/constants/contentTypes"
-import { setCurrentActionEvent } from '../../../Store/reducers/config'
+import { Checkmark, Spinner } from '../../Icons/icons';
 
-const foldersWithNoUpload = [
-  'favorites',
-  'shared',
-  'deleted'
-];
+const foldersWithNoUpload = ['favorites', 'shared', 'deleted'];
 
 const uploadProcessLine = (fileData: IFileUploadData, i: number) => {
   return (
@@ -94,7 +90,7 @@ export default function UploadModal({
   documentId: string;
   isFolderUpload: boolean;
 }) {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const cancelButtonRef = useRef(null);
   const uploaderRef = useRef<UploaderComponent>(null);
   const [uploadedDocs, setUploaded] = useState([]);
@@ -110,9 +106,9 @@ export default function UploadModal({
     fileData: null,
   });
 
-  let allowMultipleFiles = true
+  let allowMultipleFiles = true;
   if (documentId.length) {
-    allowMultipleFiles = false
+    allowMultipleFiles = false;
   }
 
   useEffect(() => {
@@ -189,22 +185,22 @@ export default function UploadModal({
           const ids = res.map((item) => {
             return item.documentId;
           });
-          DocumentsService.getDocumentsById(ids, siteId).then((uploaded: []) => {
-            setUploadProcess([]);
-            if (formkiqVersion.modules.indexOf('fulltext') > -1) {
-              const actions = [
-                {type: "fulltext"}
-              ]
-              uploaded.forEach((doc: any) => {
-                DocumentsService.postDocumentActions(
-                  doc.documentId,
-                  actions,
-                  siteId
-                )
-              })
+          DocumentsService.getDocumentsById(ids, siteId).then(
+            (uploaded: []) => {
+              setUploadProcess([]);
+              if (formkiqVersion.modules.indexOf('fulltext') > -1) {
+                const actions = [{ type: 'fulltext' }];
+                uploaded.forEach((doc: any) => {
+                  DocumentsService.postDocumentActions(
+                    doc.documentId,
+                    actions,
+                    siteId
+                  );
+                });
+              }
+              setUploaded([...uploadedDocs, ...uploaded]);
             }
-            setUploaded([...uploadedDocs, ...uploaded]);
-          });
+          );
         });
       } else {
         DocumentsService.uploadDocuments(
@@ -217,31 +213,38 @@ export default function UploadModal({
           const ids = res.map((item) => {
             return item.documentId;
           });
-          DocumentsService.getDocumentsById(ids, siteId).then((uploaded: []) => {
-            setUploadProcess([]);
-            // TODO: get file data and match ?
-            const uploadedDocuments = [...uploaded]
-            uploadedDocuments.forEach((doc: any) => {
-              const matchingFiles = filesData.filter((file: any) => {
-                let filename = doc.path
-                if (!filename) {
-                  return false
+          DocumentsService.getDocumentsById(ids, siteId).then(
+            (uploaded: []) => {
+              setUploadProcess([]);
+              // TODO: get file data and match ?
+              const uploadedDocuments = [...uploaded];
+              uploadedDocuments.forEach((doc: any) => {
+                const matchingFiles = filesData.filter((file: any) => {
+                  let filename = doc.path;
+                  if (!filename) {
+                    return false;
+                  }
+                  if (filename.lastIndexOf('/') > -1) {
+                    filename = filename.substring(
+                      filename.lastIndexOf('/') + 1
+                    );
+                  }
+                  if (
+                    file.originalFile.name ===
+                    filename.replace(' (' + doc.documentId + ')', '')
+                  ) {
+                    return true;
+                  } else {
+                    return false;
+                  }
+                });
+                if (matchingFiles.length === 1) {
+                  doc.contentType = matchingFiles[0].originalFile.type;
                 }
-                if (filename.lastIndexOf('/') > -1) {
-                  filename = filename.substring(filename.lastIndexOf('/') + 1)
-                }
-                if (file.originalFile.name === filename.replace(' (' + doc.documentId + ')', '')) {
-                  return true
-                } else {
-                  return false
-                }
-              })
-              if (matchingFiles.length === 1) {
-                doc.contentType = matchingFiles[0].originalFile.type
-              }
-            })
-            setUploaded([...uploadedDocs, ...uploaded]);
-          });
+              });
+              setUploaded([...uploadedDocs, ...uploaded]);
+            }
+          );
         });
       }
       uploaderRef.current.clearAll();
@@ -253,47 +256,54 @@ export default function UploadModal({
     }
   };
   const addToOcr = (event: any, document: DocumentUploadedInfo) => {
-    const docs = [...uploadedDocs]
-    const actions = [] as any[]
+    const docs = [...uploadedDocs];
+    const actions = [] as any[];
     docs.forEach((doc: any) => {
       if (doc.documentId === document.documentId) {
-        doc.processingOcrWorkflow = true
-        doc.submittedOcrWorkflow = false
-        DocumentsService.getDocumentActions(document.documentId).then((docActionsRes) => {
-          docActionsRes.actions.forEach((action: any, i: number) => {
-            if (!action.type || action.type !== 'fulltext') {
-              actions.push({type: action.type})
-            }
-          })
-          actions.push({type: "ocr"})
-          actions.push({type: "fulltext"})
-          DocumentsService.putDocumentActions(
-            document.documentId,
-            actions,
-            siteId
-          ).then((res) => {
-            if (res.status === 200) {
-              onFulltextActionSubmitted(document)
-            } else {
-              dispatch(openDialog({ dialogTitle: 'An error has occurred. Please try again in a few minutes.'}))
-            }
-          });
-        })        
+        doc.processingOcrWorkflow = true;
+        doc.submittedOcrWorkflow = false;
+        DocumentsService.getDocumentActions(document.documentId).then(
+          (docActionsRes) => {
+            docActionsRes.actions.forEach((action: any, i: number) => {
+              if (!action.type || action.type !== 'fulltext') {
+                actions.push({ type: action.type });
+              }
+            });
+            actions.push({ type: 'ocr' });
+            actions.push({ type: 'fulltext' });
+            DocumentsService.putDocumentActions(
+              document.documentId,
+              actions,
+              siteId
+            ).then((res) => {
+              if (res.status === 200) {
+                onFulltextActionSubmitted(document);
+              } else {
+                dispatch(
+                  openDialog({
+                    dialogTitle:
+                      'An error has occurred. Please try again in a few minutes.',
+                  })
+                );
+              }
+            });
+          }
+        );
       }
-    })
-    setUploaded(docs)
-  }
+    });
+    setUploaded(docs);
+  };
 
   const onFulltextActionSubmitted = (document: DocumentUploadedInfo) => {
-    const docs = [...uploadedDocs]
+    const docs = [...uploadedDocs];
     docs.forEach((doc: any) => {
       if (doc.documentId === document.documentId) {
-        doc.processingOcrWorkflow = false
-        doc.submittedOcrWorkflow = true
+        doc.processingOcrWorkflow = false;
+        doc.submittedOcrWorkflow = true;
       }
-    })
-    setUploaded(docs)
-  }
+    });
+    setUploaded(docs);
+  };
 
   const uploadedFileLine = (file: DocumentUploadedInfo, i: number) => {
     return (
@@ -308,33 +318,35 @@ export default function UploadModal({
           {formatDate(file.insertedDate)}
         </td>
         <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400 text-center">
-          { formkiqVersion.modules.indexOf('ocr') > -1 && formkiqVersion.modules.indexOf('fulltext') > -1 && OcrContentTypes.indexOf(file.contentType) > -1 && (
-            <>
-              { file.processingOcrWorkflow && (
-                <Spinner />
-              )}
-              { file.submittedOcrWorkflow && (
-                <div className="w-full flex">
-                  Fulltext:
-                  <span className="w-5 pl-1 text-green-500">
-                    <Checkmark />
-                  </span>
-                </div>
-              )}
-              { !file.processingOcrWorkflow && !file.submittedOcrWorkflow && (
-                <button
-                  type="button"
-                  className="mt-3 inline-flex flex-wrap w-full justify-center rounded-md border border-gray-300 bg-coreOrange-500 px-3 py-1 text-base font-semibold text-white shadow-sm hover:bg-coreOrange-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={event => {addToOcr(event, file)}}
+          {formkiqVersion.modules.indexOf('ocr') > -1 &&
+            formkiqVersion.modules.indexOf('fulltext') > -1 &&
+            OcrContentTypes.indexOf(file.contentType) > -1 && (
+              <>
+                {file.processingOcrWorkflow && <Spinner />}
+                {file.submittedOcrWorkflow && (
+                  <div className="w-full flex">
+                    Fulltext:
+                    <span className="w-5 pl-1 text-green-500">
+                      <Checkmark />
+                    </span>
+                  </div>
+                )}
+                {!file.processingOcrWorkflow && !file.submittedOcrWorkflow && (
+                  <button
+                    type="button"
+                    className="mt-3 inline-flex flex-wrap w-full justify-center rounded-md border border-gray-300 bg-coreOrange-500 px-3 py-1 text-base font-semibold text-white shadow-sm hover:bg-coreOrange-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={(event) => {
+                      addToOcr(event, file);
+                    }}
                   >
-                  Submit for OCR Processing
-                  <small className="block text-xs">
-                    (used in fulltext search)
-                  </small>
-                </button>
-              )}
-            </>
-          )}
+                    Submit for OCR Processing
+                    <small className="block text-xs">
+                      (used in fulltext search)
+                    </small>
+                  </button>
+                )}
+              </>
+            )}
         </td>
       </tr>
     );
@@ -382,9 +394,15 @@ export default function UploadModal({
                         <>
                           {isFolderUpload ? (
                             <>
-                              <span>Add All Documents from Within a Folder</span>
+                              <span>
+                                Add All Documents from Within a Folder
+                              </span>
                               <span className="block text-sm pb-4">
-                                NOTE: these will add the documents as files within the current folder; if you want to add these files into their own subfolder, please create that subfolder first, and then upload from inside that new folder.
+                                NOTE: these will add the documents as files
+                                within the current folder; if you want to add
+                                these files into their own subfolder, please
+                                create that subfolder first, and then upload
+                                from inside that new folder.
                               </span>
                             </>
                           ) : (
@@ -426,7 +444,7 @@ export default function UploadModal({
                                   Date added
                                 </th>
                                 <th className="border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
-                                  Workflow(s) 
+                                  Workflow(s)
                                 </th>
                               </tr>
                             </thead>
@@ -446,25 +464,24 @@ export default function UploadModal({
                         type="button"
                         className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-coreOrange-500 px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-coreOrange-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                         onClick={uploadFiles}
-                        >
+                      >
                         Upload
                       </button>
                       <button
                         type="button"
                         className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                         onClick={clearFileList}
-                        >
+                      >
                         Clear
                       </button>
-                      { isFolderUpload ? (
+                      {isFolderUpload ? (
                         <button
                           type="button"
                           className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                          onClick={event => {
-                              closeDialog();
-                              dispatch(setCurrentActionEvent('upload'))
-                            }
-                          }
+                          onClick={(event) => {
+                            closeDialog();
+                            dispatch(setCurrentActionEvent('upload'));
+                          }}
                           ref={cancelButtonRef}
                         >
                           Upload Files Instead...
@@ -472,15 +489,14 @@ export default function UploadModal({
                       ) : (
                         // eslint-disable-next-line react/jsx-no-useless-fragment
                         <>
-                          { !documentId.length && (
+                          {!documentId.length && (
                             <button
                               type="button"
                               className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                               onClick={() => {
-                                  closeDialog();
-                                  dispatch(setCurrentActionEvent('upload'))
-                                }
-                              }
+                                closeDialog();
+                                dispatch(setCurrentActionEvent('upload'));
+                              }}
                               ref={cancelButtonRef}
                             >
                               Upload the Contents of an Entire Folder Instead...
