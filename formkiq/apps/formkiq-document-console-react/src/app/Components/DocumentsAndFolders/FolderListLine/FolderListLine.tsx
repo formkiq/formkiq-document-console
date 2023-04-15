@@ -1,44 +1,45 @@
-import React, { useEffect, useState } from 'react'
-import { Star, StarFilled, Info, Share, Trash, ArrowBottom, ArrowRight } from '../../Icons/icons'
-import { Link, useNavigate } from 'react-router-dom'
-import { formatBytes, formatDate, getFileIcon, isTagValueIncludes } from '../../../helpers/services/toolService'
-import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover'
-import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover'
-import { getEmptyImage } from 'react-dnd-html5-backend'
-import { DocumentsService } from '../../../helpers/services/documentsService'
-import { RootState } from '../../../Store/store'
-import { connect, useDispatch } from 'react-redux'
-import { User } from '../../../Store/reducers/auth'
-import { addDocumentTag, removeDocumentTag, toggleExpandFolder } from '../../../Store/reducers/documentsList'
-import { IDocument } from '../../../helpers/types/document'
-import { IFolder } from '../../../helpers/types/folder'
-import FolderDropWrapper from '../FolderDropWrapper/folderDropWrapper'
-import { ILine } from '../../../helpers/types/line'
-import DocumentListLine from '../DocumentListLine/documentListLine'
+import React from 'react';
+import { connect, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { User } from '../../../Store/reducers/auth';
+import { toggleExpandFolder } from '../../../Store/reducers/documentsList';
+import { RootState } from '../../../Store/store';
+import { formatDate } from '../../../helpers/services/toolService';
+import { IDocument } from '../../../helpers/types/document';
+import { IFolder } from '../../../helpers/types/folder';
+import { ILine } from '../../../helpers/types/line';
+import { ArrowBottom, ArrowRight, Share, Star, Trash } from '../../Icons/icons';
+import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
+import DocumentListLine from '../DocumentListLine/documentListLine';
+import FolderDropWrapper from '../FolderDropWrapper/folderDropWrapper';
 
 interface IProps {
-  subfolder: string
-  folderInstance: IFolder
-  currentSiteId: string
-  isSiteReadOnly: boolean
-  onDeleteClick: (folder: IFolder) => () => void
-  onRestoreDocument: (file: IDocument, siteId: string, searchDocuments: any) => () => void
-  onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void
-  user: User
-  currentDocumentsRootUri: string
-  useIndividualSharing: boolean
-  onShareClick: (event: any, value: ILine | null) => void
-  formkiqVersion: any
-  useCollections: any
-  useSoftDelete: any
-  onEditTagsAndMetadataModalClick: any
-  onRenameModalClick: any
-  onMoveModalClick: any
-  onDocumentVersionsModalClick: any
-  onESignaturesModalClick: any
-  onTagChange: any
-  brand: any
-  filterTag: string
+  subfolder: string;
+  folderInstance: IFolder;
+  currentSiteId: string;
+  isSiteReadOnly: boolean;
+  onDeleteClick: (folder: IFolder) => () => void;
+  onRestoreDocument: (
+    file: IDocument,
+    siteId: string,
+    searchDocuments: any
+  ) => () => void;
+  onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void;
+  user: User;
+  currentDocumentsRootUri: string;
+  useIndividualSharing: boolean;
+  onShareClick: (event: any, value: ILine | null) => void;
+  formkiqVersion: any;
+  useCollections: any;
+  useSoftDelete: any;
+  onEditTagsAndMetadataModalClick: any;
+  onRenameModalClick: any;
+  onMoveModalClick: any;
+  onDocumentVersionsModalClick: any;
+  onESignaturesModalClick: any;
+  onTagChange: any;
+  brand: any;
+  filterTag: string;
 }
 
 function FolderListLine({
@@ -63,13 +64,14 @@ function FolderListLine({
   onRestoreDocument,
   onDeleteDocument,
   onTagChange,
-  filterTag
+  filterTag,
 }: IProps) {
-  let folderPath = folderInstance.path
+  let folderPath = folderInstance.path;
   if (folderInstance.path.indexOf('/') === -1) {
-    folderPath = subfolder + (subfolder.length ? '/' : '') + folderInstance.path
+    folderPath =
+      subfolder + (subfolder.length ? '/' : '') + folderInstance.path;
   }
-  const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1)
+  const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1);
   const trElem = React.forwardRef((props: any, ref) => (
     <tr {...props} ref={ref}>
       {props.childs}
@@ -78,18 +80,19 @@ function FolderListLine({
   const tableLeftMargin = 'ml-4';
   const dispatch = useDispatch();
 
-  const onExpandFolderClick = (folderPath: string, value: ILine | null) => () => {
-    if (value) {
-      dispatch(
-        toggleExpandFolder({
-          folder: value.folderInstance,
-          subfolderUri: folderPath,
-          siteId: currentSiteId,
-          user: user,
-        }) as any
-      );
-    }
-  };
+  const onExpandFolderClick =
+    (folderPath: string, value: ILine | null) => () => {
+      if (value) {
+        dispatch(
+          toggleExpandFolder({
+            folder: value.folderInstance,
+            subfolderUri: folderPath,
+            siteId: currentSiteId,
+            user: user,
+          }) as any
+        );
+      }
+    };
 
   const folderContent = (folderInstance: IFolder, subfolderPath: string) => {
     if (folderInstance.isExpanded) {
@@ -113,10 +116,14 @@ function FolderListLine({
                       onDeleteClick={onDeleteClick}
                       currentDocumentsRootUri={currentDocumentsRootUri}
                       onShareClick={onShareClick}
-                      onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
+                      onEditTagsAndMetadataModalClick={
+                        onEditTagsAndMetadataModalClick
+                      }
                       onRenameModalClick={onRenameModalClick}
                       onMoveModalClick={onMoveModalClick}
-                      onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                      onDocumentVersionsModalClick={
+                        onDocumentVersionsModalClick
+                      }
                       onESignaturesModalClick={onESignaturesModalClick}
                       onRestoreDocument={onRestoreDocument}
                       onDeleteDocument={onDeleteDocument}
@@ -125,10 +132,10 @@ function FolderListLine({
                       useCollections={useCollections}
                       useSoftDelete={useSoftDelete}
                       onTagChange={onTagChange}
-                      filterTag={filterTag} 
-                      brand={brand}                    
+                      filterTag={filterTag}
+                      brand={brand}
                     />
-                  )
+                  );
                 })}
               </td>
             </tr>
@@ -145,7 +152,9 @@ function FolderListLine({
                   searchDocuments={folderInstance.documents}
                   onDeleteClick={onDeleteDocument(file, null)}
                   onRestoreClick={onRestoreDocument(file, currentSiteId, null)}
-                  onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
+                  onEditTagsAndMetadataModalClick={
+                    onEditTagsAndMetadataModalClick
+                  }
                   onRenameModalClick={onRenameModalClick}
                   onMoveModalClick={onMoveModalClick}
                   onDocumentVersionsModalClick={onDocumentVersionsModalClick}
@@ -160,11 +169,13 @@ function FolderListLine({
                 />
               );
             })}
-            { folderInstance.documents.length === 25 && (
+            {folderInstance.documents.length === 25 && (
               <tr>
                 <td colSpan={6} className="text-sm">
                   <div className="-mx-1 pl-12 font-semibold py-2 hover:text-coreOrange-500">
-                    <a href={`${currentDocumentsRootUri}/folders/${subfolderPath}`}>
+                    <a
+                      href={`${currentDocumentsRootUri}/folders/${subfolderPath}`}
+                    >
                       view all documents in folder...
                     </a>
                   </div>
@@ -172,11 +183,14 @@ function FolderListLine({
               </tr>
             )}
           </React.Fragment>
-        )
+        );
       } else {
         return (
           <tr>
-            <td colSpan={6} className="border-coreOrange-50 text-sm italic p-1 pl-12 mb-2">
+            <td
+              colSpan={6}
+              className="border-coreOrange-50 text-sm italic p-1 pl-12 mb-2"
+            >
               No subfolders or files have been found in this folder
             </td>
           </tr>
@@ -184,12 +198,16 @@ function FolderListLine({
       }
     }
     return <></>;
-  }
-
+  };
 
   return (
     <div className="flex">
-      <table className={'w-full border-spacing-0 border-collapse table-auto relative ' + tableLeftMargin}>
+      <table
+        className={
+          'w-full border-spacing-0 border-collapse table-auto relative ' +
+          tableLeftMargin
+        }
+      >
         <tbody>
           <FolderDropWrapper
             className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-tight"
@@ -249,9 +267,7 @@ function FolderListLine({
             <td className="w-38 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
               {formatDate(folderInstance.lastModifiedDate)}
             </td>
-            <td className="w-24 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
-              
-            </td>
+            <td className="w-24 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static"></td>
             {useIndividualSharing && (
               <td className="w-24 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
                 Shared
@@ -259,7 +275,7 @@ function FolderListLine({
             )}
             <td className="w-28 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
               <div className="flex w-full">
-                { useIndividualSharing && (
+                {useIndividualSharing && (
                   <div
                     className="w-6 h-auto text-gray-400 mr-2 cursor-pointer hover:text-coreOrange-500"
                     onClick={(event) =>
@@ -271,16 +287,16 @@ function FolderListLine({
                         folderInstance: folderInstance,
                       })
                     }
-                    >
+                  >
                     <Share />
                   </div>
                 )}
-                { !isSiteReadOnly && (
+                {!isSiteReadOnly && (
                   <>
                     <div
                       className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
                       onClick={onDeleteClick(folderInstance)}
-                      >
+                    >
                       <Trash />
                     </div>
                     <div className="w-5 pt-0.5 h-auto text-gray-400">
@@ -291,10 +307,14 @@ function FolderListLine({
                         formkiqVersion={formkiqVersion}
                         onDeleteClick={onDeleteClick(folderInstance)}
                         onShareClick={onShareClick}
-                        onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
+                        onEditTagsAndMetadataModalClick={
+                          onEditTagsAndMetadataModalClick
+                        }
                         onRenameModalClick={onRenameModalClick}
                         onMoveModalClick={onMoveModalClick}
-                        onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                        onDocumentVersionsModalClick={
+                          onDocumentVersionsModalClick
+                        }
                         onESignaturesModalClick={onESignaturesModalClick}
                         user={user}
                         useIndividualSharing={useIndividualSharing}
@@ -318,15 +338,30 @@ function FolderListLine({
         </tbody>
       </table>
     </div>
-  )
+  );
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { user } = state.authReducer
-  const { documents } = state.documentsReducer
-  const { brand, formkiqVersion, tagColors, useIndividualSharing, useCollections, useSoftDelete } = state.configReducer
-  return { user, documents, brand, formkiqVersion, tagColors, useIndividualSharing, useCollections, useSoftDelete }
-}
+  const { user } = state.authReducer;
+  const { documents } = state.documentsReducer;
+  const {
+    brand,
+    formkiqVersion,
+    tagColors,
+    useIndividualSharing,
+    useCollections,
+    useSoftDelete,
+  } = state.configReducer;
+  return {
+    user,
+    documents,
+    brand,
+    formkiqVersion,
+    tagColors,
+    useIndividualSharing,
+    useCollections,
+    useSoftDelete,
+  };
+};
 
 export default connect(mapStateToProps)(FolderListLine as any) as any;
-  

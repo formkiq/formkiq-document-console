@@ -1,33 +1,76 @@
 import React, { useEffect, useState } from 'react';
-import { matchPath } from "react-router"
-import { connect, useDispatch } from 'react-redux'
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { logout, User } from '../../Store/reducers/auth';
+import { connect, useDispatch } from 'react-redux';
+import { matchPath } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { User, logout } from '../../Store/reducers/auth';
 import { RootState } from '../../Store/store';
-import { Bell, FolderOutline, Documents, ShareHand, Share, Star, Recent, Trash, Workflow, Api, Webhook } from '../Icons/icons';
-import { getFileIcon, getUserSites, getCurrentSiteInfo, parseSubfoldersFromUrl } from "../../helpers/services/toolService"
-import { DocumentsService } from '../../helpers/services/documentsService'
-import Notifications from './notifications';
-import SearchInput from '../DocumentsAndFolders/Search/searchInput';
-import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
-import { IDocument } from "../../helpers/types/document"
-import { IDocumentTag } from "../../helpers/types/documentTag"
-import { DocumentsAndFoldersPrefixes, WorkflowsAndIntegrationsPrefixes, AccountAndSettingsPrefixes } from '../../helpers/constants/pagePrefixes';
 import { TopLevelFolders } from '../../helpers/constants/folders';
-import moment from "moment"
+import {
+  AccountAndSettingsPrefixes,
+  DocumentsAndFoldersPrefixes,
+  WorkflowsAndIntegrationsPrefixes,
+} from '../../helpers/constants/pagePrefixes';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import {
+  getCurrentSiteInfo,
+  getUserSites,
+  parseSubfoldersFromUrl,
+} from '../../helpers/services/toolService';
+import { IDocument } from '../../helpers/types/document';
+import { IDocumentTag } from '../../helpers/types/documentTag';
+import SearchInput from '../DocumentsAndFolders/Search/searchInput';
+import {
+  Api,
+  Bell,
+  Documents,
+  FolderOutline,
+  Recent,
+  Share,
+  ShareHand,
+  Star,
+  Trash,
+  Webhook,
+  Workflow,
+} from '../Icons/icons';
+import Notifications from './notifications';
 
-function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, formkiqVersion: any, useAdvancedSearch: boolean, useNotifications: boolean, allTags: any[], currentDocumentPath: string }) {
-  const search = useLocation().search
-  const searchWord = new URLSearchParams(search).get('searchWord')
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } = getUserSites(props.user);
-  const pathname = useLocation().pathname
-  const { siteId, siteDocumentsRootUri, siteDocumentsRootName, isSiteReadOnly } = getCurrentSiteInfo(pathname, props.user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
+function Navbar(props: {
+  user: User;
+  isSidebarExpanded: boolean;
+  brand: string;
+  formkiqVersion: any;
+  useAdvancedSearch: boolean;
+  useNotifications: boolean;
+  allTags: any[];
+  currentDocumentPath: string;
+}) {
+  const search = useLocation().search;
+  const searchWord = new URLSearchParams(search).get('searchWord');
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+    getUserSites(props.user);
+  const pathname = useLocation().pathname;
+  const {
+    siteId,
+    siteDocumentsRootUri,
+    siteDocumentsRootName,
+    isSiteReadOnly,
+  } = getCurrentSiteInfo(
+    pathname,
+    props.user,
+    hasUserSite,
+    hasDefaultSite,
+    hasSharedFolders,
+    sharedFolderSites
+  );
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
-  const [currentDocumentsRootUri, setCurrentDocumentsRootUri] = useState(siteDocumentsRootUri);
-  const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(siteDocumentsRootName);
-  
+  const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
+    useState(siteDocumentsRootUri);
+  const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
+    siteDocumentsRootName
+  );
+
   let subfolderLevelPath = matchPath(
     {
       path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08/:subfolderLevel09/:subfolderLevel10`,
@@ -106,7 +149,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
       }
     }
   }
-  let subfolderUri = ''
+  let subfolderUri = '';
   if (subfolderLevelPath) {
     subfolderUri = parseSubfoldersFromUrl(
       subfolderLevelPath.params.subfolderLevel01,
@@ -119,90 +162,109 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
       subfolderLevelPath.params.subfolderLevel08,
       subfolderLevelPath.params.subfolderLevel09,
       subfolderLevelPath.params.subfolderLevel10
-    )
+    );
   }
 
   useEffect(() => {
-    const recheckSiteInfo = getCurrentSiteInfo(pathname, props.user, hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites)
-    setCurrentSiteId(recheckSiteInfo.siteId)
-    setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri)
-    setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName)
-  }, [pathname])
+    const recheckSiteInfo = getCurrentSiteInfo(
+      pathname,
+      props.user,
+      hasUserSite,
+      hasDefaultSite,
+      hasSharedFolders,
+      sharedFolderSites
+    );
+    setCurrentSiteId(recheckSiteInfo.siteId);
+    setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
+    setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
+  }, [pathname]);
 
-  const documentSubpaths: string[] = [
-    'folders',
-    'settings',
-    'help',
-    'new'
-  ];
-  
-  const documentSettingsPath = (matchPath({ path: '/documents/settings' }, window.location.pathname) as any )
-  const documentHelpPath = (matchPath({ path: '/documents/help' }, window.location.pathname) as any )
-  const [showAccountDropdown, setShowAccountDropdown] = React.useState(false)
-  const [showNotificationsDropdown, setShowNotificationsDropdown] = React.useState(false)
-  const [currentSection, setCurrentSection] = useState('DocumentsAndFolders')
-  const [inputValue, setInput] = useState('')
-  const [document, setDocument] : [IDocument | null, any] = useState(null)
-  const [documentTags, setDocumentTags] : [IDocumentTag[] | null, any] = useState([])
-  
+  const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
+
+  const documentSettingsPath = matchPath(
+    { path: '/documents/settings' },
+    window.location.pathname
+  ) as any;
+  const documentHelpPath = matchPath(
+    { path: '/documents/help' },
+    window.location.pathname
+  ) as any;
+  const [showAccountDropdown, setShowAccountDropdown] = React.useState(false);
+  const [showNotificationsDropdown, setShowNotificationsDropdown] =
+    React.useState(false);
+  const [currentSection, setCurrentSection] = useState('DocumentsAndFolders');
+  const [inputValue, setInput] = useState('');
+  const [document, setDocument]: [IDocument | null, any] = useState(null);
+  const [documentTags, setDocumentTags]: [IDocumentTag[] | null, any] =
+    useState([]);
+
   let documentId = '';
-  const documentViewPath = (matchPath({ path: `${siteDocumentsRootUri}/:id/*` }, window.location.pathname) as any )
-  if (documentViewPath && documentViewPath.params && documentViewPath.params.id) {
+  const documentViewPath = matchPath(
+    { path: `${siteDocumentsRootUri}/:id/*` },
+    window.location.pathname
+  ) as any;
+  if (
+    documentViewPath &&
+    documentViewPath.params &&
+    documentViewPath.params.id
+  ) {
     if (documentSubpaths.indexOf(documentViewPath.params.id) === -1) {
       documentId = documentViewPath.params.id;
     }
   }
 
-  let locationPrefix = useLocation().pathname
+  let locationPrefix = useLocation().pathname;
   if (locationPrefix.indexOf('/', 1) > -1) {
-    locationPrefix = locationPrefix.substring(0, locationPrefix.indexOf('/', 1))
+    locationPrefix = locationPrefix.substring(
+      0,
+      locationPrefix.indexOf('/', 1)
+    );
   }
   useEffect(() => {
     if (DocumentsAndFoldersPrefixes.indexOf(locationPrefix) > -1) {
-      setCurrentSection('DocumentsAndFolders')
+      setCurrentSection('DocumentsAndFolders');
     } else if (WorkflowsAndIntegrationsPrefixes.indexOf(locationPrefix) > -1) {
-      setCurrentSection('WorkflowsAndIntegrations')
+      setCurrentSection('WorkflowsAndIntegrations');
     } else if (AccountAndSettingsPrefixes.indexOf(locationPrefix) > -1) {
-      setCurrentSection('AccountAndSettings')
+      setCurrentSection('AccountAndSettings');
     }
-  }, [locationPrefix])
+  }, [locationPrefix]);
 
   useEffect(() => {
-    setInput(searchWord ? searchWord : '')
-  }, [search])
+    setInput(searchWord ? searchWord : '');
+  }, [search]);
 
   const redirectToSearchPage = () => {
     if (inputValue) {
-      navigate(`documents?searchWord=${inputValue}`)
+      navigate(`documents?searchWord=${inputValue}`);
     }
-  }
+  };
   const handleKeyDown = (ev: any) => {
     if (inputValue) {
       if (ev.key === 'Enter') {
-        redirectToSearchPage()
+        redirectToSearchPage();
       }
     }
-  }
+  };
 
-  const ToggleAccountSettings = () => setShowAccountDropdown(!showAccountDropdown);
-  const ToggleNotifications = () => setShowNotificationsDropdown(!showNotificationsDropdown);
+  const ToggleAccountSettings = () =>
+    setShowAccountDropdown(!showAccountDropdown);
+  const ToggleNotifications = () =>
+    setShowNotificationsDropdown(!showNotificationsDropdown);
   const signOut = () => {
-    dispatch(logout())
-    ToggleAccountSettings()
-  }
-  
+    dispatch(logout());
+    ToggleAccountSettings();
+  };
+
   const updateInputValue = (event: any) => {
-    const val: string = event.target.value
-    setInput(val)
-  }
+    const val: string = event.target.value;
+    setInput(val);
+  };
 
   const ParseEmailInitials = () => {
-    const { user } = props
-    if(user) {
-      const emailUsername = user.email.substring(
-        0,
-        user.email.indexOf('@')
-      );
+    const { user } = props;
+    if (user) {
+      const emailUsername = user.email.substring(0, user.email.indexOf('@'));
       const emailParts = emailUsername.split('.');
       let initials = '';
       emailParts.forEach((part: string) => {
@@ -211,48 +273,52 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
       initials = initials.substring(0, 3).toUpperCase();
       return <>{initials}</>;
     }
-    return <></>
-    
+    return <></>;
   };
 
   const getTopLevelFolderName = (folder: string) => {
     switch (folder) {
       case 'shared':
-        return 'Shared with me'
+        return 'Shared with me';
       case 'favorites':
-        return 'Favorites'
+        return 'Favorites';
       case 'recent':
-        return 'Recent'
+        return 'Recent';
       case 'deleted':
-        return 'Trash'
+        return 'Trash';
       default:
-        return ''
+        return '';
     }
-  }
+  };
 
   const changeSystemSubfolder = (event: any, systemSubfolderUri: string) => {
-    const newSiteId = event.target.options[event.target.selectedIndex].value
-    let newDocumentsRootUri = '/documents'
+    const newSiteId = event.target.options[event.target.selectedIndex].value;
+    let newDocumentsRootUri = '/documents';
     if (newSiteId === props.user.email) {
-      newDocumentsRootUri = '/my-documents'
+      newDocumentsRootUri = '/my-documents';
     } else if (newSiteId === 'default' && hasUserSite) {
-      newDocumentsRootUri = '/team-documents'
+      newDocumentsRootUri = '/team-documents';
     } else {
-      newDocumentsRootUri = '/shared-folders/' + newSiteId
+      newDocumentsRootUri = '/shared-folders/' + newSiteId;
     }
     navigate(
       {
-        pathname: `${newDocumentsRootUri}/folders/${systemSubfolderUri}`
+        pathname: `${newDocumentsRootUri}/folders/${systemSubfolderUri}`,
       },
       {
         replace: true,
       }
     );
-  }
+  };
 
   const DownloadDocument = () => {
     if (documentId.length) {
-      DocumentsService.getDocumentUrl(documentId, currentSiteId, '', false).then((urlResponse: any) => {
+      DocumentsService.getDocumentUrl(
+        documentId,
+        currentSiteId,
+        '',
+        false
+      ).then((urlResponse: any) => {
         if (urlResponse.url) {
           window.location.href = urlResponse.url;
         }
@@ -261,139 +327,170 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
   };
 
   return (
-    props.user && 
+    props.user && (
       <div className="flex w-full h-14.5">
         {props.useNotifications && showNotificationsDropdown && (
-          <>
-            {Notifications(ToggleNotifications)}
-          </>
+          <>{Notifications(ToggleNotifications)}</>
         )}
         <div className="flex grow relative flex-wrap items-start">
-          <div className={ (props.isSidebarExpanded ? 'left-64' : 'left-16') + ' flex fixed top-0 right-0 z-20 h-14.5 items-center justify-between bg-white border-b' }>
+          <div
+            className={
+              (props.isSidebarExpanded ? 'left-64' : 'left-16') +
+              ' flex fixed top-0 right-0 z-20 h-14.5 items-center justify-between bg-white border-b'
+            }
+          >
             <div className="w-7/8 flex">
-              <div className={'flex ' + (documentId.length ? 'w-full' : 'w-2/3') }>
-                { !props.isSidebarExpanded && (
+              <div
+                className={'flex ' + (documentId.length ? 'w-full' : 'w-2/3')}
+              >
+                {!props.isSidebarExpanded && (
                   <div className="w-40">
                     <div className="absolute top-0 pt-2.5">
                       <picture>
-                        <source srcSet="/assets/img/png/formkiq-wordmark.webp" type="image/webp" />
-                        <source srcSet="/assets/img/png/formkiq-wordmark.png" type="image/png" /> 
-                        <img src="/assets/img/png/formkiq-wordmark.png" className="ml-6 mt-2 w-28 mb-2.5" alt="FormKiQ" />
+                        <source
+                          srcSet="/assets/img/png/formkiq-wordmark.webp"
+                          type="image/webp"
+                        />
+                        <source
+                          srcSet="/assets/img/png/formkiq-wordmark.png"
+                          type="image/png"
+                        />
+                        <img
+                          src="/assets/img/png/formkiq-wordmark.png"
+                          className="ml-6 mt-2 w-28 mb-2.5"
+                          alt="FormKiQ"
+                        />
                       </picture>
                     </div>
                   </div>
                 )}
-                <div className={ (props.isSidebarExpanded ? 'w-full' : 'grow') + ' flex items-center pl-5'}>
-                  { subfolderUri && TopLevelFolders.indexOf(subfolderUri) > -1 ? (
+                <div
+                  className={
+                    (props.isSidebarExpanded ? 'w-full' : 'grow') +
+                    ' flex items-center pl-5'
+                  }
+                >
+                  {subfolderUri &&
+                  TopLevelFolders.indexOf(subfolderUri) > -1 ? (
                     <>
                       <div className="w-6 mr-1 text-coreOrange-600">
-                        { subfolderUri === 'shared' && (
+                        {subfolderUri === 'shared' && (
                           <div className="w-6">
                             <Share />
                           </div>
                         )}
-                        { subfolderUri === 'favorites' && (
+                        {subfolderUri === 'favorites' && (
                           <div className="w-5">
                             <Star />
                           </div>
                         )}
-                        { subfolderUri === 'recent' && (
+                        {subfolderUri === 'recent' && (
                           <div className="w-6">
                             <Recent />
                           </div>
                         )}
-                        { subfolderUri === 'deleted' && (
+                        {subfolderUri === 'deleted' && (
                           <div className="w-4">
                             <Trash />
                           </div>
                         )}
                       </div>
                       <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
-                        { getTopLevelFolderName(subfolderUri) }
+                        {getTopLevelFolderName(subfolderUri)}
                       </div>
-                      { ((hasUserSite && hasDefaultSite) || (hasUserSite && hasSharedFolders) || (hasDefaultSite && hasSharedFolders) || (hasSharedFolders && sharedFolderSites.length > 1)) && (
-                          <select
-                            className="ml-4 text-xs bg-gray-100 px-2 py-1 rounded-md"
-                            value={currentSiteId}
-                            onChange={event => {changeSystemSubfolder(event, subfolderUri)}}
-                            >
-                            { hasUserSite && (
-                              <option value={props.user.email}>
-                                My Documents
-                              </option>
-                            )}
-                            { hasUserSite && hasDefaultSite && (
-                              <option value='default'>
-                                Team Documents
-                              </option>
-                            )}
-                            { !hasUserSite && hasDefaultSite && (
-                              <option value='default'>
-                                Documents
-                              </option>
-                            )}
-                            { hasSharedFolders && sharedFolderSites.length > 0 && (
-                              <>
-                                { sharedFolderSites.map((sharedFolderSite, i: number) => {
+                      {((hasUserSite && hasDefaultSite) ||
+                        (hasUserSite && hasSharedFolders) ||
+                        (hasDefaultSite && hasSharedFolders) ||
+                        (hasSharedFolders && sharedFolderSites.length > 1)) && (
+                        <select
+                          className="ml-4 text-xs bg-gray-100 px-2 py-1 rounded-md"
+                          value={currentSiteId}
+                          onChange={(event) => {
+                            changeSystemSubfolder(event, subfolderUri);
+                          }}
+                        >
+                          {hasUserSite && (
+                            <option value={props.user.email}>
+                              My Documents
+                            </option>
+                          )}
+                          {hasUserSite && hasDefaultSite && (
+                            <option value="default">Team Documents</option>
+                          )}
+                          {!hasUserSite && hasDefaultSite && (
+                            <option value="default">Documents</option>
+                          )}
+                          {hasSharedFolders && sharedFolderSites.length > 0 && (
+                            <>
+                              {sharedFolderSites.map(
+                                (sharedFolderSite, i: number) => {
                                   return (
-                                    <option key={i} value={sharedFolderSite.siteId}>
+                                    <option
+                                      key={i}
+                                      value={sharedFolderSite.siteId}
+                                    >
                                       {sharedFolderSite.siteId}
                                     </option>
-                                  )
-                                })}
-                              </>
-                            )}
-                          </select>
-                        )}
+                                  );
+                                }
+                              )}
+                            </>
+                          )}
+                        </select>
+                      )}
                     </>
                   ) : (
                     // eslint-disable-next-line react/jsx-no-useless-fragment
                     <>
-                      { (locationPrefix === '/workflows' || locationPrefix === '/integrations') ? (
+                      {locationPrefix === '/workflows' ||
+                      locationPrefix === '/integrations' ? (
                         <>
                           <div className="w-6 mr-1 text-coreOrange-600">
-                            { pathname.indexOf('/workflows') > -1 && (
+                            {pathname.indexOf('/workflows') > -1 && (
                               <div className="w-5">
                                 <Workflow />
                               </div>
                             )}
-                            { pathname.indexOf('/integrations/api') > -1 && (
+                            {pathname.indexOf('/integrations/api') > -1 && (
                               <div className="w-5">
                                 <Api />
                               </div>
                             )}
-                            { pathname.indexOf('/integrations/webhooks') > -1 && (
+                            {pathname.indexOf('/integrations/webhooks') >
+                              -1 && (
                               <div className="w-5">
                                 <Webhook />
                               </div>
                             )}
                           </div>
                           <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
-                            { pathname.indexOf('/workflows') > -1 && (
+                            {pathname.indexOf('/workflows') > -1 && (
                               <span>Workflows</span>
                             )}
-                            { pathname.indexOf('/integrations/api') > -1 && (
+                            {pathname.indexOf('/integrations/api') > -1 && (
                               <span>API Explorer</span>
                             )}
-                            { pathname.indexOf('/integrations/webhooks') > -1 && (
-                              <span>Inbound Webhooks</span>
-                            )}
+                            {pathname.indexOf('/integrations/webhooks') >
+                              -1 && <span>Inbound Webhooks</span>}
                           </div>
                         </>
                       ) : (
                         <>
                           <div className="w-6 mr-1 text-coreOrange-600">
-                            { siteDocumentsRootUri.indexOf('/documents') > -1 && (
+                            {siteDocumentsRootUri.indexOf('/documents') >
+                              -1 && (
                               <div className="w-6">
                                 <Documents />
                               </div>
                             )}
-                            { siteDocumentsRootUri.indexOf('/my-documents') > -1 && (
+                            {siteDocumentsRootUri.indexOf('/my-documents') >
+                              -1 && (
                               <div className="w-5">
                                 <Documents />
                               </div>
                             )}
-                            { siteDocumentsRootUri.indexOf('/team-documents') > -1 && (
+                            {siteDocumentsRootUri.indexOf('/team-documents') >
+                              -1 && (
                               <div className="w-6 flex flex-wrap items-center mr-2">
                                 <div className="w-4">
                                   <Documents />
@@ -403,7 +500,8 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                                 </div>
                               </div>
                             )}
-                            { siteDocumentsRootUri.indexOf('/shared-folders/') > -1 && (
+                            {siteDocumentsRootUri.indexOf('/shared-folders/') >
+                              -1 && (
                               <div className="w-6 flex flex-wrap items-center mr-2">
                                 <div className="w-4">
                                   <FolderOutline />
@@ -415,16 +513,27 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                             )}
                           </div>
                           <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
-                            { siteDocumentsRootName }
-                            { documentId && props.currentDocumentPath.length ? (
+                            {siteDocumentsRootName}
+                            {documentId && props.currentDocumentPath.length ? (
                               <span>
                                 <span className="px-2">|</span>
                                 {props.currentDocumentPath}
                                 <span className="pl-8">
                                   <a
-                                    href={ siteDocumentsRootUri + '/folders/' + props.currentDocumentPath.substring(0, props.currentDocumentPath.lastIndexOf('/')) + '#id=' + documentId}
+                                    href={
+                                      siteDocumentsRootUri +
+                                      '/folders/' +
+                                      props.currentDocumentPath.substring(
+                                        0,
+                                        props.currentDocumentPath.lastIndexOf(
+                                          '/'
+                                        )
+                                      ) +
+                                      '#id=' +
+                                      documentId
+                                    }
                                     className="text-sm text-gray-500 hover:text-coreOrange-600 cursor-pointer whitespace-nowrap"
-                                    >
+                                  >
                                     view folder
                                   </a>
                                 </span>
@@ -432,7 +541,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                                   <span
                                     className="text-sm text-gray-500 hover:text-coreOrange-600 cursor-pointer whitespace-nowrap"
                                     onClick={DownloadDocument}
-                                    >
+                                  >
                                     download
                                   </span>
                                 </span>
@@ -440,7 +549,7 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                             ) : (
                               <span></span>
                             )}
-                            { searchWord && (
+                            {searchWord && (
                               <span>
                                 <span className="px-2">-</span>
                                 Search Results
@@ -453,11 +562,10 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                   )}
                 </div>
               </div>
-              { !documentId.length && currentSection === 'DocumentsAndFolders' && (
+              {!documentId.length && currentSection === 'DocumentsAndFolders' && (
                 <div className="flex items-center gap-5 w-1/2">
-                
                   <SearchInput
-                    onChange={updateInputValue} 
+                    onChange={updateInputValue}
                     onKeyDown={handleKeyDown}
                     siteId={currentSiteId}
                     formkiqVersion={props.formkiqVersion}
@@ -471,11 +579,11 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
               )}
             </div>
             <div className="w-1/4 flex justify-end mr-16">
-              { props.useNotifications && (
+              {props.useNotifications && (
                 <span
                   className="mt-0.5 mr-4 w-4 cursor-pointer"
                   onClick={ToggleNotifications}
-                  >
+                >
                   {Bell()}
                 </span>
               )}
@@ -490,34 +598,33 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
                   >
                     <ParseEmailInitials />
                   </button>
-                  {showAccountDropdown &&
-                    <ul
-                      className="dropdown-menu min-w-max absolute bg-white right-0 text-base z-50 float-right list-none text-left rounded-lg border mt-2.5"
-                    >
+                  {showAccountDropdown && (
+                    <ul className="dropdown-menu min-w-max absolute bg-white right-0 text-base z-50 float-right list-none text-left rounded-lg border mt-2.5">
                       <li className="hidden">
-                        <Link to="/account/settings"
+                        <Link
+                          to="/account/settings"
                           className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                          >
+                        >
                           Settings
                         </Link>
                       </li>
                       <li>
-                        <Link onClick={signOut} to="/sign-out"
+                        <Link
+                          onClick={signOut}
+                          to="/sign-out"
                           className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                          >
+                        >
                           Sign out
                         </Link>
                       </li>
                     </ul>
-                  }
+                  )}
                 </div>
               </div>
               <button className="lg:hidden">
                 <div className="w-4">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                    <path
-                      d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"
-                    />
+                    <path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z" />
                   </svg>
                 </div>
               </button>
@@ -525,14 +632,30 @@ function Navbar(props: { user: User, isSidebarExpanded: boolean, brand: string, 
           </div>
         </div>
       </div>
+    )
   );
 }
 
 const mapStateToProps = (state: RootState) => {
   const { user } = state.authReducer;
-  const { isSidebarExpanded, brand, formkiqVersion, useNotifications, useAdvancedSearch } = state.configReducer
-  const { allTags, currentDocumentPath } = state.dataCacheReducer
-  return { user, isSidebarExpanded, brand, formkiqVersion, useNotifications, useAdvancedSearch, allTags, currentDocumentPath }
+  const {
+    isSidebarExpanded,
+    brand,
+    formkiqVersion,
+    useNotifications,
+    useAdvancedSearch,
+  } = state.configReducer;
+  const { allTags, currentDocumentPath } = state.dataCacheReducer;
+  return {
+    user,
+    isSidebarExpanded,
+    brand,
+    formkiqVersion,
+    useNotifications,
+    useAdvancedSearch,
+    allTags,
+    currentDocumentPath,
+  };
 };
 
 export default connect(mapStateToProps)(Navbar as any);

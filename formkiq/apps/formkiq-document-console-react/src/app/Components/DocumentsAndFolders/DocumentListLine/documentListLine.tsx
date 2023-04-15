@@ -1,19 +1,30 @@
-import React, { useEffect, useState } from 'react'
-import { Star, StarFilled, Info, Share, Trash } from '../../Icons/icons'
-import { useDrag } from 'react-dnd'
-import { Link, useNavigate } from 'react-router-dom'
-import { formatBytes, formatDate, getFileIcon, isTagValueIncludes } from '../../../helpers/services/toolService'
-import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover'
-import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover'
-import { getEmptyImage } from 'react-dnd-html5-backend'
-import { DocumentsService } from '../../../helpers/services/documentsService'
-import { RootState } from '../../../Store/store'
-import { connect, useDispatch } from 'react-redux'
-import { User } from '../../../Store/reducers/auth'
-import { addDocumentTag, removeDocumentTag } from '../../../Store/reducers/documentsList'
-import { IDocument } from '../../../helpers/types/document'
+import { useEffect, useState } from 'react';
+import { useDrag } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import { connect, useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { User } from '../../../Store/reducers/auth';
+import {
+  addDocumentTag,
+  removeDocumentTag,
+} from '../../../Store/reducers/documentsList';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
-import { openDialog as openProgressDialog, closeDialog as closeProgressDialog } from '../../../Store/reducers/globalProgressControls';
+import {
+  closeDialog as closeProgressDialog,
+  openDialog as openProgressDialog,
+} from '../../../Store/reducers/globalProgressControls';
+import { RootState } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import {
+  formatBytes,
+  formatDate,
+  getFileIcon,
+  isTagValueIncludes,
+} from '../../../helpers/services/toolService';
+import { IDocument } from '../../../helpers/types/document';
+import { Info, Share, Star, StarFilled, Trash } from '../../Icons/icons';
+import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
+import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
 
 function DocumentListLine({
   file,
@@ -76,7 +87,7 @@ function DocumentListLine({
     if (useSoftDelete) {
       onDeleteClick();
     } else {
-      onPermanentDeleteClick(); 
+      onPermanentDeleteClick();
     }
   };
   const restoreDocument = () => {
@@ -86,11 +97,11 @@ function DocumentListLine({
   const onPermanentDeleteClick = () => {
     const deleteFunc = () => {
       DocumentsService.deleteDocument(file.documentId, siteId).then(() => {
-        dispatch(openProgressDialog({ dialogTitle: 'Deleting...'}))
+        dispatch(openProgressDialog({ dialogTitle: 'Deleting...' }));
         setTimeout(() => {
-          closeProgressDialog()
-          window.location.reload()
-        }, 2000)
+          closeProgressDialog();
+          window.location.reload();
+        }, 2000);
         /*
         if (useSoftDelete) {
           navigate(
@@ -128,7 +139,6 @@ function DocumentListLine({
     );
   };
 
-  
   const [{ opacity, isDragging }, drag, preview] = useDrag(
     () => ({
       type: 'file',
@@ -137,7 +147,7 @@ function DocumentListLine({
         opacity: monitor.isDragging() ? 0.4 : 1,
         isDragging: monitor.isDragging(),
       }),
-      canDrag: !isSiteReadOnly
+      canDrag: !isSiteReadOnly,
     }),
     [file]
   );
@@ -206,13 +216,13 @@ function DocumentListLine({
     );
   };
 
-  let pageSubfolderLevel = 0
+  let pageSubfolderLevel = 0;
   if (folder.length) {
-    pageSubfolderLevel = folder.split('/').length
+    pageSubfolderLevel = folder.split('/').length;
   }
-  let lineSubfolderLevel = 0
+  let lineSubfolderLevel = 0;
   if (file.path.indexOf('/') > -1) {
-    lineSubfolderLevel = file.path.split('/').length - 1
+    lineSubfolderLevel = file.path.split('/').length - 1;
   }
   return (
     <>
@@ -223,21 +233,18 @@ function DocumentListLine({
       >
         <td className={`text-gray-800 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
-            {
-              folder !== 'deleted' &&
-              folder !== 'shared' &&
-              folder !== 'recent' &&
-              folder !== 'favorites' ? (
-                <div
-                  className={lineSubfolderLevel === pageSubfolderLevel
-                  ? 'w-5 '
-                  : 'w-1'
-                  }>
-                </div>
-              ) : (
-                <div className="w-1"></div>
-              )
-            }
+            {folder !== 'deleted' &&
+            folder !== 'shared' &&
+            folder !== 'recent' &&
+            folder !== 'favorites' ? (
+              <div
+                className={
+                  lineSubfolderLevel === pageSubfolderLevel ? 'w-5 ' : 'w-1'
+                }
+              ></div>
+            ) : (
+              <div className="w-1"></div>
+            )}
             <Link
               to={`${documentsRootUri}/${file.documentId}/view`}
               className="cursor-pointer w-16 flex items-center justify-start"
@@ -254,31 +261,27 @@ function DocumentListLine({
                 className="cursor-pointer pt-1.5 flex items-center"
                 title={file.path.substring(file.path.lastIndexOf('/') + 1)}
               >
-                {
-                  folder === 'deleted' ? (
-                    <span>
-                      {file.path}
-                    </span>
-                  ) : (
-                    <span>
-                      {file.path.substring(file.path.lastIndexOf('/') + 1).length >
-                      40 ? (
-                        <span className="tracking-tightest text-clip overflow-hidden">
-                          {file.path.substring(
-                            file.path.lastIndexOf('/') + 1,
-                            file.path.lastIndexOf('/') + 50
-                          )}
-                          {file.path.substring(file.path.lastIndexOf('/') + 1)
-                            .length > 50 && <span>...</span>}
-                        </span>
-                      ) : (
-                        <span>
-                          {file.path.substring(file.path.lastIndexOf('/') + 1)}
-                        </span>
-                      )}
-                    </span>
-                  )
-                }
+                {folder === 'deleted' ? (
+                  <span>{file.path}</span>
+                ) : (
+                  <span>
+                    {file.path.substring(file.path.lastIndexOf('/') + 1)
+                      .length > 40 ? (
+                      <span className="tracking-tightest text-clip overflow-hidden">
+                        {file.path.substring(
+                          file.path.lastIndexOf('/') + 1,
+                          file.path.lastIndexOf('/') + 50
+                        )}
+                        {file.path.substring(file.path.lastIndexOf('/') + 1)
+                          .length > 50 && <span>...</span>}
+                      </span>
+                    ) : (
+                      <span>
+                        {file.path.substring(file.path.lastIndexOf('/') + 1)}
+                      </span>
+                    )}
+                  </span>
+                )}
               </Link>
               <div className="grow flex items-center justify-end pt-1.5 pr-4">
                 <div className="flex flex-wrap justify-end w-52">
@@ -293,26 +296,33 @@ function DocumentListLine({
                         'untagged',
                         'path',
                       ];
-                      let tagColor = 'gray'
+                      let tagColor = 'gray';
                       if (tagColors) {
                         tagColors.forEach((color) => {
                           if (color.tagKeys.indexOf(propertyName) > -1) {
-                            tagColor = color.colorUri
+                            tagColor = color.colorUri;
                             return;
                           }
-                        })
+                        });
                       }
-                      if (tagsToIgnore.indexOf(propertyName) === -1 && !file.tags[propertyName].length) {
+                      if (
+                        tagsToIgnore.indexOf(propertyName) === -1 &&
+                        !file.tags[propertyName].length
+                      ) {
                         showTag = true;
                       }
                       return (
                         <div key={i}>
                           {showTag && (
                             <div className="pt-0.5 pr-1 flex">
-                              <div className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}>
+                              <div
+                                className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                              >
                                 {propertyName}
                               </div>
-                              <div className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}></div>
+                              <div
+                                className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                              ></div>
                             </div>
                           )}
                         </div>
@@ -342,7 +352,7 @@ function DocumentListLine({
               className="w-5 pt-0.5 text-gray-400 mr-1 cursor-pointer hover:text-coreOrange-500"
             >
               <Info />
-            </Link>            
+            </Link>
             {folder !== 'deleted' && !isSiteReadOnly && (
               <div
                 onClick={toggleFavorite}
@@ -359,7 +369,7 @@ function DocumentListLine({
         <td className="w-24 p-2 pt-3 text-gray-800 block tracking-tight lg:table-cell relative lg:static">
           {formatBytes(file.contentLength)}
         </td>
-        { useIndividualSharing && (
+        {useIndividualSharing && (
           <td className="w-24 p-2 pt-3 text-gray-800 block tracking-tight lg:table-cell relative lg:static">
             Private
           </td>
@@ -383,7 +393,7 @@ function DocumentListLine({
               </>
             ) : (
               <>
-                { useIndividualSharing && (
+                {useIndividualSharing && (
                   <div
                     className="w-6 h-auto text-gray-400 mr-2 cursor-pointer"
                     onClick={(event) =>
@@ -392,25 +402,25 @@ function DocumentListLine({
                         documentId: file.documentId,
                       })
                     }
-                    >
+                  >
                     <Share />
                   </div>
                 )}
-                { !isSiteReadOnly && (
+                {!isSiteReadOnly && (
                   // eslint-disable-next-line react/jsx-no-useless-fragment
                   <>
-                    { useSoftDelete ? (
+                    {useSoftDelete ? (
                       <div
                         className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
                         onClick={onDeleteClick}
-                        >
+                      >
                         <Trash />
                       </div>
                     ) : (
                       <div
                         className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
                         onClick={onPermanentDeleteClick}
-                        >
+                      >
                         <Trash />
                       </div>
                     )}
@@ -429,7 +439,9 @@ function DocumentListLine({
                     formkiqVersion={formkiqVersion}
                     onDeleteClick={deleteDocument}
                     onShareClick={onShareClick}
-                    onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
+                    onEditTagsAndMetadataModalClick={
+                      onEditTagsAndMetadataModalClick
+                    }
                     onRenameModalClick={onRenameModalClick}
                     onMoveModalClick={onMoveModalClick}
                     onDocumentVersionsModalClick={onDocumentVersionsModalClick}
@@ -455,11 +467,10 @@ function DocumentListLine({
 }
 
 const mapStateToProps = (state: RootState) => {
-  const { user } = state.authReducer
-  const { documents } = state.documentsReducer
-  const { brand, formkiqVersion, tagColors } = state.configReducer
-  return { user, documents, brand, formkiqVersion, tagColors }
-}
+  const { user } = state.authReducer;
+  const { documents } = state.documentsReducer;
+  const { brand, formkiqVersion, tagColors } = state.configReducer;
+  return { user, documents, brand, formkiqVersion, tagColors };
+};
 
 export default connect(mapStateToProps)(DocumentListLine as any) as any;
-  

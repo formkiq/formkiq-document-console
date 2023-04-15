@@ -1,26 +1,38 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react'
-import { DocumentsService } from '../../../helpers/services/documentsService'
-import { ILine } from "../../../helpers/types/line"
-import { MoreActions, Star, Download, Copy, Move, ArrowRight, Share, Trash, Rename, Tag, History, Signature } from '../../Icons/icons'
-import { usePopper } from 'react-popper'
-import { ESignatureContentTypes } from '../../../helpers/constants/contentTypes'
-import { openDialog } from "../../../Store/reducers/globalNotificationControls"
-import { useDispatch } from "react-redux";
+import { useEffect, useRef, useState } from 'react';
+import { usePopper } from 'react-popper';
+import { useDispatch } from 'react-redux';
+import { ESignatureContentTypes } from '../../../helpers/constants/contentTypes';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { ILine } from '../../../helpers/types/line';
+import {
+  ArrowRight,
+  Copy,
+  Download,
+  History,
+  MoreActions,
+  Move,
+  Rename,
+  Share,
+  Signature,
+  Star,
+  Tag,
+  Trash,
+} from '../../Icons/icons';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
-      function handleClickOutside(event: any) {
-          if (ref.current && !ref.current.contains(event.target)) {
-              setExpanded(false)
-          }
+    function handleClickOutside(event: any) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setExpanded(false);
       }
-      // Bind the event listener
-      document.addEventListener("mousedown", handleClickOutside)
-      return () => {
-          // Unbind the event listener on clean up
-          document.removeEventListener("mousedown", handleClickOutside)
-      }
-  }, [ref])
+    }
+    // Bind the event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
 }
 
 export default function DocumentActionsPopover({
@@ -41,10 +53,10 @@ export default function DocumentActionsPopover({
   user,
   useIndividualSharing,
   useCollections,
-  useSoftDelete
+  useSoftDelete,
 }: any) {
   const line: ILine = value;
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [visible, setVisibility] = useState(false);
   const [referenceRef, setReferenceRef] = useState(null);
   const [popperRef, setPopperRef] = useState(null);
@@ -223,10 +235,11 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            { line.lineType === 'document' && !isSiteReadOnly && (
+            {line.lineType === 'document' && !isSiteReadOnly && (
               <div className="w-4/5 my-2 mx-6 border-b"></div>
             )}
-            { line.lineType === 'document' && !isSiteReadOnly &&
+            {line.lineType === 'document' &&
+              !isSiteReadOnly &&
               line.documentInstance &&
               formkiqVersion.modules.indexOf('esignature') > -1 &&
               ESignatureContentTypes.indexOf(
@@ -316,16 +329,22 @@ export default function DocumentActionsPopover({
                 {line.lineType === 'document' && (
                   <div className="w-4/5 my-2 mx-6 border-b"></div>
                 )}
-                { (useSoftDelete || line.lineType === 'folder') ? (
+                {useSoftDelete || line.lineType === 'folder' ? (
                   <li className="py-1 px-2 hover:bg-gray-100 cursor-pointer text-red-500">
-                    <span onClick={clickDelete} className={'flex items-baseline'}>
+                    <span
+                      onClick={clickDelete}
+                      className={'flex items-baseline'}
+                    >
                       <span className="mr-2 w-3 h-3">{Trash()}</span>
                       <span>Delete</span>
                     </span>
                   </li>
                 ) : (
                   <li className="py-1 px-2 hover:bg-gray-100 cursor-pointer text-red-500">
-                    <span onClick={clickDelete} className={'flex items-baseline'}>
+                    <span
+                      onClick={clickDelete}
+                      className={'flex items-baseline'}
+                    >
                       <span className="mr-2 w-3 h-3">{Trash()}</span>
                       <span>Delete (No Undo)</span>
                     </span>
