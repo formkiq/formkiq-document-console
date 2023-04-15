@@ -893,7 +893,7 @@ function Documents(props: {
   const filtersAndTags = () => {
     let tagsToCheck: string[] = [];
     let showAllTagsPopover = true;
-    let minTagsToShowForFilter = 3;
+    const minTagsToShowForFilter = 3;
     tagsToCheck = tagsToCheck.concat(TagsForFilterAndDisplay);
     if (
       filterTag &&

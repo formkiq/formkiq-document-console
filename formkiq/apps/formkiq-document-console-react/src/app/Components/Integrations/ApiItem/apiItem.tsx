@@ -46,9 +46,9 @@ function updateRequestsFromForm(state: any, setState: any, { apiItem, user, docu
 
   let httpRequest = apiItem.method + ' ' + path
   let curlRequest = ''
-  let fetchUrl = host + path
+  const fetchUrl = host + path
   let fetchQueryString = ''
-  let fetchHeaders: any = {};
+  const fetchHeaders: any = {};
   let fetchBody = null
   if (apiItem.method === 'POST') {
     curlRequest = 'curl -X POST "' + host + path
