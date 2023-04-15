@@ -9,19 +9,19 @@ type TagProps = {
 
 function tagListIem(tag: IDocumentTag, index: number, tags: IDocumentTag [], editingTags: TagProps [], setEditingTags: any, onEdit: any, onDelete: any) {
   const toggleEdit = () => {
-    let newArr = [...editingTags]
+    const newArr = [...editingTags]
     newArr[index].isOpened = !newArr[index]?.isOpened
     setEditingTags(newArr)
   }
   const closeEdit = () => {
-    let newArr = [...editingTags]
+    const newArr = [...editingTags]
     newArr[index].isOpened = !newArr[index]?.isOpened
     newArr[index].inputValue = tag.value ? tag.value : editingTags[index].inputValue
     setEditingTags(newArr)
   }
 
   const updateInputValue = (e: any) => {
-    let newArr = [...editingTags]
+    const newArr = [...editingTags]
     newArr[index].inputValue = e.target.value
     setEditingTags(newArr)
   }
