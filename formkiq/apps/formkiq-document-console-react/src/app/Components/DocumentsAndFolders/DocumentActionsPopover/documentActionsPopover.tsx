@@ -245,7 +245,6 @@ export default function DocumentActionsPopover({
               ESignatureContentTypes.indexOf(
                 line.documentInstance.contentType
               ) > -1 && (
-                // eslint-disable-next-line react/jsx-no-useless-fragment
                 <>
                   <li
                     className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
