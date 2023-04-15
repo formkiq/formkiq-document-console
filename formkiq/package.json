@@ -6,6 +6,8 @@
     "start": "nx serve",
     "build": "nx build",
     "test": "nx test",
+    "prettier": "npx run prettier --write .",
+    "lint": "eslint . --ext .ts,.tsx",
     "build-sdk": "cd ./libs/formkiq-client-sdk-javascript/build && npm install && npx webpack && cp ./dist/es6/formkiq-client-sdk-es6.js ../../../apps/formkiq-document-console-react/src/app/lib/formkiq-client-sdk-es6.js"
   },
   "private": true,
