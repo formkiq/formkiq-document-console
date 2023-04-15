@@ -491,7 +491,6 @@ function Documents(props: {
     }
     return () => {
       if (documentsScrollpaneRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         (documentsScrollpaneRef.current as HTMLDivElement).removeEventListener(
           'scroll',
           trackScrolling
@@ -1709,7 +1708,6 @@ function Documents(props: {
                             </div>
                           </button>
                         ) : (
-                          // eslint-disable-next-line react/jsx-no-useless-fragment
                           <>
                             {props.useSoftDelete && (
                               <button

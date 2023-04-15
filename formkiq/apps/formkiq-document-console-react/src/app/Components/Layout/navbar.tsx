@@ -440,7 +440,6 @@ function Navbar(props: {
                       )}
                     </>
                   ) : (
-                    // eslint-disable-next-line react/jsx-no-useless-fragment
                     <>
                       {locationPrefix === '/workflows' ||
                       locationPrefix === '/integrations' ? (

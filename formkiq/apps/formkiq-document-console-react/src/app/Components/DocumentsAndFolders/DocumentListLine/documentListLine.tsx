@@ -407,7 +407,6 @@ function DocumentListLine({
                   </div>
                 )}
                 {!isSiteReadOnly && (
-                  // eslint-disable-next-line react/jsx-no-useless-fragment
                   <>
                     {useSoftDelete ? (
                       <div

@@ -390,7 +390,6 @@ export default function UploadModal({
                       {documentId.length ? (
                         <span>Upload New Version</span>
                       ) : (
-                        // eslint-disable-next-line react/jsx-no-useless-fragment
                         <>
                           {isFolderUpload ? (
                             <>
@@ -487,7 +486,6 @@ export default function UploadModal({
                           Upload Files Instead...
                         </button>
                       ) : (
-                        // eslint-disable-next-line react/jsx-no-useless-fragment
                         <>
                           {!documentId.length && (
                             <button

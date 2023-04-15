@@ -271,7 +271,6 @@ export function Sidebar(props: {
       subfolderUri !== 'favorites'
     ) {
       return (
-        // eslint-disable-next-line react/jsx-no-useless-fragment
         <>
           <span className="hidden pl-6 pl-8 pl-10 pl-12 pl-14 pl-16 pl-18 pl-20 pl-22 pl-24 pl-26"></span>
           {currentSiteId === folderSiteId && (
@@ -942,7 +941,6 @@ export function Sidebar(props: {
         >
           <Link to="/">
             {sidebarExpanded ? (
-              // eslint-disable-next-line react/jsx-no-useless-fragment
               <>
                 <picture>
                   <source
