@@ -1,8 +1,8 @@
-import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { RootState } from '../../../Store/store';
 import { closeDialog } from '../../../Store/reducers/globalNotificationControls';
+import { RootState } from '../../../Store/store';
 
 function GlobalNotificationDialog({ notificationDialog }: any) {
   const dispatch = useDispatch();
@@ -39,6 +39,7 @@ function GlobalNotificationDialog({ notificationDialog }: any) {
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
+                  data-test-id="modal-title"
                   className="text-lg font-medium text-center leading-6 pb-2 text-gray-900"
                 >
                   {notificationDialog.dialogTitle}

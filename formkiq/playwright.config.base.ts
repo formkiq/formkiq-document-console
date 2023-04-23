@@ -59,4 +59,10 @@ export const baseConfig: PlaywrightTestConfig = {
     //   use: { ..devices['Desktop Chrome'], channel: 'chrome' },
     // },
   ],
+  webServer: {
+    command: 'npm run start',
+    port: 3000,
+    timeout: 180 * 1000,
+    reuseExistingServer: !process.env.CI,
+  },
 };
