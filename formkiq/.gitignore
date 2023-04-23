@@ -40,3 +40,11 @@ Thumbs.db
 
 
 core.*
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Playwright
+**/test-results
+**/playwright-report
+**/playwright/.cache
