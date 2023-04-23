@@ -7,7 +7,6 @@
       "executor": "@mands/nx-playwright:playwright-executor",
       "options": {
         "e2eFolder": "apps/formkiq-document-console-react-e2e",
-        "devServerTarget": "formkiq-document-console-react:serve",
         "packageRunner": "pnpm"
       },
       "configurations": {
