@@ -1,16 +1,22 @@
 {
-  "extends": ["plugin:cypress/recommended", "../../.eslintrc.json"],
+  "extends": ["../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
-      "rules": {}
+      "rules": {
+        "jest/no-done-callback": "off"
+      }
     },
     {
-      "files": ["src/plugins/index.js"],
+      "files": ["*.ts", "*.tsx"],
       "rules": {
-        "@typescript-eslint/no-var-requires": "off",
-        "no-undef": "off"
+        "jest/no-done-callback": "off"
       }
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "rules": {}
     }
   ]
 }
