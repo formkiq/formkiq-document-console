@@ -1,24 +1,15 @@
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../fixtures';
 import { login } from '../workflows/login';
 
 const e2eUser = process.env.E2E_USER;
 const e2ePassword = process.env.E2E_PASSWORD;
 
 test('can login with valid credentials', async ({ page }) => {
-  await page.goto('/');
-
-  //expect to be redirected to login
-  await page.waitForURL('/sign-in');
-
   await login(page);
 });
 
 test('cannot login with an invalid username', async ({ page }) => {
-  await page.goto('/');
-
-  //expect to be redirected to login
-  await page.waitForURL('/sign-in');
-
   const email = page.getByTestId('email');
   await email.type('invalid@example.com');
 
@@ -38,11 +29,6 @@ test('cannot login with an invalid username', async ({ page }) => {
 });
 
 test('cannot login with an invalid password', async ({ page }) => {
-  await page.goto('/');
-
-  //expect to be redirected to login
-  await page.waitForURL('/sign-in');
-
   const email = page.getByTestId('email');
   await email.type(e2eUser);
 
