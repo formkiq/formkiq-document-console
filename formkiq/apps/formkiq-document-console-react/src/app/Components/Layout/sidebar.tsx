@@ -340,6 +340,7 @@ export function Sidebar(props: {
                     <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
                         to="/my-documents"
+                        data-test-id="nav-my-documents"
                         end
                         className={({ isActive }) =>
                           (isActive
@@ -377,6 +378,7 @@ export function Sidebar(props: {
                     <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
                         to={hasUserSite ? '/team-documents' : '/documents'}
+                        data-test-id="nav-team-documents"
                         end
                         className={({ isActive }) =>
                           (isActive
@@ -500,6 +502,7 @@ export function Sidebar(props: {
                   <>
                     <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
+                        data-test-id="nav-favorites"
                         to={`${currentDocumentsRootUri}/folders/favorites`}
                         className={({ isActive }) =>
                           (isActive
@@ -523,6 +526,7 @@ export function Sidebar(props: {
                     {props.useSoftDelete && (
                       <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                         <NavLink
+                          data-test-id="nav-trash"
                           to={`${currentDocumentsRootUri}/folders/deleted`}
                           className={({ isActive }) =>
                             (isActive
@@ -1002,7 +1006,9 @@ export function Sidebar(props: {
                       }
                     }}
                   >
-                    {props.isSidebarExpanded && <span>New</span>}
+                    {props.isSidebarExpanded && (
+                      <span data-test-id="new-document">New</span>
+                    )}
                     <div
                       className={
                         (props.isSidebarExpanded
@@ -1015,6 +1021,7 @@ export function Sidebar(props: {
                   </button>
                   <button
                     className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                    data-test-id="upload-document"
                     onClick={(event) => {
                       // TODO: create more consistent check on site location
                       if (

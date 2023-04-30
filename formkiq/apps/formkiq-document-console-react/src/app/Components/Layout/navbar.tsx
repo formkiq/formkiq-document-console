@@ -403,6 +403,7 @@ function Navbar(props: {
                         (hasDefaultSite && hasSharedFolders) ||
                         (hasSharedFolders && sharedFolderSites.length > 1)) && (
                         <select
+                          data-test-id="system-subfolder-select"
                           className="ml-4 text-xs bg-gray-100 px-2 py-1 rounded-md"
                           value={currentSiteId}
                           onChange={(event) => {
@@ -592,6 +593,7 @@ function Navbar(props: {
                     className="w-8 h-8 rounded-full aspect-square bg-gray-400 text-white font-bold focus:ring-2 focus:ring-coreOrange-500 transition"
                     type="button"
                     data-bs-toggle="dropdown"
+                    data-test-id="profile"
                     aria-expanded="false"
                     onClick={ToggleAccountSettings}
                   >
@@ -611,6 +613,7 @@ function Navbar(props: {
                         <Link
                           onClick={signOut}
                           to="/sign-out"
+                          data-test-id="sign-out"
                           className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
                         >
                           Sign out
