@@ -17,12 +17,12 @@ export class LoginPage {
     this.errorModal = page.getByTestId('modal-title');
   }
 
-  async login(page: Page) {
+  async login() {
     await this.email.type(e2eUser);
     await this.password.type(e2ePassword);
     await this.signInButton.click();
 
-    await page.waitForURL('/my-documents');
+    await this.page.waitForURL('/my-documents');
   }
 
   async enterEmail(email: string) {

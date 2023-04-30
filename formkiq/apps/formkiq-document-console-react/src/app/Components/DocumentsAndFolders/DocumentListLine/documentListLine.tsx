@@ -408,21 +408,15 @@ function DocumentListLine({
                 )}
                 {!isSiteReadOnly && (
                   <>
-                    {useSoftDelete ? (
-                      <div
-                        className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
-                        onClick={onDeleteClick}
-                      >
-                        <Trash />
-                      </div>
-                    ) : (
-                      <div
-                        className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
-                        onClick={onPermanentDeleteClick}
-                      >
-                        <Trash />
-                      </div>
-                    )}
+                    <div
+                      className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
+                      data-test-id="delete-action"
+                      onClick={
+                        useSoftDelete ? onDeleteClick : onPermanentDeleteClick
+                      }
+                    >
+                      <Trash />
+                    </div>
                   </>
                 )}
                 <div className="w-5 pt-0.5 h-auto text-gray-400 cursor-pointer">

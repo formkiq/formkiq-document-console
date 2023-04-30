@@ -403,6 +403,7 @@ function Navbar(props: {
                         (hasDefaultSite && hasSharedFolders) ||
                         (hasSharedFolders && sharedFolderSites.length > 1)) && (
                         <select
+                          data-test-id="system-subfolder-select"
                           className="ml-4 text-xs bg-gray-100 px-2 py-1 rounded-md"
                           value={currentSiteId}
                           onChange={(event) => {

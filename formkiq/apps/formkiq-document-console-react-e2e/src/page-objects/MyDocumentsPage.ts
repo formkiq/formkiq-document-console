@@ -4,15 +4,38 @@ export class MyDocumentsPage {
   readonly page: Page;
   readonly newDocumentModal: NewDocumentModal;
   readonly newButton: Locator;
+  readonly navigate: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.newDocumentModal = new NewDocumentModal(page);
     this.newButton = page.getByTestId('new-document');
+    this.navigate = page.getByTestId('nav-my-documents');
+  }
+
+  async openPage() {
+    await this.navigate.click();
+    await this.page.waitForURL('/my-documents');
   }
 
   async openModal() {
     await this.newButton.click();
+  }
+
+  async deleteFolder(name: string) {
+    const folder = this.page.getByTestId(`folder-${name}`);
+    await folder.getByTestId('delete-action').click();
+
+    const modal = this.page.getByText(
+      'Are you sure you want to delete this folder?'
+    );
+
+    await expect(modal).toBeVisible();
+
+    const ok = this.page.getByTestId('global-modal-ok');
+    await ok.click();
+
+    await expect(modal).not.toBeVisible();
   }
 }
 

@@ -340,6 +340,7 @@ export function Sidebar(props: {
                     <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
                         to="/my-documents"
+                        data-test-id="nav-my-documents"
                         end
                         className={({ isActive }) =>
                           (isActive
@@ -377,6 +378,7 @@ export function Sidebar(props: {
                     <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
                         to={hasUserSite ? '/team-documents' : '/documents'}
+                        data-test-id="nav-team-documents"
                         end
                         className={({ isActive }) =>
                           (isActive
@@ -500,6 +502,7 @@ export function Sidebar(props: {
                   <>
                     <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
+                        data-test-id="nav-favorites"
                         to={`${currentDocumentsRootUri}/folders/favorites`}
                         className={({ isActive }) =>
                           (isActive
@@ -523,6 +526,7 @@ export function Sidebar(props: {
                     {props.useSoftDelete && (
                       <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                         <NavLink
+                          data-test-id="nav-trash"
                           to={`${currentDocumentsRootUri}/folders/deleted`}
                           className={({ isActive }) =>
                             (isActive

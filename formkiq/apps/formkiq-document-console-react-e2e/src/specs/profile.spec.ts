@@ -1,7 +1,7 @@
 import { test } from '../fixtures';
 
-test.beforeEach(async ({ page, LoginPage }) => {
-  await LoginPage.login(page);
+test.beforeEach(async ({ LoginPage }) => {
+  await LoginPage.login();
 });
 
 test('Can log out from my profile', async ({ page, Profile }) => {
