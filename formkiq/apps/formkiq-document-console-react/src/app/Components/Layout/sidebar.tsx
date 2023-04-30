@@ -1002,7 +1002,9 @@ export function Sidebar(props: {
                       }
                     }}
                   >
-                    {props.isSidebarExpanded && <span>New</span>}
+                    {props.isSidebarExpanded && (
+                      <span data-test-id="new-document">New</span>
+                    )}
                     <div
                       className={
                         (props.isSidebarExpanded

@@ -149,13 +149,17 @@ export default function NewModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-1/2 h-1/2">
+              <Dialog.Panel
+                className="relative transform overflow-hidden text-left transition-all w-full lg:w-1/2 h-1/2"
+                data-test-id="new-document-modal"
+              >
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg inline-block pr-6">
                       Create New
                     </div>
                     <div
+                      data-test-id="new-document-modal-close"
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
                       onClick={closeDialog}
                     >
@@ -164,6 +168,7 @@ export default function NewModal({
                   </div>
                   <div className="flex flex-wrap mt-4">
                     <div
+                      data-test-id="new-document-folder"
                       className={`${
                         itemToCreate === 'folder'
                           ? 'bg-gray-100 font-semibold border-gray-600'
@@ -333,6 +338,7 @@ export default function NewModal({
                           <input
                             aria-label="Name"
                             type="text"
+                            data-test-id="new-document-location-input"
                             className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600
                                                     text-sm
                                                     placeholder-gray-500 text-gray-900 rounded-t-md
@@ -346,12 +352,14 @@ export default function NewModal({
                       </div>
                       <div className="mx-4">
                         <input
+                          data-test-id="new-document-modal-create"
                           type="submit"
                           value="Create"
                           className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white font-semibold py-2 px-4 rounded mr-2"
                         />
                         <button
                           onClick={closeDialog}
+                          data-test-id="new-document-modal-cancel"
                           className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded"
                         >
                           Cancel

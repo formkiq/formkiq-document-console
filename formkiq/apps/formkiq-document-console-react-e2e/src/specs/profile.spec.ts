@@ -1,18 +1,12 @@
-import { expect } from '@playwright/test';
 import { test } from '../fixtures';
 
-test.beforeEach(async ({ page, login }) => {
-  await login(page);
+test.beforeEach(async ({ page, LoginPage }) => {
+  await LoginPage.login(page);
 });
 
-test('Can log out from my profile', async ({ page }) => {
-  const profile = page.getByTestId('profile');
-  await profile.click();
-
-  const signout = page.getByTestId('sign-out');
-  await expect(signout).toBeVisible();
-
-  await signout.click();
+test('Can log out from my profile', async ({ page, Profile }) => {
+  await Profile.openProfile();
+  await Profile.signOut();
 
   //expect to be redirected to login
   await page.waitForURL('/sign-in');

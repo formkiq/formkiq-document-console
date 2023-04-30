@@ -216,7 +216,10 @@ function FolderListLine({
             sourceSiteId={currentSiteId}
             targetSiteId={currentSiteId}
           >
-            <td className="pt-1 text-gray-800 block lg:table-cell relative lg:static">
+            <td
+              className="pt-1 text-gray-800 block lg:table-cell relative lg:static"
+              data-test-id={`folder-${folderPath}`}
+            >
               <div className="-ml-0.5 flex">
                 <div
                   className="w-4 pt-1.5 cursor-pointer"
