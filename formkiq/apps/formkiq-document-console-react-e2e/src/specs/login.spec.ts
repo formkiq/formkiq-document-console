@@ -3,8 +3,8 @@ import { test } from '../fixtures';
 
 const e2eUser = process.env.E2E_USER;
 
-test('can login with valid credentials', async ({ page, LoginPage }) => {
-  await LoginPage.login(page);
+test('can login with valid credentials', async ({ LoginPage }) => {
+  await LoginPage.login();
 });
 
 test('cannot login with an invalid username', async ({ page, LoginPage }) => {
