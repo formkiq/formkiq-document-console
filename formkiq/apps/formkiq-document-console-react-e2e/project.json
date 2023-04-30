@@ -4,16 +4,20 @@
   "projectType": "application",
   "targets": {
     "e2e": {
-      "executor": "@nrwl/cypress:cypress",
+      "executor": "@mands/nx-playwright:playwright-executor",
       "options": {
-        "cypressConfig": "apps/formkiq-document-console-react-e2e/cypress.config.ts",
-        "devServerTarget": "formkiq-document-console-react:serve:development",
-        "testingType": "e2e"
-      },
-      "configurations": {
-        "production": {
-          "devServerTarget": "formkiq-document-console-react:serve:production"
-        }
+        "e2eFolder": "apps/formkiq-document-console-react-e2e",
+        "packageRunner": "pnpm"
+      }
+    },
+    "ts-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "tsc --build --force --verbose apps/formkiq-document-console-react-e2e/tsconfig.json"
+          }
+        ]
       }
     },
     "lint": {
@@ -21,7 +25,7 @@
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
-          "apps/formkiq-document-console-react-e2e/**/*.{js,ts}"
+          "apps/formkiq-document-console-react-e2e/**/*.{ts,tsx,js,jsx}"
         ]
       }
     }
