@@ -1021,6 +1021,7 @@ export function Sidebar(props: {
                   </button>
                   <button
                     className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                    data-test-id="upload-document"
                     onClick={(event) => {
                       // TODO: create more consistent check on site location
                       if (

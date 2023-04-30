@@ -2,15 +2,19 @@ import { Locator, Page, expect } from '@playwright/test';
 
 export class MyDocumentsPage {
   readonly page: Page;
-  readonly newDocumentModal: NewDocumentModal;
+  readonly newModal: NewDocumentModal;
+  readonly uploadModal: UploadDocumentModal;
   readonly newButton: Locator;
+  readonly uploadButton: Locator;
   readonly navigate: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.newDocumentModal = new NewDocumentModal(page);
+    this.newModal = new NewDocumentModal(page);
+    this.uploadModal = new UploadDocumentModal(page);
     this.newButton = page.getByTestId('new-document');
     this.navigate = page.getByTestId('nav-my-documents');
+    this.uploadButton = page.getByTestId('upload-document');
   }
 
   async openPage() {
@@ -18,8 +22,12 @@ export class MyDocumentsPage {
     await this.page.waitForURL('/my-documents');
   }
 
-  async openModal() {
+  async openNewModal() {
     await this.newButton.click();
+  }
+
+  async openUploadModal() {
+    await this.uploadButton.click();
   }
 
   async deleteFolder(name: string) {
@@ -76,5 +84,48 @@ export class NewDocumentModal {
 
   async cancelModal() {
     await this.cancel.click();
+  }
+}
+
+export class UploadDocumentModal {
+  readonly page: Page;
+  readonly body: Locator;
+  readonly close: Locator;
+  readonly upload: Locator;
+  readonly clear: Locator;
+  readonly status: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.body = page.getByTestId('upload-document-modal');
+    this.close = page.getByTestId('upload-modal-close');
+    this.upload = page.getByTestId('upload');
+    this.clear = page.getByTestId('clear-file-list');
+    this.status = page.getByText('Ready to upload');
+  }
+
+  async closeModal() {
+    await this.close.click();
+  }
+
+  async chooseTestFile() {
+    // Start waiting for file chooser before clicking. Note no await.
+    const fileChooserPromise = this.page.waitForEvent('filechooser');
+    await this.page.getByText('BROWSE...').click();
+    const fileChooser = await fileChooserPromise;
+    //runs in cwd of test executor
+    await fileChooser.setFiles(
+      './apps/formkiq-document-console-react-e2e/src/test-files/test.txt'
+    );
+
+    await expect(this.status).toBeVisible();
+  }
+
+  async uploadFile() {
+    await this.upload.click();
+  }
+
+  async clearFiles() {
+    await this.clear.click();
   }
 }

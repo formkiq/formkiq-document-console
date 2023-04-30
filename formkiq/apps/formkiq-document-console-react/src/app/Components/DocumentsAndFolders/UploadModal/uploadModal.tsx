@@ -308,7 +308,10 @@ export default function UploadModal({
   const uploadedFileLine = (file: DocumentUploadedInfo, i: number) => {
     return (
       <tr key={i}>
-        <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400">
+        <td
+          className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400"
+          data-test-id={`uploaded-files-${i}`}
+        >
           {file.path}
         </td>
         <td className="border-b border-slate-100 nodark:border-slate-700 p-4 text-slate-500 nodark:text-slate-400">
@@ -383,7 +386,10 @@ export default function UploadModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-screen-xl">
+              <Dialog.Panel
+                data-test-id="upload-document-modal"
+                className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-screen-xl"
+              >
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="flex-1 bg-white p-5 inline-block w-full">
                     <div className="font-bold text-lg inline-block pr-6">
@@ -433,7 +439,10 @@ export default function UploadModal({
                           <table className="border-collapse table-fixed w-full text-sm">
                             <thead>
                               <tr>
-                                <th className="border-b nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                <th
+                                  className="border-b nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left"
+                                  data-test-id="uploaded-filename"
+                                >
                                   Filename
                                 </th>
                                 <th className="border-b nodark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
@@ -461,6 +470,7 @@ export default function UploadModal({
                     <div>
                       <button
                         type="button"
+                        data-test-id="upload"
                         className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-coreOrange-500 px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-coreOrange-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                         onClick={uploadFiles}
                       >
@@ -468,6 +478,7 @@ export default function UploadModal({
                       </button>
                       <button
                         type="button"
+                        data-test-id="clear-file-list"
                         className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                         onClick={clearFileList}
                       >
@@ -505,6 +516,7 @@ export default function UploadModal({
                     </div>
                     <button
                       type="button"
+                      data-test-id="upload-modal-close"
                       className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                       onClick={closeDialog}
                       ref={cancelButtonRef}
