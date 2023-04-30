@@ -42,6 +42,20 @@ export class MyDocumentsPage {
 
     const ok = this.page.getByTestId('global-modal-ok');
     await ok.click();
+  }
+
+  async deleteFile(name: string | RegExp) {
+    const file = this.page.getByTestId(name);
+    await file.getByTestId('delete-action').click();
+
+    const modal = this.page.getByText(
+      'Are you sure you want to delete this document?'
+    );
+
+    await expect(modal).toBeVisible();
+
+    const ok = this.page.getByTestId('global-modal-ok');
+    await ok.click();
 
     await expect(modal).not.toBeVisible();
   }
@@ -115,7 +129,7 @@ export class UploadDocumentModal {
     const fileChooser = await fileChooserPromise;
     //runs in cwd of test executor
     await fileChooser.setFiles(
-      './apps/formkiq-document-console-react-e2e/src/test-files/test.txt'
+      './apps/formkiq-document-console-react-e2e/src/test-files/test.png'
     );
 
     await expect(this.status).toBeVisible();

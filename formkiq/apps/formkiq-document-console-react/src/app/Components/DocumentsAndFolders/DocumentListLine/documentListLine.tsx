@@ -228,6 +228,7 @@ function DocumentListLine({
     <>
       <tr
         className={`text-sm tracking-tight`}
+        data-test-id={`${file.path}`}
         ref={drag}
         style={{ opacity, visibility: isDragging ? 'hidden' : 'inherit' }}
       >
