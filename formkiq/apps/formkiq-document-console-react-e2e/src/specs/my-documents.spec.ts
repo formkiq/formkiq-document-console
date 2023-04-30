@@ -46,11 +46,19 @@ test('Can clear out a list of uploading files', async ({ MyDocuments }) => {
   await expect(MyDocuments.uploadModal.status).not.toBeVisible();
 });
 
-test('Can upload a file', async ({ MyDocuments }) => {
+test('Can upload and delete a file', async ({ page, MyDocuments }) => {
   await MyDocuments.openUploadModal();
   await MyDocuments.uploadModal.chooseTestFile();
   await MyDocuments.uploadModal.uploadFile();
 
-  const file = MyDocuments.uploadModal.body.getByTestId('uploaded-files-0');
-  await expect(file).toHaveText(/^test/);
+  const uploadedFile =
+    MyDocuments.uploadModal.body.getByTestId('uploaded-files-0');
+  await expect(uploadedFile).toHaveText(/^test.*png$/);
+
+  await MyDocuments.uploadModal.closeModal();
+
+  await MyDocuments.deleteFile(/^test.*png$/);
+
+  const file = page.getByTestId(/^test.*png$/);
+  await expect(file).not.toBeVisible();
 });
