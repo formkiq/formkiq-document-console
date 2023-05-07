@@ -1,9 +1,7 @@
 import { Helmet } from 'react-helmet-async';
-import { connect } from 'react-redux';
 import { ComingSoon } from '../../Components/Icons/icons';
-import { RootState } from '../../Store/store';
 
-export function Workflows({ user }: any) {
+export function Workflows() {
   return (
     <>
       <Helmet>
@@ -22,8 +20,4 @@ export function Workflows({ user }: any) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  return { user: state.authReducer?.user };
-};
-
-export default connect(mapStateToProps)(Workflows as any);
+export default Workflows;

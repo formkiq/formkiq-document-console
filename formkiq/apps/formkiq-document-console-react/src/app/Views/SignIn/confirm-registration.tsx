@@ -1,19 +1,24 @@
 import { useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { AuthState } from '../../Store/reducers/auth';
+import { ConfigState } from '../../Store/reducers/config';
+import { DataCacheState } from '../../Store/reducers/data';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
-import { RootState, store, useAppDispatch } from '../../Store/store';
+import { useAppDispatch } from '../../Store/store';
 import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
 
-export function ConfirmRegistration(props: { authApi: string }) {
+export function ConfirmRegistration() {
   const {
     register,
     formState: { errors },
     handleSubmit,
     watch,
   } = useForm();
+  const { authApi } = useSelector(ConfigState);
+
   const password = useRef(null);
   password.current = watch('password', '');
   const dispatch = useAppDispatch();
@@ -22,25 +27,25 @@ export function ConfirmRegistration(props: { authApi: string }) {
   const username = new URLSearchParams(search).get('username');
   const userStatus = new URLSearchParams(search).get('userStatus');
   const session = new URLSearchParams(search).get('session');
+  const { formkiqClient } = useSelector(DataCacheState);
+  const { user } = useSelector(AuthState);
+  const { documentApi, userPoolId, clientId } = useSelector(ConfigState);
 
   const onSubmit = async (data: any) => {
-    let { formkiqClient } = store.getState().dataCacheReducer;
-    if (!formkiqClient.apiClient) {
-      const { user } = store.getState().authReducer;
-      const { documentApi, userPoolId, clientId } =
-        store.getState().configReducer;
-      formkiqClient = new FormkiqClient(documentApi, userPoolId, clientId);
-      formkiqClient.resetClient(documentApi, userPoolId, clientId);
-      formkiqClient.rebuildCognitoClient(
+    let newformkiqClient = formkiqClient;
+    if (!newformkiqClient.apiClient) {
+      newformkiqClient = new FormkiqClient(documentApi, userPoolId, clientId);
+      newformkiqClient.resetClient(documentApi, userPoolId, clientId);
+      newformkiqClient.rebuildCognitoClient(
         user?.email,
         user?.idToken,
         user?.accessToken,
         user?.refreshToken
       );
     }
-    await formkiqClient.documentsApi.apiClient.cognitoClient
+    await newformkiqClient.documentsApi.apiClient.cognitoClient
       .confirmRegistration(
-        props.authApi + '/respondToAuthChallenge',
+        authApi + '/respondToAuthChallenge',
         username,
         userStatus,
         session,
@@ -152,11 +157,4 @@ export function ConfirmRegistration(props: { authApi: string }) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { authApi } = state.configReducer;
-  return {
-    authApi,
-  };
-};
-
-export default connect(mapStateToProps)(ConfirmRegistration as any);
+export default ConfirmRegistration;

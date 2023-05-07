@@ -26,50 +26,47 @@ export const closeDialog = createAsyncThunk(
   }
 );
 
+export type GlobalNotificationSlice = {
+  callback?: () => Promise<void>;
+  dialogTitle: string;
+  isOpen: boolean;
+};
+
+const initialState: GlobalNotificationSlice = {
+  callback: undefined,
+  dialogTitle: 'Notification',
+  isOpen: false,
+};
+
 export const globalNotificationControls = createSlice({
   name: 'globalNotificationControls',
-  initialState: {
-    notificationDialog: {
-      callback: null,
-      dialogTitle: 'Notification',
-      isOpened: false,
-    },
-  },
+  initialState,
   reducers: {
     resetDialog: (state) => {
       const newDialogState = {
-        ...state.notificationDialog,
-        dialogTitle: 'Notification',
-        callback: null,
-      };
-      return {
         ...state,
-        notificationDialog: newDialogState,
+        dialogTitle: 'Notification',
+        callback: undefined,
       };
+      return newDialogState;
     },
     hideDialog: (state) => {
       const newDialogState = {
-        ...state.notificationDialog,
-        isOpened: false,
-      };
-      return {
         ...state,
-        notificationDialog: newDialogState,
+        isOpen: false,
       };
+      return newDialogState;
     },
     openDialog: (state, action) => {
       const newDialogState = {
-        ...state.notificationDialog,
+        ...state,
         callback: action.payload?.callback,
-        isOpened: true,
+        isOpen: true,
       };
       if (action.payload?.dialogTitle) {
         newDialogState.dialogTitle = action.payload.dialogTitle;
       }
-      return {
-        ...state,
-        notificationDialog: newDialogState,
-      };
+      return newDialogState;
     },
   },
   extraReducers: (builder) => {

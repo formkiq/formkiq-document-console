@@ -1,30 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { useDrop } from 'react-dnd';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { matchPath } from 'react-router-dom';
-import { User } from '../../../Store/reducers/auth';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import {
+  DocumentListState,
   retrieveAndRefreshFolder,
   updateDocumentsList,
 } from '../../../Store/reducers/documentsList';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
-import { RootState, useAppDispatch } from '../../../Store/store';
+import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { IDocument } from '../../../helpers/types/document';
 
 type folderDropProps = {
   folder: string;
-  dropcallback: any;
-  children: any;
-  documents?: any;
+  dropcallback?: any;
+  children?: any;
   wrapper?: any;
   className?: string;
-  user: User;
   sourceSiteId: string;
   targetSiteId: string;
 };
 
 function FolderDropWrapper(props: folderDropProps) {
+  const { documents } = useSelector(DocumentListState);
+  const { user } = useAuthenticatedState();
+
   const path = matchPath(
     { path: '/documents/folders/:folderName' },
     window.location.pathname
@@ -43,7 +45,7 @@ function FolderDropWrapper(props: folderDropProps) {
       {props.childs}
     </div>
   ));
-  const { children, documents, wrapper = defaultElem } = props;
+  const { children, wrapper = defaultElem } = props;
   const MainElem = wrapper;
   let defaultCallback = (doc: IDocument, monitor: any) => {
     if (props.sourceSiteId !== props.targetSiteId) {
@@ -89,7 +91,7 @@ function FolderDropWrapper(props: folderDropProps) {
                     dispatch(
                       updateDocumentsList({
                         documents: newArr,
-                        user: props.user,
+                        user,
                         isSystemDeletedByKey: false,
                       })
                     );
@@ -113,7 +115,7 @@ function FolderDropWrapper(props: folderDropProps) {
                     documents: newArr.sort((a: any, b: any) =>
                       a.path > b.path ? 1 : -1
                     ),
-                    user: props.user,
+                    user,
                     isSystemDeletedByKey: false,
                   })
                 );
@@ -150,10 +152,4 @@ function FolderDropWrapper(props: folderDropProps) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { documents } = state.documentsReducer;
-  const { user } = state.authReducer;
-  return { documents, user };
-};
-
-export default connect(mapStateToProps)(FolderDropWrapper as any) as any;
+export default FolderDropWrapper;

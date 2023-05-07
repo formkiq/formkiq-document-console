@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { ConnectedProps, connect } from 'react-redux';
-import { RootState } from '../../../Store/store';
+import { useSelector } from 'react-redux';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
+import { ConfigState } from '../../../Store/reducers/config';
 import { getFormInput } from '../../../helpers/services/toolService';
 import { ArrowBottom, ArrowRight } from '../../Icons/icons';
 
@@ -1385,9 +1386,11 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
   );
 }
 
-export function ApiItem(props: any) {
+export function ApiItem(props: { apiItem: any; sites: any[] }) {
   const [isOpened, setOpened] = useState(false);
 
+  const { documentApi } = useSelector(ConfigState);
+  const { user } = useAuthenticatedState();
   const [state, setState] = useState({
     httpRequest: '',
     curlRequest: '',
@@ -1399,7 +1402,12 @@ export function ApiItem(props: any) {
   const formRef = useRef(null);
   useEffect(() => {
     if (formRef?.current) {
-      updateRequestsFromForm(state, setState, props, formRef);
+      updateRequestsFromForm(
+        state,
+        setState,
+        { ...props, user, documentApi },
+        formRef
+      );
     }
   }, []);
   return (
@@ -1412,14 +1420,4 @@ export function ApiItem(props: any) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { documentApi } = state.configReducer;
-  return {
-    user: state.authReducer?.user,
-    documentApi,
-  };
-};
-
-const connector = connect(mapStateToProps);
-type ComponentProps = ConnectedProps<typeof connector>;
-export default connector(ApiItem);
+export default ApiItem;

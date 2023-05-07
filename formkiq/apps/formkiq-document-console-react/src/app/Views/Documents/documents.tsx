@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
@@ -31,10 +31,18 @@ import {
   View,
 } from '../../Components/Icons/icons';
 import ShareModal from '../../Components/Share/share';
-import { SubfolderUri, User } from '../../Store/reducers/auth';
-import { setCurrentActionEvent } from '../../Store/reducers/config';
-import { setAllTags, setCurrentDocumentPath } from '../../Store/reducers/data';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
 import {
+  ConfigState,
+  setCurrentActionEvent,
+} from '../../Store/reducers/config';
+import {
+  DataCacheState,
+  setAllTags,
+  setCurrentDocumentPath,
+} from '../../Store/reducers/data';
+import {
+  DocumentListState,
   fetchDeleteDocument,
   fetchDeleteFolder,
   fetchDocuments,
@@ -42,7 +50,7 @@ import {
   updateDocumentsList,
 } from '../../Store/reducers/documentsList';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
-import { RootState, useAppDispatch } from '../../Store/store';
+import { useAppDispatch } from '../../Store/store';
 import {
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
@@ -62,30 +70,30 @@ import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
 
-function Documents(props: {
-  subfolderUri: SubfolderUri;
-  user: User;
-  documents: IDocument[];
-  folders: IFolder[];
-  nextToken: string;
-  nextLoadingStatus: requestStatusTypes;
-  currentSearchPage: number;
-  isLastSearchPageLoaded: boolean;
-  isSidebarExpanded: boolean;
-  currentActionEvent: string;
-  brand: string;
-  formkiqVersion: any;
-  tagColors: any[];
-  useIndividualSharing: boolean;
-  useFileFilter: boolean;
-  useCollections: boolean;
-  useSoftDelete: boolean;
-  allTags: any[];
-}) {
+function Documents() {
   const documentsWrapperRef = useRef(null);
   const documentsScrollpaneRef = useRef(null);
   const navigate = useNavigate();
-  const { user } = props;
+  const { user } = useAuthenticatedState();
+  const {
+    documents,
+    folders,
+    nextToken,
+    nextLoadingStatus,
+    currentSearchPage,
+    isLastSearchPageLoaded,
+  } = useSelector(DocumentListState);
+  const {
+    currentActionEvent,
+    formkiqVersion,
+    tagColors,
+    useIndividualSharing,
+    useFileFilter,
+    useCollections,
+    useSoftDelete,
+  } = useSelector(ConfigState);
+  const { allTags } = useSelector(DataCacheState);
+
   const {
     subfolderLevel01,
     subfolderLevel02,
@@ -133,16 +141,20 @@ function Documents(props: {
     hasSharedFolders,
     sharedFolderSites
   );
-  if (siteRedirectUrl.length) {
-    navigate(
-      {
-        pathname: `${siteRedirectUrl}`,
-      },
-      {
-        replace: true,
-      }
-    );
-  }
+
+  useEffect(() => {
+    if (siteRedirectUrl.length) {
+      navigate(
+        {
+          pathname: `${siteRedirectUrl}`,
+        },
+        {
+          replace: true,
+        }
+      );
+    }
+  }, [siteRedirectUrl, navigate]);
+
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
@@ -196,10 +208,12 @@ function Documents(props: {
     documentListOffsetTop = 170;
   }
 
+  useEffect(() => {
+    if (formkiqVersion.modules === undefined) {
+      window.location.reload();
+    }
+  }, []);
   // TODO: improve on this check / determine why setting modules is not happening in time or without reload
-  if (props.formkiqVersion.modules === undefined) {
-    window.location.reload();
-  }
 
   const trackScrolling = useCallback(() => {
     const bottomRow = (
@@ -219,53 +233,57 @@ function Documents(props: {
     const scrollpane = document.getElementById('documentsScrollpane');
     if (
       isBottom(scrollpane as HTMLElement) &&
-      props.nextToken &&
-      props.nextLoadingStatus === requestStatusTypes.fulfilled
+      nextToken &&
+      nextLoadingStatus === requestStatusTypes.fulfilled
     ) {
-      if (props.nextToken) {
+      if (nextToken) {
         dispatch(
           fetchDocuments({
             siteId: currentSiteId,
-            formkiqVersion: props.formkiqVersion,
+            formkiqVersion: formkiqVersion,
             searchWord,
             searchFolder,
             subfolderUri,
             filterTag,
-            nextToken: props.nextToken,
+            nextToken,
           })
         );
       } else {
-        if (!props.isLastSearchPageLoaded && searchWord) {
+        if (!isLastSearchPageLoaded && searchWord) {
           dispatch(
             fetchDocuments({
               // for next page results
               siteId: currentSiteId,
-              formkiqVersion: props.formkiqVersion,
+              formkiqVersion: formkiqVersion,
               searchWord,
               searchFolder,
               subfolderUri,
               filterTag,
-              page: props.currentSearchPage + 1,
+              page: currentSearchPage + 1,
             })
           );
         }
       }
     }
-  }, [
-    props.nextToken,
-    props.nextLoadingStatus,
-    props.currentSearchPage,
-    props.isLastSearchPageLoaded,
-  ]);
+  }, [nextToken, nextLoadingStatus, currentSearchPage, isLastSearchPageLoaded]);
   if (documentsWrapperRef.current) {
     (documentsWrapperRef.current as HTMLDivElement).style.height =
       window.innerHeight - documentListOffsetTop + 'px';
   }
-  window.addEventListener('resize', (event) => {
-    if (documentsWrapperRef.current) {
-      (documentsWrapperRef.current as HTMLDivElement).style.height =
-        window.innerHeight - documentListOffsetTop + 'px';
-    }
+
+  useEffect(() => {
+    const resizeHandler = () => {
+      if (documentsWrapperRef.current) {
+        (documentsWrapperRef.current as HTMLDivElement).style.height =
+          window.innerHeight - documentListOffsetTop + 'px';
+      }
+    };
+
+    window.addEventListener('resize', resizeHandler);
+
+    return () => {
+      window.removeEventListener('resize', resizeHandler);
+    };
   });
 
   useEffect(() => {
@@ -308,8 +326,8 @@ function Documents(props: {
   }, [hash]);
 
   useEffect(() => {
-    if (props.currentActionEvent && props.currentActionEvent.length) {
-      switch (props.currentActionEvent) {
+    if (currentActionEvent && currentActionEvent.length) {
+      switch (currentActionEvent) {
         case 'upload':
           onUploadClick({}, '');
           break;
@@ -355,7 +373,7 @@ function Documents(props: {
           break;
       }
     }
-  }, [props.currentActionEvent, actionEvent]);
+  }, [currentActionEvent, actionEvent]);
 
   const updateTags = () => {
     if (infoDocumentId.length) {
@@ -378,7 +396,7 @@ function Documents(props: {
           }
         }
       );
-      if (props.formkiqVersion.type !== 'core') {
+      if (formkiqVersion.type !== 'core') {
         DocumentsService.getDocumentVersions(
           infoDocumentId,
           currentSiteId
@@ -424,84 +442,27 @@ function Documents(props: {
       isMoveModalOpened === false &&
       isRenameModalOpened === false
     ) {
-      dispatch(
-        setDocuments({
-          documents: null,
-          nextLoadingStatus: requestStatusTypes.pending,
-        })
-      );
       setTimeout(() => {
         dispatch(
           fetchDocuments({
             siteId: currentSiteId,
-            formkiqVersion: props.formkiqVersion,
+            formkiqVersion,
             searchWord,
             searchFolder,
             subfolderUri,
             filterTag,
-          }) as any
+          })
         );
       }, 300);
     }
   }, [
     currentSiteId,
-    search,
     subfolderUri,
-    filterTag,
     isUploadModalOpened,
     isFolderUploadModalOpened,
     isNewModalOpened,
     isMoveModalOpened,
     isRenameModalOpened,
-  ]);
-
-  useEffect(() => {
-    if (documentsWrapperRef.current) {
-      (documentsWrapperRef.current as HTMLDivElement).style.height =
-        window.innerHeight - documentListOffsetTop + 'px';
-      const bottomRow = (
-        document.getElementById('documentsTable') as HTMLTableElement
-      ).rows[
-        (document.getElementById('documentsTable') as HTMLTableElement).rows
-          .length - 1
-      ].getBoundingClientRect().bottom;
-      if (bottomRow < window.innerHeight && props.nextToken) {
-        dispatch(
-          fetchDocuments({
-            siteId: currentSiteId,
-            formkiqVersion: props.formkiqVersion,
-            searchWord,
-            searchFolder,
-            subfolderUri,
-            filterTag,
-            nextToken: props.nextToken,
-          })
-        );
-      }
-    }
-    if (documentsScrollpaneRef.current) {
-      (documentsScrollpaneRef.current as HTMLDivElement).removeEventListener(
-        'scroll',
-        trackScrolling
-      );
-      (documentsScrollpaneRef.current as HTMLDivElement).addEventListener(
-        'scroll',
-        trackScrolling
-      );
-    }
-    return () => {
-      if (documentsScrollpaneRef.current) {
-        (documentsScrollpaneRef.current as HTMLDivElement).removeEventListener(
-          'scroll',
-          trackScrolling
-        );
-      }
-    };
-  }, [
-    props.nextToken,
-    props.nextLoadingStatus,
-    props.currentSearchPage,
-    props.isLastSearchPageLoaded,
   ]);
 
   const deleteDocument = (file: IDocument, searchDocuments: any) => () => {
@@ -514,7 +475,7 @@ function Documents(props: {
       dispatch(
         fetchDeleteDocument({
           siteId: currentSiteId,
-          user: props.user,
+          user,
           document: file,
           documents: searchDocuments,
           isDocumentInfoPage: isDocumentInfoPage,
@@ -528,9 +489,9 @@ function Documents(props: {
       })
     );
   };
-  const deleteFolder = (folder: IFolder) => () => {
+  const deleteFolder = (folder: IFolder | IDocument) => () => {
     const deleteFunc = () => {
-      dispatch(fetchDeleteFolder({ user: props.user, folder }));
+      dispatch(fetchDeleteFolder({ user, folder }));
     };
     dispatch(
       openDialog({
@@ -648,7 +609,7 @@ function Documents(props: {
     dispatch(
       fetchDocuments({
         siteId: currentSiteId,
-        formkiqVersion: props.formkiqVersion,
+        formkiqVersion,
         searchWord,
         searchFolder,
         subfolderUri,
@@ -902,7 +863,7 @@ function Documents(props: {
       tagsToCheck.push(filterTag);
     }
     if (tagsToCheck.length === 0) {
-      const tagsToConsider = props.allTags.filter((tag: any) => {
+      const tagsToConsider = allTags.filter((tag: any) => {
         return (
           tag.value.indexOf('sys') !== 0 &&
           tag.value.indexOf('path') &&
@@ -923,7 +884,7 @@ function Documents(props: {
     return (
       <div className="flex items-center justify-start">
         <div className="w-1/3 pl-4">
-          {props.useFileFilter && (
+          {useFileFilter && (
             <>
               <span className="font-medium text-sm text-gray-500 pr-4">
                 Filter:
@@ -940,8 +901,8 @@ function Documents(props: {
               <ul className="flex flex-wrap justify-end mt-1">
                 {tagsToCheck.map((primaryTag, i) => {
                   let tagColor = 'gray';
-                  if (props.tagColors) {
-                    props.tagColors.forEach((color: any) => {
+                  if (tagColors) {
+                    tagColors.forEach((color: any) => {
                       if (color.tagKeys.indexOf(primaryTag) > -1) {
                         tagColor = color.colorUri;
                         return;
@@ -967,7 +928,7 @@ function Documents(props: {
               {showAllTagsPopover && (
                 <AllTagsPopover
                   siteId={currentSiteId}
-                  tagColors={props.tagColors}
+                  tagColors={tagColors}
                   onFilterTag={onFilterTag}
                   filterTag={filterTag}
                 />
@@ -1024,7 +985,7 @@ function Documents(props: {
                   >
                     Filesize
                   </th>
-                  {props.useIndividualSharing && (
+                  {useIndividualSharing && (
                     <th
                       scope="col"
                       className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
@@ -1071,10 +1032,6 @@ function Documents(props: {
                     onESignaturesModalClick={onESignaturesModalClick}
                     onTagChange={onTagChange}
                     filterTag={filterTag}
-                    brand={props.brand}
-                    useIndividualSharing={props.useIndividualSharing}
-                    useCollections={props.useCollections}
-                    useSoftDelete={props.useSoftDelete}
                   />
                 ))}
               </tbody>
@@ -1088,7 +1045,7 @@ function Documents(props: {
           </div>
           <div className="pt-1">
             &nbsp;
-            {props.nextLoadingStatus === requestStatusTypes.pending ? (
+            {nextLoadingStatus === requestStatusTypes.pending ? (
               <Spinner />
             ) : (
               ''
@@ -1109,7 +1066,7 @@ function Documents(props: {
                   <h3 className="text-lg mb-4">
                     No documents or folders found
                   </h3>
-                  {props.formkiqVersion.modules.indexOf('onlyoffice') > -1 ? (
+                  {formkiqVersion.modules.indexOf('onlyoffice') > -1 ? (
                     <p>
                       You can create folders and documents or upload existing
                       documents using the buttons above.
@@ -1154,9 +1111,9 @@ function Documents(props: {
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onESignaturesModalClick={onESignaturesModalClick}
                 onTagChange={onTagChange}
-                filterTag={filterTag}
                 onRestoreDocument={restoreDocument}
                 onDeleteDocument={deleteDocument}
+                filterTag={filterTag}
               />
             );
           })}
@@ -1212,7 +1169,7 @@ function Documents(props: {
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
-              {documentsTable(props.documents, props.folders)}
+              {documentsTable(documents, folders)}
             </div>
           </div>
         </div>
@@ -1276,7 +1233,7 @@ function Documents(props: {
                         />
                       </div>
                     </div>
-                    {props.formkiqVersion.type !== 'core' && (
+                    {formkiqVersion.type !== 'core' && (
                       <div
                         className="w-1/3 text-sm font-semibold cursor-pointer"
                         onClick={(event) => {
@@ -1431,8 +1388,8 @@ function Documents(props: {
                                   isKeyOnlyTag = true;
                                 }
                                 let tagColor = 'gray';
-                                if (props.tagColors) {
-                                  props.tagColors.forEach((color: any) => {
+                                if (tagColors) {
+                                  tagColors.forEach((color: any) => {
                                     if (color.tagKeys.indexOf(tag.key) > -1) {
                                       tagColor = color.colorUri;
                                       return;
@@ -1483,7 +1440,7 @@ function Documents(props: {
                             onTagChange={onTagChange}
                             updateTags={updateTags}
                             siteId={currentSiteId}
-                            tagColors={props.tagColors}
+                            tagColors={tagColors}
                           />
                         </div>
                       )}
@@ -1661,8 +1618,7 @@ function Documents(props: {
                     <div className="-mr-[4.625rem] p-4 text-[0.8125rem] leading-6 text-slate-900">
                       <div className="flex gap-4 pb-10 border-t border-slate-400/20 justify-center items-center py-6">
                         {document &&
-                          props.formkiqVersion.modules.indexOf('onlyoffice') >
-                            -1 &&
+                          formkiqVersion.modules.indexOf('onlyoffice') > -1 &&
                           OnlyOfficeContentTypes.indexOf(
                             (currentDocument as IDocument).contentType
                           ) > -1 && (
@@ -1709,7 +1665,7 @@ function Documents(props: {
                           </button>
                         ) : (
                           <>
-                            {props.useSoftDelete && (
+                            {useSoftDelete && (
                               <button
                                 className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
                                 onClick={deleteDocument(currentDocument, null)}
@@ -1733,7 +1689,7 @@ function Documents(props: {
                             }}
                             siteId={currentSiteId}
                             isSiteReadOnly={isSiteReadOnly}
-                            formkiqVersion={props.formkiqVersion}
+                            formkiqVersion={formkiqVersion}
                             onDeleteClick={deleteFolder(currentDocument)}
                             onShareClick={onShareClick}
                             onEditTagsAndMetadataModalClick={
@@ -1747,9 +1703,9 @@ function Documents(props: {
                             onESignaturesModalClick={onESignaturesModalClick}
                             onInfoPage={true}
                             user={user}
-                            useIndividualSharing={props.useIndividualSharing}
-                            useCollections={props.useCollections}
-                            useSoftDelete={props.useSoftDelete}
+                            useIndividualSharing={useIndividualSharing}
+                            useCollections={useCollections}
+                            useSoftDelete={useSoftDelete}
                           />
                         </div>
                       </div>
@@ -1799,7 +1755,7 @@ function Documents(props: {
         isOpened={isNewModalOpened}
         onClose={onNewClose}
         siteId={currentSiteId}
-        formkiqVersion={props.formkiqVersion}
+        formkiqVersion={formkiqVersion}
         value={newModalValue}
       />
       <RenameModal
@@ -1813,13 +1769,13 @@ function Documents(props: {
         onClose={onMoveModalClose}
         siteId={currentSiteId}
         value={moveModalValue}
-        allTags={props.allTags}
+        allTags={allTags}
       />
       <UploadModal
         isOpened={isUploadModalOpened}
         onClose={onUploadClose}
         siteId={currentSiteId}
-        formkiqVersion={props.formkiqVersion}
+        formkiqVersion={formkiqVersion}
         folder={subfolderUri}
         documentId={uploadModalDocumentId}
         isFolderUpload={false}
@@ -1828,7 +1784,7 @@ function Documents(props: {
         isOpened={isFolderUploadModalOpened}
         onClose={onFolderUploadClose}
         siteId={currentSiteId}
-        formkiqVersion={props.formkiqVersion}
+        formkiqVersion={formkiqVersion}
         folder={subfolderUri}
         documentId={folderUploadModalDocumentId}
         isFolderUpload={true}
@@ -1837,48 +1793,4 @@ function Documents(props: {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { subfolderUri, user } = state.authReducer;
-  const {
-    documents,
-    folders,
-    nextToken,
-    nextLoadingStatus,
-    currentSearchPage,
-    isLastSearchPageLoaded,
-  } = state.documentsReducer;
-  const {
-    isSidebarExpanded,
-    currentActionEvent,
-    brand,
-    formkiqVersion,
-    tagColors,
-    useIndividualSharing,
-    useFileFilter,
-    useCollections,
-    useSoftDelete,
-  } = state.configReducer;
-  const { allTags } = state.dataCacheReducer;
-  return {
-    subfolderUri,
-    documents,
-    folders,
-    user,
-    nextToken,
-    nextLoadingStatus,
-    currentSearchPage,
-    isLastSearchPageLoaded,
-    isSidebarExpanded,
-    currentActionEvent,
-    brand,
-    formkiqVersion,
-    tagColors,
-    useIndividualSharing,
-    useFileFilter,
-    useCollections,
-    useSoftDelete,
-    allTags,
-  };
-};
-
-export default connect(mapStateToProps)(Documents as any);
+export default Documents;

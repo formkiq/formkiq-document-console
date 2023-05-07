@@ -1,17 +1,22 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { connect } from 'react-redux';
-import { closeDialog } from '../../../Store/reducers/globalNotificationControls';
-import { RootState, useAppDispatch } from '../../../Store/store';
+import { useSelector } from 'react-redux';
+import {
+  GlobalNotificationState,
+  closeDialog,
+} from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
 
-function GlobalNotificationDialog({ notificationDialog }: any) {
+function GlobalNotificationDialog() {
   const dispatch = useAppDispatch();
+
+  const { isOpen, dialogTitle } = useSelector(GlobalNotificationState);
 
   const onClose = () => {
     dispatch(closeDialog());
   };
   return (
-    <Transition appear show={notificationDialog.isOpened} as={Fragment}>
+    <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-30" onClose={onClose}>
         <Transition.Child
           as={Fragment}
@@ -42,7 +47,7 @@ function GlobalNotificationDialog({ notificationDialog }: any) {
                   data-test-id="modal-title"
                   className="text-lg font-medium text-center leading-6 pb-2 text-gray-900"
                 >
-                  {notificationDialog.dialogTitle}
+                  {dialogTitle}
                 </Dialog.Title>
 
                 <div className="flex w-full justify-center pt-5">
@@ -63,9 +68,4 @@ function GlobalNotificationDialog({ notificationDialog }: any) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { notificationDialog } = state.globalNotificationControls;
-  return { notificationDialog };
-};
-
-export default connect(mapStateToProps)(GlobalNotificationDialog as any);
+export default GlobalNotificationDialog;

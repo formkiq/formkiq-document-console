@@ -5,7 +5,7 @@ import { render } from '@testing-library/react';
 import React, { PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
 
-import type { RootState, store } from '../Store/store';
+import type { RootState } from '../Store/store';
 // As a basic setup, import your same slice reducers
 
 import thunkMiddleware from 'redux-thunk';
@@ -23,7 +23,7 @@ import globalProgressControls from '../Store/reducers/globalProgressControls';
 // as allows the user to specify other things such as initialState, store.
 interface ExtendedRenderOptions extends Omit<RenderOptions, 'queries'> {
   preloadedState?: PreloadedState<RootState>;
-  store?: typeof store;
+  store?: any;
 }
 
 export function renderWithProviders(

@@ -13,7 +13,7 @@ export interface Config {
   userAuthenticationType: string;
   customAuthorizerUrl: string;
   brand: string;
-  formkiqVersion: string;
+  formkiqVersion: FormkiqVersion;
   tagColors: TagColor[];
   isSidebarExpanded: boolean;
   currentActionEvent: string;
@@ -30,6 +30,12 @@ export interface Config {
 export type TagColor = {
   colorUri: string;
   tagKeys: any[];
+};
+
+export type FormkiqVersion = {
+  type: string;
+  version: string;
+  modules: any[];
 };
 
 const tagColors: TagColor[] = [
@@ -83,7 +89,7 @@ export const configInitialState = {
   authApi: '',
   customAuthorizerUrl: '',
   brand: 'formkiq',
-  formkiqVersion: '',
+  formkiqVersion: { type: '', version: '', modules: [] as any[] },
   tagColors,
   isSidebarExpanded: true,
   currentActionEvent: '',
@@ -97,10 +103,10 @@ export const configInitialState = {
   useSoftDelete: true,
 } as Config;
 
-const getInitialState = () => {
+const getInitialState = (): Config => {
   let value;
   if (storage.getConfig()) {
-    value = storage.getConfig();
+    value = storage.getConfig() as Config;
   } else {
     value = configInitialState;
   }
@@ -160,7 +166,7 @@ export const configSlice = createSlice({
         fkqVersion: action.payload,
       };
     },
-    setTagColors(state, action: PayloadAction<any[]>) {
+    setTagColors(state, action: PayloadAction<TagColor[]>) {
       // console.log(action)
       return {
         ...state,
