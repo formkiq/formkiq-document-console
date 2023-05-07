@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 
 export const notificationAction = createAsyncThunk(
   'globalNotificationControls/notificationAction',
@@ -81,5 +82,8 @@ export const globalNotificationControls = createSlice({
 
 export const { openDialog, hideDialog, resetDialog } =
   globalNotificationControls.actions;
+
+export const GlobalNotificationState = (state: RootState) =>
+  state.globalNotificationControls;
 
 export default globalNotificationControls.reducer;

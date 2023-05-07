@@ -10,8 +10,9 @@ import {
 } from '../../helpers/services/toolService';
 import { IDocument, requestStatusTypes } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
+import { RootState } from '../store';
 import { DocumentsService } from './../../helpers/services/documentsService';
-import { User } from './auth';
+import { User, useAuthenticatedState } from './auth';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
 export const fetchDocuments = createAsyncThunk(
@@ -27,7 +28,7 @@ export const fetchDocuments = createAsyncThunk(
       nextToken,
       page,
     } = data;
-    const { user } = (thunkAPI.getState() as any).authReducer;
+    const { user } = useAuthenticatedState();
     let tagParam = null;
     if (filterTag) {
       tagParam = filterTag.split(':')[0];
@@ -1008,5 +1009,7 @@ export const {
   retrieveAndRefreshFolder,
   removeFolderFromList,
 } = documentsListSlice.actions;
+
+export const DocumentListState = (state: RootState) => state.documentsReducer;
 
 export default documentsListSlice.reducer;

@@ -1,60 +1,56 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 
 export interface DataCache {
-  tagsLastRefreshed: Date,
-  allTags: any[],
-  tagsSiteId: string,
-  formkiqClient: any,
-  currentDocumentPath: string,
+  tagsLastRefreshed: Date;
+  allTags: any[];
+  tagsSiteId: string;
+  formkiqClient: any;
+  currentDocumentPath: string;
 }
 
 const initialState = {
   tagsLastRefreshed: new Date(),
-  allTags: ([] as any),
+  allTags: [] as any,
   tagsSiteId: 'default',
   formkiqClient: {},
-  currentDocumentPath: ''
-} as DataCache
+  currentDocumentPath: '',
+} as DataCache;
 
 export const dataCacheSlice = createSlice({
   name: 'dataCache',
   initialState,
   reducers: {
     setAllTags(state, action: any) {
-      const { 
-        tagsLastRefreshed,
-        allTags,
-        tagsSiteId
-      } = action.payload     
-      const refreshed = tagsLastRefreshed
-      const newSiteId = tagsSiteId
-      const tags = [...allTags]
+      const { tagsLastRefreshed, allTags, tagsSiteId } = action.payload;
+      const refreshed = tagsLastRefreshed;
+      const newSiteId = tagsSiteId;
+      const tags = [...allTags];
       return {
         ...state,
         allTags: tags,
         tagsLastRefreshed: refreshed,
-        tagsSiteId: newSiteId
-      }
+        tagsSiteId: newSiteId,
+      };
     },
     setFormkiqClient(state, action: PayloadAction<any>) {
       return {
         ...state,
-        formkiqClient: action.payload
-      }
+        formkiqClient: action.payload,
+      };
     },
     setCurrentDocumentPath(state, action: PayloadAction<string>) {
       return {
         ...state,
-        currentDocumentPath: action.payload
-      }
-    }
+        currentDocumentPath: action.payload,
+      };
+    },
   },
-})
+});
 
-export const {
-  setAllTags,
-  setFormkiqClient,
-  setCurrentDocumentPath
-} = dataCacheSlice.actions
+export const { setAllTags, setFormkiqClient, setCurrentDocumentPath } =
+  dataCacheSlice.actions;
 
-export default dataCacheSlice.reducer
+export const DataCacheState = (state: RootState) => state.dataCacheState;
+
+export default dataCacheSlice.reducer;
