@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 
 export const progressAction = createAsyncThunk(
   'globalProgressControls/progressAction',
@@ -81,5 +82,8 @@ export const globalProgressControls = createSlice({
 
 export const { openDialog, hideDialog, resetDialog } =
   globalProgressControls.actions;
+
+export const GlobalProgressState = (state: RootState) =>
+  state.globalProgressControls;
 
 export default globalProgressControls.reducer;

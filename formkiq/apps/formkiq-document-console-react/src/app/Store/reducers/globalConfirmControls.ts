@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 
 export const confirmAction = createAsyncThunk(
   'globalConfirmControls/confirmAction',
@@ -81,5 +82,8 @@ export const globalConfirmControls = createSlice({
 
 export const { openDialog, hideDialog, resetDialog } =
   globalConfirmControls.actions;
+
+export const GlobalConfirmState = (state: RootState) =>
+  state.globalConfirmControls;
 
 export default globalConfirmControls.reducer;
