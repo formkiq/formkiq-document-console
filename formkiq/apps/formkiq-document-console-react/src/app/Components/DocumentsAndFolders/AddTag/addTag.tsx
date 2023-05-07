@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
 import { TagsForFilterAndDisplay } from '../../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 
@@ -20,7 +20,7 @@ export default function AddTag({
     getValues,
     setValue,
   } = useForm();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
   const typeaheadSelectRef = useRef<HTMLSelectElement>(null);
   const [allTagKeys, setAllTagKeys] = useState(null);

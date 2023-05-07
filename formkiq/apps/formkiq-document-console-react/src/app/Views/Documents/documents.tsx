@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
@@ -42,7 +42,7 @@ import {
   updateDocumentsList,
 } from '../../Store/reducers/documentsList';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
-import { RootState } from '../../Store/store';
+import { RootState, useAppDispatch } from '../../Store/store';
 import {
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
@@ -190,7 +190,7 @@ function Documents(props: {
   const [isRenameModalOpened, setRenameModalOpened] = useState(false);
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   let documentListOffsetTop = 140;
   if (isTagFilterExpanded) {
     documentListOffsetTop = 170;
@@ -232,7 +232,7 @@ function Documents(props: {
             subfolderUri,
             filterTag,
             nextToken: props.nextToken,
-          }) as any
+          })
         );
       } else {
         if (!props.isLastSearchPageLoaded && searchWord) {
@@ -246,7 +246,7 @@ function Documents(props: {
               subfolderUri,
               filterTag,
               page: props.currentSearchPage + 1,
-            }) as any
+            })
           );
         }
       }
@@ -475,7 +475,7 @@ function Documents(props: {
             subfolderUri,
             filterTag,
             nextToken: props.nextToken,
-          }) as any
+          })
         );
       }
     }
@@ -518,7 +518,7 @@ function Documents(props: {
           document: file,
           documents: searchDocuments,
           isDocumentInfoPage: isDocumentInfoPage,
-        }) as any
+        })
       );
     };
     dispatch(
@@ -530,7 +530,7 @@ function Documents(props: {
   };
   const deleteFolder = (folder: IFolder) => () => {
     const deleteFunc = () => {
-      dispatch(fetchDeleteFolder({ user: props.user, folder }) as any);
+      dispatch(fetchDeleteFolder({ user: props.user, folder }));
     };
     dispatch(
       openDialog({
@@ -653,7 +653,7 @@ function Documents(props: {
         searchFolder,
         subfolderUri,
         filterTag,
-      }) as any
+      })
     );
   };
   const onNewClick = (event: any, value: ILine | null) => {

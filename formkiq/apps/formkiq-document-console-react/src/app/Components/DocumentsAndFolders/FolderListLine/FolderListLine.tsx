@@ -1,9 +1,9 @@
 import React from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { User } from '../../../Store/reducers/auth';
 import { toggleExpandFolder } from '../../../Store/reducers/documentsList';
-import { RootState } from '../../../Store/store';
+import { RootState, useAppDispatch } from '../../../Store/store';
 import { formatDate } from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
 import { IFolder } from '../../../helpers/types/folder';
@@ -78,7 +78,7 @@ function FolderListLine({
     </tr>
   ));
   const tableLeftMargin = 'ml-4';
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const onExpandFolderClick =
     (folderPath: string, value: ILine | null) => () => {
@@ -89,7 +89,7 @@ function FolderListLine({
             subfolderUri: folderPath,
             siteId: currentSiteId,
             user: user,
-          }) as any
+          })
         );
       }
     };

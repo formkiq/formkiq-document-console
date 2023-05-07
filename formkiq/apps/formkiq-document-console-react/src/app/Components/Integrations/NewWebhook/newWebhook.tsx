@@ -1,8 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { Close } from '../../Icons/icons';
 
@@ -24,7 +24,7 @@ export default function NewWebhookModal({
   } = useForm();
   const newFormRef = useRef<HTMLFormElement>(null);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [formActive, setFormActive] = useState(true);
 
   useEffect(() => {

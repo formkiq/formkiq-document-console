@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { Spinner, Windows } from '../../Components/Icons/icons';
 import { login } from '../../Store/reducers/auth';
@@ -17,7 +17,7 @@ import {
 } from '../../Store/reducers/config';
 import { setFormkiqClient } from '../../Store/reducers/data';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
-import { RootState } from '../../Store/store';
+import { RootState, useAppDispatch } from '../../Store/store';
 import { ConfigService } from '../../helpers/services/configService';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { LocalStorage } from '../../helpers/tools/useLocalStorage';
@@ -34,7 +34,7 @@ export function SignIn(props: {
     formState: { errors },
     handleSubmit,
   } = useForm();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { search } = useLocation();
   const searchParams = search.replace('?', '').split('&') as any[];
   let isDemo = false;

@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Spinner } from '../../Components/Icons/icons';
 import { User } from '../../Store/reducers/auth';
 import { setCurrentDocumentPath } from '../../Store/reducers/data';
-import { RootState } from '../../Store/store';
+import { RootState, useAppDispatch } from '../../Store/store';
 import {
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
@@ -23,7 +23,7 @@ export function DocumentView(props: { user: User; formkiqVersion: any }) {
     'versionKey'
   );
   const { user } = props;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
     getUserSites(user);
@@ -156,8 +156,6 @@ export function DocumentView(props: { user: User; formkiqVersion: any }) {
 
   const [document, setDocument]: [IDocument | null, any] = useState(null);
   const [ooConfig, setOOConfig]: [any | null, any] = useState(null);
-  const documentIFrame = useRef<HTMLIFrameElement>(null);
-  const [documentUrl, setDocumentUrl]: [string | null, any] = useState(null);
   const [documentContent, setDocumentContent]: [string | null, any] =
     useState('');
   const DocumentViewer = () => {

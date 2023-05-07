@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
-import { useDispatch } from 'react-redux';
 import { ESignatureContentTypes } from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
@@ -56,11 +55,9 @@ export default function DocumentActionsPopover({
   useSoftDelete,
 }: any) {
   const line: ILine = value;
-  const dispatch = useDispatch();
   const [visible, setVisibility] = useState(false);
   const [referenceRef, setReferenceRef] = useState(null);
   const [popperRef, setPopperRef] = useState(null);
-  const [arrowElement, setArrowElement] = useState(null);
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, setVisibility);
   const { styles, attributes } = usePopper(referenceRef, popperRef, {
@@ -352,7 +349,7 @@ export default function DocumentActionsPopover({
               </>
             )}
           </ul>
-          <div ref={setArrowElement as any} style={styles['arrow']} />
+          <div style={styles['arrow']} />
         </div>
       )}
     </div>

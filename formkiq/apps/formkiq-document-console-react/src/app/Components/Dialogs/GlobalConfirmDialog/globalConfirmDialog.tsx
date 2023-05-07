@@ -1,20 +1,20 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import {
   closeDialog,
   confirmAction,
 } from '../../../Store/reducers/globalConfirmControls';
-import { RootState } from '../../../Store/store';
+import { RootState, useAppDispatch } from '../../../Store/store';
 
 function GlobalConfirmDialog({ confirmDialog }: any) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const onClose = () => {
-    dispatch(closeDialog() as any);
+    dispatch(closeDialog());
   };
   const onConfirm = () => {
-    dispatch(confirmAction() as any);
+    dispatch(confirmAction());
   };
   return (
     <Transition appear show={confirmDialog.isOpened} as={Fragment}>
@@ -82,4 +82,4 @@ const mapStateToProps = (state: RootState) => {
   return { confirmDialog };
 };
 
-export default connect(mapStateToProps)(GlobalConfirmDialog as any);
+export default connect(mapStateToProps)(GlobalConfirmDialog);

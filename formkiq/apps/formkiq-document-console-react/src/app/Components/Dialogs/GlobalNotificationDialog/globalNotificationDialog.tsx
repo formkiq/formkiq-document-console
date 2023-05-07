@@ -1,14 +1,14 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { closeDialog } from '../../../Store/reducers/globalNotificationControls';
-import { RootState } from '../../../Store/store';
+import { RootState, useAppDispatch } from '../../../Store/store';
 
 function GlobalNotificationDialog({ notificationDialog }: any) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const onClose = () => {
-    dispatch(closeDialog() as any);
+    dispatch(closeDialog());
   };
   return (
     <Transition appear show={notificationDialog.isOpened} as={Fragment}>

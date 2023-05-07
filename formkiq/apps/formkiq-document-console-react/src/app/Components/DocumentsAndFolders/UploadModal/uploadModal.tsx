@@ -6,9 +6,9 @@ import {
   UploadingEventArgs,
 } from '@syncfusion/ej2-react-inputs';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
 import { OcrContentTypes } from '../../../helpers/constants/contentTypes';
 import {
   DocumentUploadedInfo,
@@ -90,7 +90,7 @@ export default function UploadModal({
   documentId: string;
   isFolderUpload: boolean;
 }) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const cancelButtonRef = useRef(null);
   const uploaderRef = useRef<UploaderComponent>(null);
   const [uploadedDocs, setUploaded] = useState([]);

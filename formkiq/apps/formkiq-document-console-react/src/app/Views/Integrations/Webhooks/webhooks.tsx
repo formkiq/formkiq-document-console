@@ -1,128 +1,144 @@
-import { Helmet } from "react-helmet-async"
-import { useState, useEffect } from 'react'
-import { RootState } from "../../../Store/store"
-import { ArrowRight, ArrowBottom } from '../../../Components/Icons/icons';
-import { connect, useDispatch } from "react-redux"
-import NewWebhookModal from "../../../Components/Integrations/NewWebhook/newWebhook"
-import WebhookList from "../../../Components/Integrations/WebhookList/WebhookList"
-import { DocumentsService } from "../../../helpers/services/documentsService";
-import { openDialog } from "../../../Store/reducers/globalConfirmControls";
+import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { connect } from 'react-redux';
+import { ArrowBottom, ArrowRight } from '../../../Components/Icons/icons';
+import NewWebhookModal from '../../../Components/Integrations/NewWebhook/newWebhook';
+import WebhookList from '../../../Components/Integrations/WebhookList/WebhookList';
+import { openDialog } from '../../../Store/reducers/globalConfirmControls';
+import { RootState, useAppDispatch } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
 
 type HookItem = {
-  siteId: string,
-  readonly: boolean,
-  hooks: [] | null,
-}
+  siteId: string;
+  readonly: boolean;
+  hooks: [] | null;
+};
 export function Webhooks({ user }: any) {
-
-  const dispatch = useDispatch()
-  let userSite: any = null
-  let defaultSite: any = null
-  const sharedFolderSites: any[] = []
+  const dispatch = useAppDispatch();
+  let userSite: any = null;
+  let defaultSite: any = null;
+  const sharedFolderSites: any[] = [];
   if (user && user.sites) {
     user.sites.forEach((site: any) => {
       if (site.siteId === user.email) {
-        userSite = site
+        userSite = site;
       } else if (site.siteId === 'default') {
-        defaultSite = site
+        defaultSite = site;
       } else {
-        sharedFolderSites.push(site)
+        sharedFolderSites.push(site);
       }
-    })
+    });
   }
-  const currentSite = userSite ? userSite : (defaultSite ? defaultSite : sharedFolderSites[0] )
+  const currentSite = userSite
+    ? userSite
+    : defaultSite
+    ? defaultSite
+    : sharedFolderSites[0];
   if (currentSite === null) {
-    alert('No site configured for this user')
-    window.location.href='/'
+    alert('No site configured for this user');
+    window.location.href = '/';
   }
 
-  const [userSiteExpanded, setUserSiteExpanded] = useState(true)
-  const [userSiteWebhooks, setUserSiteWebhooks] = useState(null)
-  const [defaultSiteExpanded, setDefaultSiteExpanded] = useState(true)
-  const [deaultSiteWebhooks, setDefaultSiteWebhooks] = useState(null)
-  const [sharedFolderHooks, setSharedFolderHooks] = useState<HookItem []>([])
-  const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(false)
-  const [isNewModalOpened, setNewModalOpened] = useState(false)
-  const [newModalSiteId, setNewModalSiteId] = useState('default')
+  const [userSiteExpanded, setUserSiteExpanded] = useState(true);
+  const [userSiteWebhooks, setUserSiteWebhooks] = useState(null);
+  const [defaultSiteExpanded, setDefaultSiteExpanded] = useState(true);
+  const [deaultSiteWebhooks, setDefaultSiteWebhooks] = useState(null);
+  const [sharedFolderHooks, setSharedFolderHooks] = useState<HookItem[]>([]);
+  const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(false);
+  const [isNewModalOpened, setNewModalOpened] = useState(false);
+  const [newModalSiteId, setNewModalSiteId] = useState('default');
   const toggleUserSiteExpand = () => {
-    setUserSiteExpanded(!userSiteExpanded)
-  }
+    setUserSiteExpanded(!userSiteExpanded);
+  };
   const toggleDefaultSiteExpand = () => {
-    setDefaultSiteExpanded(!defaultSiteExpanded)
-  }
+    setDefaultSiteExpanded(!defaultSiteExpanded);
+  };
   const toggleSharedFoldersExpand = () => {
-    setSharedFoldersExpanded(!sharedFoldersExpanded)
-  }
+    setSharedFoldersExpanded(!sharedFoldersExpanded);
+  };
   const onNewClick = (event: any, siteId: string) => {
-    setNewModalSiteId(siteId)
-    setNewModalOpened(true)
-  }
+    setNewModalSiteId(siteId);
+    setNewModalOpened(true);
+  };
   const onNewClose = () => {
-    setNewModalOpened(false)
-  }
+    setNewModalOpened(false);
+  };
   useEffect(() => {
     if (isNewModalOpened === false) {
       // TODO send update instead of hacky updateWebhookExpansion
     }
-  }, [isNewModalOpened])
+  }, [isNewModalOpened]);
 
   useEffect(() => {
-    updateWebhooks()
-  }, [user])
+    updateWebhooks();
+  }, [user]);
 
   const setWebhooks = (webhooks: [], siteId: string, readonly: boolean) => {
     if (siteId === user.email) {
       // NOTE: does not allow for a readonly user site
-      setUserSiteWebhooks(webhooks as any)
+      setUserSiteWebhooks(webhooks as any);
     } else if (siteId === 'default') {
       // NOTE: does not allow for a readonly default site
-      setDefaultSiteWebhooks(webhooks as any)
+      setDefaultSiteWebhooks(webhooks as any);
     } else {
-      const index = sharedFolderHooks.findIndex((val: HookItem) => { return val.siteId === siteId})
-      const newArr = [...sharedFolderHooks]
-      if(index < 0) {
-        newArr.push({hooks: webhooks, siteId: siteId, readonly})
+      const index = sharedFolderHooks.findIndex((val: HookItem) => {
+        return val.siteId === siteId;
+      });
+      const newArr = [...sharedFolderHooks];
+      if (index < 0) {
+        newArr.push({ hooks: webhooks, siteId: siteId, readonly });
       } else {
-        const item = { ...(newArr[index]) }
-        item.hooks = webhooks
-        newArr[index] = item
+        const item = { ...newArr[index] };
+        item.hooks = webhooks;
+        newArr[index] = item;
       }
-      setSharedFolderHooks(newArr)
+      setSharedFolderHooks(newArr);
     }
-  }
-  
+  };
+
   const updateWebhooks = () => {
     if (currentSite.siteId) {
-      let readonly = false
+      let readonly = false;
       if (currentSite.permission && currentSite.permission === 'READ_ONLY') {
-        readonly = true
+        readonly = true;
       }
-      DocumentsService.getWebhooks(currentSite.siteId).then((webhooksResponse: any) => {
-        setWebhooks(webhooksResponse.webhooks, currentSite.siteId, readonly)
-      })
-    }
-    if(sharedFolderSites.length > 0) {
-      for(const item of sharedFolderSites) {
-        let readonly = false
-        if (item.permission && item.permission === 'READ_ONLY') {
-          readonly = true
+      DocumentsService.getWebhooks(currentSite.siteId).then(
+        (webhooksResponse: any) => {
+          setWebhooks(webhooksResponse.webhooks, currentSite.siteId, readonly);
         }
-        DocumentsService.getWebhooks(item.siteId).then((webhooksResponse: any) => {
-          setWebhooks(webhooksResponse.webhooks, item.siteId, readonly)
-        })
+      );
+    }
+    if (sharedFolderSites.length > 0) {
+      for (const item of sharedFolderSites) {
+        let readonly = false;
+        if (item.permission && item.permission === 'READ_ONLY') {
+          readonly = true;
+        }
+        DocumentsService.getWebhooks(item.siteId).then(
+          (webhooksResponse: any) => {
+            setWebhooks(webhooksResponse.webhooks, item.siteId, readonly);
+          }
+        );
       }
     }
-  }
+  };
 
   const deleteWebhook = (webhookId: string, siteId: string) => {
     const deleteFunc = () => {
-      setUserSiteWebhooks(null)
-      DocumentsService.deleteWebhook(webhookId, siteId).then((webhooksResponse: any) => {
-        updateWebhooks()
+      setUserSiteWebhooks(null);
+      DocumentsService.deleteWebhook(webhookId, siteId).then(
+        (webhooksResponse: any) => {
+          updateWebhooks();
+        }
+      );
+    };
+    dispatch(
+      openDialog({
+        callback: deleteFunc,
+        dialogTitle: 'Are you sure you want to delete this webhook?',
       })
-    }
-    dispatch(openDialog({ callback: deleteFunc, dialogTitle: 'Are you sure you want to delete this webhook?'}))
-  }
+    );
+  };
 
   return (
     <>
@@ -130,95 +146,121 @@ export function Webhooks({ user }: any) {
         <title>Webhooks</title>
       </Helmet>
       <div className="p-4 max-w-screen-lg font-semibold mb-4">
-        By posting an HTML web form or any other data to a webhook URL, FormKiQ will process that data and add it as a new document.
+        By posting an HTML web form or any other data to a webhook URL, FormKiQ
+        will process that data and add it as a new document.
         <span className="block mt-2">
-          Note: for outbound webhooks, please see <a href="/integrations/workflows" className="underline hover:text-coreOrange-500">Workflows</a>.
+          Note: for outbound webhooks, please see{' '}
+          <a
+            href="/integrations/workflows"
+            className="underline hover:text-coreOrange-500"
+          >
+            Workflows
+          </a>
+          .
         </span>
       </div>
       <div className="p-4">
-        { userSite && (
+        {userSite && (
           <>
             <div
               className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
               onClick={toggleUserSiteExpand}
-              >
+            >
               <div className="flex justify-end mt-3 mr-1">
-                { userSiteExpanded ? ( <ArrowBottom /> ) : ( <ArrowRight /> )}
+                {userSiteExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
                 Webhooks: My Documents
               </div>
             </div>
             {userSiteExpanded && (
-              <WebhookList siteId={userSite.siteId} webhooks={userSiteWebhooks} isSiteReadOnly={userSite.readonly} onDelete={deleteWebhook} onNewClick={onNewClick}></WebhookList>
+              <WebhookList
+                siteId={userSite.siteId}
+                webhooks={userSiteWebhooks}
+                isSiteReadOnly={userSite.readonly}
+                onDelete={deleteWebhook}
+                onNewClick={onNewClick}
+              ></WebhookList>
             )}
           </>
         )}
-        { defaultSite && defaultSite.siteId && (
+        {defaultSite && defaultSite.siteId && (
           <>
             <div
               className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
               onClick={toggleDefaultSiteExpand}
-              >
+            >
               <div className="flex justify-end mt-3 mr-1">
-                { defaultSiteExpanded ? ( <ArrowBottom /> ) : ( <ArrowRight /> )}
+                {defaultSiteExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
-                { userSite ? (
-                  <span>
-                    Webhooks: Team Documents
-                  </span>
+                {userSite ? (
+                  <span>Webhooks: Team Documents</span>
                 ) : (
-                  <span>
-                    Webhooks: Documents
-                  </span>
+                  <span>Webhooks: Documents</span>
                 )}
               </div>
             </div>
             {defaultSiteExpanded && (
-              <WebhookList webhooks={deaultSiteWebhooks} onDelete={deleteWebhook} siteId={defaultSite.siteId} isSiteReadOnly={defaultSite.readonly} onNewClick={onNewClick}></WebhookList>
+              <WebhookList
+                webhooks={deaultSiteWebhooks}
+                onDelete={deleteWebhook}
+                siteId={defaultSite.siteId}
+                isSiteReadOnly={defaultSite.readonly}
+                onNewClick={onNewClick}
+              ></WebhookList>
             )}
           </>
         )}
-        { sharedFolderSites.length > 0 && (
+        {sharedFolderSites.length > 0 && (
           <>
             <div
               className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
               onClick={toggleSharedFoldersExpand}
-              >
+            >
               <div className="flex justify-end mt-3 mr-1">
-                { sharedFoldersExpanded ? ( <ArrowBottom /> ) : ( <ArrowRight /> )}
+                {sharedFoldersExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
                 Webhooks: Shared Folders
               </div>
             </div>
-            {sharedFoldersExpanded && sharedFolderHooks.map((item: HookItem, i: number) => {
-              return (
-                <div key={i}>
-                  <div className="mt-4 ml-4 flex flex-wrap w-full">
-                    <div className="pl-1 uppercase text-sm">
-                      Webhooks: {item.siteId}
+            {sharedFoldersExpanded &&
+              sharedFolderHooks.map((item: HookItem, i: number) => {
+                return (
+                  <div key={i}>
+                    <div className="mt-4 ml-4 flex flex-wrap w-full">
+                      <div className="pl-1 uppercase text-sm">
+                        Webhooks: {item.siteId}
+                      </div>
+                    </div>
+                    <div className="mt-4 ml-4">
+                      <WebhookList
+                        webhooks={item.hooks}
+                        siteId={item.siteId}
+                        isSiteReadOnly={item.readonly}
+                        onDelete={deleteWebhook}
+                        onNewClick={onNewClick}
+                      ></WebhookList>
                     </div>
                   </div>
-                  <div className="mt-4 ml-4">
-                    <WebhookList webhooks={item.hooks} siteId={item.siteId} isSiteReadOnly={item.readonly}  onDelete={deleteWebhook} onNewClick={onNewClick}></WebhookList>
-                  </div>
-                </div>
-              )
-            }
-            )}
+                );
+              })}
           </>
         )}
       </div>
-      <NewWebhookModal isOpened={isNewModalOpened} onClose={onNewClose} updateWebhookExpansion={updateWebhooks} siteId={newModalSiteId} />
+      <NewWebhookModal
+        isOpened={isNewModalOpened}
+        onClose={onNewClose}
+        updateWebhookExpansion={updateWebhooks}
+        siteId={newModalSiteId}
+      />
     </>
   );
 }
 
 const mapStateToProps = (state: RootState) => {
-  return { user: state.authReducer?.user }
+  return { user: state.authReducer?.user };
 };
 
 export default connect(mapStateToProps)(Webhooks as any);
-  
