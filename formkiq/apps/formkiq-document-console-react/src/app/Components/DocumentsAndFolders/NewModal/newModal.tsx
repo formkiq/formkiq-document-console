@@ -1,8 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import {useNavigate, useSearchParams} from 'react-router-dom';
-import { setCurrentActionEvent, ConfigState } from '../../../Store/reducers/config';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';

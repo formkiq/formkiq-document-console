@@ -28,7 +28,6 @@ import {
   Documents,
   Examine,
   Group,
-  Users,
   Queue,
   Recent,
   Rules,
@@ -38,12 +37,12 @@ import {
   ShareHand,
   Star,
   Trash,
+  Users,
   Webhook,
   Workflow,
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
-import ButtonSecondary from "../Generic/Buttons/ButtonSecondary";
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 

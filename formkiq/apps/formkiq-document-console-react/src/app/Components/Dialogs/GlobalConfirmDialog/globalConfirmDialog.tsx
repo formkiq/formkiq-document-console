@@ -6,8 +6,8 @@ import {
   hideDialog,
 } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
-import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
+import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 
 function GlobalConfirmDialog() {
   const dispatch = useAppDispatch();
