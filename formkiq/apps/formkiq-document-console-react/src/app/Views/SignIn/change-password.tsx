@@ -1,45 +1,63 @@
 import { useRef } from 'react';
-import { Helmet } from "react-helmet-async";
-import { useForm } from "react-hook-form";
-import { useDispatch } from 'react-redux'
-import { useLocation } from "react-router-dom";
-import { openDialog} from "../../Store/reducers/globalNotificationControls"
-import { store } from '../../Store/store';
-import FormkiqClient from "../../lib/formkiq-client-sdk-es6";
+import { Helmet } from 'react-helmet-async';
+import { useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { AuthState } from '../../Store/reducers/auth';
+import { ConfigState } from '../../Store/reducers/config';
+import { DataCacheState } from '../../Store/reducers/data';
+import { openDialog } from '../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../Store/store';
+import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
 
 export function ChangePassword() {
-  const { register, formState: { errors }, handleSubmit, watch } = useForm();
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+    watch,
+  } = useForm();
   const newPassword = useRef(null);
-  newPassword.current = watch("newPassword", "");
-  const dispatch = useDispatch()
-  const search = useLocation().search
-  let email = new URLSearchParams(search).get('email')
+  newPassword.current = watch('newPassword', '');
+  const dispatch = useAppDispatch();
+  const search = useLocation().search;
+  let email = new URLSearchParams(search).get('email');
   if (email && email.length) {
-    email = email.replace(' ', '+')
+    email = email.replace(' ', '+');
   }
-  const verificationCode = new URLSearchParams(search).get('code')
-  
+  const verificationCode = new URLSearchParams(search).get('code');
+  const { formkiqClient } = useSelector(DataCacheState);
+  const { user } = useSelector(AuthState);
+  const { documentApi, userPoolId, clientId } = useSelector(ConfigState);
+
   const onSubmit = async (data: any) => {
-    let { formkiqClient } = store.getState().dataCacheReducer
+    let newformkiqClient = formkiqClient;
     if (!formkiqClient.apiClient) {
-      const { user } = store.getState().authReducer
-      const { documentApi, userPoolId, clientId } = store.getState().configReducer
-      formkiqClient = new FormkiqClient(documentApi, userPoolId, clientId)
-      formkiqClient.resetClient(documentApi, userPoolId, clientId)
-      formkiqClient.rebuildCognitoClient(
+      newformkiqClient = new FormkiqClient(documentApi, userPoolId, clientId);
+      newformkiqClient.resetClient(documentApi, userPoolId, clientId);
+      newformkiqClient.rebuildCognitoClient(
         user?.email,
         user?.idToken,
         user?.accessToken,
         user?.refreshToken
       );
     }
-    await formkiqClient.documentsApi.apiClient.cognitoClient.confirmPassword(email, verificationCode, data.newPassword).then((response: any) => {
-      if (response.cognitoErrorCode) {
-        dispatch(openDialog({ dialogTitle: 'An error occurred. Please try again in a few minutes.'}))
-      } else {
-        dispatch(openDialog({ dialogTitle: 'Your password has been changed.'}))
-      }
-    })
+    await newformkiqClient.documentsApi.apiClient.cognitoClient
+      .confirmPassword(email, verificationCode, data.newPassword)
+      .then((response: any) => {
+        if (response.cognitoErrorCode) {
+          dispatch(
+            openDialog({
+              dialogTitle:
+                'An error occurred. Please try again in a few minutes.',
+            })
+          );
+        } else {
+          dispatch(
+            openDialog({ dialogTitle: 'Your password has been changed.' })
+          );
+        }
+      });
   };
   return (
     <>
@@ -54,7 +72,10 @@ export function ChangePassword() {
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="md:flex md:items-center mx-4 mb-4 relative">
               <div className="md:w-1/3">
-                <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" htmlFor="newPassword">
+                <label
+                  className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4"
+                  htmlFor="newPassword"
+                >
                   New Password
                 </label>
               </div>
@@ -67,21 +88,27 @@ export function ChangePassword() {
                       placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-xl sm:leading-5"
                   placeholder="******"
-                  {...register("newPassword", {
+                  {...register('newPassword', {
                     minLength: {
                       value: 6,
-                      message: "Your new password must have at least 6 characters"
-                    }
+                      message:
+                        'Your new password must have at least 6 characters',
+                    },
                   })}
-                  />
+                />
                 {errors['newPassword'] && errors['newPassword'].message && (
-                  <p className="pt-1 text-red-600">{(errors['newPassword'].message as string)}</p>
+                  <p className="pt-1 text-red-600">
+                    {errors['newPassword'].message as string}
+                  </p>
                 )}
               </div>
             </div>
             <div className="md:flex md:items-center mx-4 mb-4 relative">
               <div className="md:w-1/3">
-                <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" htmlFor="confirmPassword">
+                <label
+                  className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4"
+                  htmlFor="confirmPassword"
+                >
                   Repeat Your New Password
                 </label>
               </div>
@@ -94,12 +121,15 @@ export function ChangePassword() {
                       placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 sm:text-xl sm:leading-5"
                   placeholder="******"
-                  {...register("confirmPassword", {
-                    validate: value =>
-                      value === newPassword.current
+                  {...register('confirmPassword', {
+                    validate: (value) => value === newPassword.current,
                   })}
-                  />
-                {errors['confirmPassword'] && (<p className="pt-1 text-red-600">The passwords do not match</p>)}
+                />
+                {errors['confirmPassword'] && (
+                  <p className="pt-1 text-red-600">
+                    The passwords do not match
+                  </p>
+                )}
               </div>
             </div>
             <div className="mt-5 sm:mt-8 flex justify-center">
@@ -110,12 +140,11 @@ export function ChangePassword() {
                   text-white bg-coreOrange-500 hover:bg-coreOrange-400 focus:outline-none focus:shadow-outline
                   transition duration-150 ease-in-out md:py-4 md:text-lg md:px-10"
               />
-              
             </div>
-            <div  className="mt-8 w-full text-center">
-                <a className="underline"  href="/sign-in"> 
-                  Back to Sign In
-                </a>
+            <div className="mt-8 w-full text-center">
+              <a className="underline" href="/sign-in">
+                Back to Sign In
+              </a>
             </div>
           </form>
         </div>
@@ -125,4 +154,3 @@ export function ChangePassword() {
 }
 
 export default ChangePassword;
-  

@@ -1,8 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import {
@@ -55,7 +55,7 @@ export default function ESignaturesModal({
   const toggleESignatureConfig = () => {
     setIsConfigModalOpened(!isConfigModalOpened);
   };
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const closeDialog = () => {
     reset();
     value = null;

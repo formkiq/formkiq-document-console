@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { matchPath } from 'react-router';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, logout } from '../../Store/reducers/auth';
-import { RootState } from '../../Store/store';
+import { AuthState, logout } from '../../Store/reducers/auth';
+import { ConfigState } from '../../Store/reducers/config';
+import { DataCacheState } from '../../Store/reducers/data';
+import { useAppDispatch } from '../../Store/store';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import {
   AccountAndSettingsPrefixes,
@@ -16,8 +18,6 @@ import {
   getUserSites,
   parseSubfoldersFromUrl,
 } from '../../helpers/services/toolService';
-import { IDocument } from '../../helpers/types/document';
-import { IDocumentTag } from '../../helpers/types/documentTag';
 import SearchInput from '../DocumentsAndFolders/Search/searchInput';
 import {
   Api,
@@ -34,42 +34,31 @@ import {
 } from '../Icons/icons';
 import Notifications from './notifications';
 
-function Navbar(props: {
-  user: User;
-  isSidebarExpanded: boolean;
-  brand: string;
-  formkiqVersion: any;
-  useAdvancedSearch: boolean;
-  useNotifications: boolean;
-  allTags: any[];
-  currentDocumentPath: string;
-}) {
+function Navbar() {
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { user } = useSelector(AuthState);
+  const { useNotifications, isSidebarExpanded } = useSelector(ConfigState);
+  const { currentDocumentPath } = useSelector(DataCacheState);
+
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
-    getUserSites(props.user);
+    getUserSites(user);
   const pathname = useLocation().pathname;
-  const {
-    siteId,
-    siteDocumentsRootUri,
-    siteDocumentsRootName,
-    isSiteReadOnly,
-  } = getCurrentSiteInfo(
-    pathname,
-    props.user,
-    hasUserSite,
-    hasDefaultSite,
-    hasSharedFolders,
-    sharedFolderSites
-  );
+  const { siteId, siteDocumentsRootUri, siteDocumentsRootName } =
+    getCurrentSiteInfo(
+      pathname,
+      user,
+      hasUserSite,
+      hasDefaultSite,
+      hasSharedFolders,
+      sharedFolderSites
+    );
+
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
-  const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
-    siteDocumentsRootName
-  );
 
   let subfolderLevelPath = matchPath(
     {
@@ -168,7 +157,7 @@ function Navbar(props: {
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
       pathname,
-      props.user,
+      user,
       hasUserSite,
       hasDefaultSite,
       hasSharedFolders,
@@ -176,27 +165,15 @@ function Navbar(props: {
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
   }, [pathname]);
 
   const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
-  const documentSettingsPath = matchPath(
-    { path: '/documents/settings' },
-    window.location.pathname
-  ) as any;
-  const documentHelpPath = matchPath(
-    { path: '/documents/help' },
-    window.location.pathname
-  ) as any;
   const [showAccountDropdown, setShowAccountDropdown] = React.useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] =
     React.useState(false);
   const [currentSection, setCurrentSection] = useState('DocumentsAndFolders');
   const [inputValue, setInput] = useState('');
-  const [document, setDocument]: [IDocument | null, any] = useState(null);
-  const [documentTags, setDocumentTags]: [IDocumentTag[] | null, any] =
-    useState([]);
 
   let documentId = '';
   const documentViewPath = matchPath(
@@ -262,9 +239,8 @@ function Navbar(props: {
   };
 
   const ParseEmailInitials = () => {
-    const { user } = props;
     if (user) {
-      const emailUsername = user.email.substring(0, user.email.indexOf('@'));
+      const emailUsername = user?.email.substring(0, user?.email.indexOf('@'));
       const emailParts = emailUsername.split('.');
       let initials = '';
       emailParts.forEach((part: string) => {
@@ -294,7 +270,7 @@ function Navbar(props: {
   const changeSystemSubfolder = (event: any, systemSubfolderUri: string) => {
     const newSiteId = event.target.options[event.target.selectedIndex].value;
     let newDocumentsRootUri = '/documents';
-    if (newSiteId === props.user.email) {
+    if (newSiteId === user?.email) {
       newDocumentsRootUri = '/my-documents';
     } else if (newSiteId === 'default' && hasUserSite) {
       newDocumentsRootUri = '/team-documents';
@@ -327,15 +303,15 @@ function Navbar(props: {
   };
 
   return (
-    props.user && (
+    user && (
       <div className="flex w-full h-14.5">
-        {props.useNotifications && showNotificationsDropdown && (
+        {useNotifications && showNotificationsDropdown && (
           <>{Notifications(ToggleNotifications)}</>
         )}
         <div className="flex grow relative flex-wrap items-start">
           <div
             className={
-              (props.isSidebarExpanded ? 'left-64' : 'left-16') +
+              (isSidebarExpanded ? 'left-64' : 'left-16') +
               ' flex fixed top-0 right-0 z-20 h-14.5 items-center justify-between bg-white border-b'
             }
           >
@@ -343,7 +319,7 @@ function Navbar(props: {
               <div
                 className={'flex ' + (documentId.length ? 'w-full' : 'w-2/3')}
               >
-                {!props.isSidebarExpanded && (
+                {!isSidebarExpanded && (
                   <div className="w-40">
                     <div className="absolute top-0 pt-2.5">
                       <picture>
@@ -366,7 +342,7 @@ function Navbar(props: {
                 )}
                 <div
                   className={
-                    (props.isSidebarExpanded ? 'w-full' : 'grow') +
+                    (isSidebarExpanded ? 'w-full' : 'grow') +
                     ' flex items-center pl-5'
                   }
                 >
@@ -411,9 +387,7 @@ function Navbar(props: {
                           }}
                         >
                           {hasUserSite && (
-                            <option value={props.user.email}>
-                              My Documents
-                            </option>
+                            <option value={user?.email}>My Documents</option>
                           )}
                           {hasUserSite && hasDefaultSite && (
                             <option value="default">Team Documents</option>
@@ -514,20 +488,18 @@ function Navbar(props: {
                           </div>
                           <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
                             {siteDocumentsRootName}
-                            {documentId && props.currentDocumentPath.length ? (
+                            {documentId && currentDocumentPath?.length ? (
                               <span>
                                 <span className="px-2">|</span>
-                                {props.currentDocumentPath}
+                                {currentDocumentPath}
                                 <span className="pl-8">
                                   <a
                                     href={
                                       siteDocumentsRootUri +
                                       '/folders/' +
-                                      props.currentDocumentPath.substring(
+                                      currentDocumentPath.substring(
                                         0,
-                                        props.currentDocumentPath.lastIndexOf(
-                                          '/'
-                                        )
+                                        currentDocumentPath.lastIndexOf('/')
                                       ) +
                                       '#id=' +
                                       documentId
@@ -568,18 +540,14 @@ function Navbar(props: {
                     onChange={updateInputValue}
                     onKeyDown={handleKeyDown}
                     siteId={currentSiteId}
-                    formkiqVersion={props.formkiqVersion}
                     documentsRootUri={currentDocumentsRootUri}
-                    brand={props.brand}
-                    useAdvancedSearch={props.useAdvancedSearch}
                     value={inputValue}
-                    allTags={props.allTags}
                   />
                 </div>
               )}
             </div>
             <div className="w-1/4 flex justify-end mr-16">
-              {props.useNotifications && (
+              {useNotifications && (
                 <span
                   className="mt-0.5 mr-4 w-4 cursor-pointer"
                   onClick={ToggleNotifications}
@@ -638,26 +606,4 @@ function Navbar(props: {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { user } = state.authReducer;
-  const {
-    isSidebarExpanded,
-    brand,
-    formkiqVersion,
-    useNotifications,
-    useAdvancedSearch,
-  } = state.configReducer;
-  const { allTags, currentDocumentPath } = state.dataCacheReducer;
-  return {
-    user,
-    isSidebarExpanded,
-    brand,
-    formkiqVersion,
-    useNotifications,
-    useAdvancedSearch,
-    allTags,
-    currentDocumentPath,
-  };
-};
-
-export default connect(mapStateToProps)(Navbar as any);
+export default Navbar;

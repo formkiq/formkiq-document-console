@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 
 export const progressAction = createAsyncThunk(
   'globalProgressControls/progressAction',
@@ -25,50 +26,47 @@ export const closeDialog = createAsyncThunk(
   }
 );
 
+export type GlobalProgressSlice = {
+  callback?: () => Promise<void>;
+  dialogTitle: string;
+  isOpen: boolean;
+};
+
+const initialState: GlobalProgressSlice = {
+  callback: undefined,
+  dialogTitle: 'In Progress',
+  isOpen: false,
+};
+
 export const globalProgressControls = createSlice({
   name: 'globalProgressControls',
-  initialState: {
-    progressDialog: {
-      callback: null,
-      dialogTitle: 'In Progress',
-      isOpened: false,
-    },
-  },
+  initialState,
   reducers: {
     resetDialog: (state) => {
       const newDialogState = {
-        ...state.progressDialog,
-        dialogTitle: 'In Progress',
-        callback: null,
-      };
-      return {
         ...state,
-        progressDialog: newDialogState,
+        dialogTitle: 'In Progress',
+        callback: undefined,
       };
+      return newDialogState;
     },
     hideDialog: (state) => {
       const newDialogState = {
-        ...state.progressDialog,
-        isOpened: false,
-      };
-      return {
         ...state,
-        progressDialog: newDialogState,
+        isOpen: false,
       };
+      return newDialogState;
     },
     openDialog: (state, action) => {
       const newDialogState = {
-        ...state.progressDialog,
+        ...state,
         callback: action.payload?.callback,
-        isOpened: true,
+        isOpen: true,
       };
       if (action.payload?.dialogTitle) {
         newDialogState.dialogTitle = action.payload.dialogTitle;
       }
-      return {
-        ...state,
-        progressDialog: newDialogState,
-      };
+      return newDialogState;
     },
   },
   extraReducers: (builder) => {
@@ -81,5 +79,8 @@ export const globalProgressControls = createSlice({
 
 export const { openDialog, hideDialog, resetDialog } =
   globalProgressControls.actions;
+
+export const GlobalProgressState = (state: RootState) =>
+  state.globalProgressControls;
 
 export default globalProgressControls.reducer;

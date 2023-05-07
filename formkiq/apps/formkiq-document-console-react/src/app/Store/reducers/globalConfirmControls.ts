@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 
 export const confirmAction = createAsyncThunk(
   'globalConfirmControls/confirmAction',
@@ -25,50 +26,47 @@ export const closeDialog = createAsyncThunk(
   }
 );
 
+export type GlobalConfirmSlice = {
+  callback?: () => Promise<void>;
+  dialogTitle: string;
+  isOpen: boolean;
+};
+
+const initialState: GlobalConfirmSlice = {
+  callback: undefined,
+  dialogTitle: 'Are you sure?',
+  isOpen: false,
+};
+
 export const globalConfirmControls = createSlice({
   name: 'globalConfirmControls',
-  initialState: {
-    confirmDialog: {
-      callback: null,
-      dialogTitle: 'Are you sure?',
-      isOpened: false,
-    },
-  },
+  initialState,
   reducers: {
     resetDialog: (state) => {
       const newDialogState = {
-        ...state.confirmDialog,
-        dialogTitle: 'Are you sure?',
-        callback: null,
-      };
-      return {
         ...state,
-        confirmDialog: newDialogState,
+        dialogTitle: 'Are you sure?',
+        callback: undefined,
       };
+      return newDialogState;
     },
     hideDialog: (state) => {
       const newDialogState = {
-        ...state.confirmDialog,
-        isOpened: false,
-      };
-      return {
         ...state,
-        confirmDialog: newDialogState,
+        isOpen: false,
       };
+      return newDialogState;
     },
     openDialog: (state, action) => {
       const newDialogState = {
-        ...state.confirmDialog,
+        ...state,
         callback: action.payload?.callback,
-        isOpened: true,
+        isOpen: true,
       };
       if (action.payload?.dialogTitle) {
         newDialogState.dialogTitle = action.payload.dialogTitle;
       }
-      return {
-        ...state,
-        confirmDialog: newDialogState,
-      };
+      return newDialogState;
     },
   },
   extraReducers: (builder) => {
@@ -81,5 +79,8 @@ export const globalConfirmControls = createSlice({
 
 export const { openDialog, hideDialog, resetDialog } =
   globalConfirmControls.actions;
+
+export const GlobalConfirmState = (state: RootState) =>
+  state.globalConfirmControls;
 
 export default globalConfirmControls.reducer;

@@ -1,23 +1,26 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
+  GlobalConfirmState,
   closeDialog,
   confirmAction,
 } from '../../../Store/reducers/globalConfirmControls';
-import { RootState } from '../../../Store/store';
+import { useAppDispatch } from '../../../Store/store';
 
-function GlobalConfirmDialog({ confirmDialog }: any) {
-  const dispatch = useDispatch();
+function GlobalConfirmDialog() {
+  const dispatch = useAppDispatch();
+
+  const { isOpen, dialogTitle } = useSelector(GlobalConfirmState);
 
   const onClose = () => {
-    dispatch(closeDialog() as any);
+    dispatch(closeDialog());
   };
   const onConfirm = () => {
-    dispatch(confirmAction() as any);
+    dispatch(confirmAction());
   };
   return (
-    <Transition appear show={confirmDialog.isOpened} as={Fragment}>
+    <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-30" onClose={onClose}>
         <Transition.Child
           as={Fragment}
@@ -47,7 +50,7 @@ function GlobalConfirmDialog({ confirmDialog }: any) {
                   as="h3"
                   className="text-lg font-medium text-center leading-6 pb-2 text-gray-900"
                 >
-                  {confirmDialog.dialogTitle}
+                  {dialogTitle}
                 </Dialog.Title>
 
                 <div className="flex w-full justify-center pt-5">
@@ -77,9 +80,4 @@ function GlobalConfirmDialog({ confirmDialog }: any) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { confirmDialog } = state.globalConfirmControls;
-  return { confirmDialog };
-};
-
-export default connect(mapStateToProps)(GlobalConfirmDialog as any);
+export default GlobalConfirmDialog;

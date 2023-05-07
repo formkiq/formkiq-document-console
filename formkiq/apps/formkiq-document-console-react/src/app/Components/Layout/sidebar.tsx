@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { matchPath } from 'react-router';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Section, User } from '../../Store/reducers/auth';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { AuthState } from '../../Store/reducers/auth';
 import {
+  ConfigState,
   setCurrentActionEvent,
   setIsSharedFoldersExpanded,
   setIsSidebarExpanded,
 } from '../../Store/reducers/config';
-import { RootState } from '../../Store/store';
+import { DocumentListState } from '../../Store/reducers/documentsList';
+import { useAppDispatch } from '../../Store/store';
 import {
   AccountAndSettingsPrefixes,
   DocumentsAndFoldersPrefixes,
@@ -19,7 +21,6 @@ import {
   getUserSites,
   parseSubfoldersFromUrl,
 } from '../../helpers/services/toolService';
-import { requestStatusTypes } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
 import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import {
@@ -43,48 +44,37 @@ import {
 } from '../Icons/icons';
 import SharedFoldersModal from './sharedFoldersModal';
 
-export function Sidebar(props: {
-  user: User;
-  section: Section;
-  nextLoadingStatus: requestStatusTypes;
-  folders: IFolder[];
-  isSidebarExpanded: boolean;
-  isSharedFoldersExpanded: boolean;
-  brand: string;
-  formkiqVersion: any;
-  useAccountAndSettings: boolean;
-  useSoftDelete: boolean;
-}) {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
-    getUserSites(props.user);
-  const pathname = useLocation().pathname;
+export function Sidebar() {
+  const dispatch = useAppDispatch();
+
+  const { user } = useSelector(AuthState);
+  const { folders } = useSelector(DocumentListState);
   const {
-    siteId,
-    siteRedirectUrl,
-    siteDocumentsRootUri,
-    siteDocumentsRootName,
-    isSiteReadOnly,
-  } = getCurrentSiteInfo(
+    formkiqVersion,
+    useAccountAndSettings,
+    useSoftDelete,
+    isSidebarExpanded,
+    isSharedFoldersExpanded,
+  } = useSelector(ConfigState);
+
+  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+    getUserSites(user);
+  const pathname = useLocation().pathname;
+  const { siteId, siteDocumentsRootUri, isSiteReadOnly } = getCurrentSiteInfo(
     pathname,
-    props.user,
+    user,
     hasUserSite,
     hasDefaultSite,
     hasSharedFolders,
     sharedFolderSites
   );
+
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
-  const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
-    siteDocumentsRootName
-  );
-  const [sidebarExpanded, setSidebarExpanded] = useState(
-    props.isSidebarExpanded
-  );
+  const [sidebarExpanded, setSidebarExpanded] = useState(isSidebarExpanded);
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
-  let expandSharedFoldersInitially = props.isSharedFoldersExpanded;
+  let expandSharedFoldersInitially = isSharedFoldersExpanded;
   if (
     currentDocumentsRootUri.indexOf('/shared-folders') === 0 ||
     (!hasUserSite && !hasDefaultSite && hasSharedFolders)
@@ -216,7 +206,7 @@ export function Sidebar(props: {
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
       pathname,
-      props.user,
+      user,
       hasUserSite,
       hasDefaultSite,
       hasSharedFolders,
@@ -224,7 +214,6 @@ export function Sidebar(props: {
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
   }, [pathname]);
 
   const toggleSidebarExpand = () => {
@@ -320,7 +309,7 @@ export function Sidebar(props: {
   const SidebarItems = () => {
     return (
       <div>
-        {props.isSidebarExpanded ? (
+        {isSidebarExpanded ? (
           <>
             <li
               className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
@@ -352,7 +341,7 @@ export function Sidebar(props: {
                         <FolderDropWrapper
                           folder={''}
                           sourceSiteId={currentSiteId}
-                          targetSiteId={props.user.email}
+                          targetSiteId={user?.email || ''}
                           className={
                             'w-full text-sm font-medium flex pl-5 py-2'
                           }
@@ -365,11 +354,11 @@ export function Sidebar(props: {
                       </NavLink>
                     </li>
                     {QuickFolderList(
-                      props.user.email,
-                      currentSiteId === props.user.email && subfolderUri.length
+                      user?.email || '',
+                      currentSiteId === user?.email && subfolderUri.length
                         ? subfolderUri.split('/')
                         : [],
-                      props.folders
+                      folders
                     )}
                   </>
                 )}
@@ -424,7 +413,7 @@ export function Sidebar(props: {
                       currentSiteId === 'default' && subfolderUri.length
                         ? subfolderUri.split('/')
                         : [],
-                      props.folders
+                      folders
                     )}
                   </>
                 )}
@@ -491,7 +480,7 @@ export function Sidebar(props: {
                                 subfolderUri.length
                                 ? subfolderUri.split('/')
                                 : [],
-                              props.folders
+                              folders
                             )}
                           </span>
                         );
@@ -523,7 +512,7 @@ export function Sidebar(props: {
                         </div>
                       </NavLink>
                     </li>
-                    {props.useSoftDelete && (
+                    {useSoftDelete && (
                       <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                         <NavLink
                           data-test-id="nav-trash"
@@ -638,7 +627,7 @@ export function Sidebar(props: {
                 </div>
               </>
             )}
-            {props.useAccountAndSettings && (
+            {useAccountAndSettings && (
               <>
                 <li
                   className="mt-4 w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
@@ -715,7 +704,7 @@ export function Sidebar(props: {
                   <FolderDropWrapper
                     folder={''}
                     sourceSiteId={currentSiteId}
-                    targetSiteId={props.user.email}
+                    targetSiteId={user?.email || ''}
                     className={'w-full text-sm font-medium flex pl-5 py-4 '}
                   >
                     <div className="w-4 flex items-center mr-2">
@@ -797,7 +786,7 @@ export function Sidebar(props: {
                     </div>
                   </NavLink>
                 </li>
-                {props.useSoftDelete && (
+                {useSoftDelete && (
                   <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
                       to={`${currentDocumentsRootUri}/folders/deleted`}
@@ -878,7 +867,7 @@ export function Sidebar(props: {
                 </div>
               </NavLink>
             </li>
-            {props.useAccountAndSettings && (
+            {useAccountAndSettings && (
               <>
                 <div className="flex w-full">
                   <div className="w-full mt-2 mx-2 border-b"></div>
@@ -984,14 +973,14 @@ export function Sidebar(props: {
             ' flex flex-wrap fixed bg-white '
           }
         ></div>
-        {props.user && (
+        {user && (
           <>
             <nav className="grow mt-16">
               {!isSiteReadOnly && (
                 <div className="flex flex-wrap w-full justify-center mb-4">
                   <button
                     className={
-                      (props.isSidebarExpanded ? ' mr-1 ' : 'mb-1 ') +
+                      (isSidebarExpanded ? ' mr-1 ' : 'mb-1 ') +
                       ' bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'
                     }
                     onClick={(event) => {
@@ -1006,14 +995,13 @@ export function Sidebar(props: {
                       }
                     }}
                   >
-                    {props.isSidebarExpanded && (
+                    {isSidebarExpanded && (
                       <span data-test-id="new-document">New</span>
                     )}
                     <div
                       className={
-                        (props.isSidebarExpanded
-                          ? 'ml-2 mt-1 '
-                          : 'ml-0 mt-0 ') + ' w-3 h-3'
+                        (isSidebarExpanded ? 'ml-2 mt-1 ' : 'ml-0 mt-0 ') +
+                        ' w-3 h-3'
                       }
                     >
                       {Plus()}
@@ -1034,12 +1022,11 @@ export function Sidebar(props: {
                       }
                     }}
                   >
-                    {props.isSidebarExpanded && <span>Upload</span>}
+                    {isSidebarExpanded && <span>Upload</span>}
                     <div
                       className={
-                        (props.isSidebarExpanded
-                          ? 'ml-2 mt-1 '
-                          : 'ml-0 mt-0 ') + ' w-3 h-3'
+                        (isSidebarExpanded ? 'ml-2 mt-1 ' : 'ml-0 mt-0 ') +
+                        ' w-3 h-3'
                       }
                     >
                       {Upload()}
@@ -1051,14 +1038,11 @@ export function Sidebar(props: {
                 <SidebarItems />
               </ul>
             </nav>
-            {props.formkiqVersion &&
-              props.formkiqVersion.type &&
-              props.isSidebarExpanded && (
-                <div className="text-xxs absolute bottom-0 w-full flex justify-center items-end -mt-1 mb-4">
-                  {props.formkiqVersion.type.toUpperCase()} v
-                  {props.formkiqVersion.version}
-                </div>
-              )}
+            {formkiqVersion && formkiqVersion.type && isSidebarExpanded && (
+              <div className="text-xxs absolute bottom-0 w-full flex justify-center items-end -mt-1 mb-4">
+                {formkiqVersion.type.toUpperCase()} v{formkiqVersion.version}
+              </div>
+            )}
           </>
         )}
       </div>
@@ -1071,29 +1055,4 @@ export function Sidebar(props: {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { user, section } = state.authReducer;
-  const { nextLoadingStatus, folders } = state.documentsReducer;
-  const {
-    isSidebarExpanded,
-    isSharedFoldersExpanded,
-    brand,
-    formkiqVersion,
-    useAccountAndSettings,
-    useSoftDelete,
-  } = state.configReducer;
-  return {
-    user,
-    section,
-    nextLoadingStatus,
-    folders,
-    isSidebarExpanded,
-    isSharedFoldersExpanded,
-    brand,
-    formkiqVersion,
-    useAccountAndSettings,
-    useSoftDelete,
-  };
-};
-
-export default connect(mapStateToProps)(Sidebar as any);
+export default Sidebar;
