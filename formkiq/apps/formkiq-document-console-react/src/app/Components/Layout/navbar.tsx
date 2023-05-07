@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { matchPath } from 'react-router';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { User, logout } from '../../Store/reducers/auth';
-import { RootState } from '../../Store/store';
+import { RootState, useAppDispatch } from '../../Store/store';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import {
   AccountAndSettingsPrefixes,
@@ -16,8 +16,6 @@ import {
   getUserSites,
   parseSubfoldersFromUrl,
 } from '../../helpers/services/toolService';
-import { IDocument } from '../../helpers/types/document';
-import { IDocumentTag } from '../../helpers/types/documentTag';
 import SearchInput from '../DocumentsAndFolders/Search/searchInput';
 import {
   Api,
@@ -46,7 +44,7 @@ function Navbar(props: {
 }) {
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
     getUserSites(props.user);
@@ -67,9 +65,6 @@ function Navbar(props: {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
-  const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
-    siteDocumentsRootName
-  );
 
   let subfolderLevelPath = matchPath(
     {
@@ -176,27 +171,15 @@ function Navbar(props: {
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
   }, [pathname]);
 
   const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
-  const documentSettingsPath = matchPath(
-    { path: '/documents/settings' },
-    window.location.pathname
-  ) as any;
-  const documentHelpPath = matchPath(
-    { path: '/documents/help' },
-    window.location.pathname
-  ) as any;
   const [showAccountDropdown, setShowAccountDropdown] = React.useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] =
     React.useState(false);
   const [currentSection, setCurrentSection] = useState('DocumentsAndFolders');
   const [inputValue, setInput] = useState('');
-  const [document, setDocument]: [IDocument | null, any] = useState(null);
-  const [documentTags, setDocumentTags]: [IDocumentTag[] | null, any] =
-    useState([]);
 
   let documentId = '';
   const documentViewPath = matchPath(

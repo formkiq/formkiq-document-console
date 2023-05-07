@@ -1,9 +1,9 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import { Close } from '../../Icons/icons';
@@ -32,7 +32,7 @@ export default function EditTagsAndMetadataModal({
     reset,
   } = useForm();
   const doneButtonRef = useRef(null);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
   const closeDialog = () => {
     reset();

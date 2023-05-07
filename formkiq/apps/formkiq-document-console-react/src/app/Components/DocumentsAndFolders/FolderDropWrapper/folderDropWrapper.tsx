@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDrop } from 'react-dnd';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { matchPath } from 'react-router-dom';
 import { User } from '../../../Store/reducers/auth';
 import {
@@ -8,7 +8,7 @@ import {
   updateDocumentsList,
 } from '../../../Store/reducers/documentsList';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
-import { RootState } from '../../../Store/store';
+import { RootState, useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { IDocument } from '../../../helpers/types/document';
 
@@ -37,7 +37,7 @@ function FolderDropWrapper(props: folderDropProps) {
   useEffect(() => {
     setCurrentFolder(folderName);
   }, [folderName]);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const defaultElem = React.forwardRef((props: any, ref) => (
     <div {...props} ref={ref}>
       {props.childs}

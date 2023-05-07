@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { connect, useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { User } from '../../../Store/reducers/auth';
 import {
   addDocumentTag,
@@ -13,7 +13,7 @@ import {
   closeDialog as closeProgressDialog,
   openDialog as openProgressDialog,
 } from '../../../Store/reducers/globalProgressControls';
-import { RootState } from '../../../Store/store';
+import { RootState, useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import {
   formatBytes,
@@ -80,8 +80,7 @@ function DocumentListLine({
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const deleteDocument = () => {
     if (useSoftDelete) {

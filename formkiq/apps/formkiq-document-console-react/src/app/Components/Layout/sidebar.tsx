@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { matchPath } from 'react-router';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Section, User } from '../../Store/reducers/auth';
 import {
   setCurrentActionEvent,
   setIsSharedFoldersExpanded,
   setIsSidebarExpanded,
 } from '../../Store/reducers/config';
-import { RootState } from '../../Store/store';
+import { RootState, useAppDispatch } from '../../Store/store';
 import {
   AccountAndSettingsPrefixes,
   DocumentsAndFoldersPrefixes,
@@ -55,8 +55,7 @@ export function Sidebar(props: {
   useAccountAndSettings: boolean;
   useSoftDelete: boolean;
 }) {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
     getUserSites(props.user);
   const pathname = useLocation().pathname;
@@ -77,9 +76,6 @@ export function Sidebar(props: {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
-  const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
-    siteDocumentsRootName
-  );
   const [sidebarExpanded, setSidebarExpanded] = useState(
     props.isSidebarExpanded
   );
@@ -224,7 +220,6 @@ export function Sidebar(props: {
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
   }, [pathname]);
 
   const toggleSidebarExpand = () => {

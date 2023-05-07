@@ -1,15 +1,15 @@
-import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { connect, useDispatch } from 'react-redux';
-import { RootState } from '../../../Store/store';
-import { closeDialog } from '../../../Store/reducers/globalNotificationControls';
+import { Fragment } from 'react';
+import { connect } from 'react-redux';
 import { Spinner } from '../../../Components/Icons/icons';
+import { closeDialog } from '../../../Store/reducers/globalNotificationControls';
+import { RootState, useAppDispatch } from '../../../Store/store';
 
 function GlobalProgressDialog({ progressDialog }: any) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const onClose = () => {
-    dispatch(closeDialog() as any);
+    dispatch(closeDialog());
   };
   return (
     <Transition appear show={progressDialog.isOpened} as={Fragment}>
@@ -61,4 +61,4 @@ const mapStateToProps = (state: RootState) => {
   return { progressDialog };
 };
 
-export default connect(mapStateToProps)(GlobalProgressDialog as any);
+export default connect(mapStateToProps)(GlobalProgressDialog);
