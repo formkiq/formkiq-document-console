@@ -1,9 +1,13 @@
 import { useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import { AuthState } from '../../Store/reducers/auth';
+import { ConfigState } from '../../Store/reducers/config';
+import { DataCacheState } from '../../Store/reducers/data';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
-import { store, useAppDispatch } from '../../Store/store';
+import { useAppDispatch } from '../../Store/store';
 import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
 
 export function ChangePassword() {
@@ -22,23 +26,23 @@ export function ChangePassword() {
     email = email.replace(' ', '+');
   }
   const verificationCode = new URLSearchParams(search).get('code');
+  const { formkiqClient } = useSelector(DataCacheState);
+  const { user } = useSelector(AuthState);
+  const { documentApi, userPoolId, clientId } = useSelector(ConfigState);
 
   const onSubmit = async (data: any) => {
-    let { formkiqClient } = store.getState().dataCacheReducer;
+    let newformkiqClient = formkiqClient;
     if (!formkiqClient.apiClient) {
-      const { user } = store.getState().authReducer;
-      const { documentApi, userPoolId, clientId } =
-        store.getState().configReducer;
-      formkiqClient = new FormkiqClient(documentApi, userPoolId, clientId);
-      formkiqClient.resetClient(documentApi, userPoolId, clientId);
-      formkiqClient.rebuildCognitoClient(
+      newformkiqClient = new FormkiqClient(documentApi, userPoolId, clientId);
+      newformkiqClient.resetClient(documentApi, userPoolId, clientId);
+      newformkiqClient.rebuildCognitoClient(
         user?.email,
         user?.idToken,
         user?.accessToken,
         user?.refreshToken
       );
     }
-    await formkiqClient.documentsApi.apiClient.cognitoClient
+    await newformkiqClient.documentsApi.apiClient.cognitoClient
       .confirmPassword(email, verificationCode, data.newPassword)
       .then((response: any) => {
         if (response.cognitoErrorCode) {

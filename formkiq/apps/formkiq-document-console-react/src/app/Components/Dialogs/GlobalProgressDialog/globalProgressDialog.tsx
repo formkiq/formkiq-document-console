@@ -1,18 +1,21 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Spinner } from '../../../Components/Icons/icons';
 import { closeDialog } from '../../../Store/reducers/globalNotificationControls';
-import { RootState, useAppDispatch } from '../../../Store/store';
+import { GlobalProgressState } from '../../../Store/reducers/globalProgressControls';
+import { useAppDispatch } from '../../../Store/store';
 
-function GlobalProgressDialog({ progressDialog }: any) {
+function GlobalProgressDialog() {
   const dispatch = useAppDispatch();
+
+  const { isOpen, dialogTitle } = useSelector(GlobalProgressState);
 
   const onClose = () => {
     dispatch(closeDialog());
   };
   return (
-    <Transition appear show={progressDialog.isOpened} as={Fragment}>
+    <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-30" onClose={onClose}>
         <Transition.Child
           as={Fragment}
@@ -42,7 +45,7 @@ function GlobalProgressDialog({ progressDialog }: any) {
                   as="h3"
                   className="text-lg font-medium text-center leading-6 pb-2 text-gray-900"
                 >
-                  {progressDialog.dialogTitle}
+                  {dialogTitle}
                 </Dialog.Title>
                 <div className="flex w-full justify-center pt-5">
                   <Spinner />
@@ -56,9 +59,4 @@ function GlobalProgressDialog({ progressDialog }: any) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { progressDialog } = state.globalProgressControls;
-  return { progressDialog };
-};
-
-export default connect(mapStateToProps)(GlobalProgressDialog);
+export default GlobalProgressDialog;

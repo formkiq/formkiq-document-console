@@ -1,6 +1,9 @@
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import { ConfigState } from '../../../Store/reducers/config';
+import { DataCacheState } from '../../../Store/reducers/data';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { formatDate, getFileIcon } from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
@@ -28,11 +31,7 @@ export default function SearchInput({
   onKeyDown,
   siteId,
   documentsRootUri,
-  brand,
-  formkiqVersion,
-  useAdvancedSearch,
   value,
-  allTags,
 }: any) {
   const [expanded, setExpanded] = useState(false);
   const [documents, setDocuments] = useState(null);
@@ -40,6 +39,8 @@ export default function SearchInput({
     useState(false);
   const navigate = useNavigate();
 
+  const { formkiqVersion, useAdvancedSearch } = useSelector(ConfigState);
+  const { allTags } = useSelector(DataCacheState);
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, setExpanded);
 

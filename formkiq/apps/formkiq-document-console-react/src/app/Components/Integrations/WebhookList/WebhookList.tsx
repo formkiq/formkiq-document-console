@@ -1,5 +1,3 @@
-import { ConnectedProps, connect } from 'react-redux';
-import { RootState } from '../../../Store/store';
 import { Plus } from '../../Icons/icons';
 
 type Props = {
@@ -87,10 +85,4 @@ export function WebhookList({
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  return { user: state.authReducer?.user };
-};
-
-const connector = connect(mapStateToProps);
-type ComponentProps = ConnectedProps<typeof connector>;
-export default connector(WebhookList);
+export default WebhookList;

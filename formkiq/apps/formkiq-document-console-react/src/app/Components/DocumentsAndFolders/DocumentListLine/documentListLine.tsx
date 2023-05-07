@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { User } from '../../../Store/reducers/auth';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
+import { ConfigState } from '../../../Store/reducers/config';
 import {
   addDocumentTag,
   removeDocumentTag,
@@ -13,7 +14,7 @@ import {
   closeDialog as closeProgressDialog,
   openDialog as openProgressDialog,
 } from '../../../Store/reducers/globalProgressControls';
-import { RootState, useAppDispatch } from '../../../Store/store';
+import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import {
   formatBytes,
@@ -21,7 +22,6 @@ import {
   getFileIcon,
   isTagValueIncludes,
 } from '../../../helpers/services/toolService';
-import { IDocument } from '../../../helpers/types/document';
 import { Info, Share, Star, StarFilled, Trash } from '../../Icons/icons';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
@@ -33,7 +33,6 @@ function DocumentListLine({
   isSiteReadOnly,
   documentsRootUri,
   onShareClick,
-  searchDocuments,
   onDeleteClick,
   onRestoreClick,
   onEditTagsAndMetadataModalClick,
@@ -42,14 +41,7 @@ function DocumentListLine({
   onDocumentVersionsModalClick,
   onESignaturesModalClick,
   onTagChange,
-  user,
-  filterTag,
-  brand,
-  formkiqVersion,
-  tagColors,
-  useIndividualSharing,
-  useCollections,
-  useSoftDelete,
+
   leftOffset = 0,
 }: {
   file: any;
@@ -67,20 +59,22 @@ function DocumentListLine({
   onDocumentVersionsModalClick: any;
   onESignaturesModalClick: any;
   onTagChange: any;
-  user: User;
-  documents: IDocument[];
-  filterTag: string;
-  brand: string;
-  formkiqVersion: any;
-  tagColors: any[];
-  useIndividualSharing: boolean;
-  useCollections: boolean;
-  useSoftDelete: boolean;
-  leftOffset: number;
+  filterTag: string | null;
+  leftOffset?: number;
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
   const dispatch = useAppDispatch();
+
+  const { user } = useAuthenticatedState();
+
+  const {
+    formkiqVersion,
+    tagColors,
+    useCollections,
+    useSoftDelete,
+    useIndividualSharing,
+  } = useSelector(ConfigState);
 
   const deleteDocument = () => {
     if (useSoftDelete) {
@@ -459,11 +453,4 @@ function DocumentListLine({
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { user } = state.authReducer;
-  const { documents } = state.documentsReducer;
-  const { brand, formkiqVersion, tagColors } = state.configReducer;
-  return { user, documents, brand, formkiqVersion, tagColors };
-};
-
-export default connect(mapStateToProps)(DocumentListLine as any) as any;
+export default DocumentListLine;

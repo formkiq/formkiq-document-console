@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { ArrowBottom, ArrowRight } from '../../../Components/Icons/icons';
 import NewWebhookModal from '../../../Components/Integrations/NewWebhook/newWebhook';
 import WebhookList from '../../../Components/Integrations/WebhookList/WebhookList';
+import { AuthState } from '../../../Store/reducers/auth';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
-import { RootState, useAppDispatch } from '../../../Store/store';
+import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 
 type HookItem = {
@@ -13,11 +14,12 @@ type HookItem = {
   readonly: boolean;
   hooks: [] | null;
 };
-export function Webhooks({ user }: any) {
+export function Webhooks() {
   const dispatch = useAppDispatch();
   let userSite: any = null;
   let defaultSite: any = null;
   const sharedFolderSites: any[] = [];
+  const { user } = useSelector(AuthState);
   if (user && user.sites) {
     user.sites.forEach((site: any) => {
       if (site.siteId === user.email) {
@@ -74,7 +76,7 @@ export function Webhooks({ user }: any) {
   }, [user]);
 
   const setWebhooks = (webhooks: [], siteId: string, readonly: boolean) => {
-    if (siteId === user.email) {
+    if (siteId === user?.email) {
       // NOTE: does not allow for a readonly user site
       setUserSiteWebhooks(webhooks as any);
     } else if (siteId === 'default') {
@@ -259,8 +261,4 @@ export function Webhooks({ user }: any) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  return { user: state.authReducer?.user };
-};
-
-export default connect(mapStateToProps)(Webhooks as any);
+export default Webhooks;

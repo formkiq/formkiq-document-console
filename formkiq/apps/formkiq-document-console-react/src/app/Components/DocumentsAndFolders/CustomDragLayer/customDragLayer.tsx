@@ -1,33 +1,27 @@
 import { useDragLayer } from 'react-dnd';
-import { connect } from 'react-redux';
-import { User } from '../../../Store/reducers/auth';
-import { RootState } from '../../../Store/store';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import {
   getFileIcon,
   isTagValueIncludes,
 } from '../../../helpers/services/toolService';
 import { Star, StarFilled } from '../../Icons/icons';
 
-function CustomDragLayer(props: { user: User; brand: string }) {
-  const {
-    itemType,
-    isDragging,
-    item,
-    initialOffset,
-    currentOffset,
-    clientOffset,
-  } = useDragLayer((monitor) => ({
-    item: monitor.getItem(),
-    itemType: monitor.getItemType(),
-    initialOffset: monitor.getInitialSourceClientOffset(),
-    currentOffset: monitor.getSourceClientOffset(),
-    isDragging: monitor.isDragging(),
-    clientOffset: monitor.getClientOffset(),
-  }));
+function CustomDragLayer() {
+  const { itemType, isDragging, item, currentOffset, clientOffset } =
+    useDragLayer((monitor) => ({
+      item: monitor.getItem(),
+      itemType: monitor.getItemType(),
+      initialOffset: monitor.getInitialSourceClientOffset(),
+      currentOffset: monitor.getSourceClientOffset(),
+      isDragging: monitor.isDragging(),
+      clientOffset: monitor.getClientOffset(),
+    }));
+
+  const { user } = useAuthenticatedState();
 
   const isFavorited = isTagValueIncludes(
     item?.tags?.sysFavoritedBy,
-    props.user.email
+    user.email
   );
   const renderItem = () => {
     switch (itemType) {
@@ -82,10 +76,4 @@ function CustomDragLayer(props: { user: User; brand: string }) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { user } = state.authReducer;
-  const { brand } = state.configReducer;
-  return { user, brand };
-};
-
-export default connect(mapStateToProps)(CustomDragLayer as any);
+export default CustomDragLayer;

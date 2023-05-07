@@ -1,16 +1,18 @@
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { ConfigState } from '../../Store/reducers/config';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
-import { RootState, useAppDispatch } from '../../Store/store';
+import { useAppDispatch } from '../../Store/store';
 
-export function ForgotPassword({ authApi }: { authApi: string }) {
+export function ForgotPassword() {
   const {
     register,
     formState: { errors },
     handleSubmit,
   } = useForm();
   const dispatch = useAppDispatch();
+  const { authApi } = useSelector(ConfigState);
 
   const onSubmit = async (data: any) => {
     const body = {
@@ -109,11 +111,4 @@ export function ForgotPassword({ authApi }: { authApi: string }) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { authApi } = state.configReducer;
-  return {
-    authApi,
-  };
-};
-
-export default connect(mapStateToProps)(ForgotPassword as any);
+export default ForgotPassword;

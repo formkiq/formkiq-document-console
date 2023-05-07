@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { connect } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Spinner } from '../../Components/Icons/icons';
-import { User } from '../../Store/reducers/auth';
-import { RootState } from '../../Store/store';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { OnlyOfficeNewFileExtensions } from '../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -12,15 +10,13 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 
-export function DocumentNew(props: { user: User }) {
+export function DocumentNew() {
   const { extension } = useParams();
-  const { user } = props;
+  const { user } = useAuthenticatedState();
   const navigate = useNavigate();
   const search = useLocation().search;
-  let path = new URLSearchParams(search).get('path');
-  if (!path) {
-    path = '';
-  }
+  const path = new URLSearchParams(search).get('path') || '';
+
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
     getUserSites(user);
   const pathname = useLocation().pathname;
@@ -29,7 +25,6 @@ export function DocumentNew(props: { user: User }) {
     siteRedirectUrl,
     siteDocumentsRootUri,
     siteDocumentsRootName,
-    isSiteReadOnly,
   } = getCurrentSiteInfo(
     pathname,
     user,
@@ -134,9 +129,4 @@ export function DocumentNew(props: { user: User }) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { user } = state.authReducer;
-  return { user: user };
-};
-
-export default connect(mapStateToProps)(DocumentNew as any);
+export default DocumentNew;

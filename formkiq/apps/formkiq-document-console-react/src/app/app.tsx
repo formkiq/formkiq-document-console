@@ -55,7 +55,7 @@ export const App = () => {
         config.userPoolId,
         config.clientId
       );
-      const { user } = store.getState().authReducer;
+      const { user } = store.getState().authState;
       formkiqClient.rebuildCognitoClient(
         user?.email,
         user?.idToken,

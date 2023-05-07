@@ -1,10 +1,11 @@
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { Spinner, Windows } from '../../Components/Icons/icons';
 import { login } from '../../Store/reducers/auth';
 import {
+  ConfigState,
   configInitialState,
   setAuthApi,
   setBrand,
@@ -17,7 +18,7 @@ import {
 } from '../../Store/reducers/config';
 import { setFormkiqClient } from '../../Store/reducers/data';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
-import { RootState, useAppDispatch } from '../../Store/store';
+import { useAppDispatch } from '../../Store/store';
 import { ConfigService } from '../../helpers/services/configService';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { LocalStorage } from '../../helpers/tools/useLocalStorage';
@@ -25,15 +26,15 @@ import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
 
 const storage: LocalStorage = LocalStorage.Instance;
 
-export function SignIn(props: {
-  userAuthenticationType: string;
-  customAuthorizerUrl: string;
-}) {
+export function SignIn() {
   const {
     register,
     formState: { errors },
     handleSubmit,
   } = useForm();
+
+  const { userAuthenticationType, customAuthorizerUrl } =
+    useSelector(ConfigState);
   const dispatch = useAppDispatch();
   const { search } = useLocation();
   const searchParams = search.replace('?', '').split('&') as any[];
@@ -172,7 +173,7 @@ export function SignIn(props: {
         <div className="w-full mt-8 justify-center bg-white p-5">
           <div className="font-bold text-lg text-center mb-4">
             <div className="w-full flex justify-center mb-2">
-              {props.userAuthenticationType === 'activedirectory' && (
+              {userAuthenticationType === 'activedirectory' && (
                 <span className="block w-6">
                   <Windows />
                 </span>
@@ -181,17 +182,17 @@ export function SignIn(props: {
             <span className="text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
               Sign In
             </span>
-            {props.userAuthenticationType === 'activedirectory' && (
+            {userAuthenticationType === 'activedirectory' && (
               <>
                 <span> with Active Directory</span>
               </>
             )}
-            {props.userAuthenticationType !== 'cognito' &&
-              props.userAuthenticationType !== 'activedirectory' && (
+            {userAuthenticationType !== 'cognito' &&
+              userAuthenticationType !== 'activedirectory' && (
                 <span> using External Provider</span>
               )}
           </div>
-          {props.userAuthenticationType === 'cognito' && !isDemo ? (
+          {userAuthenticationType === 'cognito' && !isDemo ? (
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="md:w-1/3">
@@ -262,14 +263,11 @@ export function SignIn(props: {
             </form>
           ) : (
             <div className="w-full flex justify-center">
-              {props.customAuthorizerUrl.length && !isDemo && (
+              {customAuthorizerUrl.length && !isDemo && (
                 <button
                   className="w-48 flex bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                   onClick={(event) => {
-                    signInWithCustomAuthorizer(
-                      event,
-                      props.customAuthorizerUrl
-                    );
+                    signInWithCustomAuthorizer(event, customAuthorizerUrl);
                   }}
                 >
                   <span className="">Sign In</span>
@@ -284,12 +282,4 @@ export function SignIn(props: {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { userAuthenticationType, customAuthorizerUrl } = state.configReducer;
-  return {
-    userAuthenticationType,
-    customAuthorizerUrl,
-  };
-};
-
-export default connect(mapStateToProps)(SignIn as any);
+export default SignIn;
