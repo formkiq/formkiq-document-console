@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { connect, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Spinner } from '../../Components/Icons/icons';
-import { User } from '../../Store/reducers/auth';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { ConfigState } from '../../Store/reducers/config';
 import { setCurrentDocumentPath } from '../../Store/reducers/data';
-import { RootState } from '../../Store/store';
+import { useAppDispatch } from '../../Store/store';
 import {
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
@@ -17,13 +18,16 @@ import {
 } from '../../helpers/services/toolService';
 import { IDocument } from '../../helpers/types/document';
 
-export function DocumentView(props: { user: User; formkiqVersion: any }) {
+export function DocumentView() {
   const { id } = useParams();
   const versionKey = new URLSearchParams(useLocation().search).get(
     'versionKey'
   );
-  const { user } = props;
-  const dispatch = useDispatch();
+  const { user } = useAuthenticatedState();
+
+  const { formkiqVersion } = useSelector(ConfigState);
+
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
     getUserSites(user);
@@ -33,7 +37,6 @@ export function DocumentView(props: { user: User; formkiqVersion: any }) {
     siteRedirectUrl,
     siteDocumentsRootUri,
     siteDocumentsRootName,
-    isSiteReadOnly,
   } = getCurrentSiteInfo(
     pathname,
     user,
@@ -73,7 +76,7 @@ export function DocumentView(props: { user: User; formkiqVersion: any }) {
           setDocument(response);
           dispatch(setCurrentDocumentPath(response.path));
           if (
-            props.formkiqVersion.modules.indexOf('onlyoffice') > -1 &&
+            formkiqVersion.modules.indexOf('onlyoffice') > -1 &&
             OnlyOfficeContentTypes.indexOf(
               (response as IDocument).contentType
             ) > -1
@@ -156,8 +159,6 @@ export function DocumentView(props: { user: User; formkiqVersion: any }) {
 
   const [document, setDocument]: [IDocument | null, any] = useState(null);
   const [ooConfig, setOOConfig]: [any | null, any] = useState(null);
-  const documentIFrame = useRef<HTMLIFrameElement>(null);
-  const [documentUrl, setDocumentUrl]: [string | null, any] = useState(null);
   const [documentContent, setDocumentContent]: [string | null, any] =
     useState('');
   const DocumentViewer = () => {
@@ -212,10 +213,4 @@ export function DocumentView(props: { user: User; formkiqVersion: any }) {
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { user } = state.authReducer;
-  const { formkiqVersion } = state.configReducer;
-  return { user, formkiqVersion };
-};
-
-export default connect(mapStateToProps)(DocumentView as any);
+export default DocumentView;

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
-import { useDispatch } from 'react-redux';
 import { ColorPicker } from '../../Icons/icons';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
@@ -26,7 +25,6 @@ export default function TagColorPickerPopover({
   tagKey,
   tagColors,
 }: any) {
-  const dispatch = useDispatch();
   const [visible, setVisibility] = useState(false);
   const [referenceRef, setReferenceRef] = useState(null);
   const [popperRef, setPopperRef] = useState(null);

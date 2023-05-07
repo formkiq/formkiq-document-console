@@ -10,6 +10,7 @@ import {
 } from '../../helpers/services/toolService';
 import { IDocument, requestStatusTypes } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
+import { RootState } from '../store';
 import { DocumentsService } from './../../helpers/services/documentsService';
 import { User } from './auth';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
@@ -27,12 +28,12 @@ export const fetchDocuments = createAsyncThunk(
       nextToken,
       page,
     } = data;
-    const { user } = (thunkAPI.getState() as any).authReducer;
+    const user = (thunkAPI.getState() as any)?.authState.user;
     let tagParam = null;
     if (filterTag) {
       tagParam = filterTag.split(':')[0];
     }
-    const dataCache = (thunkAPI.getState() as any)?.dataCacheReducer;
+    const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
     const dateDiff =
       new Date().getTime() - dataCache.tagsLastRefreshed.getTime();
     if (dateDiff / 1000 > 30 || dataCache.tagsSiteId !== siteId) {
@@ -75,7 +76,7 @@ export const fetchDocuments = createAsyncThunk(
           }
         });
       } else {
-        const dataCache = (thunkAPI.getState() as any)?.dataCacheReducer;
+        const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
         DocumentsService.searchDocuments(
           siteId,
           formkiqVersion,
@@ -221,7 +222,7 @@ export const fetchDocuments = createAsyncThunk(
             }
           });
         } else {
-          const dataCache = (thunkAPI.getState() as any)?.dataCacheReducer;
+          const dataCache = (thunkAPI.getState() as RootState).dataCacheState;
           DocumentsService.getDocumentsInFolder(
             subfolderUri,
             siteId,
@@ -253,7 +254,7 @@ export const fetchDocuments = createAsyncThunk(
           });
         }
       } else {
-        const dataCache = (thunkAPI.getState() as any)?.dataCacheReducer;
+        const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
         DocumentsService.getDocumentsInFolder(
           '',
           siteId,
@@ -298,7 +299,7 @@ export const toggleExpandFolder = createAsyncThunk(
       user: User;
     } = data;
 
-    const dataCache = (thunkAPI.getState() as any)?.dataCacheReducer;
+    const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
     const dateDiff =
       new Date().getTime() - dataCache.tagsLastRefreshed.getTime();
     if (dateDiff / 1000 > 30 || dataCache.tagsSiteId !== siteId) {
@@ -468,8 +469,8 @@ export const fetchDeleteDocument = createAsyncThunk(
   }
 );
 const defaultState = {
-  documents: null,
-  folders: null,
+  documents: [] as any[],
+  folders: [] as any[],
   nextLoadingStatus: requestStatusTypes.fulfilled,
   nextToken: null,
   currentSearchPage: 1,
@@ -989,8 +990,20 @@ export const documentsListSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(fetchDocuments.fulfilled, (state) => {
+      return {
+        ...state,
+        nextLoadingStatus: requestStatusTypes.fulfilled,
+      };
+    });
+    builder.addCase(fetchDocuments.rejected, (state) => {
+      return {
+        ...state,
+        nextLoadingStatus: requestStatusTypes.rejected,
+      };
+    });
     // Add reducers for additional action types here, and handle loading state as needed
-    builder.addCase(fetchDocuments.pending, (state, action) => {
+    builder.addCase(fetchDocuments.pending, (state) => {
       return {
         ...state,
         nextLoadingStatus: requestStatusTypes.pending,
@@ -1008,5 +1021,7 @@ export const {
   retrieveAndRefreshFolder,
   removeFolderFromList,
 } = documentsListSlice.actions;
+
+export const DocumentListState = (state: RootState) => state.documentListState;
 
 export default documentsListSlice.reducer;

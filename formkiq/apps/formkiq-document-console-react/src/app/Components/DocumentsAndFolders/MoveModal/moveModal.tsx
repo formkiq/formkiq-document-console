@@ -1,7 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import {
@@ -25,7 +25,7 @@ export default function MoveModal({
   value: ILine | null;
   allTags: any;
 }) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const initialFolders = {
     root: [] as any[],
   };

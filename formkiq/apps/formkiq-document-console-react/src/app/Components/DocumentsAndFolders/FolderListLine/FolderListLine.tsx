@@ -1,9 +1,10 @@
 import React from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { User } from '../../../Store/reducers/auth';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
+import { ConfigState } from '../../../Store/reducers/config';
 import { toggleExpandFolder } from '../../../Store/reducers/documentsList';
-import { RootState } from '../../../Store/store';
+import { useAppDispatch } from '../../../Store/store';
 import { formatDate } from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
 import { IFolder } from '../../../helpers/types/folder';
@@ -25,21 +26,15 @@ interface IProps {
     searchDocuments: any
   ) => () => void;
   onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void;
-  user: User;
   currentDocumentsRootUri: string;
-  useIndividualSharing: boolean;
   onShareClick: (event: any, value: ILine | null) => void;
-  formkiqVersion: any;
-  useCollections: any;
-  useSoftDelete: any;
   onEditTagsAndMetadataModalClick: any;
   onRenameModalClick: any;
   onMoveModalClick: any;
   onDocumentVersionsModalClick: any;
   onESignaturesModalClick: any;
   onTagChange: any;
-  brand: any;
-  filterTag: string;
+  filterTag: string | null;
 }
 
 function FolderListLine({
@@ -48,19 +43,13 @@ function FolderListLine({
   currentSiteId,
   isSiteReadOnly,
   onDeleteClick,
-  user,
   currentDocumentsRootUri,
-  useIndividualSharing,
   onShareClick,
-  formkiqVersion,
-  useCollections,
-  useSoftDelete,
   onEditTagsAndMetadataModalClick,
   onRenameModalClick,
   onMoveModalClick,
   onDocumentVersionsModalClick,
   onESignaturesModalClick,
-  brand,
   onRestoreDocument,
   onDeleteDocument,
   onTagChange,
@@ -71,6 +60,15 @@ function FolderListLine({
     folderPath =
       subfolder + (subfolder.length ? '/' : '') + folderInstance.path;
   }
+
+  const { user } = useAuthenticatedState();
+  const {
+    formkiqVersion,
+    useIndividualSharing,
+    useCollections,
+    useSoftDelete,
+  } = useSelector(ConfigState);
+
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1);
   const trElem = React.forwardRef((props: any, ref) => (
     <tr {...props} ref={ref}>
@@ -78,7 +76,7 @@ function FolderListLine({
     </tr>
   ));
   const tableLeftMargin = 'ml-4';
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const onExpandFolderClick =
     (folderPath: string, value: ILine | null) => () => {
@@ -89,7 +87,7 @@ function FolderListLine({
             subfolderUri: folderPath,
             siteId: currentSiteId,
             user: user,
-          }) as any
+          })
         );
       }
     };
@@ -110,7 +108,6 @@ function FolderListLine({
                       subfolder={subfolder}
                       folderInstance={folder}
                       key={j}
-                      user={user}
                       currentSiteId={currentSiteId}
                       isSiteReadOnly={isSiteReadOnly}
                       onDeleteClick={onDeleteClick}
@@ -127,13 +124,8 @@ function FolderListLine({
                       onESignaturesModalClick={onESignaturesModalClick}
                       onRestoreDocument={onRestoreDocument}
                       onDeleteDocument={onDeleteDocument}
-                      useIndividualSharing={useIndividualSharing}
-                      formkiqVersion={formkiqVersion}
-                      useCollections={useCollections}
-                      useSoftDelete={useSoftDelete}
                       onTagChange={onTagChange}
                       filterTag={filterTag}
-                      brand={brand}
                     />
                   );
                 })}
@@ -161,10 +153,6 @@ function FolderListLine({
                   onESignaturesModalClick={onESignaturesModalClick}
                   onTagChange={onTagChange}
                   filterTag={filterTag}
-                  brand={brand}
-                  useIndividualSharing={useIndividualSharing}
-                  useCollections={useCollections}
-                  useSoftDelete={useSoftDelete}
                   leftOffset={4}
                 />
               );
@@ -344,27 +332,4 @@ function FolderListLine({
   );
 }
 
-const mapStateToProps = (state: RootState) => {
-  const { user } = state.authReducer;
-  const { documents } = state.documentsReducer;
-  const {
-    brand,
-    formkiqVersion,
-    tagColors,
-    useIndividualSharing,
-    useCollections,
-    useSoftDelete,
-  } = state.configReducer;
-  return {
-    user,
-    documents,
-    brand,
-    formkiqVersion,
-    tagColors,
-    useIndividualSharing,
-    useCollections,
-    useSoftDelete,
-  };
-};
-
-export default connect(mapStateToProps)(FolderListLine as any) as any;
+export default FolderListLine;

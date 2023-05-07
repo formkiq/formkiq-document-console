@@ -1,73 +1,85 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import { LocalStorage } from '../../helpers/tools/useLocalStorage';
+import { RootState } from '../store';
 
-const storage: LocalStorage = LocalStorage.Instance
+const storage: LocalStorage = LocalStorage.Instance;
 
 export interface Config {
-  documentApi: string,
-  userPoolId: string,
-  clientId: string,
-  authApi: string,
-  userAuthenticationType: string,
-  customAuthorizerUrl: string,
-  brand: string,
-  formkiqVersion: string,
-  tagColors: string[],
-  isSidebarExpanded: boolean,
-  currentActionEvent: string,
-  isSharedFoldersExpanded: boolean,
-  useIndividualSharing: boolean,
-  useNotifications: boolean,
-  useFileFilter: boolean,
-  useAccountAndSettings: boolean,
-  useCollections: boolean,
-  useAdvancedSearch: boolean,
-  useSoftDelete: boolean,
+  documentApi: string;
+  userPoolId: string;
+  clientId: string;
+  authApi: string;
+  userAuthenticationType: string;
+  customAuthorizerUrl: string;
+  brand: string;
+  formkiqVersion: FormkiqVersion;
+  tagColors: TagColor[];
+  isSidebarExpanded: boolean;
+  currentActionEvent: string;
+  isSharedFoldersExpanded: boolean;
+  useIndividualSharing: boolean;
+  useNotifications: boolean;
+  useFileFilter: boolean;
+  useAccountAndSettings: boolean;
+  useCollections: boolean;
+  useAdvancedSearch: boolean;
+  useSoftDelete: boolean;
 }
 
-const tagColors = [
+export type TagColor = {
+  colorUri: string;
+  tagKeys: any[];
+};
+
+export type FormkiqVersion = {
+  type: string;
+  version: string;
+  modules: any[];
+};
+
+const tagColors: TagColor[] = [
   {
     colorUri: 'flamingo',
-    tagKeys: []
+    tagKeys: [],
   },
   {
     colorUri: 'turbo',
-    tagKeys: []
+    tagKeys: [],
   },
   {
     colorUri: 'citrus',
-    tagKeys: []
+    tagKeys: [],
   },
   {
     colorUri: 'buttercup',
-    tagKeys: []
+    tagKeys: [],
   },
   {
     colorUri: 'ochre',
-    tagKeys: []
+    tagKeys: [],
   },
   {
     colorUri: 'mountain-meadow',
-    tagKeys: []
+    tagKeys: [],
   },
   {
     colorUri: 'dodger-blue',
-    tagKeys: []
+    tagKeys: [],
   },
   {
     colorUri: 'cornflower-blue',
-    tagKeys: []
+    tagKeys: [],
   },
   {
     colorUri: 'orchid',
-    tagKeys: []
+    tagKeys: [],
   },
   {
     colorUri: 'french-rose',
-    tagKeys: []
+    tagKeys: [],
   },
-] as any[]
+];
 
 export const configInitialState = {
   documentApi: '',
@@ -77,7 +89,7 @@ export const configInitialState = {
   authApi: '',
   customAuthorizerUrl: '',
   brand: 'formkiq',
-  formkiqVersion: '',
+  formkiqVersion: { type: '', version: '', modules: [] as any[] },
   tagColors,
   isSidebarExpanded: true,
   currentActionEvent: '',
@@ -89,18 +101,18 @@ export const configInitialState = {
   useCollections: false,
   useAdvancedSearch: false,
   useSoftDelete: true,
-} as Config
+} as Config;
 
-const getInitialState = () => {
-  let value
+const getInitialState = (): Config => {
+  let value;
   if (storage.getConfig()) {
-    value = storage.getConfig()
+    value = storage.getConfig() as Config;
   } else {
-    value = configInitialState
+    value = configInitialState;
   }
-  storage.setConfig(value)
-  return value
-}
+  storage.setConfig(value);
+  return value;
+};
 
 export const configSlice = createSlice({
   name: 'config',
@@ -109,78 +121,78 @@ export const configSlice = createSlice({
     setDocumentApi(state, action: PayloadAction<string>) {
       return {
         ...state,
-        documentApi: action.payload
-      }
+        documentApi: action.payload,
+      };
     },
     setUserPoolId(state, action: PayloadAction<string>) {
       return {
         ...state,
-        userPoolId: action.payload
-      }
+        userPoolId: action.payload,
+      };
     },
     setClientId(state, action: PayloadAction<string>) {
       return {
         ...state,
-        clientId: action.payload
-      }
+        clientId: action.payload,
+      };
     },
     setUserAuthenticationType(state, action: PayloadAction<string>) {
       return {
         ...state,
-        userAuthenticationType: action.payload 
-      }
+        userAuthenticationType: action.payload,
+      };
     },
     setAuthApi(state, action: PayloadAction<string>) {
       return {
         ...state,
-        authApi: action.payload
-      }
+        authApi: action.payload,
+      };
     },
     setCustomAuthorizerUrl(state, action: PayloadAction<string>) {
       return {
         ...state,
-        customAuthorizerUrl: action.payload
-      }
+        customAuthorizerUrl: action.payload,
+      };
     },
     setBrand(state, action: PayloadAction<string>) {
       return {
         ...state,
-        brand: action.payload
-      }
+        brand: action.payload,
+      };
     },
     setFormkiqVersion(state, action: PayloadAction<any>) {
       return {
         ...state,
-        fkqVersion: action.payload
-      }
+        fkqVersion: action.payload,
+      };
     },
-    setTagColors(state, action: PayloadAction<any[]>) {
+    setTagColors(state, action: PayloadAction<TagColor[]>) {
       // console.log(action)
       return {
         ...state,
-        tagColors: action.payload
-      }
+        tagColors: action.payload,
+      };
     },
     setIsSidebarExpanded(state, action: PayloadAction<boolean>) {
       return {
         ...state,
-        isSidebarExpanded: action.payload
-      }
+        isSidebarExpanded: action.payload,
+      };
     },
     setCurrentActionEvent(state, action: PayloadAction<string>) {
       return {
         ...state,
-        currentActionEvent: action.payload
-      }
+        currentActionEvent: action.payload,
+      };
     },
     setIsSharedFoldersExpanded(state, action: PayloadAction<boolean>) {
       return {
         ...state,
-        isSharedFoldersExpanded: action.payload
-      }
-    }
+        isSharedFoldersExpanded: action.payload,
+      };
+    },
   },
-})
+});
 
 export const {
   setDocumentApi,
@@ -194,7 +206,8 @@ export const {
   setTagColors,
   setIsSidebarExpanded,
   setCurrentActionEvent,
-  setIsSharedFoldersExpanded
-} = configSlice.actions
+  setIsSharedFoldersExpanded,
+} = configSlice.actions;
 
-export default configSlice.reducer
+export const ConfigState = (state: RootState) => state.configState;
+export default configSlice.reducer;
