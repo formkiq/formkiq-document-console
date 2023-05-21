@@ -25,6 +25,7 @@ export function WebhookList({
         <div className="mt-4 flex px-4">
           <button
             className="flex bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
+            data-test-id="create-webhook"
             onClick={(event) => onNewClick(event, siteId)}
           >
             <span>Create new</span>
@@ -52,7 +53,7 @@ export function WebhookList({
               <>
                 {(webhooks as any).map((webhook: any, i: number) => {
                   return (
-                    <tr key={i}>
+                    <tr key={i} data-test-id={`webhook-${webhook.name}`}>
                       <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400">
                         {webhook.name}
                       </td>
@@ -62,6 +63,7 @@ export function WebhookList({
                       <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400">
                         <button
                           onClick={onDeleteClick(webhook.id, siteId)}
+                          data-test-id="delete-webhook"
                           className="bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
                         >
                           Delete
