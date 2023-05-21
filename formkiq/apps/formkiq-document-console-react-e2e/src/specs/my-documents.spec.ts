@@ -51,14 +51,16 @@ test('Can upload and delete a file', async ({ page, MyDocuments }) => {
   await MyDocuments.uploadModal.chooseTestFile();
   await MyDocuments.uploadModal.uploadFile();
 
+  await page.waitForTimeout(1000);
   const uploadedFile =
     MyDocuments.uploadModal.body.getByTestId('uploaded-files-0');
-  await expect(uploadedFile).toHaveText(/^test.*png$/);
+  await expect(uploadedFile).toHaveText(/^blue-jay.*jpeg$/);
 
+  await page.waitForTimeout(1000);
   await MyDocuments.uploadModal.closeModal();
 
-  await MyDocuments.deleteFile(/^test.*png$/);
+  await MyDocuments.deleteFile(/^blue-jay.*jpeg$/);
 
-  const file = page.getByTestId(/^test.*png$/);
+  const file = page.getByTestId(/^blue-jay.*jpeg$/);
   await expect(file).not.toBeVisible();
 });

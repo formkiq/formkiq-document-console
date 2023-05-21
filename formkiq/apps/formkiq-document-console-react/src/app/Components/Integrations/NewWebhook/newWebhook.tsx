@@ -61,7 +61,12 @@ export default function NewWebhookModal({
 
   return (
     <Transition.Root show={isOpened} as={Fragment}>
-      <Dialog as="div" className="relative z-20" onClose={() => {}}>
+      <Dialog
+        as="div"
+        className="relative z-20"
+        onClose={() => {}}
+        data-test-id="webhook-creation-modal"
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -93,6 +98,7 @@ export default function NewWebhookModal({
                     </div>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
+                      data-test-id="close-webhook-creation"
                       onClick={closeDialog}
                     >
                       <Close />
@@ -108,6 +114,7 @@ export default function NewWebhookModal({
                         <div className="w-full mr-12">
                           <input
                             aria-label="Name"
+                            data-test-id="webhook-name-input"
                             type="text"
                             className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600
                                                     text-sm
@@ -124,10 +131,12 @@ export default function NewWebhookModal({
                         <input
                           type="submit"
                           value="Create"
+                          data-test-id="confirm-webhook-creation"
                           className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white font-semibold py-2 px-4 rounded mr-2"
                         />
                         <button
                           onClick={closeDialog}
+                          data-test-id="cancel-webhook-creation"
                           className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-2 px-4 rounded"
                         >
                           Cancel
