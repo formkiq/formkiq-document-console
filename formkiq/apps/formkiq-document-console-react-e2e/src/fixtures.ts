@@ -1,10 +1,12 @@
 import { test as base } from '@playwright/test';
+import { ApiExplorerPage } from './page-objects/ApiExplorerPage';
 import { FavoritesPage } from './page-objects/FavoritesPage';
 import { LoginPage } from './page-objects/LoginPage';
 import { MyDocumentsPage } from './page-objects/MyDocumentsPage';
 import { Profile } from './page-objects/Profile';
 import { TeamDocumentsPage } from './page-objects/TeamDocumentsPage';
 import { TrashPage } from './page-objects/TrashPage';
+import { WebhooksPage } from './page-objects/WebhooksPage';
 
 type Fixture = {
   LoginPage: LoginPage;
@@ -13,6 +15,8 @@ type Fixture = {
   TeamDocuments: TeamDocumentsPage;
   Trash: TrashPage;
   Favorites: FavoritesPage;
+  ApiExplorer: ApiExplorerPage;
+  Webhooks: WebhooksPage;
 };
 
 // Extend basic test by providing our fixtures.
@@ -40,6 +44,14 @@ export const test = base.extend<Fixture>({
   Favorites: async ({ page }, use) => {
     const favorites = new FavoritesPage(page);
     await use(favorites);
+  },
+  ApiExplorer: async ({ page }, use) => {
+    const apiExplorer = new ApiExplorerPage(page);
+    await use(apiExplorer);
+  },
+  Webhooks: async ({ page }, use) => {
+    const webhooks = new WebhooksPage(page);
+    await use(webhooks);
   },
   page: async ({ page }, use) => {
     await page.goto('/');

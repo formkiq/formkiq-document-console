@@ -314,6 +314,7 @@ export function Sidebar() {
             <li
               className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
               onClick={toggleDocumentsExpand}
+              data-test-id="expand-documents"
             >
               <div className="flex justify-end mt-2 mr-1">
                 {documentsExpanded ? <ArrowBottom /> : <ArrowRight />}
@@ -546,6 +547,7 @@ export function Sidebar() {
             )}
             <li
               className="mt-2 w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              data-test-id="expand-integrations"
               onClick={toggleIntegrationsExpand}
             >
               <div className="flex justify-end mt-2 mr-1">
@@ -587,6 +589,7 @@ export function Sidebar() {
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"
+                    data-test-id="nav-api-explorer"
                     className={({ isActive }) =>
                       (isActive
                         ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
@@ -607,6 +610,7 @@ export function Sidebar() {
                 <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/webhooks"
+                    data-test-id="nav-webhooks"
                     className={({ isActive }) =>
                       (isActive
                         ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '

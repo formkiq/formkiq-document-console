@@ -45,8 +45,7 @@ export class MyDocumentsPage {
   }
 
   async deleteFile(name: string | RegExp) {
-    const file = this.page.getByTestId(name);
-    await file.getByTestId('delete-action').click();
+    await this.page.getByTestId(name).getByTestId('delete-action').click();
 
     const modal = this.page.getByText(
       'Are you sure you want to delete this document?'
@@ -129,7 +128,7 @@ export class UploadDocumentModal {
     const fileChooser = await fileChooserPromise;
     //runs in cwd of test executor
     await fileChooser.setFiles(
-      './apps/formkiq-document-console-react-e2e/src/test-files/test.png'
+      './apps/formkiq-document-console-react-e2e/src/test-files/blue-jay.jpeg'
     );
 
     await expect(this.status).toBeVisible();

@@ -423,7 +423,7 @@ function updateFormValidity(state: any, setState: any, formRef: any) {
   });
 }
 function getApiItem(props: any, state: any, setState: any, formRef: any) {
-  const { apiItem, sites, documentApi } = props;
+  const { apiItem, sites } = props;
   const onFormChange = (ev: any) => {
     updateRequestsFromForm(state, setState, props, formRef);
   };
@@ -1274,6 +1274,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
               <ul className="list-reset flex border-b">
                 <li className="-mb-px mr-1">
                   <a
+                    data-test-id="apiItem-HTTP"
                     className={`inline-block cursor-pointer border-l border-t border-r rounded-t py-2 px-4 text-blue-dark font-semibold 
                       ${
                         state.currentRequestTab === 'http'
@@ -1287,6 +1288,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 </li>
                 <li className="-mb-px mr-1">
                   <a
+                    data-test-id="apiItem-cURL"
                     className={`inline-block cursor-pointer border-l border-t border-r rounded-t py-2 px-4 text-blue-dark font-semibold 
                       ${
                         state.currentRequestTab === 'curl'
@@ -1314,6 +1316,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
               <textarea
                 aria-label="cURL Request"
                 id="curl-textarea"
+                data-test-id="apiItem-curl-request"
                 rows={8}
                 readOnly={true}
                 value={state.curlRequest}
@@ -1327,6 +1330,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
           </div>
           <div className="ml-4">
             <button
+              data-test-id="apiItem-fetch"
               className={`px-2 md:px-4 font-semibold px-4 py-1 rounded-2xl
                   ${
                     state.isValidForm
@@ -1351,6 +1355,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
 
               {state.responseStatus && (
                 <div
+                  data-test-id="apiItem-response-status"
                   className={
                     renderResponseStatusClasses(state.responseStatus) +
                     ' mt-4 p-2 rounded-md border font-semibold text-xl'
@@ -1366,6 +1371,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                   </h6>
                   <textarea
                     aria-label="Response"
+                    data-test-id="apiItem-response-data"
                     id="response-textarea"
                     rows={8}
                     readOnly={true}
@@ -1410,11 +1416,16 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
       );
     }
   }, []);
+
+  const apiItemName = props.apiItem.method + props.apiItem.path;
   return (
-    <div className="w-full flex flex-col lg:flex-col">
+    <div
+      className="w-full flex flex-col lg:flex-col"
+      data-test-id={`apiItem-${apiItemName}`}
+    >
       {itemHeader(isOpened, setOpened, props.apiItem)}
       <div className={`${isOpened ? '' : 'hidden'} border-b mb-2`}>
-        {getApiItem(props, state, setState, formRef)}
+        {getApiItem({ documentApi, user, ...props }, state, setState, formRef)}
       </div>
     </div>
   );

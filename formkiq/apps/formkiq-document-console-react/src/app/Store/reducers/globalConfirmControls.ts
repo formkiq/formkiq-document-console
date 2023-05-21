@@ -1,30 +1,5 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-
-export const confirmAction = createAsyncThunk(
-  'globalConfirmControls/confirmAction',
-  async (_, thunkAPI) => {
-    const { callback } = (thunkAPI.getState() as any).globalConfirmControls
-      .confirmDialog;
-    callback();
-    thunkAPI.dispatch(closeDialog());
-    return '';
-  }
-);
-
-export const closeDialog = createAsyncThunk(
-  'globalConfirmControls/closeDialog',
-  async (_, thunkAPI) => {
-    thunkAPI.dispatch(hideDialog());
-    await new Promise((res, rej) => {
-      // wait for dialog animation fadeout
-      setTimeout(() => {
-        thunkAPI.dispatch(resetDialog());
-        res('');
-      }, 200);
-    });
-  }
-);
 
 export type GlobalConfirmSlice = {
   callback?: () => Promise<void>;
@@ -68,12 +43,6 @@ export const globalConfirmControls = createSlice({
       }
       return newDialogState;
     },
-  },
-  extraReducers: (builder) => {
-    // Add reducers for additional action types here, and handle loading state as needed
-    builder.addCase(confirmAction.fulfilled, (state, action) => {
-      // console.log(action)
-    });
   },
 });
 
