@@ -126,9 +126,9 @@ export function Webhooks() {
   };
 
   const deleteWebhook = (webhookId: string, siteId: string) => {
-    const deleteFunc = () => {
+    const deleteFunc = async () => {
       setUserSiteWebhooks(null);
-      DocumentsService.deleteWebhook(webhookId, siteId).then(
+      await DocumentsService.deleteWebhook(webhookId, siteId).then(
         (webhooksResponse: any) => {
           updateWebhooks();
         }
