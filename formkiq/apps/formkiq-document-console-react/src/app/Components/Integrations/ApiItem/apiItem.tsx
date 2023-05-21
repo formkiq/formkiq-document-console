@@ -423,7 +423,7 @@ function updateFormValidity(state: any, setState: any, formRef: any) {
   });
 }
 function getApiItem(props: any, state: any, setState: any, formRef: any) {
-  const { apiItem, sites, documentApi } = props;
+  const { apiItem, sites } = props;
   const onFormChange = (ev: any) => {
     updateRequestsFromForm(state, setState, props, formRef);
   };
@@ -1414,7 +1414,7 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     <div className="w-full flex flex-col lg:flex-col">
       {itemHeader(isOpened, setOpened, props.apiItem)}
       <div className={`${isOpened ? '' : 'hidden'} border-b mb-2`}>
-        {getApiItem(props, state, setState, formRef)}
+        {getApiItem({ documentApi, user, ...props }, state, setState, formRef)}
       </div>
     </div>
   );
