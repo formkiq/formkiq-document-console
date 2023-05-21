@@ -3,22 +3,26 @@ import { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import {
   GlobalConfirmState,
-  closeDialog,
-  confirmAction,
+  hideDialog,
 } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 
 function GlobalConfirmDialog() {
   const dispatch = useAppDispatch();
 
-  const { isOpen, dialogTitle } = useSelector(GlobalConfirmState);
+  const { isOpen, dialogTitle, callback } = useSelector(GlobalConfirmState);
 
   const onClose = () => {
-    dispatch(closeDialog());
+    dispatch(hideDialog());
   };
-  const onConfirm = () => {
-    dispatch(confirmAction());
+
+  const onConfirm = async () => {
+    if (callback) {
+      await callback();
+    }
+    dispatch(hideDialog());
   };
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-30" onClose={onClose}>
