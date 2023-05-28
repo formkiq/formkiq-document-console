@@ -14,7 +14,7 @@
         "baseHref": "/",
         "main": "apps/formkiq-document-console-react/src/main.tsx",
         "polyfills": "apps/formkiq-document-console-react/src/polyfills.ts",
-        "tsConfig": "apps/formkiq-document-console-react/tsconfig.app.json",
+        "tsConfig": "apps/formkiq-document-console-react/tsconfig.json",
         "assets": [
           "apps/formkiq-document-console-react/src/favicon.ico",
           "apps/formkiq-document-console-react/src/assets"
@@ -79,6 +79,16 @@
       "options": {
         "jestConfig": "apps/formkiq-document-console-react/jest.config.ts",
         "passWithNoTests": true
+      }
+    },
+    "ts-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "tsc --build --force apps/formkiq-document-console-react/tsconfig.json"
+          }
+        ]
       }
     }
   },
