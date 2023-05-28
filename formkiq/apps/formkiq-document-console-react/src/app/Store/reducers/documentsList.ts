@@ -471,7 +471,7 @@ export const fetchDeleteDocument = createAsyncThunk(
 const defaultState = {
   documents: [] as any[],
   folders: [] as any[],
-  nextLoadingStatus: requestStatusTypes.fulfilled,
+  loadingStatus: requestStatusTypes.fulfilled,
   nextToken: null,
   currentSearchPage: 1,
   isLastSearchPageLoaded: false,
@@ -613,7 +613,7 @@ export const documentsListSlice = createSlice({
             nextToken: next,
             documents: docsRes,
             folders,
-            nextLoadingStatus: requestStatusTypes.fulfilled as any, // for bottom spiner with scroll loading
+            loadingStatus: requestStatusTypes.fulfilled, // for bottom spiner with scroll loading
             currentSearchPage: page,
             isLastSearchPageLoaded: isLastSearchPageLoaded,
           };
@@ -993,20 +993,19 @@ export const documentsListSlice = createSlice({
     builder.addCase(fetchDocuments.fulfilled, (state) => {
       return {
         ...state,
-        nextLoadingStatus: requestStatusTypes.fulfilled,
+        loadingStatus: requestStatusTypes.fulfilled,
       };
     });
     builder.addCase(fetchDocuments.rejected, (state) => {
       return {
         ...state,
-        nextLoadingStatus: requestStatusTypes.rejected,
+        loadingStatus: requestStatusTypes.rejected,
       };
     });
-    // Add reducers for additional action types here, and handle loading state as needed
     builder.addCase(fetchDocuments.pending, (state) => {
       return {
         ...state,
-        nextLoadingStatus: requestStatusTypes.pending,
+        loadingStatus: requestStatusTypes.pending,
       };
     });
   },

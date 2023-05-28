@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { matchPath } from 'react-router';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { AuthState } from '../../Store/reducers/auth';
 import {
@@ -19,9 +18,9 @@ import {
 import {
   getCurrentSiteInfo,
   getUserSites,
-  parseSubfoldersFromUrl,
 } from '../../helpers/services/toolService';
 import { IFolder } from '../../helpers/types/folder';
+import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import {
   Api,
@@ -93,99 +92,8 @@ export function Sidebar() {
     0,
     window.location.pathname.indexOf('/', 1)
   );
-  let subfolderLevelPath = matchPath(
-    {
-      path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08/:subfolderLevel09/:subfolderLevel10`,
-    },
-    window.location.pathname
-  ) as any;
-  if (!subfolderLevelPath) {
-    subfolderLevelPath = matchPath(
-      {
-        path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08/:subfolderLevel09`,
-      },
-      window.location.pathname
-    ) as any;
-    if (!subfolderLevelPath) {
-      subfolderLevelPath = matchPath(
-        {
-          path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07/:subfolderLevel08`,
-        },
-        window.location.pathname
-      ) as any;
-      if (!subfolderLevelPath) {
-        subfolderLevelPath = matchPath(
-          {
-            path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06/:subfolderLevel07`,
-          },
-          window.location.pathname
-        ) as any;
-        if (!subfolderLevelPath) {
-          subfolderLevelPath = matchPath(
-            {
-              path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05/:subfolderLevel06`,
-            },
-            window.location.pathname
-          ) as any;
-          if (!subfolderLevelPath) {
-            subfolderLevelPath = matchPath(
-              {
-                path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04/:subfolderLevel05`,
-              },
-              window.location.pathname
-            ) as any;
-            if (!subfolderLevelPath) {
-              subfolderLevelPath = matchPath(
-                {
-                  path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03/:subfolderLevel04`,
-                },
-                window.location.pathname
-              ) as any;
-              if (!subfolderLevelPath) {
-                subfolderLevelPath = matchPath(
-                  {
-                    path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02/:subfolderLevel03`,
-                  },
-                  window.location.pathname
-                ) as any;
-                if (!subfolderLevelPath) {
-                  subfolderLevelPath = matchPath(
-                    {
-                      path: `${currentDocumentsRootUri}/folders/:subfolderLevel01/:subfolderLevel02`,
-                    },
-                    window.location.pathname
-                  ) as any;
-                  if (!subfolderLevelPath) {
-                    subfolderLevelPath = matchPath(
-                      {
-                        path: `${currentDocumentsRootUri}/folders/:subfolderLevel01`,
-                      },
-                      window.location.pathname
-                    ) as any;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  let subfolderUri = '';
-  if (subfolderLevelPath) {
-    subfolderUri = parseSubfoldersFromUrl(
-      subfolderLevelPath.params.subfolderLevel01,
-      subfolderLevelPath.params.subfolderLevel02,
-      subfolderLevelPath.params.subfolderLevel03,
-      subfolderLevelPath.params.subfolderLevel04,
-      subfolderLevelPath.params.subfolderLevel05,
-      subfolderLevelPath.params.subfolderLevel06,
-      subfolderLevelPath.params.subfolderLevel07,
-      subfolderLevelPath.params.subfolderLevel08,
-      subfolderLevelPath.params.subfolderLevel09,
-      subfolderLevelPath.params.subfolderLevel10
-    );
-  }
+
+  const subfolderUri = useSubfolderUri();
 
   useEffect(() => {
     if (DocumentsAndFoldersPrefixes.indexOf(locationPrefix) > -1) {
