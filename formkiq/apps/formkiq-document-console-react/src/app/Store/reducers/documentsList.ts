@@ -1,4 +1,4 @@
-import {PayloadAction, createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   addOrCreateTagValue,
   excludeDocumentsWithTagFromAll,
@@ -7,14 +7,14 @@ import {
   isTagValueIncludes,
   removeTagOrTagValue,
 } from '../../helpers/services/toolService';
-import {IDocument, RequestStatus} from '../../helpers/types/document';
-import {IFolder} from '../../helpers/types/folder';
-import {RootState} from '../store';
-import {DocumentsService} from './../../helpers/services/documentsService';
-import {User} from './auth';
-import {openDialog as openNotificationDialog} from './globalNotificationControls';
-import {getAllAttributes, getAllTags, setAllTags, setAllAttributes} from "../../helpers/tools/useCacheStorage";
-import {setAllAttributesData, setAllTagsData} from "./attributesData";
+import { getAllAttributes, getAllTags, setAllAttributes, setAllTags } from "../../helpers/tools/useCacheStorage";
+import { IDocument, RequestStatus } from '../../helpers/types/document';
+import { IFolder } from '../../helpers/types/folder';
+import { RootState } from '../store';
+import { DocumentsService } from './../../helpers/services/documentsService';
+import { setAllAttributesData, setAllTagsData } from "./attributesData";
+import { User } from './auth';
+import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
 export const fetchDocuments = createAsyncThunk(
   'documentsList/fetchDocuments',
