@@ -1,8 +1,6 @@
-import { IDocument } from './../types/document';
-import { IDocumentTag } from './../types/documentTag';
-import { IFolder } from './../types/folder';
 import moment from 'moment';
-import { User } from '../../Store/reducers/auth';
+import { IDocument } from './../types/document';
+import { IFolder } from './../types/folder';
 
 export function getFileIcon(filename: string) {
   let fileIcon = '';
@@ -93,139 +91,151 @@ export function getFileIcon(filename: string) {
 }
 
 export interface IUserSiteInfo {
-  hasUserSite: boolean
-  hasDefaultSite: boolean
-  hasSharedFolders: boolean
-  sharedFolderSites: any[]
+  hasUserSite: boolean;
+  hasDefaultSite: boolean;
+  hasSharedFolders: boolean;
+  sharedFolderSites: any[];
 }
 
-export function getUserSites(userToCheck: any): IUserSiteInfo  {
+export function getUserSites(userToCheck: any): IUserSiteInfo {
   const userSiteInfo: IUserSiteInfo = {
     hasUserSite: false,
     hasDefaultSite: false,
     hasSharedFolders: false,
-    sharedFolderSites: [] as any[]
-  }
+    sharedFolderSites: [] as any[],
+  };
   if (userToCheck && userToCheck.sites) {
     userToCheck.sites.forEach((site: any) => {
       if (site.siteId === userToCheck.email) {
-        userSiteInfo.hasUserSite = true
+        userSiteInfo.hasUserSite = true;
       } else if (site.siteId === 'default') {
-        userSiteInfo.hasDefaultSite = true
+        userSiteInfo.hasDefaultSite = true;
       } else {
-        userSiteInfo.hasSharedFolders = true
-        userSiteInfo.sharedFolderSites.push(site)
+        userSiteInfo.hasSharedFolders = true;
+        userSiteInfo.sharedFolderSites.push(site);
       }
-    })
+    });
   }
   return userSiteInfo;
 }
 
 export interface ICurrentSiteInfo {
-  siteId: string
-  siteRedirectUrl: string
-  siteDocumentsRootUri: string
-  siteDocumentsRootName: string
-  isSiteReadOnly: boolean
+  siteId: string;
+  siteRedirectUrl: string;
+  siteDocumentsRootUri: string;
+  siteDocumentsRootName: string;
+  isSiteReadOnly: boolean;
 }
 
-export function getCurrentSiteInfo(pathname: string, user: any, hasUserSite: boolean, hasDefaultSite: boolean, hasSharedFolders: boolean, sharedFolderSites: any[]): ICurrentSiteInfo {
+export function getCurrentSiteInfo(
+  pathname: string,
+  user: any,
+  hasUserSite: boolean,
+  hasDefaultSite: boolean,
+  hasSharedFolders: boolean,
+  sharedFolderSites: any[]
+): ICurrentSiteInfo {
   const currentSiteInfo = {
     siteId: '',
     siteRedirectUrl: '',
     siteDocumentsRootUri: '/documents',
     siteDocumentsRootName: 'Documents',
-    isSiteReadOnly: false
-  }
+    isSiteReadOnly: false,
+  };
   if (hasUserSite && pathname.indexOf('/documents') === 0) {
-    currentSiteInfo.siteId = user.email
-    currentSiteInfo.siteRedirectUrl = '/my-documents'
-    currentSiteInfo.siteDocumentsRootUri = '/my-documents'
-    currentSiteInfo.siteDocumentsRootName = 'My Documents'
+    currentSiteInfo.siteId = user.email;
+    currentSiteInfo.siteRedirectUrl = '/my-documents';
+    currentSiteInfo.siteDocumentsRootUri = '/my-documents';
+    currentSiteInfo.siteDocumentsRootName = 'My Documents';
   } else if (!hasUserSite && pathname.indexOf('/my-documents') === 0) {
     if (hasDefaultSite || !hasSharedFolders || !sharedFolderSites.length) {
-      currentSiteInfo.siteId = 'default'
-      currentSiteInfo.siteRedirectUrl = '/documents'
-      currentSiteInfo.siteDocumentsRootUri = '/documents'
-      currentSiteInfo.siteDocumentsRootName = 'Documents'
+      currentSiteInfo.siteId = 'default';
+      currentSiteInfo.siteRedirectUrl = '/documents';
+      currentSiteInfo.siteDocumentsRootUri = '/documents';
+      currentSiteInfo.siteDocumentsRootName = 'Documents';
     } else if (hasSharedFolders) {
-      currentSiteInfo.siteId = sharedFolderSites[0].siteId
-      currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`
-      currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`
+      currentSiteInfo.siteId = sharedFolderSites[0].siteId;
+      currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
     }
   } else if (!hasUserSite && pathname.indexOf('/team-documents') === 0) {
     if (hasDefaultSite || !hasSharedFolders || !sharedFolderSites.length) {
-      currentSiteInfo.siteId = 'default'
-      currentSiteInfo.siteRedirectUrl = '/documents'
-      currentSiteInfo.siteDocumentsRootUri = '/documents'
-      currentSiteInfo.siteDocumentsRootName = 'Documents'
+      currentSiteInfo.siteId = 'default';
+      currentSiteInfo.siteRedirectUrl = '/documents';
+      currentSiteInfo.siteDocumentsRootUri = '/documents';
+      currentSiteInfo.siteDocumentsRootName = 'Documents';
     } else if (hasSharedFolders) {
-      currentSiteInfo.siteId = sharedFolderSites[0].siteId
-      currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`
-      currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`
+      currentSiteInfo.siteId = sharedFolderSites[0].siteId;
+      currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
     }
   }
   if (user && user.email) {
     if (pathname.indexOf('/my-documents') === 0) {
-      currentSiteInfo.siteId = user.email
-      currentSiteInfo.siteDocumentsRootUri = '/my-documents'
-      currentSiteInfo.siteDocumentsRootName = 'My Documents'
+      currentSiteInfo.siteId = user.email;
+      currentSiteInfo.siteDocumentsRootUri = '/my-documents';
+      currentSiteInfo.siteDocumentsRootName = 'My Documents';
     } else if (pathname.indexOf('/team-documents') === 0) {
-      currentSiteInfo.siteId = 'default'
-      currentSiteInfo.siteDocumentsRootUri = '/team-documents'
-      currentSiteInfo.siteDocumentsRootName = 'Team Documents'
+      currentSiteInfo.siteId = 'default';
+      currentSiteInfo.siteDocumentsRootUri = '/team-documents';
+      currentSiteInfo.siteDocumentsRootName = 'Team Documents';
     } else if (pathname.indexOf('/shared-folders') === 0) {
-      const pathAfterSharedFolders = pathname.substring(pathname.indexOf('/', 1) + 1)
+      const pathAfterSharedFolders = pathname.substring(
+        pathname.indexOf('/', 1) + 1
+      );
       if (pathAfterSharedFolders.indexOf('/') > -1) {
-        currentSiteInfo.siteId = pathAfterSharedFolders.substring(0, pathAfterSharedFolders.indexOf('/'))
+        currentSiteInfo.siteId = pathAfterSharedFolders.substring(
+          0,
+          pathAfterSharedFolders.indexOf('/')
+        );
       } else {
-        currentSiteInfo.siteId = pathAfterSharedFolders
+        currentSiteInfo.siteId = pathAfterSharedFolders;
       }
       if (!currentSiteInfo.siteId.length) {
         if (hasUserSite) {
-          currentSiteInfo.siteId = user.email
-          currentSiteInfo.siteRedirectUrl = '/my-documents'
-          currentSiteInfo.siteDocumentsRootUri = '/my-documents'
-          currentSiteInfo.siteDocumentsRootName = 'My Documents'
+          currentSiteInfo.siteId = user.email;
+          currentSiteInfo.siteRedirectUrl = '/my-documents';
+          currentSiteInfo.siteDocumentsRootUri = '/my-documents';
+          currentSiteInfo.siteDocumentsRootName = 'My Documents';
         } else if (hasDefaultSite) {
-            currentSiteInfo.siteId = user.email
-            currentSiteInfo.siteRedirectUrl = '/my-documents'
-            currentSiteInfo.siteDocumentsRootUri = '/my-documents'
-            currentSiteInfo.siteDocumentsRootName = 'My Documents'
+          currentSiteInfo.siteId = user.email;
+          currentSiteInfo.siteRedirectUrl = '/my-documents';
+          currentSiteInfo.siteDocumentsRootUri = '/my-documents';
+          currentSiteInfo.siteDocumentsRootName = 'My Documents';
         } else {
-          currentSiteInfo.siteId = ''
-          currentSiteInfo.siteRedirectUrl = '/documents'
-          currentSiteInfo.siteDocumentsRootUri = '/documents'
-          currentSiteInfo.siteDocumentsRootName = 'Documents'
+          currentSiteInfo.siteId = '';
+          currentSiteInfo.siteRedirectUrl = '/documents';
+          currentSiteInfo.siteDocumentsRootUri = '/documents';
+          currentSiteInfo.siteDocumentsRootName = 'Documents';
         }
       }
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${currentSiteInfo.siteId}`
-      currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${currentSiteInfo.siteId}`
+      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${currentSiteInfo.siteId}`;
+      currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${currentSiteInfo.siteId}`;
     }
     if (currentSiteInfo.siteId === '' && user) {
       user.sites.forEach((site: any) => {
-        currentSiteInfo.siteId = site.siteId
+        currentSiteInfo.siteId = site.siteId;
         if (site.siteId !== 'default' && site.siteId !== user.email) {
-          currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${site.siteId}`
-          currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${site.siteId}`
+          currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${site.siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${site.siteId}`;
         }
         return;
-      })
+      });
     }
     user.sites.forEach((site: any) => {
       if (site.siteId === currentSiteInfo.siteId) {
         if (site.permission && site.permission === 'READ_ONLY') {
-          currentSiteInfo.isSiteReadOnly = true
+          currentSiteInfo.isSiteReadOnly = true;
         } else {
-          currentSiteInfo.isSiteReadOnly = false
+          currentSiteInfo.isSiteReadOnly = false;
         }
-        return
+        return;
       }
-    })
+    });
   }
-  return currentSiteInfo
+  return currentSiteInfo;
 }
 
 export function formatBytes(bytes: number, decimals = 2) {
@@ -361,10 +371,13 @@ export function findFolderAndParent(
       return [parentFolder.folders[i], i, parentFolder];
     } else {
       if (parentFolder.folders[i]?.folders?.length > 0) {
-        const subfolderResult = findFolderAndParent(folderId, parentFolder.folders[i])
+        const subfolderResult = findFolderAndParent(
+          folderId,
+          parentFolder.folders[i]
+        );
         // NOTE: if `number` on subfolders is not null, a match has been found that we can return
         if (subfolderResult[1] !== null) {
-          return subfolderResult
+          return subfolderResult;
         }
       }
     }
@@ -405,14 +418,14 @@ export function excludeDocumentsWithTagFromAll(
       const docs = [...documents];
       if (tagValue.length) {
         return (docs as any[]).filter((doc: any) => {
-          return !isTagValueIncludes(doc.tags[tagKey], tagValue)
+          return !isTagValueIncludes(doc.tags[tagKey], tagValue);
         });
       } else {
         return (docs as any[]).filter((doc: any) => {
           if (isSystemDeletedByKey) {
-            return (doc.tags as any)['sysDeletedBy']
+            return (doc.tags as any)['sysDeletedBy'];
           } else {
-            return !(doc.tags as any)['sysDeletedBy']
+            return !(doc.tags as any)['sysDeletedBy'];
           }
         });
       }
@@ -433,133 +446,4 @@ export function excludeDocumentsWithTagFromAll(
     res.folders = foldersRes;
   }
   return res;
-}
-
-export function parseSubfoldersFromUrl(
-  subfolderLevel01: string | undefined,
-  subfolderLevel02: string | undefined,
-  subfolderLevel03: string | undefined,
-  subfolderLevel04: string | undefined,
-  subfolderLevel05: string | undefined,
-  subfolderLevel06: string | undefined,
-  subfolderLevel07: string | undefined,
-  subfolderLevel08: string | undefined,
-  subfolderLevel09: string | undefined,
-  subfolderLevel10: string | undefined
-) {
-  let subfolderUri = '';
-  if (subfolderLevel10) {
-    subfolderUri =
-      subfolderLevel01 +
-      '/' +
-      subfolderLevel02 +
-      '/' +
-      subfolderLevel03 +
-      '/' +
-      subfolderLevel04 +
-      '/' +
-      subfolderLevel05 +
-      '/' +
-      subfolderLevel06 +
-      '/' +
-      subfolderLevel07 +
-      '/' +
-      subfolderLevel08 +
-      '/' +
-      subfolderLevel09 +
-      '/' +
-      subfolderLevel10;
-  } else if (subfolderLevel09) {
-    subfolderUri =
-      subfolderLevel01 +
-      '/' +
-      subfolderLevel02 +
-      '/' +
-      subfolderLevel03 +
-      '/' +
-      subfolderLevel04 +
-      '/' +
-      subfolderLevel05 +
-      '/' +
-      subfolderLevel06 +
-      '/' +
-      subfolderLevel07 +
-      '/' +
-      subfolderLevel08 +
-      '/' +
-      subfolderLevel09;
-  } else if (subfolderLevel08) {
-    subfolderUri =
-      subfolderLevel01 +
-      '/' +
-      subfolderLevel02 +
-      '/' +
-      subfolderLevel03 +
-      '/' +
-      subfolderLevel04 +
-      '/' +
-      subfolderLevel05 +
-      '/' +
-      subfolderLevel06 +
-      '/' +
-      subfolderLevel07 +
-      '/' +
-      subfolderLevel08;
-  } else if (subfolderLevel07) {
-    subfolderUri =
-      subfolderLevel01 +
-      '/' +
-      subfolderLevel02 +
-      '/' +
-      subfolderLevel03 +
-      '/' +
-      subfolderLevel04 +
-      '/' +
-      subfolderLevel05 +
-      '/' +
-      subfolderLevel06 +
-      '/' +
-      subfolderLevel07;
-  } else if (subfolderLevel06) {
-    subfolderUri =
-      subfolderLevel01 +
-      '/' +
-      subfolderLevel02 +
-      '/' +
-      subfolderLevel03 +
-      '/' +
-      subfolderLevel04 +
-      '/' +
-      subfolderLevel05 +
-      '/' +
-      subfolderLevel06;
-  } else if (subfolderLevel05) {
-    subfolderUri =
-      subfolderLevel01 +
-      '/' +
-      subfolderLevel02 +
-      '/' +
-      subfolderLevel03 +
-      '/' +
-      subfolderLevel04 +
-      '/' +
-      subfolderLevel05;
-  } else if (subfolderLevel04) {
-    subfolderUri =
-      subfolderLevel01 +
-      '/' +
-      subfolderLevel02 +
-      '/' +
-      subfolderLevel03 +
-      '/' +
-      subfolderLevel04;
-  } else if (subfolderLevel03) {
-    subfolderUri =
-      subfolderLevel01 + '/' + subfolderLevel02 + '/' + subfolderLevel03;
-  } else if (subfolderLevel02) {
-    subfolderUri = subfolderLevel01 + '/' + subfolderLevel02;
-  } else if (subfolderLevel01) {
-    subfolderUri = subfolderLevel01;
-  }
-  return subfolderUri
 }

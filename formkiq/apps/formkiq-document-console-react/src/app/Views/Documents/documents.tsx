@@ -2,7 +2,7 @@ import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
 import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
@@ -63,12 +63,12 @@ import {
   getCurrentSiteInfo,
   getFileIcon,
   getUserSites,
-  parseSubfoldersFromUrl,
 } from '../../helpers/services/toolService';
 import { IDocument, requestStatusTypes } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -94,30 +94,7 @@ function Documents() {
   } = useSelector(ConfigState);
   const { allTags } = useSelector(DataCacheState);
 
-  const {
-    subfolderLevel01,
-    subfolderLevel02,
-    subfolderLevel03,
-    subfolderLevel04,
-    subfolderLevel05,
-    subfolderLevel06,
-    subfolderLevel07,
-    subfolderLevel08,
-    subfolderLevel09,
-    subfolderLevel10,
-  } = useParams();
-  const subfolderUri = parseSubfoldersFromUrl(
-    subfolderLevel01,
-    subfolderLevel02,
-    subfolderLevel03,
-    subfolderLevel04,
-    subfolderLevel05,
-    subfolderLevel06,
-    subfolderLevel07,
-    subfolderLevel08,
-    subfolderLevel09,
-    subfolderLevel10
-  );
+  const subfolderUri = useSubfolderUri();
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
@@ -158,9 +135,6 @@ function Documents() {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
-  const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
-    siteDocumentsRootName
-  );
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
@@ -203,10 +177,7 @@ function Documents() {
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
-  let documentListOffsetTop = 140;
-  if (isTagFilterExpanded) {
-    documentListOffsetTop = 170;
-  }
+  const documentListOffsetTop = isTagFilterExpanded ? 170 : 140;
 
   useEffect(() => {
     if (formkiqVersion.modules === undefined) {
@@ -215,7 +186,7 @@ function Documents() {
   }, []);
   // TODO: improve on this check / determine why setting modules is not happening in time or without reload
 
-  const trackScrolling = useCallback(() => {
+  const trackScrolling = useCallback(async () => {
     const bottomRow = (
       document.getElementById('documentsTable') as HTMLTableElement
     ).rows[
@@ -237,7 +208,7 @@ function Documents() {
       nextLoadingStatus === requestStatusTypes.fulfilled
     ) {
       if (nextToken) {
-        dispatch(
+        await dispatch(
           fetchDocuments({
             siteId: currentSiteId,
             formkiqVersion: formkiqVersion,
@@ -250,7 +221,7 @@ function Documents() {
         );
       } else {
         if (!isLastSearchPageLoaded && searchWord) {
-          dispatch(
+          await dispatch(
             fetchDocuments({
               // for next page results
               siteId: currentSiteId,
@@ -430,7 +401,6 @@ function Documents() {
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
   }, [pathname]);
 
   useEffect(() => {
