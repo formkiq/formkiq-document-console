@@ -1,0 +1,13 @@
+name: Typecheck
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        working-directory: ./formkiq
+        run: npm ci
+      - name: Run ESLint
+        working-directory: ./formkiq
+        run: npm run typecheck
