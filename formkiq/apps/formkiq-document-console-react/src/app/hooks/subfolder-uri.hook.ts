@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
 /**
@@ -8,11 +9,15 @@ import { useLocation } from 'react-router-dom';
 export const useSubfolderUri = () => {
   const location = useLocation();
 
-  const folderIndex = location.pathname.indexOf('/folders/');
+  const subfolderUri = useMemo(() => {
+    const folderIndex = location.pathname.indexOf('/folders/');
 
-  if (folderIndex > 0) {
-    return location.pathname.substring(folderIndex + 9); //9 is the length of /folders/
-  }
+    if (folderIndex > 0) {
+      return location.pathname.substring(folderIndex + 9); //9 is the length of /folders/
+    }
 
-  return '';
+    return '';
+  }, [location.pathname]);
+
+  return subfolderUri;
 };
