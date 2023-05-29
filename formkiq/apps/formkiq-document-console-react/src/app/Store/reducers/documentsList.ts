@@ -989,6 +989,8 @@ export const documentsListSlice = createSlice({
     builder.addCase(fetchDocuments.pending, (state) => {
       return {
         ...state,
+        documents: [],
+        folders: [],
         loadingStatus: RequestStatus.pending,
       };
     });
