@@ -1136,6 +1136,8 @@ export const documentsListSlice = createSlice({
       return {
         ...state,
         nextLoadingStatus: RequestStatus.pending,
+        documents: [],
+        folders: [],
       };
     });
   },
