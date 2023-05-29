@@ -43,7 +43,7 @@ import {
 } from '../../Store/reducers/data';
 import {
   DocumentListState,
-  fetchDeleteDocument,
+  deleteDocument,
   fetchDeleteFolder,
   fetchDocuments,
   setDocuments,
@@ -64,11 +64,12 @@ import {
   getFileIcon,
   getUserSites,
 } from '../../helpers/services/toolService';
-import { IDocument, requestStatusTypes } from '../../helpers/types/document';
+import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
+import { EmptyDocumentsTable } from './EmptyDocumentsTable';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -79,7 +80,7 @@ function Documents() {
     documents,
     folders,
     nextToken,
-    nextLoadingStatus,
+    loadingStatus,
     currentSearchPage,
     isLastSearchPageLoaded,
   } = useSelector(DocumentListState);
@@ -205,7 +206,7 @@ function Documents() {
     if (
       isBottom(scrollpane as HTMLElement) &&
       nextToken &&
-      nextLoadingStatus === requestStatusTypes.fulfilled
+      loadingStatus === RequestStatus.fulfilled
     ) {
       if (nextToken) {
         await dispatch(
@@ -236,7 +237,7 @@ function Documents() {
         }
       }
     }
-  }, [nextToken, nextLoadingStatus, currentSearchPage, isLastSearchPageLoaded]);
+  }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
   if (documentsWrapperRef.current) {
     (documentsWrapperRef.current as HTMLDivElement).style.height =
       window.innerHeight - documentListOffsetTop + 'px';
@@ -435,7 +436,7 @@ function Documents() {
     isRenameModalOpened,
   ]);
 
-  const deleteDocument = (file: IDocument, searchDocuments: any) => () => {
+  const onDeleteDocument = (file: IDocument, searchDocuments: any) => () => {
     const deleteFunc = () => {
       let isDocumentInfoPage = false;
       if (infoDocumentId.length) {
@@ -443,7 +444,7 @@ function Documents() {
         setIsCurrentDocumentSoftDeleted(true);
       }
       dispatch(
-        fetchDeleteDocument({
+        deleteDocument({
           siteId: currentSiteId,
           user,
           document: file,
@@ -914,148 +915,121 @@ function Documents() {
     );
   };
 
-  const documentsTable = (
-    documents: any[] | null,
-    subfolders: any[] | null
-  ) => {
-    if (documents) {
-      const docs = documents as [];
-      const folders = subfolders as [];
-      return docs.length > 0 || folders.length > 0 ? (
+  const documentsTable = (documents: IDocument[], subfolders: any[]) => {
+    if (
+      documents.length === 0 &&
+      subfolders.length === 0 &&
+      loadingStatus !== RequestStatus.pending
+    ) {
+      return (
+        <EmptyDocumentsTable
+          formkiqVersion={formkiqVersion}
+          subfolderUri={subfolderUri}
+        />
+      );
+    }
+
+    return (
+      <div className="relative mt-5 overflow-hidden" ref={documentsWrapperRef}>
         <div
-          className="relative mt-5 overflow-hidden"
-          ref={documentsWrapperRef}
+          className="overflow-scroll h-full"
+          ref={documentsScrollpaneRef}
+          id="documentsScrollpane"
         >
-          <div
-            className="overflow-scroll h-full"
-            ref={documentsScrollpaneRef}
-            id="documentsScrollpane"
+          <table
+            className="border-separate border-spacing-0 table-auto w-full"
+            id="documentsTable"
           >
-            <table
-              className="border-separate border-spacing-0 table-auto w-full"
-              id="documentsTable"
-            >
-              <thead className="sticky top-0 bg-white z-10">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
-                  >
-                    Name
-                  </th>
-                  <th
-                    scope="col"
-                    className="w-38 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
-                  >
-                    Last modified
-                  </th>
+            <thead className="sticky top-0 bg-white z-10">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
+                >
+                  Name
+                </th>
+                <th
+                  scope="col"
+                  className="w-38 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
+                >
+                  Last modified
+                </th>
+                <th
+                  scope="col"
+                  className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
+                >
+                  Filesize
+                </th>
+                {useIndividualSharing && (
                   <th
                     scope="col"
                     className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
                   >
-                    Filesize
+                    {subfolderUri === 'shared' && <span>Shared by</span>}
+                    {subfolderUri !== 'shared' && <span>Access</span>}
                   </th>
-                  {useIndividualSharing && (
-                    <th
-                      scope="col"
-                      className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
-                    >
-                      {subfolderUri === 'shared' && <span>Shared by</span>}
-                      {subfolderUri !== 'shared' && <span>Access</span>}
-                    </th>
+                )}
+                <th
+                  scope="col"
+                  className="w-28 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan={6} className="h-2"></td>
+              </tr>
+              {folders && folderDocumentsTable(folders, subfolderUri)}
+              {documents.length === 0 &&
+              folders.length === 0 &&
+              loadingStatus === RequestStatus.pending ? (
+                <Spinner />
+              ) : undefined}
+              {documents.map((file, i) => (
+                <DocumentListLine
+                  key={i}
+                  file={file}
+                  folder={subfolderUri}
+                  siteId={currentSiteId}
+                  isSiteReadOnly={isSiteReadOnly}
+                  documentsRootUri={currentDocumentsRootUri}
+                  onShareClick={onShareClick}
+                  searchDocuments={documents}
+                  onDeleteClick={onDeleteDocument(file, documents)}
+                  onRestoreClick={restoreDocument(
+                    file,
+                    currentSiteId,
+                    documents
                   )}
-                  <th
-                    scope="col"
-                    className="w-28 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={6} className="h-2"></td>
-                </tr>
-                {folders && folderDocumentsTable(folders, subfolderUri)}
-                {docs.map((file, i) => (
-                  <DocumentListLine
-                    key={i}
-                    file={file}
-                    folder={subfolderUri}
-                    siteId={currentSiteId}
-                    isSiteReadOnly={isSiteReadOnly}
-                    documentsRootUri={currentDocumentsRootUri}
-                    onShareClick={onShareClick}
-                    searchDocuments={documents}
-                    onDeleteClick={deleteDocument(file, documents)}
-                    onRestoreClick={restoreDocument(
-                      file,
-                      currentSiteId,
-                      documents
-                    )}
-                    onEditTagsAndMetadataModalClick={
-                      onEditTagsAndMetadataModalClick
-                    }
-                    onRenameModalClick={onRenameModalClick}
-                    onMoveModalClick={onMoveModalClick}
-                    onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                    onESignaturesModalClick={onESignaturesModalClick}
-                    onTagChange={onTagChange}
-                    filterTag={filterTag}
-                  />
-                ))}
-              </tbody>
-            </table>
-            <FolderDropWrapper
-              className="absolute w-full h-full"
-              folder={subfolderUri}
-              sourceSiteId={currentSiteId}
-              targetSiteId={currentSiteId}
-            ></FolderDropWrapper>
-          </div>
-          <div className="pt-1">
-            &nbsp;
-            {nextLoadingStatus === requestStatusTypes.pending ? (
-              <Spinner />
-            ) : (
-              ''
-            )}
-          </div>
-          <CustomDragLayer />
+                  onEditTagsAndMetadataModalClick={
+                    onEditTagsAndMetadataModalClick
+                  }
+                  onRenameModalClick={onRenameModalClick}
+                  onMoveModalClick={onMoveModalClick}
+                  onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                  onESignaturesModalClick={onESignaturesModalClick}
+                  onTagChange={onTagChange}
+                  filterTag={filterTag}
+                />
+              ))}
+            </tbody>
+          </table>
+          <FolderDropWrapper
+            className="absolute w-full h-full"
+            folder={subfolderUri}
+            sourceSiteId={currentSiteId}
+            targetSiteId={currentSiteId}
+          ></FolderDropWrapper>
         </div>
-      ) : (
-        <div className="text-center mt-4">
-          <div role="status">
-            <div className="overflow-x-auto flex justify-center">
-              {subfolderUri.length ? (
-                <span>
-                  No subfolders or files have been found in this folder
-                </span>
-              ) : (
-                <div className="mt-4 w-2/3 p-2 border border-gray-400 rounded-md text-gray-900 font-semibold bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300">
-                  <h3 className="text-lg mb-4">
-                    No documents or folders found
-                  </h3>
-                  {formkiqVersion.modules.indexOf('onlyoffice') > -1 ? (
-                    <p>
-                      You can create folders and documents or upload existing
-                      documents using the buttons above.
-                    </p>
-                  ) : (
-                    <p>
-                      You can create folders or upload existing documents using
-                      the buttons above.
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+        <div className="pt-1">
+          &nbsp;
+          {loadingStatus === RequestStatus.pending ? <Spinner /> : ''}
         </div>
-      );
-    } else {
-      return <Spinner />;
-    }
+        <CustomDragLayer />
+      </div>
+    );
   };
 
   const folderDocumentsTable = (folders: IFolder[], subfolder: string) => {
@@ -1082,7 +1056,7 @@ function Documents() {
                 onESignaturesModalClick={onESignaturesModalClick}
                 onTagChange={onTagChange}
                 onRestoreDocument={restoreDocument}
-                onDeleteDocument={deleteDocument}
+                onDeleteDocument={onDeleteDocument}
                 filterTag={filterTag}
               />
             );
@@ -1638,7 +1612,10 @@ function Documents() {
                             {useSoftDelete && (
                               <button
                                 className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                                onClick={deleteDocument(currentDocument, null)}
+                                onClick={onDeleteDocument(
+                                  currentDocument,
+                                  null
+                                )}
                               >
                                 <span className="">Delete</span>
                                 <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">

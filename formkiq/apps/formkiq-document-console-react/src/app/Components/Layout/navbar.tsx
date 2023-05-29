@@ -34,6 +34,23 @@ import {
 } from '../Icons/icons';
 import Notifications from './notifications';
 
+const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
+
+const getTopLevelFolderName = (folder: string) => {
+  switch (folder) {
+    case 'shared':
+      return 'Shared with me';
+    case 'favorites':
+      return 'Favorites';
+    case 'recent':
+      return 'Recent';
+    case 'deleted':
+      return 'Trash';
+    default:
+      return '';
+  }
+};
+
 function Navbar() {
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
@@ -74,8 +91,6 @@ function Navbar() {
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
   }, [pathname]);
-
-  const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
   const [showAccountDropdown, setShowAccountDropdown] = React.useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] =
@@ -158,21 +173,6 @@ function Navbar() {
       return <>{initials}</>;
     }
     return <></>;
-  };
-
-  const getTopLevelFolderName = (folder: string) => {
-    switch (folder) {
-      case 'shared':
-        return 'Shared with me';
-      case 'favorites':
-        return 'Favorites';
-      case 'recent':
-        return 'Recent';
-      case 'deleted':
-        return 'Trash';
-      default:
-        return '';
-    }
   };
 
   const changeSystemSubfolder = (event: any, systemSubfolderUri: string) => {
