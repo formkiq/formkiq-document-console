@@ -7,8 +7,9 @@
     "build": "nx build",
     "test": "nx test",
     "prettier": "npx run prettier --write .",
-    "lint": "nx lint",
-    "lint:fix": "nx lint --fix",
+    "lint": "nx lint formkiq-document-console-react-e2e; nx lint formkiq-document-console-react",
+    "lint:fix": "npm run lint -- --fix",
+    "typecheck": "nx ts-check formkiq-document-console-react-e2e; nx ts-check formkiq-document-console-react",
     "e2e": "nx e2e formkiq-document-console-react-e2e",
     "build-sdk": "cd ./libs/formkiq-client-sdk-javascript/build && npm install && npx webpack && cp ./dist/es6/formkiq-client-sdk-es6.js ../../../apps/formkiq-document-console-react/src/app/lib/formkiq-client-sdk-es6.js"
   },

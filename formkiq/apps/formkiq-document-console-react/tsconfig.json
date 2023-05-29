@@ -3,6 +3,7 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "allowJs": true,
+    "outDir": "../../out-tsc",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -12,15 +13,5 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true
-  },
-  "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ]
+  }
 }
