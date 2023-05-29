@@ -229,14 +229,10 @@ export default function UploadModal({
                       filename.lastIndexOf('/') + 1
                     );
                   }
-                  if (
+                  return (
                     file.originalFile.name ===
                     filename.replace(' (' + doc.documentId + ')', '')
-                  ) {
-                    return true;
-                  } else {
-                    return false;
-                  }
+                  );
                 });
                 if (matchingFiles.length === 1) {
                   doc.contentType = matchingFiles[0].originalFile.type;

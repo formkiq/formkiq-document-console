@@ -56,11 +56,7 @@ export default function AddTag({
     setAllTagKeys(null);
     DocumentsService.getAllTagKeys(siteId).then((data) => {
       const tagKeys = data?.values.filter((value: any) => {
-        if (systemTags.indexOf(value.value) === -1) {
-          return true;
-        } else {
-          return false;
-        }
+        return systemTags.indexOf(value.value) === -1;
       });
       const checkTagKeys = [...tagKeys];
 
