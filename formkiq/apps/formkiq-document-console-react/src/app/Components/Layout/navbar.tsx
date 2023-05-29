@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { matchPath } from 'react-router';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -95,7 +95,32 @@ function Navbar() {
   const [showAccountDropdown, setShowAccountDropdown] = React.useState(false);
   const [showNotificationsDropdown, setShowNotificationsDropdown] =
     React.useState(false);
-  const [currentSection, setCurrentSection] = useState('DocumentsAndFolders');
+
+  const location = useLocation();
+
+  const locationPrefix = useMemo(() => {
+    let locationPrefix = location.pathname;
+    if (locationPrefix.indexOf('/', 1) > -1) {
+      locationPrefix = locationPrefix.substring(
+        0,
+        locationPrefix.indexOf('/', 1)
+      );
+    }
+    return locationPrefix;
+  }, [location]);
+
+  const currentSection = useMemo(() => {
+    if (DocumentsAndFoldersPrefixes.indexOf(locationPrefix) > -1) {
+      return 'DocumentsAndFolders';
+    } else if (WorkflowsAndIntegrationsPrefixes.indexOf(locationPrefix) > -1) {
+      return 'WorkflowsAndIntegrations';
+    } else if (AccountAndSettingsPrefixes.indexOf(locationPrefix) > -1) {
+      return 'AccountAndSettings';
+    }
+
+    return 'DocumentsAndFolders';
+  }, [locationPrefix]);
+
   const [inputValue, setInput] = useState('');
 
   let documentId = '';
@@ -112,24 +137,6 @@ function Navbar() {
       documentId = documentViewPath.params.id;
     }
   }
-
-  let locationPrefix = useLocation().pathname;
-  if (locationPrefix.indexOf('/', 1) > -1) {
-    locationPrefix = locationPrefix.substring(
-      0,
-      locationPrefix.indexOf('/', 1)
-    );
-  }
-  useEffect(() => {
-    if (DocumentsAndFoldersPrefixes.indexOf(locationPrefix) > -1) {
-      setCurrentSection('DocumentsAndFolders');
-    } else if (WorkflowsAndIntegrationsPrefixes.indexOf(locationPrefix) > -1) {
-      setCurrentSection('WorkflowsAndIntegrations');
-    } else if (AccountAndSettingsPrefixes.indexOf(locationPrefix) > -1) {
-      setCurrentSection('AccountAndSettings');
-    }
-  }, [locationPrefix]);
-
   useEffect(() => {
     setInput(searchWord ? searchWord : '');
   }, [search]);

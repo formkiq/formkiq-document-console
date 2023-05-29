@@ -63,10 +63,7 @@ export default function MoveModal({
       if (response) {
         const retrievedFolders: any[] = response.documents.filter(
           (doc: any) => {
-            if (doc.folder) {
-              return true;
-            }
-            return false;
+            return !!doc.folder;
           }
         );
         if (indexKey.length) {

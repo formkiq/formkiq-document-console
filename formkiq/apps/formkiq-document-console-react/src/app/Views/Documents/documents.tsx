@@ -413,7 +413,7 @@ function Documents() {
       isMoveModalOpened === false &&
       isRenameModalOpened === false
     ) {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         dispatch(
           fetchDocuments({
             siteId: currentSiteId,
@@ -425,7 +425,12 @@ function Documents() {
           })
         );
       }, 300);
+
+      return () => {
+        clearTimeout(timeout);
+      };
     }
+    return;
   }, [
     currentSiteId,
     subfolderUri,
@@ -477,15 +482,11 @@ function Documents() {
         file.documentId,
         siteId,
         'sysDeletedBy'
-      ).then((response) => {
+      ).then(() => {
         let newDocs = null;
         if (searchDocuments) {
           newDocs = searchDocuments.filter((doc: any) => {
-            if (doc.documentId === file.documentId) {
-              return false;
-            } else {
-              return true;
-            }
+            return doc.documentId !== file.documentId;
           });
         }
         setIsCurrentDocumentSoftDeleted(false);
@@ -634,7 +635,7 @@ function Documents() {
       });
     }
   };
-  const ViewDocument = () => {
+  const viewDocument = () => {
     if (infoDocumentId.length) {
       navigate(`${currentDocumentsRootUri}/${infoDocumentId}/view`);
     }
@@ -1568,7 +1569,7 @@ function Documents() {
                           ) > -1 && (
                             <button
                               className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                              onClick={ViewDocument}
+                              onClick={viewDocument}
                             >
                               <span className="">Edit</span>
                               <span className="pl-4 pt-1 w-8">{Edit()}</span>
@@ -1580,7 +1581,7 @@ function Documents() {
                           ) > -1 && (
                             <button
                               className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                              onClick={ViewDocument}
+                              onClick={viewDocument}
                             >
                               <span className="">View</span>
                               <span className="pl-4 pt-0.5 w-9">{View()}</span>
