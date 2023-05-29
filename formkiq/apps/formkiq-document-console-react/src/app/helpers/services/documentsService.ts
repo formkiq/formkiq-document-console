@@ -194,6 +194,16 @@ export class DocumentsService {
     });
   }
 
+  public static deleteDocumentVersion(
+    documentId: string,
+    versionKey: string
+  ): Promise<any> {
+    const apiClient = this.getFormkiqClient().apiClient;
+    const url = `https://${apiClient.host}/documents/${documentId}/versions/${versionKey}`;
+    const options = apiClient.buildOptions('DELETE');
+    return apiClient.fetchAndRespond(url, options);
+  }
+
   @formkiqAPIHandler
   public static async uploadDocument(
     folder: string,

@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import moment from 'moment';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { InlineViewableContentTypes } from '../../../helpers/constants/contentTypes';
@@ -111,6 +111,30 @@ export default function DocumentVersionsModal({
       });
     }
   };
+
+  const openDeleteDialog = useCallback(
+    (versionKey: string) => {
+      const deleteVersion = () => {
+        if (value) {
+          DocumentsService.deleteDocumentVersion(
+            value.documentId,
+            versionKey
+          ).catch((err) => {
+            console.error('Failed to delete document version: ', err);
+          });
+        }
+      };
+
+      dispatch(
+        openDialog({
+          callback: deleteVersion,
+          dialogTitle: 'Are you sure you want to delete this document version?',
+        })
+      );
+    },
+    [dispatch, value]
+  );
+
   const revertDocumentVersion = (event: any, versionKey: string) => {
     if (value) {
       DocumentsService.putDocumentVersion(
@@ -246,7 +270,7 @@ export default function DocumentVersionsModal({
                                   {version.contentType}
                                 </td>
                                 <td className="border-b border-slate-100 nodark:border-slate-700 p-2 pr-2 text-slate-500 nodark:text-slate-400">
-                                  <div className="flex flex-wrap justify-center gap-4">
+                                  <div className="flex flex-wrap justify-left gap-4">
                                     {InlineViewableContentTypes.indexOf(
                                       version.contentType
                                     ) > -1 && (
@@ -273,6 +297,16 @@ export default function DocumentVersionsModal({
                                     >
                                       Download
                                     </button>
+                                    {version.versionKey && (
+                                      <button
+                                        className="flex items-center bg-gradient-to-l py-2 px-5 hover:bg-gray-100 cursor-pointer text-red-500 text-gray-900 text-smaller font-semibold py-2 rounded-2xl flex focus:outline-none"
+                                        onClick={() => {
+                                          openDeleteDialog(version.versionKey);
+                                        }}
+                                      >
+                                        Delete
+                                      </button>
+                                    )}
                                     {version.version && !isSiteReadOnly && (
                                       <button
                                         className="flex items-center bg-gradient-to-l from-yellow-200 via-amber-200 to-yellow-300 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 text-gray-900 text-smaller font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
