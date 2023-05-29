@@ -8,7 +8,7 @@ import {
   isTagValueIncludes,
   removeTagOrTagValue,
 } from '../../helpers/services/toolService';
-import { IDocument, requestStatusTypes } from '../../helpers/types/document';
+import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
 import { RootState } from '../store';
 import { DocumentsService } from './../../helpers/services/documentsService';
@@ -29,15 +29,11 @@ export const fetchDocuments = createAsyncThunk(
       page,
     } = data;
     const user = (thunkAPI.getState() as any)?.authState.user;
-    let tagParam = null;
-    if (filterTag) {
-      tagParam = filterTag.split(':')[0];
-    }
+    const tagParam = filterTag ? filterTag.split(':')[0] : null;
     const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
     const dateDiff =
       new Date().getTime() - dataCache.tagsLastRefreshed.getTime();
     if (dateDiff / 1000 > 30 || dataCache.tagsSiteId !== siteId) {
-      // console.log('fetching all tags for refresh')
       await DocumentsService.getAllTagKeys(siteId).then((response: any) => {
         const allTagData = {
           allTags: response?.values,
@@ -86,13 +82,11 @@ export const fetchDocuments = createAsyncThunk(
           dataCache.allTags
         ).then((response: any) => {
           if (response) {
-            const temp: any = [];
-            response.documents?.forEach((el: IDocument) => {
-              if (el.path) {
-                // el.insertedDate = moment(el.insertedDate).format('YYYY-MM-DD HH:mm')
-                temp.push(el);
+            const temp: any = response.documents.filter(
+              (document: IDocument) => {
+                return document.path;
               }
-            });
+            );
             const data = {
               siteId,
               documents: temp,
@@ -406,8 +400,8 @@ export const fetchDeleteFolder = createAsyncThunk(
     });
   }
 );
-export const fetchDeleteDocument = createAsyncThunk(
-  'documentsList/fetchDeleteDocument',
+export const deleteDocument = createAsyncThunk(
+  'documentsList/deleteDocument',
   async (data: any, thunkAPI) => {
     const {
       siteId,
@@ -425,7 +419,7 @@ export const fetchDeleteDocument = createAsyncThunk(
     DocumentsService.addTag(document.documentId, siteId, {
       key: 'sysDeletedBy',
       value: user.email,
-    }).then((response) => {
+    }).then(() => {
       if (documents) {
         thunkAPI.dispatch(
           addDocumentTag({
@@ -435,11 +429,7 @@ export const fetchDeleteDocument = createAsyncThunk(
           })
         );
         const newDocs = documents.filter((doc: any) => {
-          if (doc.documentId === document.documentId) {
-            return false;
-          } else {
-            return true;
-          }
+          return doc.documentId !== document.documentId;
         });
         thunkAPI.dispatch(
           updateDocumentsList({
@@ -471,7 +461,7 @@ export const fetchDeleteDocument = createAsyncThunk(
 const defaultState = {
   documents: [] as any[],
   folders: [] as any[],
-  loadingStatus: requestStatusTypes.fulfilled,
+  loadingStatus: RequestStatus.fulfilled,
   nextToken: null,
   currentSearchPage: 1,
   isLastSearchPageLoaded: false,
@@ -520,11 +510,7 @@ export const documentsListSlice = createSlice({
                 if (tag.indexOf(':') === -1) {
                   type ObjectKey = keyof typeof doc.tags;
                   const tagProperty = tag as ObjectKey;
-                  if (doc.tags[tagProperty] !== undefined) {
-                    return true;
-                  } else {
-                    return false;
-                  }
+                  return doc.tags[tagProperty] !== undefined;
                 } else {
                   type ObjectKey = keyof typeof doc.tags;
                   const tagProperty = tag.split(':')[0] as ObjectKey;
@@ -613,7 +599,7 @@ export const documentsListSlice = createSlice({
             nextToken: next,
             documents: docsRes,
             folders,
-            loadingStatus: requestStatusTypes.fulfilled, // for bottom spiner with scroll loading
+            loadingStatus: RequestStatus.fulfilled, // for bottom spiner with scroll loading
             currentSearchPage: page,
             isLastSearchPageLoaded: isLastSearchPageLoaded,
           };
@@ -626,7 +612,7 @@ export const documentsListSlice = createSlice({
     },
     updateDocumentsList: (state, action) => {
       if (action.payload && state.documents) {
-        const { user, documents, isSystemDeletedByKey } = action.payload;
+        const { documents, isSystemDeletedByKey } = action.payload;
         const temp = {
           folders: state.folders,
           documents: documents,
@@ -704,7 +690,7 @@ export const documentsListSlice = createSlice({
       }: { folderToUpdate: IFolder; newValue: IFolder } = action.payload;
       if (state.folders) {
         if (newValue === null) {
-          console.log('update folder failure');
+          console.error('Failed to update folder');
         } else {
           const [folder, index, parentFolder] = findFolderAndParent(
             folderToUpdate.documentId,
@@ -722,12 +708,10 @@ export const documentsListSlice = createSlice({
         folderPath,
         document,
         documentAction,
-        user,
       }: {
         folderPath: string;
         document: IDocument;
         documentAction: string;
-        user: User;
       } = action.payload;
       let foundFolder: any = folderPath ? null : state;
       let fullFolderPath = '';
@@ -993,19 +977,21 @@ export const documentsListSlice = createSlice({
     builder.addCase(fetchDocuments.fulfilled, (state) => {
       return {
         ...state,
-        loadingStatus: requestStatusTypes.fulfilled,
+        loadingStatus: RequestStatus.fulfilled,
       };
     });
     builder.addCase(fetchDocuments.rejected, (state) => {
       return {
         ...state,
-        loadingStatus: requestStatusTypes.rejected,
+        loadingStatus: RequestStatus.rejected,
       };
     });
     builder.addCase(fetchDocuments.pending, (state) => {
       return {
         ...state,
-        loadingStatus: requestStatusTypes.pending,
+        documents: [],
+        folders: [],
+        loadingStatus: RequestStatus.pending,
       };
     });
   },

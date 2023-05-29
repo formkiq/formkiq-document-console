@@ -61,11 +61,7 @@ export default function DocumentTagsPopover({
         (data) => {
           setAllTags(
             data?.tags.filter((tag: any) => {
-              if (systemTags.indexOf(tag.key) === -1) {
-                return true;
-              } else {
-                return false;
-              }
+              return systemTags.indexOf(tag.key) === -1;
             })
           );
           setIsLoading(false);

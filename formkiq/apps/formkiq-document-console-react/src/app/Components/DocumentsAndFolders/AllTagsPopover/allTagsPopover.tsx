@@ -64,14 +64,10 @@ export default function AllTagsPopover({
     DocumentsService.getAllTagKeys(siteId).then((data) => {
       setAllTagKeys(
         data?.values.filter((value: any) => {
-          if (
+          return (
             TagsForFilterAndDisplay.indexOf(value.value) === -1 &&
             systemTags.indexOf(value.value) === -1
-          ) {
-            return true;
-          } else {
-            return false;
-          }
+          );
         })
       );
     });
