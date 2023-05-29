@@ -4,10 +4,8 @@ name: Build
 
 # Controls when the workflow will run
 on:
- push:
-   branches: [ main ]
- pull_request:
-   branches: [ main ]
+  push:
+    branches: [main]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -32,8 +30,8 @@ jobs:
 
       - uses: nyaa8/package-version@v1
         with:
-         path: 'formkiq/package.json'
-         follow-symlinks: 'false' # Optional
+          path: "formkiq/package.json"
+          follow-symlinks: "false" # Optional
 
       # Runs a single command using the runners shell
       - name: Set AWS credentials
