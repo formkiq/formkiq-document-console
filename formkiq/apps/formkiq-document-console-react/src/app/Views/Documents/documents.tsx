@@ -238,16 +238,12 @@ function Documents() {
       }
     }
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
-  if (documentsWrapperRef.current) {
-    (documentsWrapperRef.current as HTMLDivElement).style.height =
-      window.innerHeight - documentListOffsetTop + 'px';
-  }
 
   useEffect(() => {
     const resizeHandler = () => {
       if (documentsWrapperRef.current) {
-        (documentsWrapperRef.current as HTMLDivElement).style.height =
-          window.innerHeight - documentListOffsetTop + 'px';
+        (documentsWrapperRef.current as HTMLDivElement).style.marginTop =
+          documentListOffsetTop + 'px';
       }
     };
 
@@ -256,7 +252,7 @@ function Documents() {
     return () => {
       window.removeEventListener('resize', resizeHandler);
     };
-  });
+  }, [documentListOffsetTop]);
 
   useEffect(() => {
     DocumentsService.getAllTagKeys(currentSiteId).then((response: any) => {
@@ -277,16 +273,6 @@ function Documents() {
       );
     }
     dispatch(setCurrentDocumentPath(''));
-    if (documentsWrapperRef.current) {
-      (documentsWrapperRef.current as HTMLDivElement).style.height =
-        window.innerHeight - documentListOffsetTop + 400 + 'px';
-    }
-    if (documentsScrollpaneRef.current) {
-      (documentsScrollpaneRef.current as HTMLDivElement).addEventListener(
-        'scroll',
-        trackScrolling
-      );
-    }
   }, [infoDocumentId]);
 
   useEffect(() => {
@@ -931,7 +917,10 @@ function Documents() {
     }
 
     return (
-      <div className="relative mt-5 overflow-hidden" ref={documentsWrapperRef}>
+      <div
+        className="relative mt-5 overflow-hidden h-full"
+        ref={documentsWrapperRef}
+      >
         <div
           className="overflow-scroll h-full"
           ref={documentsScrollpaneRef}
@@ -1109,8 +1098,8 @@ function Documents() {
               </div>
             </div>
           </div>
-          <div className="flex flex-row">
-            <div className="flex-1 inline-block">
+          <div className="flex flex-row h-full">
+            <div className="flex-1 inline-block h-full">
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
