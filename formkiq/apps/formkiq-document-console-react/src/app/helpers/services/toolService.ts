@@ -77,6 +77,9 @@ export function getFileIcon(filename: string) {
       case 'wav':
         fileIcon = '/assets/img/svg/icon-wav.svg';
         break;
+      case 'eml':
+        fileIcon = '/assets/img/svg/icon-eml.svg';
+        break;
       case 'dwg':
         fileIcon = '/assets/img/svg/icon-dwg.svg';
         break;
