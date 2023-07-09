@@ -1202,95 +1202,206 @@ function Documents() {
                       ' w-64 mr-12'
                     }
                   >
-                    <dl className="p-4 pr-6 pt-2 text-medsmall text-gray-600">
-                      <div className="flex flex-col pb-3">
-                        <dt className="mb-1">Location</dt>
-                        <dd className="font-semibold text-sm text-coreOrange-600 hover:text-coreOrange-400">
-                          {(currentDocument as IDocument).path.substring(
-                            0,
-                            (currentDocument as IDocument).path.lastIndexOf('/')
-                          ).length ? (
-                            <Link
-                              to={
-                                siteDocumentsRootUri +
-                                '/folders/' +
-                                (currentDocument as IDocument).path.substring(
-                                  0,
-                                  (
+                    {currentDocument && (currentDocument as IDocument).path && (
+                      <dl className="p-4 pr-6 pt-2 text-medsmall text-gray-600">
+                        <div className="flex flex-col pb-3">
+                          <dt className="mb-1">Location</dt>
+                          <dd className="font-semibold text-sm text-coreOrange-600 hover:text-coreOrange-400">
+                            {(currentDocument as IDocument).path.substring(
+                              0,
+                              (currentDocument as IDocument).path.lastIndexOf(
+                                '/'
+                              )
+                            ).length ? (
+                              <Link
+                                to={
+                                  siteDocumentsRootUri +
+                                  '/folders/' +
+                                  (currentDocument as IDocument).path.substring(
+                                    0,
+                                    (
+                                      currentDocument as IDocument
+                                    ).path.lastIndexOf('/')
+                                  )
+                                }
+                                className="flex"
+                              >
+                                <span className="pr-1">
+                                  {siteDocumentsRootName.replace(
+                                    'Shared Folder: ',
+                                    ''
+                                  )}
+                                  :
+                                </span>
+                                <span>
+                                  {(
                                     currentDocument as IDocument
-                                  ).path.lastIndexOf('/')
-                                )
-                              }
-                              className="flex"
-                            >
-                              <span className="pr-1">
+                                  ).path.substring(
+                                    0,
+                                    (
+                                      currentDocument as IDocument
+                                    ).path.lastIndexOf('/')
+                                  )}
+                                </span>
+                                <div className="w-4 pt-0.5">
+                                  <ChevronRight />
+                                </div>
+                              </Link>
+                            ) : (
+                              <Link to={siteDocumentsRootUri} className="flex">
                                 {siteDocumentsRootName.replace(
                                   'Shared Folder: ',
                                   ''
                                 )}
-                                :
-                              </span>
-                              <span>
-                                {(currentDocument as IDocument).path.substring(
-                                  0,
-                                  (
-                                    currentDocument as IDocument
-                                  ).path.lastIndexOf('/')
+                                <div className="w-4 pt-0.5">
+                                  <ChevronRight />
+                                </div>
+                              </Link>
+                            )}
+                          </dd>
+                        </div>
+                        <div className="flex flex-col pb-3">
+                          <dt className="mb-1">Added by</dt>
+                          <dd className="font-semibold text-sm">
+                            {(currentDocument as IDocument).userId}
+                          </dd>
+                        </div>
+                        <div className="flex flex-col pb-3">
+                          <dt className="mb-1">Date added</dt>
+                          <dd className="font-semibold text-sm">
+                            {formatDate(
+                              (currentDocument as IDocument).insertedDate
+                            )}
+                          </dd>
+                        </div>
+                        <div className="flex flex-col pb-3">
+                          <dt className="mb-1">Last modified</dt>
+                          <dd className="font-semibold text-sm">
+                            {formatDate(
+                              (currentDocument as IDocument).lastModifiedDate
+                            )}
+                          </dd>
+                        </div>
+                        <div className="w-68 flex mr-3 border-b"></div>
+                        <div className="flex flex-col pt-3">
+                          <dt className="mb-1 flex justify-between">
+                            <span className="text-sm font-semibold text-coreOrange-500">
+                              Tags
+                            </span>
+                            {!isSiteReadOnly && (
+                              <div
+                                className="w-3/5 flex font-semibold text-coreOrange-500 cursor-pointer"
+                                onClick={(event) =>
+                                  setInfoTagEditMode(!infoTagEditMode)
+                                }
+                              >
+                                {infoTagEditMode ? (
+                                  <>
+                                    <div className="w-4 pt-0.5">
+                                      <ChevronLeft />
+                                    </div>
+                                    <span>cancel edit</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>edit tags</span>
+                                    <div className="w-4 pt-0.5">
+                                      <ChevronRight />
+                                    </div>
+                                  </>
                                 )}
-                              </span>
-                              <div className="w-4 pt-0.5">
-                                <ChevronRight />
                               </div>
-                            </Link>
-                          ) : (
-                            <Link to={siteDocumentsRootUri} className="flex">
-                              {siteDocumentsRootName.replace(
-                                'Shared Folder: ',
-                                ''
+                            )}
+                          </dt>
+                          <dd className="text-sm">
+                            {currentDocumentTags &&
+                              (currentDocumentTags as []).map(
+                                (tag: any, i: number) => {
+                                  let isKeyOnlyTag = false;
+                                  if (
+                                    (tag.value !== undefined &&
+                                      tag.value.length === 0) ||
+                                    (tag.values !== undefined &&
+                                      tag.values.length === 0)
+                                  ) {
+                                    isKeyOnlyTag = true;
+                                  }
+                                  let tagColor = 'gray';
+                                  if (tagColors) {
+                                    tagColors.forEach((color: any) => {
+                                      if (color.tagKeys.indexOf(tag.key) > -1) {
+                                        tagColor = color.colorUri;
+                                        return;
+                                      }
+                                    });
+                                  }
+                                  return (
+                                    <div key={i} className="inline">
+                                      {isKeyOnlyTag && (
+                                        <div className="pt-0.5 pr-1 flex items-center">
+                                          <div
+                                            className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}
+                                          >
+                                            {tag.key}
+                                            {infoTagEditMode && (
+                                              <button
+                                                className="pl-2 font-semibold hover:text-red-600"
+                                                onClick={(event) =>
+                                                  onTagDelete(tag.key)
+                                                }
+                                              >
+                                                x
+                                              </button>
+                                            )}
+                                          </div>
+                                          <div
+                                            className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                                          ></div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                }
                               )}
-                              <div className="w-4 pt-0.5">
-                                <ChevronRight />
-                              </div>
-                            </Link>
-                          )}
-                        </dd>
-                      </div>
-                      <div className="flex flex-col pb-3">
-                        <dt className="mb-1">Added by</dt>
-                        <dd className="font-semibold text-sm">
-                          {(currentDocument as IDocument).userId}
-                        </dd>
-                      </div>
-                      <div className="flex flex-col pb-3">
-                        <dt className="mb-1">Date added</dt>
-                        <dd className="font-semibold text-sm">
-                          {formatDate(
-                            (currentDocument as IDocument).insertedDate
-                          )}
-                        </dd>
-                      </div>
-                      <div className="flex flex-col pb-3">
-                        <dt className="mb-1">Last modified</dt>
-                        <dd className="font-semibold text-sm">
-                          {formatDate(
-                            (currentDocument as IDocument).lastModifiedDate
-                          )}
-                        </dd>
-                      </div>
-                      <div className="w-68 flex mr-3 border-b"></div>
-                      <div className="flex flex-col pt-3">
-                        <dt className="mb-1 flex justify-between">
-                          <span className="text-sm font-semibold text-coreOrange-500">
-                            Tags
-                          </span>
+                          </dd>
+                        </div>
+                        {infoTagEditMode && (
+                          <div className="flex mt-2">
+                            <AddTag
+                              line={{
+                                lineType: 'document',
+                                folder: subfolderUri,
+                                documentId: (currentDocument as IDocument)
+                                  .documentId,
+                                documentInstance: currentDocument as IDocument,
+                                folderInstance: null,
+                              }}
+                              onTagChange={onTagChange}
+                              updateTags={updateTags}
+                              siteId={currentSiteId}
+                              tagColors={tagColors}
+                            />
+                          </div>
+                        )}
+                        <div className="w-68 flex mt-3 mr-3 border-b"></div>
+                        <div className="pt-3 flex justify-between text-sm font-semibold text-coreOrange-500">
+                          Metadata
                           {!isSiteReadOnly && (
                             <div
-                              className="w-3/5 flex font-semibold text-coreOrange-500 cursor-pointer"
+                              className="w-3/5 flex text-medsmall font-semibold text-coreOrange-500 cursor-pointer"
                               onClick={(event) =>
-                                setInfoTagEditMode(!infoTagEditMode)
+                                onEditTagsAndMetadataModalClick(event, {
+                                  lineType: 'document',
+                                  folder: subfolderUri,
+                                  documentId: (currentDocument as IDocument)
+                                    .documentId,
+                                  documentInstance:
+                                    currentDocument as IDocument,
+                                  folderInstance: null,
+                                })
                               }
                             >
-                              {infoTagEditMode ? (
+                              {infoMetadataEditMode ? (
                                 <>
                                   <div className="w-4 pt-0.5">
                                     <ChevronLeft />
@@ -1299,7 +1410,7 @@ function Documents() {
                                 </>
                               ) : (
                                 <>
-                                  <span>edit tags</span>
+                                  <span>add/edit metadata</span>
                                   <div className="w-4 pt-0.5">
                                     <ChevronRight />
                                   </div>
@@ -1307,147 +1418,47 @@ function Documents() {
                               )}
                             </div>
                           )}
-                        </dt>
-                        <dd className="text-sm">
-                          {currentDocumentTags &&
-                            (currentDocumentTags as []).map(
-                              (tag: any, i: number) => {
-                                let isKeyOnlyTag = false;
-                                if (
-                                  (tag.value !== undefined &&
-                                    tag.value.length === 0) ||
-                                  (tag.values !== undefined &&
-                                    tag.values.length === 0)
-                                ) {
-                                  isKeyOnlyTag = true;
-                                }
-                                let tagColor = 'gray';
-                                if (tagColors) {
-                                  tagColors.forEach((color: any) => {
-                                    if (color.tagKeys.indexOf(tag.key) > -1) {
-                                      tagColor = color.colorUri;
-                                      return;
-                                    }
-                                  });
-                                }
-                                return (
-                                  <div key={i} className="inline">
-                                    {isKeyOnlyTag && (
-                                      <div className="pt-0.5 pr-1 flex items-center">
-                                        <div
-                                          className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}
-                                        >
-                                          {tag.key}
-                                          {infoTagEditMode && (
-                                            <button
-                                              className="pl-2 font-semibold hover:text-red-600"
-                                              onClick={(event) =>
-                                                onTagDelete(tag.key)
-                                              }
-                                            >
-                                              x
-                                            </button>
-                                          )}
-                                        </div>
-                                        <div
-                                          className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                                        ></div>
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              }
-                            )}
-                        </dd>
-                      </div>
-                      {infoTagEditMode && (
-                        <div className="flex mt-2">
-                          <AddTag
-                            line={{
-                              lineType: 'document',
-                              folder: subfolderUri,
-                              documentId: (currentDocument as IDocument)
-                                .documentId,
-                              documentInstance: currentDocument as IDocument,
-                              folderInstance: null,
-                            }}
-                            onTagChange={onTagChange}
-                            updateTags={updateTags}
-                            siteId={currentSiteId}
-                            tagColors={tagColors}
-                          />
                         </div>
-                      )}
-                      <div className="w-68 flex mt-3 mr-3 border-b"></div>
-                      <div className="pt-3 flex justify-between text-sm font-semibold text-coreOrange-500">
-                        Metadata
-                        {!isSiteReadOnly && (
-                          <div
-                            className="w-3/5 flex text-medsmall font-semibold text-coreOrange-500 cursor-pointer"
-                            onClick={(event) =>
-                              onEditTagsAndMetadataModalClick(event, {
-                                lineType: 'document',
-                                folder: subfolderUri,
-                                documentId: (currentDocument as IDocument)
-                                  .documentId,
-                                documentInstance: currentDocument as IDocument,
-                                folderInstance: null,
-                              })
-                            }
-                          >
-                            {infoMetadataEditMode ? (
-                              <>
-                                <div className="w-4 pt-0.5">
-                                  <ChevronLeft />
+                        {currentDocumentTags &&
+                          (currentDocumentTags as []).map(
+                            (tag: any, i: number) => {
+                              let isKeyOnlyTag = false;
+                              if (
+                                (tag.value !== undefined &&
+                                  tag.value.length === 0) ||
+                                (tag.values !== undefined &&
+                                  tag.values.length === 0)
+                              ) {
+                                isKeyOnlyTag = true;
+                              }
+                              return (
+                                <div
+                                  key={i}
+                                  className={
+                                    (isKeyOnlyTag ? 'hidden' : 'inline') +
+                                    ' flex flex-col pt-3'
+                                  }
+                                >
+                                  <dt className="mb-1">{tag.key}</dt>
+                                  <dd className="font-semibold text-sm">
+                                    {tag.value && <span>{tag.value}</span>}
+                                    {tag.values !== undefined &&
+                                      tag.values.map(
+                                        (value: any, j: number) => {
+                                          return (
+                                            <span className="block">
+                                              {value}
+                                            </span>
+                                          );
+                                        }
+                                      )}
+                                  </dd>
                                 </div>
-                                <span>cancel edit</span>
-                              </>
-                            ) : (
-                              <>
-                                <span>add/edit metadata</span>
-                                <div className="w-4 pt-0.5">
-                                  <ChevronRight />
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      {currentDocumentTags &&
-                        (currentDocumentTags as []).map(
-                          (tag: any, i: number) => {
-                            let isKeyOnlyTag = false;
-                            if (
-                              (tag.value !== undefined &&
-                                tag.value.length === 0) ||
-                              (tag.values !== undefined &&
-                                tag.values.length === 0)
-                            ) {
-                              isKeyOnlyTag = true;
+                              );
                             }
-                            return (
-                              <div
-                                key={i}
-                                className={
-                                  (isKeyOnlyTag ? 'hidden' : 'inline') +
-                                  ' flex flex-col pt-3'
-                                }
-                              >
-                                <dt className="mb-1">{tag.key}</dt>
-                                <dd className="font-semibold text-sm">
-                                  {tag.value && <span>{tag.value}</span>}
-                                  {tag.values !== undefined &&
-                                    tag.values.map((value: any, j: number) => {
-                                      return (
-                                        <span className="block">{value}</span>
-                                      );
-                                    })}
-                                </dd>
-                              </div>
-                            );
-                          }
-                        )}
-                    </dl>
+                          )}
+                      </dl>
+                    )}
                     <div className="mt-4 w-full flex justify-center">
                       <button
                         className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"

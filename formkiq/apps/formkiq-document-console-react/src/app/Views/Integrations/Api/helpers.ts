@@ -725,14 +725,16 @@ export const getConfigurationApiItem = {
   path: '/configuration',
   description: 'Returns the current configuration',
   username: 'Cognito User',
+  hasNoParams: true,
   requiresAuthentication: true,
 };
 
 export const postConfigurationApiItem = {
-  method: 'POST',
+  method: 'PATCH',
   path: '/configuration',
-  description: 'Sets the current configuration',
+  description: 'Updates the current configuration',
   username: 'Cognito User',
+  requiresPostJson: true,
   requiresAuthentication: true,
 };
 
