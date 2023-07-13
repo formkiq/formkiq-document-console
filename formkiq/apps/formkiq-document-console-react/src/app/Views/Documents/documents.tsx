@@ -975,7 +975,11 @@ function Documents() {
               {documents.length === 0 &&
               folders.length === 0 &&
               loadingStatus === RequestStatus.pending ? (
-                <Spinner />
+                <tr>
+                  <td colSpan={6}>
+                    <Spinner />
+                  </td>
+                </tr>
               ) : undefined}
               {documents.map((file, i) => (
                 <DocumentListLine
@@ -1280,6 +1284,12 @@ function Documents() {
                             {formatDate(
                               (currentDocument as IDocument).lastModifiedDate
                             )}
+                          </dd>
+                        </div>
+                        <div className="flex flex-col pb-3">
+                          <dt className="mb-1">ID</dt>
+                          <dd className="font-semibold text-xxs tracking-tight">
+                            {(currentDocument as IDocument).documentId}
                           </dd>
                         </div>
                         <div className="w-68 flex mr-3 border-b"></div>

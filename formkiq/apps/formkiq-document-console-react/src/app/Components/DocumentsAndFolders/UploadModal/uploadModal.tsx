@@ -238,6 +238,68 @@ export default function UploadModal({
                   doc.contentType = matchingFiles[0].originalFile.type;
                 }
               });
+              const actions: any = [];
+              const actionCheckboxAntivirus = document.getElementById(
+                'actionCheckboxAntivirus'
+              );
+              const actionCheckboxOcr =
+                document.getElementById('actionCheckboxOcr');
+              const actionCheckboxTypesense = document.getElementById(
+                'actionCheckboxTypesense'
+              );
+              const actionCheckboxFulltext = document.getElementById(
+                'actionCheckboxFulltext'
+              );
+              if (
+                actionCheckboxAntivirus &&
+                (actionCheckboxAntivirus as HTMLInputElement).checked
+              ) {
+                actions.push({
+                  type: 'antivirus',
+                });
+              }
+              if (
+                actionCheckboxOcr &&
+                (actionCheckboxOcr as HTMLInputElement).checked
+              ) {
+                actions.push({
+                  type: 'ocr',
+                  parseTypes: 'TEXT',
+                });
+              }
+              if (
+                (actionCheckboxTypesense &&
+                  (actionCheckboxTypesense as HTMLInputElement).checked) ||
+                (actionCheckboxFulltext &&
+                  (actionCheckboxFulltext as HTMLInputElement).checked)
+              ) {
+                actions.push({
+                  type: 'fulltext',
+                });
+              }
+              /*
+                {
+                  type: 'documenttagging',
+                  parameters: {
+                    engine: 'chatgpt',
+                    tags: 'document type,sender name,recipient name,total amount',
+                    tags: 'document type,meeting date,chairperson,secretary,board members,resolutions',
+                    tags: 'document type,contract purpose,party names,party addresses,clause names',
+                  },
+                },
+              */
+
+              // TODO: check file type before requesting incompatible actions
+              // e.g.: OcrContentTypes.indexOf(doc.contentType) > -1
+
+              uploaded.forEach((doc: any) => {
+                DocumentsService.postDocumentActions(
+                  doc.documentId,
+                  actions,
+                  siteId
+                );
+              });
+
               setUploaded([...uploadedDocs, ...uploaded]);
             }
           );
@@ -316,7 +378,7 @@ export default function UploadModal({
         <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400">
           {formatDate(file.insertedDate)}
         </td>
-        <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400 text-center">
+        <td className="hidden border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400 text-center">
           {formkiqVersion.modules.indexOf('ocr') > -1 &&
             formkiqVersion.modules.indexOf('fulltext') > -1 &&
             OcrContentTypes.indexOf(file.contentType) > -1 && (
@@ -425,44 +487,67 @@ export default function UploadModal({
                         directoryUpload={isFolderUpload}
                       />
                     </div>
-                    <div>{uploadProcessTable(uploadProcessDocs)}</div>
-                    {uploadedDocs.length > 0 && (
-                      <div className="relative rounded-xl overflow-auto max-h-64 overflow-y-scroll">
-                        <div className="shadow-sm overflow-hidden my-8">
-                          <div className="font-bold text-lg inline-block pr-6 pb-6">
-                            Uploaded files:
+                    <div className="flex flex-wrap">
+                      <h4 className="w-full font-semibold">
+                        Run the following actions, when available:
+                      </h4>
+                      <div className="mt-2 mb-5 w-full flex text-sm">
+                        {formkiqVersion.modules.indexOf('antivirus') > -1 && (
+                          <div className="px-4">
+                            <input
+                              id="actionCheckboxAntivirus"
+                              type="checkbox"
+                            />
+                            <label
+                              htmlFor="actionCheckboxAntivirus"
+                              className="pl-2 font-semibold cursor-pointer"
+                            >
+                              Scan Document for Viruses and Other Malware
+                            </label>
                           </div>
-                          <table className="border-collapse table-fixed w-full text-sm">
-                            <thead>
-                              <tr>
-                                <th
-                                  className="border-b nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left"
-                                  data-test-id="uploaded-filename"
-                                >
-                                  Filename
-                                </th>
-                                <th className="border-b nodark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
-                                  Uploaded by
-                                </th>
-                                <th className="border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
-                                  Date added
-                                </th>
-                                <th className="border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
-                                  Workflow(s)
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white nodark:bg-slate-800">
-                              {uploadedDocs.map((file, i) => {
-                                return uploadedFileLine(file, i);
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
+                        )}
+                        {formkiqVersion.modules.indexOf('ocr') > -1 && (
+                          <div className="px-4">
+                            <input id="actionCheckboxOcr" type="checkbox" />
+                            <label
+                              htmlFor="actionCheckboxOcr"
+                              className="pl-2 font-semibold cursor-pointer"
+                            >
+                              Retrieve and Store Content Using OCR
+                            </label>
+                          </div>
+                        )}
+                        {formkiqVersion.modules.indexOf('typesense') > -1 && (
+                          <div className="px-4">
+                            <input
+                              id="actionCheckboxTypesense"
+                              type="checkbox"
+                            />
+                            <label
+                              htmlFor="actionCheckboxTypesense"
+                              className="pl-2 font-semibold cursor-pointer"
+                            >
+                              Add Content to Typesense Fulltext Search
+                            </label>
+                          </div>
+                        )}
+                        {formkiqVersion.modules.indexOf('fulltext') > -1 && (
+                          <div className="px-4">
+                            <input
+                              id="actionCheckboxFulltext"
+                              type="checkbox"
+                              checked
+                            />
+                            <label
+                              htmlFor="actionCheckboxFulltext"
+                              className="pl-2 font-semibold cursor-pointer"
+                            >
+                              Add Content to Fulltext Search
+                            </label>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="flex justify-between mr-8">
+                    </div>
                     <div>
                       <button
                         type="button"
@@ -500,7 +585,7 @@ export default function UploadModal({
                               className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                               onClick={() => {
                                 closeDialog();
-                                dispatch(setCurrentActionEvent('upload'));
+                                dispatch(setCurrentActionEvent('folderUpload'));
                               }}
                               ref={cancelButtonRef}
                             >
@@ -510,6 +595,46 @@ export default function UploadModal({
                         </>
                       )}
                     </div>
+                    <div className="flex justify-between mr-8"></div>
+                    <div>{uploadProcessTable(uploadProcessDocs)}</div>
+                    {uploadedDocs.length > 0 && (
+                      <div className="relative rounded-xl overflow-auto max-h-64 overflow-y-scroll">
+                        <div className="shadow-sm overflow-hidden my-8">
+                          <div className="font-bold text-lg inline-block pr-6 pb-6">
+                            Uploaded files:
+                          </div>
+                          <table className="border-collapse table-fixed w-full text-sm">
+                            <thead>
+                              <tr>
+                                <th
+                                  className="border-b nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left"
+                                  data-test-id="uploaded-filename"
+                                >
+                                  Filename
+                                </th>
+                                <th className="border-b nodark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                  Uploaded by
+                                </th>
+                                <th className="border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                  Date added
+                                </th>
+                                <th className="hidden border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                  Workflow(s)
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white nodark:bg-slate-800">
+                              {uploadedDocs.map((file, i) => {
+                                return uploadedFileLine(file, i);
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-between mr-8">
+                    <div></div>
                     <button
                       type="button"
                       data-test-id="upload-modal-close"
