@@ -29,6 +29,7 @@ export type DocumentUploadedInfo = {
 export type DocumentUploadBody = {
   tagSchemaId?: string;
   path?: any;
+  contentLength?: any;
   tags?: any[];
   actions?: { type?: string; parameters?: any }[];
 };
@@ -220,6 +221,7 @@ export class DocumentsService {
     } else {
       path = file.name;
     }
+    const contentLength = file.size;
     const actions = [] as any[];
     if (formkiqVersion.modules.indexOf('fulltext') > -1) {
       // NOTE: future versions may automatically add all documents to OpenSearch
@@ -231,7 +233,8 @@ export class DocumentsService {
     };
     return await this.getFormkiqClient().documentsApi.getSignedUrlForNewDocumentUploadWithBody(
       uploadBody,
-      siteId
+      siteId,
+      contentLength
     );
   }
 
@@ -247,7 +250,8 @@ export class DocumentsService {
     return await this.getFormkiqClient().documentsApi.getSignedUrlForDocumentReplacementUpload(
       documentId,
       null,
-      siteId
+      siteId,
+      file.size
     );
   }
 
