@@ -32,19 +32,3 @@ jobs:
         with:
           path: "formkiq/package.json"
           follow-symlinks: "false" # Optional
-
-      # Runs a single command using the runners shell
-      - name: Set AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
-
-      # Runs a set of commands using the runners shell
-      - name: Deploy to S3
-        env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET }}
-          VERSION: ${{ env.PACKAGE_VERSION }}
-        run: |
-          aws s3 cp formkiq/dist/apps/formkiq-document-console-react/formkiq-console.zip s3://${S3_BUCKET}/formkiq-console/v${VERSION}/formkiq-console.zip --acl public-read
