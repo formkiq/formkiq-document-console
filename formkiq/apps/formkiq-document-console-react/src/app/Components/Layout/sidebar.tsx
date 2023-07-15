@@ -71,6 +71,8 @@ export function Sidebar() {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
+  const [specialFoldersRootUri, setSpecialFoldersRootUri] =
+    useState(siteDocumentsRootUri);
   const [sidebarExpanded, setSidebarExpanded] = useState(isSidebarExpanded);
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
   let expandSharedFoldersInitially = isSharedFoldersExpanded;
@@ -122,6 +124,11 @@ export function Sidebar() {
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
+    if (recheckSiteInfo.siteDocumentsRootUri.indexOf('shared-folders') > 0) {
+      if (!hasUserSite && !hasDefaultSite && hasSharedFolders) {
+        setSpecialFoldersRootUri('/documents');
+      }
+    }
   }, [pathname]);
 
   const toggleSidebarExpand = () => {
@@ -401,7 +408,7 @@ export function Sidebar() {
                     <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
                         data-test-id="nav-favorites"
-                        to={`${currentDocumentsRootUri}/folders/favorites`}
+                        to={`${specialFoldersRootUri}/folders/favorites`}
                         className={({ isActive }) =>
                           (isActive
                             ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
@@ -425,7 +432,7 @@ export function Sidebar() {
                       <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                         <NavLink
                           data-test-id="nav-trash"
-                          to={`${currentDocumentsRootUri}/folders/deleted`}
+                          to={`${specialFoldersRootUri}/folders/deleted`}
                           className={({ isActive }) =>
                             (isActive
                               ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
@@ -681,7 +688,7 @@ export function Sidebar() {
               <>
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to={`${currentDocumentsRootUri}/folders/favorites`}
+                    to={`${specialFoldersRootUri}/folders/favorites`}
                     className={({ isActive }) =>
                       (isActive
                         ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
@@ -701,7 +708,7 @@ export function Sidebar() {
                 {useSoftDelete && (
                   <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
-                      to={`${currentDocumentsRootUri}/folders/deleted`}
+                      to={`${specialFoldersRootUri}/folders/deleted`}
                       className={({ isActive }) =>
                         (isActive
                           ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
