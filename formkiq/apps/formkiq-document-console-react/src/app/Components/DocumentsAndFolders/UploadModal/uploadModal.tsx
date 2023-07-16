@@ -534,7 +534,7 @@ export default function UploadModal({
                               htmlFor="actionCheckboxTypesense"
                               className="pl-2 font-semibold cursor-pointer"
                             >
-                              Add Content to Typesense Fulltext Search
+                              Add Content to Fulltext Search
                             </label>
                           </div>
                         )}
