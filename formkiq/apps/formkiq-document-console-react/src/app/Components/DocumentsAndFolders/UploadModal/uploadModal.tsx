@@ -250,6 +250,9 @@ export default function UploadModal({
               const actionCheckboxFulltext = document.getElementById(
                 'actionCheckboxFulltext'
               );
+              const actionCheckboxDocumentTypeTag = document.getElementById(
+                'actionCheckboxDocumentTypeTag'
+              );
               if (
                 actionCheckboxAntivirus &&
                 (actionCheckboxAntivirus as HTMLInputElement).checked
@@ -277,17 +280,21 @@ export default function UploadModal({
                   type: 'fulltext',
                 });
               }
-              /*
-                {
+              if (
+                actionCheckboxDocumentTypeTag &&
+                (actionCheckboxDocumentTypeTag as HTMLInputElement).checked
+              ) {
+                actions.push({
                   type: 'documenttagging',
                   parameters: {
                     engine: 'chatgpt',
-                    tags: 'document type,sender name,recipient name,total amount',
-                    tags: 'document type,meeting date,chairperson,secretary,board members,resolutions',
-                    tags: 'document type,contract purpose,party names,party addresses,clause names',
+                    tags: 'document type',
+                    /*tags: 'document type,sender name,recipient name,total amount',*/
+                    /*tags: 'document type,meeting date,chairperson,secretary,board members,resolutions',*/
+                    /*tags: 'document type,contract purpose,party names,party addresses,clause names',*/
                   },
-                },
-              */
+                });
+              }
 
               // TODO: check file type before requesting incompatible actions
               // e.g.: OcrContentTypes.indexOf(doc.contentType) > -1
@@ -536,7 +543,6 @@ export default function UploadModal({
                             <input
                               id="actionCheckboxFulltext"
                               type="checkbox"
-                              checked
                             />
                             <label
                               htmlFor="actionCheckboxFulltext"
@@ -546,6 +552,21 @@ export default function UploadModal({
                             </label>
                           </div>
                         )}
+                        <div className="px-4">
+                          <input
+                            id="actionCheckboxDocumentTypeTag"
+                            type="checkbox"
+                          />
+                          <label
+                            htmlFor="actionCheckboxDocumentTypeTag"
+                            className="pl-2 font-semibold cursor-pointer"
+                          >
+                            Use Content to Determine Document Type
+                            <span className="text-xs block">
+                              (requires OpenAI API Key)
+                            </span>
+                          </label>
+                        </div>
                       </div>
                     </div>
                     <div>
