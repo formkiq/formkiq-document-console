@@ -160,7 +160,11 @@ export function getCurrentSiteInfo(
       currentSiteInfo.siteId = sharedFolderSites[0].siteId;
       currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
       currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+      if (hasDefaultSite || hasUserSite) {
+        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+      } else {
+        currentSiteInfo.siteDocumentsRootName = `Folder: ${sharedFolderSites[0].siteId}`;
+      }
     }
   } else if (!hasUserSite && pathname.indexOf('/team-documents') === 0) {
     if (hasDefaultSite || !hasSharedFolders || !sharedFolderSites.length) {
@@ -172,7 +176,11 @@ export function getCurrentSiteInfo(
       currentSiteInfo.siteId = sharedFolderSites[0].siteId;
       currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
       currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+      if (hasDefaultSite || hasUserSite) {
+        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+      } else {
+        currentSiteInfo.siteDocumentsRootName = `Folder: ${sharedFolderSites[0].siteId}`;
+      }
     }
   }
   if (user && user.email) {
@@ -215,14 +223,22 @@ export function getCurrentSiteInfo(
         }
       }
       currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${currentSiteInfo.siteId}`;
-      currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${currentSiteInfo.siteId}`;
+      if (hasDefaultSite || hasUserSite) {
+        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+      } else {
+        currentSiteInfo.siteDocumentsRootName = `Folder: ${sharedFolderSites[0].siteId}`;
+      }
     }
     if (currentSiteInfo.siteId === '' && user) {
       user.sites.forEach((site: any) => {
         currentSiteInfo.siteId = site.siteId;
         if (site.siteId !== 'default' && site.siteId !== user.email) {
           currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${site.siteId}`;
-          currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${site.siteId}`;
+          if (hasDefaultSite || hasUserSite) {
+            currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${site.siteId}`;
+          } else {
+            currentSiteInfo.siteDocumentsRootName = `Folder: ${site.siteId}`;
+          }
         }
         return;
       });
