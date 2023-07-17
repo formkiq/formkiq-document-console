@@ -1000,6 +1000,22 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getConfiguration(siteId: string): Promise<any> {
+    return this.getFormkiqClient().configurationApi.getConfiguration(siteId);
+  }
+
+  @formkiqAPIHandler
+  public static async updateConfiguration(
+    configuration: any,
+    siteId: string
+  ): Promise<any> {
+    return this.getFormkiqClient().configurationApi.updateConfiguration(
+      configuration,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
   public static async getSites(): Promise<any> {
     return this.getFormkiqClient().sitesApi.getSites();
   }

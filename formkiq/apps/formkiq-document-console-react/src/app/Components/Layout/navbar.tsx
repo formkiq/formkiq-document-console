@@ -25,6 +25,7 @@ import {
   Documents,
   FolderOutline,
   Recent,
+  Settings,
   Share,
   ShareHand,
   Star,
@@ -332,7 +333,8 @@ function Navbar() {
                   ) : (
                     <>
                       {locationPrefix === '/workflows' ||
-                      locationPrefix === '/integrations' ? (
+                      locationPrefix === '/integrations' ||
+                      locationPrefix === '/account' ? (
                         <>
                           <div className="w-6 mr-1 text-coreOrange-600">
                             {pathname.indexOf('/workflows') > -1 && (
@@ -351,6 +353,11 @@ function Navbar() {
                                 <Webhook />
                               </div>
                             )}
+                            {pathname.indexOf('/account/settings') > -1 && (
+                              <div className="w-5">
+                                <Settings />
+                              </div>
+                            )}
                           </div>
                           <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
                             {pathname.indexOf('/workflows') > -1 && (
@@ -361,6 +368,9 @@ function Navbar() {
                             )}
                             {pathname.indexOf('/integrations/webhooks') >
                               -1 && <span>Inbound Webhooks</span>}
+                            {pathname.indexOf('/account/settings') > -1 && (
+                              <span>Settings</span>
+                            )}
                           </div>
                         </>
                       ) : (
@@ -484,7 +494,7 @@ function Navbar() {
                   </button>
                   {showAccountDropdown && (
                     <ul className="dropdown-menu min-w-max absolute bg-white right-0 text-base z-50 float-right list-none text-left rounded-lg border mt-2.5">
-                      <li className="hidden">
+                      <li onClick={ToggleAccountSettings}>
                         <Link
                           to="/account/settings"
                           className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
