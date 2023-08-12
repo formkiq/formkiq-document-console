@@ -188,7 +188,7 @@ export default function UploadModal({
           DocumentsService.getDocumentsById(ids, siteId).then(
             (uploaded: []) => {
               setUploadProcess([]);
-              if (formkiqVersion.modules.indexOf('fulltext') > -1) {
+              if (formkiqVersion.modules?.indexOf('fulltext') > -1) {
                 const actions = [{ type: 'fulltext' }];
                 uploaded.forEach((doc: any) => {
                   DocumentsService.postDocumentActions(
@@ -386,8 +386,8 @@ export default function UploadModal({
           {formatDate(file.insertedDate)}
         </td>
         <td className="hidden border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400 text-center">
-          {formkiqVersion.modules.indexOf('ocr') > -1 &&
-            formkiqVersion.modules.indexOf('fulltext') > -1 &&
+          {formkiqVersion.modules?.indexOf('ocr') > -1 &&
+            formkiqVersion.modules?.indexOf('fulltext') > -1 &&
             OcrContentTypes.indexOf(file.contentType) > -1 && (
               <>
                 {file.processingOcrWorkflow && <Spinner />}
@@ -499,7 +499,7 @@ export default function UploadModal({
                         Run the following actions, when available:
                       </h4>
                       <div className="mt-2 mb-5 w-full flex text-sm">
-                        {formkiqVersion.modules.indexOf('antivirus') > -1 && (
+                        {formkiqVersion.modules?.indexOf('antivirus') > -1 && (
                           <div className="px-4">
                             <input
                               id="actionCheckboxAntivirus"
@@ -513,7 +513,7 @@ export default function UploadModal({
                             </label>
                           </div>
                         )}
-                        {formkiqVersion.modules.indexOf('ocr') > -1 && (
+                        {formkiqVersion.modules?.indexOf('ocr') > -1 && (
                           <div className="px-4">
                             <input id="actionCheckboxOcr" type="checkbox" />
                             <label
@@ -524,7 +524,7 @@ export default function UploadModal({
                             </label>
                           </div>
                         )}
-                        {formkiqVersion.modules.indexOf('typesense') > -1 && (
+                        {formkiqVersion.modules?.indexOf('typesense') > -1 && (
                           <div className="px-4">
                             <input
                               id="actionCheckboxTypesense"
@@ -538,7 +538,7 @@ export default function UploadModal({
                             </label>
                           </div>
                         )}
-                        {formkiqVersion.modules.indexOf('fulltext') > -1 && (
+                        {formkiqVersion.modules?.indexOf('fulltext') > -1 && (
                           <div className="px-4">
                             <input
                               id="actionCheckboxFulltext"

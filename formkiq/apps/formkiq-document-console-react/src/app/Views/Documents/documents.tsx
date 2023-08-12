@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Tooltip } from 'react-tooltip';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -18,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Close,
+  CopyIcon,
   Download,
   Edit,
   FolderOutline,
@@ -67,6 +69,7 @@ import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
+import { CopyButton } from '../../Components/Generic/CopyButton';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -431,7 +434,7 @@ function Documents() {
   };
   const deleteFolder = (folder: IFolder | IDocument) => () => {
     const deleteFunc = () => {
-      dispatch(fetchDeleteFolder({ user, folder }));
+      dispatch(fetchDeleteFolder({ user, folder, siteId }));
     };
     dispatch(
       openDialog({
@@ -1126,9 +1129,14 @@ function Documents() {
                           </dd>
                         </div>
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">ID</dt>
+                          <dt className="mb-1">
+                            ID{' '}
+                            <CopyButton
+                              value={(currentDocument as IDocument).documentId}
+                            />
+                          </dt>
                           <dd className="font-semibold text-xxs tracking-tight">
-                            {(currentDocument as IDocument).documentId}
+                            {(currentDocument as IDocument).documentId}&nbsp;
                           </dd>
                         </div>
                         <div className="w-68 flex mr-3 border-b"></div>
@@ -1412,7 +1420,7 @@ function Documents() {
                     <div className="-mr-[4.625rem] p-4 text-[0.8125rem] leading-6 text-slate-900">
                       <div className="flex gap-4 pb-10 border-t border-slate-400/20 justify-center items-center py-6">
                         {document &&
-                          formkiqVersion.modules.indexOf('onlyoffice') > -1 &&
+                          formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
                           OnlyOfficeContentTypes.indexOf(
                             (currentDocument as IDocument).contentType
                           ) > -1 && (

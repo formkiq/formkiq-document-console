@@ -238,7 +238,7 @@ export default function DocumentActionsPopover({
             {line.lineType === 'document' &&
               !isSiteReadOnly &&
               line.documentInstance &&
-              formkiqVersion.modules.indexOf('esignature') > -1 &&
+              formkiqVersion.modules?.indexOf('esignature') > -1 &&
               ESignatureContentTypes.indexOf(
                 line.documentInstance.contentType
               ) > -1 && (

@@ -550,7 +550,7 @@ export class DocumentsService {
     indexKey: string,
     siteId = ''
   ): Promise<any> {
-    if (!siteId || !siteId.length) {
+    if (!siteId) {
       siteId = this.determineSiteId();
     }
     return this.getFormkiqClient().documentsApi.deleteFolder(indexKey, siteId);
