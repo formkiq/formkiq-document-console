@@ -434,7 +434,7 @@ function Documents() {
   };
   const deleteFolder = (folder: IFolder | IDocument) => () => {
     const deleteFunc = () => {
-      dispatch(fetchDeleteFolder({ user, folder, siteId }));
+      dispatch(fetchDeleteFolder({ folder, siteId }));
     };
     dispatch(
       openDialog({

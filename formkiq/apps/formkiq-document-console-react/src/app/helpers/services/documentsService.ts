@@ -553,6 +553,7 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
+    indexKey = indexKey.replace('#', '%23');
     return this.getFormkiqClient().documentsApi.deleteFolder(indexKey, siteId);
   }
 
