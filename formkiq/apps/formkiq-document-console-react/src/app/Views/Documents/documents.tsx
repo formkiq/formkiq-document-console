@@ -180,13 +180,6 @@ function Documents() {
   const dispatch = useAppDispatch();
   const documentListOffsetTop = isTagFilterExpanded ? 170 : 140;
 
-  useEffect(() => {
-    if (formkiqVersion.modules === undefined) {
-      window.location.reload();
-    }
-  }, []);
-  // TODO: improve on this check / determine why setting modules is not happening in time or without reload
-
   const trackScrolling = useCallback(async () => {
     const bottomRow = (
       document.getElementById('documentsTable') as HTMLTableElement
