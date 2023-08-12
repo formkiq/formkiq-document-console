@@ -599,8 +599,10 @@ export const documentsListSlice = createSlice({
             nextToken: next,
             documents: docsRes,
             folders,
-            loadingStatus: RequestStatus.fulfilled, // for bottom spiner with scroll loading
             currentSearchPage: page,
+            //Because we don't set the documents in the .fulfilled handler of the thunk, there is a brief desync between the fulfilled status
+            //and the documents beings set which leads to the empty table being briefly shown
+            loadingStatus: RequestStatus.fulfilled,
             isLastSearchPageLoaded: isLastSearchPageLoaded,
           };
         }
@@ -974,12 +976,6 @@ export const documentsListSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchDocuments.fulfilled, (state) => {
-      return {
-        ...state,
-        loadingStatus: RequestStatus.fulfilled,
-      };
-    });
     builder.addCase(fetchDocuments.rejected, (state) => {
       return {
         ...state,
