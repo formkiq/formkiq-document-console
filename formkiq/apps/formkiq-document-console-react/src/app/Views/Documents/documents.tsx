@@ -1045,7 +1045,7 @@ function Documents() {
                   <div
                     className={
                       (infoDocumentView === 'info' ? 'block ' : 'hidden ') +
-                      ' w-64 mr-12'
+                      ' w-64 mr-12 overflow-y-auto h-[calc(100vh-3.68rem)]'
                     }
                   >
                     {currentDocument && (currentDocument as IDocument).path && (
