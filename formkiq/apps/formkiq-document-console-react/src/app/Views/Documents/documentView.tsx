@@ -76,7 +76,7 @@ export function DocumentView() {
           setDocument(response);
           dispatch(setCurrentDocumentPath(response.path));
           if (
-            formkiqVersion.modules.indexOf('onlyoffice') > -1 &&
+            formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
             OnlyOfficeContentTypes.indexOf(
               (response as IDocument).contentType
             ) > -1

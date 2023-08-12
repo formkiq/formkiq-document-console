@@ -376,11 +376,13 @@ export const fetchDeleteFolder = createAsyncThunk(
     const {
       user,
       folder,
+      siteId,
     }: {
       user: User;
       folder: IFolder;
+      siteId: string;
     } = data;
-    DocumentsService.deleteFolder(folder.indexKey).then((response) => {
+    DocumentsService.deleteFolder(folder.indexKey, siteId).then((response) => {
       if (response.status && response.status === 200) {
         thunkAPI.dispatch(removeFolderFromList({ folderToDelete: folder }));
       } else {
