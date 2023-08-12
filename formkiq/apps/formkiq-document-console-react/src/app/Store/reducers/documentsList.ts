@@ -374,11 +374,9 @@ export const fetchDeleteFolder = createAsyncThunk(
   'documentsList/fetchDeleteFolder',
   async (data: any, thunkAPI) => {
     const {
-      user,
       folder,
       siteId,
     }: {
-      user: User;
       folder: IFolder;
       siteId: string;
     } = data;
