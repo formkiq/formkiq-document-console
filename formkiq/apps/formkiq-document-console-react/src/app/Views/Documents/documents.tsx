@@ -5,14 +5,11 @@ import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
-import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
-import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
 import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
 import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
 import EditTagsAndMetadataModal from '../../Components/DocumentsAndFolders/EditTagsAndMetadataModal/editTagsAndMetadataModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
-import FolderListLine from '../../Components/DocumentsAndFolders/FolderListLine/FolderListLine';
 import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
@@ -69,7 +66,7 @@ import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
-import { EmptyDocumentsTable } from './EmptyDocumentsTable';
+import { DocumentsTable } from './documentsTable';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -77,8 +74,6 @@ function Documents() {
   const navigate = useNavigate();
   const { user } = useAuthenticatedState();
   const {
-    documents,
-    folders,
     nextToken,
     loadingStatus,
     currentSearchPage,
@@ -238,6 +233,12 @@ function Documents() {
         (documentsWrapperRef.current as HTMLDivElement).style.marginTop =
           documentListOffsetTop + 'px';
       }
+      if (documentsScrollpaneRef.current) {
+        (documentsScrollpaneRef.current as HTMLDivElement).addEventListener(
+          'scroll',
+          trackScrolling
+        );
+      }
     };
 
     window.addEventListener('resize', resizeHandler);
@@ -384,40 +385,24 @@ function Documents() {
   }, [pathname]);
 
   useEffect(() => {
-    // TODO: create a refresh required status to prevent "Cancel" on modal from trigerring refresh?
-    if (
-      isUploadModalOpened === false &&
-      isFolderUploadModalOpened === false &&
-      isNewModalOpened === false &&
-      isMoveModalOpened === false &&
-      isRenameModalOpened === false
-    ) {
-      const timeout = setTimeout(() => {
-        dispatch(
-          fetchDocuments({
-            siteId: currentSiteId,
-            formkiqVersion,
-            searchWord,
-            searchFolder,
-            subfolderUri,
-            filterTag,
-          })
-        );
-      }, 300);
-
-      return () => {
-        clearTimeout(timeout);
-      };
-    }
-    return;
+    dispatch(
+      fetchDocuments({
+        siteId: currentSiteId,
+        formkiqVersion,
+        searchWord,
+        searchFolder,
+        subfolderUri,
+        filterTag,
+      })
+    );
   }, [
     currentSiteId,
+    dispatch,
+    searchWord,
+    searchFolder,
     subfolderUri,
-    isUploadModalOpened,
-    isFolderUploadModalOpened,
-    isNewModalOpened,
-    isMoveModalOpened,
-    isRenameModalOpened,
+    filterTag,
+    formkiqVersion,
   ]);
 
   const onDeleteDocument = (file: IDocument, searchDocuments: any) => () => {
@@ -895,164 +880,6 @@ function Documents() {
     );
   };
 
-  const documentsTable = (documents: IDocument[], subfolders: any[]) => {
-    if (
-      documents.length === 0 &&
-      subfolders.length === 0 &&
-      loadingStatus !== RequestStatus.pending
-    ) {
-      return (
-        <EmptyDocumentsTable
-          formkiqVersion={formkiqVersion}
-          subfolderUri={subfolderUri}
-        />
-      );
-    }
-
-    return (
-      <div
-        className="relative mt-5 overflow-hidden h-full"
-        ref={documentsWrapperRef}
-      >
-        <div
-          className="overflow-scroll h-full"
-          ref={documentsScrollpaneRef}
-          id="documentsScrollpane"
-        >
-          <table
-            className="border-separate border-spacing-0 table-auto w-full"
-            id="documentsTable"
-          >
-            <thead className="sticky top-0 bg-white z-10">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
-                >
-                  Name
-                </th>
-                <th
-                  scope="col"
-                  className="w-38 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
-                >
-                  Last modified
-                </th>
-                <th
-                  scope="col"
-                  className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
-                >
-                  Filesize
-                </th>
-                {useIndividualSharing && (
-                  <th
-                    scope="col"
-                    className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
-                  >
-                    {subfolderUri === 'shared' && <span>Shared by</span>}
-                    {subfolderUri !== 'shared' && <span>Access</span>}
-                  </th>
-                )}
-                <th
-                  scope="col"
-                  className="w-28 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 border-t border-b border-gray-300"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td colSpan={6} className="h-2"></td>
-              </tr>
-              {folders && folderDocumentsTable(folders, subfolderUri)}
-              {documents.length === 0 &&
-              folders.length === 0 &&
-              loadingStatus === RequestStatus.pending ? (
-                <tr>
-                  <td colSpan={6}>
-                    <Spinner />
-                  </td>
-                </tr>
-              ) : undefined}
-              {documents.map((file, i) => (
-                <DocumentListLine
-                  key={i}
-                  file={file}
-                  folder={subfolderUri}
-                  siteId={currentSiteId}
-                  isSiteReadOnly={isSiteReadOnly}
-                  documentsRootUri={currentDocumentsRootUri}
-                  onShareClick={onShareClick}
-                  searchDocuments={documents}
-                  onDeleteClick={onDeleteDocument(file, documents)}
-                  onRestoreClick={restoreDocument(
-                    file,
-                    currentSiteId,
-                    documents
-                  )}
-                  onEditTagsAndMetadataModalClick={
-                    onEditTagsAndMetadataModalClick
-                  }
-                  onRenameModalClick={onRenameModalClick}
-                  onMoveModalClick={onMoveModalClick}
-                  onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                  onESignaturesModalClick={onESignaturesModalClick}
-                  onTagChange={onTagChange}
-                  filterTag={filterTag}
-                />
-              ))}
-            </tbody>
-          </table>
-          <FolderDropWrapper
-            className="absolute w-full h-full"
-            folder={subfolderUri}
-            sourceSiteId={currentSiteId}
-            targetSiteId={currentSiteId}
-          ></FolderDropWrapper>
-        </div>
-        <div className="pt-1">
-          &nbsp;
-          {loadingStatus === RequestStatus.pending ? <Spinner /> : ''}
-        </div>
-        <CustomDragLayer />
-      </div>
-    );
-  };
-
-  const folderDocumentsTable = (folders: IFolder[], subfolder: string) => {
-    return (
-      <tr>
-        <td colSpan={6}>
-          {folders.map((folder: IFolder, j: number) => {
-            return (
-              <FolderListLine
-                subfolder={subfolder}
-                folderInstance={folder}
-                key={j}
-                currentSiteId={currentSiteId}
-                isSiteReadOnly={isSiteReadOnly}
-                onDeleteClick={deleteFolder}
-                currentDocumentsRootUri={currentDocumentsRootUri}
-                onShareClick={onShareClick}
-                onEditTagsAndMetadataModalClick={
-                  onEditTagsAndMetadataModalClick
-                }
-                onRenameModalClick={onRenameModalClick}
-                onMoveModalClick={onMoveModalClick}
-                onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                onESignaturesModalClick={onESignaturesModalClick}
-                onTagChange={onTagChange}
-                onRestoreDocument={restoreDocument}
-                onDeleteDocument={onDeleteDocument}
-                filterTag={filterTag}
-              />
-            );
-          })}
-        </td>
-      </tr>
-    );
-  };
-
   const viewDocumentVersion = (versionKey: string) => {
     if (infoDocumentId) {
       if (versionKey !== undefined) {
@@ -1100,7 +927,26 @@ function Documents() {
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
-              {documentsTable(documents, folders)}
+              <DocumentsTable
+                onDeleteDocument={onDeleteDocument}
+                onRestoreDocument={restoreDocument}
+                onRenameModalClick={onRenameModalClick}
+                onMoveModalClick={onMoveModalClick}
+                onShareClick={onShareClick}
+                documentsScrollpaneRef={documentsScrollpaneRef}
+                documentsWrapperRef={documentsWrapperRef}
+                currentSiteId={currentSiteId}
+                currentDocumentsRootUri={currentDocumentsRootUri}
+                onESignaturesModalClick={onESignaturesModalClick}
+                onTagChange={onTagChange}
+                isSiteReadOnly={isSiteReadOnly}
+                onEditTagsAndMetadataModalClick={
+                  onEditTagsAndMetadataModalClick
+                }
+                filterTag={filterTag}
+                onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                deleteFolder={deleteFolder}
+              />
             </div>
           </div>
         </div>
