@@ -16,7 +16,7 @@ export const EmptyDocumentsTable = ({
           ) : (
             <div className="mt-4 w-2/3 p-2 border border-gray-400 rounded-md text-gray-900 font-semibold bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300">
               <h3 className="text-lg mb-4">No documents or folders found</h3>
-              {formkiqVersion.modules.indexOf('onlyoffice') > -1 ? (
+              {formkiqVersion.modules?.indexOf('onlyoffice') > -1 ? (
                 <p>
                   You can create folders and documents or upload existing
                   documents using the buttons above.

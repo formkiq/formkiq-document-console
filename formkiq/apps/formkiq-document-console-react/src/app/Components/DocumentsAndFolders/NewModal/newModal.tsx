@@ -219,7 +219,7 @@ export default function NewModal({
                         Upload a New Folder
                       </div>
                     </div>
-                    {formkiqVersion.modules.indexOf('onlyoffice') > -1 && (
+                    {formkiqVersion.modules?.indexOf('onlyoffice') > -1 && (
                       <>
                         <div
                           className={`${

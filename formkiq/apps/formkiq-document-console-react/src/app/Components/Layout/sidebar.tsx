@@ -24,6 +24,7 @@ import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import {
   Api,
+  ApiKey,
   ArrowBottom,
   ArrowRight,
   ChevronLeft,
@@ -468,13 +469,13 @@ export function Sidebar() {
               <div className="flex justify-end mt-2 mr-1">
                 {integrationsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
-              <div className="uppercase font-semibold text-xs">
+              <div className="uppercase font-semibold text-xs mb-2">
                 Integrations
               </div>
             </li>
             {integrationsExpanded && (
               <>
-                <li className="hidden w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="hidden w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/workflows"
                     className={({ isActive }) =>
@@ -513,12 +514,33 @@ export function Sidebar() {
                     }
                   >
                     <div
-                      className={'w-full text-sm font-medium flex pl-5 py-4 '}
+                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
                     >
                       <div className="w-4 flex items-center mr-2">
                         <Api />
                       </div>
                       <div>API Explorer</div>
+                    </div>
+                  </NavLink>
+                </li>
+                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                  <NavLink
+                    to="/integrations/apiKeys"
+                    data-test-id="nav-api-keys"
+                    className={({ isActive }) =>
+                      (isActive
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
+                    }
+                  >
+                    <div
+                      className={'w-full text-sm font-medium flex pl-5 py-2'}
+                    >
+                      <div className="w-4 flex items-center mr-2">
+                        <ApiKey />
+                      </div>
+                      <div>API Keys</div>
                     </div>
                   </NavLink>
                 </li>
@@ -533,7 +555,9 @@ export function Sidebar() {
                       ' w-full text-sm font-medium flex '
                     }
                   >
-                    <div className={'w-full text-sm font-medium flex pl-5 '}>
+                    <div
+                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
+                    >
                       <div className="w-4 flex items-center mr-2">
                         <Webhook />
                       </div>
