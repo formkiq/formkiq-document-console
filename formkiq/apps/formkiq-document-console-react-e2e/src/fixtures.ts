@@ -1,5 +1,6 @@
 import { test as base } from '@playwright/test';
 import { ApiExplorerPage } from './page-objects/ApiExplorerPage';
+import { ApiKeysPage } from './page-objects/ApiKeysPage';
 import { FavoritesPage } from './page-objects/FavoritesPage';
 import { LoginPage } from './page-objects/LoginPage';
 import { MyDocumentsPage } from './page-objects/MyDocumentsPage';
@@ -16,6 +17,7 @@ type Fixture = {
   Trash: TrashPage;
   Favorites: FavoritesPage;
   ApiExplorer: ApiExplorerPage;
+  ApiKeys: ApiKeysPage;
   Webhooks: WebhooksPage;
 };
 
@@ -48,6 +50,10 @@ export const test = base.extend<Fixture>({
   ApiExplorer: async ({ page }, use) => {
     const apiExplorer = new ApiExplorerPage(page);
     await use(apiExplorer);
+  },
+  ApiKeys: async ({ page }, use) => {
+    const apiKeys = new ApiKeysPage(page);
+    await use(apiKeys);
   },
   Webhooks: async ({ page }, use) => {
     const webhooks = new WebhooksPage(page);

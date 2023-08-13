@@ -1027,6 +1027,40 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getApiKeys(siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().configurationApi.getApiKeys(siteId);
+  }
+
+  @formkiqAPIHandler
+  public static addApiKey(
+    name: string,
+    permissions: any,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().configurationApi.addApiKey(
+      { name, permissions },
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static deleteApiKey(apiKey: string, siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().configurationApi.deleteApiKey(
+      apiKey,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
   public static async getWebhooks(siteId: string): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();

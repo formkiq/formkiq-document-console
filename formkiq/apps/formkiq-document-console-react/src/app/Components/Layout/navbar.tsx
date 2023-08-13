@@ -21,6 +21,7 @@ import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import SearchInput from '../DocumentsAndFolders/Search/searchInput';
 import {
   Api,
+  ApiKey,
   Bell,
   Documents,
   FolderOutline,
@@ -342,9 +343,16 @@ function Navbar() {
                                 <Workflow />
                               </div>
                             )}
-                            {pathname.indexOf('/integrations/api') > -1 && (
+                            {pathname.indexOf('/integrations/api') > -1 &&
+                              pathname.indexOf('/integrations/apiKeys') ===
+                                -1 && (
+                                <div className="w-5">
+                                  <Api />
+                                </div>
+                              )}
+                            {pathname.indexOf('/integrations/apiKeys') > -1 && (
                               <div className="w-5">
-                                <Api />
+                                <ApiKey />
                               </div>
                             )}
                             {pathname.indexOf('/integrations/webhooks') >
@@ -363,8 +371,11 @@ function Navbar() {
                             {pathname.indexOf('/workflows') > -1 && (
                               <span>Workflows</span>
                             )}
-                            {pathname.indexOf('/integrations/api') > -1 && (
-                              <span>API Explorer</span>
+                            {pathname.indexOf('/integrations/api') > -1 &&
+                              pathname.indexOf('/integrations/apiKeys') ===
+                                -1 && <span>API Explorer</span>}
+                            {pathname.indexOf('/integrations/apiKeys') > -1 && (
+                              <span>API Keys</span>
                             )}
                             {pathname.indexOf('/integrations/webhooks') >
                               -1 && <span>Inbound Webhooks</span>}
