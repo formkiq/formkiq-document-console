@@ -41,11 +41,11 @@ function GlobalNotificationDialog() {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
                   data-test-id="modal-title"
-                  className="text-lg font-medium text-center leading-6 pb-2 text-gray-900"
+                  className="text-base font-medium text-center leading-6 pb-2 text-gray-900 pr-2"
                 >
                   {dialogTitle}
                 </Dialog.Title>

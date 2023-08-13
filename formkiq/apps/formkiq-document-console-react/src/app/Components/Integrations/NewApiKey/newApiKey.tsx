@@ -52,18 +52,33 @@ export default function NewApiKeyModal({
         event.preventDefault();
         return;
       }
-      closeDialog();
       let permissionValue: any = permissions;
       if (typeof permissions === 'string') {
-        permissionValue = {
-          permissions,
-        };
+        permissionValue = [permissions];
       } else {
         permissionValue = permissions;
+      }
+      if (!permissionValue) {
+        dispatch(
+          openDialog({
+            dialogTitle: 'You must specify permissions for this API Key',
+          })
+        );
+        event.preventDefault();
+        return;
       }
       DocumentsService.addApiKey(nameValue, permissionValue, siteId).then(
         (data) => {
           // TODO: error handling
+          closeDialog();
+          dispatch(
+            openDialog({
+              dialogTitle:
+                'Please save this API Key in a safe place; you will not be able to retrieve it again:\n\n' +
+                data.apiKey +
+                '  ',
+            })
+          );
           updateApiKeyExpansion(siteId);
         }
       );
@@ -170,7 +185,7 @@ export default function NewApiKeyModal({
                           />
                           <label
                             htmlFor="permissions-checkbox-read"
-                            className="pl-2 pr-4"
+                            className="pl-2 pr-4 cursor-pointer"
                           >
                             READ
                           </label>
@@ -187,7 +202,7 @@ export default function NewApiKeyModal({
                           />
                           <label
                             htmlFor="permissions-checkbox-write"
-                            className="pl-2 pr-4"
+                            className="pl-2 pr-4 cursor-pointer"
                           >
                             WRITE
                           </label>
@@ -204,7 +219,7 @@ export default function NewApiKeyModal({
                           />
                           <label
                             htmlFor="permissions-checkbox-delete"
-                            className="pl-2 pr-4"
+                            className="pl-2 pr-4 cursor-pointer"
                           >
                             DELETE
                           </label>
