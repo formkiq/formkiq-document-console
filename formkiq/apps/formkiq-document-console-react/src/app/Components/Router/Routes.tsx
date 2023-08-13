@@ -30,6 +30,9 @@ const Workflows = React.lazy(() => import('../../Views/Workflows/workflows'));
 const ApiExplorer = React.lazy(
   () => import('../../Views/Integrations/Api/apiExplorer')
 );
+const ApiKeys = React.lazy(
+  () => import('../../Views/Integrations/Api/apiKeys')
+);
 const Webhooks = React.lazy(
   () => import('../../Views/Integrations/Webhooks/webhooks')
 );
@@ -113,6 +116,7 @@ const RoutesMapper = () => {
 
       <Route path="/workflows" element={<Workflows />}></Route>
       <Route path="/integrations/api" element={<ApiExplorer />}></Route>
+      <Route path="/integrations/apiKeys" element={<ApiKeys />}></Route>
       <Route path="/integrations/webhooks" element={<Webhooks />}></Route>
       <Route path="/account/settings" element={<AccountSettings />}></Route>
       <Route path="*" element={<Page404 />}></Route>
