@@ -2,19 +2,20 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { ArrowBottom, ArrowRight } from '../../../Components/Icons/icons';
-import NewWebhookModal from '../../../Components/Integrations/NewWebhook/newWebhook';
-import WebhookList from '../../../Components/Integrations/WebhookList/WebhookList';
+import ApiKeyList from '../../../Components/Integrations/ApiKeyList/ApiKeyList';
+import NewApiKeyModal from '../../../Components/Integrations/NewApiKey/newApiKey';
 import { AuthState } from '../../../Store/reducers/auth';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 
-type HookItem = {
+type KeyItem = {
   siteId: string;
   readonly: boolean;
-  hooks: [] | null;
+  keys: [] | null;
 };
-export function Webhooks() {
+
+export function ApiKeys() {
   const dispatch = useAppDispatch();
   let userSite: any = null;
   let defaultSite: any = null;
@@ -42,10 +43,10 @@ export function Webhooks() {
   }
 
   const [userSiteExpanded, setUserSiteExpanded] = useState(true);
-  const [userSiteWebhooks, setUserSiteWebhooks] = useState(null);
+  const [userSiteApiKeys, setUserSiteApiKeys] = useState(null);
   const [defaultSiteExpanded, setDefaultSiteExpanded] = useState(true);
-  const [defaultSiteWebhooks, setDefaultSiteWebhooks] = useState(null);
-  const [sharedFolderHooks, setSharedFolderHooks] = useState<HookItem[]>([]);
+  const [defaultSiteApiKeys, setDefaultSiteApiKeys] = useState(null);
+  const [sharedFolderKeys, setSharedFolderKeys] = useState<KeyItem[]>([]);
   const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(false);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
@@ -67,46 +68,46 @@ export function Webhooks() {
   };
   useEffect(() => {
     if (isNewModalOpened === false) {
-      // TODO send update instead of hacky updateWebhookExpansion
+      // TODO send update instead of hacky updateApiKeyExpansion
     }
   }, [isNewModalOpened]);
 
   useEffect(() => {
-    updateWebhooks();
+    updateApiKeys();
   }, [user]);
 
-  const setWebhooks = (webhooks: [], siteId: string, readonly: boolean) => {
+  const setApiKeys = (apiKeys: [], siteId: string, readonly: boolean) => {
     if (siteId === user?.email) {
       // NOTE: does not allow for a readonly user site
-      setUserSiteWebhooks(webhooks as any);
+      setUserSiteApiKeys(apiKeys as any);
     } else if (siteId === 'default') {
       // NOTE: does not allow for a readonly default site
-      setDefaultSiteWebhooks(webhooks as any);
+      setDefaultSiteApiKeys(apiKeys as any);
     } else {
-      const index = sharedFolderHooks.findIndex((val: HookItem) => {
+      const index = sharedFolderKeys.findIndex((val: KeyItem) => {
         return val.siteId === siteId;
       });
-      const newArr = [...sharedFolderHooks];
+      const newArr = [...sharedFolderKeys];
       if (index < 0) {
-        newArr.push({ hooks: webhooks, siteId: siteId, readonly });
+        newArr.push({ keys: apiKeys, siteId: siteId, readonly });
       } else {
         const item = { ...newArr[index] };
-        item.hooks = webhooks;
+        item.keys = apiKeys;
         newArr[index] = item;
       }
-      setSharedFolderHooks(newArr);
+      setSharedFolderKeys(newArr);
     }
   };
 
-  const updateWebhooks = () => {
+  const updateApiKeys = () => {
     if (userSite) {
       let readonly = false;
       if (userSite.permission && userSite.permission === 'READ_ONLY') {
         readonly = true;
       }
-      DocumentsService.getWebhooks(userSite.siteId).then(
-        (webhooksResponse: any) => {
-          setWebhooks(webhooksResponse.webhooks, userSite.siteId, readonly);
+      DocumentsService.getApiKeys(userSite.siteId).then(
+        (apiKeysResponse: any) => {
+          setApiKeys(apiKeysResponse.apiKeys, userSite.siteId, readonly);
         }
       );
     }
@@ -115,9 +116,9 @@ export function Webhooks() {
       if (defaultSite.permission && defaultSite.permission === 'READ_ONLY') {
         readonly = true;
       }
-      DocumentsService.getWebhooks(defaultSite.siteId).then(
-        (webhooksResponse: any) => {
-          setWebhooks(webhooksResponse.webhooks, defaultSite.siteId, readonly);
+      DocumentsService.getApiKeys(defaultSite.siteId).then(
+        (apiKeysResponse: any) => {
+          setApiKeys(apiKeysResponse.apiKeys, defaultSite.siteId, readonly);
         }
       );
     }
@@ -127,28 +128,28 @@ export function Webhooks() {
         if (item.permission && item.permission === 'READ_ONLY') {
           readonly = true;
         }
-        DocumentsService.getWebhooks(item.siteId).then(
-          (webhooksResponse: any) => {
-            setWebhooks(webhooksResponse.webhooks, item.siteId, readonly);
+        DocumentsService.getApiKeys(item.siteId).then(
+          (apiKeysResponse: any) => {
+            setApiKeys(apiKeysResponse.apiKeys, item.siteId, readonly);
           }
         );
       }
     }
   };
 
-  const deleteWebhook = (webhookId: string, siteId: string) => {
+  const deleteApiKey = (apiKey: string, siteId: string) => {
     const deleteFunc = async () => {
-      setUserSiteWebhooks(null);
-      await DocumentsService.deleteWebhook(webhookId, siteId).then(
-        (webhooksResponse: any) => {
-          updateWebhooks();
+      setUserSiteApiKeys(null);
+      await DocumentsService.deleteApiKey(apiKey, siteId).then(
+        (apiKeysResponse: any) => {
+          updateApiKeys();
         }
       );
     };
     dispatch(
       openDialog({
         callback: deleteFunc,
-        dialogTitle: 'Are you sure you want to delete this webhook?',
+        dialogTitle: 'Are you sure you want to delete this API Key?',
       })
     );
   };
@@ -156,21 +157,10 @@ export function Webhooks() {
   return (
     <>
       <Helmet>
-        <title>Webhooks</title>
+        <title>Api Keys</title>
       </Helmet>
       <div className="p-4 max-w-screen-lg font-semibold mb-4">
-        By posting an HTML web form or any other data to a webhook URL, FormKiQ
-        will process that data and add it as a new document.
-        <span className="block mt-2">
-          Note: for outbound webhooks, please see{' '}
-          <a
-            href="/integrations/workflows"
-            className="underline hover:text-coreOrange-500"
-          >
-            Workflows
-          </a>
-          .
-        </span>
+        FormKiQ allows for API authentication using API Keys
       </div>
       <div className="p-4">
         {userSite && (
@@ -183,17 +173,17 @@ export function Webhooks() {
                 {userSiteExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
-                Webhooks: My Documents
+                Api Keys: My Documents
               </div>
             </div>
             {userSiteExpanded && (
-              <WebhookList
+              <ApiKeyList
                 siteId={userSite.siteId}
-                webhooks={userSiteWebhooks}
+                apiKeys={userSiteApiKeys}
                 isSiteReadOnly={userSite.readonly}
-                onDelete={deleteWebhook}
+                onDelete={deleteApiKey}
                 onNewClick={onNewClick}
-              ></WebhookList>
+              ></ApiKeyList>
             )}
           </>
         )}
@@ -215,13 +205,13 @@ export function Webhooks() {
               </div>
             </div>
             {defaultSiteExpanded && (
-              <WebhookList
-                webhooks={defaultSiteWebhooks}
-                onDelete={deleteWebhook}
+              <ApiKeyList
+                apiKeys={defaultSiteApiKeys}
+                onDelete={deleteApiKey}
                 siteId={defaultSite.siteId}
                 isSiteReadOnly={defaultSite.readonly}
                 onNewClick={onNewClick}
-              ></WebhookList>
+              ></ApiKeyList>
             )}
           </>
         )}
@@ -235,26 +225,26 @@ export function Webhooks() {
                 {sharedFoldersExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
-                Webhooks: Shared Folders
+                API Keys: Shared Folders
               </div>
             </div>
             {sharedFoldersExpanded &&
-              sharedFolderHooks.map((item: HookItem, i: number) => {
+              sharedFolderKeys.map((item: KeyItem, i: number) => {
                 return (
                   <div key={i}>
                     <div className="mt-4 ml-4 flex flex-wrap w-full">
                       <div className="pl-1 uppercase text-sm">
-                        Webhooks: {item.siteId}
+                        API Keys: {item.siteId}
                       </div>
                     </div>
                     <div className="mt-4 ml-4">
-                      <WebhookList
-                        webhooks={item.hooks}
+                      <ApiKeyList
+                        apiKeys={item.keys}
                         siteId={item.siteId}
                         isSiteReadOnly={item.readonly}
-                        onDelete={deleteWebhook}
+                        onDelete={deleteApiKey}
                         onNewClick={onNewClick}
-                      ></WebhookList>
+                      ></ApiKeyList>
                     </div>
                   </div>
                 );
@@ -262,14 +252,14 @@ export function Webhooks() {
           </>
         )}
       </div>
-      <NewWebhookModal
+      <NewApiKeyModal
         isOpened={isNewModalOpened}
         onClose={onNewClose}
-        updateWebhookExpansion={updateWebhooks}
+        updateApiKeyExpansion={updateApiKeys}
         siteId={newModalSiteId}
       />
     </>
   );
 }
 
-export default Webhooks;
+export default ApiKeys;
