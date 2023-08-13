@@ -64,7 +64,25 @@ export function ApiKeyList({
                         {apiKey.apiKey}
                       </td>
                       <td className="border-b border-slate-100 nodark:border-slate-700 p-4 text-slate-500 nodark:text-slate-400">
-                        {apiKey.permissions}
+                        {(apiKey as any).permissions &&
+                        (apiKey as any).permissions.length ? (
+                          <>
+                            {(apiKey as any).permissions.map(
+                              (permission: any, j: number) => {
+                                return (
+                                  <span
+                                    key={j}
+                                    className="inline-block mx-1 rounded-md border px-1"
+                                  >
+                                    {permission}
+                                  </span>
+                                );
+                              }
+                            )}
+                          </>
+                        ) : (
+                          <span>No permissions found</span>
+                        )}
                       </td>
                       <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400">
                         <button
