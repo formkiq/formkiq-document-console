@@ -1,6 +1,5 @@
 import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Tooltip } from 'react-tooltip';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -15,11 +14,11 @@ import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal'
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
+import { CopyButton } from '../../Components/Generic/CopyButton';
 import {
   ChevronLeft,
   ChevronRight,
   Close,
-  CopyIcon,
   Download,
   Edit,
   FolderOutline,
@@ -69,7 +68,6 @@ import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import { CopyButton } from '../../Components/Generic/CopyButton';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
