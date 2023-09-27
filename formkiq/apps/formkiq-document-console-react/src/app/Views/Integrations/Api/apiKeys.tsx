@@ -198,9 +198,9 @@ export function ApiKeys() {
               </div>
               <div className="pl-1 uppercase text-base">
                 {userSite ? (
-                  <span>Webhooks: Team Documents</span>
+                  <span>API Keys: Team Documents</span>
                 ) : (
-                  <span>Webhooks: Documents</span>
+                  <span>API Keys: Documents</span>
                 )}
               </div>
             </div>
