@@ -83,19 +83,6 @@ export function ApiKeys() {
     } else if (siteId === 'default') {
       // NOTE: does not allow for a readonly default site
       setDefaultSiteApiKeys(apiKeys as any);
-    } else {
-      const index = sharedFolderKeys.findIndex((val: KeyItem) => {
-        return val.siteId === siteId;
-      });
-      const newArr = [...sharedFolderKeys];
-      if (index < 0) {
-        newArr.push({ keys: apiKeys, siteId: siteId, readonly });
-      } else {
-        const item = { ...newArr[index] };
-        item.keys = apiKeys;
-        newArr[index] = item;
-      }
-      setSharedFolderKeys(newArr);
     }
   };
 
@@ -123,17 +110,32 @@ export function ApiKeys() {
       );
     }
     if (sharedFolderSites.length > 0) {
-      for (const item of sharedFolderSites) {
-        let readonly = false;
-        if (item.permission && item.permission === 'READ_ONLY') {
-          readonly = true;
-        }
-        DocumentsService.getApiKeys(item.siteId).then(
-          (apiKeysResponse: any) => {
-            setApiKeys(apiKeysResponse.apiKeys, item.siteId, readonly);
+      const initialSharedFolderApiKeysPromises = sharedFolderSites.map(
+        (item) => {
+          let readonly = false;
+          if (item.permission && item.permission === 'READ_ONLY') {
+            readonly = true;
           }
-        );
-      }
+          return DocumentsService.getApiKeys(item.siteId).then(
+            (apiKeysResponse: any) => {
+              return {
+                keys: apiKeysResponse.apiKeys,
+                siteId: item.siteId,
+                readonly,
+              };
+            }
+          );
+        }
+      );
+
+      Promise.all(initialSharedFolderApiKeysPromises)
+        .then((initialSharedFolderApiKeys) => {
+          setSharedFolderKeys(initialSharedFolderApiKeys);
+        })
+        .catch((error) => {
+          // Handle any errors that occurred during the requests
+          console.error('Error fetching webhooks:', error);
+        });
     }
   };
 
@@ -174,6 +176,10 @@ export function ApiKeys() {
               </div>
               <div className="pl-1 uppercase text-base">
                 Api Keys: My Documents
+                <span className="block normal-case">
+                  {' '}
+                  (Site ID: {userSite.siteId})
+                </span>
               </div>
             </div>
             {userSiteExpanded && (
@@ -198,9 +204,19 @@ export function ApiKeys() {
               </div>
               <div className="pl-1 uppercase text-base">
                 {userSite ? (
-                  <span>API Keys: Team Documents</span>
+                  <span>
+                    API Keys: Team Documents
+                    <span className="block normal-case">
+                      (Site ID: default)
+                    </span>
+                  </span>
                 ) : (
-                  <span>API Keys: Documents</span>
+                  <span>
+                    API Keys: Documents
+                    <span className="block normal-case">
+                      (Site ID: default)
+                    </span>
+                  </span>
                 )}
               </div>
             </div>
@@ -234,7 +250,8 @@ export function ApiKeys() {
                   <div key={i}>
                     <div className="mt-4 ml-4 flex flex-wrap w-full">
                       <div className="pl-1 uppercase text-sm">
-                        API Keys: {item.siteId}
+                        API Keys:{' '}
+                        <span className="normal-case">{item.siteId}</span>
                       </div>
                     </div>
                     <div className="mt-4 ml-4">

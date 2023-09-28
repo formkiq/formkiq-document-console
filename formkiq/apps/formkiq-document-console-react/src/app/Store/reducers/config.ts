@@ -101,6 +101,7 @@ export const configInitialState = {
   useCollections: false,
   useAdvancedSearch: false,
   useSoftDelete: true,
+  showIntegrations: true,
 } as Config;
 
 const getInitialState = (): Config => {
