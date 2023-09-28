@@ -386,7 +386,9 @@ export function Sidebar() {
                                     </div>
                                   </div>
                                   <div>
-                                    <span>{site.siteId.replace('_', ' ')}</span>
+                                    <span>
+                                      {site.siteId.replaceAll('_', ' ')}
+                                    </span>
                                   </div>
                                 </FolderDropWrapper>
                               </NavLink>

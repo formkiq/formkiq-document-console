@@ -82,23 +82,10 @@ export function Webhooks() {
     } else if (siteId === 'default') {
       // NOTE: does not allow for a readonly default site
       setDefaultSiteWebhooks(webhooks as any);
-    } else {
-      const index = sharedFolderHooks.findIndex((val: HookItem) => {
-        return val.siteId === siteId;
-      });
-      const newArr = [...sharedFolderHooks];
-      if (index < 0) {
-        newArr.push({ hooks: webhooks, siteId: siteId, readonly });
-      } else {
-        const item = { ...newArr[index] };
-        item.hooks = webhooks;
-        newArr[index] = item;
-      }
-      setSharedFolderHooks(newArr);
     }
   };
 
-  const updateWebhooks = () => {
+  const updateWebhooks = async () => {
     if (userSite) {
       let readonly = false;
       if (userSite.permission && userSite.permission === 'READ_ONLY') {
@@ -122,17 +109,30 @@ export function Webhooks() {
       );
     }
     if (sharedFolderSites.length > 0) {
-      for (const item of sharedFolderSites) {
+      const initialSharedFolderHooksPromises = sharedFolderSites.map((item) => {
         let readonly = false;
         if (item.permission && item.permission === 'READ_ONLY') {
           readonly = true;
         }
-        DocumentsService.getWebhooks(item.siteId).then(
+        return DocumentsService.getWebhooks(item.siteId).then(
           (webhooksResponse: any) => {
-            setWebhooks(webhooksResponse.webhooks, item.siteId, readonly);
+            return {
+              hooks: webhooksResponse.webhooks,
+              siteId: item.siteId,
+              readonly,
+            };
           }
         );
-      }
+      });
+
+      Promise.all(initialSharedFolderHooksPromises)
+        .then((initialSharedFolderHooks) => {
+          setSharedFolderHooks(initialSharedFolderHooks);
+        })
+        .catch((error) => {
+          // Handle any errors that occurred during the requests
+          console.error('Error fetching webhooks:', error);
+        });
     }
   };
 
@@ -161,16 +161,6 @@ export function Webhooks() {
       <div className="p-4 max-w-screen-lg font-semibold mb-4">
         By posting an HTML web form or any other data to a webhook URL, FormKiQ
         will process that data and add it as a new document.
-        <span className="block mt-2">
-          Note: for outbound webhooks, please see{' '}
-          <a
-            href="/integrations/workflows"
-            className="underline hover:text-coreOrange-500"
-          >
-            Workflows
-          </a>
-          .
-        </span>
       </div>
       <div className="p-4">
         {userSite && (
@@ -184,6 +174,10 @@ export function Webhooks() {
               </div>
               <div className="pl-1 uppercase text-base">
                 Webhooks: My Documents
+                <span className="block normal-case">
+                  {' '}
+                  (Site ID: {userSite.siteId})
+                </span>
               </div>
             </div>
             {userSiteExpanded && (
@@ -208,9 +202,19 @@ export function Webhooks() {
               </div>
               <div className="pl-1 uppercase text-base">
                 {userSite ? (
-                  <span>Webhooks: Team Documents</span>
+                  <span>
+                    Webhooks: Team Documents
+                    <span className="block normal-case">
+                      (Site ID: default)
+                    </span>
+                  </span>
                 ) : (
-                  <span>Webhooks: Documents</span>
+                  <span>
+                    Webhooks: Documents
+                    <span className="block normal-case">
+                      (Site ID: default)
+                    </span>
+                  </span>
                 )}
               </div>
             </div>
@@ -244,7 +248,8 @@ export function Webhooks() {
                   <div key={i}>
                     <div className="mt-4 ml-4 flex flex-wrap w-full">
                       <div className="pl-1 uppercase text-sm">
-                        Webhooks: {item.siteId}
+                        Webhooks:{' '}
+                        <span className="normal-case">{item.siteId}</span>
                       </div>
                     </div>
                     <div className="mt-4 ml-4">
