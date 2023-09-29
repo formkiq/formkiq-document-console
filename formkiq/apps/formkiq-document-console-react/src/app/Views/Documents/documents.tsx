@@ -100,7 +100,7 @@ function Documents() {
   const { hash } = useLocation();
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
     getUserSites(user);
-  const pathname = useLocation().pathname;
+  const pathname = decodeURI(useLocation().pathname);
   const {
     siteId,
     siteRedirectUrl,
@@ -363,6 +363,7 @@ function Documents() {
   };
 
   useEffect(() => {
+    console.log(pathname);
     const recheckSiteInfo = getCurrentSiteInfo(
       pathname,
       user,

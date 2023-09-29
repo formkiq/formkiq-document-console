@@ -11,7 +11,7 @@ const publicLocations: string[] = [
 
 const ProtectedRoute = (props: { children: any }) => {
   const { pathname, search } = useLocation();
-  const index = publicLocations.indexOf(pathname);
+  const index = publicLocations.indexOf(decodeURI(pathname));
   const { user } = useSelector(AuthState);
   if (index < 0) {
     // if not public location

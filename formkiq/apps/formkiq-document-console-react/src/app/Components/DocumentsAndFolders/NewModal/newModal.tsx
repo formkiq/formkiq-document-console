@@ -54,6 +54,7 @@ export default function NewModal({
     setFormActive(false);
     reset();
     onClose();
+    window.location.reload();
   };
 
   const onNewFolderClick = (event: any, value: ILine | null) => {

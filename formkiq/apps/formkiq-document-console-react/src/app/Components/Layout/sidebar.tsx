@@ -59,7 +59,7 @@ export function Sidebar() {
 
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
     getUserSites(user);
-  const pathname = useLocation().pathname;
+  const pathname = decodeURI(useLocation().pathname);
   const { siteId, siteDocumentsRootUri, isSiteReadOnly } = getCurrentSiteInfo(
     pathname,
     user,
@@ -91,9 +91,9 @@ export function Sidebar() {
   const [isSharedFoldersModalOpened, setSharedFoldersModalOpened] =
     useState(false);
 
-  const locationPrefix = window.location.pathname.substring(
+  const locationPrefix = decodeURI(window.location.pathname).substring(
     0,
-    window.location.pathname.indexOf('/', 1)
+    decodeURI(window.location.pathname).indexOf('/', 1)
   );
 
   const subfolderUri = useSubfolderUri();
