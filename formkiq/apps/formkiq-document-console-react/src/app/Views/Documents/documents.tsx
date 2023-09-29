@@ -363,7 +363,6 @@ function Documents() {
   };
 
   useEffect(() => {
-    console.log(pathname);
     const recheckSiteInfo = getCurrentSiteInfo(
       pathname,
       user,
