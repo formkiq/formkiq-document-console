@@ -113,6 +113,18 @@ export const postDocumentActionsApiItem = {
   defaultPostJsonValue: '{"actions":[{"type":"OCR"},{"type":"FULLTEXT"}]}',
 };
 
+export const postDocumentCompressApiItem = {
+  method: 'POST',
+  path: '/documents/compress',
+  description:
+    'Compresses one or more documents into a ZIP file, accessible via S3 Signed URL',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"documentIds":[]}',
+};
+
 export const putDocumentAntivirusApiItem = {
   method: 'PUT',
   path: '/documents/ DOCUMENT_ID /antivirus',

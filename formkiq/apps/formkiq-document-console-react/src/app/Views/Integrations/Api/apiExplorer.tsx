@@ -27,18 +27,18 @@ import {
   getDocumentFulltextApiItem,
   getDocumentOcrApiItem,
   getDocumentReplaceUploadApiItem,
-  getDocumentsApiItem,
   getDocumentTagsApiItem,
   getDocumentUrlApiItem,
   getDocumentVersionsApiItem,
+  getDocumentsApiItem,
   getNewDocumentUploadApiItem,
   getSitesApiItem,
   getTagSchemaApiItem,
   getTagSchemasApiItem,
   getVersionApiItem,
   getWebhookApiItem,
-  getWebhooksApiItem,
   getWebhookTagsApiItem,
+  getWebhooksApiItem,
   moveDocumentApiItem,
   patchDocumentApiItem,
   patchDocumentFulltextApiItem,
@@ -46,6 +46,7 @@ import {
   postApiKeysApiItem,
   postConfigurationApiItem,
   postDocumentActionsApiItem,
+  postDocumentCompressApiItem,
   postDocumentOcrApiItem,
   postDocumentsApiItem,
   postDocumentsPublicApiItem,
@@ -53,8 +54,8 @@ import {
   postPublicWebhooksApiItem,
   postSearchIndices,
   postTagSchemasApiItem,
-  postWebhooksApiItem,
   postWebhookTagsApiItem,
+  postWebhooksApiItem,
   postWithBodyForNewDocumentUploadApiItem,
   putDocumentAntivirusApiItem,
   putDocumentFulltextApiItem,
@@ -261,6 +262,17 @@ export function ApiExplorer() {
                       />
                       <ApiItem
                         apiItem={getDocumentReplaceUploadApiItem}
+                        sites={sites}
+                      />
+                    </div>
+                  </div>
+                </ApiSegment>
+                <ApiSegment title="Document Compress">
+                  <div className="ml-2 flex flex-cols">
+                    <div className="w-4 border-l"></div>
+                    <div className="grow">
+                      <ApiItem
+                        apiItem={postDocumentCompressApiItem}
                         sites={sites}
                       />
                     </div>
