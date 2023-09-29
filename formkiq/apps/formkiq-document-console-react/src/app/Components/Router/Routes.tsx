@@ -93,8 +93,8 @@ const RoutesMapper = () => {
       <Route path="/shared-folders/:siteId" element={<Documents />}></Route>
       <Route
         path="/shared-folders/:siteId/folders/*"
-        element={<Navigate to="/shared-folders/" />}
-      />
+        element={<Documents />}
+      ></Route>
       <Route
         path="/shared-folders/:siteId/settings"
         element={<DocumentSettings />}

@@ -10,10 +10,10 @@ export const useSubfolderUri = () => {
   const location = useLocation();
 
   const subfolderUri = useMemo(() => {
-    const folderIndex = location.pathname.indexOf('/folders/');
+    const folderIndex = decodeURI(location.pathname).indexOf('/folders/');
 
     if (folderIndex > 0) {
-      return location.pathname.substring(folderIndex + 9); //9 is the length of /folders/
+      return decodeURI(location.pathname).substring(folderIndex + 9); //9 is the length of /folders/
     }
 
     return '';

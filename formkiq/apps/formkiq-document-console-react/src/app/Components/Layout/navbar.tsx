@@ -64,7 +64,7 @@ function Navbar() {
 
   const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
     getUserSites(user);
-  const pathname = useLocation().pathname;
+  const pathname = decodeURI(useLocation().pathname);
   const { siteId, siteDocumentsRootUri, siteDocumentsRootName } =
     getCurrentSiteInfo(
       pathname,
@@ -101,7 +101,7 @@ function Navbar() {
   const location = useLocation();
 
   const locationPrefix = useMemo(() => {
-    let locationPrefix = location.pathname;
+    let locationPrefix = decodeURI(location.pathname);
     if (locationPrefix.indexOf('/', 1) > -1) {
       locationPrefix = locationPrefix.substring(
         0,
@@ -128,7 +128,7 @@ function Navbar() {
   let documentId = '';
   const documentViewPath = matchPath(
     { path: `${siteDocumentsRootUri}/:id/*` },
-    window.location.pathname
+    decodeURI(window.location.pathname)
   ) as any;
   if (
     documentViewPath &&
