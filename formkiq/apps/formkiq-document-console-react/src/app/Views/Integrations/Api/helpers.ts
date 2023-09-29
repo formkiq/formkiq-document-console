@@ -153,6 +153,8 @@ export const getDocumentTagsApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
 };
 
 export const documentsDocumentIdTagsPost = {
