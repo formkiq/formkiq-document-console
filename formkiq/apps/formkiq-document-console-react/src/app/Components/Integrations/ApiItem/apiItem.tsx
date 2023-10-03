@@ -47,6 +47,22 @@ function updateRequestsFromForm(
       );
     }
   }
+  if (apiItem.requiresShareKey) {
+    if (getFormInput(formRef, 'shareKey')?.validity?.valid) {
+      path = path.replace(
+        ' SHARE_KEY ',
+        getFormInput(formRef, 'shareKey')?.value
+      );
+    }
+  }
+  if (apiItem.requiresVersionKey) {
+    if (getFormInput(formRef, 'versionKey')?.validity?.valid) {
+      path = path.replace(
+        ' VERSION_KEY ',
+        getFormInput(formRef, 'versionKey')?.value
+      );
+    }
+  }
   if (apiItem.requiresWebhookID) {
     if (getFormInput(formRef, 'webhookID')?.validity?.valid) {
       path = path.replace(
@@ -88,11 +104,30 @@ function updateRequestsFromForm(
       params.set('siteId', getFormInput(formRef, 'siteID')?.value);
     }
     if (
+      getFormInput(formRef, 'shareKey')?.value &&
+      getFormInput(formRef, 'shareKey')?.validity?.valid &&
+      getFormInput(formRef, 'shareKey')?.value.length > 0
+    ) {
+      params.set('shareKey', getFormInput(formRef, 'shareKey')?.value);
+    }
+    // NOTE: we want this to be ignored for DELETE documents/{id}/versions/{versionKey}
+    if (
       getFormInput(formRef, 'versionKey')?.value &&
       getFormInput(formRef, 'versionKey')?.validity?.valid &&
-      getFormInput(formRef, 'versionKey')?.value.length > 0
+      getFormInput(formRef, 'versionKey')?.value.length > 0 &&
+      apiItem.method !== 'DELETE'
     ) {
       params.set('versionKey', getFormInput(formRef, 'versionKey')?.value);
+    }
+    if (
+      getFormInput(formRef, 'indexKey')?.value &&
+      getFormInput(formRef, 'indexKey')?.validity?.valid &&
+      getFormInput(formRef, 'indexKey')?.value.length > 0
+    ) {
+      params.set(
+        'indexKey',
+        encodeURIComponent(getFormInput(formRef, 'indexKey')?.value)
+      );
     }
     if (
       getFormInput(formRef, 'duration')?.value &&
@@ -191,6 +226,13 @@ function updateRequestsFromForm(
       getFormInput(formRef, 'siteID')?.value.length > 0
     ) {
       params.set('siteId', getFormInput(formRef, 'siteID')?.value);
+    }
+    if (
+      getFormInput(formRef, 'shareKey')?.value &&
+      getFormInput(formRef, 'shareKey')?.validity?.valid &&
+      getFormInput(formRef, 'shareKey')?.value.length > 0
+    ) {
+      params.set('shareKey', getFormInput(formRef, 'shareKey')?.value);
     }
     if (
       getFormInput(formRef, 'duration')?.value &&
@@ -396,6 +438,9 @@ function itemHeader(isOpened: boolean, setOpened: any, apiItem: any) {
       >
         <span>{apiItem.method} </span>
         <span>{apiItem.path}</span>
+        {apiItem.showDeprecationMessage && (
+          <span className="text-red-500">(deprecated)</span>
+        )}
         {!isOpened ? <ArrowRight /> : <ArrowBottom />}
       </h4>
     </div>
@@ -501,6 +546,17 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
       {apiItem.description && apiItem.description.length && (
         <div className="ml-2 w-2/3 font-bold text-lg text-coreOrange-500 mb-4">
           <h3>{apiItem.description}</h3>
+          {apiItem.showDeprecationMessage && (
+            <>
+              <h4 className="mt-2 text-base font-extrabold text-red-500">
+                {apiItem.deprecationMessage.length ? (
+                  <span>{apiItem.deprecationMessage}</span>
+                ) : (
+                  <span>Deprecated.</span>
+                )}
+              </h4>
+            </>
+          )}
         </div>
       )}
       <ul className="mt-4 md:grid md:grid-cols-2 md:col-gap-4 md:row-gap-4">
@@ -568,6 +624,48 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
                   Parameters
                 </h6>
+              </div>
+            )}
+            {apiItem.requiresShareKey && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Share Key
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Share Key"
+                    name="shareKey"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                        placeholder-gray-500 text-gray-900 rounded-t-md
+                        focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.allowsShareKey && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Share Key
+                    <small className="block">
+                      Provides access within the specified site via a share
+                    </small>
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Share Key"
+                    name="shareKey"
+                    type="text"
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                        placeholder-gray-500 text-gray-900 rounded-t-md
+                        focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
               </div>
             )}
             {apiItem.requiresDocumentID && (
@@ -688,6 +786,25 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                     name="indexKey"
                     type="text"
                     required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                        placeholder-gray-500 text-gray-900 rounded-t-md
+                        focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.allowsIndexKey && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Index Key
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Index Key"
+                    name="indexKey"
+                    type="text"
                     className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
                         placeholder-gray-500 text-gray-900 rounded-t-md
                         focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"

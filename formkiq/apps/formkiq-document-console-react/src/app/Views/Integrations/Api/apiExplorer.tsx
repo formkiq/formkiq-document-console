@@ -11,13 +11,17 @@ import {
   deleteDocumentFulltextTagValueApiItem,
   deleteDocumentOcrApiItem,
   deleteDocumentTagValueApiItem,
+  deleteDocumentVersionApiItem,
   deleteFolderApiItem,
+  deleteFolderDeprecatedApiItem,
+  deleteShareApiItem,
   deleteTagSchemaApiItem,
   deleteWebhookApiItem,
   documentFulltextSearch,
   documentsDocumentIdTagsPost,
   documentsDocumentIdTagsTagKeyDelete,
   documentsDocumentIdTagsTagKeyGet,
+  documentsTagsPatchApiItem,
   fulltextQueryApiItem,
   getApiKeysApiItem,
   getConfigurationApiItem,
@@ -27,11 +31,14 @@ import {
   getDocumentFulltextApiItem,
   getDocumentOcrApiItem,
   getDocumentReplaceUploadApiItem,
+  getDocumentSyncsApiItem,
   getDocumentTagsApiItem,
   getDocumentUrlApiItem,
   getDocumentVersionsApiItem,
   getDocumentsApiItem,
+  getFoldersApiItem,
   getNewDocumentUploadApiItem,
+  getSharesApiItem,
   getSitesApiItem,
   getTagSchemaApiItem,
   getTagSchemasApiItem,
@@ -50,9 +57,11 @@ import {
   postDocumentOcrApiItem,
   postDocumentsApiItem,
   postDocumentsPublicApiItem,
+  postFoldersApiItem,
   postPrivateWebhooksApiItem,
   postPublicWebhooksApiItem,
   postSearchIndices,
+  postShareFolderApiItem,
   postTagSchemasApiItem,
   postWebhookTagsApiItem,
   postWebhooksApiItem,
@@ -122,6 +131,21 @@ export function ApiExplorer() {
                     </div>
                   </div>
                 </ApiSegment>
+                <ApiSegment title="Folders">
+                  <div className="ml-2 flex flex-cols">
+                    <div className="w-4 border-l"></div>
+                    <div className="grow">
+                      <ApiItem apiItem={getFoldersApiItem} sites={sites} />
+                      <ApiItem apiItem={postFoldersApiItem} sites={sites} />
+                      <ApiItem apiItem={moveDocumentApiItem} sites={sites} />
+                      <ApiItem apiItem={deleteFolderApiItem} sites={sites} />
+                      <ApiItem
+                        apiItem={deleteFolderDeprecatedApiItem}
+                        sites={sites}
+                      />
+                    </div>
+                  </div>
+                </ApiSegment>
                 <ApiSegment title="Document Actions">
                   <div className="ml-2 flex flex-cols">
                     <div className="w-4 border-l"></div>
@@ -155,6 +179,17 @@ export function ApiExplorer() {
                     </div>
                   </div>
                 </ApiSegment>
+                <ApiSegment title="Document Compress">
+                  <div className="ml-2 flex flex-cols">
+                    <div className="w-4 border-l"></div>
+                    <div className="grow">
+                      <ApiItem
+                        apiItem={postDocumentCompressApiItem}
+                        sites={sites}
+                      />
+                    </div>
+                  </div>
+                </ApiSegment>
                 <ApiSegment
                   title={
                     <div className="uppercase font-semibold text-base">
@@ -173,6 +208,17 @@ export function ApiExplorer() {
                       <ApiItem apiItem={putDocumentOcrApiItem} sites={sites} />
                       <ApiItem
                         apiItem={deleteDocumentOcrApiItem}
+                        sites={sites}
+                      />
+                    </div>
+                  </div>
+                </ApiSegment>
+                <ApiSegment title="Document Syncs">
+                  <div className="ml-2 flex flex-cols">
+                    <div className="w-4 border-l"></div>
+                    <div className="grow">
+                      <ApiItem
+                        apiItem={getDocumentSyncsApiItem}
                         sites={sites}
                       />
                     </div>
@@ -245,6 +291,10 @@ export function ApiExplorer() {
                         apiItem={deleteDocumentFulltextTagValueApiItem}
                         sites={sites}
                       />
+                      <ApiItem
+                        apiItem={documentsTagsPatchApiItem}
+                        sites={sites}
+                      />
                     </div>
                   </div>
                 </ApiSegment>
@@ -267,17 +317,6 @@ export function ApiExplorer() {
                     </div>
                   </div>
                 </ApiSegment>
-                <ApiSegment title="Document Compress">
-                  <div className="ml-2 flex flex-cols">
-                    <div className="w-4 border-l"></div>
-                    <div className="grow">
-                      <ApiItem
-                        apiItem={postDocumentCompressApiItem}
-                        sites={sites}
-                      />
-                    </div>
-                  </div>
-                </ApiSegment>
                 <ApiSegment title="Document Versions">
                   <div className="ml-2 flex flex-cols">
                     <div className="w-4 border-l"></div>
@@ -290,18 +329,23 @@ export function ApiExplorer() {
                         apiItem={putDocumentVersionApiItem}
                         sites={sites}
                       />
+                      <ApiItem
+                        apiItem={deleteDocumentVersionApiItem}
+                        sites={sites}
+                      />
                     </div>
                   </div>
                 </ApiSegment>
-                <ApiSegment title="Folders">
-                  <div className="ml-2 flex flex-cols">
-                    <div className="w-4 border-l"></div>
-                    <div className="grow">
-                      <ApiItem apiItem={moveDocumentApiItem} sites={sites} />
-                      <ApiItem apiItem={deleteFolderApiItem} sites={sites} />
-                    </div>
-                  </div>
-                </ApiSegment>
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Shares">
+            <div className="ml-2 mb-4 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={getSharesApiItem} sites={sites} />
+                <ApiItem apiItem={postShareFolderApiItem} sites={sites} />
+                <ApiItem apiItem={deleteShareApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>
