@@ -4,10 +4,13 @@ export interface ApiItem {
   username: string;
   hasNoParams: boolean;
   requiresSite: boolean;
+  requiresShareKey: boolean;
+  allowsShareKey: boolean;
   requiresAuthentication: boolean;
   requiresDocumentID: boolean;
   requiresWebhookID: boolean;
   requiresTagKey: boolean;
+  allowsIndexKey: boolean;
   requiresIndexKey: boolean;
   requiresPostJson: boolean;
   requiresFileUpload: boolean;
@@ -17,6 +20,8 @@ export interface ApiItem {
   allowsLimit: boolean;
   hasPagingTokens: boolean;
   allowsPath: boolean;
+  showDeprecationMessage: boolean;
+  deprecationMessage: string;
 }
 
 export const getDocumentsApiItem = {
@@ -38,6 +43,7 @@ export const getDocumentApiItem = {
   description: "Retrieves a document's details, i.e., metadata",
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
 };
@@ -49,6 +55,7 @@ export const postDocumentsApiItem = {
     "Creates a new document; the body may include the document's content if it's less than 5 MB",
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresPostJson: true,
   defaultPostJsonValue:
@@ -74,6 +81,7 @@ export const patchDocumentApiItem = {
   description: "Update a document's details, i.e., metadata",
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresPostJson: true,
@@ -97,6 +105,7 @@ export const getDocumentActionsApiItem = {
   description: "Gets a document's actions and their status",
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
 };
@@ -107,6 +116,7 @@ export const postDocumentActionsApiItem = {
   description: 'Adds an action to a document',
   username: 'Cognito User',
   requiresSite: true,
+  //allowsShareKey: true,
   requiresAuthentication: true,
   requiresPostJson: true,
   requiresDocumentID: true,
@@ -131,6 +141,7 @@ export const putDocumentAntivirusApiItem = {
   description: 'Performs an antivirus and anti-malware scan on a document.',
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
 };
@@ -141,6 +152,7 @@ export const documentsDocumentIdTagsTagKeyGet = {
   description: 'Get a document tag by using its key',
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresTagKey: true,
@@ -152,6 +164,7 @@ export const documentsDocumentIdTagsTagKeyDelete = {
   description: 'Delete a document tag by using its key',
   username: 'Cognito User',
   requiresSite: true,
+  /*allowsShareKey: true,*/
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresTagKey: true,
@@ -163,10 +176,26 @@ export const getDocumentTagsApiItem = {
   description: "Gets a listing of a document's tags",
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   allowsLimit: true,
   hasPagingTokens: true,
+};
+
+export const documentsTagsPatchApiItem = {
+  method: 'PATCH',
+  path: '/documents/tags',
+  description:
+    'Allows the adding/updating of multiple document tag(s) based on document(s) that have the matching tag',
+  username: 'Cognito User',
+  requiresSite: true,
+  /*allowsShareKey: true,*/
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"match":{"tag": {"key":"MyTagKey","eq":"MyTagValue"}}, "update":{"tags": [{"key":"MyTagKey","value":"MyTagValue"}]}}',
 };
 
 export const documentsDocumentIdTagsPost = {
@@ -202,6 +231,7 @@ export const deleteDocumentTagValueApiItem = {
     "Delete a specific document tag's key/value combination; the request will be ignored if there is no valid key/value combination foundment tag",
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresTagKey: true,
@@ -215,6 +245,7 @@ export const getDocumentContentApiItem = {
     'Get a document\'s contents. text/*, application/json, application/x-www-form-urlencoded returns a "content" field, while all other content-types returns a "contentUrl" for retrieving the content.',
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   allowsVersionKey: true,
@@ -227,6 +258,7 @@ export const getDocumentOcrApiItem = {
     "Gets a document's optical character recognition (OCR) result, if exists",
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   allowsContentUrl: true,
@@ -274,12 +306,24 @@ export const deleteDocumentOcrApiItem = {
   allowsRawText: true,
 };
 
+export const getDocumentSyncsApiItem = {
+  method: 'GET',
+  path: '/documents/ DOCUMENT_ID /syncs',
+  description: "Gets the status of a document's syncs with other services",
+  username: 'Cognito User',
+  requiresSite: true,
+  allowsShareKey: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+};
+
 export const getDocumentVersionsApiItem = {
   method: 'GET',
   path: '/documents/ DOCUMENT_ID /versions',
   description: 'Get a listing of document content versions',
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
 };
@@ -290,6 +334,19 @@ export const putDocumentVersionApiItem = {
   description: "Sets a document's current version to a previous version",
   username: 'Cognito User',
   requiresSite: true,
+  //allowsShareKey: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresVersionKey: true,
+};
+
+export const deleteDocumentVersionApiItem = {
+  method: 'DELETE',
+  path: '/documents/ DOCUMENT_ID /versions/ VERSION_KEY ',
+  description: "Sets a document's current version to a previous version",
+  username: 'Cognito User',
+  requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresVersionKey: true,
@@ -302,6 +359,7 @@ export const getDocumentUrlApiItem = {
     "Returns a URL for the document's contents that expires (the default duration is 48 hours)",
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   allowsVersionKey: true,
@@ -316,6 +374,7 @@ export const getNewDocumentUploadApiItem = {
     'Returns a URL that can be used to upload document content and create a new document; required to add content that is larger than 5 MB',
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   allowsDuration: true,
   allowsPath: true,
@@ -328,6 +387,7 @@ export const postWithBodyForNewDocumentUploadApiItem = {
     'Returns a URL that can be used to upload document content and create a new document; required to add content that is larger than 5 MB',
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresPostJson: true,
   defaultPostJsonValue:
@@ -342,9 +402,36 @@ export const getDocumentReplaceUploadApiItem = {
     'Returns a URL that can be used to upload documents for a specific documentId (required for documents larger than 5 MB)',
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   allowsDuration: true,
+};
+
+export const getFoldersApiItem = {
+  method: 'GET',
+  path: '/folders',
+  description:
+    'Get folders and documents within a folder (or at the top level)',
+  username: 'Cognito User',
+  requiresSite: true,
+  allowsShareKey: true,
+  requiresAuthentication: true,
+  allowsIndexKey: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+};
+
+export const postFoldersApiItem = {
+  method: 'POST',
+  path: '/folders',
+  description: 'Adds a folder, either within a folder or at the top level',
+  username: 'Cognito User',
+  requiresSite: true,
+  allowsShareKey: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"path":"MyFolderPath"}',
 };
 
 export const moveDocumentApiItem = {
@@ -361,12 +448,25 @@ export const moveDocumentApiItem = {
 
 export const deleteFolderApiItem = {
   method: 'DELETE',
+  path: '/folders/ INDEX_KEY ',
+  description: 'Performs a delete of a folder',
+  username: 'Cognito User',
+  requiresSite: true,
+  allowsShareKey: true,
+  requiresAuthentication: true,
+  requiresIndexKey: true,
+};
+
+export const deleteFolderDeprecatedApiItem = {
+  method: 'DELETE',
   path: '/indices/folder/ INDEX_KEY ',
   description: 'Performs a delete of a key from the folder index',
   username: 'Cognito User',
   requiresSite: true,
   requiresAuthentication: true,
   requiresIndexKey: true,
+  showDeprecationMessage: true,
+  deprecationMessage: 'Deprecated. Please use DELETE /folders/ INDEX_KEY ',
 };
 
 export const deleteTagFromIndexApiItem = {
@@ -458,6 +558,7 @@ export const getDocumentFulltextApiItem = {
   description: "Retrieves an OpenSearch document's details, i.e., metadata",
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
 };
@@ -508,6 +609,7 @@ export const deleteDocumentFulltextTagApiItem = {
   description: 'Removes a tag from full text search for a document',
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresTagKey: true,
@@ -519,6 +621,7 @@ export const deleteDocumentFulltextTagValueApiItem = {
   description: 'Removes a tag value from full text search for a document',
   username: 'Cognito User',
   requiresSite: true,
+  allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresTagKey: true,
@@ -724,6 +827,41 @@ export const getSitesApiItem = {
   requiresAuthentication: true,
 };
 
+export const getSharesApiItem = {
+  method: 'GET',
+  path: '/shares',
+  description: 'Returns the list of shares that the user has access to',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  hasNoParams: true,
+};
+
+export const postShareFolderApiItem = {
+  method: 'POST',
+  path: '/shares/folders/ INDEX_KEY ',
+  description:
+    "Creates a folder share; you can retrieve the folder's index key using GET /folders and specifying the site and the parent folder, if one exists",
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  requiresIndexKey: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"share":{"group":"default", "permissions":"READ,WRITE"}}',
+};
+
+export const deleteShareApiItem = {
+  method: 'DELETE',
+  path: '/shares/ SHARE_KEY ',
+  descriptino: 'Deletes an share',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  requiresShareKey: true,
+};
+
+postShareFolderApiItem;
 export const getVersionApiItem = {
   method: 'GET',
   path: '/version',
