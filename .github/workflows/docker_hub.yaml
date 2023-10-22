@@ -24,14 +24,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build project
+      - name: Npm Install
         run: cd formkiq && npm install
 
       - name: Build project
         run: cd formkiq && npx nx build formkiq-document-console-react
-
-      #- name: Zip project
-      #  run: cd formkiq/dist/apps/formkiq-document-console-react && zip -r formkiq-console.zip *
 
       - uses: nyaa8/package-version@v1
         with:
@@ -45,4 +42,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: "formkiq/document-console:${{ env.PACKAGE_VERSION }}-SNAPSHOT"
+          tags: "${{ env.PACKAGE_VERSION }}-SNAPSHOT"
