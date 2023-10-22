@@ -9,6 +9,7 @@ export interface ApiItem {
   requiresAuthentication: boolean;
   requiresDocumentID: boolean;
   requiresWebhookID: boolean;
+  requiresWorkflowID: boolean;
   requiresTagKey: boolean;
   allowsIndexKey: boolean;
   requiresIndexKey: boolean;
@@ -817,6 +818,49 @@ export const postPublicWebhooksApiItem = {
   requiresAuthentication: false,
   requiresWebhookID: true,
   requiresPostJson: true,
+};
+
+export const getWorkflowsApiItem = {
+  method: 'GET',
+  path: '/workflows',
+  description: 'Returns a list of workflows',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+};
+
+export const getWorkflowApiItem = {
+  method: 'GET',
+  path: '/workflows/ WORKFLOW_ID ',
+  description: "Returns a workflow's details, i.e., its metadata",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresWorkflowID: true,
+};
+
+export const postWorkflowsApiItem = {
+  method: 'POST',
+  path: '/workflows',
+  description: 'Create a new workflow',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"name":"Test Workflow","description":"Some description","config":{"notificationType":"none"},"steps":[]}',
+};
+
+export const deleteWorkflowApiItem = {
+  method: 'DELETE',
+  path: '/workflows/ WORKFLOW_ID ',
+  description: 'Deletes a workflow',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresWorkflowID: true,
 };
 
 export const getSitesApiItem = {

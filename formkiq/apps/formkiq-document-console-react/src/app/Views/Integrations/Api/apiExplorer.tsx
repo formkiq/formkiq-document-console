@@ -17,6 +17,7 @@ import {
   deleteShareApiItem,
   deleteTagSchemaApiItem,
   deleteWebhookApiItem,
+  deleteWorkflowApiItem,
   documentFulltextSearch,
   documentsDocumentIdTagsPost,
   documentsDocumentIdTagsTagKeyDelete,
@@ -46,6 +47,8 @@ import {
   getWebhookApiItem,
   getWebhookTagsApiItem,
   getWebhooksApiItem,
+  getWorkflowApiItem,
+  getWorkflowsApiItem,
   moveDocumentApiItem,
   patchDocumentApiItem,
   patchDocumentFulltextApiItem,
@@ -66,6 +69,7 @@ import {
   postWebhookTagsApiItem,
   postWebhooksApiItem,
   postWithBodyForNewDocumentUploadApiItem,
+  postWorkflowsApiItem,
   putDocumentAntivirusApiItem,
   putDocumentFulltextApiItem,
   putDocumentOcrApiItem,
@@ -391,6 +395,17 @@ export function ApiExplorer() {
                     </div>
                   </div>
                 </ApiSegment>
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Workflows">
+            <div className="ml-2 mb-4 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={getWorkflowsApiItem} sites={sites} />
+                <ApiItem apiItem={postWorkflowsApiItem} sites={sites} />
+                <ApiItem apiItem={getWorkflowApiItem} sites={sites} />
+                <ApiItem apiItem={deleteWorkflowApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>
