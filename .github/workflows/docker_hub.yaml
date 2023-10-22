@@ -36,10 +36,10 @@ jobs:
           follow-symlinks: "false" # Optional
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v1.1.0
+        uses: docker/build-push-action@v5.0.0
         with:
           build-arg: CONSOLE_VERSION=${{ env.PACKAGE_VERSION }}
           context: .
           file: ./Dockerfile
           push: true
-          tags: "${{ env.PACKAGE_VERSION }}-SNAPSHOT"
+          tags: "formkiq/document-console:${{ env.PACKAGE_VERSION }}-SNAPSHOT"
