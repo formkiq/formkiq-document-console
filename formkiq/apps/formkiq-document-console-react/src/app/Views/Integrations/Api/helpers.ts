@@ -889,7 +889,7 @@ export const getWorkflowsApiItem = {
   requiresAuthentication: true,
   allowsLimit: true,
   hasPagingTokens: true,
-  license: 'Core',
+  license: 'Pro|Enterprise',
 };
 
 export const getWorkflowApiItem = {
@@ -900,7 +900,7 @@ export const getWorkflowApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresWorkflowID: true,
-  license: 'Core',
+  license: 'Pro|Enterprise',
 };
 
 export const postWorkflowsApiItem = {
@@ -913,7 +913,7 @@ export const postWorkflowsApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue:
     '{"name":"Test Workflow","description":"Some description","config":{"notificationType":"none"},"steps":[]}',
-  license: 'Core',
+  license: 'Pro|Enterprise',
 };
 
 export const deleteWorkflowApiItem = {
@@ -924,7 +924,7 @@ export const deleteWorkflowApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresWorkflowID: true,
-  license: 'Core',
+  license: 'Pro|Enterprise',
 };
 
 export const getSitesApiItem = {
