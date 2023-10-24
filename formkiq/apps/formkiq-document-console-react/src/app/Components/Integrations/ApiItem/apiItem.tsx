@@ -450,6 +450,21 @@ function itemHeader(isOpened: boolean, setOpened: any, apiItem: any) {
         {apiItem.showDeprecationMessage && (
           <span className="text-red-500">(deprecated)</span>
         )}
+        {apiItem.license === 'Core' && (
+          <span className="mx-2 p-1 bg-coreOrange-500 text-white uppercase text-xs">
+            {apiItem.license}
+          </span>
+        )}
+        {apiItem.license === 'Pro|Enterprise' && (
+          <>
+            <span className="ml-2 mr-1 p-1 bg-proTeal-500 text-white uppercase text-xs">
+              Pro
+            </span>
+            <span className="ml-1 mr-2 p-1 bg-enterpriseBlue-500 text-white uppercase text-xs">
+              Enterprise
+            </span>
+          </>
+        )}
         {!isOpened ? <ArrowRight /> : <ArrowBottom />}
       </h4>
     </div>

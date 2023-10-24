@@ -23,6 +23,7 @@ export interface ApiItem {
   allowsPath: boolean;
   showDeprecationMessage: boolean;
   deprecationMessage: string;
+  license: string;
 }
 
 export const getDocumentsApiItem = {
@@ -36,6 +37,7 @@ export const getDocumentsApiItem = {
   allowsDate: true,
   allowsLimit: true,
   hasPagingTokens: true,
+  license: 'Core',
 };
 
 export const getDocumentApiItem = {
@@ -47,6 +49,7 @@ export const getDocumentApiItem = {
   allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  license: 'Core',
 };
 
 export const postDocumentsApiItem = {
@@ -61,6 +64,7 @@ export const postDocumentsApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue:
     '{"path":"user.json","content":{"name":"John Smith"},"tags":[{"key":"content","value":"text"}]}',
+  license: 'Core',
 };
 
 export const postDocumentsPublicApiItem = {
@@ -74,6 +78,7 @@ export const postDocumentsPublicApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue:
     '{"path":"user.json","content":{"name":"John Smith"},"tags":[{"key":"content","value":"text"}]}',
+  license: 'Core',
 };
 
 export const patchDocumentApiItem = {
@@ -88,6 +93,7 @@ export const patchDocumentApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue:
     '{"path":"user.json","tags":[{"key":"content","value":"text"}]}',
+  license: 'Core',
 };
 
 export const deleteDocumentApiItem = {
@@ -98,6 +104,7 @@ export const deleteDocumentApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  license: 'Core',
 };
 
 export const getDocumentActionsApiItem = {
@@ -109,6 +116,7 @@ export const getDocumentActionsApiItem = {
   allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  license: 'Core',
 };
 
 export const postDocumentActionsApiItem = {
@@ -122,6 +130,7 @@ export const postDocumentActionsApiItem = {
   requiresPostJson: true,
   requiresDocumentID: true,
   defaultPostJsonValue: '{"actions":[{"type":"OCR"},{"type":"FULLTEXT"}]}',
+  license: 'Core',
 };
 
 export const postDocumentCompressApiItem = {
@@ -134,6 +143,7 @@ export const postDocumentCompressApiItem = {
   requiresAuthentication: true,
   requiresPostJson: true,
   defaultPostJsonValue: '{"documentIds":[]}',
+  license: 'Core',
 };
 
 export const putDocumentAntivirusApiItem = {
@@ -145,6 +155,7 @@ export const putDocumentAntivirusApiItem = {
   allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  license: 'Pro|Enterprise',
 };
 
 export const documentsDocumentIdTagsTagKeyGet = {
@@ -157,6 +168,7 @@ export const documentsDocumentIdTagsTagKeyGet = {
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresTagKey: true,
+  license: 'Core',
 };
 
 export const documentsDocumentIdTagsTagKeyDelete = {
@@ -169,6 +181,7 @@ export const documentsDocumentIdTagsTagKeyDelete = {
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresTagKey: true,
+  license: 'Core',
 };
 
 export const getDocumentTagsApiItem = {
@@ -182,6 +195,7 @@ export const getDocumentTagsApiItem = {
   requiresDocumentID: true,
   allowsLimit: true,
   hasPagingTokens: true,
+  license: 'Core',
 };
 
 export const documentsTagsPatchApiItem = {
@@ -197,6 +211,7 @@ export const documentsTagsPatchApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue:
     '{"match":{"tag": {"key":"MyTagKey","eq":"MyTagValue"}}, "update":{"tags": [{"key":"MyTagKey","value":"MyTagValue"}]}}',
+  license: 'Core',
 };
 
 export const documentsDocumentIdTagsPost = {
@@ -210,6 +225,7 @@ export const documentsDocumentIdTagsPost = {
   requiresDocumentID: true,
   requiresPostJson: true,
   defaultPostJsonValue: '{"key":"MyTagKey", "value":"MyTagValue"}',
+  license: 'Core',
 };
 
 export const putDocumentTagApiItem = {
@@ -223,6 +239,7 @@ export const putDocumentTagApiItem = {
   requiresTagKey: true,
   requiresPostJson: true,
   defaultPostJsonValue: '{"value":"MyTagValue"}',
+  license: 'Core',
 };
 
 export const deleteDocumentTagValueApiItem = {
@@ -237,6 +254,7 @@ export const deleteDocumentTagValueApiItem = {
   requiresDocumentID: true,
   requiresTagKey: true,
   requiresTagValue: true,
+  license: 'Core',
 };
 
 export const getDocumentContentApiItem = {
@@ -250,6 +268,7 @@ export const getDocumentContentApiItem = {
   requiresAuthentication: true,
   requiresDocumentID: true,
   allowsVersionKey: true,
+  license: 'Core',
 };
 
 export const getDocumentOcrApiItem = {
@@ -264,6 +283,7 @@ export const getDocumentOcrApiItem = {
   requiresDocumentID: true,
   allowsContentUrl: true,
   allowsRawText: true,
+  license: 'Core',
 };
 
 export const postDocumentOcrApiItem = {
@@ -279,6 +299,7 @@ export const postDocumentOcrApiItem = {
   requiresAddPdfDetectedCharactersAsText: true,
   allowsContentUrl: true,
   allowsRawText: true,
+  license: 'Core',
 };
 
 export const putDocumentOcrApiItem = {
@@ -292,6 +313,7 @@ export const putDocumentOcrApiItem = {
   requiresIsBase64: true,
   requiresContent: true,
   requiresContentType: true,
+  license: 'Core',
 };
 
 export const deleteDocumentOcrApiItem = {
@@ -305,6 +327,7 @@ export const deleteDocumentOcrApiItem = {
   requiresDocumentID: true,
   allowsContentUrl: true,
   allowsRawText: true,
+  license: 'Core',
 };
 
 export const getDocumentSyncsApiItem = {
@@ -316,6 +339,7 @@ export const getDocumentSyncsApiItem = {
   allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  license: 'Core',
 };
 
 export const getDocumentVersionsApiItem = {
@@ -327,6 +351,7 @@ export const getDocumentVersionsApiItem = {
   allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  license: 'Pro|Enterprise',
 };
 
 export const putDocumentVersionApiItem = {
@@ -339,6 +364,7 @@ export const putDocumentVersionApiItem = {
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresVersionKey: true,
+  license: 'Pro|Enterprise',
 };
 
 export const deleteDocumentVersionApiItem = {
@@ -351,6 +377,7 @@ export const deleteDocumentVersionApiItem = {
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresVersionKey: true,
+  license: 'Pro|Enterprise',
 };
 
 export const getDocumentUrlApiItem = {
@@ -366,6 +393,7 @@ export const getDocumentUrlApiItem = {
   allowsVersionKey: true,
   allowsInline: true,
   allowsDuration: true,
+  license: 'Core',
 };
 
 export const getNewDocumentUploadApiItem = {
@@ -379,6 +407,7 @@ export const getNewDocumentUploadApiItem = {
   requiresAuthentication: true,
   allowsDuration: true,
   allowsPath: true,
+  license: 'Core',
 };
 
 export const postWithBodyForNewDocumentUploadApiItem = {
@@ -394,6 +423,7 @@ export const postWithBodyForNewDocumentUploadApiItem = {
   defaultPostJsonValue:
     '{"path":"user.json","tags":[{"key":"content","value":"text"}]}',
   allowsDuration: true,
+  license: 'Core',
 };
 
 export const getDocumentReplaceUploadApiItem = {
@@ -407,6 +437,7 @@ export const getDocumentReplaceUploadApiItem = {
   requiresAuthentication: true,
   requiresDocumentID: true,
   allowsDuration: true,
+  license: 'Core',
 };
 
 export const getFoldersApiItem = {
@@ -421,6 +452,7 @@ export const getFoldersApiItem = {
   allowsIndexKey: true,
   allowsLimit: true,
   hasPagingTokens: true,
+  license: 'Core',
 };
 
 export const postFoldersApiItem = {
@@ -433,6 +465,7 @@ export const postFoldersApiItem = {
   requiresAuthentication: true,
   requiresPostJson: true,
   defaultPostJsonValue: '{"path":"MyFolderPath"}',
+  license: 'Core',
 };
 
 export const moveDocumentApiItem = {
@@ -445,6 +478,7 @@ export const moveDocumentApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue:
     '{"source":"DocumentSourcePath", "target":"NewPathWithFoldersOnly/"}',
+  license: 'Core',
 };
 
 export const deleteFolderApiItem = {
@@ -456,6 +490,7 @@ export const deleteFolderApiItem = {
   allowsShareKey: true,
   requiresAuthentication: true,
   requiresIndexKey: true,
+  license: 'Core',
 };
 
 export const deleteFolderDeprecatedApiItem = {
@@ -468,6 +503,7 @@ export const deleteFolderDeprecatedApiItem = {
   requiresIndexKey: true,
   showDeprecationMessage: true,
   deprecationMessage: 'Deprecated. Please use DELETE /folders/ INDEX_KEY ',
+  license: 'Core',
 };
 
 export const deleteTagFromIndexApiItem = {
@@ -489,6 +525,7 @@ export const deleteTagFromIndexApiItem = {
   allowsLimit: false,
   hasPagingTokens: false,
   allowsPath: false,
+  license: 'Core',
 };
 
 export const searchDocumentQueryApiItem = {
@@ -509,6 +546,7 @@ export const searchDocumentQueryApiItem = {
   allowsLimit: true,
   hasPagingTokens: true,
   allowsPath: false,
+  license: 'Core',
 };
 
 export const postSearchIndices = {
@@ -521,13 +559,14 @@ export const postSearchIndices = {
   requiresIndexType: true,
   allowsLimit: true,
   hasPagingTokens: true,
+  license: 'Core',
 };
 
 export const documentFulltextSearch = {
   method: 'POST',
   path: '/searchFulltext',
   description:
-    'Document full text search (and more robust multi-tag search queries, powered by OpenSearch)',
+    'Document full text search (and more robust multi-tag search queries, powered by Typesense or OpenSearch)',
   username: 'Cognito User',
   requiresSite: true,
   requiresAuthentication: true,
@@ -535,6 +574,7 @@ export const documentFulltextSearch = {
   defaultPostJsonValue: '{"query":{"text":"abc*","page":1}}',
   allowsLimit: true,
   hasPagingTokens: true,
+  license: 'Core',
 };
 
 export const fulltextQueryApiItem = {
@@ -551,6 +591,7 @@ export const fulltextQueryApiItem = {
   allowsLimit: false,
   hasPagingTokens: false,
   allowsPath: false,
+  license: 'Pro|Enterprise',
 };
 
 export const getDocumentFulltextApiItem = {
@@ -562,6 +603,7 @@ export const getDocumentFulltextApiItem = {
   allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  license: 'Core',
 };
 
 export const putDocumentFulltextApiItem = {
@@ -577,6 +619,7 @@ export const putDocumentFulltextApiItem = {
   allowsPath: true,
   allowsTagJson: true,
   defaultTagJsonValue: '[{"key":"MyTagKey", "value":"MyTagValue"}]',
+  license: 'Core',
 };
 
 export const patchDocumentFulltextApiItem = {
@@ -592,6 +635,7 @@ export const patchDocumentFulltextApiItem = {
   allowsPath: true,
   allowsTagJson: true,
   defaultTagJsonValue: '[{"key":"MyTagKey", "value":"MyTagValue"}]',
+  license: 'Core',
 };
 
 export const deleteDocumentFulltextApiItem = {
@@ -602,6 +646,7 @@ export const deleteDocumentFulltextApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  license: 'Core',
 };
 
 export const deleteDocumentFulltextTagApiItem = {
@@ -614,6 +659,7 @@ export const deleteDocumentFulltextTagApiItem = {
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresTagKey: true,
+  license: 'Core',
 };
 
 export const deleteDocumentFulltextTagValueApiItem = {
@@ -626,6 +672,7 @@ export const deleteDocumentFulltextTagValueApiItem = {
   requiresAuthentication: true,
   requiresDocumentID: true,
   requiresTagKey: true,
+  license: 'Core',
 };
 
 export const getTagSchemasApiItem = {
@@ -637,6 +684,7 @@ export const getTagSchemasApiItem = {
   requiresAuthentication: true,
   allowsLimit: true,
   hasPagingTokens: true,
+  license: 'Pro|Enterprise',
 };
 
 export const postTagSchemasApiItem = {
@@ -661,6 +709,7 @@ export const postTagSchemasApiItem = {
   allowsLimit: false,
   hasPagingTokens: false,
   allowsPath: false,
+  license: 'Pro|Enterprise',
 };
 
 export const getTagSchemaApiItem = {
@@ -684,6 +733,7 @@ export const getTagSchemaApiItem = {
   allowsLimit: false,
   hasPagingTokens: false,
   allowsPath: false,
+  license: 'Pro|Enterprise',
 };
 
 export const deleteTagSchemaApiItem = {
@@ -707,6 +757,7 @@ export const deleteTagSchemaApiItem = {
   allowsLimit: false,
   hasPagingTokens: false,
   allowsPath: false,
+  license: 'Pro|Enterprise',
 };
 
 export const getWebhooksApiItem = {
@@ -719,6 +770,7 @@ export const getWebhooksApiItem = {
   requiresAuthentication: true,
   allowsLimit: true,
   hasPagingTokens: true,
+  license: 'Core',
 };
 
 export const postWebhooksApiItem = {
@@ -734,6 +786,7 @@ export const postWebhooksApiItem = {
   requiresEnabled: true,
   allowsTagJson: true,
   defaultTagJsonValue: '[{"key":"MyTagKey", "value":"MyTagValue"}]',
+  license: 'Core',
 };
 
 export const getWebhookApiItem = {
@@ -744,6 +797,7 @@ export const getWebhookApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresWebhookID: true,
+  license: 'Core',
 };
 
 export const deleteWebhookApiItem = {
@@ -755,6 +809,7 @@ export const deleteWebhookApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresWebhookID: true,
+  license: 'Core',
 };
 
 export const patchWebhookApiItem = {
@@ -770,6 +825,7 @@ export const patchWebhookApiItem = {
   requiresEnabled: true,
   allowsTagJson: true,
   defaultTagJsonValue: '[{"key":"MyTagKey", "value":"MyTagValue"}]',
+  license: 'Core',
 };
 
 export const getWebhookTagsApiItem = {
@@ -781,6 +837,7 @@ export const getWebhookTagsApiItem = {
   requiresAuthentication: true,
   requiresWebhookID: true,
   requiresTagKey: true,
+  license: 'Core',
 };
 
 export const postWebhookTagsApiItem = {
@@ -794,6 +851,7 @@ export const postWebhookTagsApiItem = {
   requiresWebhookID: true,
   requiresPostJson: true,
   defaultPostJsonValue: '{"key":"MyTagKey", "value":"MyTagValue"}',
+  license: 'Core',
 };
 
 export const postPrivateWebhooksApiItem = {
@@ -806,6 +864,7 @@ export const postPrivateWebhooksApiItem = {
   requiresAuthentication: true,
   requiresWebhookID: true,
   requiresPostJson: true,
+  license: 'Core',
 };
 
 export const postPublicWebhooksApiItem = {
@@ -818,6 +877,7 @@ export const postPublicWebhooksApiItem = {
   requiresAuthentication: false,
   requiresWebhookID: true,
   requiresPostJson: true,
+  license: 'Core',
 };
 
 export const getWorkflowsApiItem = {
@@ -829,6 +889,7 @@ export const getWorkflowsApiItem = {
   requiresAuthentication: true,
   allowsLimit: true,
   hasPagingTokens: true,
+  license: 'Core',
 };
 
 export const getWorkflowApiItem = {
@@ -839,6 +900,7 @@ export const getWorkflowApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresWorkflowID: true,
+  license: 'Core',
 };
 
 export const postWorkflowsApiItem = {
@@ -851,6 +913,7 @@ export const postWorkflowsApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue:
     '{"name":"Test Workflow","description":"Some description","config":{"notificationType":"none"},"steps":[]}',
+  license: 'Core',
 };
 
 export const deleteWorkflowApiItem = {
@@ -861,6 +924,7 @@ export const deleteWorkflowApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresWorkflowID: true,
+  license: 'Core',
 };
 
 export const getSitesApiItem = {
@@ -869,6 +933,7 @@ export const getSitesApiItem = {
   description: 'Returns the list of sites that the user has access to',
   username: 'Cognito User',
   requiresAuthentication: true,
+  license: 'Core',
 };
 
 export const getSharesApiItem = {
@@ -879,6 +944,7 @@ export const getSharesApiItem = {
   requiresAuthentication: true,
   requiresSite: true,
   hasNoParams: true,
+  license: 'Pro|Enterprise',
 };
 
 export const postShareFolderApiItem = {
@@ -893,6 +959,7 @@ export const postShareFolderApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue:
     '{"share":{"group":"default", "permissions":"READ,WRITE"}}',
+  license: 'Pro|Enterprise',
 };
 
 export const deleteShareApiItem = {
@@ -903,6 +970,7 @@ export const deleteShareApiItem = {
   requiresAuthentication: true,
   requiresSite: true,
   requiresShareKey: true,
+  license: 'Pro|Enterprise',
 };
 
 postShareFolderApiItem;
@@ -914,6 +982,7 @@ export const getVersionApiItem = {
   hasNoParams: true,
   requiresSite: false,
   requiresAuthentication: true,
+  license: 'Core',
 };
 
 export const getConfigurationApiItem = {
@@ -923,6 +992,7 @@ export const getConfigurationApiItem = {
   username: 'Cognito User',
   hasNoParams: true,
   requiresAuthentication: true,
+  license: 'Core',
 };
 
 export const postConfigurationApiItem = {
@@ -932,6 +1002,7 @@ export const postConfigurationApiItem = {
   username: 'Cognito User',
   requiresPostJson: true,
   requiresAuthentication: true,
+  license: 'Core',
 };
 
 export const getApiKeysApiItem = {
@@ -940,6 +1011,7 @@ export const getApiKeysApiItem = {
   descriptino: 'Gets the current api keys',
   username: 'Cognito User',
   requiresAuthentication: true,
+  license: 'Core',
 };
 
 export const postApiKeysApiItem = {
@@ -948,6 +1020,7 @@ export const postApiKeysApiItem = {
   descriptino: 'Sets the current api keys',
   username: 'Cognito User',
   requiresAuthentication: true,
+  license: 'Core',
 };
 export const deleteApiKeyApiItem = {
   method: 'DELETE',
@@ -955,4 +1028,5 @@ export const deleteApiKeyApiItem = {
   descriptino: 'Deletes an api key',
   username: 'Cognito User',
   requiresAuthentication: true,
+  license: 'Core',
 };
