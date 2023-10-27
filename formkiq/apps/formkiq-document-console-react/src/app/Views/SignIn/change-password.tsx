@@ -42,6 +42,7 @@ export function ChangePassword() {
         user?.refreshToken
       );
     }
+    // NOTE: change password should not occur if using useAuthApiForSignIn=true
     await newformkiqClient.documentsApi.apiClient.cognitoClient
       .confirmPassword(email, verificationCode, data.newPassword)
       .then((response: any) => {

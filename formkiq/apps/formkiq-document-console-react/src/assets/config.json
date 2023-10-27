@@ -6,5 +6,6 @@
   "brand": "formkiq",
   "userAuthentication": "cognito",
   "authApi": "https://nt5e3thcgl.execute-api.us-east-2.amazonaws.com",
-  "cognitoHostedUi": "https://formkiq-enterprise-demo-622653865277.auth.us-east-2.amazoncognito.com"
+  "cognitoHostedUi": "https://formkiq-enterprise-demo-622653865277.auth.us-east-2.amazoncognito.com",
+  "useAuthApiForSignIn": "false"
 }
