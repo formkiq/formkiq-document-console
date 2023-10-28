@@ -5,17 +5,23 @@ export class ApiExplorerPage {
   readonly navigateLink: Locator;
   readonly integrationDropdown: Locator;
   readonly fetchButton: Locator;
+  readonly documentsSegment: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.integrationDropdown = page.getByTestId('expand-integrations');
     this.navigateLink = page.getByTestId('nav-api-explorer');
     this.fetchButton = page.getByTestId('apiItem-fetch');
+    this.documentsSegment = page.getByTestId('Documents-&-Folders')
   }
 
   async openPage() {
     await this.integrationDropdown.click();
     await this.navigateLink.click();
+  }
+
+  async openDocuments() {
+    await this.documentsSegment.click();
   }
 }
 
