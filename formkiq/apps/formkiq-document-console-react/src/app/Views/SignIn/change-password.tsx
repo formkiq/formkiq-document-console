@@ -23,7 +23,7 @@ export function ChangePassword() {
   const search = useLocation().search;
   let email = new URLSearchParams(search).get('email');
   if (email && email.length) {
-    email = email.replace(' ', '+');
+    email = (email as any).replaceAll(' ', '+');
   }
   const verificationCode = new URLSearchParams(search).get('code');
   const { formkiqClient } = useSelector(DataCacheState);

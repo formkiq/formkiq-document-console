@@ -54,6 +54,7 @@ export default function NewModal({
     setFormActive(false);
     reset();
     onClose();
+    window.location.reload();
   };
 
   const onNewFolderClick = (event: any, value: ILine | null) => {
@@ -302,7 +303,7 @@ export default function NewModal({
                         itemToCreate === 'outbound-webhook'
                           ? 'bg-gray-100 font-semibold border-gray-600'
                           : 'cursor-pointer hover:bg-gray-100'
-                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2 hidden`}
                       onClick={(event) => (window.location.href = '/workflows')}
                     >
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">

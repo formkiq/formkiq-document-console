@@ -163,7 +163,7 @@ export function getCurrentSiteInfo(
       if (hasDefaultSite || hasUserSite) {
         currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
       } else {
-        currentSiteInfo.siteDocumentsRootName = `Folder: ${sharedFolderSites[0].siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Site Folder: ${sharedFolderSites[0].siteId}`;
       }
     }
   } else if (!hasUserSite && pathname.indexOf('/team-documents') === 0) {
@@ -177,9 +177,15 @@ export function getCurrentSiteInfo(
       currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
       currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
       if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId.replaceAll(
+          '_',
+          ' '
+        )}`;
       } else {
-        currentSiteInfo.siteDocumentsRootName = `Folder: ${sharedFolderSites[0].siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Site Folder: ${sharedFolderSites[0].siteId.replaceAll(
+          '_',
+          ' '
+        )}`;
       }
     }
   }
@@ -224,9 +230,35 @@ export function getCurrentSiteInfo(
       }
       currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${currentSiteInfo.siteId}`;
       if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
       } else {
-        currentSiteInfo.siteDocumentsRootName = `Folder: ${sharedFolderSites[0].siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Site Folder: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      }
+    } else {
+      if (hasDefaultSite) {
+        currentSiteInfo.siteId = 'default';
+        currentSiteInfo.siteDocumentsRootUri = '/documents';
+        currentSiteInfo.siteDocumentsRootName = 'Documents';
+      } else if (hasUserSite) {
+        currentSiteInfo.siteId = user.email;
+        currentSiteInfo.siteRedirectUrl = '/my-documents';
+        currentSiteInfo.siteDocumentsRootUri = '/my-documents';
+        currentSiteInfo.siteDocumentsRootName = 'My Documents';
+      } else {
+        if (
+          !currentSiteInfo ||
+          !currentSiteInfo.siteId ||
+          !currentSiteInfo.siteId.length
+        ) {
+          currentSiteInfo.siteId = sharedFolderSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Site Folder: ${sharedFolderSites[0].siteId}`;
+        }
       }
     }
     if (currentSiteInfo.siteId === '' && user) {
@@ -235,9 +267,12 @@ export function getCurrentSiteInfo(
         if (site.siteId !== 'default' && site.siteId !== user.email) {
           currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${site.siteId}`;
           if (hasDefaultSite || hasUserSite) {
-            currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${site.siteId}`;
+            currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${site.siteId.replaceAll(
+              '_',
+              ' '
+            )}`;
           } else {
-            currentSiteInfo.siteDocumentsRootName = `Folder: ${site.siteId}`;
+            currentSiteInfo.siteDocumentsRootName = `Site Folder: ${site.siteId}`;
           }
         }
         return;

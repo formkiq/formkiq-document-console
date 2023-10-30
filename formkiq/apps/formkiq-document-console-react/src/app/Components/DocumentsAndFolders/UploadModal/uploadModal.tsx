@@ -148,6 +148,7 @@ export default function UploadModal({
   const closeDialog = () => {
     setUploaded([]);
     onClose();
+    window.location.reload();
   };
 
   const onprogress = function (data: IFileUploadData) {
