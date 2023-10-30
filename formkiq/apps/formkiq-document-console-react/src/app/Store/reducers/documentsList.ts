@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { setAllTags } from '../../Store/reducers/data';
 import {
   addOrCreateTagValue,
@@ -471,7 +471,7 @@ export const documentsListSlice = createSlice({
   name: 'documentsList',
   initialState: defaultState,
   reducers: {
-    setDocuments: (state, action: any) => {
+    setDocuments: (state, action: PayloadAction<any>) => {
       if (action.payload) {
         const {
           siteId,
@@ -609,7 +609,7 @@ export const documentsListSlice = createSlice({
       }
       return {
         ...state,
-        documents: null,
+        documents: [] as any[],
       };
     },
     updateDocumentsList: (state, action) => {

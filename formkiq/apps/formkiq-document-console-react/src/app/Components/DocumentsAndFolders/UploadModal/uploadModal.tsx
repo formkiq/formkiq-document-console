@@ -98,6 +98,7 @@ export default function UploadModal({
     uploadProcessDocs: IFileUploadData[],
     setUploadProcess: any
   ] = useState([]);
+  const [isAiScanEnabled, setIsAiScanEnabled] = useState(false);
   const [uploadData, setUploadData]: [
     uploadData: { event: any; fileData: IFileUploadData | null },
     setUploadData: any
@@ -110,6 +111,15 @@ export default function UploadModal({
   if (documentId.length) {
     allowMultipleFiles = false;
   }
+
+  useEffect(() => {
+    const siteId = DocumentsService.determineSiteId();
+    DocumentsService.getConfiguration(siteId).then((response) => {
+      if (response.chatGptApiKey) {
+        setIsAiScanEnabled(true);
+      }
+    })
+  }, [])
 
   useEffect(() => {
     if (uploadData.event) {
@@ -553,7 +563,8 @@ export default function UploadModal({
                             </label>
                           </div>
                         )}
-                        <div className="px-4">
+                        {isAiScanEnabled ? 
+                          <div className="px-4">
                           <input
                             id="actionCheckboxDocumentTypeTag"
                             type="checkbox"
@@ -567,7 +578,7 @@ export default function UploadModal({
                               (requires OpenAI API Key)
                             </span>
                           </label>
-                        </div>
+                        </div> : undefined}
                       </div>
                     </div>
                     <div>

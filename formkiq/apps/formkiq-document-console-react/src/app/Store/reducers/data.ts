@@ -21,7 +21,7 @@ export const dataCacheSlice = createSlice({
   name: 'dataCache',
   initialState,
   reducers: {
-    setAllTags(state, action: any) {
+    setAllTags: (state, action: PayloadAction<any>)  => {
       const { tagsLastRefreshed, allTags, tagsSiteId } = action.payload;
       const refreshed = tagsLastRefreshed;
       const newSiteId = tagsSiteId;
@@ -33,13 +33,13 @@ export const dataCacheSlice = createSlice({
         tagsSiteId: newSiteId,
       };
     },
-    setFormkiqClient(state, action: PayloadAction<any>) {
+    setFormkiqClient: (state, action: PayloadAction<any>) => {
       return {
         ...state,
         formkiqClient: action.payload,
       };
     },
-    setCurrentDocumentPath(state, action: PayloadAction<string>) {
+    setCurrentDocumentPath: (state, action: PayloadAction<string>) => {
       return {
         ...state,
         currentDocumentPath: action.payload,
