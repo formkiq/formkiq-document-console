@@ -224,7 +224,7 @@ export function Sidebar() {
 
   const SidebarItems = () => {
     return (
-      <div>
+      <div className="tracking-tight">
         {isSidebarExpanded ? (
           <>
             <li
