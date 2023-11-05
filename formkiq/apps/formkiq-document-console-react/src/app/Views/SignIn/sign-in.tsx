@@ -13,6 +13,7 @@ import {
   setCustomAuthorizerUrl,
   setDocumentApi,
   setFormkiqVersion,
+  setUseAuthApiForSignIn,
   setUserAuthenticationType,
   setUserPoolId,
 } from '../../Store/reducers/config';
@@ -49,6 +50,8 @@ export function SignIn() {
   const onSubmit = async (data: any) => {
     storage.setConfig(configInitialState);
     let formkiqClient: any = null;
+    let authApi = '';
+    let useAuthApiForSignIn = false;
     await ConfigService.getSystemConfigData().then((config) => {
       if (config.documentApi) {
         dispatch(setDocumentApi(config.documentApi));
@@ -64,6 +67,11 @@ export function SignIn() {
       }
       if (config.authApi) {
         dispatch(setAuthApi(config.authApi));
+        authApi = config.authApi;
+      }
+      if (config.useAuthApiForSignIn) {
+        dispatch(setUseAuthApiForSignIn(config.useAuthApiForSignIn));
+        useAuthApiForSignIn = config.useAuthApiForSignIn;
       }
       if (config.cognitoHostedUi) {
         dispatch(setCustomAuthorizerUrl(config.cognitoHostedUi));
@@ -83,72 +91,155 @@ export function SignIn() {
       );
     });
     if (formkiqClient) {
-      await formkiqClient
-        .login(data.email, data.password)
-        .then((response: any) => {
-          dispatch(setFormkiqClient(formkiqClient));
-          if (response.username) {
-            const user = {
-              email: response.username,
-              idToken: response.idToken,
-              accessToken: response.accessToken,
-              refreshToken: response.refreshToken,
-              sites: [],
-              defaultSiteId: null,
-              currentSiteId: null,
-            };
-            // formkiqClient.rebuildCognitoClient(user.email, user.idToken, user.accessToken, user.refreshToken)
-            // TODO: add promise, make requests concurrently
-            DocumentsService.getVersion().then((versionResponse: any) => {
-              dispatch(setFormkiqVersion(versionResponse));
-              DocumentsService.getSites().then((sitesResponse: any) => {
-                if (sitesResponse.sites && sitesResponse.sites.length) {
-                  sitesResponse.sites.forEach((site: any) => {
-                    if (site.siteId === 'default') {
-                      user.defaultSiteId = site.siteId;
-                    }
-                  });
-                  if (!user.defaultSiteId) {
-                    user.defaultSiteId = sitesResponse.sites[0].sideId;
-                  }
-                  user.currentSiteId = user.defaultSiteId;
-                  user.sites = sitesResponse.sites;
-                }
-                dispatch(login(user));
-              });
-            });
-          } else {
-            if (response.cognitoErrorCode) {
-              switch (response.cognitoErrorCode) {
-                case 'NotAuthorizedException':
-                  dispatch(
-                    openDialog({
-                      dialogTitle:
-                        'Incorrect email or password. Please try again.',
-                    })
-                  );
-                  break;
-                default:
-                  dispatch(
-                    openDialog({
-                      dialogTitle:
-                        'An unexpected error has occurred. Please try again in a few minutes.',
-                    })
-                  );
-                  console.log(response);
-                  break;
-              }
-            } else {
-              dispatch(
-                openDialog({
-                  dialogTitle:
-                    'An unexpected error has occurred. Please try again in a few minutes.',
-                })
+      const options: RequestInit = {
+        method: 'POST',
+        body: JSON.stringify({
+          username: data.email,
+          password: data.password,
+        }),
+      };
+      if (useAuthApiForSignIn) {
+        await fetch(authApi + '/login', options)
+          .then((r) =>
+            r.json().then((data) => ({ httpStatus: r.status, body: data }))
+          )
+          .then((obj) => {
+            console.log(obj);
+            if (obj.body.AuthenticationResult) {
+              const user = {
+                email: data.email,
+                idToken: obj.body.AuthenticationResult.IdToken,
+                accessToken: obj.body.AuthenticationResult.AccessToken,
+                refreshToken: obj.body.AuthenticationResult.RefreshToken,
+                sites: [],
+                defaultSiteId: null,
+                currentSiteId: null,
+              };
+              formkiqClient.rebuildCognitoClient(
+                user?.email,
+                user?.idToken,
+                user?.accessToken,
+                user?.refreshToken
               );
-              console.log(response);
+              dispatch(setFormkiqClient(formkiqClient));
+              // TODO: add promise, make requests concurrently
+              DocumentsService.getVersion().then((versionResponse: any) => {
+                dispatch(setFormkiqVersion(versionResponse));
+                DocumentsService.getSites().then((sitesResponse: any) => {
+                  if (sitesResponse.sites && sitesResponse.sites.length) {
+                    sitesResponse.sites.forEach((site: any) => {
+                      if (site.siteId === 'default') {
+                        user.defaultSiteId = site.siteId;
+                      }
+                    });
+                    if (!user.defaultSiteId) {
+                      user.defaultSiteId = sitesResponse.sites[0].sideId;
+                    }
+                    user.currentSiteId = user.defaultSiteId;
+                    user.sites = sitesResponse.sites;
+                  }
+                  dispatch(login(user));
+                });
+              });
+            } else {
+              if (obj.body.code) {
+                switch (obj.body.code) {
+                  case 'NotAuthorizedException':
+                    dispatch(
+                      openDialog({
+                        dialogTitle:
+                          'Incorrect email or password. Please try again.',
+                      })
+                    );
+                    break;
+                  default:
+                    dispatch(
+                      openDialog({
+                        dialogTitle:
+                          'An unexpected error has occurred. Please try again in a few minutes.',
+                      })
+                    );
+                    console.log(obj.body);
+                    break;
+                }
+              } else {
+                dispatch(
+                  openDialog({
+                    dialogTitle:
+                      'An unexpected error has occurred. Please try again in a few minutes.',
+                  })
+                );
+                console.log(obj.body);
+              }
             }
-          }
-        });
+          });
+      } else {
+        await formkiqClient
+          .login(data.email, data.password)
+          .then((response: any) => {
+            dispatch(setFormkiqClient(formkiqClient));
+            if (response.username) {
+              const user = {
+                email: response.username,
+                idToken: response.idToken,
+                accessToken: response.accessToken,
+                refreshToken: response.refreshToken,
+                sites: [],
+                defaultSiteId: null,
+                currentSiteId: null,
+              };
+              // TODO: add promise, make requests concurrently
+              DocumentsService.getVersion().then((versionResponse: any) => {
+                dispatch(setFormkiqVersion(versionResponse));
+                DocumentsService.getSites().then((sitesResponse: any) => {
+                  if (sitesResponse.sites && sitesResponse.sites.length) {
+                    sitesResponse.sites.forEach((site: any) => {
+                      if (site.siteId === 'default') {
+                        user.defaultSiteId = site.siteId;
+                      }
+                    });
+                    if (!user.defaultSiteId) {
+                      user.defaultSiteId = sitesResponse.sites[0].sideId;
+                    }
+                    user.currentSiteId = user.defaultSiteId;
+                    user.sites = sitesResponse.sites;
+                  }
+                  dispatch(login(user));
+                });
+              });
+            } else {
+              if (response.cognitoErrorCode) {
+                switch (response.cognitoErrorCode) {
+                  case 'NotAuthorizedException':
+                    dispatch(
+                      openDialog({
+                        dialogTitle:
+                          'Incorrect email or password. Please try again.',
+                      })
+                    );
+                    break;
+                  default:
+                    dispatch(
+                      openDialog({
+                        dialogTitle:
+                          'An unexpected error has occurred. Please try again in a few minutes.',
+                      })
+                    );
+                    console.log(response);
+                    break;
+                }
+              } else {
+                dispatch(
+                  openDialog({
+                    dialogTitle:
+                      'An unexpected error has occurred. Please try again in a few minutes.',
+                  })
+                );
+                console.log(response);
+              }
+            }
+          });
+      }
     }
   };
   const signInWithCustomAuthorizer = (event: any, url: any) => {

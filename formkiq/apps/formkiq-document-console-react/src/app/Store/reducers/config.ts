@@ -10,6 +10,7 @@ export interface Config {
   userPoolId: string;
   clientId: string;
   authApi: string;
+  useAuthApiForSignIn: boolean;
   userAuthenticationType: string;
   customAuthorizerUrl: string;
   brand: string;
@@ -87,6 +88,7 @@ export const configInitialState = {
   clientId: '',
   userAuthenticationType: 'cognito',
   authApi: '',
+  useAuthApiForSignIn: false,
   customAuthorizerUrl: '',
   brand: 'formkiq',
   formkiqVersion: { type: '', version: '', modules: [] as any[] },
@@ -149,6 +151,12 @@ export const configSlice = createSlice({
         authApi: action.payload,
       };
     },
+    setUseAuthApiForSignIn(state, action: PayloadAction<boolean>) {
+      return {
+        ...state,
+        useAuthApiForSignIn: action.payload,
+      };
+    },
     setCustomAuthorizerUrl(state, action: PayloadAction<string>) {
       return {
         ...state,
@@ -201,6 +209,7 @@ export const {
   setClientId,
   setUserAuthenticationType,
   setAuthApi,
+  setUseAuthApiForSignIn,
   setCustomAuthorizerUrl,
   setBrand,
   setFormkiqVersion,

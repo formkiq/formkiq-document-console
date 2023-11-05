@@ -200,7 +200,7 @@ export class DocumentsService {
     versionKey: string
   ): Promise<any> {
     const apiClient = this.getFormkiqClient().apiClient;
-    const url = `https://${apiClient.host}/documents/${documentId}/versions/${versionKey}`;
+    const url = `${apiClient.host}/documents/${documentId}/versions/${versionKey}`;
     const options = apiClient.buildOptions('DELETE');
     return apiClient.fetchAndRespond(url, options);
   }
