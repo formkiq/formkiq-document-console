@@ -37,6 +37,7 @@ import {
   getDocumentUrlApiItem,
   getDocumentVersionsApiItem,
   getDocumentsApiItem,
+  getDocumentsInQueueApiItem,
   getFoldersApiItem,
   getNewDocumentUploadApiItem,
   getSharesApiItem,
@@ -398,7 +399,7 @@ export function ApiExplorer() {
               </div>
             </div>
           </ApiSegment>
-          <ApiSegment title="Workflows">
+          <ApiSegment title="Workflows and Queues">
             <div className="ml-2 mb-4 flex flex-cols">
               <div className="w-4 border-l"></div>
               <div className="grow">
@@ -406,6 +407,7 @@ export function ApiExplorer() {
                 <ApiItem apiItem={postWorkflowsApiItem} sites={sites} />
                 <ApiItem apiItem={getWorkflowApiItem} sites={sites} />
                 <ApiItem apiItem={deleteWorkflowApiItem} sites={sites} />
+                <ApiItem apiItem={getDocumentsInQueueApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>

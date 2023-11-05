@@ -16,6 +16,7 @@ export interface ApiItem {
   requiresPostJson: boolean;
   requiresFileUpload: boolean;
   requiresIndexType: boolean;
+  requiresQueueName: boolean;
   allowsVersionKey: boolean;
   allowsDate: boolean;
   allowsLimit: boolean;
@@ -913,6 +914,19 @@ export const postWorkflowsApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue:
     '{"name":"Test Workflow","description":"Some description","config":{"notificationType":"none"},"steps":[]}',
+  license: 'Pro|Enterprise',
+};
+
+export const getDocumentsInQueueApiItem = {
+  method: 'GET',
+  path: '/queues/ QUEUE_NAME /documents',
+  description: 'Returns a list of documents in a specified queue',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresQueueName: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
   license: 'Pro|Enterprise',
 };
 
