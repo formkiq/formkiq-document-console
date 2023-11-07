@@ -34,7 +34,9 @@ jobs:
         with:
           path: "formkiq/package.json"
           follow-symlinks: "false" # Optional
-
+      - name: set env
+        run: echo "NOW=$(date +'%Y%m%d')" >> $GITHUB_ENV
+    
       - name: Build and push Docker image
         uses: docker/build-push-action@v5.0.0
         with:
@@ -42,4 +44,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: "formkiq/document-console:${{ env.PACKAGE_VERSION }}-SNAPSHOT"
+          tags: "formkiq/document-console:${{ env.PACKAGE_VERSION }}-SNAPSHOT-${{ env.NOW }}"
