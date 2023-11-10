@@ -81,11 +81,11 @@ function updateRequestsFromForm(
     }
   }
 
-  if (apiItem.requiresQueueName) {
-    if (getFormInput(formRef, 'queueName')?.validity?.valid) {
+  if (apiItem.requiresQueueId) {
+    if (getFormInput(formRef, 'queueId')?.validity?.valid) {
       path = path.replace(
-        ' QUEUE_NAME ',
-        getFormInput(formRef, 'queueName')?.value
+        ' QUEUE_ID ',
+        getFormInput(formRef, 'queueId')?.value
       );
     }
   }
@@ -764,17 +764,17 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
               </div>
             )}
 
-            {apiItem.requiresQueueName && (
+            {apiItem.requiresQueueId && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    Queue Name
+                    Queue ID
                   </label>
                 </div>
                 <div className="w-full md:w-3/4">
                   <input
-                    aria-label="Workflow Name"
-                    name="workflowName"
+                    aria-label="Queue ID"
+                    name="queueId"
                     type="text"
                     required
                     className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600

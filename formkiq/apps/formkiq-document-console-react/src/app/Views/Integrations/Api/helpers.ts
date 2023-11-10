@@ -16,7 +16,7 @@ export interface ApiItem {
   requiresPostJson: boolean;
   requiresFileUpload: boolean;
   requiresIndexType: boolean;
-  requiresQueueName: boolean;
+  requiresQueueId: boolean;
   allowsVersionKey: boolean;
   allowsDate: boolean;
   allowsLimit: boolean;
@@ -917,19 +917,6 @@ export const postWorkflowsApiItem = {
   license: 'Pro|Enterprise',
 };
 
-export const getDocumentsInQueueApiItem = {
-  method: 'GET',
-  path: '/queues/ QUEUE_NAME /documents',
-  description: 'Returns a list of documents in a specified queue',
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresQueueName: true,
-  allowsLimit: true,
-  hasPagingTokens: true,
-  license: 'Pro|Enterprise',
-};
-
 export const deleteWorkflowApiItem = {
   method: 'DELETE',
   path: '/workflows/ WORKFLOW_ID ',
@@ -938,6 +925,69 @@ export const deleteWorkflowApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresWorkflowID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getQueuesApiItem = {
+  method: 'GET',
+  path: '/queues',
+  description: 'Returns a list of queues',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  license: 'Pro|Enterprise',
+};
+
+export const postQueuesApiItem = {
+  method: 'POST',
+  path: '/queues',
+  description: 'Create a new queue',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"name":"Test Queue"}',
+  license: 'Pro|Enterprise',
+};
+
+export const getDocumentsInQueueApiItem = {
+  method: 'GET',
+  path: '/queues/ QUEUE_ID /documents',
+  description: 'Returns a list of documents in a specified queue',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresQueueId: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const postDocumentWorkflowApiItem = {
+  method: 'POST',
+  path: '/documents/ DOCUMENT_ID /workflows',
+  description: 'Assigns a workflow to a document',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"workflowId":"WORKFLOW_ID"}',
+  license: 'Pro|Enterprise',
+};
+
+export const postDocumentWorkflowDecisionsApiItem = {
+  method: 'POST',
+  path: '/documents/ DOCUMENT_ID /workflows/ WORKFLOW_ID /decisions',
+  description: 'Adds a decision to a document approval step',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresWorkflowID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"queueId":"QUEUE_ID", "decision": "ACCEPT|REJECT", "comments": ""}',
   license: 'Pro|Enterprise',
 };
 

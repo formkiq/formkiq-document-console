@@ -40,6 +40,7 @@ import {
   getDocumentsInQueueApiItem,
   getFoldersApiItem,
   getNewDocumentUploadApiItem,
+  getQueuesApiItem,
   getSharesApiItem,
   getSitesApiItem,
   getTagSchemaApiItem,
@@ -59,11 +60,14 @@ import {
   postDocumentActionsApiItem,
   postDocumentCompressApiItem,
   postDocumentOcrApiItem,
+  postDocumentWorkflowApiItem,
+  postDocumentWorkflowDecisionsApiItem,
   postDocumentsApiItem,
   postDocumentsPublicApiItem,
   postFoldersApiItem,
   postPrivateWebhooksApiItem,
   postPublicWebhooksApiItem,
+  postQueuesApiItem,
   postSearchIndices,
   postShareFolderApiItem,
   postTagSchemasApiItem,
@@ -407,7 +411,14 @@ export function ApiExplorer() {
                 <ApiItem apiItem={postWorkflowsApiItem} sites={sites} />
                 <ApiItem apiItem={getWorkflowApiItem} sites={sites} />
                 <ApiItem apiItem={deleteWorkflowApiItem} sites={sites} />
+                <ApiItem apiItem={postDocumentWorkflowApiItem} sites={sites} />
+                <ApiItem apiItem={getQueuesApiItem} sites={sites} />
+                <ApiItem apiItem={postQueuesApiItem} sites={sites} />
                 <ApiItem apiItem={getDocumentsInQueueApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={postDocumentWorkflowDecisionsApiItem}
+                  sites={sites}
+                />
               </div>
             </div>
           </ApiSegment>
