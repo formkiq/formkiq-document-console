@@ -15,6 +15,7 @@ import {
   DocumentsAndFoldersPrefixes,
   WorkflowsAndIntegrationsPrefixes,
 } from '../../helpers/constants/pagePrefixes';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
@@ -29,10 +30,10 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  ComingSoon,
   Documents,
   FolderOutline,
   Plus,
+  Queue,
   Settings,
   ShareHand,
   Star,
@@ -86,6 +87,7 @@ export function Sidebar() {
   const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(
     expandSharedFoldersInitially
   );
+  const [documentQueuesExpanded, setDocumentQueuesExpanded] = useState(true);
   const [integrationsExpanded, setIntegrationsExpanded] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [isSharedFoldersModalOpened, setSharedFoldersModalOpened] =
@@ -95,6 +97,8 @@ export function Sidebar() {
     0,
     decodeURI(window.location.pathname).indexOf('/', 1)
   );
+
+  const [documentQueues, setDocumentQueues] = useState([]);
 
   const subfolderUri = useSubfolderUri();
 
@@ -132,6 +136,14 @@ export function Sidebar() {
     }
   }, [pathname]);
 
+  useEffect(() => {
+    if (documentQueuesExpanded) {
+      DocumentsService.getQueues(currentSiteId).then((queuesResponse: any) => {
+        setDocumentQueues(queuesResponse.queues);
+      });
+    }
+  }, [documentQueuesExpanded]);
+
   const toggleSidebarExpand = () => {
     dispatch(setIsSidebarExpanded(!sidebarExpanded));
     setSidebarExpanded(!sidebarExpanded);
@@ -145,6 +157,13 @@ export function Sidebar() {
     }
     dispatch(setIsSharedFoldersExpanded(!sharedFoldersExpanded));
     setSharedFoldersExpanded(!sharedFoldersExpanded);
+  };
+  const toggleDocumentQueuesExpand = () => {
+    if (!documentQueuesExpanded) {
+      setDocumentQueuesExpanded(true);
+    }
+    // dispatch(setIsDocumentQueuesExpanded(!documentQueuesExpanded));
+    setDocumentQueuesExpanded(!documentQueuesExpanded);
   };
   const toggleIntegrationsExpand = () => {
     setIntegrationsExpanded(!integrationsExpanded);
@@ -458,6 +477,47 @@ export function Sidebar() {
                     )}
                   </>
                 )}
+                <li
+                  className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+                  onClick={toggleDocumentQueuesExpand}
+                >
+                  <div className="flex justify-end mt-2 mr-1">
+                    {documentQueuesExpanded ? <ArrowBottom /> : <ArrowRight />}
+                  </div>
+                  <div className="pl-1 uppercase text-xs">Document Queues</div>
+                </li>
+                {documentQueuesExpanded &&
+                  documentQueues.map((queue: any, i: number) => {
+                    return (
+                      <span key={i}>
+                        <li className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                          <NavLink
+                            to={'/document-queues/' + queue.queueId}
+                            end
+                            className={({ isActive }) =>
+                              (isActive
+                                ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                : 'text-gray-500 bg-white ') +
+                              ' w-full text-sm font-medium flex'
+                            }
+                          >
+                            <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
+                              <Queue />
+                            </div>
+                            <div>
+                              <span>
+                                {queue.name.length > 20 ? (
+                                  <span>{queue.name.substring(0, 20)}...</span>
+                                ) : (
+                                  <span>{queue.name}</span>
+                                )}
+                              </span>
+                            </div>
+                          </NavLink>
+                        </li>
+                      </span>
+                    );
+                  })}
                 <div className="flex w-full">
                   <div className="w-full mt-2 border-b"></div>
                 </div>
@@ -472,12 +532,12 @@ export function Sidebar() {
                 {integrationsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="uppercase font-semibold text-xs mb-2">
-                Integrations
+                Workflows & Integrations
               </div>
             </li>
             {integrationsExpanded && (
               <>
-                <li className="hidden w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/workflows"
                     className={({ isActive }) =>
@@ -496,15 +556,10 @@ export function Sidebar() {
                         <Workflow />
                       </div>
                       <div>Workflows</div>
-                      <div className="flex ml-2 grow justify-start">
-                        <div className="w-10">
-                          <ComingSoon />
-                        </div>
-                      </div>
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"
                     data-test-id="nav-api-explorer"

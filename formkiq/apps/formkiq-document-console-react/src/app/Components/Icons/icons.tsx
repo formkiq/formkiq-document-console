@@ -943,6 +943,32 @@ export function Workflow() {
   );
 }
 
+export function Queue() {
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 448 448"
+      className="fill-current"
+    >
+      <g transform="translate(0,-604.36224)">
+        <path
+          d="M 32 128 L 32 160 L 32 384 L 32 416 L 288 416 L 320 416 L 320 384 L 320 160 L 320 128 L 288 128 L 64 128 L 32 128 z M 64 160 L 288 160 L 288 384 L 64 384 L 64 160 z "
+          transform="translate(0,604.36224)"
+        />
+        <path
+          d="M 96 64 L 96 96 L 352 96 L 352 352 L 384 352 L 384 96 L 384 64 L 352 64 L 96 64 z "
+          transform="translate(0,604.36224)"
+        />
+        <path
+          d="M 160 0 L 160 32 L 416 32 L 416 288 L 448 288 L 448 32 L 448 0 L 416 0 L 160 0 z "
+          transform="translate(0,604.36224)"
+        />
+      </g>
+    </svg>
+  );
+}
+
 export function Api() {
   return (
     <svg

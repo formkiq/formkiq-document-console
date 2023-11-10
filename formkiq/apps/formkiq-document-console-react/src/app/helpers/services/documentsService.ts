@@ -1085,6 +1085,55 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getWorkflows(siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getWorkflows(siteId);
+  }
+
+  @formkiqAPIHandler
+  public static async getWorkflow(
+    workflowId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getWorkflow(workflowId, siteId);
+  }
+
+  @formkiqAPIHandler
+  public static addWorkflow(name: string, siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.addWorkflow({ name }, siteId);
+  }
+
+  @formkiqAPIHandler
+  public static deleteWorkflow(
+    workflowId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.deleteWorkflow(
+      workflowId,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async getQueues(siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getQueues(siteId);
+  }
+
+  @formkiqAPIHandler
   public static async getESignatureConfig(siteId: string): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
