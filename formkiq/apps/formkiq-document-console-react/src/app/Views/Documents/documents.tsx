@@ -66,6 +66,7 @@ import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { useQueueUri } from '../../hooks/queue-uri.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
 
@@ -92,6 +93,7 @@ function Documents() {
   const { allTags } = useSelector(DataCacheState);
 
   const subfolderUri = useSubfolderUri();
+  const queueUri = useQueueUri();
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');

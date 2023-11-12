@@ -87,7 +87,14 @@ export function Sidebar() {
   const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(
     expandSharedFoldersInitially
   );
-  const [documentQueuesExpanded, setDocumentQueuesExpanded] = useState(true);
+  const [userSiteDocumentQueuesExpanded, setUserSiteDocumentQueuesExpanded] =
+    useState(true);
+  const [
+    defaultSiteDocumentQueuesExpanded,
+    setDefaultSiteDocumentQueuesExpanded,
+  ] = useState(true);
+  const [otherSiteDocumentQueuesExpanded, setOtherSiteDocumentQueuesExpanded] =
+    useState(true);
   const [integrationsExpanded, setIntegrationsExpanded] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [isSharedFoldersModalOpened, setSharedFoldersModalOpened] =
@@ -98,11 +105,17 @@ export function Sidebar() {
     decodeURI(window.location.pathname).indexOf('/', 1)
   );
 
-  const [documentQueues, setDocumentQueues] = useState([]);
+  const [defaultSiteDocumentQueues, setDefaultSiteDocumentQueues] = useState(
+    []
+  );
+  const [userSiteDocumentQueues, setUserSiteDocumentQueues] = useState([]);
+  const [otherSiteDocumentQueues, setOtherSiteDocumentQueues] = useState([]);
 
   const subfolderUri = useSubfolderUri();
 
   useEffect(() => {
+    setOtherSiteDocumentQueuesExpanded(false);
+    // TODO: determine if we should expand queues by default for "other" sites
     if (DocumentsAndFoldersPrefixes.indexOf(locationPrefix) > -1) {
       setDocumentsExpanded(true);
       setIntegrationsExpanded(false);
@@ -137,12 +150,49 @@ export function Sidebar() {
   }, [pathname]);
 
   useEffect(() => {
-    if (documentQueuesExpanded) {
-      DocumentsService.getQueues(currentSiteId).then((queuesResponse: any) => {
-        setDocumentQueues(queuesResponse.queues);
+    if (hasDefaultSite && defaultSiteDocumentQueuesExpanded) {
+      DocumentsService.getQueues('default').then((queuesResponse: any) => {
+        if (queuesResponse.queues) {
+          setDefaultSiteDocumentQueues(queuesResponse.queues);
+        } else {
+          setDefaultSiteDocumentQueues([]);
+        }
       });
     }
-  }, [documentQueuesExpanded]);
+  }, [defaultSiteDocumentQueuesExpanded]);
+
+  useEffect(() => {
+    if (hasUserSite && userSiteDocumentQueuesExpanded) {
+      DocumentsService.getQueues(user?.email as string).then(
+        (queuesResponse: any) => {
+          if (queuesResponse.queues) {
+            setUserSiteDocumentQueues(queuesResponse.queues);
+          } else {
+            setUserSiteDocumentQueues([]);
+          }
+        }
+      );
+    }
+  }, [userSiteDocumentQueuesExpanded]);
+
+  useEffect(() => {
+    if (
+      hasSharedFolders &&
+      currentSiteId !== 'default' &&
+      currentSiteId !== user?.email &&
+      otherSiteDocumentQueuesExpanded
+    ) {
+      DocumentsService.getQueues(currentSiteId).then((queuesResponse: any) => {
+        if (queuesResponse.queues) {
+          setOtherSiteDocumentQueues(queuesResponse.queues);
+        } else {
+          setOtherSiteDocumentQueues([]);
+        }
+      });
+    } else {
+      setOtherSiteDocumentQueues([]);
+    }
+  }, [otherSiteDocumentQueuesExpanded]);
 
   const toggleSidebarExpand = () => {
     dispatch(setIsSidebarExpanded(!sidebarExpanded));
@@ -158,12 +208,23 @@ export function Sidebar() {
     dispatch(setIsSharedFoldersExpanded(!sharedFoldersExpanded));
     setSharedFoldersExpanded(!sharedFoldersExpanded);
   };
-  const toggleDocumentQueuesExpand = () => {
-    if (!documentQueuesExpanded) {
-      setDocumentQueuesExpanded(true);
+  const toggleDefaultSiteDocumentQueuesExpand = () => {
+    if (!defaultSiteDocumentQueuesExpanded) {
+      setDefaultSiteDocumentQueuesExpanded(true);
     }
-    // dispatch(setIsDocumentQueuesExpanded(!documentQueuesExpanded));
-    setDocumentQueuesExpanded(!documentQueuesExpanded);
+    setDefaultSiteDocumentQueuesExpanded(!defaultSiteDocumentQueuesExpanded);
+  };
+  const toggleUserSiteDocumentQueuesExpand = () => {
+    if (!userSiteDocumentQueuesExpanded) {
+      setUserSiteDocumentQueuesExpanded(true);
+    }
+    setUserSiteDocumentQueuesExpanded(!userSiteDocumentQueuesExpanded);
+  };
+  const toggleOtherSiteDocumentQueuesExpand = () => {
+    if (!otherSiteDocumentQueuesExpanded) {
+      setOtherSiteDocumentQueuesExpanded(true);
+    }
+    setOtherSiteDocumentQueuesExpanded(!otherSiteDocumentQueuesExpanded);
   };
   const toggleIntegrationsExpand = () => {
     setIntegrationsExpanded(!integrationsExpanded);
@@ -296,6 +357,70 @@ export function Sidebar() {
                         : [],
                       folders
                     )}
+                    {currentSiteId === user?.email && (
+                      <>
+                        <li
+                          className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
+                          onClick={toggleUserSiteDocumentQueuesExpand}
+                        >
+                          <div className="flex justify-end mt-2 mr-1">
+                            {userSiteDocumentQueuesExpanded ? (
+                              <ArrowBottom />
+                            ) : (
+                              <ArrowRight />
+                            )}
+                          </div>
+                          <div className="pl-1 uppercase text-xs">Queues</div>
+                        </li>
+                        {userSiteDocumentQueuesExpanded &&
+                          userSiteDocumentQueues.map(
+                            (queue: any, i: number) => {
+                              return (
+                                <span key={i}>
+                                  <li className="pl-5 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                                    <NavLink
+                                      to={
+                                        '/my-documents/queues/' + queue.queueId
+                                      }
+                                      end
+                                      className={({ isActive }) =>
+                                        (isActive
+                                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                          : 'text-gray-500 bg-white ') +
+                                        ' w-full text-sm font-medium flex'
+                                      }
+                                    >
+                                      <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
+                                        <Queue />
+                                      </div>
+                                      <div>
+                                        <span className="tracking-tightest">
+                                          {queue.name.length > 22 ? (
+                                            <span>
+                                              {queue.name.substring(0, 22)}...
+                                            </span>
+                                          ) : (
+                                            <span>{queue.name}</span>
+                                          )}
+                                        </span>
+                                      </div>
+                                    </NavLink>
+                                  </li>
+                                </span>
+                              );
+                            }
+                          )}
+                        {userSiteDocumentQueuesExpanded &&
+                          !userSiteDocumentQueues.length && (
+                            <div className="text-xs pl-8">
+                              (no queues found)
+                            </div>
+                          )}
+                        {userSiteDocumentQueuesExpanded && (
+                          <div className="mb-2"></div>
+                        )}
+                      </>
+                    )}
                   </>
                 )}
                 {hasDefaultSite && (
@@ -350,6 +475,71 @@ export function Sidebar() {
                         ? subfolderUri.split('/')
                         : [],
                       folders
+                    )}
+                    {currentSiteId === 'default' && (
+                      <>
+                        <li
+                          className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
+                          onClick={toggleDefaultSiteDocumentQueuesExpand}
+                        >
+                          <div className="flex justify-end mt-2 mr-1">
+                            {defaultSiteDocumentQueuesExpanded ? (
+                              <ArrowBottom />
+                            ) : (
+                              <ArrowRight />
+                            )}
+                          </div>
+                          <div className="pl-1 uppercase text-xs">Queues</div>
+                        </li>
+                        {defaultSiteDocumentQueuesExpanded &&
+                          defaultSiteDocumentQueues.map(
+                            (queue: any, i: number) => {
+                              return (
+                                <span key={i}>
+                                  <li className="pl-5 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                                    <NavLink
+                                      to={
+                                        (hasUserSite
+                                          ? '/team-documents'
+                                          : '/documents') +
+                                        '/queues/' +
+                                        queue.queueId
+                                      }
+                                      end
+                                      className={({ isActive }) =>
+                                        (isActive
+                                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                          : 'text-gray-500 bg-white ') +
+                                        ' w-full text-sm font-medium flex'
+                                      }
+                                    >
+                                      <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
+                                        <Queue />
+                                      </div>
+                                      <div>
+                                        <span className="tracking-tightest">
+                                          {queue.name.length > 22 ? (
+                                            <span>
+                                              {queue.name.substring(0, 22)}...
+                                            </span>
+                                          ) : (
+                                            <span>{queue.name}</span>
+                                          )}
+                                        </span>
+                                      </div>
+                                    </NavLink>
+                                  </li>
+                                </span>
+                              );
+                            }
+                          )}
+                        {defaultSiteDocumentQueuesExpanded &&
+                          !defaultSiteDocumentQueues.length && (
+                            <div className="text-xs pl-8 mb-2">
+                              (no queues found)
+                            </div>
+                          )}
+                      </>
                     )}
                   </>
                 )}
@@ -420,6 +610,76 @@ export function Sidebar() {
                                 : [],
                               folders
                             )}
+                            {currentSiteId === site.siteId && (
+                              <>
+                                <li
+                                  className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-8 px-4 pb-2 cursor-pointer"
+                                  onClick={toggleOtherSiteDocumentQueuesExpand}
+                                >
+                                  <div className="flex justify-end mt-2 mr-1">
+                                    {otherSiteDocumentQueuesExpanded ? (
+                                      <ArrowBottom />
+                                    ) : (
+                                      <ArrowRight />
+                                    )}
+                                  </div>
+                                  <div className="pl-1 uppercase text-xs">
+                                    Queues
+                                  </div>
+                                </li>
+                                {otherSiteDocumentQueuesExpanded &&
+                                  otherSiteDocumentQueues.map(
+                                    (queue: any, i: number) => {
+                                      return (
+                                        <span key={i}>
+                                          <li className="pl-7 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                                            <NavLink
+                                              to={
+                                                '/shared-folders/' +
+                                                currentSiteId +
+                                                '/queues/' +
+                                                queue.queueId
+                                              }
+                                              end
+                                              className={({ isActive }) =>
+                                                (isActive
+                                                  ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                                  : 'text-gray-500 bg-white ') +
+                                                ' w-full text-sm font-medium flex'
+                                              }
+                                            >
+                                              <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
+                                                <Queue />
+                                              </div>
+                                              <div>
+                                                <span className="tracking-tightest">
+                                                  {queue.name.length > 22 ? (
+                                                    <span>
+                                                      {queue.name.substring(
+                                                        0,
+                                                        22
+                                                      )}
+                                                      ...
+                                                    </span>
+                                                  ) : (
+                                                    <span>{queue.name}</span>
+                                                  )}
+                                                </span>
+                                              </div>
+                                            </NavLink>
+                                          </li>
+                                        </span>
+                                      );
+                                    }
+                                  )}
+                                {otherSiteDocumentQueuesExpanded &&
+                                  !otherSiteDocumentQueues.length && (
+                                    <div className="text-xs pl-10 mb-2">
+                                      (no queues found)
+                                    </div>
+                                  )}
+                              </>
+                            )}
                           </span>
                         );
                       })}
@@ -477,47 +737,6 @@ export function Sidebar() {
                     )}
                   </>
                 )}
-                <li
-                  className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
-                  onClick={toggleDocumentQueuesExpand}
-                >
-                  <div className="flex justify-end mt-2 mr-1">
-                    {documentQueuesExpanded ? <ArrowBottom /> : <ArrowRight />}
-                  </div>
-                  <div className="pl-1 uppercase text-xs">Document Queues</div>
-                </li>
-                {documentQueuesExpanded &&
-                  documentQueues.map((queue: any, i: number) => {
-                    return (
-                      <span key={i}>
-                        <li className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                          <NavLink
-                            to={'/document-queues/' + queue.queueId}
-                            end
-                            className={({ isActive }) =>
-                              (isActive
-                                ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                                : 'text-gray-500 bg-white ') +
-                              ' w-full text-sm font-medium flex'
-                            }
-                          >
-                            <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
-                              <Queue />
-                            </div>
-                            <div>
-                              <span>
-                                {queue.name.length > 20 ? (
-                                  <span>{queue.name.substring(0, 20)}...</span>
-                                ) : (
-                                  <span>{queue.name}</span>
-                                )}
-                              </span>
-                            </div>
-                          </NavLink>
-                        </li>
-                      </span>
-                    );
-                  })}
                 <div className="flex w-full">
                   <div className="w-full mt-2 border-b"></div>
                 </div>

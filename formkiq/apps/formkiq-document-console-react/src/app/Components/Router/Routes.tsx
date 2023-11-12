@@ -54,6 +54,7 @@ const RoutesMapper = () => {
 
       <Route path="/documents" element={<Documents />}></Route>
       <Route path="/documents/folders/*" element={<Documents />}></Route>
+      <Route path="/documents/queues/*" element={<Documents />}></Route>
       <Route path="/documents/settings" element={<DocumentSettings />}></Route>
       <Route path="/documents/help" element={<DocumentHelp />}></Route>
       <Route path="/documents/new/:extension" element={<DocumentNew />}></Route>
@@ -61,6 +62,10 @@ const RoutesMapper = () => {
       <Route path="/documents/:id/view" element={<DocumentView />}></Route>
       <Route path="/documents" element={<Documents />}></Route>
       <Route path="/my-documents/folders/*" element={<Documents />}></Route>
+      <Route
+        path="/my-documents/queues/:queueId"
+        element={<Documents />}
+      ></Route>
       <Route path="/my-documents" element={<Documents />}></Route>
       <Route
         path="/my-documents/settings"
@@ -76,6 +81,10 @@ const RoutesMapper = () => {
 
       <Route path="/team-documents" element={<Documents />}></Route>
       <Route path="/team-documents/folders/*" element={<Documents />}></Route>
+      <Route
+        path="/team-documents/queues/:queueId"
+        element={<Documents />}
+      ></Route>
       <Route
         path="/team-documents/settings"
         element={<DocumentSettings />}
@@ -96,6 +105,10 @@ const RoutesMapper = () => {
         element={<Documents />}
       ></Route>
       <Route
+        path="/shared-folders/:siteId/queues/:queueId"
+        element={<Documents />}
+      ></Route>
+      <Route
         path="/shared-folders/:siteId/settings"
         element={<DocumentSettings />}
       ></Route>
@@ -112,7 +125,6 @@ const RoutesMapper = () => {
         path="/shared-folders/:siteId/:id/view"
         element={<DocumentView />}
       ></Route>
-      <Route path="/shared-folders/:siteId" element={<Documents />}></Route>
 
       <Route path="/workflows" element={<Workflows />}></Route>
       <Route path="/integrations/api" element={<ApiExplorer />}></Route>
