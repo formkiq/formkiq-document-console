@@ -24,6 +24,7 @@ export const fetchDocuments = createAsyncThunk(
       searchWord,
       searchFolder,
       subfolderUri,
+      queueId,
       filterTag,
       nextToken,
       page,
@@ -106,7 +107,34 @@ export const fetchDocuments = createAsyncThunk(
         });
       }
     } else {
-      if (subfolderUri) {
+      if (queueId && queueId.length) {
+        const dataCache = (thunkAPI.getState() as RootState).dataCacheState;
+        DocumentsService.getDocumentsInQueue(
+          queueId,
+          siteId,
+          null,
+          nextToken,
+          20
+        ).then((response: any) => {
+          if (response) {
+            const data = {
+              siteId,
+              documents: response.documents,
+              user: user,
+              next: response.next,
+              isLoadingMore: false,
+              isLastSearchPageLoaded: false,
+            };
+            if (nextToken) {
+              data.isLoadingMore = true;
+            }
+            if (response.documents?.length === 0) {
+              data.isLastSearchPageLoaded = true;
+            }
+            thunkAPI.dispatch(setDocuments(data));
+          }
+        });
+      } else if (subfolderUri) {
         if (subfolderUri === 'shared') {
           DocumentsService.getDocumentsSharedWithMe(
             siteId,
@@ -554,7 +582,11 @@ export const documentsListSlice = createSlice({
                 }
               }
             } else {
-              return !(doc.tags as any)['sysDeletedBy'];
+              if (doc.tags) {
+                return !(doc.tags as any)['sysDeletedBy'];
+              } else {
+                return true;
+              }
             }
           });
           if (isLoadingMore && state.documents) {

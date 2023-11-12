@@ -66,7 +66,7 @@ import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
-import { useQueueUri } from '../../hooks/queue-uri.hook';
+import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
 
@@ -93,7 +93,7 @@ function Documents() {
   const { allTags } = useSelector(DataCacheState);
 
   const subfolderUri = useSubfolderUri();
-  const queueUri = useQueueUri();
+  const queueId = useQueueId();
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
@@ -207,6 +207,7 @@ function Documents() {
             searchWord,
             searchFolder,
             subfolderUri,
+            queueId,
             filterTag,
             nextToken,
           })
@@ -221,6 +222,7 @@ function Documents() {
               searchWord,
               searchFolder,
               subfolderUri,
+              queueId,
               filterTag,
               page: currentSearchPage + 1,
             })
@@ -395,6 +397,7 @@ function Documents() {
         searchWord,
         searchFolder,
         subfolderUri,
+        queueId,
         filterTag,
       })
     );
@@ -404,6 +407,7 @@ function Documents() {
     searchWord,
     searchFolder,
     subfolderUri,
+    queueId,
     filterTag,
     formkiqVersion,
   ]);
@@ -551,6 +555,7 @@ function Documents() {
         formkiqVersion,
         searchWord,
         searchFolder,
+        queueId,
         subfolderUri,
         filterTag,
       })

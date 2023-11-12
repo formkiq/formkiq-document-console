@@ -6,10 +6,10 @@ import { useLocation } from 'react-router-dom';
  *
  * @returns current subfolder path
  */
-export const useQueueUri = () => {
+export const useQueueId = () => {
   const location = useLocation();
 
-  const queueUri = useMemo(() => {
+  const queueId = useMemo(() => {
     const queueIndex = decodeURI(location.pathname).indexOf('/queues/');
 
     if (queueIndex > 0) {
@@ -19,5 +19,5 @@ export const useQueueUri = () => {
     return '';
   }, [location.pathname]);
 
-  return queueUri;
+  return queueId;
 };
