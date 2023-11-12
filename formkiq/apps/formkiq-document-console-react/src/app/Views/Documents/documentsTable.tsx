@@ -1,17 +1,17 @@
+import { Ref } from 'react';
 import { useSelector } from 'react-redux';
 import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
-import { Spinner } from '../../Components/Icons/icons';
-import { IDocument, RequestStatus } from '../../helpers/types/document';
-import { EmptyDocumentsTable } from './EmptyDocumentsTable';
-import { IFolder } from '../../helpers/types/folder';
 import FolderListLine from '../../Components/DocumentsAndFolders/FolderListLine/FolderListLine';
+import { Spinner } from '../../Components/Icons/icons';
 import { ConfigState } from '../../Store/reducers/config';
-import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
-import { Ref } from 'react';
-import { ILine } from '../../helpers/types/line';
 import { DocumentListState } from '../../Store/reducers/documentsList';
+import { IDocument, RequestStatus } from '../../helpers/types/document';
+import { IFolder } from '../../helpers/types/folder';
+import { ILine } from '../../helpers/types/line';
+import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
+import { EmptyDocumentsTable } from './EmptyDocumentsTable';
 
 type DocumentTableProps = {
   documentsWrapperRef: Ref<any>;
@@ -131,7 +131,11 @@ export const DocumentsTable = (props: DocumentTableProps) => {
             {documents.length === 0 &&
             folders.length === 0 &&
             loadingStatus === RequestStatus.pending ? (
-              <Spinner />
+              <tr>
+                <td colSpan={6}>
+                  <Spinner />
+                </td>
+              </tr>
             ) : undefined}
             {documents.map((file: any, i: number) => (
               <DocumentListLine
