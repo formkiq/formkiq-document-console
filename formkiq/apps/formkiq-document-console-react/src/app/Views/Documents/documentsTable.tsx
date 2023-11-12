@@ -10,6 +10,7 @@ import { DocumentListState } from '../../Store/reducers/documentsList';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { EmptyDocumentsTable } from './EmptyDocumentsTable';
 
@@ -58,6 +59,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
   const { documents, folders, loadingStatus } = useSelector(DocumentListState);
   const subfolderUri = useSubfolderUri();
+  const queueId = useQueueId();
 
   if (
     documents.length === 0 &&
@@ -68,6 +70,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
       <EmptyDocumentsTable
         formkiqVersion={formkiqVersion}
         subfolderUri={subfolderUri}
+        queueId={queueId}
       />
     );
   }
