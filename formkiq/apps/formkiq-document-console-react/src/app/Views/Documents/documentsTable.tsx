@@ -32,6 +32,7 @@ type DocumentTableProps = {
   onRenameModalClick: (event: any, value: ILine | null) => void;
   onMoveModalClick: (event: any, value: ILine | null) => void;
   onDocumentVersionsModalClick: (event: any, value: ILine | null) => void;
+  onDocumentWorkflowsModalClick: (event: any, value: ILine | null) => void;
   onEditTagsAndMetadataModalClick: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
@@ -51,6 +52,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     currentDocumentsRootUri,
     filterTag,
     onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
@@ -162,6 +164,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onRenameModalClick={onRenameModalClick}
                 onMoveModalClick={onMoveModalClick}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                 onESignaturesModalClick={onESignaturesModalClick}
                 onTagChange={onTagChange}
                 filterTag={filterTag}
@@ -200,6 +203,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     currentDocumentsRootUri,
     filterTag,
     onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
@@ -224,6 +228,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               onRenameModalClick={onRenameModalClick}
               onMoveModalClick={onMoveModalClick}
               onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+              onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
               onESignaturesModalClick={onESignaturesModalClick}
               onTagChange={onTagChange}
               onRestoreDocument={onRestoreDocument}

@@ -7,6 +7,7 @@ import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
+import DocumentWorkflowsModal from '../../Components/DocumentsAndFolders/DocumentWorkflowsModal/documentWorkflowsModal';
 import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
 import EditTagsAndMetadataModal from '../../Components/DocumentsAndFolders/EditTagsAndMetadataModal/editTagsAndMetadataModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
@@ -165,6 +166,10 @@ function Documents() {
   const [documentVersionsModalValue, setDocumentVersionsModalValue] =
     useState<ILine | null>(null);
   const [isDocumentVersionsModalOpened, setDocumentVersionsModalOpened] =
+    useState(false);
+  const [documentWorkflowsModalValue, setDocumentWorkflowsModalValue] =
+    useState<ILine | null>(null);
+  const [isDocumentWorkflowsModalOpened, setDocumentWorkflowsModalOpened] =
     useState(false);
   const [eSignaturesModalValue, setESignaturesModalValue] =
     useState<ILine | null>(null);
@@ -538,6 +543,13 @@ function Documents() {
   };
   const onDocumentVersionsModalClose = () => {
     setDocumentVersionsModalOpened(false);
+  };
+  const onDocumentWorkflowsModalClick = (event: any, value: ILine | null) => {
+    setDocumentWorkflowsModalValue(value);
+    setDocumentWorkflowsModalOpened(true);
+  };
+  const onDocumentWorkflowsModalClose = () => {
+    setDocumentWorkflowsModalOpened(false);
   };
   const onESignaturesModalClick = (event: any, value: ILine | null) => {
     setESignaturesModalValue(value);
@@ -953,6 +965,7 @@ function Documents() {
                 }
                 filterTag={filterTag}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                 deleteFolder={deleteFolder}
               />
             </div>
@@ -1419,6 +1432,29 @@ function Documents() {
                           Versions
                         </button>
                       </div>
+                      <div className="mt-2 flex justify-center">
+                        <button
+                          className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                          onClick={(event) => {
+                            const documentLine: ILine = {
+                              lineType: 'document',
+                              folder: '',
+                              documentId: infoDocumentId,
+                              documentInstance: currentDocument,
+                              folderInstance: null,
+                            };
+                            onDocumentWorkflowsModalClick(event, documentLine);
+                          }}
+                        >
+                          View
+                          {isSiteReadOnly ? (
+                            <span>&nbsp;</span>
+                          ) : (
+                            <span>&nbsp;/ Assign&nbsp;</span>
+                          )}
+                          Workflows
+                        </button>
+                      </div>
                     </span>
                   </div>
                   <div className="hidden overflow-x-auto relative">
@@ -1510,6 +1546,9 @@ function Documents() {
                             onDocumentVersionsModalClick={
                               onDocumentVersionsModalClick
                             }
+                            onDocumentWorkflowsModalClick={
+                              onDocumentWorkflowsModalClick
+                            }
                             onESignaturesModalClick={onESignaturesModalClick}
                             onInfoPage={true}
                             user={user}
@@ -1554,6 +1593,14 @@ function Documents() {
         isSiteReadOnly={isSiteReadOnly}
         documentsRootUri={currentDocumentsRootUri}
         value={documentVersionsModalValue}
+      />
+      <DocumentWorkflowsModal
+        isOpened={isDocumentWorkflowsModalOpened}
+        onClose={onDocumentWorkflowsModalClose}
+        siteId={currentSiteId}
+        isSiteReadOnly={isSiteReadOnly}
+        documentsRootUri={currentDocumentsRootUri}
+        value={documentWorkflowsModalValue}
       />
       <ESignaturesModal
         isOpened={isESignaturesModalOpened}

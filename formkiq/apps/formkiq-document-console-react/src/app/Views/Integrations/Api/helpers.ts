@@ -963,6 +963,34 @@ export const getDocumentsInQueueApiItem = {
   license: 'Pro|Enterprise',
 };
 
+export const getWorkflowsInDocumentApiItem = {
+  method: 'GET',
+  path: '/documents/ DOCUMENT_ID /workflows',
+  description:
+    'Returns a list of workflows that have been assigned to a document',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getWorkflowByIdInDocumentApiItem = {
+  method: 'GET',
+  path: '/documents/ DOCUMENT_ID /workflows/ WORKFLOW_ID',
+  description: 'Returns a workflow by ID that has been assigned to a document',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresWorkflowID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
 export const postDocumentWorkflowApiItem = {
   method: 'POST',
   path: '/documents/ DOCUMENT_ID /workflows',

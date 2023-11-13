@@ -50,7 +50,9 @@ import {
   getWebhookTagsApiItem,
   getWebhooksApiItem,
   getWorkflowApiItem,
+  getWorkflowByIdInDocumentApiItem,
   getWorkflowsApiItem,
+  getWorkflowsInDocumentApiItem,
   moveDocumentApiItem,
   patchDocumentApiItem,
   patchDocumentFulltextApiItem,
@@ -415,6 +417,14 @@ export function ApiExplorer() {
                 <ApiItem apiItem={getQueuesApiItem} sites={sites} />
                 <ApiItem apiItem={postQueuesApiItem} sites={sites} />
                 <ApiItem apiItem={getDocumentsInQueueApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={getWorkflowsInDocumentApiItem}
+                  sites={sites}
+                />
+                <ApiItem
+                  apiItem={getWorkflowByIdInDocumentApiItem}
+                  sites={sites}
+                />
                 <ApiItem
                   apiItem={postDocumentWorkflowDecisionsApiItem}
                   sites={sites}
