@@ -101,7 +101,7 @@ function Documents() {
   const filterTag = new URLSearchParams(search).get('filterTag');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
   const { hash } = useLocation();
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const {
@@ -115,8 +115,8 @@ function Documents() {
     user,
     hasUserSite,
     hasDefaultSite,
-    hasSharedFolders,
-    sharedFolderSites
+    hasWorkspaces,
+    workspaceSites
   );
 
   useEffect(() => {
@@ -377,8 +377,8 @@ function Documents() {
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
     if (recheckSiteInfo.siteRedirectUrl.length) {
       navigate(

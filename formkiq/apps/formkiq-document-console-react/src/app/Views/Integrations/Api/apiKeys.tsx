@@ -19,7 +19,7 @@ export function ApiKeys() {
   const dispatch = useAppDispatch();
   let userSite: any = null;
   let defaultSite: any = null;
-  const sharedFolderSites: any[] = [];
+  const workspaceSites: any[] = [];
   const { user } = useSelector(AuthState);
   if (user && user.sites) {
     user.sites.forEach((site: any) => {
@@ -28,7 +28,7 @@ export function ApiKeys() {
       } else if (site.siteId === 'default') {
         defaultSite = site;
       } else {
-        sharedFolderSites.push(site);
+        workspaceSites.push(site);
       }
     });
   }
@@ -36,7 +36,7 @@ export function ApiKeys() {
     ? userSite
     : defaultSite
     ? defaultSite
-    : sharedFolderSites[0];
+    : workspaceSites[0];
   if (currentSite === null) {
     alert('No site configured for this user');
     window.location.href = '/';
@@ -46,8 +46,8 @@ export function ApiKeys() {
   const [userSiteApiKeys, setUserSiteApiKeys] = useState(null);
   const [defaultSiteExpanded, setDefaultSiteExpanded] = useState(true);
   const [defaultSiteApiKeys, setDefaultSiteApiKeys] = useState(null);
-  const [sharedFolderKeys, setSharedFolderKeys] = useState<KeyItem[]>([]);
-  const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(false);
+  const [workspaceKeys, setWorkspaceKeys] = useState<KeyItem[]>([]);
+  const [workspacesExpanded, setWorkspacesExpanded] = useState(false);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
   const toggleUserSiteExpand = () => {
@@ -56,8 +56,8 @@ export function ApiKeys() {
   const toggleDefaultSiteExpand = () => {
     setDefaultSiteExpanded(!defaultSiteExpanded);
   };
-  const toggleSharedFoldersExpand = () => {
-    setSharedFoldersExpanded(!sharedFoldersExpanded);
+  const toggleWorkspacesExpand = () => {
+    setWorkspacesExpanded(!workspacesExpanded);
   };
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
@@ -109,28 +109,26 @@ export function ApiKeys() {
         }
       );
     }
-    if (sharedFolderSites.length > 0) {
-      const initialSharedFolderApiKeysPromises = sharedFolderSites.map(
-        (item) => {
-          let readonly = false;
-          if (item.permission && item.permission === 'READ_ONLY') {
-            readonly = true;
-          }
-          return DocumentsService.getApiKeys(item.siteId).then(
-            (apiKeysResponse: any) => {
-              return {
-                keys: apiKeysResponse.apiKeys,
-                siteId: item.siteId,
-                readonly,
-              };
-            }
-          );
+    if (workspaceSites.length > 0) {
+      const initialWorkspaceApiKeysPromises = workspaceSites.map((item) => {
+        let readonly = false;
+        if (item.permission && item.permission === 'READ_ONLY') {
+          readonly = true;
         }
-      );
+        return DocumentsService.getApiKeys(item.siteId).then(
+          (apiKeysResponse: any) => {
+            return {
+              keys: apiKeysResponse.apiKeys,
+              siteId: item.siteId,
+              readonly,
+            };
+          }
+        );
+      });
 
-      Promise.all(initialSharedFolderApiKeysPromises)
-        .then((initialSharedFolderApiKeys) => {
-          setSharedFolderKeys(initialSharedFolderApiKeys);
+      Promise.all(initialWorkspaceApiKeysPromises)
+        .then((initialWorkspaceApiKeys) => {
+          setWorkspaceKeys(initialWorkspaceApiKeys);
         })
         .catch((error) => {
           // Handle any errors that occurred during the requests
@@ -231,21 +229,21 @@ export function ApiKeys() {
             )}
           </>
         )}
-        {sharedFolderSites.length > 0 && (
+        {workspaceSites.length > 0 && (
           <>
             <div
               className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleSharedFoldersExpand}
+              onClick={toggleWorkspacesExpand}
             >
               <div className="flex justify-end mt-3 mr-1">
-                {sharedFoldersExpanded ? <ArrowBottom /> : <ArrowRight />}
+                {workspacesExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
                 API Keys: Workspaces
               </div>
             </div>
-            {sharedFoldersExpanded &&
-              sharedFolderKeys.map((item: KeyItem, i: number) => {
+            {workspacesExpanded &&
+              workspaceKeys.map((item: KeyItem, i: number) => {
                 return (
                   <div key={i}>
                     <div className="mt-4 ml-4 flex flex-wrap w-full">

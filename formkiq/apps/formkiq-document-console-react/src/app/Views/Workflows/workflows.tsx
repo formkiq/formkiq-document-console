@@ -18,7 +18,7 @@ export function Workflows() {
   const dispatch = useAppDispatch();
   let userSite: any = null;
   let defaultSite: any = null;
-  const sharedFolderSites: any[] = [];
+  const workspaceSites: any[] = [];
   const { user } = useSelector(AuthState);
   if (user && user.sites) {
     user.sites.forEach((site: any) => {
@@ -27,7 +27,7 @@ export function Workflows() {
       } else if (site.siteId === 'default') {
         defaultSite = site;
       } else {
-        sharedFolderSites.push(site);
+        workspaceSites.push(site);
       }
     });
   }
@@ -35,7 +35,7 @@ export function Workflows() {
     ? userSite
     : defaultSite
     ? defaultSite
-    : sharedFolderSites[0];
+    : workspaceSites[0];
   if (currentSite === null) {
     alert('No site configured for this user');
     window.location.href = '/';
@@ -45,10 +45,10 @@ export function Workflows() {
   const [userSiteWorkflows, setUserSiteWorkflows] = useState(null);
   const [defaultSiteExpanded, setDefaultSiteExpanded] = useState(true);
   const [defaultSiteWorkflows, setDefaultSiteWorkflows] = useState(null);
-  const [sharedFolderWorkflows, setSharedFolderWorkflows] = useState<
-    WorkflowItem[]
-  >([]);
-  const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(false);
+  const [workspaceWorkflows, setWorkspaceWorkflows] = useState<WorkflowItem[]>(
+    []
+  );
+  const [workspacesExpanded, setWorkspacesExpanded] = useState(false);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
   const toggleUserSiteExpand = () => {
@@ -57,8 +57,8 @@ export function Workflows() {
   const toggleDefaultSiteExpand = () => {
     setDefaultSiteExpanded(!defaultSiteExpanded);
   };
-  const toggleSharedFoldersExpand = () => {
-    setSharedFoldersExpanded(!sharedFoldersExpanded);
+  const toggleWorkspacesExpand = () => {
+    setWorkspacesExpanded(!workspacesExpanded);
   };
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
@@ -114,28 +114,26 @@ export function Workflows() {
         }
       );
     }
-    if (sharedFolderSites.length > 0) {
-      const initialSharedFolderWorkflowsPromises = sharedFolderSites.map(
-        (item) => {
-          let readonly = false;
-          if (item.permission && item.permission === 'READ_ONLY') {
-            readonly = true;
-          }
-          return DocumentsService.getWorkflows(item.siteId).then(
-            (workflowsResponse: any) => {
-              return {
-                workflows: workflowsResponse.workflows,
-                siteId: item.siteId,
-                readonly,
-              };
-            }
-          );
+    if (workspaceSites.length > 0) {
+      const initialWorkspaceWorkflowsPromises = workspaceSites.map((item) => {
+        let readonly = false;
+        if (item.permission && item.permission === 'READ_ONLY') {
+          readonly = true;
         }
-      );
+        return DocumentsService.getWorkflows(item.siteId).then(
+          (workflowsResponse: any) => {
+            return {
+              workflows: workflowsResponse.workflows,
+              siteId: item.siteId,
+              readonly,
+            };
+          }
+        );
+      });
 
-      Promise.all(initialSharedFolderWorkflowsPromises)
-        .then((initialSharedFolderWorkflows) => {
-          setSharedFolderWorkflows(initialSharedFolderWorkflows);
+      Promise.all(initialWorkspaceWorkflowsPromises)
+        .then((initialWorkspaceWorkflows) => {
+          setWorkspaceWorkflows(initialWorkspaceWorkflows);
         })
         .catch((error) => {
           // Handle any errors that occurred during the requests
@@ -244,21 +242,21 @@ export function Workflows() {
             )}
           </>
         )}
-        {sharedFolderSites.length > 0 && (
+        {workspaceSites.length > 0 && (
           <>
             <div
               className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleSharedFoldersExpand}
+              onClick={toggleWorkspacesExpand}
             >
               <div className="flex justify-end mt-3 mr-1">
-                {sharedFoldersExpanded ? <ArrowBottom /> : <ArrowRight />}
+                {workspacesExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
                 Workflows: Workspaces
               </div>
             </div>
-            {sharedFoldersExpanded &&
-              sharedFolderWorkflows.map((item: WorkflowItem, i: number) => {
+            {workspacesExpanded &&
+              workspaceWorkflows.map((item: WorkflowItem, i: number) => {
                 return (
                   <div key={i}>
                     <div className="mt-4 ml-4 flex flex-wrap w-full">

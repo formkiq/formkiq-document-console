@@ -15,7 +15,7 @@ export function AccountSettings() {
     let userSite = null;
     let defaultSite = null;
     const sites: any[] = [];
-    const sharedFolderSites: any[] = [];
+    const workspaceSites: any[] = [];
     if (user && user.sites) {
       user.sites.forEach((site: any) => {
         if (site.siteId === user.email) {
@@ -23,7 +23,7 @@ export function AccountSettings() {
         } else if (site.siteId === 'default') {
           defaultSite = site;
         } else {
-          sharedFolderSites.push(site);
+          workspaceSites.push(site);
         }
       });
     }
@@ -33,7 +33,7 @@ export function AccountSettings() {
     if (userSite) {
       sites.push(userSite);
     }
-    return sites.concat(sharedFolderSites);
+    return sites.concat(workspaceSites);
   }, [user]);
   const {
     register,

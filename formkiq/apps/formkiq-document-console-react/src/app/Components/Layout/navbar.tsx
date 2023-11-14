@@ -24,7 +24,6 @@ import {
   ApiKey,
   Bell,
   Documents,
-  FolderOutline,
   Recent,
   Settings,
   Share,
@@ -33,6 +32,7 @@ import {
   Trash,
   Webhook,
   Workflow,
+  Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
 
@@ -62,7 +62,7 @@ function Navbar() {
   const { useNotifications, isSidebarExpanded } = useSelector(ConfigState);
   const { currentDocumentPath } = useSelector(DataCacheState);
 
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const { siteId, siteDocumentsRootUri, siteDocumentsRootName } =
@@ -71,8 +71,8 @@ function Navbar() {
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
 
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
@@ -87,8 +87,8 @@ function Navbar() {
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
@@ -292,9 +292,9 @@ function Navbar() {
                         {getTopLevelFolderName(subfolderUri)}
                       </div>
                       {((hasUserSite && hasDefaultSite) ||
-                        (hasUserSite && hasSharedFolders) ||
-                        (hasDefaultSite && hasSharedFolders) ||
-                        (hasSharedFolders && sharedFolderSites.length > 1)) && (
+                        (hasUserSite && hasWorkspaces) ||
+                        (hasDefaultSite && hasWorkspaces) ||
+                        (hasWorkspaces && workspaceSites.length > 1)) && (
                         <select
                           data-test-id="system-subfolder-select"
                           className="ml-4 text-xs bg-gray-100 px-2 py-1 rounded-md"
@@ -312,16 +312,16 @@ function Navbar() {
                           {!hasUserSite && hasDefaultSite && (
                             <option value="default">Documents</option>
                           )}
-                          {hasSharedFolders && sharedFolderSites.length > 0 && (
+                          {hasWorkspaces && workspaceSites.length > 0 && (
                             <>
-                              {sharedFolderSites.map(
-                                (sharedFolderSite, i: number) => {
+                              {workspaceSites.map(
+                                (workspaceSite, i: number) => {
                                   return (
                                     <option
                                       key={i}
-                                      value={sharedFolderSite.siteId}
+                                      value={workspaceSite.siteId}
                                     >
-                                      {sharedFolderSite.siteId}
+                                      {workspaceSite.siteId}
                                     </option>
                                   );
                                 }
@@ -413,11 +413,8 @@ function Navbar() {
                             {siteDocumentsRootUri.indexOf('/workspaces/') >
                               -1 && (
                               <div className="w-6 flex flex-wrap items-center mr-2">
-                                <div className="w-4">
-                                  <FolderOutline />
-                                </div>
-                                <div className="w-6 -mt-3.5 -ml-1">
-                                  <ShareHand />
+                                <div className="w-6">
+                                  <Workspace />
                                 </div>
                               </div>
                             )}
