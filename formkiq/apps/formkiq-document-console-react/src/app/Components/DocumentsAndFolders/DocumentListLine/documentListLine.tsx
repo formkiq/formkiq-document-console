@@ -39,6 +39,7 @@ function DocumentListLine({
   onRenameModalClick,
   onMoveModalClick,
   onDocumentVersionsModalClick,
+  onDocumentWorkflowsModalClick,
   onESignaturesModalClick,
   onTagChange,
 
@@ -57,6 +58,7 @@ function DocumentListLine({
   onRenameModalClick: any;
   onMoveModalClick: any;
   onDocumentVersionsModalClick: any;
+  onDocumentWorkflowsModalClick: any;
   onESignaturesModalClick: any;
   onTagChange: any;
   filterTag: string | null;
@@ -279,50 +281,51 @@ function DocumentListLine({
               </Link>
               <div className="grow flex items-center justify-end pt-1.5 pr-4">
                 <div className="flex flex-wrap justify-end w-52">
-                  {Object.getOwnPropertyNames(file.tags).map(
-                    (propertyName, i) => {
-                      let showTag = false;
-                      // TODO: determine why constants arrays are intermittently failing
-                      const tagsToIgnore = [
-                        'sysFavoritedBy',
-                        'sysSharedWith',
-                        'sysDeletedBy',
-                        'untagged',
-                        'path',
-                      ];
-                      let tagColor = 'gray';
-                      if (tagColors) {
-                        tagColors.forEach((color) => {
-                          if (color.tagKeys.indexOf(propertyName) > -1) {
-                            tagColor = color.colorUri;
-                            return;
-                          }
-                        });
-                      }
-                      if (
-                        tagsToIgnore.indexOf(propertyName) === -1 &&
-                        !file.tags[propertyName].length
-                      ) {
-                        showTag = true;
-                      }
-                      return (
-                        <div key={i}>
-                          {showTag && (
-                            <div className="pt-0.5 pr-1 flex">
-                              <div
-                                className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
-                              >
-                                {propertyName}
+                  {file.tags &&
+                    Object.getOwnPropertyNames(file.tags).map(
+                      (propertyName, i) => {
+                        let showTag = false;
+                        // TODO: determine why constants arrays are intermittently failing
+                        const tagsToIgnore = [
+                          'sysFavoritedBy',
+                          'sysSharedWith',
+                          'sysDeletedBy',
+                          'untagged',
+                          'path',
+                        ];
+                        let tagColor = 'gray';
+                        if (tagColors) {
+                          tagColors.forEach((color) => {
+                            if (color.tagKeys.indexOf(propertyName) > -1) {
+                              tagColor = color.colorUri;
+                              return;
+                            }
+                          });
+                        }
+                        if (
+                          tagsToIgnore.indexOf(propertyName) === -1 &&
+                          !file.tags[propertyName].length
+                        ) {
+                          showTag = true;
+                        }
+                        return (
+                          <div key={i}>
+                            {showTag && (
+                              <div className="pt-0.5 pr-1 flex">
+                                <div
+                                  className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                                >
+                                  {propertyName}
+                                </div>
+                                <div
+                                  className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                                ></div>
                               </div>
-                              <div
-                                className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                              ></div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    }
-                  )}
+                            )}
+                          </div>
+                        );
+                      }
+                    )}
                 </div>
                 <div className="flex">
                   <div className="w-4 h-4 text-gray-400 ml-2 -mt-1 cursor-pointer">
@@ -432,6 +435,9 @@ function DocumentListLine({
                     onRenameModalClick={onRenameModalClick}
                     onMoveModalClick={onMoveModalClick}
                     onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                    onDocumentWorkflowsModalClick={
+                      onDocumentWorkflowsModalClick
+                    }
                     onESignaturesModalClick={onESignaturesModalClick}
                     user={user}
                     useIndividualSharing={useIndividualSharing}

@@ -1134,6 +1134,26 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getDocumentsInQueue(
+    queueId: string,
+    siteId: string,
+    previous = null,
+    next = null,
+    limit = 20
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getDocumentsInQueue(
+      queueId,
+      siteId,
+      limit,
+      next,
+      previous
+    );
+  }
+
+  @formkiqAPIHandler
   public static async getESignatureConfig(siteId: string): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();

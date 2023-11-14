@@ -5,8 +5,8 @@ import { AuthState } from '../../Store/reducers/auth';
 import {
   ConfigState,
   setCurrentActionEvent,
-  setIsSharedFoldersExpanded,
   setIsSidebarExpanded,
+  setIsWorkspacesExpanded,
 } from '../../Store/reducers/config';
 import { DocumentListState } from '../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../Store/store';
@@ -42,8 +42,9 @@ import {
   UserIcon,
   Webhook,
   Workflow,
+  Workspace,
 } from '../Icons/icons';
-import SharedFoldersModal from './sharedFoldersModal';
+import WorkspacesModal from './workspacesModal';
 
 export function Sidebar() {
   const dispatch = useAppDispatch();
@@ -55,10 +56,10 @@ export function Sidebar() {
     useAccountAndSettings,
     useSoftDelete,
     isSidebarExpanded,
-    isSharedFoldersExpanded,
+    isWorkspacesExpanded,
   } = useSelector(ConfigState);
 
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const { siteId, siteDocumentsRootUri, isSiteReadOnly } = getCurrentSiteInfo(
@@ -66,8 +67,8 @@ export function Sidebar() {
     user,
     hasUserSite,
     hasDefaultSite,
-    hasSharedFolders,
-    sharedFolderSites
+    hasWorkspaces,
+    workspaceSites
   );
 
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
@@ -77,15 +78,15 @@ export function Sidebar() {
     useState(siteDocumentsRootUri);
   const [sidebarExpanded, setSidebarExpanded] = useState(isSidebarExpanded);
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
-  let expandSharedFoldersInitially = isSharedFoldersExpanded;
+  let expandWorkspacesInitially = isWorkspacesExpanded;
   if (
-    currentDocumentsRootUri.indexOf('/shared-folders') === 0 ||
-    (!hasUserSite && !hasDefaultSite && hasSharedFolders)
+    currentDocumentsRootUri.indexOf('/workspaces') === 0 ||
+    (!hasUserSite && !hasDefaultSite && hasWorkspaces)
   ) {
-    expandSharedFoldersInitially = true;
+    expandWorkspacesInitially = true;
   }
-  const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(
-    expandSharedFoldersInitially
+  const [workspacesExpanded, setWorkspacesExpanded] = useState(
+    expandWorkspacesInitially
   );
   const [userSiteDocumentQueuesExpanded, setUserSiteDocumentQueuesExpanded] =
     useState(true);
@@ -97,8 +98,7 @@ export function Sidebar() {
     useState(true);
   const [integrationsExpanded, setIntegrationsExpanded] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
-  const [isSharedFoldersModalOpened, setSharedFoldersModalOpened] =
-    useState(false);
+  const [isWorkspacesModalOpened, setWorkspacesModalOpened] = useState(false);
 
   const locationPrefix = decodeURI(window.location.pathname).substring(
     0,
@@ -137,13 +137,13 @@ export function Sidebar() {
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    if (recheckSiteInfo.siteDocumentsRootUri.indexOf('shared-folders') > 0) {
-      if (!hasUserSite && !hasDefaultSite && hasSharedFolders) {
+    if (recheckSiteInfo.siteDocumentsRootUri.indexOf('workspaces') > 0) {
+      if (!hasUserSite && !hasDefaultSite && hasWorkspaces) {
         setSpecialFoldersRootUri('/documents');
       }
     }
@@ -177,7 +177,7 @@ export function Sidebar() {
 
   useEffect(() => {
     if (
-      hasSharedFolders &&
+      hasWorkspaces &&
       currentSiteId !== 'default' &&
       currentSiteId !== user?.email &&
       otherSiteDocumentQueuesExpanded
@@ -201,12 +201,12 @@ export function Sidebar() {
   const toggleDocumentsExpand = () => {
     setDocumentsExpanded(!documentsExpanded);
   };
-  const toggleSharedFoldersExpand = () => {
-    if (!sharedFoldersExpanded) {
+  const toggleWorkspacesExpand = () => {
+    if (!workspacesExpanded) {
       setDocumentsExpanded(true);
     }
-    dispatch(setIsSharedFoldersExpanded(!sharedFoldersExpanded));
-    setSharedFoldersExpanded(!sharedFoldersExpanded);
+    dispatch(setIsWorkspacesExpanded(!workspacesExpanded));
+    setWorkspacesExpanded(!workspacesExpanded);
   };
   const toggleDefaultSiteDocumentQueuesExpand = () => {
     if (!defaultSiteDocumentQueuesExpanded) {
@@ -232,11 +232,11 @@ export function Sidebar() {
   const toggleSettingsExpand = () => {
     setSettingsExpanded(!settingsExpanded);
   };
-  const onSharedFoldersClick = (event: any) => {
-    setSharedFoldersModalOpened(true);
+  const onWorkspacesClick = (event: any) => {
+    setWorkspacesModalOpened(true);
   };
-  const onSharedFoldersModalClose = () => {
-    setSharedFoldersModalOpened(false);
+  const onWorkspacesModalClose = () => {
+    setWorkspacesModalOpened(false);
   };
 
   const QuickFolderList = (
@@ -246,7 +246,7 @@ export function Sidebar() {
   ) => {
     let folderBreadcrumbUrl = `${currentDocumentsRootUri}/folders`;
     let initialPaddingLeft = 8;
-    if (currentDocumentsRootUri.indexOf('shared-folders') > 0) {
+    if (currentDocumentsRootUri.indexOf('workspaces') > 0) {
       initialPaddingLeft = 10;
     }
     if (
@@ -543,33 +543,31 @@ export function Sidebar() {
                     )}
                   </>
                 )}
-                {hasSharedFolders && (
+                {hasWorkspaces && (
                   <>
                     {(hasUserSite || hasDefaultSite) && (
                       <li
                         className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
-                        onClick={toggleSharedFoldersExpand}
+                        onClick={toggleWorkspacesExpand}
                       >
                         <div className="flex justify-end mt-2 mr-1">
-                          {sharedFoldersExpanded ? (
+                          {workspacesExpanded ? (
                             <ArrowBottom />
                           ) : (
                             <ArrowRight />
                           )}
                         </div>
-                        <div className="pl-1 uppercase text-xs">
-                          Shared Folders
-                        </div>
+                        <div className="pl-1 uppercase text-xs">Workspaces</div>
                       </li>
                     )}
-                    {(sharedFoldersExpanded ||
+                    {(workspacesExpanded ||
                       (!hasUserSite && !hasDefaultSite)) &&
-                      sharedFolderSites.map((site: any, i: number) => {
+                      workspaceSites.map((site: any, i: number) => {
                         return (
                           <span key={i}>
                             <li className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                               <NavLink
-                                to={'/shared-folders/' + site.siteId}
+                                to={'/workspaces/' + site.siteId}
                                 end
                                 className={({ isActive }) =>
                                   (isActive
@@ -587,12 +585,7 @@ export function Sidebar() {
                                   }
                                 >
                                   <div className="w-5 flex flex-wrap items-center mr-2">
-                                    <div className="w-4">
-                                      <FolderOutline />
-                                    </div>
-                                    <div className="-mt-3 -ml-0.5">
-                                      <ShareHand />
-                                    </div>
+                                    <Workspace />
                                   </div>
                                   <div>
                                     <span>
@@ -635,7 +628,7 @@ export function Sidebar() {
                                           <li className="pl-7 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                                             <NavLink
                                               to={
-                                                '/shared-folders/' +
+                                                '/workspaces/' +
                                                 currentSiteId +
                                                 '/queues/' +
                                                 queue.queueId
@@ -969,18 +962,13 @@ export function Sidebar() {
                 </NavLink>
               </li>
             )}
-            {hasSharedFolders && (
+            {hasWorkspaces && (
               <div className="w-full text-sm font-medium flex pl-5 py-3 bg-white mb-4">
                 <div
                   className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
-                  onClick={onSharedFoldersClick}
+                  onClick={onWorkspacesClick}
                 >
-                  <div className="w-3.5 text-gray-700">
-                    <FolderOutline />
-                  </div>
-                  <div className="-mt-2.5 -ml-0.5">
-                    <ShareHand />
-                  </div>
+                  <Workspace />
                 </div>
               </div>
             )}
@@ -1265,10 +1253,10 @@ export function Sidebar() {
           </>
         )}
       </div>
-      <SharedFoldersModal
-        isOpened={isSharedFoldersModalOpened}
-        onClose={onSharedFoldersModalClose}
-        sharedFolderSites={sharedFolderSites}
+      <WorkspacesModal
+        isOpened={isWorkspacesModalOpened}
+        onClose={onWorkspacesModalClose}
+        workspaceSites={workspaceSites}
       />
     </div>
   );

@@ -1,17 +1,18 @@
+import { Ref } from 'react';
 import { useSelector } from 'react-redux';
 import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
-import { Spinner } from '../../Components/Icons/icons';
-import { IDocument, RequestStatus } from '../../helpers/types/document';
-import { EmptyDocumentsTable } from './EmptyDocumentsTable';
-import { IFolder } from '../../helpers/types/folder';
 import FolderListLine from '../../Components/DocumentsAndFolders/FolderListLine/FolderListLine';
+import { Spinner } from '../../Components/Icons/icons';
 import { ConfigState } from '../../Store/reducers/config';
-import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
-import { Ref } from 'react';
-import { ILine } from '../../helpers/types/line';
 import { DocumentListState } from '../../Store/reducers/documentsList';
+import { IDocument, RequestStatus } from '../../helpers/types/document';
+import { IFolder } from '../../helpers/types/folder';
+import { ILine } from '../../helpers/types/line';
+import { useQueueId } from '../../hooks/queue-id.hook';
+import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
+import { EmptyDocumentsTable } from './EmptyDocumentsTable';
 
 type DocumentTableProps = {
   documentsWrapperRef: Ref<any>;
@@ -31,6 +32,7 @@ type DocumentTableProps = {
   onRenameModalClick: (event: any, value: ILine | null) => void;
   onMoveModalClick: (event: any, value: ILine | null) => void;
   onDocumentVersionsModalClick: (event: any, value: ILine | null) => void;
+  onDocumentWorkflowsModalClick: (event: any, value: ILine | null) => void;
   onEditTagsAndMetadataModalClick: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
@@ -50,6 +52,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     currentDocumentsRootUri,
     filterTag,
     onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
@@ -58,6 +61,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
   const { documents, folders, loadingStatus } = useSelector(DocumentListState);
   const subfolderUri = useSubfolderUri();
+  const queueId = useQueueId();
 
   if (
     documents.length === 0 &&
@@ -68,6 +72,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
       <EmptyDocumentsTable
         formkiqVersion={formkiqVersion}
         subfolderUri={subfolderUri}
+        queueId={queueId}
       />
     );
   }
@@ -131,7 +136,11 @@ export const DocumentsTable = (props: DocumentTableProps) => {
             {documents.length === 0 &&
             folders.length === 0 &&
             loadingStatus === RequestStatus.pending ? (
-              <Spinner />
+              <tr>
+                <td colSpan={6}>
+                  <Spinner />
+                </td>
+              </tr>
             ) : undefined}
             {documents.map((file: any, i: number) => (
               <DocumentListLine
@@ -155,6 +164,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onRenameModalClick={onRenameModalClick}
                 onMoveModalClick={onMoveModalClick}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                 onESignaturesModalClick={onESignaturesModalClick}
                 onTagChange={onTagChange}
                 filterTag={filterTag}
@@ -193,6 +203,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     currentDocumentsRootUri,
     filterTag,
     onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
@@ -217,6 +228,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               onRenameModalClick={onRenameModalClick}
               onMoveModalClick={onMoveModalClick}
               onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+              onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
               onESignaturesModalClick={onESignaturesModalClick}
               onTagChange={onTagChange}
               onRestoreDocument={onRestoreDocument}

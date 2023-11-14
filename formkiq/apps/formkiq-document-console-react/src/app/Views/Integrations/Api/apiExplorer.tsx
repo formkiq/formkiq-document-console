@@ -50,7 +50,9 @@ import {
   getWebhookTagsApiItem,
   getWebhooksApiItem,
   getWorkflowApiItem,
+  getWorkflowByIdInDocumentApiItem,
   getWorkflowsApiItem,
+  getWorkflowsInDocumentApiItem,
   moveDocumentApiItem,
   patchDocumentApiItem,
   patchDocumentFulltextApiItem,
@@ -90,7 +92,7 @@ export function ApiExplorer() {
     let userSite = null;
     let defaultSite = null;
     const sites: any[] = [];
-    const sharedFolderSites: any[] = [];
+    const workspaceSites: any[] = [];
     if (user && user.sites) {
       user.sites.forEach((site: any) => {
         if (site.siteId === user.email) {
@@ -98,7 +100,7 @@ export function ApiExplorer() {
         } else if (site.siteId === 'default') {
           defaultSite = site;
         } else {
-          sharedFolderSites.push(site);
+          workspaceSites.push(site);
         }
       });
     }
@@ -108,7 +110,7 @@ export function ApiExplorer() {
     if (userSite) {
       sites.push(userSite);
     }
-    return sites.concat(sharedFolderSites);
+    return sites.concat(workspaceSites);
   }, [user]);
 
   return (
@@ -415,6 +417,14 @@ export function ApiExplorer() {
                 <ApiItem apiItem={getQueuesApiItem} sites={sites} />
                 <ApiItem apiItem={postQueuesApiItem} sites={sites} />
                 <ApiItem apiItem={getDocumentsInQueueApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={getWorkflowsInDocumentApiItem}
+                  sites={sites}
+                />
+                <ApiItem
+                  apiItem={getWorkflowByIdInDocumentApiItem}
+                  sites={sites}
+                />
                 <ApiItem
                   apiItem={postDocumentWorkflowDecisionsApiItem}
                   sites={sites}

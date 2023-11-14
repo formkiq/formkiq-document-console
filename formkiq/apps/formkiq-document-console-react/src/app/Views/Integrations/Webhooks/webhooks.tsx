@@ -18,7 +18,7 @@ export function Webhooks() {
   const dispatch = useAppDispatch();
   let userSite: any = null;
   let defaultSite: any = null;
-  const sharedFolderSites: any[] = [];
+  const workspaceSites: any[] = [];
   const { user } = useSelector(AuthState);
   if (user && user.sites) {
     user.sites.forEach((site: any) => {
@@ -27,7 +27,7 @@ export function Webhooks() {
       } else if (site.siteId === 'default') {
         defaultSite = site;
       } else {
-        sharedFolderSites.push(site);
+        workspaceSites.push(site);
       }
     });
   }
@@ -35,7 +35,7 @@ export function Webhooks() {
     ? userSite
     : defaultSite
     ? defaultSite
-    : sharedFolderSites[0];
+    : workspaceSites[0];
   if (currentSite === null) {
     alert('No site configured for this user');
     window.location.href = '/';
@@ -45,8 +45,8 @@ export function Webhooks() {
   const [userSiteWebhooks, setUserSiteWebhooks] = useState(null);
   const [defaultSiteExpanded, setDefaultSiteExpanded] = useState(true);
   const [defaultSiteWebhooks, setDefaultSiteWebhooks] = useState(null);
-  const [sharedFolderHooks, setSharedFolderHooks] = useState<HookItem[]>([]);
-  const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(false);
+  const [workspaceHooks, setWorkspaceHooks] = useState<HookItem[]>([]);
+  const [workspacesExpanded, setWorkspacesExpanded] = useState(false);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
   const toggleUserSiteExpand = () => {
@@ -55,8 +55,8 @@ export function Webhooks() {
   const toggleDefaultSiteExpand = () => {
     setDefaultSiteExpanded(!defaultSiteExpanded);
   };
-  const toggleSharedFoldersExpand = () => {
-    setSharedFoldersExpanded(!sharedFoldersExpanded);
+  const toggleWorkspacesExpand = () => {
+    setWorkspacesExpanded(!workspacesExpanded);
   };
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
@@ -108,8 +108,8 @@ export function Webhooks() {
         }
       );
     }
-    if (sharedFolderSites.length > 0) {
-      const initialSharedFolderHooksPromises = sharedFolderSites.map((item) => {
+    if (workspaceSites.length > 0) {
+      const initialWorkspaceHooksPromises = workspaceSites.map((item) => {
         let readonly = false;
         if (item.permission && item.permission === 'READ_ONLY') {
           readonly = true;
@@ -125,9 +125,9 @@ export function Webhooks() {
         );
       });
 
-      Promise.all(initialSharedFolderHooksPromises)
-        .then((initialSharedFolderHooks) => {
-          setSharedFolderHooks(initialSharedFolderHooks);
+      Promise.all(initialWorkspaceHooksPromises)
+        .then((initialWorkspaceHooks) => {
+          setWorkspaceHooks(initialWorkspaceHooks);
         })
         .catch((error) => {
           // Handle any errors that occurred during the requests
@@ -229,21 +229,21 @@ export function Webhooks() {
             )}
           </>
         )}
-        {sharedFolderSites.length > 0 && (
+        {workspaceSites.length > 0 && (
           <>
             <div
               className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleSharedFoldersExpand}
+              onClick={toggleWorkspacesExpand}
             >
               <div className="flex justify-end mt-3 mr-1">
-                {sharedFoldersExpanded ? <ArrowBottom /> : <ArrowRight />}
+                {workspacesExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
-                Webhooks: Shared Folders
+                Webhooks: Workspaces
               </div>
             </div>
-            {sharedFoldersExpanded &&
-              sharedFolderHooks.map((item: HookItem, i: number) => {
+            {workspacesExpanded &&
+              workspaceHooks.map((item: HookItem, i: number) => {
                 return (
                   <div key={i}>
                     <div className="mt-4 ml-4 flex flex-wrap w-full">

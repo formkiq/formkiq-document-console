@@ -98,31 +98,28 @@ const RoutesMapper = () => {
       <Route path="/team-documents/:id/view" element={<DocumentView />}></Route>
       <Route path="/team-documents" element={<Documents />}></Route>
 
-      <Route path="/shared-folders/" element={<Documents />}></Route>
-      <Route path="/shared-folders/:siteId" element={<Documents />}></Route>
+      <Route path="/workspaces/" element={<Documents />}></Route>
+      <Route path="/workspaces/:siteId" element={<Documents />}></Route>
       <Route
-        path="/shared-folders/:siteId/folders/*"
+        path="/workspaces/:siteId/folders/*"
         element={<Documents />}
       ></Route>
       <Route
-        path="/shared-folders/:siteId/queues/:queueId"
+        path="/workspaces/:siteId/queues/:queueId"
         element={<Documents />}
       ></Route>
       <Route
-        path="/shared-folders/:siteId/settings"
+        path="/workspaces/:siteId/settings"
         element={<DocumentSettings />}
       ></Route>
+      <Route path="/workspaces/:siteId/help" element={<DocumentHelp />}></Route>
       <Route
-        path="/shared-folders/:siteId/help"
-        element={<DocumentHelp />}
-      ></Route>
-      <Route
-        path="/shared-folders/:siteId/new/:extension"
+        path="/workspaces/:siteId/new/:extension"
         element={<DocumentNew />}
       ></Route>
-      <Route path="/shared-folders/:siteId/:id" element={<Documents />}></Route>
+      <Route path="/workspaces/:siteId/:id" element={<Documents />}></Route>
       <Route
-        path="/shared-folders/:siteId/:id/view"
+        path="/workspaces/:siteId/:id/view"
         element={<DocumentView />}
       ></Route>
 

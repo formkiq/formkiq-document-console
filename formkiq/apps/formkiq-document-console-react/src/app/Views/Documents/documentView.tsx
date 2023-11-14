@@ -29,7 +29,7 @@ export function DocumentView() {
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const {
@@ -42,8 +42,8 @@ export function DocumentView() {
     user,
     hasUserSite,
     hasDefaultSite,
-    hasSharedFolders,
-    sharedFolderSites
+    hasWorkspaces,
+    workspaceSites
   );
   if (siteRedirectUrl.length) {
     navigate(
@@ -137,8 +137,8 @@ export function DocumentView() {
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
     if (recheckSiteInfo.siteRedirectUrl.length) {
       navigate(
