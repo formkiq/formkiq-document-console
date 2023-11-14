@@ -158,10 +158,10 @@ export function getCurrentSiteInfo(
       currentSiteInfo.siteDocumentsRootName = 'Documents';
     } else if (hasSharedFolders) {
       currentSiteInfo.siteId = sharedFolderSites[0].siteId;
-      currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
+      currentSiteInfo.siteRedirectUrl = `/workspaces/${sharedFolderSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootUri = `/workspaces/${sharedFolderSites[0].siteId}`;
       if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Workspace: ${sharedFolderSites[0].siteId}`;
       } else {
         currentSiteInfo.siteDocumentsRootName = `Site Folder: ${sharedFolderSites[0].siteId}`;
       }
@@ -174,19 +174,12 @@ export function getCurrentSiteInfo(
       currentSiteInfo.siteDocumentsRootName = 'Documents';
     } else if (hasSharedFolders) {
       currentSiteInfo.siteId = sharedFolderSites[0].siteId;
-      currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId.replaceAll(
-          '_',
-          ' '
-        )}`;
-      } else {
-        currentSiteInfo.siteDocumentsRootName = `Site Folder: ${sharedFolderSites[0].siteId.replaceAll(
-          '_',
-          ' '
-        )}`;
-      }
+      currentSiteInfo.siteRedirectUrl = `/workspaces/${sharedFolderSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootUri = `/workspaces/${sharedFolderSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootName = `Workspace: ${sharedFolderSites[0].siteId.replaceAll(
+        '_',
+        ' '
+      )}`;
     }
   }
   if (user && user.email) {
@@ -198,7 +191,7 @@ export function getCurrentSiteInfo(
       currentSiteInfo.siteId = 'default';
       currentSiteInfo.siteDocumentsRootUri = '/team-documents';
       currentSiteInfo.siteDocumentsRootName = 'Team Documents';
-    } else if (pathname.indexOf('/shared-folders') === 0) {
+    } else if (pathname.indexOf('/workspaces') === 0) {
       const pathAfterSharedFolders = pathname.substring(
         pathname.indexOf('/', 1) + 1
       );
@@ -228,16 +221,10 @@ export function getCurrentSiteInfo(
           currentSiteInfo.siteDocumentsRootName = 'Documents';
         }
       }
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${currentSiteInfo.siteId}`;
-      if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${(
-          currentSiteInfo.siteId as any
-        ).replaceAll('_', ' ')}`;
-      } else {
-        currentSiteInfo.siteDocumentsRootName = `Site Folder: ${(
-          currentSiteInfo.siteId as any
-        ).replaceAll('_', ' ')}`;
-      }
+      currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+      currentSiteInfo.siteDocumentsRootName = `Workspace: ${(
+        currentSiteInfo.siteId as any
+      ).replaceAll('_', ' ')}`;
     } else {
       if (hasDefaultSite) {
         currentSiteInfo.siteId = 'default';
@@ -255,8 +242,8 @@ export function getCurrentSiteInfo(
           !currentSiteInfo.siteId.length
         ) {
           currentSiteInfo.siteId = sharedFolderSites[0].siteId;
-          currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
-          currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/workspaces/${sharedFolderSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${sharedFolderSites[0].siteId}`;
           currentSiteInfo.siteDocumentsRootName = `Site Folder: ${sharedFolderSites[0].siteId}`;
         }
       }
@@ -265,15 +252,11 @@ export function getCurrentSiteInfo(
       user.sites.forEach((site: any) => {
         currentSiteInfo.siteId = site.siteId;
         if (site.siteId !== 'default' && site.siteId !== user.email) {
-          currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${site.siteId}`;
-          if (hasDefaultSite || hasUserSite) {
-            currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${site.siteId.replaceAll(
-              '_',
-              ' '
-            )}`;
-          } else {
-            currentSiteInfo.siteDocumentsRootName = `Site Folder: ${site.siteId}`;
-          }
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${site.siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${site.siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
         }
         return;
       });

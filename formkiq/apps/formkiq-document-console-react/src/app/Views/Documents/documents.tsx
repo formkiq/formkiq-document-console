@@ -684,7 +684,7 @@ function Documents() {
                 to={`${currentDocumentsRootUri}`}
                 className="hover:text-coreOrange-600"
               >
-                {siteDocumentsRootName.replace('Shared Folder: ', '')}:
+                {siteDocumentsRootName.replace('Workspace: ', '')}:
               </Link>
             </span>
             <p className={'flex px-1'}> / </p>
@@ -735,7 +735,7 @@ function Documents() {
                 to={`${currentDocumentsRootUri}`}
                 className="hover:text-coreOrange-600"
               >
-                {siteDocumentsRootName.replace('Shared Folder: ', '')}:
+                {siteDocumentsRootName.replace('Workspace: ', '')}:
               </Link>
             </span>
             {folderLevels.length > 1 && (
@@ -800,7 +800,7 @@ function Documents() {
         className={'hidden flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
       >
         <span className="pr-1">
-          {siteDocumentsRootName.replace('Shared Folder: ', '')}
+          {siteDocumentsRootName.replace('Workspace: ', '')}
         </span>
       </span>
     );
@@ -1092,7 +1092,7 @@ function Documents() {
                               >
                                 <span className="pr-1">
                                   {siteDocumentsRootName.replace(
-                                    'Shared Folder: ',
+                                    'Workspace: ',
                                     ''
                                   )}
                                   :
@@ -1114,7 +1114,7 @@ function Documents() {
                             ) : (
                               <Link to={siteDocumentsRootUri} className="flex">
                                 {siteDocumentsRootName.replace(
-                                  'Shared Folder: ',
+                                  'Workspace: ',
                                   ''
                                 )}
                                 <div className="w-4 pt-0.5">

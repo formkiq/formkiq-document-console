@@ -254,7 +254,7 @@ export function Workflows() {
                 {sharedFoldersExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
-                Workflows: Shared Folders
+                Workflows: Workspaces
               </div>
             </div>
             {sharedFoldersExpanded &&

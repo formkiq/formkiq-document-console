@@ -79,7 +79,7 @@ export function Sidebar() {
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
   let expandSharedFoldersInitially = isSharedFoldersExpanded;
   if (
-    currentDocumentsRootUri.indexOf('/shared-folders') === 0 ||
+    currentDocumentsRootUri.indexOf('/workspaces') === 0 ||
     (!hasUserSite && !hasDefaultSite && hasSharedFolders)
   ) {
     expandSharedFoldersInitially = true;
@@ -142,7 +142,7 @@ export function Sidebar() {
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    if (recheckSiteInfo.siteDocumentsRootUri.indexOf('shared-folders') > 0) {
+    if (recheckSiteInfo.siteDocumentsRootUri.indexOf('workspaces') > 0) {
       if (!hasUserSite && !hasDefaultSite && hasSharedFolders) {
         setSpecialFoldersRootUri('/documents');
       }
@@ -246,7 +246,7 @@ export function Sidebar() {
   ) => {
     let folderBreadcrumbUrl = `${currentDocumentsRootUri}/folders`;
     let initialPaddingLeft = 8;
-    if (currentDocumentsRootUri.indexOf('shared-folders') > 0) {
+    if (currentDocumentsRootUri.indexOf('workspaces') > 0) {
       initialPaddingLeft = 10;
     }
     if (
@@ -557,9 +557,7 @@ export function Sidebar() {
                             <ArrowRight />
                           )}
                         </div>
-                        <div className="pl-1 uppercase text-xs">
-                          Shared Folders
-                        </div>
+                        <div className="pl-1 uppercase text-xs">Workspaces</div>
                       </li>
                     )}
                     {(sharedFoldersExpanded ||
@@ -569,7 +567,7 @@ export function Sidebar() {
                           <span key={i}>
                             <li className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                               <NavLink
-                                to={'/shared-folders/' + site.siteId}
+                                to={'/workspaces/' + site.siteId}
                                 end
                                 className={({ isActive }) =>
                                   (isActive
@@ -635,7 +633,7 @@ export function Sidebar() {
                                           <li className="pl-7 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                                             <NavLink
                                               to={
-                                                '/shared-folders/' +
+                                                '/workspaces/' +
                                                 currentSiteId +
                                                 '/queues/' +
                                                 queue.queueId

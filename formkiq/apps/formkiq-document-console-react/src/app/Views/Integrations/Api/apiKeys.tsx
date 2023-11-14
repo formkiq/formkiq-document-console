@@ -241,7 +241,7 @@ export function ApiKeys() {
                 {sharedFoldersExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
-                API Keys: Shared Folders
+                API Keys: Workspaces
               </div>
             </div>
             {sharedFoldersExpanded &&

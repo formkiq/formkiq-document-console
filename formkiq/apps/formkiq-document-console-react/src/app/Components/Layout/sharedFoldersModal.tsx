@@ -45,7 +45,7 @@ export default function SharedFoldersModal({
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg inline-block pr-6">
-                      Shared Folders
+                      Workspaces
                     </div>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
@@ -63,7 +63,7 @@ export default function SharedFoldersModal({
                             className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap"
                           >
                             <NavLink
-                              to={'/shared-folders/' + site.siteId}
+                              to={'/workspaces/' + site.siteId}
                               end
                               onClick={closeDialog}
                               className={({ isActive }) =>

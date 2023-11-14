@@ -192,7 +192,7 @@ function Navbar() {
     } else if (newSiteId === 'default' && hasUserSite) {
       newDocumentsRootUri = '/team-documents';
     } else {
-      newDocumentsRootUri = '/shared-folders/' + newSiteId;
+      newDocumentsRootUri = '/workspaces/' + newSiteId;
     }
     navigate(
       {
@@ -410,7 +410,7 @@ function Navbar() {
                                 </div>
                               </div>
                             )}
-                            {siteDocumentsRootUri.indexOf('/shared-folders/') >
+                            {siteDocumentsRootUri.indexOf('/workspaces/') >
                               -1 && (
                               <div className="w-6 flex flex-wrap items-center mr-2">
                                 <div className="w-4">

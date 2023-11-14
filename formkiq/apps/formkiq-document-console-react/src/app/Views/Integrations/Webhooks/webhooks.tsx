@@ -239,7 +239,7 @@ export function Webhooks() {
                 {sharedFoldersExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="pl-1 uppercase text-base">
-                Webhooks: Shared Folders
+                Webhooks: Workspaces
               </div>
             </div>
             {sharedFoldersExpanded &&
