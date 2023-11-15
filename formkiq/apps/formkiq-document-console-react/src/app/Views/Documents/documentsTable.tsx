@@ -36,6 +36,7 @@ type DocumentTableProps = {
   onEditTagsAndMetadataModalClick: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
+  trackScrolling: () => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -56,6 +57,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
+    trackScrolling
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
@@ -83,9 +85,11 @@ export const DocumentsTable = (props: DocumentTableProps) => {
       ref={documentsWrapperRef}
     >
       <div
-        className="overflow-scroll h-full"
+        className="overflow-y-scroll overflow-x-auto h-full"
         ref={documentsScrollpaneRef}
         id="documentsScrollpane"
+        onScroll={trackScrolling}
+
       >
         <table
           className="border-separate border-spacing-0 table-auto w-full"
