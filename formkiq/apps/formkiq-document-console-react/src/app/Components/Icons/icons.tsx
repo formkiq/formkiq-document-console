@@ -899,28 +899,28 @@ export function Workspace() {
           <path d="m157.84 252.34h63.344v265.91h-63.344z" />
         </clipPath>
       </defs>
-      <g clip-path="url(#a)">
-        <g clip-path="url(#e)">
+      <g clipPath="url(#a)">
+        <g clipPath="url(#e)">
           <path
             transform="matrix(.75 0 0 .75 31.156 107.16)"
             d="m48 5.5227e-4h844.91c12.729 0 24.938 5.0573 33.943 14.057 9 9 14.057 21.214 14.057 33.943v642.23c0 12.729-5.0573 24.938-14.057 33.938-9.0052 9.0052-21.214 14.063-33.943 14.063h-844.91c-12.729 0-24.938-5.0573-33.943-14.063-9-9-14.057-21.208-14.057-33.938v-642.23c0-12.729 5.0573-24.943 14.057-33.943 9.0052-9 21.214-14.057 33.943-14.057z"
             fill="none"
             stroke="#000"
-            stroke-width="128"
+            strokeWidth="128"
           />
         </g>
       </g>
-      <g clip-path="url(#c)">
-        <g clip-path="url(#f)">
+      <g clipPath="url(#c)">
+        <g clipPath="url(#f)">
           <path d="m157.84 216.59h63.344v62.473h-63.344z" />
         </g>
       </g>
-      <g clip-path="url(#b)">
-        <g clip-path="url(#d)">
+      <g clipPath="url(#b)">
+        <g clipPath="url(#d)">
           <path d="m157.84 488.94h63.344v62.473h-63.344z" />
         </g>
       </g>
-      <g clip-path="url(#g)">
+      <g clipPath="url(#g)">
         <path d="m157.84 252.34h63.344v265.91h-63.344z" />
       </g>
     </svg>

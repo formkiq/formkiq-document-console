@@ -29,7 +29,7 @@ export const fetchDocuments = createAsyncThunk(
       nextToken,
       page,
       documents,
-      folders
+      folders,
     } = data;
     const user = (thunkAPI.getState() as any)?.authState.user;
     const tagParam = filterTag ? filterTag.split(':')[0] : null;
@@ -288,30 +288,41 @@ export const fetchDocuments = createAsyncThunk(
           20,
           dataCache.allTags
         ).then((response: any) => {
+          function ConcatDocumentArrays(
+            folders: [],
+            documents: [],
+            newDocuments: []
+          ) {
+            const isFoldersUndefined = folders === undefined;
+            const isDocumentsUndefined = documents === undefined;
 
-          function ConcatDocumentArrays (folders: [], documents: [], newDocuments: []){
-            const isFoldersUndefined= folders===undefined
-            const isDocumentsUndefined= documents===undefined
+            let oldDocuments: any[] = [];
 
-            let oldDocuments: any[] = []
-
-            if (!isFoldersUndefined&&!isDocumentsUndefined) {
+            if (!isFoldersUndefined && !isDocumentsUndefined) {
               // NOTE: Used this construction in order to make deep copy vs shallow copy with normal concat
-              oldDocuments = JSON.parse(JSON.stringify(folders.concat(documents)));
-            }else if (!isDocumentsUndefined) {
-              oldDocuments = documents
-            } else if (!isFoldersUndefined){
-              oldDocuments = folders
+              oldDocuments = JSON.parse(
+                JSON.stringify(folders.concat(documents))
+              );
+            } else if (!isDocumentsUndefined) {
+              oldDocuments = documents;
+            } else if (!isFoldersUndefined) {
+              oldDocuments = folders;
             }
-            let updatedDocuments = oldDocuments
+            let updatedDocuments = oldDocuments;
 
-            if (newDocuments !== undefined){
-              updatedDocuments = JSON.parse(JSON.stringify(oldDocuments.concat(response.documents)));
+            if (newDocuments !== undefined) {
+              updatedDocuments = JSON.parse(
+                JSON.stringify(oldDocuments.concat(response.documents))
+              );
             }
-            return updatedDocuments
+            return updatedDocuments;
           }
 
-          const updatedDocuments = ConcatDocumentArrays(folders, documents, response.documents)
+          const updatedDocuments = ConcatDocumentArrays(
+            folders,
+            documents,
+            response.documents
+          );
 
           if (response) {
             const data = {
@@ -1039,14 +1050,6 @@ export const documentsListSlice = createSlice({
       return {
         ...state,
         loadingStatus: RequestStatus.rejected,
-      };
-    });
-    builder.addCase(fetchDocuments.pending, (state) => {
-      return {
-        ...state,
-        documents: [],
-        folders: [],
-        loadingStatus: RequestStatus.pending,
       };
     });
   },

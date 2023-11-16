@@ -1,4 +1,4 @@
-import { Ref, useState, useEffect } from 'react';
+import { Ref, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
@@ -57,7 +57,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
-    trackScrolling
+    trackScrolling,
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
@@ -70,12 +70,11 @@ export const DocumentsTable = (props: DocumentTableProps) => {
 
   // scroll "documentsScrollpane" to the latest position when documents state updates
   useEffect(() => {
-    const scrollPane = document.getElementById("documentsScrollpane");
-    if(scrollPane){
-         scrollPane.scrollTo({top: scrollPosition})
+    const scrollPane = document.getElementById('documentsScrollpane');
+    if (scrollPane) {
+      scrollPane.scrollTo({ top: scrollPosition });
     }
   }, [documents, scrollPosition]);
-
 
   if (
     documents.length === 0 &&
@@ -91,17 +90,16 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     );
   }
 
-  const handleScroll = (event:any) =>{
-    const el = event.target
+  const handleScroll = (event: any) => {
+    const el = event.target;
     //track scroll when table reaches bottom
-    if (el.offsetHeight + el.scrollTop+10 > el.scrollHeight){
-      if (el.scrollTop>0){
-        setScrollPosition(el.scrollTop)
-        trackScrolling()
+    if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
+      if (el.scrollTop > 0) {
+        setScrollPosition(el.scrollTop);
+        trackScrolling();
       }
     }
-  }
-
+  };
 
   return (
     <div
@@ -113,7 +111,6 @@ export const DocumentsTable = (props: DocumentTableProps) => {
         ref={documentsScrollpaneRef}
         id="documentsScrollpane"
         onScroll={handleScroll}
-
       >
         <table
           className="border-separate border-spacing-0 table-auto w-full"

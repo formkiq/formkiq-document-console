@@ -82,7 +82,7 @@ function Documents() {
     currentSearchPage,
     isLastSearchPageLoaded,
     documents,
-    folders
+    folders,
   } = useSelector(DocumentListState);
   const {
     currentActionEvent,
@@ -183,7 +183,7 @@ function Documents() {
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
-  const [documentListOffsetTop, setDocumentListOffsetTop] =  useState<number>(0)
+  const [documentListOffsetTop, setDocumentListOffsetTop] = useState<number>(0);
 
   const trackScrolling = useCallback(async () => {
     const bottomRow = (
@@ -194,9 +194,7 @@ function Documents() {
     ].getBoundingClientRect().bottom;
     const isBottom = (el: HTMLElement) => {
       if (el) {
-        return (
-          el.offsetHeight + el.scrollTop+10 > el.scrollHeight
-        );
+        return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
       }
       return false;
     };
@@ -218,7 +216,7 @@ function Documents() {
             filterTag,
             nextToken,
             documents,
-            folders
+            folders,
           })
         );
       } else {
@@ -242,7 +240,7 @@ function Documents() {
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
 
   useEffect(() => {
-    setDocumentListOffsetTop(isTagFilterExpanded ? 0 : 45)
+    setDocumentListOffsetTop(isTagFilterExpanded ? 0 : 45);
   }, [isTagFilterExpanded]);
 
   useEffect(() => {
@@ -929,7 +927,14 @@ function Documents() {
               </div>
             </div>
           </div>
-          <div className="flex flex-row " style={{height:`calc(100% ${isTagFilterExpanded?'- 6rem':'- 3.68rem'}`}} >
+          <div
+            className="flex flex-row "
+            style={{
+              height: `calc(100% ${
+                isTagFilterExpanded ? '- 6rem' : '- 3.68rem'
+              }`,
+            }}
+          >
             <div className="flex-1 inline-block h-full">
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
@@ -954,7 +959,7 @@ function Documents() {
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                 deleteFolder={deleteFolder}
-                trackScrolling = {trackScrolling}
+                trackScrolling={trackScrolling}
               />
             </div>
           </div>
