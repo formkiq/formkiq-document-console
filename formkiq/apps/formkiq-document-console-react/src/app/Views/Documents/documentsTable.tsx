@@ -1,4 +1,4 @@
-import { Ref } from 'react';
+import { Ref, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
@@ -62,8 +62,20 @@ export const DocumentsTable = (props: DocumentTableProps) => {
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
   const { documents, folders, loadingStatus } = useSelector(DocumentListState);
+
+  const [scrollPosition, setScrollPosition] = useState(0);
+
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
+
+  // scroll "documentsScrollpane" to the latest position when documents state updates
+  useEffect(() => {
+    const scrollPane = document.getElementById("documentsScrollpane");
+    if(scrollPane){
+         scrollPane.scrollTo({top: scrollPosition})
+    }
+  }, [documents, scrollPosition]);
+
 
   if (
     documents.length === 0 &&
@@ -79,6 +91,18 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     );
   }
 
+  const handleScroll = (event:any) =>{
+    const el = event.target
+    //track scroll when table reaches bottom
+    if (el.offsetHeight + el.scrollTop+10 > el.scrollHeight){
+      if (el.scrollTop>0){
+        setScrollPosition(el.scrollTop)
+        trackScrolling()
+      }
+    }
+  }
+
+
   return (
     <div
       className="relative mt-5 overflow-hidden h-full"
@@ -88,7 +112,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
         className="overflow-y-scroll overflow-x-auto h-full"
         ref={documentsScrollpaneRef}
         id="documentsScrollpane"
-        onScroll={trackScrolling}
+        onScroll={handleScroll}
 
       >
         <table

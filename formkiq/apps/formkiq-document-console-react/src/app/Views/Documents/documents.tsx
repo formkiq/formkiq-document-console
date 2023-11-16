@@ -81,6 +81,8 @@ function Documents() {
     loadingStatus,
     currentSearchPage,
     isLastSearchPageLoaded,
+    documents,
+    folders
   } = useSelector(DocumentListState);
   const {
     currentActionEvent,
@@ -193,7 +195,7 @@ function Documents() {
     const isBottom = (el: HTMLElement) => {
       if (el) {
         return (
-          el.scrollTop + el.offsetHeight >= bottomRow - documentListOffsetTop
+          el.offsetHeight + el.scrollTop+10 > el.scrollHeight
         );
       }
       return false;
@@ -215,6 +217,8 @@ function Documents() {
             queueId,
             filterTag,
             nextToken,
+            documents,
+            folders
           })
         );
       } else {
@@ -925,7 +929,7 @@ function Documents() {
               </div>
             </div>
           </div>
-          <div className="flex flex-row h-[calc(100%-3.68rem)]">
+          <div className="flex flex-row " style={{height:`calc(100% ${isTagFilterExpanded?'- 6rem':'- 3.68rem'}`}} >
             <div className="flex-1 inline-block h-full">
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
