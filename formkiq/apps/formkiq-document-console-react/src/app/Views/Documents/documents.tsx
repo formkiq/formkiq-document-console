@@ -181,7 +181,7 @@ function Documents() {
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
-  const documentListOffsetTop = isTagFilterExpanded ? 170 : 140;
+  const [documentListOffsetTop, setDocumentListOffsetTop] = useState<number>(0);
 
   const trackScrolling = useCallback(async () => {
     const bottomRow = (
@@ -192,9 +192,7 @@ function Documents() {
     ].getBoundingClientRect().bottom;
     const isBottom = (el: HTMLElement) => {
       if (el) {
-        return (
-          el.scrollTop + el.offsetHeight >= bottomRow - documentListOffsetTop
-        );
+        return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
       }
       return false;
     };
@@ -238,25 +236,8 @@ function Documents() {
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
 
   useEffect(() => {
-    const resizeHandler = () => {
-      if (documentsWrapperRef.current) {
-        (documentsWrapperRef.current as HTMLDivElement).style.marginTop =
-          documentListOffsetTop + 'px';
-      }
-      if (documentsScrollpaneRef.current) {
-        (documentsScrollpaneRef.current as HTMLDivElement).addEventListener(
-          'scroll',
-          trackScrolling
-        );
-      }
-    };
-
-    window.addEventListener('resize', resizeHandler);
-
-    return () => {
-      window.removeEventListener('resize', resizeHandler);
-    };
-  }, [documentListOffsetTop]);
+    setDocumentListOffsetTop(isTagFilterExpanded ? 0 : 45);
+  }, [isTagFilterExpanded]);
 
   useEffect(() => {
     DocumentsService.getAllTagKeys(currentSiteId).then((response: any) => {
@@ -942,7 +923,14 @@ function Documents() {
               </div>
             </div>
           </div>
-          <div className="flex flex-row h-full">
+          <div
+            className="flex flex-row "
+            style={{
+              height: `calc(100% ${
+                isTagFilterExpanded ? '- 6rem' : '- 3.68rem'
+              }`,
+            }}
+          >
             <div className="flex-1 inline-block h-full">
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
@@ -967,6 +955,7 @@ function Documents() {
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                 deleteFolder={deleteFolder}
+                trackScrolling={trackScrolling}
               />
             </div>
           </div>

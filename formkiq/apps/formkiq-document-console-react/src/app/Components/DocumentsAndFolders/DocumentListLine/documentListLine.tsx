@@ -451,7 +451,7 @@ function DocumentListLine({
         </td>
       </tr>
       <tr>
-        <td colSpan={6} className="p-0 m-0">
+        <td colSpan={6} className="p-0 m-0 overflow-hidden">
           <div className="w-full border-t ml-4 h-0"></div>
         </td>
       </tr>

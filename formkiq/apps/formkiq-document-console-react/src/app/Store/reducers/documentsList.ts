@@ -28,6 +28,8 @@ export const fetchDocuments = createAsyncThunk(
       filterTag,
       nextToken,
       page,
+      documents,
+      folders,
     } = data;
     const user = (thunkAPI.getState() as any)?.authState.user;
     const tagParam = filterTag ? filterTag.split(':')[0] : null;
@@ -1020,14 +1022,6 @@ export const documentsListSlice = createSlice({
       return {
         ...state,
         loadingStatus: RequestStatus.rejected,
-      };
-    });
-    builder.addCase(fetchDocuments.pending, (state) => {
-      return {
-        ...state,
-        documents: [],
-        folders: [],
-        loadingStatus: RequestStatus.pending,
       };
     });
   },
