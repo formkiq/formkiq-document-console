@@ -395,9 +395,9 @@ export function Sidebar() {
                                       </div>
                                       <div>
                                         <span className="tracking-tightest">
-                                          {queue.name.length > 22 ? (
+                                          {queue.name.length > 28 ? (
                                             <span>
-                                              {queue.name.substring(0, 22)}...
+                                              {queue.name.substring(0, 28)}...
                                             </span>
                                           ) : (
                                             <span>{queue.name}</span>
@@ -518,9 +518,9 @@ export function Sidebar() {
                                       </div>
                                       <div>
                                         <span className="tracking-tightest">
-                                          {queue.name.length > 22 ? (
+                                          {queue.name.length > 28 ? (
                                             <span>
-                                              {queue.name.substring(0, 22)}...
+                                              {queue.name.substring(0, 28)}...
                                             </span>
                                           ) : (
                                             <span>{queue.name}</span>
@@ -646,11 +646,11 @@ export function Sidebar() {
                                               </div>
                                               <div>
                                                 <span className="tracking-tightest">
-                                                  {queue.name.length > 22 ? (
+                                                  {queue.name.length > 26 ? (
                                                     <span>
                                                       {queue.name.substring(
                                                         0,
-                                                        22
+                                                        26
                                                       )}
                                                       ...
                                                     </span>
@@ -768,6 +768,28 @@ export function Sidebar() {
                         <Workflow />
                       </div>
                       <div>Workflows</div>
+                    </div>
+                  </NavLink>
+                </li>
+                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                  <NavLink
+                    to="/queues"
+                    className={({ isActive }) =>
+                      (isActive
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
+                    }
+                  >
+                    <div
+                      className={
+                        'w-full text-sm font-medium flex items-center pl-5 '
+                      }
+                    >
+                      <div className="w-4 flex items-center mr-2">
+                        <Queue />
+                      </div>
+                      <div>Queues</div>
                     </div>
                   </NavLink>
                 </li>
@@ -1036,6 +1058,27 @@ export function Sidebar() {
                 >
                   <div className="w-4 flex items-center mr-2">
                     <Workflow />
+                  </div>
+                </div>
+              </NavLink>
+            </li>
+            <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+              <NavLink
+                to="/queues"
+                className={({ isActive }) =>
+                  (isActive
+                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                    : 'text-gray-500 bg-white ') +
+                  ' w-full text-sm font-medium flex '
+                }
+              >
+                <div
+                  className={
+                    'w-full text-sm font-medium flex items-center pl-5 py-4 '
+                  }
+                >
+                  <div className="w-4 flex items-center mr-2">
+                    <Queue />
                   </div>
                 </div>
               </NavLink>

@@ -420,7 +420,28 @@ function Navbar() {
                             )}
                           </div>
                           <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
-                            {siteDocumentsRootName}
+                            {pathname.indexOf('documents/queues/') > 0 ? (
+                              <>
+                                {pathname.indexOf(
+                                  '1ddb4cbb-43be-482f-9de7-c15401a4553b'
+                                ) > 0 && <span>Queue: Document Approval</span>}
+                                {pathname.indexOf(
+                                  '3fddbc42-dbe5-4aba-b9fe-58b0fefdce6e'
+                                ) > 0 && (
+                                  <span>
+                                    Queue: Financial Document Intake Review
+                                  </span>
+                                )}
+                                {pathname.indexOf(
+                                  '1ddb4cbb-43be-482f-9de7-c15401a4553b'
+                                ) === -1 &&
+                                  pathname.indexOf(
+                                    '3fddbc42-dbe5-4aba-b9fe-58b0fefdce6e'
+                                  ) === -1 && <span>Queue</span>}
+                              </>
+                            ) : (
+                              <>{siteDocumentsRootName}</>
+                            )}
                             {documentId && currentDocumentPath?.length ? (
                               <span>
                                 <span className="px-2">|</span>
