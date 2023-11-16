@@ -116,10 +116,18 @@ export const fetchDocuments = createAsyncThunk(
           nextToken,
           20
         ).then((response: any) => {
+          // putting workflow under document object, for top-level object consistency with other search results
           if (response) {
+            const mappedDocuments: any = [];
+            response.documents.map((val: any) => {
+              if (val.workflow) {
+                val.document.workflow = val.workflow;
+              }
+              mappedDocuments.push(val.document);
+            });
             const data = {
               siteId,
-              documents: response.documents,
+              documents: mappedDocuments,
               user: user,
               next: response.next,
               isLoadingMore: false,
