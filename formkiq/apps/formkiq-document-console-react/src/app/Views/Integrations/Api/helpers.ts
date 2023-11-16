@@ -913,7 +913,21 @@ export const postWorkflowsApiItem = {
   requiresAuthentication: true,
   requiresPostJson: true,
   defaultPostJsonValue:
-    '{"name":"Test Workflow","description":"Some description","config":{"notificationType":"none"},"steps":[]}',
+    '{"name":"Test Workflow","description":"Some description","status":"INACTIVE", "config":{"notificationType":"none"},"steps":[]}',
+  license: 'Pro|Enterprise',
+};
+
+export const putWorkflowsApiItem = {
+  method: 'PUT',
+  path: '/workflows/ WORKFLOW_ID',
+  description: 'Updates (by replacing) a workflow',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresWorkflowID: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"name":"Test Workflow","description":"Some description","status":"INACTIVE", "config":{"notificationType":"none"},"steps":[]}',
   license: 'Pro|Enterprise',
 };
 

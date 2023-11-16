@@ -82,6 +82,7 @@ import {
   putDocumentOcrApiItem,
   putDocumentTagApiItem,
   putDocumentVersionApiItem,
+  putWorkflowsApiItem,
   searchDocumentQueryApiItem,
 } from './helpers';
 
@@ -412,6 +413,7 @@ export function ApiExplorer() {
                 <ApiItem apiItem={getWorkflowsApiItem} sites={sites} />
                 <ApiItem apiItem={postWorkflowsApiItem} sites={sites} />
                 <ApiItem apiItem={getWorkflowApiItem} sites={sites} />
+                <ApiItem apiItem={putWorkflowsApiItem} sites={sites} />
                 <ApiItem apiItem={deleteWorkflowApiItem} sites={sites} />
                 <ApiItem apiItem={postDocumentWorkflowApiItem} sites={sites} />
                 <ApiItem apiItem={getQueuesApiItem} sites={sites} />
