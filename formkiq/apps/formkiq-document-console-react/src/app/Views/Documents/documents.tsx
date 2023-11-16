@@ -81,8 +81,6 @@ function Documents() {
     loadingStatus,
     currentSearchPage,
     isLastSearchPageLoaded,
-    documents,
-    folders,
   } = useSelector(DocumentListState);
   const {
     currentActionEvent,
@@ -215,8 +213,6 @@ function Documents() {
             queueId,
             filterTag,
             nextToken,
-            documents,
-            folders,
           })
         );
       } else {

@@ -288,46 +288,10 @@ export const fetchDocuments = createAsyncThunk(
           20,
           dataCache.allTags
         ).then((response: any) => {
-          function ConcatDocumentArrays(
-            folders: [],
-            documents: [],
-            newDocuments: []
-          ) {
-            const isFoldersUndefined = folders === undefined;
-            const isDocumentsUndefined = documents === undefined;
-
-            let oldDocuments: any[] = [];
-
-            if (!isFoldersUndefined && !isDocumentsUndefined) {
-              // NOTE: Used this construction in order to make deep copy vs shallow copy with normal concat
-              oldDocuments = JSON.parse(
-                JSON.stringify(folders.concat(documents))
-              );
-            } else if (!isDocumentsUndefined) {
-              oldDocuments = documents;
-            } else if (!isFoldersUndefined) {
-              oldDocuments = folders;
-            }
-            let updatedDocuments = oldDocuments;
-
-            if (newDocuments !== undefined) {
-              updatedDocuments = JSON.parse(
-                JSON.stringify(oldDocuments.concat(response.documents))
-              );
-            }
-            return updatedDocuments;
-          }
-
-          const updatedDocuments = ConcatDocumentArrays(
-            folders,
-            documents,
-            response.documents
-          );
-
           if (response) {
             const data = {
               siteId,
-              documents: updatedDocuments,
+              documents: response.documents,
               user: user,
               folder: '',
               tag: filterTag,
