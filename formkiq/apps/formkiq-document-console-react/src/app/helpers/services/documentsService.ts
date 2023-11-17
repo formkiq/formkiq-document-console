@@ -256,6 +256,20 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static compressDocuments(
+    documentIds: string[],
+    siteId = ''
+  ): Promise<any> {
+    if (!siteId || !siteId.length) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.compressDocuments(
+      documentIds,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
   public static async getDocumentsInFolder(
     folder: string,
     siteId = '',
