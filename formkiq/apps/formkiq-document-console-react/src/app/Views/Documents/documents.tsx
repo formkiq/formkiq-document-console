@@ -912,15 +912,19 @@ function Documents() {
   }
   const createArchive = () => {
     setArchiveStatus(ARCHIVE_STATUSES.PENDING)
-    let documentIds: string[] = []
+    const documentIds: string[] = []
     pendingArchive.forEach(document => {
       documentIds.push(document.documentId)
     })
     const options={
       method: 'POST',
-      body: JSON.stringify(documentIds),
+      body:
+        {
+          "documentIds": documentIds
+        },
     }
     const id = setInterval(()=>fetchData(options), 15000)
+    console.log(options.body)
     setIntervalId(id)
     fetchData(options)
   }
@@ -974,7 +978,9 @@ function Documents() {
                 </div>
               ):<div className="text-md text-gray-500 ml-2">No files in archive</div>):
 
-               archiveStatus === ARCHIVE_STATUSES.PENDING ? <div className="text-md text-gray-500 ml-2">Creating archive...</div>:
+                archiveStatus === ARCHIVE_STATUSES.PENDING ? <div className="h-full flex flex-col justify-center"><Spinner/>
+                    <div className="text-md text-gray-500 ml-2 text-center">compressing...</div>
+              </div>:
                  <div className="text-md text-gray-500 ml-2">Archive downloaded succesfully</div>}
             </div>
 
