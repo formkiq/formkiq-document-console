@@ -34,6 +34,7 @@ type DocumentTableProps = {
   onEditTagsAndMetadataModalClick: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
+  isArchiveTabExpanded: boolean;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -53,6 +54,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
+    isArchiveTabExpanded
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
@@ -162,6 +164,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onESignaturesModalClick={onESignaturesModalClick}
                 onTagChange={onTagChange}
                 filterTag={filterTag}
+                isArchiveTabExpanded={isArchiveTabExpanded}
               />
             ))}
           </tbody>

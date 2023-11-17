@@ -33,6 +33,7 @@ import { useAuthenticatedState } from '../../Store/reducers/auth';
 import {
   ConfigState,
   setCurrentActionEvent,
+  setPendingArchive,
 } from '../../Store/reducers/config';
 import {
   DataCacheState,
@@ -88,6 +89,7 @@ function Documents() {
     useFileFilter,
     useCollections,
     useSoftDelete,
+    pendingArchive
   } = useSelector(ConfigState);
   const { allTags } = useSelector(DataCacheState);
 
@@ -133,6 +135,7 @@ function Documents() {
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
+  const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
   const [infoTagEditMode, setInfoTagEditMode] = useState(false);
@@ -880,6 +883,120 @@ function Documents() {
       </div>
     );
   };
+  const ToggleArchiveTab = () => {
+    setIsArchiveTabExpanded(!isArchiveTabExpanded);
+  }
+  const deleteFileFromArchive = (file:IDocument) => {
+    dispatch(setPendingArchive( pendingArchive.filter(f => f.documentId !== file.documentId)))
+  }
+
+  const ARCHIVE_STATUSES = {
+    INITIAL: "INITIAL",
+    PENDING: "PENDING",
+    COMPLETE: "COMPLETE"
+  }
+  const [archiveStatus, setArchiveStatus] = useState(ARCHIVE_STATUSES.INITIAL);
+  const [intervalId, setIntervalId] = useState<string | number | NodeJS.Timeout | undefined>(0)
+
+  const fetchData = async (options:any) => {
+    try {
+      const response = await fetch('/documents/compress', options)
+      if (response.ok) {
+        console.log('Archive created successfully')
+        setArchiveStatus(ARCHIVE_STATUSES.COMPLETE)
+        clearInterval(intervalId)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  const createArchive = () => {
+    setArchiveStatus(ARCHIVE_STATUSES.PENDING)
+    let documentIds: string[] = []
+    pendingArchive.forEach(document => {
+      documentIds.push(document.documentId)
+    })
+    const options={
+      method: 'POST',
+      body: JSON.stringify(documentIds),
+    }
+    const id = setInterval(()=>fetchData(options), 15000)
+    setIntervalId(id)
+    fetchData(options)
+  }
+
+  const PendingArchiveTab = () => {
+    return (
+        <div className='w-full h-56 p-4 flex flex-col justify-between'>
+            <div className="font-bold text-xl text-gray-900 mb-2">Document Archive (ZIP)</div>
+
+            <div className="h-full border-gray-400 border overflow-auto">
+
+              { archiveStatus === ARCHIVE_STATUSES.INITIAL ? (pendingArchive? pendingArchive.map((file:IDocument) =>
+                <div key={file.documentId} className="flex flex-row p-2">
+                  <button className="w-6 mr-2 text-gray-400 cursor-pointer hover:text-coreOrange-500" onClick={()=>deleteFileFromArchive(file)} >
+                    <Close/>
+                  </button>
+                <Link
+                  to={`${currentDocumentsRootUri}/${file.documentId}/view`}
+                  className="cursor-pointer w-16 flex items-center justify-start"
+                >
+                  <img
+                    src={getFileIcon(file.path)}
+                    className="w-8 inline-block"
+                    alt="icon"
+                  />
+                </Link>
+                <Link
+                  to={`${currentDocumentsRootUri}/${file.documentId}/view`}
+                  className="cursor-pointer pt-1.5 flex items-center"
+                  title={file.path.substring(file.path.lastIndexOf('/') + 1)}
+                >
+                                      <span>
+                    {file.path.substring(file.path.lastIndexOf('/') + 1)
+                      .length > 40 ? (
+                      <span className="tracking-tightest text-clip overflow-hidden">
+                        {file.path.substring(
+                          file.path.lastIndexOf('/') + 1,
+                          file.path.lastIndexOf('/') + 50
+                        )}
+                        {file.path.substring(file.path.lastIndexOf('/') + 1)
+                          .length > 50 && <span>...</span>}
+                      </span>
+                    ) : (
+                      <span>
+                        {file.path.substring(file.path.lastIndexOf('/') + 1)}
+                      </span>
+                    )}
+                  </span>
+
+                </Link>
+                </div>
+              ):<div className="text-md text-gray-500 ml-2">No files in archive</div>):
+
+               archiveStatus === ARCHIVE_STATUSES.PENDING ? <div className="text-md text-gray-500 ml-2">Creating archive...</div>:
+                 <div className="text-md text-gray-500 ml-2">Archive downloaded succesfully</div>}
+            </div>
+
+          <button
+            className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2"
+            onClick={createArchive}
+            disabled={pendingArchive===undefined ||pendingArchive.length === 0}
+            style={{
+              backgroundColor: pendingArchive===undefined || pendingArchive.length === 0 ? '#F1F1F1' : '#FFFFFF',
+              cursor: pendingArchive===undefined || pendingArchive.length === 0 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            <span className='mr-1'>Compress</span>
+            <div
+              className='w-3.5 pt-0.5'
+            >
+              <ChevronRight/>
+            </div>
+          </button>
+        </div>
+      );
+  }
 
   const viewDocumentVersion = (versionKey: string) => {
     if (infoDocumentId) {
@@ -901,10 +1018,24 @@ function Documents() {
         <title>Documents</title>
       </Helmet>
       <div className="h-[calc(100vh-3.68rem)] flex">
-        <div className="grow">
+        <div className="grow flex flex-col justify-stretch">
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
-            <div className="flex w-20 items-end">
+            <div className="flex items-center gap-4 pr-8">
+
+              <button
+                className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer ${isArchiveTabExpanded ? 'text-coreOrange-500 border-coreOrange-500' : 'text-gray-500 border-gray-400'}`}
+                onClick={ToggleArchiveTab}
+              >
+                <span className='mr-1'>Create Archive</span>
+                <div
+                  className='w-3.5 pt-0.5'
+                >
+                  <ChevronRight/>
+                </div>
+              </button>
+
+
               <div
                 className={
                   (isTagFilterExpanded
@@ -923,10 +1054,13 @@ function Documents() {
               </div>
             </div>
           </div>
-          <div className="flex flex-row h-full">
-            <div className="flex-1 inline-block h-full">
+          <div className="min-h-0 flex flex-row h-full">
+            <div className="flex-1 inline-block h-full flex flex-col">
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
+              )}
+              {isArchiveTabExpanded && (
+                <div className="pt-2 pr-8"><PendingArchiveTab/></div>
               )}
               <DocumentsTable
                 onDeleteDocument={onDeleteDocument}
@@ -947,6 +1081,7 @@ function Documents() {
                 filterTag={filterTag}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 deleteFolder={deleteFolder}
+                isArchiveTabExpanded={isArchiveTabExpanded}
               />
             </div>
           </div>

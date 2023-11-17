@@ -1,6 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { LocalStorage } from '../../helpers/tools/useLocalStorage';
+import { IDocument } from '../../helpers/types/document';
 import { RootState } from '../store';
 
 const storage: LocalStorage = LocalStorage.Instance;
@@ -26,6 +27,7 @@ export interface Config {
   useCollections: boolean;
   useAdvancedSearch: boolean;
   useSoftDelete: boolean;
+  pendingArchive: IDocument[];
 }
 
 export type TagColor = {
@@ -104,6 +106,7 @@ export const configInitialState = {
   useAdvancedSearch: false,
   useSoftDelete: true,
   showIntegrations: true,
+  pendingArchive: [] as IDocument[],
 } as Config;
 
 const getInitialState = (): Config => {
@@ -200,6 +203,12 @@ export const configSlice = createSlice({
         isSharedFoldersExpanded: action.payload,
       };
     },
+    setPendingArchive(state, action: PayloadAction<IDocument[]>) {
+      return {
+            ...state,
+            pendingArchive: action.payload,
+        };
+    }
   },
 });
 
@@ -217,6 +226,7 @@ export const {
   setIsSidebarExpanded,
   setCurrentActionEvent,
   setIsSharedFoldersExpanded,
+  setPendingArchive,
 } = configSlice.actions;
 
 export const ConfigState = (state: RootState) => state.configState;

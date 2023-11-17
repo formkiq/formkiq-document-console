@@ -22,9 +22,10 @@ import {
   getFileIcon,
   isTagValueIncludes,
 } from '../../../helpers/services/toolService';
-import { Info, Share, Star, StarFilled, Trash } from '../../Icons/icons';
+import { Info, Share, Star, StarFilled, Trash, Plus } from '../../Icons/icons';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
+import {setPendingArchive} from '../../../Store/reducers/config';
 
 function DocumentListLine({
   file,
@@ -43,6 +44,7 @@ function DocumentListLine({
   onTagChange,
 
   leftOffset = 0,
+  isArchiveTabExpanded
 }: {
   file: any;
   folder: any;
@@ -61,6 +63,7 @@ function DocumentListLine({
   onTagChange: any;
   filterTag: string | null;
   leftOffset?: number;
+  isArchiveTabExpanded?: boolean;
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
@@ -74,6 +77,7 @@ function DocumentListLine({
     useCollections,
     useSoftDelete,
     useIndividualSharing,
+    pendingArchive
   } = useSelector(ConfigState);
 
   const deleteDocument = () => {
@@ -217,6 +221,18 @@ function DocumentListLine({
   if (file.path.indexOf('/') > -1) {
     lineSubfolderLevel = file.path.split('/').length - 1;
   }
+
+  const addToPendingArchive = () => {
+    if (pendingArchive){
+      if (pendingArchive.indexOf(file) === -1) {
+        dispatch(setPendingArchive([...pendingArchive, file]));
+      }
+    } else {
+      dispatch(setPendingArchive([file]));
+    }
+
+  }
+
   return (
     <>
       <tr
@@ -227,6 +243,17 @@ function DocumentListLine({
       >
         <td className={`text-gray-800 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
+            {isArchiveTabExpanded && (
+              <div className="p-2 ml-3">
+                <div
+                  className="w-5 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
+                  data-test-id="delete-action"
+                  onClick={addToPendingArchive}
+                >
+                  <Plus/>
+                </div>
+              </div>
+            )}
             {folder !== 'deleted' &&
             folder !== 'shared' &&
             folder !== 'recent' &&
