@@ -893,50 +893,73 @@ function Documents() {
   const ARCHIVE_STATUSES = {
     INITIAL: "INITIAL",
     PENDING: "PENDING",
-    COMPLETE: "COMPLETE"
+    COMPLETE: "COMPLETE",
+    ERROR: "ERROR"
   }
   const [archiveStatus, setArchiveStatus] = useState(ARCHIVE_STATUSES.INITIAL);
   const [intervalId, setIntervalId] = useState<string | number | NodeJS.Timeout | undefined>(0)
+  const [archiveDownloadUrl, setArchiveDownloadUrl] = useState<string | undefined>(undefined)
+  const [isCompressButtonDisabled, setIsCompressButtonDisabled] = useState(true)
 
-  const fetchData = async (options:any) => {
-    try {
-      const response = await fetch('/documents/compress', options)
-      if (response.ok) {
-        console.log('Archive created successfully')
-        setArchiveStatus(ARCHIVE_STATUSES.COMPLETE)
-        clearInterval(intervalId)
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-  const createArchive = () => {
+  const compressDocuments = () => {
     setArchiveStatus(ARCHIVE_STATUSES.PENDING)
     const documentIds: string[] = []
     pendingArchive.forEach(document => {
       documentIds.push(document.documentId)
     })
-    const options={
-      method: 'POST',
-      body:
-        {
-          "documentIds": documentIds
-        },
-    }
-    const id = setInterval(()=>fetchData(options), 15000)
-    console.log(options.body)
-    setIntervalId(id)
-    fetchData(options)
+
+    DocumentsService.compressDocuments(documentIds, currentSiteId).then(
+      (response: any) => {
+        setArchiveStatus(ARCHIVE_STATUSES.PENDING)
+        if (response.status === 201) {
+          let counter = 0
+          const downloadArchive = async () => {
+            try {
+              // NOTE: Showing link after 15 seconds. Update to do URL polling instead.
+              if (counter===1){
+                setArchiveDownloadUrl(response.downloadUrl)
+                setArchiveStatus(ARCHIVE_STATUSES.COMPLETE)
+                dispatch(setPendingArchive([]))
+                clearInterval(intervalId)
+              } else {
+                counter+=1
+              }
+              await fetch(response.downloadUrl).then(r => {
+                    if (r.ok) {
+                        setArchiveDownloadUrl(response.downloadUrl)
+                        setArchiveStatus(ARCHIVE_STATUSES.COMPLETE)
+                        dispatch(setPendingArchive([]))
+                        clearInterval(intervalId)
+                    }
+                })
+            } catch (e) {console.log(e, "error")}
+          }
+          const id = setInterval(downloadArchive,15000)
+          setIntervalId(id)
+          downloadArchive()
+        }
+      }
+    )
   }
+
+  useEffect(() => {
+    if (pendingArchive === undefined||pendingArchive.length===0 || archiveStatus===ARCHIVE_STATUSES.COMPLETE || archiveStatus===ARCHIVE_STATUSES.PENDING){
+      setIsCompressButtonDisabled(true)
+    } else {
+      setIsCompressButtonDisabled(false)
+    }
+
+    if (archiveStatus===ARCHIVE_STATUSES.COMPLETE && pendingArchive.length>0){
+      setArchiveStatus(ARCHIVE_STATUSES.INITIAL)
+    }
+  },[pendingArchive,archiveStatus,isCompressButtonDisabled])
 
   const PendingArchiveTab = () => {
     return (
-        <div className='w-full h-56 p-4 flex flex-col justify-between'>
-            <div className="font-bold text-xl text-gray-900 mb-2">Document Archive (ZIP)</div>
-
-            <div className="h-full border-gray-400 border overflow-auto">
-
-              { archiveStatus === ARCHIVE_STATUSES.INITIAL ? (pendingArchive? pendingArchive.map((file:IDocument) =>
+      <div className='w-full h-56 p-4 flex flex-col justify-between'>
+        <div className="font-bold text-xl text-gray-900 mb-2">Document Archive (ZIP)</div>
+        <div className="h-full border-gray-400 border overflow-auto">
+          { archiveStatus === ARCHIVE_STATUSES.INITIAL ? (pendingArchive? pendingArchive.map((file:IDocument) =>
                 <div key={file.documentId} className="flex flex-row p-2">
                   <button className="w-6 mr-2 text-gray-400 cursor-pointer hover:text-coreOrange-500" onClick={()=>deleteFileFromArchive(file)} >
                     <Close/>
@@ -976,32 +999,31 @@ function Documents() {
 
                 </Link>
                 </div>
-              ):<div className="text-md text-gray-500 ml-2">No files in archive</div>):
-
-                archiveStatus === ARCHIVE_STATUSES.PENDING ? <div className="h-full flex flex-col justify-center"><Spinner/>
-                    <div className="text-md text-gray-500 ml-2 text-center">compressing...</div>
-              </div>:
-                 <div className="text-md text-gray-500 ml-2">Archive downloaded succesfully</div>}
+            ):<div className="text-md text-gray-500 ml-2">No files in archive</div>):
+            archiveStatus === ARCHIVE_STATUSES.PENDING ? <div className="h-full flex flex-col justify-center"><Spinner/>
+                <div className="text-md text-gray-500 ml-2 text-center">compressing...</div></div>:
+              <div className="h-full flex flex-col justify-center">
+                <a href={archiveDownloadUrl}>
+                  <div className="text-lg text-coreOrange-500 ml-2 text-center hover:underline cursor-pointer">Download archive</div>
+                </a>
+              </div>}
             </div>
-
-          <button
-            className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2"
-            onClick={createArchive}
-            disabled={pendingArchive===undefined ||pendingArchive.length === 0}
-            style={{
-              backgroundColor: pendingArchive===undefined || pendingArchive.length === 0 ? '#F1F1F1' : '#FFFFFF',
-              cursor: pendingArchive===undefined || pendingArchive.length === 0 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            <span className='mr-1'>Compress</span>
-            <div
-              className='w-3.5 pt-0.5'
-            >
+        <button
+          className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2"
+          onClick={compressDocuments}
+          disabled={isCompressButtonDisabled}
+          style={{
+            backgroundColor: isCompressButtonDisabled ? '#F1F1F1' : '#FFFFFF',
+            cursor: isCompressButtonDisabled ? 'not-allowed' : 'pointer'
+        }}
+        >
+          <span className='mr-1'>Compress</span>
+          <div className='w-3.5 pt-0.5' >
               <ChevronRight/>
-            </div>
-          </button>
-        </div>
-      );
+          </div>
+        </button>
+      </div>
+    );
   }
 
   const viewDocumentVersion = (versionKey: string) => {
