@@ -23,12 +23,20 @@ export function WorkflowList({
     <>
       {!isSiteReadOnly && (
         <div className="mt-4 flex px-4">
+          <a
+            className="flex bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
+            data-test-id="create-workflow"
+            href={`/workflows/designer`}
+          >
+            <span>Create new</span>
+            <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
+          </a>
           <button
             className="flex bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
             data-test-id="create-workflow"
             onClick={(event) => onNewClick(event, siteId)}
           >
-            <span>Create new</span>
+            <span>Create new (OLD)</span>
             <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
           </button>
         </div>
@@ -61,9 +69,15 @@ export function WorkflowList({
                         {workflow.description}
                       </td>
                       <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400 flex">
-                        <button className="mx-1 bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none">
+                        <a
+                          href={
+                            `/workflows/designer?workflowId=` +
+                            workflow.workflowId
+                          }
+                          className="mx-1 bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                        >
                           View
-                        </button>
+                        </a>
                         <button
                           onClick={onDeleteClick(workflow.id, siteId)}
                           data-test-id="delete-workflow"

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Queues from '../../Views/Workflows/queues';
+import WorkflowDesigner from '../../Views/Workflows/workflowDesigner';
 
 const SignIn = React.lazy(() => import('../../Views/SignIn/sign-in'));
 const ForgotPassword = React.lazy(
@@ -125,6 +126,7 @@ const RoutesMapper = () => {
       ></Route>
 
       <Route path="/workflows" element={<Workflows />}></Route>
+      <Route path="/workflows/designer" element={<WorkflowDesigner />}></Route>
       <Route path="/queues" element={<Queues />}></Route>
       <Route path="/integrations/api" element={<ApiExplorer />}></Route>
       <Route path="/integrations/apiKeys" element={<ApiKeys />}></Route>
