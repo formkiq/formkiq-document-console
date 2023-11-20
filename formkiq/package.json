@@ -58,6 +58,7 @@
     "@headlessui/react": "^1.7.2",
     "@mands/nx-playwright": "^0.4.0",
     "@popperjs/core": "^2.11.6",
+    "@projectstorm/react-diagrams": "^7.0.3",
     "@reduxjs/toolkit": "^1.9.7",
     "@syncfusion/ej2-react-inputs": "20.1.61",
     "core-js": "^3.33.1",
