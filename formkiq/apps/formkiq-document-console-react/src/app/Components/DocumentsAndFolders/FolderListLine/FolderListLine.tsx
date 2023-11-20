@@ -35,6 +35,10 @@ interface IProps {
   onESignaturesModalClick: any;
   onTagChange: any;
   filterTag: string | null;
+  isArchiveTabExpanded?: boolean;
+  addToPendingArchive?: (file: IDocument) => void;
+  deleteFromPendingArchive?: (file: IDocument) => void;
+  archiveStatus?: string;
 }
 
 function FolderListLine({
@@ -54,6 +58,10 @@ function FolderListLine({
   onDeleteDocument,
   onTagChange,
   filterTag,
+  isArchiveTabExpanded,
+  addToPendingArchive,
+  deleteFromPendingArchive,
+  archiveStatus
 }: IProps) {
   let folderPath = folderInstance.path;
   if (folderInstance.path.indexOf('/') === -1) {
@@ -126,6 +134,10 @@ function FolderListLine({
                       onDeleteDocument={onDeleteDocument}
                       onTagChange={onTagChange}
                       filterTag={filterTag}
+                      isArchiveTabExpanded={isArchiveTabExpanded}
+                      archiveStatus={archiveStatus}
+                      addToPendingArchive={addToPendingArchive}
+                      deleteFromPendingArchive={deleteFromPendingArchive}
                     />
                   );
                 })}
@@ -154,6 +166,10 @@ function FolderListLine({
                   onTagChange={onTagChange}
                   filterTag={filterTag}
                   leftOffset={4}
+                  isArchiveTabExpanded={isArchiveTabExpanded}
+                  archiveStatus={archiveStatus}
+                  addToPendingArchive={addToPendingArchive}
+                  deleteFromPendingArchive={deleteFromPendingArchive}
                 />
               );
             })}

@@ -89,7 +89,7 @@ function Documents() {
     useFileFilter,
     useCollections,
     useSoftDelete,
-    pendingArchive,
+    pendingArchive
   } = useSelector(ConfigState);
   const { allTags } = useSelector(DataCacheState);
 
@@ -883,19 +883,26 @@ function Documents() {
       </div>
     );
   };
+
   const ToggleArchiveTab = () => {
     if (!isArchiveTabExpanded) {
       setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
     }
     setIsArchiveTabExpanded(!isArchiveTabExpanded);
-  };
-  const deleteFileFromArchive = (file: IDocument) => {
-    dispatch(
-      setPendingArchive(
-        pendingArchive.filter((f) => f.documentId !== file.documentId)
-      )
-    );
-  };
+  }
+  const deleteFromPendingArchive = (file:IDocument) => {
+    dispatch(setPendingArchive( pendingArchive.filter(f => f.documentId !== file.documentId)))
+  }
+  const addToPendingArchive = (file:IDocument) => {
+    if (pendingArchive) {
+      if (pendingArchive.indexOf(file) === -1) {
+        dispatch(setPendingArchive([...pendingArchive, file]));
+      }
+    } else {
+      dispatch(setPendingArchive([file]));
+    }
+
+  }
 
   const ARCHIVE_STATUSES = {
     INITIAL: 'INITIAL',
@@ -979,16 +986,17 @@ function Documents() {
         <div className="font-bold text-xl text-gray-900 mb-2">
           Document Archive (ZIP)
         </div>
-        <div className="h-full border-gray-400 border overflow-auto">
+        <div className="h-full border-gray-400 border overflow-y-auto">
           {archiveStatus === ARCHIVE_STATUSES.INITIAL ? (
             pendingArchive ? (
-              pendingArchive.map((file: IDocument) => (
+                <div className="grid grid-cols-2 2xl:grid-cols-3">
+                  {pendingArchive.map((file: IDocument) => (
                 <div key={file.documentId} className="flex flex-row p-2">
                   <button
                     className="w-6 mr-2 text-gray-400 cursor-pointer hover:text-coreOrange-500"
-                    onClick={() => deleteFileFromArchive(file)}
+                    onClick={()=>deleteFromPendingArchive(file)}
                   >
-                    <Close />
+                    <Close/>
                   </button>
                   <Link
                     to={`${currentDocumentsRootUri}/${file.documentId}/view`}
@@ -1024,8 +1032,8 @@ function Documents() {
                     </span>
                   </Link>
                 </div>
-              ))
-            ) : (
+                  ))}</div>
+              ) : (
               <div className="text-md text-gray-500 ml-2">
                 No files in archive
               </div>
@@ -1061,21 +1069,15 @@ function Documents() {
               )}
             </>
           )}
-        </div>
-        <button
-          className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2"
-          onClick={compressDocuments}
-          disabled={isCompressButtonDisabled}
-          style={{
-            backgroundColor: isCompressButtonDisabled ? '#F1F1F1' : '#FFFFFF',
-            cursor: isCompressButtonDisabled ? 'not-allowed' : 'pointer',
-          }}
-        >
-          <span className="mr-1">Compress</span>
-          <div className="w-3.5 pt-0.5">
-            <ChevronRight />
+            </div>
+        {!isCompressButtonDisabled && <button
+          className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer"
+          onClick={compressDocuments}>
+          <span className='mr-1'>Compress</span>
+          <div className='w-3.5 pt-0.5' >
+            <ChevronRight/>
           </div>
-        </button>
+        </button>}
       </div>
     );
   };
@@ -1117,6 +1119,7 @@ function Documents() {
                   <ChevronRight />
                 </div>
               </button>
+
 
               <div
                 className={
@@ -1166,6 +1169,9 @@ function Documents() {
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 deleteFolder={deleteFolder}
                 isArchiveTabExpanded={isArchiveTabExpanded}
+                addToPendingArchive={addToPendingArchive}
+                deleteFromPendingArchive={deleteFromPendingArchive}
+                archiveStatus={archiveStatus}
               />
             </div>
           </div>

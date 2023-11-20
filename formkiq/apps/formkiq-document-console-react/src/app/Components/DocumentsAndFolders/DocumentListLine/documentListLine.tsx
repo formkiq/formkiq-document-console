@@ -22,10 +22,10 @@ import {
   getFileIcon,
   isTagValueIncludes,
 } from '../../../helpers/services/toolService';
-import { Info, Share, Star, StarFilled, Trash, Plus } from '../../Icons/icons';
+import {Info, Share, Star, StarFilled, Trash, Plus, Close, Minus} from '../../Icons/icons';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
-import {setPendingArchive} from '../../../Store/reducers/config';
+import { IDocument} from "../../../helpers/types/document";
 
 function DocumentListLine({
   file,
@@ -42,9 +42,11 @@ function DocumentListLine({
   onDocumentVersionsModalClick,
   onESignaturesModalClick,
   onTagChange,
-
   leftOffset = 0,
-  isArchiveTabExpanded
+  isArchiveTabExpanded,
+  addToPendingArchive,
+  deleteFromPendingArchive,
+  archiveStatus
 }: {
   file: any;
   folder: any;
@@ -64,6 +66,9 @@ function DocumentListLine({
   filterTag: string | null;
   leftOffset?: number;
   isArchiveTabExpanded?: boolean;
+  addToPendingArchive?: (file: IDocument) => void;
+  deleteFromPendingArchive?: (file: IDocument) => void;
+  archiveStatus?: string;
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
@@ -222,16 +227,7 @@ function DocumentListLine({
     lineSubfolderLevel = file.path.split('/').length - 1;
   }
 
-  const addToPendingArchive = () => {
-    if (pendingArchive){
-      if (pendingArchive.indexOf(file) === -1) {
-        dispatch(setPendingArchive([...pendingArchive, file]));
-      }
-    } else {
-      dispatch(setPendingArchive([file]));
-    }
 
-  }
 
   return (
     <>
@@ -243,16 +239,26 @@ function DocumentListLine({
       >
         <td className={`text-gray-800 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
-            {isArchiveTabExpanded && (
-              <div className="p-2 ml-3">
+            {(isArchiveTabExpanded && (archiveStatus === "INITIAL"|| archiveStatus==="COMPLETE")) && (
+              (pendingArchive.indexOf(file) === -1) ?(<div className="p-2 ml-3">
                 <div
                   className="w-5 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
                   data-test-id="delete-action"
-                  onClick={addToPendingArchive}
+                  onClick={addToPendingArchive? ()=>addToPendingArchive(file):undefined}
                 >
                   <Plus/>
                 </div>
               </div>
+              ):(<div className="p-2 ml-3">
+                  <div
+                    className="w-5 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
+                    data-test-id="delete-action"
+                    onClick={deleteFromPendingArchive? ()=>deleteFromPendingArchive(file):undefined}
+                  >
+                    <Minus/>
+                  </div>
+                </div>
+              )
             )}
             {folder !== 'deleted' &&
             folder !== 'shared' &&

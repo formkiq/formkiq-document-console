@@ -35,6 +35,9 @@ type DocumentTableProps = {
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
   isArchiveTabExpanded: boolean;
+  addToPendingArchive: (file: IDocument) => void;
+  deleteFromPendingArchive: (file: IDocument) => void;
+  archiveStatus: string;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -54,7 +57,10 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
-    isArchiveTabExpanded
+    isArchiveTabExpanded,
+    addToPendingArchive,
+    deleteFromPendingArchive,
+    archiveStatus
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
@@ -165,6 +171,9 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onTagChange={onTagChange}
                 filterTag={filterTag}
                 isArchiveTabExpanded={isArchiveTabExpanded}
+                archiveStatus={archiveStatus}
+                addToPendingArchive={addToPendingArchive}
+                deleteFromPendingArchive={deleteFromPendingArchive}
               />
             ))}
           </tbody>
@@ -204,6 +213,10 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     isSiteReadOnly,
     onMoveModalClick,
     deleteFolder,
+    isArchiveTabExpanded,
+    addToPendingArchive,
+    deleteFromPendingArchive,
+    archiveStatus
   } = props;
 
   return (
@@ -229,6 +242,10 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               onRestoreDocument={onRestoreDocument}
               onDeleteDocument={onDeleteDocument}
               filterTag={filterTag}
+              isArchiveTabExpanded={isArchiveTabExpanded}
+              archiveStatus={archiveStatus}
+              addToPendingArchive={addToPendingArchive}
+              deleteFromPendingArchive={deleteFromPendingArchive}
             />
           );
         })}
