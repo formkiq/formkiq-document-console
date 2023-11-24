@@ -236,7 +236,7 @@ export default function DocumentActionsPopover({
             )}
             {line.lineType === 'document' && (
               <li
-                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                className="hidden py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
                   onDocumentWorkflowsModalClick(event, {
                     lineType: line.lineType,

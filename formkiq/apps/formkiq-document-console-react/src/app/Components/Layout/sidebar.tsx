@@ -89,13 +89,13 @@ export function Sidebar() {
     expandWorkspacesInitially
   );
   const [userSiteDocumentQueuesExpanded, setUserSiteDocumentQueuesExpanded] =
-    useState(true);
+    useState(false);
   const [
     defaultSiteDocumentQueuesExpanded,
     setDefaultSiteDocumentQueuesExpanded,
-  ] = useState(true);
+  ] = useState(false);
   const [otherSiteDocumentQueuesExpanded, setOtherSiteDocumentQueuesExpanded] =
-    useState(true);
+    useState(false);
   const [integrationsExpanded, setIntegrationsExpanded] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [isWorkspacesModalOpened, setWorkspacesModalOpened] = useState(false);
@@ -360,7 +360,7 @@ export function Sidebar() {
                     {currentSiteId === user?.email && (
                       <>
                         <li
-                          className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
+                          className="hidden w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
                           onClick={toggleUserSiteDocumentQueuesExpand}
                         >
                           <div className="flex justify-end mt-2 mr-1">
@@ -479,7 +479,7 @@ export function Sidebar() {
                     {currentSiteId === 'default' && (
                       <>
                         <li
-                          className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
+                          className="hidden w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
                           onClick={toggleDefaultSiteDocumentQueuesExpand}
                         >
                           <div className="flex justify-end mt-2 mr-1">
@@ -606,7 +606,7 @@ export function Sidebar() {
                             {currentSiteId === site.siteId && (
                               <>
                                 <li
-                                  className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-8 px-4 pb-2 cursor-pointer"
+                                  className="hidden w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-8 px-4 pb-2 cursor-pointer"
                                   onClick={toggleOtherSiteDocumentQueuesExpand}
                                 >
                                   <div className="flex justify-end mt-2 mr-1">
@@ -749,7 +749,7 @@ export function Sidebar() {
             </li>
             {integrationsExpanded && (
               <>
-                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="hidden w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/workflows"
                     className={({ isActive }) =>
@@ -771,7 +771,7 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="hidden w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/queues"
                     className={({ isActive }) =>
@@ -793,7 +793,7 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"
                     data-test-id="nav-api-explorer"
