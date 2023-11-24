@@ -17,7 +17,7 @@ export function DocumentNew() {
   const search = useLocation().search;
   const path = new URLSearchParams(search).get('path') || '';
 
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const {
@@ -30,8 +30,8 @@ export function DocumentNew() {
     user,
     hasUserSite,
     hasDefaultSite,
-    hasSharedFolders,
-    sharedFolderSites
+    hasWorkspaces,
+    workspaceSites
   );
   if (siteRedirectUrl.length) {
     navigate(
@@ -90,8 +90,8 @@ export function DocumentNew() {
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
     if (recheckSiteInfo.siteRedirectUrl.length) {
       navigate(

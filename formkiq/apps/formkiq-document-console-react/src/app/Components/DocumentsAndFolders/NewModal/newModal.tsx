@@ -13,6 +13,7 @@ import {
   FolderSolid,
   Upload,
   Webhook,
+  Workflow,
 } from '../../Icons/icons';
 
 export default function NewModal({
@@ -281,6 +282,23 @@ export default function NewModal({
                         </div>
                       </>
                     )}
+                    <div
+                      className={`${
+                        itemToCreate === 'workflow'
+                          ? 'bg-gray-100 font-semibold border-gray-600'
+                          : 'cursor-pointer hover:bg-gray-100'
+                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                      onClick={(event) =>
+                        (window.location.href = '/integrations/workflows')
+                      }
+                    >
+                      <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
+                        <Workflow />
+                      </div>
+                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                        Workflow
+                      </div>
+                    </div>
                     <div
                       className={`${
                         itemToCreate === 'inbound-webhook'

@@ -7,6 +7,7 @@ import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
+import DocumentWorkflowsModal from '../../Components/DocumentsAndFolders/DocumentWorkflowsModal/documentWorkflowsModal';
 import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
 import EditTagsAndMetadataModal from '../../Components/DocumentsAndFolders/EditTagsAndMetadataModal/editTagsAndMetadataModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
@@ -66,6 +67,7 @@ import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
 
@@ -92,13 +94,14 @@ function Documents() {
   const { allTags } = useSelector(DataCacheState);
 
   const subfolderUri = useSubfolderUri();
+  const queueId = useQueueId();
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
   const filterTag = new URLSearchParams(search).get('filterTag');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
   const { hash } = useLocation();
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const {
@@ -112,8 +115,8 @@ function Documents() {
     user,
     hasUserSite,
     hasDefaultSite,
-    hasSharedFolders,
-    sharedFolderSites
+    hasWorkspaces,
+    workspaceSites
   );
 
   useEffect(() => {
@@ -164,6 +167,10 @@ function Documents() {
     useState<ILine | null>(null);
   const [isDocumentVersionsModalOpened, setDocumentVersionsModalOpened] =
     useState(false);
+  const [documentWorkflowsModalValue, setDocumentWorkflowsModalValue] =
+    useState<ILine | null>(null);
+  const [isDocumentWorkflowsModalOpened, setDocumentWorkflowsModalOpened] =
+    useState(false);
   const [eSignaturesModalValue, setESignaturesModalValue] =
     useState<ILine | null>(null);
   const [isESignaturesModalOpened, setESignaturesModalOpened] = useState(false);
@@ -174,7 +181,7 @@ function Documents() {
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
-  const documentListOffsetTop = isTagFilterExpanded ? 170 : 140;
+  const [documentListOffsetTop, setDocumentListOffsetTop] = useState<number>(0);
 
   const trackScrolling = useCallback(async () => {
     const bottomRow = (
@@ -185,9 +192,7 @@ function Documents() {
     ].getBoundingClientRect().bottom;
     const isBottom = (el: HTMLElement) => {
       if (el) {
-        return (
-          el.scrollTop + el.offsetHeight >= bottomRow - documentListOffsetTop
-        );
+        return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
       }
       return false;
     };
@@ -205,6 +210,7 @@ function Documents() {
             searchWord,
             searchFolder,
             subfolderUri,
+            queueId,
             filterTag,
             nextToken,
           })
@@ -219,6 +225,7 @@ function Documents() {
               searchWord,
               searchFolder,
               subfolderUri,
+              queueId,
               filterTag,
               page: currentSearchPage + 1,
             })
@@ -229,25 +236,8 @@ function Documents() {
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
 
   useEffect(() => {
-    const resizeHandler = () => {
-      if (documentsWrapperRef.current) {
-        (documentsWrapperRef.current as HTMLDivElement).style.marginTop =
-          documentListOffsetTop + 'px';
-      }
-      if (documentsScrollpaneRef.current) {
-        (documentsScrollpaneRef.current as HTMLDivElement).addEventListener(
-          'scroll',
-          trackScrolling
-        );
-      }
-    };
-
-    window.addEventListener('resize', resizeHandler);
-
-    return () => {
-      window.removeEventListener('resize', resizeHandler);
-    };
-  }, [documentListOffsetTop]);
+    setDocumentListOffsetTop(isTagFilterExpanded ? 0 : 45);
+  }, [isTagFilterExpanded]);
 
   useEffect(() => {
     DocumentsService.getAllTagKeys(currentSiteId).then((response: any) => {
@@ -368,8 +358,8 @@ function Documents() {
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
     if (recheckSiteInfo.siteRedirectUrl.length) {
       navigate(
@@ -393,6 +383,7 @@ function Documents() {
         searchWord,
         searchFolder,
         subfolderUri,
+        queueId,
         filterTag,
       })
     );
@@ -402,6 +393,7 @@ function Documents() {
     searchWord,
     searchFolder,
     subfolderUri,
+    queueId,
     filterTag,
     formkiqVersion,
   ]);
@@ -533,6 +525,13 @@ function Documents() {
   const onDocumentVersionsModalClose = () => {
     setDocumentVersionsModalOpened(false);
   };
+  const onDocumentWorkflowsModalClick = (event: any, value: ILine | null) => {
+    setDocumentWorkflowsModalValue(value);
+    setDocumentWorkflowsModalOpened(true);
+  };
+  const onDocumentWorkflowsModalClose = () => {
+    setDocumentWorkflowsModalOpened(false);
+  };
   const onESignaturesModalClick = (event: any, value: ILine | null) => {
     setESignaturesModalValue(value);
     setESignaturesModalOpened(true);
@@ -549,6 +548,7 @@ function Documents() {
         formkiqVersion,
         searchWord,
         searchFolder,
+        queueId,
         subfolderUri,
         filterTag,
       })
@@ -665,7 +665,7 @@ function Documents() {
                 to={`${currentDocumentsRootUri}`}
                 className="hover:text-coreOrange-600"
               >
-                {siteDocumentsRootName.replace('Shared Folder: ', '')}:
+                {siteDocumentsRootName.replace('Workspace: ', '')}:
               </Link>
             </span>
             <p className={'flex px-1'}> / </p>
@@ -716,7 +716,7 @@ function Documents() {
                 to={`${currentDocumentsRootUri}`}
                 className="hover:text-coreOrange-600"
               >
-                {siteDocumentsRootName.replace('Shared Folder: ', '')}:
+                {siteDocumentsRootName.replace('Workspace: ', '')}:
               </Link>
             </span>
             {folderLevels.length > 1 && (
@@ -781,7 +781,7 @@ function Documents() {
         className={'hidden flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
       >
         <span className="pr-1">
-          {siteDocumentsRootName.replace('Shared Folder: ', '')}
+          {siteDocumentsRootName.replace('Workspace: ', '')}
         </span>
       </span>
     );
@@ -923,7 +923,14 @@ function Documents() {
               </div>
             </div>
           </div>
-          <div className="flex flex-row h-full">
+          <div
+            className="flex flex-row "
+            style={{
+              height: `calc(100% ${
+                isTagFilterExpanded ? '- 6rem' : '- 3.68rem'
+              }`,
+            }}
+          >
             <div className="flex-1 inline-block h-full">
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
@@ -946,7 +953,9 @@ function Documents() {
                 }
                 filterTag={filterTag}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                 deleteFolder={deleteFolder}
+                trackScrolling={trackScrolling}
               />
             </div>
           </div>
@@ -1072,7 +1081,7 @@ function Documents() {
                               >
                                 <span className="pr-1">
                                   {siteDocumentsRootName.replace(
-                                    'Shared Folder: ',
+                                    'Workspace: ',
                                     ''
                                   )}
                                   :
@@ -1094,7 +1103,7 @@ function Documents() {
                             ) : (
                               <Link to={siteDocumentsRootUri} className="flex">
                                 {siteDocumentsRootName.replace(
-                                  'Shared Folder: ',
+                                  'Workspace: ',
                                   ''
                                 )}
                                 <div className="w-4 pt-0.5">
@@ -1412,6 +1421,29 @@ function Documents() {
                           Versions
                         </button>
                       </div>
+                      <div className="mt-2 flex justify-center">
+                        <button
+                          className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                          onClick={(event) => {
+                            const documentLine: ILine = {
+                              lineType: 'document',
+                              folder: '',
+                              documentId: infoDocumentId,
+                              documentInstance: currentDocument,
+                              folderInstance: null,
+                            };
+                            onDocumentWorkflowsModalClick(event, documentLine);
+                          }}
+                        >
+                          View
+                          {isSiteReadOnly ? (
+                            <span>&nbsp;</span>
+                          ) : (
+                            <span>&nbsp;/ Assign&nbsp;</span>
+                          )}
+                          Workflows
+                        </button>
+                      </div>
                     </span>
                   </div>
                   <div className="hidden overflow-x-auto relative">
@@ -1503,6 +1535,9 @@ function Documents() {
                             onDocumentVersionsModalClick={
                               onDocumentVersionsModalClick
                             }
+                            onDocumentWorkflowsModalClick={
+                              onDocumentWorkflowsModalClick
+                            }
                             onESignaturesModalClick={onESignaturesModalClick}
                             onInfoPage={true}
                             user={user}
@@ -1547,6 +1582,14 @@ function Documents() {
         isSiteReadOnly={isSiteReadOnly}
         documentsRootUri={currentDocumentsRootUri}
         value={documentVersionsModalValue}
+      />
+      <DocumentWorkflowsModal
+        isOpened={isDocumentWorkflowsModalOpened}
+        onClose={onDocumentWorkflowsModalClose}
+        siteId={currentSiteId}
+        isSiteReadOnly={isSiteReadOnly}
+        documentsRootUri={currentDocumentsRootUri}
+        value={documentWorkflowsModalValue}
       />
       <ESignaturesModal
         isOpened={isESignaturesModalOpened}

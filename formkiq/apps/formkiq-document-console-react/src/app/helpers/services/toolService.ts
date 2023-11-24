@@ -96,16 +96,16 @@ export function getFileIcon(filename: string) {
 export interface IUserSiteInfo {
   hasUserSite: boolean;
   hasDefaultSite: boolean;
-  hasSharedFolders: boolean;
-  sharedFolderSites: any[];
+  hasWorkspaces: boolean;
+  workspaceSites: any[];
 }
 
 export function getUserSites(userToCheck: any): IUserSiteInfo {
   const userSiteInfo: IUserSiteInfo = {
     hasUserSite: false,
     hasDefaultSite: false,
-    hasSharedFolders: false,
-    sharedFolderSites: [] as any[],
+    hasWorkspaces: false,
+    workspaceSites: [] as any[],
   };
   if (userToCheck && userToCheck.sites) {
     userToCheck.sites.forEach((site: any) => {
@@ -114,8 +114,8 @@ export function getUserSites(userToCheck: any): IUserSiteInfo {
       } else if (site.siteId === 'default') {
         userSiteInfo.hasDefaultSite = true;
       } else {
-        userSiteInfo.hasSharedFolders = true;
-        userSiteInfo.sharedFolderSites.push(site);
+        userSiteInfo.hasWorkspaces = true;
+        userSiteInfo.workspaceSites.push(site);
       }
     });
   }
@@ -135,8 +135,8 @@ export function getCurrentSiteInfo(
   user: any,
   hasUserSite: boolean,
   hasDefaultSite: boolean,
-  hasSharedFolders: boolean,
-  sharedFolderSites: any[]
+  hasWorkspaces: boolean,
+  workspaceSites: any[]
 ): ICurrentSiteInfo {
   const currentSiteInfo = {
     siteId: '',
@@ -151,42 +151,35 @@ export function getCurrentSiteInfo(
     currentSiteInfo.siteDocumentsRootUri = '/my-documents';
     currentSiteInfo.siteDocumentsRootName = 'My Documents';
   } else if (!hasUserSite && pathname.indexOf('/my-documents') === 0) {
-    if (hasDefaultSite || !hasSharedFolders || !sharedFolderSites.length) {
+    if (hasDefaultSite || !hasWorkspaces || !workspaceSites.length) {
       currentSiteInfo.siteId = 'default';
       currentSiteInfo.siteRedirectUrl = '/documents';
       currentSiteInfo.siteDocumentsRootUri = '/documents';
       currentSiteInfo.siteDocumentsRootName = 'Documents';
-    } else if (hasSharedFolders) {
-      currentSiteInfo.siteId = sharedFolderSites[0].siteId;
-      currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
+    } else if (hasWorkspaces) {
+      currentSiteInfo.siteId = workspaceSites[0].siteId;
+      currentSiteInfo.siteRedirectUrl = `/workspaces/${workspaceSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
       if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId}`;
       } else {
-        currentSiteInfo.siteDocumentsRootName = `Site Folder: ${sharedFolderSites[0].siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Site Folder: ${workspaceSites[0].siteId}`;
       }
     }
   } else if (!hasUserSite && pathname.indexOf('/team-documents') === 0) {
-    if (hasDefaultSite || !hasSharedFolders || !sharedFolderSites.length) {
+    if (hasDefaultSite || !hasWorkspaces || !workspaceSites.length) {
       currentSiteInfo.siteId = 'default';
       currentSiteInfo.siteRedirectUrl = '/documents';
       currentSiteInfo.siteDocumentsRootUri = '/documents';
       currentSiteInfo.siteDocumentsRootName = 'Documents';
-    } else if (hasSharedFolders) {
-      currentSiteInfo.siteId = sharedFolderSites[0].siteId;
-      currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId.replaceAll(
-          '_',
-          ' '
-        )}`;
-      } else {
-        currentSiteInfo.siteDocumentsRootName = `Site Folder: ${sharedFolderSites[0].siteId.replaceAll(
-          '_',
-          ' '
-        )}`;
-      }
+    } else if (hasWorkspaces) {
+      currentSiteInfo.siteId = workspaceSites[0].siteId;
+      currentSiteInfo.siteRedirectUrl = `/workspaces/${workspaceSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+        '_',
+        ' '
+      )}`;
     }
   }
   if (user && user.email) {
@@ -198,17 +191,17 @@ export function getCurrentSiteInfo(
       currentSiteInfo.siteId = 'default';
       currentSiteInfo.siteDocumentsRootUri = '/team-documents';
       currentSiteInfo.siteDocumentsRootName = 'Team Documents';
-    } else if (pathname.indexOf('/shared-folders') === 0) {
-      const pathAfterSharedFolders = pathname.substring(
+    } else if (pathname.indexOf('/workspaces') === 0) {
+      const pathAfterWorkspaces = pathname.substring(
         pathname.indexOf('/', 1) + 1
       );
-      if (pathAfterSharedFolders.indexOf('/') > -1) {
-        currentSiteInfo.siteId = pathAfterSharedFolders.substring(
+      if (pathAfterWorkspaces.indexOf('/') > -1) {
+        currentSiteInfo.siteId = pathAfterWorkspaces.substring(
           0,
-          pathAfterSharedFolders.indexOf('/')
+          pathAfterWorkspaces.indexOf('/')
         );
       } else {
-        currentSiteInfo.siteId = pathAfterSharedFolders;
+        currentSiteInfo.siteId = pathAfterWorkspaces;
       }
       if (!currentSiteInfo.siteId.length) {
         if (hasUserSite) {
@@ -228,16 +221,10 @@ export function getCurrentSiteInfo(
           currentSiteInfo.siteDocumentsRootName = 'Documents';
         }
       }
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${currentSiteInfo.siteId}`;
-      if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${(
-          currentSiteInfo.siteId as any
-        ).replaceAll('_', ' ')}`;
-      } else {
-        currentSiteInfo.siteDocumentsRootName = `Site Folder: ${(
-          currentSiteInfo.siteId as any
-        ).replaceAll('_', ' ')}`;
-      }
+      currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+      currentSiteInfo.siteDocumentsRootName = `Workspace: ${(
+        currentSiteInfo.siteId as any
+      ).replaceAll('_', ' ')}`;
     } else {
       if (hasDefaultSite) {
         currentSiteInfo.siteId = 'default';
@@ -254,10 +241,10 @@ export function getCurrentSiteInfo(
           !currentSiteInfo.siteId ||
           !currentSiteInfo.siteId.length
         ) {
-          currentSiteInfo.siteId = sharedFolderSites[0].siteId;
-          currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
-          currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
-          currentSiteInfo.siteDocumentsRootName = `Site Folder: ${sharedFolderSites[0].siteId}`;
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Site Folder: ${workspaceSites[0].siteId}`;
         }
       }
     }
@@ -265,15 +252,11 @@ export function getCurrentSiteInfo(
       user.sites.forEach((site: any) => {
         currentSiteInfo.siteId = site.siteId;
         if (site.siteId !== 'default' && site.siteId !== user.email) {
-          currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${site.siteId}`;
-          if (hasDefaultSite || hasUserSite) {
-            currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${site.siteId.replaceAll(
-              '_',
-              ' '
-            )}`;
-          } else {
-            currentSiteInfo.siteDocumentsRootName = `Site Folder: ${site.siteId}`;
-          }
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${site.siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${site.siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
         }
         return;
       });

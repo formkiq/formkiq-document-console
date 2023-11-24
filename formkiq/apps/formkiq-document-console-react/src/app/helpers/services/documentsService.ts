@@ -1099,6 +1099,94 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getWorkflows(siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getWorkflows(siteId);
+  }
+
+  @formkiqAPIHandler
+  public static async getWorkflow(
+    workflowId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getWorkflow(workflowId, siteId);
+  }
+
+  @formkiqAPIHandler
+  public static addWorkflow(name: string, siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.addWorkflow({ name }, siteId);
+  }
+
+  @formkiqAPIHandler
+  public static deleteWorkflow(
+    workflowId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.deleteWorkflow(
+      workflowId,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async getQueues(siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getQueues(siteId);
+  }
+
+  @formkiqAPIHandler
+  public static async addQueue(name: string, siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.addQueue({ name }, siteId);
+  }
+
+  @formkiqAPIHandler
+  public static async deleteQueue(
+    queueId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.deleteQueue(queueId, siteId);
+  }
+
+  @formkiqAPIHandler
+  public static async getDocumentsInQueue(
+    queueId: string,
+    siteId: string,
+    previous = null,
+    next = null,
+    limit = 20
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getDocumentsInQueue(
+      queueId,
+      siteId,
+      limit,
+      next,
+      previous
+    );
+  }
+
+  @formkiqAPIHandler
   public static async getESignatureConfig(siteId: string): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();

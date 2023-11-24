@@ -5,8 +5,8 @@ import { AuthState } from '../../Store/reducers/auth';
 import {
   ConfigState,
   setCurrentActionEvent,
-  setIsSharedFoldersExpanded,
   setIsSidebarExpanded,
+  setIsWorkspacesExpanded,
 } from '../../Store/reducers/config';
 import { DocumentListState } from '../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../Store/store';
@@ -15,6 +15,7 @@ import {
   DocumentsAndFoldersPrefixes,
   WorkflowsAndIntegrationsPrefixes,
 } from '../../helpers/constants/pagePrefixes';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
@@ -29,10 +30,10 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  ComingSoon,
   Documents,
   FolderOutline,
   Plus,
+  Queue,
   Settings,
   ShareHand,
   Star,
@@ -41,8 +42,9 @@ import {
   UserIcon,
   Webhook,
   Workflow,
+  Workspace,
 } from '../Icons/icons';
-import SharedFoldersModal from './sharedFoldersModal';
+import WorkspacesModal from './workspacesModal';
 
 export function Sidebar() {
   const dispatch = useAppDispatch();
@@ -54,10 +56,10 @@ export function Sidebar() {
     useAccountAndSettings,
     useSoftDelete,
     isSidebarExpanded,
-    isSharedFoldersExpanded,
+    isWorkspacesExpanded,
   } = useSelector(ConfigState);
 
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const { siteId, siteDocumentsRootUri, isSiteReadOnly } = getCurrentSiteInfo(
@@ -65,8 +67,8 @@ export function Sidebar() {
     user,
     hasUserSite,
     hasDefaultSite,
-    hasSharedFolders,
-    sharedFolderSites
+    hasWorkspaces,
+    workspaceSites
   );
 
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
@@ -76,29 +78,44 @@ export function Sidebar() {
     useState(siteDocumentsRootUri);
   const [sidebarExpanded, setSidebarExpanded] = useState(isSidebarExpanded);
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
-  let expandSharedFoldersInitially = isSharedFoldersExpanded;
+  let expandWorkspacesInitially = isWorkspacesExpanded;
   if (
-    currentDocumentsRootUri.indexOf('/shared-folders') === 0 ||
-    (!hasUserSite && !hasDefaultSite && hasSharedFolders)
+    currentDocumentsRootUri.indexOf('/workspaces') === 0 ||
+    (!hasUserSite && !hasDefaultSite && hasWorkspaces)
   ) {
-    expandSharedFoldersInitially = true;
+    expandWorkspacesInitially = true;
   }
-  const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(
-    expandSharedFoldersInitially
+  const [workspacesExpanded, setWorkspacesExpanded] = useState(
+    expandWorkspacesInitially
   );
+  const [userSiteDocumentQueuesExpanded, setUserSiteDocumentQueuesExpanded] =
+    useState(true);
+  const [
+    defaultSiteDocumentQueuesExpanded,
+    setDefaultSiteDocumentQueuesExpanded,
+  ] = useState(true);
+  const [otherSiteDocumentQueuesExpanded, setOtherSiteDocumentQueuesExpanded] =
+    useState(true);
   const [integrationsExpanded, setIntegrationsExpanded] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
-  const [isSharedFoldersModalOpened, setSharedFoldersModalOpened] =
-    useState(false);
+  const [isWorkspacesModalOpened, setWorkspacesModalOpened] = useState(false);
 
   const locationPrefix = decodeURI(window.location.pathname).substring(
     0,
     decodeURI(window.location.pathname).indexOf('/', 1)
   );
 
+  const [defaultSiteDocumentQueues, setDefaultSiteDocumentQueues] = useState(
+    []
+  );
+  const [userSiteDocumentQueues, setUserSiteDocumentQueues] = useState([]);
+  const [otherSiteDocumentQueues, setOtherSiteDocumentQueues] = useState([]);
+
   const subfolderUri = useSubfolderUri();
 
   useEffect(() => {
+    setOtherSiteDocumentQueuesExpanded(false);
+    // TODO: determine if we should expand queues by default for "other" sites
     if (DocumentsAndFoldersPrefixes.indexOf(locationPrefix) > -1) {
       setDocumentsExpanded(true);
       setIntegrationsExpanded(false);
@@ -120,17 +137,62 @@ export function Sidebar() {
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    if (recheckSiteInfo.siteDocumentsRootUri.indexOf('shared-folders') > 0) {
-      if (!hasUserSite && !hasDefaultSite && hasSharedFolders) {
+    if (recheckSiteInfo.siteDocumentsRootUri.indexOf('workspaces') > 0) {
+      if (!hasUserSite && !hasDefaultSite && hasWorkspaces) {
         setSpecialFoldersRootUri('/documents');
       }
     }
   }, [pathname]);
+
+  useEffect(() => {
+    if (hasDefaultSite && defaultSiteDocumentQueuesExpanded) {
+      DocumentsService.getQueues('default').then((queuesResponse: any) => {
+        if (queuesResponse.queues) {
+          setDefaultSiteDocumentQueues(queuesResponse.queues);
+        } else {
+          setDefaultSiteDocumentQueues([]);
+        }
+      });
+    }
+  }, [defaultSiteDocumentQueuesExpanded]);
+
+  useEffect(() => {
+    if (hasUserSite && userSiteDocumentQueuesExpanded) {
+      DocumentsService.getQueues(user?.email as string).then(
+        (queuesResponse: any) => {
+          if (queuesResponse.queues) {
+            setUserSiteDocumentQueues(queuesResponse.queues);
+          } else {
+            setUserSiteDocumentQueues([]);
+          }
+        }
+      );
+    }
+  }, [userSiteDocumentQueuesExpanded]);
+
+  useEffect(() => {
+    if (
+      hasWorkspaces &&
+      currentSiteId !== 'default' &&
+      currentSiteId !== user?.email &&
+      otherSiteDocumentQueuesExpanded
+    ) {
+      DocumentsService.getQueues(currentSiteId).then((queuesResponse: any) => {
+        if (queuesResponse.queues) {
+          setOtherSiteDocumentQueues(queuesResponse.queues);
+        } else {
+          setOtherSiteDocumentQueues([]);
+        }
+      });
+    } else {
+      setOtherSiteDocumentQueues([]);
+    }
+  }, [otherSiteDocumentQueuesExpanded]);
 
   const toggleSidebarExpand = () => {
     dispatch(setIsSidebarExpanded(!sidebarExpanded));
@@ -139,12 +201,30 @@ export function Sidebar() {
   const toggleDocumentsExpand = () => {
     setDocumentsExpanded(!documentsExpanded);
   };
-  const toggleSharedFoldersExpand = () => {
-    if (!sharedFoldersExpanded) {
+  const toggleWorkspacesExpand = () => {
+    if (!workspacesExpanded) {
       setDocumentsExpanded(true);
     }
-    dispatch(setIsSharedFoldersExpanded(!sharedFoldersExpanded));
-    setSharedFoldersExpanded(!sharedFoldersExpanded);
+    dispatch(setIsWorkspacesExpanded(!workspacesExpanded));
+    setWorkspacesExpanded(!workspacesExpanded);
+  };
+  const toggleDefaultSiteDocumentQueuesExpand = () => {
+    if (!defaultSiteDocumentQueuesExpanded) {
+      setDefaultSiteDocumentQueuesExpanded(true);
+    }
+    setDefaultSiteDocumentQueuesExpanded(!defaultSiteDocumentQueuesExpanded);
+  };
+  const toggleUserSiteDocumentQueuesExpand = () => {
+    if (!userSiteDocumentQueuesExpanded) {
+      setUserSiteDocumentQueuesExpanded(true);
+    }
+    setUserSiteDocumentQueuesExpanded(!userSiteDocumentQueuesExpanded);
+  };
+  const toggleOtherSiteDocumentQueuesExpand = () => {
+    if (!otherSiteDocumentQueuesExpanded) {
+      setOtherSiteDocumentQueuesExpanded(true);
+    }
+    setOtherSiteDocumentQueuesExpanded(!otherSiteDocumentQueuesExpanded);
   };
   const toggleIntegrationsExpand = () => {
     setIntegrationsExpanded(!integrationsExpanded);
@@ -152,11 +232,11 @@ export function Sidebar() {
   const toggleSettingsExpand = () => {
     setSettingsExpanded(!settingsExpanded);
   };
-  const onSharedFoldersClick = (event: any) => {
-    setSharedFoldersModalOpened(true);
+  const onWorkspacesClick = (event: any) => {
+    setWorkspacesModalOpened(true);
   };
-  const onSharedFoldersModalClose = () => {
-    setSharedFoldersModalOpened(false);
+  const onWorkspacesModalClose = () => {
+    setWorkspacesModalOpened(false);
   };
 
   const QuickFolderList = (
@@ -166,7 +246,7 @@ export function Sidebar() {
   ) => {
     let folderBreadcrumbUrl = `${currentDocumentsRootUri}/folders`;
     let initialPaddingLeft = 8;
-    if (currentDocumentsRootUri.indexOf('shared-folders') > 0) {
+    if (currentDocumentsRootUri.indexOf('workspaces') > 0) {
       initialPaddingLeft = 10;
     }
     if (
@@ -277,6 +357,70 @@ export function Sidebar() {
                         : [],
                       folders
                     )}
+                    {currentSiteId === user?.email && (
+                      <>
+                        <li
+                          className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
+                          onClick={toggleUserSiteDocumentQueuesExpand}
+                        >
+                          <div className="flex justify-end mt-2 mr-1">
+                            {userSiteDocumentQueuesExpanded ? (
+                              <ArrowBottom />
+                            ) : (
+                              <ArrowRight />
+                            )}
+                          </div>
+                          <div className="pl-1 uppercase text-xs">Queues</div>
+                        </li>
+                        {userSiteDocumentQueuesExpanded &&
+                          userSiteDocumentQueues.map(
+                            (queue: any, i: number) => {
+                              return (
+                                <span key={i}>
+                                  <li className="pl-5 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                                    <NavLink
+                                      to={
+                                        '/my-documents/queues/' + queue.queueId
+                                      }
+                                      end
+                                      className={({ isActive }) =>
+                                        (isActive
+                                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                          : 'text-gray-500 bg-white ') +
+                                        ' w-full text-sm font-medium flex'
+                                      }
+                                    >
+                                      <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
+                                        <Queue />
+                                      </div>
+                                      <div>
+                                        <span className="tracking-tightest">
+                                          {queue.name.length > 28 ? (
+                                            <span>
+                                              {queue.name.substring(0, 28)}...
+                                            </span>
+                                          ) : (
+                                            <span>{queue.name}</span>
+                                          )}
+                                        </span>
+                                      </div>
+                                    </NavLink>
+                                  </li>
+                                </span>
+                              );
+                            }
+                          )}
+                        {userSiteDocumentQueuesExpanded &&
+                          !userSiteDocumentQueues.length && (
+                            <div className="text-xs pl-8">
+                              (no queues found)
+                            </div>
+                          )}
+                        {userSiteDocumentQueuesExpanded && (
+                          <div className="mb-2"></div>
+                        )}
+                      </>
+                    )}
                   </>
                 )}
                 {hasDefaultSite && (
@@ -332,35 +476,98 @@ export function Sidebar() {
                         : [],
                       folders
                     )}
+                    {currentSiteId === 'default' && (
+                      <>
+                        <li
+                          className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
+                          onClick={toggleDefaultSiteDocumentQueuesExpand}
+                        >
+                          <div className="flex justify-end mt-2 mr-1">
+                            {defaultSiteDocumentQueuesExpanded ? (
+                              <ArrowBottom />
+                            ) : (
+                              <ArrowRight />
+                            )}
+                          </div>
+                          <div className="pl-1 uppercase text-xs">Queues</div>
+                        </li>
+                        {defaultSiteDocumentQueuesExpanded &&
+                          defaultSiteDocumentQueues.map(
+                            (queue: any, i: number) => {
+                              return (
+                                <span key={i}>
+                                  <li className="pl-5 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                                    <NavLink
+                                      to={
+                                        (hasUserSite
+                                          ? '/team-documents'
+                                          : '/documents') +
+                                        '/queues/' +
+                                        queue.queueId
+                                      }
+                                      end
+                                      className={({ isActive }) =>
+                                        (isActive
+                                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                          : 'text-gray-500 bg-white ') +
+                                        ' w-full text-sm font-medium flex'
+                                      }
+                                    >
+                                      <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
+                                        <Queue />
+                                      </div>
+                                      <div>
+                                        <span className="tracking-tightest">
+                                          {queue.name.length > 28 ? (
+                                            <span>
+                                              {queue.name.substring(0, 28)}...
+                                            </span>
+                                          ) : (
+                                            <span>{queue.name}</span>
+                                          )}
+                                        </span>
+                                      </div>
+                                    </NavLink>
+                                  </li>
+                                </span>
+                              );
+                            }
+                          )}
+                        {defaultSiteDocumentQueuesExpanded &&
+                          !defaultSiteDocumentQueues.length && (
+                            <div className="text-xs pl-8 mb-2">
+                              (no queues found)
+                            </div>
+                          )}
+                      </>
+                    )}
                   </>
                 )}
-                {hasSharedFolders && (
+                {hasWorkspaces && (
                   <>
                     {(hasUserSite || hasDefaultSite) && (
                       <li
                         className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
-                        onClick={toggleSharedFoldersExpand}
+                        onClick={toggleWorkspacesExpand}
                       >
                         <div className="flex justify-end mt-2 mr-1">
-                          {sharedFoldersExpanded ? (
+                          {workspacesExpanded ? (
                             <ArrowBottom />
                           ) : (
                             <ArrowRight />
                           )}
                         </div>
-                        <div className="pl-1 uppercase text-xs">
-                          Shared Folders
-                        </div>
+                        <div className="pl-1 uppercase text-xs">Workspaces</div>
                       </li>
                     )}
-                    {(sharedFoldersExpanded ||
+                    {(workspacesExpanded ||
                       (!hasUserSite && !hasDefaultSite)) &&
-                      sharedFolderSites.map((site: any, i: number) => {
+                      workspaceSites.map((site: any, i: number) => {
                         return (
                           <span key={i}>
                             <li className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                               <NavLink
-                                to={'/shared-folders/' + site.siteId}
+                                to={'/workspaces/' + site.siteId}
                                 end
                                 className={({ isActive }) =>
                                   (isActive
@@ -378,12 +585,7 @@ export function Sidebar() {
                                   }
                                 >
                                   <div className="w-5 flex flex-wrap items-center mr-2">
-                                    <div className="w-4">
-                                      <FolderOutline />
-                                    </div>
-                                    <div className="-mt-3 -ml-0.5">
-                                      <ShareHand />
-                                    </div>
+                                    <Workspace />
                                   </div>
                                   <div>
                                     <span>
@@ -400,6 +602,76 @@ export function Sidebar() {
                                 ? subfolderUri.split('/')
                                 : [],
                               folders
+                            )}
+                            {currentSiteId === site.siteId && (
+                              <>
+                                <li
+                                  className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-8 px-4 pb-2 cursor-pointer"
+                                  onClick={toggleOtherSiteDocumentQueuesExpand}
+                                >
+                                  <div className="flex justify-end mt-2 mr-1">
+                                    {otherSiteDocumentQueuesExpanded ? (
+                                      <ArrowBottom />
+                                    ) : (
+                                      <ArrowRight />
+                                    )}
+                                  </div>
+                                  <div className="pl-1 uppercase text-xs">
+                                    Queues
+                                  </div>
+                                </li>
+                                {otherSiteDocumentQueuesExpanded &&
+                                  otherSiteDocumentQueues.map(
+                                    (queue: any, i: number) => {
+                                      return (
+                                        <span key={i}>
+                                          <li className="pl-7 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                                            <NavLink
+                                              to={
+                                                '/workspaces/' +
+                                                currentSiteId +
+                                                '/queues/' +
+                                                queue.queueId
+                                              }
+                                              end
+                                              className={({ isActive }) =>
+                                                (isActive
+                                                  ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                                  : 'text-gray-500 bg-white ') +
+                                                ' w-full text-sm font-medium flex'
+                                              }
+                                            >
+                                              <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
+                                                <Queue />
+                                              </div>
+                                              <div>
+                                                <span className="tracking-tightest">
+                                                  {queue.name.length > 26 ? (
+                                                    <span>
+                                                      {queue.name.substring(
+                                                        0,
+                                                        26
+                                                      )}
+                                                      ...
+                                                    </span>
+                                                  ) : (
+                                                    <span>{queue.name}</span>
+                                                  )}
+                                                </span>
+                                              </div>
+                                            </NavLink>
+                                          </li>
+                                        </span>
+                                      );
+                                    }
+                                  )}
+                                {otherSiteDocumentQueuesExpanded &&
+                                  !otherSiteDocumentQueues.length && (
+                                    <div className="text-xs pl-10 mb-2">
+                                      (no queues found)
+                                    </div>
+                                  )}
+                              </>
                             )}
                           </span>
                         );
@@ -472,12 +744,12 @@ export function Sidebar() {
                 {integrationsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="uppercase font-semibold text-xs mb-2">
-                Integrations
+                Workflows & Integrations
               </div>
             </li>
             {integrationsExpanded && (
               <>
-                <li className="hidden w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/workflows"
                     className={({ isActive }) =>
@@ -496,15 +768,32 @@ export function Sidebar() {
                         <Workflow />
                       </div>
                       <div>Workflows</div>
-                      <div className="flex ml-2 grow justify-start">
-                        <div className="w-10">
-                          <ComingSoon />
-                        </div>
-                      </div>
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                  <NavLink
+                    to="/queues"
+                    className={({ isActive }) =>
+                      (isActive
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
+                    }
+                  >
+                    <div
+                      className={
+                        'w-full text-sm font-medium flex items-center pl-5 '
+                      }
+                    >
+                      <div className="w-4 flex items-center mr-2">
+                        <Queue />
+                      </div>
+                      <div>Queues</div>
+                    </div>
+                  </NavLink>
+                </li>
+                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"
                     data-test-id="nav-api-explorer"
@@ -695,18 +984,13 @@ export function Sidebar() {
                 </NavLink>
               </li>
             )}
-            {hasSharedFolders && (
+            {hasWorkspaces && (
               <div className="w-full text-sm font-medium flex pl-5 py-3 bg-white mb-4">
                 <div
                   className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
-                  onClick={onSharedFoldersClick}
+                  onClick={onWorkspacesClick}
                 >
-                  <div className="w-3.5 text-gray-700">
-                    <FolderOutline />
-                  </div>
-                  <div className="-mt-2.5 -ml-0.5">
-                    <ShareHand />
-                  </div>
+                  <Workspace />
                 </div>
               </div>
             )}
@@ -774,6 +1058,27 @@ export function Sidebar() {
                 >
                   <div className="w-4 flex items-center mr-2">
                     <Workflow />
+                  </div>
+                </div>
+              </NavLink>
+            </li>
+            <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+              <NavLink
+                to="/queues"
+                className={({ isActive }) =>
+                  (isActive
+                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                    : 'text-gray-500 bg-white ') +
+                  ' w-full text-sm font-medium flex '
+                }
+              >
+                <div
+                  className={
+                    'w-full text-sm font-medium flex items-center pl-5 py-4 '
+                  }
+                >
+                  <div className="w-4 flex items-center mr-2">
+                    <Queue />
                   </div>
                 </div>
               </NavLink>
@@ -991,10 +1296,10 @@ export function Sidebar() {
           </>
         )}
       </div>
-      <SharedFoldersModal
-        isOpened={isSharedFoldersModalOpened}
-        onClose={onSharedFoldersModalClose}
-        sharedFolderSites={sharedFolderSites}
+      <WorkspacesModal
+        isOpened={isWorkspacesModalOpened}
+        onClose={onWorkspacesModalClose}
+        workspaceSites={workspaceSites}
       />
     </div>
   );

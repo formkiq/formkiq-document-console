@@ -913,7 +913,21 @@ export const postWorkflowsApiItem = {
   requiresAuthentication: true,
   requiresPostJson: true,
   defaultPostJsonValue:
-    '{"name":"Test Workflow","description":"Some description","config":{"notificationType":"none"},"steps":[]}',
+    '{"name":"Test Workflow","description":"Some description","status":"INACTIVE", "config":{"notificationType":"none"},"steps":[]}',
+  license: 'Pro|Enterprise',
+};
+
+export const putWorkflowsApiItem = {
+  method: 'PUT',
+  path: '/workflows/ WORKFLOW_ID',
+  description: 'Updates (by replacing) a workflow',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresWorkflowID: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"name":"Test Workflow","description":"Some description","status":"INACTIVE", "config":{"notificationType":"none"},"steps":[]}',
   license: 'Pro|Enterprise',
 };
 
@@ -958,6 +972,34 @@ export const getDocumentsInQueueApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresQueueId: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getWorkflowsInDocumentApiItem = {
+  method: 'GET',
+  path: '/documents/ DOCUMENT_ID /workflows',
+  description:
+    'Returns a list of workflows that have been assigned to a document',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getWorkflowByIdInDocumentApiItem = {
+  method: 'GET',
+  path: '/documents/ DOCUMENT_ID /workflows/ WORKFLOW_ID',
+  description: 'Returns a workflow by ID that has been assigned to a document',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresWorkflowID: true,
   allowsLimit: true,
   hasPagingTokens: true,
   license: 'Pro|Enterprise',
