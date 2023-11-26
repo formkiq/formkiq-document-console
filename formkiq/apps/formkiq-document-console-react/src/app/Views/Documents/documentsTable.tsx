@@ -64,7 +64,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     isArchiveTabExpanded,
     addToPendingArchive,
     deleteFromPendingArchive,
-    archiveStatus
+    archiveStatus,
     trackScrolling,
   } = props;
 
@@ -248,7 +248,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     isArchiveTabExpanded,
     addToPendingArchive,
     deleteFromPendingArchive,
-    archiveStatus
+    archiveStatus,
   } = props;
 
   return (
