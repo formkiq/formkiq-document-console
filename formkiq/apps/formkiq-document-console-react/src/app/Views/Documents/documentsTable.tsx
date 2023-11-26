@@ -1,4 +1,4 @@
-import { Ref } from 'react';
+import { Ref, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
@@ -10,6 +10,7 @@ import { DocumentListState } from '../../Store/reducers/documentsList';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { EmptyDocumentsTable } from './EmptyDocumentsTable';
 
@@ -31,6 +32,7 @@ type DocumentTableProps = {
   onRenameModalClick: (event: any, value: ILine | null) => void;
   onMoveModalClick: (event: any, value: ILine | null) => void;
   onDocumentVersionsModalClick: (event: any, value: ILine | null) => void;
+  onDocumentWorkflowsModalClick: (event: any, value: ILine | null) => void;
   onEditTagsAndMetadataModalClick: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
@@ -38,6 +40,7 @@ type DocumentTableProps = {
   addToPendingArchive: (file: IDocument) => void;
   deleteFromPendingArchive: (file: IDocument) => void;
   archiveStatus: string;
+  trackScrolling: () => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -54,6 +57,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     currentDocumentsRootUri,
     filterTag,
     onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
@@ -61,11 +65,24 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     addToPendingArchive,
     deleteFromPendingArchive,
     archiveStatus
+    trackScrolling,
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
   const { documents, folders, loadingStatus } = useSelector(DocumentListState);
+
+  const [scrollPosition, setScrollPosition] = useState(0);
+
   const subfolderUri = useSubfolderUri();
+  const queueId = useQueueId();
+
+  // scroll "documentsScrollpane" to the latest position when documents state updates
+  useEffect(() => {
+    const scrollPane = document.getElementById('documentsScrollpane');
+    if (scrollPane) {
+      scrollPane.scrollTo({ top: scrollPosition });
+    }
+  }, [documents, scrollPosition]);
 
   if (
     documents.length === 0 &&
@@ -76,9 +93,21 @@ export const DocumentsTable = (props: DocumentTableProps) => {
       <EmptyDocumentsTable
         formkiqVersion={formkiqVersion}
         subfolderUri={subfolderUri}
+        queueId={queueId}
       />
     );
   }
+
+  const handleScroll = (event: any) => {
+    const el = event.target;
+    //track scroll when table reaches bottom
+    if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
+      if (el.scrollTop > 0) {
+        setScrollPosition(el.scrollTop);
+        trackScrolling();
+      }
+    }
+  };
 
   return (
     <div
@@ -86,9 +115,10 @@ export const DocumentsTable = (props: DocumentTableProps) => {
       ref={documentsWrapperRef}
     >
       <div
-        className="overflow-scroll h-full"
+        className="overflow-y-scroll overflow-x-auto h-full"
         ref={documentsScrollpaneRef}
         id="documentsScrollpane"
+        onScroll={handleScroll}
       >
         <table
           className="border-separate border-spacing-0 table-auto w-full"
@@ -167,6 +197,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onRenameModalClick={onRenameModalClick}
                 onMoveModalClick={onMoveModalClick}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                 onESignaturesModalClick={onESignaturesModalClick}
                 onTagChange={onTagChange}
                 filterTag={filterTag}
@@ -209,6 +240,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     currentDocumentsRootUri,
     filterTag,
     onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
@@ -237,6 +269,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               onRenameModalClick={onRenameModalClick}
               onMoveModalClick={onMoveModalClick}
               onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+              onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
               onESignaturesModalClick={onESignaturesModalClick}
               onTagChange={onTagChange}
               onRestoreDocument={onRestoreDocument}

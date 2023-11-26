@@ -24,9 +24,12 @@ export const fetchDocuments = createAsyncThunk(
       searchWord,
       searchFolder,
       subfolderUri,
+      queueId,
       filterTag,
       nextToken,
       page,
+      documents,
+      folders,
     } = data;
     const user = (thunkAPI.getState() as any)?.authState.user;
     const tagParam = filterTag ? filterTag.split(':')[0] : null;
@@ -106,7 +109,42 @@ export const fetchDocuments = createAsyncThunk(
         });
       }
     } else {
-      if (subfolderUri) {
+      if (queueId && queueId.length) {
+        const dataCache = (thunkAPI.getState() as RootState).dataCacheState;
+        DocumentsService.getDocumentsInQueue(
+          queueId,
+          siteId,
+          null,
+          nextToken,
+          20
+        ).then((response: any) => {
+          // putting workflow under document object, for top-level object consistency with other search results
+          if (response) {
+            const mappedDocuments: any = [];
+            response.documents.map((val: any) => {
+              if (val.workflow) {
+                val.document.workflow = val.workflow;
+              }
+              mappedDocuments.push(val.document);
+            });
+            const data = {
+              siteId,
+              documents: mappedDocuments,
+              user: user,
+              next: response.next,
+              isLoadingMore: false,
+              isLastSearchPageLoaded: false,
+            };
+            if (nextToken) {
+              data.isLoadingMore = true;
+            }
+            if (response.documents?.length === 0) {
+              data.isLastSearchPageLoaded = true;
+            }
+            thunkAPI.dispatch(setDocuments(data));
+          }
+        });
+      } else if (subfolderUri) {
         if (subfolderUri === 'shared') {
           DocumentsService.getDocumentsSharedWithMe(
             siteId,
@@ -554,7 +592,11 @@ export const documentsListSlice = createSlice({
                 }
               }
             } else {
-              return !(doc.tags as any)['sysDeletedBy'];
+              if (doc.tags) {
+                return !(doc.tags as any)['sysDeletedBy'];
+              } else {
+                return true;
+              }
             }
           });
           if (isLoadingMore && state.documents) {
@@ -980,14 +1022,6 @@ export const documentsListSlice = createSlice({
       return {
         ...state,
         loadingStatus: RequestStatus.rejected,
-      };
-    });
-    builder.addCase(fetchDocuments.pending, (state) => {
-      return {
-        ...state,
-        documents: [],
-        folders: [],
-        loadingStatus: RequestStatus.pending,
       };
     });
   },

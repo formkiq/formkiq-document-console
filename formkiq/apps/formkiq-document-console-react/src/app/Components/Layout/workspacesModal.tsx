@@ -1,16 +1,16 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Close, FolderOutline, ShareHand } from '../Icons/icons';
+import { Close, Workspace } from '../Icons/icons';
 
-export default function SharedFoldersModal({
+export default function WorkspacesModal({
   isOpened,
   onClose,
-  sharedFolderSites,
+  workspaceSites,
 }: {
   isOpened: boolean;
   onClose: any;
-  sharedFolderSites: any;
+  workspaceSites: any;
 }) {
   const closeDialog = () => {
     onClose();
@@ -45,7 +45,7 @@ export default function SharedFoldersModal({
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg inline-block pr-6">
-                      Shared Folders
+                      Workspaces
                     </div>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
@@ -55,15 +55,15 @@ export default function SharedFoldersModal({
                     </div>
                   </div>
                   <div className="flex flext-wrap mt-4">
-                    {sharedFolderSites &&
-                      sharedFolderSites.map((site: any, i: number) => {
+                    {workspaceSites &&
+                      workspaceSites.map((site: any, i: number) => {
                         return (
                           <li
                             key={i}
                             className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap"
                           >
                             <NavLink
-                              to={'/shared-folders/' + site.siteId}
+                              to={'/workspaces/' + site.siteId}
                               end
                               onClick={closeDialog}
                               className={({ isActive }) =>
@@ -79,12 +79,7 @@ export default function SharedFoldersModal({
                                 }
                               >
                                 <div className="w-4 flex flex-wrap items-center mr-2">
-                                  <div>
-                                    <FolderOutline />
-                                  </div>
-                                  <div className="-mt-3 -ml-0.5">
-                                    <ShareHand />
-                                  </div>
+                                  <Workspace />
                                 </div>
                                 <div>
                                   <span>

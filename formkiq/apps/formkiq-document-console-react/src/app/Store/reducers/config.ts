@@ -19,7 +19,7 @@ export interface Config {
   tagColors: TagColor[];
   isSidebarExpanded: boolean;
   currentActionEvent: string;
-  isSharedFoldersExpanded: boolean;
+  isWorkspacesExpanded: boolean;
   useIndividualSharing: boolean;
   useNotifications: boolean;
   useFileFilter: boolean;
@@ -97,7 +97,7 @@ export const configInitialState = {
   tagColors,
   isSidebarExpanded: true,
   currentActionEvent: '',
-  isSharedFoldersExpanded: false,
+  isWorkspacesExpanded: false,
   useIndividualSharing: false,
   useNotifications: false,
   useFileFilter: false,
@@ -197,18 +197,18 @@ export const configSlice = createSlice({
         currentActionEvent: action.payload,
       };
     },
-    setIsSharedFoldersExpanded(state, action: PayloadAction<boolean>) {
+    setIsWorkspacesExpanded(state, action: PayloadAction<boolean>) {
       return {
         ...state,
-        isSharedFoldersExpanded: action.payload,
+        isWorkspacesExpanded: action.payload,
       };
     },
     setPendingArchive(state, action: PayloadAction<IDocument[]>) {
       return {
-            ...state,
-            pendingArchive: action.payload,
-        };
-    }
+        ...state,
+        pendingArchive: action.payload,
+      };
+    },
   },
 });
 
@@ -225,8 +225,8 @@ export const {
   setTagColors,
   setIsSidebarExpanded,
   setCurrentActionEvent,
-  setIsSharedFoldersExpanded,
   setPendingArchive,
+  setIsWorkspacesExpanded,
 } = configSlice.actions;
 
 export const ConfigState = (state: RootState) => state.configState;

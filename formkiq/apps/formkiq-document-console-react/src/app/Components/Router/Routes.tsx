@@ -1,5 +1,7 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import Queues from '../../Views/Workflows/queues';
+import WorkflowDesigner from '../../Views/Workflows/workflowDesigner';
 
 const SignIn = React.lazy(() => import('../../Views/SignIn/sign-in'));
 const ForgotPassword = React.lazy(
@@ -54,6 +56,7 @@ const RoutesMapper = () => {
 
       <Route path="/documents" element={<Documents />}></Route>
       <Route path="/documents/folders/*" element={<Documents />}></Route>
+      <Route path="/documents/queues/*" element={<Documents />}></Route>
       <Route path="/documents/settings" element={<DocumentSettings />}></Route>
       <Route path="/documents/help" element={<DocumentHelp />}></Route>
       <Route path="/documents/new/:extension" element={<DocumentNew />}></Route>
@@ -61,6 +64,10 @@ const RoutesMapper = () => {
       <Route path="/documents/:id/view" element={<DocumentView />}></Route>
       <Route path="/documents" element={<Documents />}></Route>
       <Route path="/my-documents/folders/*" element={<Documents />}></Route>
+      <Route
+        path="/my-documents/queues/:queueId"
+        element={<Documents />}
+      ></Route>
       <Route path="/my-documents" element={<Documents />}></Route>
       <Route
         path="/my-documents/settings"
@@ -77,6 +84,10 @@ const RoutesMapper = () => {
       <Route path="/team-documents" element={<Documents />}></Route>
       <Route path="/team-documents/folders/*" element={<Documents />}></Route>
       <Route
+        path="/team-documents/queues/:queueId"
+        element={<Documents />}
+      ></Route>
+      <Route
         path="/team-documents/settings"
         element={<DocumentSettings />}
       ></Route>
@@ -89,32 +100,34 @@ const RoutesMapper = () => {
       <Route path="/team-documents/:id/view" element={<DocumentView />}></Route>
       <Route path="/team-documents" element={<Documents />}></Route>
 
-      <Route path="/shared-folders/" element={<Documents />}></Route>
-      <Route path="/shared-folders/:siteId" element={<Documents />}></Route>
+      <Route path="/workspaces/" element={<Documents />}></Route>
+      <Route path="/workspaces/:siteId" element={<Documents />}></Route>
       <Route
-        path="/shared-folders/:siteId/folders/*"
+        path="/workspaces/:siteId/folders/*"
         element={<Documents />}
       ></Route>
       <Route
-        path="/shared-folders/:siteId/settings"
+        path="/workspaces/:siteId/queues/:queueId"
+        element={<Documents />}
+      ></Route>
+      <Route
+        path="/workspaces/:siteId/settings"
         element={<DocumentSettings />}
       ></Route>
+      <Route path="/workspaces/:siteId/help" element={<DocumentHelp />}></Route>
       <Route
-        path="/shared-folders/:siteId/help"
-        element={<DocumentHelp />}
-      ></Route>
-      <Route
-        path="/shared-folders/:siteId/new/:extension"
+        path="/workspaces/:siteId/new/:extension"
         element={<DocumentNew />}
       ></Route>
-      <Route path="/shared-folders/:siteId/:id" element={<Documents />}></Route>
+      <Route path="/workspaces/:siteId/:id" element={<Documents />}></Route>
       <Route
-        path="/shared-folders/:siteId/:id/view"
+        path="/workspaces/:siteId/:id/view"
         element={<DocumentView />}
       ></Route>
-      <Route path="/shared-folders/:siteId" element={<Documents />}></Route>
 
       <Route path="/workflows" element={<Workflows />}></Route>
+      <Route path="/workflows/designer" element={<WorkflowDesigner />}></Route>
+      <Route path="/queues" element={<Queues />}></Route>
       <Route path="/integrations/api" element={<ApiExplorer />}></Route>
       <Route path="/integrations/apiKeys" element={<ApiKeys />}></Route>
       <Route path="/integrations/webhooks" element={<Webhooks />}></Route>
