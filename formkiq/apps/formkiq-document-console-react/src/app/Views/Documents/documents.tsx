@@ -17,6 +17,8 @@ import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/rename
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import { CopyButton } from '../../Components/Generic/CopyButton';
 import {
+  ArrowBottom,
+  ArrowRight,
   ChevronLeft,
   ChevronRight,
   Close,
@@ -186,6 +188,7 @@ function Documents() {
   const dispatch = useAppDispatch();
   const [documentListOffsetTop, setDocumentListOffsetTop] = useState<number>(0);
 
+  console.log(user);
   const trackScrolling = useCallback(async () => {
     const bottomRow = (
       document.getElementById('documentsTable') as HTMLTableElement
@@ -1125,10 +1128,21 @@ function Documents() {
                 }`}
                 onClick={ToggleArchiveTab}
               >
-                <span className="mr-1">Create Archive</span>
-                <div className="w-3.5 pt-0.5">
-                  <ChevronRight />
-                </div>
+                {isArchiveTabExpanded ? (
+                  <>
+                    <span className="mr-1">Minimize Archive</span>
+                    <div className="hidden w-3.5 pt-0.5">
+                      <ArrowBottom />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span className="mr-1">Create Archive</span>
+                    <div className="hidden w-3.5 pt-0.5">
+                      <ArrowRight />
+                    </div>
+                  </>
+                )}
               </button>
 
               <div
