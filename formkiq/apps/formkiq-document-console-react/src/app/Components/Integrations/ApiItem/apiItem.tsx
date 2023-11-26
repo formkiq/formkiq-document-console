@@ -408,9 +408,9 @@ function updateRequestsFromForm(
   httpRequest += ' HTTP/1.1\nHost: ' + host.replace(/(^\w+:|^)\/\//, '');
   curlRequest += '-H ';
   if (apiItem.requiresAuthentication) {
-    httpRequest += '\r\nAuthorization: ' + user.idToken;
-    curlRequest += '"Authorization: ' + user.idToken + '" ';
-    fetchHeaders.Authorization = user.idToken;
+    httpRequest += '\r\nAuthorization: ' + user.accessToken;
+    curlRequest += '"Authorization: ' + user.accessToken + '" ';
+    fetchHeaders.Authorization = user.accessToken;
   }
   if (postJson.length > 0) {
     fetchBody = postJson;
