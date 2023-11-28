@@ -113,6 +113,9 @@ const getInitialState = (): Config => {
   let value;
   if (storage.getConfig()) {
     value = storage.getConfig() as Config;
+    if (value.pendingArchive === undefined) {
+      value.pendingArchive = [];
+    }
   } else {
     value = configInitialState;
   }
