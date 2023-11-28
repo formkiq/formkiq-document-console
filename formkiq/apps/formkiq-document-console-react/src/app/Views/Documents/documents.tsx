@@ -17,8 +17,6 @@ import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/rename
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import { CopyButton } from '../../Components/Generic/CopyButton';
 import {
-  ArrowBottom,
-  ArrowRight,
   ChevronLeft,
   ChevronRight,
   Close,
@@ -890,7 +888,6 @@ function Documents() {
     if (!isArchiveTabExpanded) {
       setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
     }
-    console.log(isArchiveTabExpanded);
     setIsArchiveTabExpanded(!isArchiveTabExpanded);
   };
   const deleteFromPendingArchive = (file: IDocument) => {
@@ -965,6 +962,11 @@ function Documents() {
       }
     );
   };
+  const ClearPendingArchive = () => {
+    setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+    dispatch(setPendingArchive([]));
+    setIsArchiveTabExpanded(!isArchiveTabExpanded);
+  };
 
   useEffect(() => {
     if (
@@ -988,11 +990,11 @@ function Documents() {
 
   const PendingArchiveTab = () => {
     return (
-      <div className="w-full h-56 -mt-10 p-4 flex flex-col justify-between">
-        <div className="font-bold text-xl text-gray-900 mb-2">
+      <div className="w-full h-56 p-4 flex flex-col justify-between relative">
+        <div className="absolute flex w-full h-40 justify-center items-center font-bold text-5xl text-gray-100 mb-2">
           Document Archive (ZIP)
         </div>
-        <div className="h-full border-gray-400 border overflow-y-auto">
+        <div className="h-full border-gray-400 border overflow-y-auto z-20">
           {archiveStatus === ARCHIVE_STATUSES.INITIAL ? (
             pendingArchive ? (
               <div className="grid grid-cols-2 2xl:grid-cols-3">
@@ -1070,10 +1072,13 @@ function Documents() {
                   </a>
                 </div>
               ) : (
-                <div className="h-full flex flex-col justify-center">
-                  <a href={archiveDownloadUrl}>
-                    <div className="text-lg text-coreOrange-500 ml-2 text-center hover:underline cursor-pointer">
-                      Download archive
+                <div className="flex w-full pt-10 justify-center items-center">
+                  <a
+                    href={archiveDownloadUrl}
+                    className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-coreOrange-500 hover:text-coreOrange-500"
+                  >
+                    <div className="text-lg ml-2 text-center cursor-pointer">
+                      Download Archive
                     </div>
                   </a>
                 </div>
@@ -1081,17 +1086,24 @@ function Documents() {
             </>
           )}
         </div>
-        {!isCompressButtonDisabled && (
-          <button
-            className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer"
-            onClick={compressDocuments}
-          >
-            <span className="mr-1">Compress</span>
-            <div className="w-3.5 pt-0.5">
-              <ChevronRight />
-            </div>
-          </button>
-        )}
+        <div className="h-12 flex justify-end">
+          {!isCompressButtonDisabled && (
+            <button
+              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-coreOrange-500 hover:text-coreOrange-500"
+              onClick={compressDocuments}
+            >
+              <span>Compress</span>
+            </button>
+          )}
+          {archiveStatus === ARCHIVE_STATUSES.COMPLETE && (
+            <button
+              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-coreOrange-500 hover:text-coreOrange-500"
+              onClick={ClearPendingArchive}
+            >
+              <span>Done</span>
+            </button>
+          )}
+        </div>
       </div>
     );
   };
@@ -1119,32 +1131,36 @@ function Documents() {
         <div className="grow flex flex-col justify-stretch">
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
-            <div className="flex items-center gap-4 pr-8">
-              <button
-                className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer ${
-                  isArchiveTabExpanded
-                    ? 'text-coreOrange-500 border-coreOrange-500'
-                    : 'text-gray-500 border-gray-400'
-                }`}
-                onClick={ToggleArchiveTab}
-              >
-                {isArchiveTabExpanded ? (
-                  <>
-                    <span className="mr-1">Minimize Archive</span>
-                    <div className="hidden w-3.5 pt-0.5">
-                      <ArrowBottom />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <span className="mr-1">Create Archive</span>
-                    <div className="hidden w-3.5 pt-0.5">
-                      <ArrowRight />
-                    </div>
-                  </>
+            <div className="flex items-center gap-4 pr-8 z-30">
+              {archiveStatus !== ARCHIVE_STATUSES.COMPLETE && (
+                <button
+                  className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500`}
+                  onClick={ToggleArchiveTab}
+                >
+                  {isArchiveTabExpanded ? (
+                    <>
+                      <span>Minimize Archive</span>
+                    </>
+                  ) : (
+                    <>
+                      {pendingArchive.length ? (
+                        <span>View Pending Archive</span>
+                      ) : (
+                        <span>Create Archive</span>
+                      )}
+                    </>
+                  )}
+                </button>
+              )}
+              {isArchiveTabExpanded &&
+                archiveStatus === ARCHIVE_STATUSES.INITIAL && (
+                  <button
+                    className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500`}
+                    onClick={ClearPendingArchive}
+                  >
+                    Cancel Archive Creation
+                  </button>
                 )}
-              </button>
-
               <div
                 className={
                   (isTagFilterExpanded
