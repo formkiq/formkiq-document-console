@@ -34,6 +34,7 @@ import { useAuthenticatedState } from '../../Store/reducers/auth';
 import {
   ConfigState,
   setCurrentActionEvent,
+  setPendingArchive,
 } from '../../Store/reducers/config';
 import {
   DataCacheState,
@@ -90,6 +91,7 @@ function Documents() {
     useFileFilter,
     useCollections,
     useSoftDelete,
+    pendingArchive,
   } = useSelector(ConfigState);
   const { allTags } = useSelector(DataCacheState);
 
@@ -136,6 +138,7 @@ function Documents() {
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
+  const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
   const [infoTagEditMode, setInfoTagEditMode] = useState(false);
@@ -881,6 +884,230 @@ function Documents() {
     );
   };
 
+  const ToggleArchiveTab = () => {
+    if (!isArchiveTabExpanded) {
+      setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+    }
+    setIsArchiveTabExpanded(!isArchiveTabExpanded);
+  };
+  const deleteFromPendingArchive = (file: IDocument) => {
+    dispatch(
+      setPendingArchive(
+        pendingArchive.filter((f) => f.documentId !== file.documentId)
+      )
+    );
+  };
+  const addToPendingArchive = (file: IDocument) => {
+    if (pendingArchive) {
+      if (pendingArchive.indexOf(file) === -1) {
+        dispatch(setPendingArchive([...pendingArchive, file]));
+      }
+    } else {
+      dispatch(setPendingArchive([file]));
+    }
+  };
+
+  const ARCHIVE_STATUSES = {
+    INITIAL: 'INITIAL',
+    PENDING: 'PENDING',
+    COMPLETE: 'COMPLETE',
+    ERROR: 'ERROR',
+  };
+  const [archiveStatus, setArchiveStatus] = useState(ARCHIVE_STATUSES.INITIAL);
+  const [intervalId, setIntervalId] = useState<
+    string | number | NodeJS.Timeout | undefined
+  >(0);
+  const [archiveDownloadUrl, setArchiveDownloadUrl] = useState<
+    string | undefined
+  >(undefined);
+  const [isCompressButtonDisabled, setIsCompressButtonDisabled] =
+    useState(true);
+
+  const compressDocuments = () => {
+    setArchiveStatus(ARCHIVE_STATUSES.PENDING);
+    const documentIds: string[] = [];
+    pendingArchive.forEach((document) => {
+      documentIds.push(document.documentId);
+    });
+
+    DocumentsService.compressDocuments(documentIds, currentSiteId).then(
+      (response: any) => {
+        setArchiveStatus(ARCHIVE_STATUSES.PENDING);
+        if (response.status === 201) {
+          let counter = 0;
+          const downloadArchive = async () => {
+            try {
+              await fetch(response.downloadUrl).then((r) => {
+                if (r.ok) {
+                  setArchiveDownloadUrl(response.downloadUrl);
+                  setArchiveStatus(ARCHIVE_STATUSES.COMPLETE);
+                  dispatch(setPendingArchive([]));
+                  clearInterval(downloadInterval);
+                }
+              });
+              if (counter === 120) {
+                setArchiveStatus(ARCHIVE_STATUSES.ERROR);
+                clearInterval(downloadInterval);
+              } else {
+                counter += 1;
+              }
+            } catch (e) {
+              console.log(e, 'error');
+            }
+          };
+          const downloadInterval = setInterval(downloadArchive, 500);
+          setIntervalId(downloadInterval);
+          downloadArchive();
+        }
+      }
+    );
+  };
+  const ClearPendingArchive = () => {
+    setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+    dispatch(setPendingArchive([]));
+    setIsArchiveTabExpanded(!isArchiveTabExpanded);
+  };
+
+  useEffect(() => {
+    if (
+      pendingArchive === undefined ||
+      pendingArchive.length === 0 ||
+      archiveStatus === ARCHIVE_STATUSES.COMPLETE ||
+      archiveStatus === ARCHIVE_STATUSES.PENDING
+    ) {
+      setIsCompressButtonDisabled(true);
+    } else {
+      setIsCompressButtonDisabled(false);
+    }
+
+    if (
+      archiveStatus === ARCHIVE_STATUSES.COMPLETE &&
+      pendingArchive.length > 0
+    ) {
+      setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+    }
+  }, [pendingArchive, archiveStatus, isCompressButtonDisabled]);
+
+  const PendingArchiveTab = () => {
+    return (
+      <div className="w-full h-56 p-4 flex flex-col justify-between relative">
+        <div className="absolute flex w-full h-40 justify-center items-center font-bold text-5xl text-gray-100 mb-2">
+          Document Archive (ZIP)
+        </div>
+        <div className="h-full border-gray-400 border overflow-y-auto z-20">
+          {archiveStatus === ARCHIVE_STATUSES.INITIAL ? (
+            pendingArchive ? (
+              <div className="grid grid-cols-2 2xl:grid-cols-3">
+                {pendingArchive.map((file: IDocument) => (
+                  <div key={file.documentId} className="flex flex-row p-2">
+                    <button
+                      className="w-6 mr-2 text-gray-400 cursor-pointer hover:text-coreOrange-500"
+                      onClick={() => deleteFromPendingArchive(file)}
+                    >
+                      <Close />
+                    </button>
+                    <Link
+                      to={`${currentDocumentsRootUri}/${file.documentId}/view`}
+                      className="cursor-pointer w-16 flex items-center justify-start"
+                    >
+                      <img
+                        src={getFileIcon(file.path)}
+                        className="w-8 inline-block"
+                        alt="icon"
+                      />
+                    </Link>
+                    <Link
+                      to={`${currentDocumentsRootUri}/${file.documentId}/view`}
+                      className="cursor-pointer pt-1.5 flex items-center"
+                      title={file.path.substring(
+                        file.path.lastIndexOf('/') + 1
+                      )}
+                    >
+                      <span>
+                        {file.path.substring(file.path.lastIndexOf('/') + 1)
+                          .length > 40 ? (
+                          <span className="tracking-tightest text-clip overflow-hidden">
+                            {file.path.substring(
+                              file.path.lastIndexOf('/') + 1,
+                              file.path.lastIndexOf('/') + 50
+                            )}
+                            {file.path.substring(file.path.lastIndexOf('/') + 1)
+                              .length > 50 && <span>...</span>}
+                          </span>
+                        ) : (
+                          <span>
+                            {file.path.substring(
+                              file.path.lastIndexOf('/') + 1
+                            )}
+                          </span>
+                        )}
+                      </span>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-md text-gray-500 ml-2">
+                No files in archive
+              </div>
+            )
+          ) : archiveStatus === ARCHIVE_STATUSES.PENDING ? (
+            <div className="h-full flex flex-col justify-center">
+              <Spinner />
+              <div className="text-md text-gray-500 ml-2 text-center">
+                compressing...
+              </div>
+            </div>
+          ) : (
+            <>
+              {archiveStatus === ARCHIVE_STATUSES.ERROR ? (
+                <div className="h-full flex flex-col justify-center font-semibold text-center">
+                  <span className="text-red-600">Error: please try again.</span>
+                  <a
+                    href="JavaScript://"
+                    onClick={compressDocuments}
+                    className="block font-bold hover:underline"
+                  >
+                    retry
+                  </a>
+                </div>
+              ) : (
+                <div className="flex w-full pt-10 justify-center items-center">
+                  <a
+                    href={archiveDownloadUrl}
+                    className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-coreOrange-500 hover:text-coreOrange-500"
+                  >
+                    <div className="text-lg ml-2 text-center cursor-pointer">
+                      Download Archive
+                    </div>
+                  </a>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <div className="h-12 flex justify-end">
+          {!isCompressButtonDisabled && (
+            <button
+              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-coreOrange-500 hover:text-coreOrange-500"
+              onClick={compressDocuments}
+            >
+              <span>Compress</span>
+            </button>
+          )}
+          {archiveStatus === ARCHIVE_STATUSES.COMPLETE && (
+            <button
+              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-coreOrange-500 hover:text-coreOrange-500"
+              onClick={ClearPendingArchive}
+            >
+              <span>Done</span>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const viewDocumentVersion = (versionKey: string) => {
     if (infoDocumentId) {
       if (versionKey !== undefined) {
@@ -901,10 +1128,39 @@ function Documents() {
         <title>Documents</title>
       </Helmet>
       <div className="h-[calc(100vh-3.68rem)] flex">
-        <div className="grow">
+        <div className="grow flex flex-col justify-stretch">
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
-            <div className="flex w-20 items-end">
+            <div className="flex items-center gap-4 pr-8 z-30">
+              {archiveStatus !== ARCHIVE_STATUSES.COMPLETE && (
+                <button
+                  className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500`}
+                  onClick={ToggleArchiveTab}
+                >
+                  {isArchiveTabExpanded ? (
+                    <>
+                      <span>Minimize Archive</span>
+                    </>
+                  ) : (
+                    <>
+                      {pendingArchive.length ? (
+                        <span>View Pending Archive</span>
+                      ) : (
+                        <span>Create Archive</span>
+                      )}
+                    </>
+                  )}
+                </button>
+              )}
+              {isArchiveTabExpanded &&
+                archiveStatus === ARCHIVE_STATUSES.INITIAL && (
+                  <button
+                    className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500`}
+                    onClick={ClearPendingArchive}
+                  >
+                    Cancel Archive Creation
+                  </button>
+                )}
               <div
                 className={
                   (isTagFilterExpanded
@@ -935,6 +1191,11 @@ function Documents() {
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
+              {isArchiveTabExpanded && (
+                <div className="pt-2 pr-8">
+                  <PendingArchiveTab />
+                </div>
+              )}
               <DocumentsTable
                 onDeleteDocument={onDeleteDocument}
                 onRestoreDocument={restoreDocument}
@@ -956,6 +1217,10 @@ function Documents() {
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
+                isArchiveTabExpanded={isArchiveTabExpanded}
+                addToPendingArchive={addToPendingArchive}
+                deleteFromPendingArchive={deleteFromPendingArchive}
+                archiveStatus={archiveStatus}
               />
             </div>
           </div>

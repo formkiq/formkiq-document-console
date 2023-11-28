@@ -263,7 +263,7 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.compressDocuments(
+    return this.getFormkiqClient().documentsApi.postDocumentCompress(
       documentIds,
       siteId
     );

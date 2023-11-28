@@ -36,6 +36,10 @@ type DocumentTableProps = {
   onEditTagsAndMetadataModalClick: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
+  isArchiveTabExpanded: boolean;
+  addToPendingArchive: (file: IDocument) => void;
+  deleteFromPendingArchive: (file: IDocument) => void;
+  archiveStatus: string;
   trackScrolling: () => void;
 };
 
@@ -57,6 +61,10 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
+    isArchiveTabExpanded,
+    addToPendingArchive,
+    deleteFromPendingArchive,
+    archiveStatus,
     trackScrolling,
   } = props;
 
@@ -193,6 +201,10 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onESignaturesModalClick={onESignaturesModalClick}
                 onTagChange={onTagChange}
                 filterTag={filterTag}
+                isArchiveTabExpanded={isArchiveTabExpanded}
+                archiveStatus={archiveStatus}
+                addToPendingArchive={addToPendingArchive}
+                deleteFromPendingArchive={deleteFromPendingArchive}
               />
             ))}
           </tbody>
@@ -233,6 +245,10 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     isSiteReadOnly,
     onMoveModalClick,
     deleteFolder,
+    isArchiveTabExpanded,
+    addToPendingArchive,
+    deleteFromPendingArchive,
+    archiveStatus,
   } = props;
 
   return (
@@ -259,6 +275,10 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               onRestoreDocument={onRestoreDocument}
               onDeleteDocument={onDeleteDocument}
               filterTag={filterTag}
+              isArchiveTabExpanded={isArchiveTabExpanded}
+              archiveStatus={archiveStatus}
+              addToPendingArchive={addToPendingArchive}
+              deleteFromPendingArchive={deleteFromPendingArchive}
             />
           );
         })}

@@ -22,9 +22,10 @@ import {
   getFileIcon,
   isTagValueIncludes,
 } from '../../../helpers/services/toolService';
-import { Info, Share, Star, StarFilled, Trash } from '../../Icons/icons';
+import {Info, Share, Star, StarFilled, Trash, Plus, Close, Minus} from '../../Icons/icons';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
+import { IDocument} from "../../../helpers/types/document";
 
 function DocumentListLine({
   file,
@@ -42,8 +43,11 @@ function DocumentListLine({
   onDocumentWorkflowsModalClick,
   onESignaturesModalClick,
   onTagChange,
-
   leftOffset = 0,
+  isArchiveTabExpanded,
+  addToPendingArchive,
+  deleteFromPendingArchive,
+  archiveStatus
 }: {
   file: any;
   folder: any;
@@ -63,6 +67,10 @@ function DocumentListLine({
   onTagChange: any;
   filterTag: string | null;
   leftOffset?: number;
+  isArchiveTabExpanded?: boolean;
+  addToPendingArchive?: (file: IDocument) => void;
+  deleteFromPendingArchive?: (file: IDocument) => void;
+  archiveStatus?: string;
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
@@ -76,6 +84,7 @@ function DocumentListLine({
     useCollections,
     useSoftDelete,
     useIndividualSharing,
+    pendingArchive
   } = useSelector(ConfigState);
 
   const deleteDocument = () => {
@@ -219,6 +228,9 @@ function DocumentListLine({
   if (file.path.indexOf('/') > -1) {
     lineSubfolderLevel = file.path.split('/').length - 1;
   }
+
+
+
   return (
     <>
       <tr
@@ -229,6 +241,27 @@ function DocumentListLine({
       >
         <td className={`text-gray-800 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
+            {(isArchiveTabExpanded && (archiveStatus === "INITIAL"|| archiveStatus==="COMPLETE")) && (
+              (pendingArchive.indexOf(file) === -1) ?(<div className="p-2 ml-3">
+                <div
+                  className="w-5 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
+                  data-test-id="delete-action"
+                  onClick={addToPendingArchive? ()=>addToPendingArchive(file):undefined}
+                >
+                  <Plus/>
+                </div>
+              </div>
+              ):(<div className="p-2 ml-3">
+                  <div
+                    className="w-5 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
+                    data-test-id="delete-action"
+                    onClick={deleteFromPendingArchive? ()=>deleteFromPendingArchive(file):undefined}
+                  >
+                    <Minus/>
+                  </div>
+                </div>
+              )
+            )}
             {folder !== 'deleted' &&
             folder !== 'shared' &&
             folder !== 'recent' &&
