@@ -22,10 +22,18 @@ import {
   getFileIcon,
   isTagValueIncludes,
 } from '../../../helpers/services/toolService';
-import {Info, Share, Star, StarFilled, Trash, Plus, Close, Minus} from '../../Icons/icons';
+import { IDocument } from '../../../helpers/types/document';
+import {
+  Info,
+  Minus,
+  Plus,
+  Share,
+  Star,
+  StarFilled,
+  Trash,
+} from '../../Icons/icons';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
-import { IDocument} from "../../../helpers/types/document";
 
 function DocumentListLine({
   file,
@@ -47,7 +55,7 @@ function DocumentListLine({
   isArchiveTabExpanded,
   addToPendingArchive,
   deleteFromPendingArchive,
-  archiveStatus
+  archiveStatus,
 }: {
   file: any;
   folder: any;
@@ -84,7 +92,7 @@ function DocumentListLine({
     useCollections,
     useSoftDelete,
     useIndividualSharing,
-    pendingArchive
+    pendingArchive,
   } = useSelector(ConfigState);
 
   const deleteDocument = () => {
@@ -229,8 +237,6 @@ function DocumentListLine({
     lineSubfolderLevel = file.path.split('/').length - 1;
   }
 
-
-
   return (
     <>
       <tr
@@ -241,27 +247,51 @@ function DocumentListLine({
       >
         <td className={`text-gray-800 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
-            {(isArchiveTabExpanded && (archiveStatus === "INITIAL"|| archiveStatus==="COMPLETE")) && (
-              (pendingArchive.indexOf(file) === -1) ?(<div className="p-2 ml-3">
+            {isArchiveTabExpanded &&
+              (archiveStatus === 'INITIAL' || archiveStatus === 'COMPLETE') &&
+              (pendingArchive.indexOf(file) === -1 ? (
                 <div
-                  className="w-5 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
-                  data-test-id="delete-action"
-                  onClick={addToPendingArchive? ()=>addToPendingArchive(file):undefined}
+                  className={
+                    `py-2 ml-3 ` +
+                    (lineSubfolderLevel === pageSubfolderLevel
+                      ? '-mr-2'
+                      : 'mr-2')
+                  }
                 >
-                  <Plus/>
-                </div>
-              </div>
-              ):(<div className="p-2 ml-3">
                   <div
-                    className="w-5 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
+                    className="w-4 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
                     data-test-id="delete-action"
-                    onClick={deleteFromPendingArchive? ()=>deleteFromPendingArchive(file):undefined}
+                    onClick={
+                      addToPendingArchive
+                        ? () => addToPendingArchive(file)
+                        : undefined
+                    }
                   >
-                    <Minus/>
+                    <Plus />
                   </div>
                 </div>
-              )
-            )}
+              ) : (
+                <div
+                  className={
+                    `py-2 ml-3 ` +
+                    (lineSubfolderLevel === pageSubfolderLevel
+                      ? '-mr-2'
+                      : 'mr-2')
+                  }
+                >
+                  <div
+                    className="w-4 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
+                    data-test-id="delete-action"
+                    onClick={
+                      deleteFromPendingArchive
+                        ? () => deleteFromPendingArchive(file)
+                        : undefined
+                    }
+                  >
+                    <Minus />
+                  </div>
+                </div>
+              ))}
             {folder !== 'deleted' &&
             folder !== 'shared' &&
             folder !== 'recent' &&
