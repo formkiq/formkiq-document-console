@@ -188,7 +188,6 @@ function Documents() {
   const dispatch = useAppDispatch();
   const [documentListOffsetTop, setDocumentListOffsetTop] = useState<number>(0);
 
-  console.log(user);
   const trackScrolling = useCallback(async () => {
     const bottomRow = (
       document.getElementById('documentsTable') as HTMLTableElement
@@ -891,6 +890,7 @@ function Documents() {
     if (!isArchiveTabExpanded) {
       setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
     }
+    console.log(isArchiveTabExpanded);
     setIsArchiveTabExpanded(!isArchiveTabExpanded);
   };
   const deleteFromPendingArchive = (file: IDocument) => {
@@ -988,7 +988,7 @@ function Documents() {
 
   const PendingArchiveTab = () => {
     return (
-      <div className="w-full h-56 p-4 flex flex-col justify-between">
+      <div className="w-full h-56 -mt-10 p-4 flex flex-col justify-between">
         <div className="font-bold text-xl text-gray-900 mb-2">
           Document Archive (ZIP)
         </div>
