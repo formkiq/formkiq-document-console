@@ -47,4 +47,4 @@ jobs:
           VERSION: ${{ env.PACKAGE_VERSION }}
         run: |
           aws s3 cp formkiq/dist/apps/formkiq-document-console-react/formkiq-console.zip s3://${S3_BUCKET}/formkiq-console/v${VERSION}/formkiq-console.zip --acl public-read
-          aws s3api put-object-legal-hold --bucket ${S3_BUCKET} --key formkiq-console/v${VERSION}/formkiq-console.zip
+          aws s3api put-object-legal-hold --bucket ${S3_BUCKET} --key formkiq-console/v${VERSION}/formkiq-console.zip --legal-hold Status=ON
