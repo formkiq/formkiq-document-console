@@ -46,6 +46,7 @@ import {
   deleteDocument,
   fetchDeleteFolder,
   fetchDocuments,
+  setDocumentLoadingStatusPending,
   setDocuments,
   updateDocumentsList,
 } from '../../Store/reducers/documentsList';
@@ -205,6 +206,7 @@ function Documents() {
       nextToken &&
       loadingStatus === RequestStatus.fulfilled
     ) {
+      dispatch(setDocumentLoadingStatusPending());
       if (nextToken) {
         await dispatch(
           fetchDocuments({
@@ -1131,7 +1133,7 @@ function Documents() {
         <div className="grow flex flex-col justify-stretch">
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
-            <div className="flex items-center gap-4 pr-8 z-30">
+            <div className="flex items-center gap-4 pr-8 z-10">
               {archiveStatus !== ARCHIVE_STATUSES.COMPLETE && (
                 <button
                   className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500`}

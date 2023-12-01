@@ -509,6 +509,12 @@ export const documentsListSlice = createSlice({
   name: 'documentsList',
   initialState: defaultState,
   reducers: {
+    setDocumentLoadingStatusPending: (state) => {
+      return {
+        ...state,
+        loadingStatus: RequestStatus.pending,
+      };
+    },
     setDocuments: (state, action: PayloadAction<any>) => {
       if (action.payload) {
         const {
@@ -527,6 +533,8 @@ export const documentsListSlice = createSlice({
         if (next) {
           page = 1;
           isLastSearchPageLoaded = false;
+        } else {
+          isLastSearchPageLoaded = true;
         }
 
         if (documents) {
@@ -1024,10 +1032,17 @@ export const documentsListSlice = createSlice({
         loadingStatus: RequestStatus.rejected,
       };
     });
+    builder.addCase(fetchDocuments.pending, (state) => {
+      return {
+        ...state,
+        nextLoadingStatus: RequestStatus.pending,
+      };
+    });
   },
 });
 
 export const {
+  setDocumentLoadingStatusPending,
   setDocuments,
   addDocumentTag,
   removeDocumentTag,

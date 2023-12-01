@@ -209,6 +209,11 @@ export const DocumentsTable = (props: DocumentTableProps) => {
             ))}
           </tbody>
         </table>
+        {loadingStatus === RequestStatus.pending && (
+          <div className="absolute bottom-0 w-full flex justify-center">
+            <Spinner />
+          </div>
+        )}
         <FolderDropWrapper
           className="absolute w-full h-full"
           folder={subfolderUri}
@@ -216,11 +221,11 @@ export const DocumentsTable = (props: DocumentTableProps) => {
           targetSiteId={currentSiteId}
         ></FolderDropWrapper>
       </div>
+      <CustomDragLayer />
       <div className="pt-1">
         &nbsp;
         {loadingStatus === RequestStatus.pending ? <Spinner /> : ''}
       </div>
-      <CustomDragLayer />
     </div>
   );
 };
