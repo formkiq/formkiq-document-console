@@ -9,8 +9,17 @@ export const EmptyDocumentsTable = ({
   queueId,
   formkiqVersion,
 }: EmptyDocumentsTableProps) => {
+  // TODO: "React-ify"
+  document.getElementById('emptyDocumentsTable')?.classList.add('hidden');
+  setTimeout(() => {
+    document.getElementById('emptyDocumentsTable')?.classList.remove('hidden');
+  }, 400);
+
   return (
-    <div className="text-center mt-4 justify-center">
+    <div
+      id="emptyDocumentsTable"
+      className="hidden text-center mt-4 justify-center"
+    >
       <div role="status">
         <div className="overflow-x-auto flex justify-center">
           {queueId.length ? (
