@@ -48,6 +48,7 @@ export const fetchDocuments = createAsyncThunk(
     }
     if (searchWord) {
       if (searchFolder && searchFolder.length) {
+        // TODO: see if now implemented on backend
         // NOTE: not yet implemented on backend
         DocumentsService.searchDocumentsInFolder(
           siteId,
