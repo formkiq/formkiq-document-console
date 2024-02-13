@@ -224,7 +224,7 @@ export class DocumentsService {
     const contentLength = file.size;
     const actions = [] as any[];
     if (formkiqVersion.modules.indexOf('fulltext') > -1) {
-      // NOTE: future versions may automatically add all documents to OpenSearch
+      // NOTE: 'fulltext' has been replaced with 'opensearch' and 'typesense', but this should not trigger for now
       actions.push({ type: 'fulltext' });
     }
     const uploadBody: DocumentUploadBody = {
@@ -599,7 +599,10 @@ export class DocumentsService {
         customIncludeTags.push(allTag.value);
       }
     });
-    if (formkiqVersion.modules.indexOf('fulltext') === -1) {
+    if (
+      formkiqVersion.modules.indexOf('opensearch') === -1 ||
+      formkiqVersion.modules.indexOf('typesense') === -1
+    ) {
       const searchBody = {
         query: {
           text: searchText + '*',
@@ -1118,11 +1121,28 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static addWorkflow(name: string, siteId: string): Promise<any> {
+  public static addWorkflow(workflow: any, siteId: string): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().workflowsApi.addWorkflow({ name }, siteId);
+    return this.getFormkiqClient().workflowsApi.addWorkflow(workflow, siteId);
+  }
+
+  @formkiqAPIHandler
+  public static putWorkflow(
+    workflowId: string,
+    addWorkflowParameters: any,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+
+    return this.getFormkiqClient().workflowsApi.putWorkflow(
+      workflowId,
+      addWorkflowParameters,
+      siteId
+    );
   }
 
   @formkiqAPIHandler

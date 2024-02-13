@@ -9,14 +9,12 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
-import { OcrContentTypes } from '../../../helpers/constants/contentTypes';
 import {
   DocumentUploadedInfo,
   DocumentsService,
   IFileUploadData,
 } from '../../../helpers/services/documentsService';
 import { formatDate } from '../../../helpers/services/toolService';
-import { Checkmark, Spinner } from '../../Icons/icons';
 
 const foldersWithNoUpload = ['favorites', 'shared', 'deleted'];
 
@@ -118,8 +116,8 @@ export default function UploadModal({
       if (response.chatGptApiKey) {
         setIsAiScanEnabled(true);
       }
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
     if (uploadData.event) {
@@ -199,6 +197,7 @@ export default function UploadModal({
           DocumentsService.getDocumentsById(ids, siteId).then(
             (uploaded: []) => {
               setUploadProcess([]);
+              // NOTE: 'fulltext' has been replaced with 'opensearch' and 'typesense', but this should not trigger for now
               if (formkiqVersion.modules?.indexOf('fulltext') > -1) {
                 const actions = [{ type: 'fulltext' }];
                 uploaded.forEach((doc: any) => {
@@ -258,8 +257,8 @@ export default function UploadModal({
               const actionCheckboxTypesense = document.getElementById(
                 'actionCheckboxTypesense'
               );
-              const actionCheckboxFulltext = document.getElementById(
-                'actionCheckboxFulltext'
+              const actionCheckboxOpensearch = document.getElementById(
+                'actionCheckboxOpensearch'
               );
               const actionCheckboxDocumentTypeTag = document.getElementById(
                 'actionCheckboxDocumentTypeTag'
@@ -284,8 +283,8 @@ export default function UploadModal({
               if (
                 (actionCheckboxTypesense &&
                   (actionCheckboxTypesense as HTMLInputElement).checked) ||
-                (actionCheckboxFulltext &&
-                  (actionCheckboxFulltext as HTMLInputElement).checked)
+                (actionCheckboxOpensearch &&
+                  (actionCheckboxOpensearch as HTMLInputElement).checked)
               ) {
                 actions.push({
                   type: 'fulltext',
@@ -396,37 +395,6 @@ export default function UploadModal({
         <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400">
           {formatDate(file.insertedDate)}
         </td>
-        <td className="hidden border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400 text-center">
-          {formkiqVersion.modules?.indexOf('ocr') > -1 &&
-            formkiqVersion.modules?.indexOf('fulltext') > -1 &&
-            OcrContentTypes.indexOf(file.contentType) > -1 && (
-              <>
-                {file.processingOcrWorkflow && <Spinner />}
-                {file.submittedOcrWorkflow && (
-                  <div className="w-full flex">
-                    Fulltext:
-                    <span className="w-5 pl-1 text-green-500">
-                      <Checkmark />
-                    </span>
-                  </div>
-                )}
-                {!file.processingOcrWorkflow && !file.submittedOcrWorkflow && (
-                  <button
-                    type="button"
-                    className="mt-3 inline-flex flex-wrap w-full justify-center rounded-md border border-gray-300 bg-coreOrange-500 px-3 py-1 text-base font-semibold text-white shadow-sm hover:bg-coreOrange-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                    onClick={(event) => {
-                      addToOcr(event, file);
-                    }}
-                  >
-                    Submit for OCR Processing
-                    <small className="block text-xs">
-                      (used in fulltext search)
-                    </small>
-                  </button>
-                )}
-              </>
-            )}
-        </td>
       </tr>
     );
   };
@@ -535,50 +503,53 @@ export default function UploadModal({
                             </label>
                           </div>
                         )}
-                        {formkiqVersion.modules?.indexOf('typesense') > -1 && (
+                        {formkiqVersion.modules?.indexOf('typesense') > -1 &&
+                          formkiqVersion.modules?.indexOf('opensearch') ===
+                            -1 && (
+                            <div className="px-4">
+                              <input
+                                id="actionCheckboxTypesense"
+                                type="checkbox"
+                              />
+                              <label
+                                htmlFor="actionCheckboxTypesense"
+                                className="pl-2 font-semibold cursor-pointer"
+                              >
+                                Add Content to Fulltext Search
+                              </label>
+                            </div>
+                          )}
+                        {formkiqVersion.modules?.indexOf('opensearch') > -1 && (
                           <div className="px-4">
                             <input
-                              id="actionCheckboxTypesense"
+                              id="actionCheckboxOpensearch"
                               type="checkbox"
                             />
                             <label
-                              htmlFor="actionCheckboxTypesense"
+                              htmlFor="actionCheckboxOpensearch"
                               className="pl-2 font-semibold cursor-pointer"
                             >
                               Add Content to Fulltext Search
                             </label>
                           </div>
                         )}
-                        {formkiqVersion.modules?.indexOf('fulltext') > -1 && (
+                        {isAiScanEnabled ? (
                           <div className="px-4">
                             <input
-                              id="actionCheckboxFulltext"
+                              id="actionCheckboxDocumentTypeTag"
                               type="checkbox"
                             />
                             <label
-                              htmlFor="actionCheckboxFulltext"
+                              htmlFor="actionCheckboxDocumentTypeTag"
                               className="pl-2 font-semibold cursor-pointer"
                             >
-                              Add Content to Fulltext Search
+                              Use Content to Determine Document Type
+                              <span className="text-xs block">
+                                (requires OpenAI API Key)
+                              </span>
                             </label>
                           </div>
-                        )}
-                        {isAiScanEnabled ? 
-                          <div className="px-4">
-                          <input
-                            id="actionCheckboxDocumentTypeTag"
-                            type="checkbox"
-                          />
-                          <label
-                            htmlFor="actionCheckboxDocumentTypeTag"
-                            className="pl-2 font-semibold cursor-pointer"
-                          >
-                            Use Content to Determine Document Type
-                            <span className="text-xs block">
-                              (requires OpenAI API Key)
-                            </span>
-                          </label>
-                        </div> : undefined}
+                        ) : undefined}
                       </div>
                     </div>
                     <div>
