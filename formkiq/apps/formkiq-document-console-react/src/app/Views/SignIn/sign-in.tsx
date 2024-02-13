@@ -138,7 +138,16 @@ export function SignIn() {
                     user.currentSiteId = user.defaultSiteId;
                     user.sites = sitesResponse.sites;
                   }
-                  dispatch(login(user));
+                  if (user.sites.length) {
+                    dispatch(login(user));
+                  } else {
+                    dispatch(
+                      openDialog({
+                        dialogTitle:
+                          'No access is allowed to this application for this user. Please contact your administrator.',
+                      })
+                    );
+                  }
                 });
               });
             } else {
@@ -204,7 +213,16 @@ export function SignIn() {
                     user.currentSiteId = user.defaultSiteId;
                     user.sites = sitesResponse.sites;
                   }
-                  dispatch(login(user));
+                  if (user.sites.length) {
+                    dispatch(login(user));
+                  } else {
+                    dispatch(
+                      openDialog({
+                        dialogTitle:
+                          'No access is allowed to this application for this user. Please contact your administrator.',
+                      })
+                    );
+                  }
                 });
               });
             } else {
