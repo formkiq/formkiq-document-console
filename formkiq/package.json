@@ -1,6 +1,6 @@
 {
   "name": "formkiq",
-  "version": "3.4.0",
+  "version": "3.3.2",
   "license": "MIT",
   "scripts": {
     "start": "nx serve",
