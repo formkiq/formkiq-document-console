@@ -1,11 +1,12 @@
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { ConfigState } from '../../Store/reducers/config';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
 
-export function ForgotPassword() {
+export function RequestPasswordChange() {
   const {
     register,
     formState: { errors },
@@ -13,6 +14,7 @@ export function ForgotPassword() {
   } = useForm();
   const dispatch = useAppDispatch();
   const { authApi } = useSelector(ConfigState);
+  const { pathname } = useLocation();
 
   const onSubmit = async (data: any) => {
     const body = {
@@ -50,13 +52,19 @@ export function ForgotPassword() {
   return (
     <>
       <Helmet>
-        <title>Forgot Password</title>
+        <title>
+          {pathname === '/forgot-password'
+            ? 'Forgot Password'
+            : 'Reset Password'}
+        </title>
       </Helmet>
       <div className="flex flex-col lg:flex-row">
         <div className="mt-8 h-screen flex-1 bg-white p-5">
           <div className="font-bold text-lg text-center mb-8">
-            <span className="text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
-              Forgot Your Password?
+            <span className="text-transparent text-2xl bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+              {pathname === '/forgot-password'
+                ? 'Forgot Your Password?'
+                : 'Your temporary password has expired.'}
             </span>
             <small className="block">
               Enter your email address to receive a link to reset your password
@@ -111,4 +119,4 @@ export function ForgotPassword() {
   );
 }
 
-export default ForgotPassword;
+export default RequestPasswordChange;

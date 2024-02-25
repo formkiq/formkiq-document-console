@@ -4,8 +4,8 @@ import Queues from '../../Views/Workflows/queues';
 import WorkflowDesigner from '../../Views/Workflows/workflowDesigner';
 
 const SignIn = React.lazy(() => import('../../Views/SignIn/sign-in'));
-const ForgotPassword = React.lazy(
-  () => import('../../Views/SignIn/forgot-password')
+const RequestPasswordChange = React.lazy(
+  () => import('../../Views/SignIn/request-password-change')
 );
 const ChangePassword = React.lazy(
   () => import('../../Views/SignIn/change-password')
@@ -46,7 +46,11 @@ const RoutesMapper = () => {
   return (
     <Routes>
       <Route path="/sign-in" element={<SignIn />}></Route>
-      <Route path="/forgot-password" element={<ForgotPassword />}></Route>
+      <Route
+        path="/forgot-password"
+        element={<RequestPasswordChange />}
+      ></Route>
+      <Route path="/reset-password" element={<RequestPasswordChange />}></Route>
       <Route path="/change-password" element={<ChangePassword />}></Route>
       <Route
         path="/confirm-registration"
