@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
@@ -30,6 +30,12 @@ export function ConfirmRegistration() {
   const { formkiqClient } = useSelector(DataCacheState);
   const { user } = useSelector(AuthState);
   const { documentApi, userPoolId, clientId } = useSelector(ConfigState);
+
+  useEffect(() => {
+    if (!session || session === '0') {
+      navigate('/reset-password');
+    }
+  }, []);
 
   const onSubmit = async (data: any) => {
     let newformkiqClient = formkiqClient;

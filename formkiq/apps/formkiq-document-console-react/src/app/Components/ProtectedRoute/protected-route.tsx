@@ -5,6 +5,7 @@ import { AuthState } from '../../Store/reducers/auth';
 const publicLocations: string[] = [
   '/sign-in',
   '/forgot-password',
+  '/reset-password',
   '/change-password',
   '/confirm-registration',
 ];
