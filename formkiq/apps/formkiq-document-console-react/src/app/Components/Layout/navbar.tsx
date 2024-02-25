@@ -219,6 +219,20 @@ function Navbar() {
     }
   };
 
+  const [hasDocumentVersions, setHasDocumentVersions] = useState(false);
+
+  useEffect(() => {
+    DocumentsService.getDocumentVersions(documentId, currentSiteId).then(
+      (response: any) => {
+        if (response.documents && response.documents.length > 0) {
+          setHasDocumentVersions(true);
+        } else {
+          setHasDocumentVersions(false);
+        }
+      }
+    );
+  }, [documentId]);
+
   return (
     user && (
       <div className="flex w-full h-14.5">
@@ -471,6 +485,25 @@ function Navbar() {
                                     download
                                   </span>
                                 </span>
+                                {hasDocumentVersions && (
+                                  <span className="pl-6">
+                                    <a
+                                      href={
+                                        siteDocumentsRootUri +
+                                        '/folders/' +
+                                        currentDocumentPath.substring(
+                                          0,
+                                          currentDocumentPath.lastIndexOf('/')
+                                        ) +
+                                        '#history_id=' +
+                                        documentId
+                                      }
+                                      className="text-sm text-gray-500 hover:text-coreOrange-600 cursor-pointer whitespace-nowrap"
+                                    >
+                                      view versions
+                                    </a>
+                                  </span>
+                                )}
                               </span>
                             ) : (
                               <span></span>
