@@ -268,6 +268,9 @@ function Documents() {
   useEffect(() => {
     if (hash.indexOf('#id=') > -1) {
       setInfoDocumentId(hash.substring(4));
+    } else if (hash.indexOf('#history_id') > -1) {
+      setInfoDocumentId(hash.substring(12));
+      setInfoDocumentView('history');
     } else {
       setInfoDocumentId('');
     }
