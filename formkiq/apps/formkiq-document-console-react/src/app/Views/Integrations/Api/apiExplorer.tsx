@@ -14,6 +14,7 @@ import {
   deleteDocumentVersionApiItem,
   deleteFolderApiItem,
   deleteFolderDeprecatedApiItem,
+  deleteQueueApiItem,
   deleteShareApiItem,
   deleteTagSchemaApiItem,
   deleteWebhookApiItem,
@@ -25,6 +26,13 @@ import {
   documentsTagsPatchApiItem,
   fulltextQueryApiItem,
   getApiKeysApiItem,
+  getCaseApiItem,
+  getCaseDocumentsApiItem,
+  getCaseNigoDocumentsApiItem,
+  getCaseNigosApiItem,
+  getCaseTaskDocumentsApiItem,
+  getCaseTasksApiItem,
+  getCasesApiItem,
   getConfigurationApiItem,
   getDocumentActionsApiItem,
   getDocumentApiItem,
@@ -40,6 +48,7 @@ import {
   getDocumentsInQueueApiItem,
   getFoldersApiItem,
   getNewDocumentUploadApiItem,
+  getQueueApiItem,
   getQueuesApiItem,
   getSharesApiItem,
   getSitesApiItem,
@@ -418,6 +427,8 @@ export function ApiExplorer() {
                 <ApiItem apiItem={postDocumentWorkflowApiItem} sites={sites} />
                 <ApiItem apiItem={getQueuesApiItem} sites={sites} />
                 <ApiItem apiItem={postQueuesApiItem} sites={sites} />
+                <ApiItem apiItem={getQueueApiItem} sites={sites} />
+                <ApiItem apiItem={deleteQueueApiItem} sites={sites} />
                 <ApiItem apiItem={getDocumentsInQueueApiItem} sites={sites} />
                 <ApiItem
                   apiItem={getWorkflowsInDocumentApiItem}
@@ -458,6 +469,20 @@ export function ApiExplorer() {
               <div className="w-4 border-l"></div>
               <div className="grow">
                 <ApiItem apiItem={getVersionApiItem} sites={sites} />
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Cases">
+            <div className="ml-2 mb-4 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={getCasesApiItem} sites={sites} />
+                <ApiItem apiItem={getCaseApiItem} sites={sites} />
+                <ApiItem apiItem={getCaseDocumentsApiItem} sites={sites} />
+                <ApiItem apiItem={getCaseTasksApiItem} sites={sites} />
+                <ApiItem apiItem={getCaseTaskDocumentsApiItem} sites={sites} />
+                <ApiItem apiItem={getCaseNigosApiItem} sites={sites} />
+                <ApiItem apiItem={getCaseNigoDocumentsApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>
