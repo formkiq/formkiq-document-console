@@ -600,7 +600,7 @@ export class DocumentsService {
       }
     });
     if (
-      formkiqVersion.modules.indexOf('opensearch') === -1 ||
+      formkiqVersion.modules.indexOf('opensearch') === -1 &&
       formkiqVersion.modules.indexOf('typesense') === -1
     ) {
       const searchBody = {
