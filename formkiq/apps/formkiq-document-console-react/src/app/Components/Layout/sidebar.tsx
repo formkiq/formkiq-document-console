@@ -750,7 +750,7 @@ export function Sidebar() {
             </li>
             {integrationsExpanded && (
               <>
-                <li className="hidden w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/workflows"
                     className={({ isActive }) =>
@@ -772,7 +772,7 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="hidden w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-6 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/queues"
                     className={({ isActive }) =>
@@ -794,7 +794,7 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="mt-4 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"
                     data-test-id="nav-api-explorer"
