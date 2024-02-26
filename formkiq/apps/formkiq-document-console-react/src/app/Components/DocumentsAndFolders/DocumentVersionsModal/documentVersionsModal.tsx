@@ -1,6 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import moment from 'moment';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { InlineViewableContentTypes } from '../../../helpers/constants/contentTypes';
@@ -32,6 +33,7 @@ export default function DocumentVersionsModal({
   const closeDialog = () => {
     onClose();
   };
+  const navigate = useNavigate();
 
   const doneButtonRef = useRef() as React.MutableRefObject<HTMLButtonElement>;
 
@@ -81,15 +83,21 @@ export default function DocumentVersionsModal({
   const viewDocumentVersion = (event: any, versionKey: string) => {
     if (value) {
       if (versionKey !== undefined) {
+        /*
         window.open(
           `${window.location.origin}${documentsRootUri}/${value.documentId}/view?versionKey=${versionKey}`
         );
-        // navigate(`/documents/${value.documentId}/view?versionKey=${versionKey}`)
+        */
+        navigate(
+          `${documentsRootUri}/${value.documentId}/view?versionKey=${versionKey}`
+        );
       } else {
+        /*
         window.open(
           `${window.location.origin}${documentsRootUri}/${value.documentId}/view`
         );
-        // navigate(`/documents/${value.documentId}/view`)
+        */
+        navigate(`${documentsRootUri}/${value.documentId}/view`);
       }
     }
   };

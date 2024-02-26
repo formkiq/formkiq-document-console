@@ -1116,13 +1116,11 @@ function Documents() {
   const viewDocumentVersion = (versionKey: string) => {
     if (infoDocumentId) {
       if (versionKey !== undefined) {
-        window.open(
-          `${window.location.origin}${currentDocumentsRootUri}/${infoDocumentId}/view?versionKey=${versionKey}`
+        navigate(
+          `${currentDocumentsRootUri}/${infoDocumentId}/view?versionKey=${versionKey}`
         );
       } else {
-        window.open(
-          `${window.location.origin}${currentDocumentsRootUri}/${infoDocumentId}/view`
-        );
+        navigate(`${currentDocumentsRootUri}/${infoDocumentId}/view`);
       }
     }
   };
