@@ -26,6 +26,7 @@ import {
   Bell,
   Documents,
   Recent,
+  Rules,
   Settings,
   Share,
   ShareHand,
@@ -205,6 +206,27 @@ function Navbar() {
     );
   };
 
+  const changeSiteId = (event: any) => {
+    const newSiteId = event.target.options[event.target.selectedIndex].value;
+    let newDocumentsRootUri;
+    if (newSiteId === user?.email) {
+      newDocumentsRootUri = location.pathname.split('/')[1];
+    } else if (newSiteId === 'default') {
+      newDocumentsRootUri = location.pathname.split('/')[1];
+    } else {
+      newDocumentsRootUri =
+        location.pathname.split('/')[1] + '/workspaces/' + newSiteId;
+    }
+    navigate(
+      {
+        pathname: `${newDocumentsRootUri}`,
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
   const DownloadDocument = () => {
     if (documentId.length) {
       DocumentsService.getDocumentUrl(
@@ -350,12 +372,18 @@ function Navbar() {
                     <>
                       {locationPrefix === '/workflows' ||
                       locationPrefix === '/integrations' ||
-                      locationPrefix === '/account' ? (
+                      locationPrefix === '/account' ||
+                      locationPrefix === 'rulesets' ? (
                         <>
                           <div className="w-6 mr-1 text-coreOrange-600">
                             {pathname.indexOf('/workflows') > -1 && (
                               <div className="w-5">
                                 <Workflow />
+                              </div>
+                            )}
+                            {pathname.indexOf('/rulesets') > -1 && (
+                              <div className="w-5">
+                                <Rules />
                               </div>
                             )}
                             {pathname.indexOf('/integrations/api') > -1 &&
@@ -381,7 +409,56 @@ function Navbar() {
                                 <Settings />
                               </div>
                             )}
+                            {pathname.indexOf('/rulesets') > -1 && (
+                              <span>Rulesets</span>
+                            )}
                           </div>
+
+                          {pathname.indexOf('/rulesets') > -1 &&
+                            ((hasUserSite && hasDefaultSite) ||
+                              (hasUserSite && hasWorkspaces) ||
+                              (hasDefaultSite && hasWorkspaces) ||
+                              (hasWorkspaces && workspaceSites.length > 1)) && (
+                              <select
+                                data-test-id="system-subfolder-select"
+                                className="ml-4 text-xs bg-gray-100 px-2 py-1 rounded-md"
+                                value={currentSiteId}
+                                onChange={(event) => {
+                                  changeSiteId(event);
+                                }}
+                              >
+                                {hasUserSite && (
+                                  <option value={user?.email}>
+                                    My Documents
+                                  </option>
+                                )}
+                                {hasUserSite && hasDefaultSite && (
+                                  <option value="default">
+                                    Team Documents
+                                  </option>
+                                )}
+                                {!hasUserSite && hasDefaultSite && (
+                                  <option value="default">Documents</option>
+                                )}
+                                {hasWorkspaces && workspaceSites.length > 0 && (
+                                  <>
+                                    {workspaceSites.map(
+                                      (workspaceSite, i: number) => {
+                                        return (
+                                          <option
+                                            key={i}
+                                            value={workspaceSite.siteId}
+                                          >
+                                            {workspaceSite.siteId}
+                                          </option>
+                                        );
+                                      }
+                                    )}
+                                  </>
+                                )}
+                              </select>
+                            )}
+
                           <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
                             {pathname.indexOf('/workflows') > -1 && (
                               <span>Workflows</span>

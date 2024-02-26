@@ -10,6 +10,8 @@ export interface ApiItem {
   requiresDocumentID: boolean;
   requiresWebhookID: boolean;
   requiresWorkflowID: boolean;
+  requiresRulesetID: boolean;
+  requiresRuleID: boolean;
   requiresCaseID: boolean;
   requiresTaskID: boolean;
   requiresNigoID: boolean;
@@ -1211,6 +1213,131 @@ export const deleteApiKeyApiItem = {
   username: 'Cognito User',
   requiresAuthentication: true,
   license: 'Core',
+};
+
+export const getRulesetsApiItem = {
+  method: 'GET',
+  path: '/rulesets',
+  description: 'Returns a list of rulesets',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const postRulesetsApiItem = {
+  method: 'POST',
+  path: '/rulesets',
+  description: 'Create a new ruleset',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"ruleset": {"description": "Test Ruleset", "priority": 0, "version": 0,  "status": "ACTIVE"  }}',
+  license: 'Pro|Enterprise',
+};
+
+export const getRulesetApiItem = {
+  method: 'GET',
+  path: '/rulesets/ RULESET_ID ',
+  description: 'Returns a ruleset',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresRulesetID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const patchRulesetApiItem = {
+  method: 'PATCH',
+  path: '/rulesets/ RULESET_ID ',
+  description: 'Updates (by replacing) a ruleset',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresRulesetID: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{ "ruleset": { "description": "Test Ruleset", "priority": 0, "version": 0, "status": "ACTIVE" }}',
+  license: 'Pro|Enterprise',
+};
+
+export const deleteRulesetApiItem = {
+  method: 'DELETE',
+  path: '/rulesets/ RULESET_ID ',
+  description: 'Deletes a ruleset',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresRulesetID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getRulesApiItem = {
+  method: 'GET',
+  path: '/rulesets/ RULESET_ID /rules',
+  description: 'Returns a list of rules in a ruleset',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresRulesetID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const postRuleApiItem = {
+  method: 'POST',
+  path: '/rulesets/ RULESET_ID /rules',
+  description: 'Create a new rule',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  requiresRulesetID: true,
+  defaultPostJsonValue:
+    '{ "rule": { "priority": 0, "description": "Test Rule", "workflowId": "Test Workflow Id", "status": "ACTIVE", "conditions": { "must": [{ "attribute": "TEXT", "fieldName": "Test Field Name", "value": "Test Value", "operation": "EQ" }]}}}',
+  license: 'Pro|Enterprise',
+};
+
+export const getRuleApiItem = {
+  method: 'GET',
+  path: '/rulesets/ RULESET_ID /rules/ RULE_ID ',
+  description: 'Returns a rule in a ruleset',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresRulesetID: true,
+  requiresRuleID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const patchRuleApiItem = {
+  method: 'PATCH',
+  path: '/rulesets/ RULESET_ID /rules/ RULE_ID ',
+  description: 'Updates a rule',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresRulesetID: true,
+  requiresRuleID: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{ "rule": { "priority": 0, "description": "Test Rule", "workflowId": "Test Workflow Id", "status": "ACTIVE", "conditions": { "must": [{ "attribute": "TEXT", "fieldName": "Test Field Name", "value": "Test Value", "operation": "EQ" }]}}}',
+  license: 'Pro|Enterprise',
+};
+
+export const deleteRuleApiItem = {
+  method: 'DELETE',
+  path: '/rulesets/ RULESET_ID /rules/ RULE_ID ',
+  description: 'Deletes a rule',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresRulesetID: true,
+  requiresRuleID: true,
+  license: 'Pro|Enterprise',
 };
 
 export const getCasesApiItem = {

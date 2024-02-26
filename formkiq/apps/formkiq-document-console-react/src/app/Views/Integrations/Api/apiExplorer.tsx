@@ -16,6 +16,8 @@ import {
   deleteFolderApiItem,
   deleteFolderDeprecatedApiItem,
   deleteQueueApiItem,
+  deleteRuleApiItem,
+  deleteRulesetApiItem,
   deleteShareApiItem,
   deleteTagSchemaApiItem,
   deleteWebhookApiItem,
@@ -52,6 +54,10 @@ import {
   getNewDocumentUploadApiItem,
   getQueueApiItem,
   getQueuesApiItem,
+  getRuleApiItem,
+  getRulesApiItem,
+  getRulesetApiItem,
+  getRulesetsApiItem,
   getSharesApiItem,
   getSitesApiItem,
   getTagSchemaApiItem,
@@ -67,6 +73,8 @@ import {
   moveDocumentApiItem,
   patchDocumentApiItem,
   patchDocumentFulltextApiItem,
+  patchRuleApiItem,
+  patchRulesetApiItem,
   patchWebhookApiItem,
   postApiKeysApiItem,
   postConfigurationApiItem,
@@ -81,6 +89,8 @@ import {
   postPrivateWebhooksApiItem,
   postPublicWebhooksApiItem,
   postQueuesApiItem,
+  postRuleApiItem,
+  postRulesetsApiItem,
   postSearchIndices,
   postShareFolderApiItem,
   postTagSchemasApiItem,
@@ -415,6 +425,23 @@ export function ApiExplorer() {
                     </div>
                   </div>
                 </ApiSegment>
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Rulesets">
+            <div className="ml-2 mb-4 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={getRulesetsApiItem} sites={sites} />
+                <ApiItem apiItem={postRulesetsApiItem} sites={sites} />
+                <ApiItem apiItem={getRulesetApiItem} sites={sites} />
+                <ApiItem apiItem={patchRulesetApiItem} sites={sites} />
+                <ApiItem apiItem={deleteRulesetApiItem} sites={sites} />
+                <ApiItem apiItem={getRulesApiItem} sites={sites} />
+                <ApiItem apiItem={postRuleApiItem} sites={sites} />
+                <ApiItem apiItem={getRuleApiItem} sites={sites} />
+                <ApiItem apiItem={patchRuleApiItem} sites={sites} />
+                <ApiItem apiItem={deleteRuleApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>

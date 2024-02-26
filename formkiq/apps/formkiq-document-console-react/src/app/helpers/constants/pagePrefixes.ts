@@ -8,6 +8,7 @@ export const DocumentsAndFoldersPrefixes: string[] = [
 export const WorkflowsAndIntegrationsPrefixes: string[] = [
   '/workflows',
   '/integrations',
+  '/rulesets',
 ];
 
 export const AccountAndSettingsPrefixes: string[] = ['/account', '/settings'];

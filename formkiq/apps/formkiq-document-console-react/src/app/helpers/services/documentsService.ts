@@ -1292,4 +1292,152 @@ export class DocumentsService {
       carbonCopies
     );
   }
+
+  @formkiqAPIHandler
+  public static async getRulesets(
+    siteId: string,
+    next = null,
+    limit = 20
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().rulesetsApi.getRulesets(siteId, next, limit);
+  }
+
+  @formkiqAPIHandler
+  public static async getRuleset(
+    rulesetId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().rulesetsApi.getRuleset(rulesetId, siteId);
+  }
+
+  @formkiqAPIHandler
+  public static async addRuleset(
+    addRulesetParameters: any,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().rulesetsApi.addRuleset(
+      addRulesetParameters,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async updateRuleset(
+    rulesetId: string,
+    addRulesetParameters: any,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().rulesetsApi.patchRuleset(
+      rulesetId,
+      addRulesetParameters,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async deleteRuleset(
+    rulesetId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().rulesetsApi.deleteRuleset(rulesetId, siteId);
+  }
+
+  @formkiqAPIHandler
+  public static async getRules(
+    rulesetId: string,
+    siteId: string,
+    next = null,
+    limit = 20
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().rulesetsApi.getRules(
+      rulesetId,
+      siteId,
+      next,
+      limit
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async addRule(
+    rulesetId: string,
+    addRuleParameters: any,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().rulesetsApi.addRule(
+      rulesetId,
+      addRuleParameters,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async getRule(
+    rulesetId: string,
+    ruleId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().rulesetsApi.getRule(
+      rulesetId,
+      ruleId,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async updateRule(
+    rulesetId: string,
+    ruleId: string,
+    addRuleParameters: any,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().rulesetsApi.patchRule(
+      rulesetId,
+      ruleId,
+      addRuleParameters,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async deleteRule(
+    rulesetId: string,
+    ruleId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().rulesetsApi.deleteRule(
+      rulesetId,
+      ruleId,
+      siteId
+    );
+  }
 }
