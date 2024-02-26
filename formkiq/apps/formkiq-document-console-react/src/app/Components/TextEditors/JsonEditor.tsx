@@ -36,5 +36,11 @@ export const JSONEditorReact: React.FC<JSONEditorPropsOptional> = (props) => {
       refEditor.current.updateProps(props);
     }
   }, [props]);
-  return <div ref={refContainer} className="whitespace-nowrap" />;
+  return (
+    <div
+      ref={refContainer}
+      className="whitespace-nowrap"
+      style={{ height: 'calc(100% - 56px)' }}
+    />
+  );
 };

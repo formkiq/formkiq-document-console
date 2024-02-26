@@ -41,6 +41,11 @@ const Webhooks = React.lazy(
 const AccountSettings = React.lazy(
   () => import('../../Views/Account/accountSettings')
 );
+const Rulesets = React.lazy(() => import('../../Views/Ruleset/rulesets'));
+
+const Ruleset = React.lazy(() => import('../../Views/Ruleset/ruleset'));
+
+const Rule = React.lazy(() => import('../../Views/Ruleset/rule'));
 const Admin = React.lazy(() => import('../../Views/Account/admin'));
 
 const RoutesMapper = () => {
@@ -129,6 +134,19 @@ const RoutesMapper = () => {
         path="/workspaces/:siteId/:id/view"
         element={<DocumentView />}
       ></Route>
+
+      <Route path="/rulesets" element={<Rulesets />}></Route>
+      <Route path="/rulesets/workspaces/:siteId" element={<Rulesets />}></Route>
+      <Route
+        path="/rulesets/workspaces/:siteId/:id"
+        element={<Ruleset />}
+      ></Route>
+      <Route
+        path="/rulesets/workspaces/:siteId/:id/rule/:ruleId"
+        element={<Rule />}
+      ></Route>
+      <Route path="/rulesets/:id" element={<Ruleset />}></Route>
+      <Route path="/rulesets/:id/rule/:ruleId" element={<Rule />}></Route>
 
       <Route path="/workflows" element={<Workflows />}></Route>
       <Route path="/workflows/designer" element={<WorkflowDesigner />}></Route>

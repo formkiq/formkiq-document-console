@@ -225,6 +225,29 @@ export function getCurrentSiteInfo(
       currentSiteInfo.siteDocumentsRootName = `Workspace: ${(
         currentSiteInfo.siteId as any
       ).replaceAll('_', ' ')}`;
+    } else if (pathname.indexOf('/rulesets') === 0) {
+      if (pathname.indexOf('/rulesets/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(21).split('/')[0]; // 21 is the length of '/rulesets/workspaces/'
+        currentSiteInfo.siteDocumentsRootName = `Workspace: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Rulesets';
+        } else if (hasUserSite) {
+          currentSiteInfo.siteId = user.email;
+          currentSiteInfo.siteRedirectUrl = '/my-rulesets';
+          currentSiteInfo.siteDocumentsRootName = 'My Rulesets';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/rulesets/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
     } else {
       if (hasDefaultSite) {
         currentSiteInfo.siteId = 'default';

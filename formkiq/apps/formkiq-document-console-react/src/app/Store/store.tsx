@@ -11,6 +11,7 @@ import documentListState from './reducers/documentsList';
 import globalConfirmControls from './reducers/globalConfirmControls';
 import globalNotificationControls from './reducers/globalNotificationControls';
 import globalProgressControls from './reducers/globalProgressControls';
+import rulesetsState from './reducers/rulesets';
 
 export const store = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ export const store = configureStore({
     globalConfirmControls,
     globalNotificationControls,
     globalProgressControls,
+    rulesetsState,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

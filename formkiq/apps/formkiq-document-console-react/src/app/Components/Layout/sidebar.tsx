@@ -34,6 +34,7 @@ import {
   FolderOutline,
   Plus,
   Queue,
+  Rules,
   Settings,
   ShareHand,
   Star,
@@ -832,6 +833,27 @@ export function Sidebar() {
                         <ApiKey />
                       </div>
                       <div>API Keys</div>
+                    </div>
+                  </NavLink>
+                </li>
+                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                  <NavLink
+                    to="/rulesets"
+                    data-test-id="rulesets"
+                    className={({ isActive }) =>
+                      (isActive
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
+                    }
+                  >
+                    <div
+                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
+                    >
+                      <div className="w-4 flex items-center mr-2">
+                        <Rules />
+                      </div>
+                      <div>Rulesets</div>
                     </div>
                   </NavLink>
                 </li>
