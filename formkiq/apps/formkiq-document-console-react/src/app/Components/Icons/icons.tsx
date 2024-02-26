@@ -407,17 +407,17 @@ export function Plus() {
 }
 
 export function Minus() {
-    return (
-      <svg
-        width="100%"
-        height="100%"
-        viewBox="5 5 14 14"
-        xmlns="http://www.w3.org/2000/svg"
-        className="fill-current "
-      >
-        <path fill="currentColor" d="M19 13H5v-2h14v2Z"/>
-      </svg>
-    );
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="5 5 14 14"
+      xmlns="http://www.w3.org/2000/svg"
+      className="fill-current "
+    >
+      <path fill="currentColor" d="M19 13H5v-2h14v2Z" />
+    </svg>
+  );
 }
 
 export function Edit() {
@@ -1206,6 +1206,37 @@ export function External() {
     >
       <path d="M12.1.6a.944.944 0 0 0 .2 1.04l1.352 1.353L10.28 6.37a.956.956 0 0 0 1.35 1.35l3.382-3.38 1.352 1.352a.944.944 0 0 0 1.04.2.958.958 0 0 0 .596-.875V.96a.964.964 0 0 0-.96-.96h-4.057a.958.958 0 0 0-.883.6z" />
       <path d="M14 11v5a2.006 2.006 0 0 1-2 2H2a2.006 2.006 0 0 1-2-2V6a2.006 2.006 0 0 1 2-2h5a1 1 0 0 1 0 2H2v10h10v-5a1 1 0 0 1 2 0z" />
+    </svg>
+  );
+}
+
+export function Admin() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 24 24"
+    >
+      <path
+        fill="currentColor"
+        d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12c5.16-1.26 9-6.45 9-12V5Zm0 3.9a3 3 0 1 1-3 3a3 3 0 0 1 3-3m0 7.9c2 0 6 1.09 6 3.08a7.2 7.2 0 0 1-12 0c0-1.99 4-3.08 6-3.08"
+      />
+    </svg>
+  );
+}
+export function Save() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 24 24"
+    >
+      <path
+        fill="currentColor"
+        d="M21 7v12q0 .825-.587 1.413T19 21H5q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h12zm-2 .85L16.15 5H5v14h14zM12 18q1.25 0 2.125-.875T15 15q0-1.25-.875-2.125T12 12q-1.25 0-2.125.875T9 15q0 1.25.875 2.125T12 18m-6-8h9V6H6zM5 7.85V19V5z"
+      />
     </svg>
   );
 }

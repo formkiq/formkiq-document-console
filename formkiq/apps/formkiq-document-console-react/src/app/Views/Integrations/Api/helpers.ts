@@ -1098,7 +1098,7 @@ export const postShareFolderApiItem = {
 export const deleteShareApiItem = {
   method: 'DELETE',
   path: '/shares/ SHARE_KEY ',
-  descriptino: 'Deletes an share',
+  description: 'Deletes an share',
   username: 'Cognito User',
   requiresAuthentication: true,
   requiresSite: true,
@@ -1125,6 +1125,7 @@ export const getConfigurationApiItem = {
   username: 'Cognito User',
   hasNoParams: true,
   requiresAuthentication: true,
+  requiresSite: true,
   license: 'Core',
 };
 
@@ -1135,13 +1136,61 @@ export const postConfigurationApiItem = {
   username: 'Cognito User',
   requiresPostJson: true,
   requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+};
+
+export const getConfigurationOpaPoliciesApiItem = {
+  method: 'GET',
+  path: '/configuration/opa',
+  description: 'Returns all Open Policy Agent (OPA) access policies',
+  username: 'Cognito User',
+  hasNoParams: true,
+  requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+};
+
+/*
+export const getConfigurationOpaPolicyApiItem = {
+  method: 'GET',
+  path: '/configuration/opa',
+  description:
+    "Returns the current site's Open Policy Agent (OPA) access policy",
+  username: 'Cognito User',
+  hasNoParams: true,
+  requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+};
+*/
+
+export const putConfigurationOpaPolicyApiItem = {
+  method: 'PUT',
+  path: '/configuration/opa',
+  description:
+    "Updates the current site's Open Policy Agent (OPA) access policy",
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+};
+
+export const deleteConfigurationOpaPolicyApiItem = {
+  method: 'DELETE',
+  path: '/configuration/opa',
+  description:
+    "Deletes the current site's Open Policy Agent (OPA) access policy",
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
   license: 'Core',
 };
 
 export const getApiKeysApiItem = {
   method: 'GET',
   path: '/configuration/apiKeys',
-  descriptino: 'Gets the current api keys',
+  description: 'Gets the current api keys',
   username: 'Cognito User',
   requiresAuthentication: true,
   license: 'Core',
@@ -1150,7 +1199,7 @@ export const getApiKeysApiItem = {
 export const postApiKeysApiItem = {
   method: 'POST',
   path: '/configuration/apiKeys',
-  descriptino: 'Sets the current api keys',
+  description: 'Sets the current api keys',
   username: 'Cognito User',
   requiresAuthentication: true,
   license: 'Core',
@@ -1158,7 +1207,7 @@ export const postApiKeysApiItem = {
 export const deleteApiKeyApiItem = {
   method: 'DELETE',
   path: '/configuration/apiKeys/ API_KEY ',
-  descriptino: 'Deletes an api key',
+  description: 'Deletes an api key',
   username: 'Cognito User',
   requiresAuthentication: true,
   license: 'Core',

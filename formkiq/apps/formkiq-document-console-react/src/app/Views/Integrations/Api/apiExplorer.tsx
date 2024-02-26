@@ -5,6 +5,7 @@ import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ApiSegment } from './api-segment';
 import {
   deleteApiKeyApiItem,
+  deleteConfigurationOpaPolicyApiItem,
   deleteDocumentApiItem,
   deleteDocumentFulltextApiItem,
   deleteDocumentFulltextTagApiItem,
@@ -34,6 +35,7 @@ import {
   getCaseTasksApiItem,
   getCasesApiItem,
   getConfigurationApiItem,
+  getConfigurationOpaPoliciesApiItem,
   getDocumentActionsApiItem,
   getDocumentApiItem,
   getDocumentContentApiItem,
@@ -86,6 +88,7 @@ import {
   postWebhooksApiItem,
   postWithBodyForNewDocumentUploadApiItem,
   postWorkflowsApiItem,
+  putConfigurationOpaPolicyApiItem,
   putDocumentAntivirusApiItem,
   putDocumentFulltextApiItem,
   putDocumentOcrApiItem,
@@ -451,6 +454,18 @@ export function ApiExplorer() {
               <div className="grow">
                 <ApiItem apiItem={getConfigurationApiItem} sites={sites} />
                 <ApiItem apiItem={postConfigurationApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={getConfigurationOpaPoliciesApiItem}
+                  sites={sites}
+                />
+                <ApiItem
+                  apiItem={putConfigurationOpaPolicyApiItem}
+                  sites={sites}
+                />
+                <ApiItem
+                  apiItem={deleteConfigurationOpaPolicyApiItem}
+                  sites={sites}
+                />
               </div>
             </div>
           </ApiSegment>

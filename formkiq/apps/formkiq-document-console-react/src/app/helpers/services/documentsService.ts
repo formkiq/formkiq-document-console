@@ -1034,6 +1034,44 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getOpenPolicyAgentConfiguration(
+    siteId: string
+  ): Promise<any> {
+    console.log(siteId, 'getOpenPolicyAgent');
+    return this.getFormkiqClient().configurationApi.getOpenPolicyAgentConfiguration(
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async getOpenPolicyAgentConfigurations(
+    siteId: string
+  ): Promise<any> {
+    console.log(siteId, 'getOpenPolicyAgent');
+    return this.getFormkiqClient().configurationApi.getOpenPolicyAgentConfigurations(
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async deleteOpenPolicyAgent(siteId: string): Promise<any> {
+    return this.getFormkiqClient().configurationApi.deleteOpenPolicyAgent(
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
+  public static async configureOpenPolicyAgent(
+    updateConfigurationParameters: string,
+    siteId: string
+  ): Promise<any> {
+    return this.getFormkiqClient().configurationApi.configureOpenPolicyAgent(
+      updateConfigurationParameters,
+      siteId
+    );
+  }
+
+  @formkiqAPIHandler
   public static async getSites(): Promise<any> {
     return this.getFormkiqClient().sitesApi.getSites();
   }

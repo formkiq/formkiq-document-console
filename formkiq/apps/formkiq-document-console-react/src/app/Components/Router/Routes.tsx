@@ -41,6 +41,7 @@ const Webhooks = React.lazy(
 const AccountSettings = React.lazy(
   () => import('../../Views/Account/accountSettings')
 );
+const Admin = React.lazy(() => import('../../Views/Account/admin'));
 
 const RoutesMapper = () => {
   return (
@@ -136,6 +137,7 @@ const RoutesMapper = () => {
       <Route path="/integrations/apiKeys" element={<ApiKeys />}></Route>
       <Route path="/integrations/webhooks" element={<Webhooks />}></Route>
       <Route path="/account/settings" element={<AccountSettings />}></Route>
+      <Route path="/account/admin" element={<Admin />}></Route>
       <Route path="*" element={<Page404 />}></Route>
     </Routes>
   );
