@@ -37,6 +37,7 @@ export default function SearchInput({
   const [documents, setDocuments] = useState(null);
   const [isAdvancedSearchModalOpened, setAdvancedSearchModalOpened] =
     useState(false);
+  const [isSearchAvailable, setIsSearchAvailable] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const { formkiqVersion, useAdvancedSearch } = useSelector(ConfigState);
@@ -70,6 +71,9 @@ export default function SearchInput({
             }
           });
           setDocuments(temp);
+          setIsSearchAvailable(true);
+        } else if (response.status === 400) {
+          setIsSearchAvailable(false);
         }
       });
     }
@@ -102,6 +106,12 @@ export default function SearchInput({
           </div>
         );
       }
+    } else if (!isSearchAvailable) {
+      return (
+        <div className="text-center text-gray-500">
+          Search Currently Unavailable
+        </div>
+      );
     } else {
       return <Spinner />;
     }
@@ -244,14 +254,16 @@ export default function SearchInput({
             )}
             <DocumentsPreview />
           </ul>
-          <div className="px-4 py-2">
-            <button
-              className="w-full bg-coreOrange-500 hover:bg-coreOrange-700 text-white font-bold py-2 px-4 rounded flex justify-center"
-              onClick={SearchForFilesAndFolders}
-            >
-              See all results
-            </button>
-          </div>
+          {isSearchAvailable && (
+            <div className="px-4 py-2">
+              <button
+                className="w-full bg-coreOrange-500 hover:bg-coreOrange-700 text-white font-bold py-2 px-4 rounded flex justify-center"
+                onClick={SearchForFilesAndFolders}
+              >
+                See all results
+              </button>
+            </div>
+          )}
           <div className="hidden mb-2 flex justify-center">
             <div className="pt-0.5">
               <input id="searchCurrentFolderOnly" type="checkbox" />
