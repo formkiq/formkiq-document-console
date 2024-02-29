@@ -273,7 +273,6 @@ const RuleEditingTab = ({
     // TODO: figure out size or paging/infinite load
     DocumentsService.getWorkflows(currentSiteId).then((response: any) => {
       setWorkflows(response.workflows);
-      console.log(response.workflows);
     });
   }, [currentSiteId]);
 
@@ -404,6 +403,7 @@ const RuleEditingTab = ({
           </label>
           <select
             aria-label="Workflow to Trigger"
+            value={ruleValue.rule.workflowId}
             name="workflowId"
             className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
             onChange={(e) =>
