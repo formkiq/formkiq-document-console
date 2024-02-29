@@ -271,9 +271,11 @@ const RuleEditingTab = ({
 
   useEffect(() => {
     // TODO: figure out size or paging/infinite load
-    DocumentsService.getWorkflows(currentSiteId).then((response: any) => {
-      setWorkflows(response.workflows);
-    });
+    DocumentsService.getWorkflows(currentSiteId, null, null, null, 100).then(
+      (response: any) => {
+        setWorkflows(response.workflows);
+      }
+    );
   }, [currentSiteId]);
 
   const addCondition = () => {
