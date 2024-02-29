@@ -218,6 +218,7 @@ function Ruleset() {
             ruleValue={newRuleValue}
             setRuleValue={setNewRuleValue}
             createNewRule={saveRule}
+            currentSiteId={currentSiteId}
           />
         )}
         <div
@@ -245,14 +246,16 @@ const RuleEditingTab = ({
   ruleValue,
   setRuleValue,
   createNewRule,
+  currentSiteId,
 }: {
   onCancelEdit: () => void;
   ruleValue: any;
   setRuleValue: (ruleValue: any) => void;
   createNewRule: () => void;
+  currentSiteId: string;
 }) => {
   const dispatch = useAppDispatch();
-
+  const [workflows, setWorkflows] = useState([]);
   const onSubmit = (e: any) => {
     e.preventDefault();
     if (ruleValue.rule.conditions.must.length === 0) {
@@ -265,6 +268,14 @@ const RuleEditingTab = ({
     }
     createNewRule();
   };
+
+  useEffect(() => {
+    // TODO: figure out size or paging/infinite load
+    DocumentsService.getWorkflows(currentSiteId).then((response: any) => {
+      setWorkflows(response.workflows);
+      console.log(response.workflows);
+    });
+  }, [currentSiteId]);
 
   const addCondition = () => {
     setRuleValue({
@@ -311,7 +322,7 @@ const RuleEditingTab = ({
   };
 
   return (
-    <form onSubmit={onSubmit} className="max-h-80 overflow-y-auto">
+    <form onSubmit={onSubmit} className="max-h-120 overflow-y-auto">
       <div className="flex flex-col lg:flex-row justify-start items-end gap-2 p-2">
         <div className="flex flex-col justify-start gap-2">
           <label
@@ -333,7 +344,7 @@ const RuleEditingTab = ({
             minLength={1}
             required={true}
             autoFocus={true}
-            className="w-52 p-2 border-2 border-gray-300 rounded"
+            className="w-64 p-2 border-2 border-gray-300 rounded"
           />
         </div>
         <div className="flex flex-col justify-start gap-2">
@@ -360,28 +371,6 @@ const RuleEditingTab = ({
             className="w-24 p-2 border-2 border-gray-300 rounded"
           />
         </div>
-
-        <div className="flex flex-col justify-start gap-2">
-          <label
-            htmlFor="workflowId"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Workflow ID
-          </label>
-          <input
-            name="workflowId"
-            placeholder="Workflow ID"
-            value={ruleValue.rule.workflowId}
-            onChange={(e) =>
-              setRuleValue({
-                rule: { ...ruleValue.rule, workflowId: e.target.value },
-              })
-            }
-            required={true}
-            className="w-24 p-2 border-2 border-gray-300 rounded"
-          />
-        </div>
-
         <div className="flex flex-col justify-start gap-2">
           <label
             htmlFor="status"
@@ -402,6 +391,35 @@ const RuleEditingTab = ({
           >
             <option value="ACTIVE">ACTIVE</option>
             <option value="INACTIVE">INACTIVE</option>
+          </select>
+        </div>
+      </div>
+      <div className="flex flex-col lg:flex-row justify-start items-end gap-2 p-2">
+        <div className="flex flex-col justify-start gap-2">
+          <label
+            htmlFor="workflowId"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Workflow to Trigger
+          </label>
+          <select
+            aria-label="Workflow to Trigger"
+            name="workflowId"
+            className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+            onChange={(e) =>
+              setRuleValue({
+                rule: { ...ruleValue.rule, workflowId: e.target.value },
+              })
+            }
+          >
+            {workflows &&
+              workflows.map((workflow: any, i: number) => {
+                return (
+                  <option key={i} value={workflow.workflowId}>
+                    {workflow.name} ({workflow.workflowId})
+                  </option>
+                );
+              })}
           </select>
         </div>
       </div>
