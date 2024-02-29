@@ -263,6 +263,59 @@ export const deleteDocumentTagValueApiItem = {
   license: 'Core',
 };
 
+export const getDocumentAccessAttributesApiItem = {
+  method: 'GET',
+  path: '/documents/ DOCUMENT_ID /accessAttributes',
+  description: "Gets a listing of a document's accessAttributes",
+  username: 'Cognito User',
+  requiresSite: true,
+  allowsShareKey: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const postDocumentAccessAttributesApiItem = {
+  method: 'POST',
+  path: '/documents/ DOCUMENT_ID /accessAttributes',
+  description: 'Adds access attributes to a document',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"accessAttributes":[{"key":"myKey","stringValue":"myValue"}]}',
+  license: 'Pro|Enterprise',
+};
+
+export const putDocumentAccessAttributesApiItem = {
+  method: 'PUT',
+  path: '/documents/ DOCUMENT_ID /accessAttributes',
+  description: 'Updates the access attributes for a document',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"accessAttributes":[{"key":"myKey","stringValue":"myValue"}]}',
+  license: 'Pro|Enterprise',
+};
+
+export const deleteDocumentAccessAttributesApiItem = {
+  method: 'DELETE',
+  path: '/documents/ DOCUMENT_ID /accessAttributes ',
+  description: 'Deletes the access attributes for a document',
+  username: 'Cognito User',
+  requiresSite: true,
+  allowsShareKey: true,
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  license: 'Pro|Enterprise',
+};
+
 export const getDocumentContentApiItem = {
   method: 'GET',
   path: '/documents/ DOCUMENT_ID /content',

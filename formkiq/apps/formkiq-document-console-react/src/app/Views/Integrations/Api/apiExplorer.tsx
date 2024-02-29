@@ -6,6 +6,7 @@ import { ApiSegment } from './api-segment';
 import {
   deleteApiKeyApiItem,
   deleteConfigurationOpaPolicyApiItem,
+  deleteDocumentAccessAttributesApiItem,
   deleteDocumentApiItem,
   deleteDocumentFulltextApiItem,
   deleteDocumentFulltextTagApiItem,
@@ -38,6 +39,7 @@ import {
   getCasesApiItem,
   getConfigurationApiItem,
   getConfigurationOpaPoliciesApiItem,
+  getDocumentAccessAttributesApiItem,
   getDocumentActionsApiItem,
   getDocumentApiItem,
   getDocumentContentApiItem,
@@ -78,6 +80,7 @@ import {
   patchWebhookApiItem,
   postApiKeysApiItem,
   postConfigurationApiItem,
+  postDocumentAccessAttributesApiItem,
   postDocumentActionsApiItem,
   postDocumentCompressApiItem,
   postDocumentOcrApiItem,
@@ -99,6 +102,7 @@ import {
   postWithBodyForNewDocumentUploadApiItem,
   postWorkflowsApiItem,
   putConfigurationOpaPolicyApiItem,
+  putDocumentAccessAttributesApiItem,
   putDocumentAntivirusApiItem,
   putDocumentFulltextApiItem,
   putDocumentOcrApiItem,
@@ -327,6 +331,29 @@ export function ApiExplorer() {
                       />
                       <ApiItem
                         apiItem={documentsTagsPatchApiItem}
+                        sites={sites}
+                      />
+                    </div>
+                  </div>
+                </ApiSegment>
+                <ApiSegment title="Document Access Attributes">
+                  <div className="ml-2 flex flex-cols">
+                    <div className="w-4 border-l"></div>
+                    <div className="grow">
+                      <ApiItem
+                        apiItem={getDocumentAccessAttributesApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={postDocumentAccessAttributesApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={putDocumentAccessAttributesApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={deleteDocumentAccessAttributesApiItem}
                         sites={sites}
                       />
                     </div>
