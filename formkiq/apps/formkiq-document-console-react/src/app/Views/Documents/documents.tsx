@@ -152,6 +152,10 @@ function Documents() {
     IDocumentTag[] | null,
     any
   ] = useState([]);
+  const [currentDocumentAccessAttributes, setCurrentDocumentAccessAttributes]: [
+    IDocumentTag[] | null,
+    any
+  ] = useState([]);
   const [currentDocumentVersions, setCurrentDocumentVersions] = useState(null);
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
@@ -357,6 +361,14 @@ function Documents() {
           }
         });
       }
+      DocumentsService.getDocumentAccessAttributes(
+        currentSiteId,
+        infoDocumentId
+      ).then((response: any) => {
+        if (response) {
+          setCurrentDocumentAccessAttributes(response.accessAttributes);
+        }
+      });
     }
   };
 
@@ -1589,6 +1601,41 @@ function Documents() {
                               );
                             }
                           )}
+                        <div className="w-68 flex mt-3 mr-3 border-b"></div>
+                        <div className="flex flex-col pt-3">
+                          <dt className="mb-1 flex justify-between">
+                            <span className="text-sm font-semibold text-coreOrange-500">
+                              Access Attributes
+                            </span>
+                          </dt>
+                          <dd className="text-sm">
+                            {currentDocumentAccessAttributes &&
+                              (currentDocumentAccessAttributes as []).map(
+                                (attribute: any, i: number) => {
+                                  return (
+                                    <div key={i} className="">
+                                      <div className="pt-1 pr-1 flex items-center">
+                                        <div className={`h-5.5 pr-1 `}>
+                                          <span className="block text-xs">
+                                            {attribute.key}
+                                          </span>
+                                          <span className="font-semibold">
+                                            {attribute.stringValue}
+                                          </span>
+                                          <span className="font-semibold">
+                                            {attribute.numberValue}
+                                          </span>
+                                          <span className="font-semibold">
+                                            {attribute.booleanValue}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                              )}
+                          </dd>
+                        </div>
                       </dl>
                     )}
                     <div className="mt-4 w-full flex justify-center">

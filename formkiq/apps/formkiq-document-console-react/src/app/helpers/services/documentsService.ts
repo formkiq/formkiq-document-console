@@ -831,6 +831,22 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getDocumentAccessAttributes(
+    siteId: string,
+    documentId: string
+  ): Promise<any> {
+    if (!siteId || !siteId.length) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.getDocumentAccessAttributes(
+      siteId,
+      documentId
+    );
+  }
+
+  // TODO: add other access attribute functions
+
+  @formkiqAPIHandler
   public static async getDocumentVersions(
     documentId: string,
     siteId = ''
