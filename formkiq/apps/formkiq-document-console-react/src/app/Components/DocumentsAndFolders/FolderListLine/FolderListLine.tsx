@@ -63,7 +63,7 @@ function FolderListLine({
   isArchiveTabExpanded,
   addToPendingArchive,
   deleteFromPendingArchive,
-  archiveStatus
+  archiveStatus,
 }: IProps) {
   let folderPath = folderInstance.path;
   if (folderInstance.path.indexOf('/') === -1) {
@@ -182,7 +182,7 @@ function FolderListLine({
             {folderInstance.documents.length === 25 && (
               <tr>
                 <td colSpan={6} className="text-sm">
-                  <div className="-mx-1 pl-12 font-semibold py-2 hover:text-coreOrange-500">
+                  <div className="-mx-1 pl-12 font-semibold py-2 hover:text-primary-500">
                     <a
                       href={`${currentDocumentsRootUri}/folders/${subfolderPath}`}
                     >
@@ -199,7 +199,7 @@ function FolderListLine({
           <tr>
             <td
               colSpan={6}
-              className="border-coreOrange-50 text-sm italic p-1 pl-12 mb-2"
+              className="border-primary-50 text-sm italic p-1 pl-12 mb-2"
             >
               No subfolders or files have been found in this folder
             </td>
@@ -290,7 +290,7 @@ function FolderListLine({
               <div className="flex w-full">
                 {useIndividualSharing && (
                   <div
-                    className="w-6 h-auto text-gray-400 mr-2 cursor-pointer hover:text-coreOrange-500"
+                    className="w-6 h-auto text-gray-400 mr-2 cursor-pointer hover:text-primary-500"
                     onClick={(event) =>
                       onShareClick(event, {
                         lineType: 'folder',
@@ -307,7 +307,7 @@ function FolderListLine({
                 {!isSiteReadOnly && (
                   <>
                     <div
-                      className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
+                      className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-primary-500"
                       onClick={onDeleteClick(folderInstance)}
                     >
                       <Trash />

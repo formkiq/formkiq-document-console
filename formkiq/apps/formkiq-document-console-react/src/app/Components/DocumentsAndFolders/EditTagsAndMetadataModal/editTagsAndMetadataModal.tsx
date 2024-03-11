@@ -149,7 +149,7 @@ export default function EditTagsAndMetadataModal({
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg pr-6">
-                      <span className="inline-block text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+                      <span className="inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                         Add Metadata (or Add a Tag)
                       </span>
                       <span className="block text-sm">
@@ -206,7 +206,7 @@ export default function EditTagsAndMetadataModal({
                           <input
                             type="submit"
                             value="Add"
-                            className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                            className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                           />
                         </div>
                       </div>
@@ -221,7 +221,7 @@ export default function EditTagsAndMetadataModal({
                 </div>
                 <div className="bg-white mt-1 p-4 rounded-lg bg-white shadow-xl border h-full">
                   <div className="flex w-full items-center">
-                    <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 pr-6">
+                    <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
                       Edit Metadata/Tags
                     </div>
                   </div>
@@ -237,7 +237,7 @@ export default function EditTagsAndMetadataModal({
                   <div className="w-full flex mt-4 justify-center">
                     <button
                       type="button"
-                      className="flex items-center bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                      className="flex items-center bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
                       onClick={closeDialog}
                       ref={doneButtonRef}
                     >

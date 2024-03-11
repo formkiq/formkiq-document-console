@@ -517,7 +517,7 @@ const RuleEditingTab = ({
                   },
                 });
               }}
-              className="w-5 text-gray-700 mb-2 hover:text-coreOrange-500 cursor-pointer focus:outline-none focus:text-coreOrange-500 active:text-coreOrange-500 transition-all duration-300 ease-in-out"
+              className="w-5 text-gray-700 mb-2 hover:text-primary-500 cursor-pointer focus:outline-none focus:text-primary-500 active:text-primary-500 transition-all duration-300 ease-in-out"
               type="button"
               aria-label="Delete condition"
             >
@@ -529,7 +529,7 @@ const RuleEditingTab = ({
       <div className="">
         <button
           onClick={addCondition}
-          className="flex flex-row justify-start items-end gap-2 p-2 hover:text-coreOrange-500"
+          className="flex flex-row justify-start items-end gap-2 p-2 hover:text-primary-500"
         >
           <div className="w-5">
             <Plus />
@@ -539,7 +539,7 @@ const RuleEditingTab = ({
       </div>
       <div className="flex flex-col lg:flex-row justify-start items-end gap-2 p-2">
         <button
-          className="bg-coreOrange-500 hover:bg-coreOrange-600 active:bg-coreOrange-400 text-white font-bold py-2 px-4 rounded"
+          className="bg-primary-500 hover:bg-primary-600 active:bg-primary-400 text-white font-bold py-2 px-4 rounded"
           type="submit"
         >
           {' '}

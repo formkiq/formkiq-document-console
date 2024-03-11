@@ -262,7 +262,7 @@ export default function ESignaturesModal({
                   <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                     <div className="flex w-full items-center">
                       <div className="font-semibold grow text-lg inline-block pr-6">
-                        <span className="text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                           Document eSignature
                         </span>
                         {document && (
@@ -382,7 +382,7 @@ export default function ESignaturesModal({
                             </button>
                             <button
                               type="submit"
-                              className="w-64 flex justify-center mr-2 bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                              className="w-64 flex justify-center mr-2 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                             >
                               <span>Send for Signature</span>
                               <div className="w-4 h-4 ml-2 mt-1">

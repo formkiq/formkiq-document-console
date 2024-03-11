@@ -271,7 +271,7 @@ export function WorkflowDesigner() {
             <div className="text-lg font-medium">
               {workflow.name}
               <button
-                className="w-4 h-4 ml-2 hover:text-coreOrange-500"
+                className="w-4 h-4 ml-2 hover:text-primary-500"
                 onClick={() => setEditWorkflowInfo(true)}
               >
                 <Edit />
@@ -298,7 +298,7 @@ export function WorkflowDesigner() {
         {editWorkflowInfo && (
           <button
             onClick={changeWorkflowInfo}
-            className="self-end border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500"
+            className="self-end border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500"
           >
             {' '}
             Save{' '}
@@ -325,13 +325,13 @@ export function WorkflowDesigner() {
           <Panel position="top-right">
             <button
               onClick={addStep}
-              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500 my-2 bg-white"
+              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500 my-2 bg-white"
             >
               Add New Step
             </button>
             <button
               onClick={saveWorkflow}
-              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500 my-2 bg-white"
+              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500 my-2 bg-white"
             >
               Save Workflow
             </button>

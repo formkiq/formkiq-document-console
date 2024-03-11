@@ -97,7 +97,7 @@ export default function ESignatureConfigModal({
               <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-1/2 h-1/2">
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border h-full">
                   <div className="flex w-full items-center">
-                    <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 pr-6">
+                    <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
                       Configure eSignature Provider (DocuSign)
                     </div>
                     <div
@@ -202,7 +202,7 @@ export default function ESignatureConfigModal({
                         <input
                           type="submit"
                           value="Configure"
-                          className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none mr-2"
+                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none mr-2"
                         />
                         <button
                           onClick={closeDialog}

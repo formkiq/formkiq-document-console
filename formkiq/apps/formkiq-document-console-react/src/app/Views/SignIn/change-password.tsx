@@ -138,7 +138,7 @@ export function ChangePassword() {
                 type="submit"
                 value="Set New Password"
                 className="px-8 cursor-pointer py-3 mx-1 border border-transparent text-base leading-6 font-medium rounded-md shadow
-                  text-white bg-coreOrange-500 hover:bg-coreOrange-400 focus:outline-none focus:shadow-outline
+                  text-white bg-primary-500 hover:bg-primary-400 focus:outline-none focus:shadow-outline
                   transition duration-150 ease-in-out md:py-4 md:text-lg md:px-10"
               />
             </div>

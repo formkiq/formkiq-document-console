@@ -97,7 +97,7 @@ export default function DocumentActionsPopover({
         <button
           ref={setReferenceRef as any}
           onClick={handleDropdownClick}
-          className="w-20 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+          className="w-20 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
         >
           <span className="w-5 pt-1">{MoreActions()}</span>
         </button>

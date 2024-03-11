@@ -271,7 +271,7 @@ export function Sidebar() {
                         key={i}
                         className={
                           (i === folderLevels.length - 1
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                             : 'text-gray-500 bg-white ') +
                           ' p-1 pl-' +
                           paddingLeft +
@@ -331,7 +331,7 @@ export function Sidebar() {
                         end
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                             : 'text-gray-500 bg-white ') +
                           ' w-full text-sm font-medium flex'
                         }
@@ -386,7 +386,7 @@ export function Sidebar() {
                                       end
                                       className={({ isActive }) =>
                                         (isActive
-                                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                          ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                                           : 'text-gray-500 bg-white ') +
                                         ' w-full text-sm font-medium flex'
                                       }
@@ -433,7 +433,7 @@ export function Sidebar() {
                         end
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                             : 'text-gray-500 bg-white ') +
                           ' w-full text-sm font-medium flex'
                         }
@@ -509,7 +509,7 @@ export function Sidebar() {
                                       end
                                       className={({ isActive }) =>
                                         (isActive
-                                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                          ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                                           : 'text-gray-500 bg-white ') +
                                         ' w-full text-sm font-medium flex'
                                       }
@@ -572,7 +572,7 @@ export function Sidebar() {
                                 end
                                 className={({ isActive }) =>
                                   (isActive
-                                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                    ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                                     : 'text-gray-500 bg-white ') +
                                   ' w-full text-sm font-medium flex'
                                 }
@@ -637,7 +637,7 @@ export function Sidebar() {
                                               end
                                               className={({ isActive }) =>
                                                 (isActive
-                                                  ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                                                  ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                                                   : 'text-gray-500 bg-white ') +
                                                 ' w-full text-sm font-medium flex'
                                               }
@@ -687,7 +687,7 @@ export function Sidebar() {
                         to={`${specialFoldersRootUri}/folders/favorites`}
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                             : 'text-gray-500 bg-white ') +
                           ' w-full text-sm font-medium flex '
                         }
@@ -711,7 +711,7 @@ export function Sidebar() {
                           to={`${specialFoldersRootUri}/folders/deleted`}
                           className={({ isActive }) =>
                             (isActive
-                              ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                              ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                               : 'text-gray-500 bg-white ') +
                             ' w-full text-sm font-medium flex '
                           }
@@ -755,7 +755,7 @@ export function Sidebar() {
                     to="/workflows"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -777,7 +777,7 @@ export function Sidebar() {
                     to="/queues"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -800,7 +800,7 @@ export function Sidebar() {
                     data-test-id="nav-api-explorer"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -821,7 +821,7 @@ export function Sidebar() {
                     data-test-id="nav-api-keys"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -842,7 +842,7 @@ export function Sidebar() {
                     data-test-id="rulesets"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -863,7 +863,7 @@ export function Sidebar() {
                     data-test-id="nav-webhooks"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -903,7 +903,7 @@ export function Sidebar() {
                         to="/account"
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                             : 'text-gray-500 bg-white ') +
                           ' w-full text-sm font-medium flex '
                         }
@@ -923,7 +923,7 @@ export function Sidebar() {
                         to="/settings"
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                            ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                             : 'text-gray-500 bg-white ') +
                           ' w-full text-sm font-medium flex '
                         }
@@ -952,7 +952,7 @@ export function Sidebar() {
                   end
                   className={({ isActive }) =>
                     (isActive
-                      ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                      ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                       : 'text-gray-500 bg-white ') +
                     ' w-full text-sm font-medium flex '
                   }
@@ -977,7 +977,7 @@ export function Sidebar() {
                   end
                   className={({ isActive }) =>
                     (isActive
-                      ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                      ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                       : 'text-gray-500 bg-white ') +
                     ' w-full text-sm font-medium flex '
                   }
@@ -1023,7 +1023,7 @@ export function Sidebar() {
                     to={`${specialFoldersRootUri}/folders/favorites`}
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -1043,7 +1043,7 @@ export function Sidebar() {
                       to={`${specialFoldersRootUri}/folders/deleted`}
                       className={({ isActive }) =>
                         (isActive
-                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                          ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                           : 'text-gray-500 bg-white ') +
                         ' w-full text-sm font-medium flex '
                       }
@@ -1068,7 +1068,7 @@ export function Sidebar() {
                 to="/workflows"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                    ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                     : 'text-gray-500 bg-white ') +
                   ' w-full text-sm font-medium flex '
                 }
@@ -1089,7 +1089,7 @@ export function Sidebar() {
                 to="/queues"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                    ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                     : 'text-gray-500 bg-white ') +
                   ' w-full text-sm font-medium flex '
                 }
@@ -1110,7 +1110,7 @@ export function Sidebar() {
                 to="/integrations/api"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                    ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                     : 'text-gray-500 bg-white ') +
                   ' w-full text-sm font-medium flex '
                 }
@@ -1127,7 +1127,7 @@ export function Sidebar() {
                 to="/integrations/webhooks"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                    ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                     : 'text-gray-500 bg-white ') +
                   ' w-full text-sm font-medium flex '
                 }
@@ -1149,7 +1149,7 @@ export function Sidebar() {
                     to="/account"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -1168,7 +1168,7 @@ export function Sidebar() {
                     to="/settings"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        ? 'text-primary-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
                         : 'text-gray-500 bg-white ') +
                       ' w-full text-sm font-medium flex '
                     }
@@ -1230,7 +1230,7 @@ export function Sidebar() {
           <div
             className={
               (sidebarExpanded ? 'justify-end mr-2 ' : 'justify-end mr-2') +
-              ' text-gray-600 hover:text-coreOrange-500 flex mt-2 cursor-pointer '
+              ' text-gray-600 hover:text-primary-500 flex mt-2 cursor-pointer '
             }
             onClick={toggleSidebarExpand}
           >
@@ -1253,7 +1253,7 @@ export function Sidebar() {
                   <button
                     className={
                       (isSidebarExpanded ? ' mr-1 ' : 'mb-1 ') +
-                      ' bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'
+                      ' bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'
                     }
                     onClick={(event) => {
                       // TODO: create more consistent check on site location

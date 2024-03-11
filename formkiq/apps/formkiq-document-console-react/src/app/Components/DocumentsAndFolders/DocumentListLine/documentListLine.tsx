@@ -259,7 +259,7 @@ function DocumentListLine({
                   }
                 >
                   <div
-                    className="w-4 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
+                    className="w-4 h-auto text-gray-400 cursor-pointer hover:text-primary-500 "
                     data-test-id="delete-action"
                     onClick={
                       addToPendingArchive
@@ -280,7 +280,7 @@ function DocumentListLine({
                   }
                 >
                   <div
-                    className="w-4 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
+                    className="w-4 h-auto text-gray-400 cursor-pointer hover:text-primary-500 "
                     data-test-id="delete-action"
                     onClick={
                       deleteFromPendingArchive
@@ -408,7 +408,7 @@ function DocumentListLine({
             </div>
             <Link
               to={`#id=${file.documentId}`}
-              className="w-5 pt-0.5 text-gray-400 mr-1 cursor-pointer hover:text-coreOrange-500"
+              className="w-5 pt-0.5 text-gray-400 mr-1 cursor-pointer hover:text-primary-500"
             >
               <Info />
             </Link>
@@ -439,7 +439,7 @@ function DocumentListLine({
               <>
                 <button
                   onClick={restoreDocument}
-                  className="flex items-center mr-2 bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-6 rounded-2xl flex cursor-pointer focus:outline-none"
+                  className="flex items-center mr-2 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-6 rounded-2xl flex cursor-pointer focus:outline-none"
                 >
                   Restore
                 </button>
@@ -468,7 +468,7 @@ function DocumentListLine({
                 {!isSiteReadOnly && (
                   <>
                     <div
-                      className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
+                      className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-primary-500"
                       data-test-id="delete-action"
                       onClick={
                         useSoftDelete ? onDeleteClick : onPermanentDeleteClick

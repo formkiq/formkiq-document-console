@@ -1,5 +1,5 @@
-const { createGlobPatternsForDependencies } = require('@nrwl/react/tailwind');
-const { join } = require('path');
+const {createGlobPatternsForDependencies} = require('@nrwl/react/tailwind');
+const {join} = require('path');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -13,6 +13,24 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        primary: {
+          default: '#3b82f6',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
+          950: '#172554'
+        },
+        secondary: {
+          400: "#e879f9",
+          500: "#d946ef",
+        },
         yellowGray: {
           400: "#f8f4dc",
           500: "#f4eec7",
@@ -200,6 +218,9 @@ module.exports = {
           '800': '#4B301C',
           '900': '#22160D'
         },
+      },
+      fontFamily: {
+        sans:['Urbanist', "ui-sans-serif", "system-ui", "sans-serif", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"],
       },
       fontSize: {
         "smaller": "0.8125rem",

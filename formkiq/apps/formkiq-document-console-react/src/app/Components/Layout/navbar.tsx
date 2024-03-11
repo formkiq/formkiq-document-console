@@ -303,7 +303,7 @@ function Navbar() {
                   {subfolderUri &&
                   TopLevelFolders.indexOf(subfolderUri) > -1 ? (
                     <>
-                      <div className="w-6 mr-1 text-coreOrange-600">
+                      <div className="w-6 mr-1 text-primary-600">
                         {subfolderUri === 'shared' && (
                           <div className="w-6">
                             <Share />
@@ -325,7 +325,7 @@ function Navbar() {
                           </div>
                         )}
                       </div>
-                      <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+                      <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                         {getTopLevelFolderName(subfolderUri)}
                       </div>
                       {((hasUserSite && hasDefaultSite) ||
@@ -375,7 +375,7 @@ function Navbar() {
                       locationPrefix === '/account' ||
                       locationPrefix === 'rulesets' ? (
                         <>
-                          <div className="w-6 mr-1 text-coreOrange-600">
+                          <div className="w-6 mr-1 text-primary-600">
                             {pathname.indexOf('/workflows') > -1 && (
                               <div className="w-5">
                                 <Workflow />
@@ -459,7 +459,7 @@ function Navbar() {
                               </select>
                             )}
 
-                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
+                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
                             {pathname.indexOf('/workflows') > -1 && (
                               <span>Workflows</span>
                             )}
@@ -483,7 +483,7 @@ function Navbar() {
                         </>
                       ) : (
                         <>
-                          <div className="w-6 mr-1 text-coreOrange-600">
+                          <div className="w-6 mr-1 text-primary-600">
                             {siteDocumentsRootUri.indexOf('/documents') >
                               -1 && (
                               <div className="w-6">
@@ -516,7 +516,7 @@ function Navbar() {
                               </div>
                             )}
                           </div>
-                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 ">
+                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
                             {pathname.indexOf('documents/queues/') > 0 ? (
                               <>
                                 {pathname.indexOf(
@@ -555,14 +555,14 @@ function Navbar() {
                                       '#id=' +
                                       documentId
                                     }
-                                    className="text-sm text-gray-500 hover:text-coreOrange-600 cursor-pointer whitespace-nowrap"
+                                    className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
                                   >
                                     view folder
                                   </a>
                                 </span>
                                 <span className="pl-6">
                                   <span
-                                    className="text-sm text-gray-500 hover:text-coreOrange-600 cursor-pointer whitespace-nowrap"
+                                    className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
                                     onClick={DownloadDocument}
                                   >
                                     download
@@ -581,7 +581,7 @@ function Navbar() {
                                         '#history_id=' +
                                         documentId
                                       }
-                                      className="text-sm text-gray-500 hover:text-coreOrange-600 cursor-pointer whitespace-nowrap"
+                                      className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
                                     >
                                       view versions
                                     </a>
@@ -628,7 +628,7 @@ function Navbar() {
               <div className="justify-center hidden lg:flex items-center">
                 <div className="dropdown -mt-1 relative">
                   <button
-                    className="w-8 h-8 rounded-full aspect-square bg-gray-400 text-white font-bold focus:ring-2 focus:ring-coreOrange-500 transition"
+                    className="w-8 h-8 rounded-full aspect-square bg-gray-400 text-white font-bold focus:ring-2 focus:ring-primary-500 transition"
                     type="button"
                     data-bs-toggle="dropdown"
                     data-test-id="profile"

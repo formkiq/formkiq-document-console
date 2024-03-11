@@ -347,7 +347,7 @@ const RulesetEditingTab = ({
       </div>
 
       <button
-        className="bg-coreOrange-500 hover:bg-coreOrange-600 active:bg-coreOrange-400 text-white font-bold py-2 px-4 rounded"
+        className="bg-primary-500 hover:bg-primary-600 active:bg-primary-400 text-white font-bold py-2 px-4 rounded"
         type="submit"
       >
         {' '}

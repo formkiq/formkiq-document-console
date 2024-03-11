@@ -257,7 +257,7 @@ export default function SearchInput({
           {isSearchAvailable && (
             <div className="px-4 py-2">
               <button
-                className="w-full bg-coreOrange-500 hover:bg-coreOrange-700 text-white font-bold py-2 px-4 rounded flex justify-center"
+                className="w-full bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded flex justify-center"
                 onClick={SearchForFilesAndFolders}
               >
                 See all results

@@ -73,13 +73,13 @@ function RulesetsTable({
                     <div className="flex items-center">
                       <button
                         onClick={() => showRulesetEditTab(ruleset.rulesetId)}
-                        className="w-4 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500 my-[3px]"
+                        className="w-4 h-auto text-gray-400 mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
                       >
                         <Edit />
                       </button>
                       <button
                         onClick={() => onRulesetDelete(ruleset.rulesetId)}
-                        className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500 my-[3px]"
+                        className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
                       >
                         <Trash />
                       </button>

@@ -78,21 +78,21 @@ function RulesTable({
                     <div className="flex items-center">
                       <button
                         onClick={() => editRule(rule)}
-                        className="w-4 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500 my-[3px]"
+                        className="w-4 h-auto text-gray-400 mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
                       >
                         <Edit />
                       </button>
 
                       <button
                         onClick={() => onRuleDelete(rule.ruleId)}
-                        className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500 my-[3px]"
+                        className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
                       >
                         <Trash />
                       </button>
 
                       <a
                         href={pathname + '/rule/' + rule.ruleId}
-                        className="w-4 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500 my-[3px] whitespace-nowrap"
+                        className="w-4 h-auto text-gray-400 mr-3 cursor-pointer hover:text-primary-500 my-[3px] whitespace-nowrap"
                       >
                         Open in Editor
                       </a>

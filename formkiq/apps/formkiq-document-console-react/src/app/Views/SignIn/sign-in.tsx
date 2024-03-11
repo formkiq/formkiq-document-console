@@ -288,7 +288,7 @@ export function SignIn() {
                 </span>
               )}
             </div>
-            <span className="text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
               Sign In
             </span>
             {userAuthenticationType === 'activedirectory' && (
@@ -358,12 +358,12 @@ export function SignIn() {
                   type="submit"
                   data-test-id="sign-in"
                   value="Sign In"
-                  className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                  className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                 />
               </div>
               <div className="mt-8 w-full text-center">
                 <a
-                  className="underline hover:text-coreOrange-500"
+                  className="underline hover:text-primary-500"
                   href="/forgot-password"
                 >
                   Forgot Your Password?
@@ -374,7 +374,7 @@ export function SignIn() {
             <div className="w-full flex justify-center">
               {customAuthorizerUrl.length && !isDemo && (
                 <button
-                  className="w-48 flex bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                  className="w-48 flex bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                   onClick={(event) => {
                     signInWithCustomAuthorizer(event, customAuthorizerUrl);
                   }}

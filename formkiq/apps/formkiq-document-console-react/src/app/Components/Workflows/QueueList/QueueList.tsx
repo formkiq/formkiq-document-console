@@ -24,7 +24,7 @@ export function QueueList({
       {!isSiteReadOnly && (
         <div className="mt-4 flex px-4">
           <button
-            className="flex bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
+            className="flex bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
             data-test-id="create-queue"
             onClick={(event) => onNewClick(event, siteId)}
           >
