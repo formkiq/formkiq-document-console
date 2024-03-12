@@ -201,7 +201,7 @@ export default function SearchInput({
             aria-label="text"
             type="text"
             placeholder="Search"
-            className="block w-full appearance-none bg-transparent py-2 pl-4 pr-12 text-base text-slate-900 placeholder:text-slate-600 focus:outline-none sm:text-sm sm:leading-6"
+            className="block w-full appearance-none bg-transparent py-2 pl-4 pr-12 text-base text-slate-900 placeholder:text-slate-600 focus:outline-none sm:text-sm sm:leading-6 border-none focus:outline-none focus:ring-0"
           />
         </div>
         <div className="grow-0 ml-2 -mt-1">

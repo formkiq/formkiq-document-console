@@ -453,7 +453,7 @@ export function Rename() {
             <path
               d="m0 0c0-28.175-22.84-51.016-51.015-51.016s-51.016 22.841-51.016 51.016 22.841 51.016 51.016 51.016 51.015-22.841 51.015-51.016z"
               fill="none"
-              stroke="#9ca2af"
+              stroke="currentColor"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeMiterlimit="10"
@@ -464,7 +464,7 @@ export function Rename() {
             <path
               d="m0 0v-115.6"
               fill="none"
-              stroke="#9ca2af"
+              stroke="currentColor"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeMiterlimit="10"
@@ -475,7 +475,7 @@ export function Rename() {
             <path
               d="m0 0v-169.98"
               fill="none"
-              stroke="#9ca2af"
+              stroke="currentColor"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeMiterlimit="10"
@@ -486,7 +486,7 @@ export function Rename() {
             <path
               d="m0 0c0-31.479 25.519-56.997 56.997-56.997s56.996 25.518 56.996 56.997c0 31.478-25.518 56.997-56.996 56.997s-56.997-25.519-56.997-56.997z"
               fill="none"
-              stroke="#9ca2af"
+              stroke="currentColor"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeMiterlimit="10"
@@ -497,7 +497,7 @@ export function Rename() {
             <path
               d="m0 0h-405.74c-21.042 0-38.1 17.058-38.1 38.101v193.78c0 21.042 17.058 38.1 38.1 38.1h405.74c21.043 0 38.102-17.058 38.102-38.1v-193.78c0-21.043-17.059-38.101-38.102-38.101z"
               fill="none"
-              stroke="#9ca2af"
+              stroke="currentColor"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeMiterlimit="10"
@@ -508,7 +508,7 @@ export function Rename() {
             <path
               d="m0 0v0c20.346 0 36.839 16.493 36.839 36.839v343.09c0 20.345-16.493 36.838-36.839 36.838"
               fill="none"
-              stroke="#9ca2af"
+              stroke="currentColor"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeMiterlimit="10"
@@ -519,7 +519,7 @@ export function Rename() {
             <path
               d="m0 0v0c-20.346 0-36.839 16.493-36.839 36.839v343.09c0 20.345 16.493 36.838 36.839 36.838"
               fill="none"
-              stroke="#9ca2af"
+              stroke="currentColor"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeMiterlimit="10"

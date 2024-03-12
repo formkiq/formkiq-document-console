@@ -19,6 +19,7 @@ import {
   parametersDoubleInnerType,
   parametersInnerType,
 } from '../../../helpers/types/workflows';
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import {
   Antivirus,
   ArrowRight,
@@ -411,12 +412,12 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
         <TextInputs newStep={newStep} setNewStep={setNewStep} />
         <CheckBoxes newStep={newStep} setNewStep={setNewStep} />
         {!isAddButtonDisabled && newStep !== null && (
-          <button
-            className=" mt-4 border-2 text-sm font-semibold py-1 px-4 rounded-md flex items-center cursor-pointer text-gray-600 border-gray-600 self-end mt-2 hover:bg-gray-100 hover:text-gray-700 nodrag"
+          <ButtonGhost
+            className="nodrag mt-4"
             onClick={() => onAdd(newStep)}
           >
             Save
-          </button>
+          </ButtonGhost>
         )}
       </div>
     </>

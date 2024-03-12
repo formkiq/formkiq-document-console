@@ -266,7 +266,7 @@ function Navbar() {
           <div
             className={
               (isSidebarExpanded ? 'left-64' : 'left-16') +
-              ' flex fixed top-0 right-0 z-20 h-14.5 items-center justify-between bg-white border-b'
+              ' flex fixed top-0 right-0 z-20 h-14.5 items-center justify-between bg-white border-b  border-neutral-300'
             }
           >
             <div className="w-7/8 flex">
@@ -638,7 +638,7 @@ function Navbar() {
                     <ParseEmailInitials />
                   </button>
                   {showAccountDropdown && (
-                    <ul className="dropdown-menu min-w-max absolute bg-white right-0 text-base z-50 float-right list-none text-left rounded-lg border mt-2.5">
+                    <ul className="dropdown-menu min-w-max absolute bg-white right-0 text-base z-50 float-right list-none text-left rounded-lg border  border-neutral-300 mt-2.5">
                       <li onClick={ToggleAccountSettings}>
                         <Link
                           to="/account/settings"

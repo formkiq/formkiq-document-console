@@ -227,7 +227,7 @@ function FolderListLine({
             targetSiteId={currentSiteId}
           >
             <td
-              className="pt-1 text-gray-800 block lg:table-cell relative lg:static"
+              className="pt-1 text-neutral-900 block lg:table-cell relative lg:static"
               data-test-id={`folder-${folderPath}`}
             >
               <div className="-ml-0.5 flex">
@@ -271,26 +271,26 @@ function FolderListLine({
                   >
                     {folderName}
                   </Link>
-                  <div className="hidden w-5 text-gray-400 mr-4 cursor-pointer px-2 box-content">
+                  <div className="hidden w-5 text-neutral-900 mr-4 cursor-pointer px-2 box-content">
                     <Star />
                   </div>
                 </div>
               </div>
             </td>
-            <td className="w-38 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
+            <td className="w-38 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static">
               {formatDate(folderInstance.lastModifiedDate)}
             </td>
-            <td className="w-24 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static"></td>
+            <td className="w-24 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static"></td>
             {useIndividualSharing && (
-              <td className="w-24 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
+              <td className="w-24 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static">
                 Shared
               </td>
             )}
-            <td className="w-28 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
+            <td className="w-28 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static">
               <div className="flex w-full">
                 {useIndividualSharing && (
                   <div
-                    className="w-6 h-auto text-gray-400 mr-2 cursor-pointer hover:text-primary-500"
+                    className="w-6 h-auto text-neutral-900 mr-2 cursor-pointer hover:text-primary-500"
                     onClick={(event) =>
                       onShareClick(event, {
                         lineType: 'folder',
@@ -307,12 +307,12 @@ function FolderListLine({
                 {!isSiteReadOnly && (
                   <>
                     <div
-                      className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-primary-500"
+                      className="w-3 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
                       onClick={onDeleteClick(folderInstance)}
                     >
                       <Trash />
                     </div>
-                    <div className="w-5 pt-0.5 h-auto text-gray-400">
+                    <div className="w-5 pt-0.5 h-auto text-neutral-900">
                       <DocumentActionsPopover
                         value={{ lineType: 'folder', folder: folderPath }}
                         siteId={currentSiteId}
@@ -347,7 +347,7 @@ function FolderListLine({
           {!folderInstance.isExpanded && (
             <tr>
               <td colSpan={6} className="p-0 m-0">
-                <div className="w-full border-t h-0 -m-b"></div>
+                <div className="w-full border-t h-0 -m-b border-neutral-300"></div>
               </td>
             </tr>
           )}

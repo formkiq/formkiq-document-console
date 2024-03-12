@@ -121,33 +121,33 @@ export const DocumentsTable = (props: DocumentTableProps) => {
         onScroll={handleScroll}
       >
         <table
-          className="border-separate border-spacing-0 table-auto w-full"
+          className="border-separate border-spacing-0 table-auto w-full "
           id="documentsTable"
         >
-          <thead className="sticky top-0 bg-white z-10">
+          <thead className="sticky top-0 bg-neutral-100 z-10">
             <tr>
               <th
                 scope="col"
-                className="px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-gray-300"
+                className="px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
               >
                 Name
               </th>
               <th
                 scope="col"
-                className="w-38 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-gray-300"
+                className="w-38 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
               >
                 Last modified
               </th>
               <th
                 scope="col"
-                className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-gray-300"
+                className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
               >
                 Filesize
               </th>
               {useIndividualSharing && (
                 <th
                   scope="col"
-                  className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-gray-300"
+                  className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
                 >
                   {subfolderUri === 'shared' && <span>Shared by</span>}
                   {subfolderUri !== 'shared' && <span>Access</span>}
@@ -155,7 +155,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
               )}
               <th
                 scope="col"
-                className="w-28 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-gray-300"
+                className="w-28 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
               >
                 Actions
               </th>

@@ -12,6 +12,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { v4 as uuid } from 'uuid';
+import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
+import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
 import { Edit } from '../../Components/Icons/icons';
 import {
   CreatorNode,
@@ -250,13 +252,13 @@ export function WorkflowDesigner() {
         <title>Workflow Designer</title>
       </Helmet>
 
-      <div className="w-full h-24 py-2 px-4 flex flex-row items-center justify-start text-gray-700 border-b gap-4">
+      <div className="w-full h-24 py-2 px-4 flex flex-row items-center justify-start text-neutral-900 border-b gap-4">
         <div className="flex flex-col">
           {editWorkflowInfo ? (
             <div className="flex flex-row">
               <input
                 type="text"
-                className="w-80 mt-2 border border-gray-300 p-1 rounded-md"
+                className="w-80 mt-2 border border-neutral-300 p-1"
                 value={workflowInfo.name}
                 onChange={(e) =>
                   setWorkflowInfo({
@@ -268,10 +270,10 @@ export function WorkflowDesigner() {
               />
             </div>
           ) : (
-            <div className="text-lg font-medium">
+            <div className="text-2xl font-medium">
               {workflow.name}
               <button
-                className="w-4 h-4 ml-2 hover:text-primary-500"
+                className="w-5 h-5 ml-2 hover:text-primary-500"
                 onClick={() => setEditWorkflowInfo(true)}
               >
                 <Edit />
@@ -281,7 +283,7 @@ export function WorkflowDesigner() {
           {editWorkflowInfo ? (
             <input
               type="text"
-              className="w-80 mt-2 border border-gray-300 p-1 rounded-md"
+              className="w-80 mt-2 border border-neutral-300 p-1"
               value={workflowInfo.description}
               onChange={(e) =>
                 setWorkflowInfo({
@@ -292,17 +294,17 @@ export function WorkflowDesigner() {
               placeholder="Workflow Description"
             />
           ) : (
-            <div>{workflow.description}</div>
+            <div className="text-sm">{workflow.description}</div>
           )}
         </div>
         {editWorkflowInfo && (
-          <button
+          <ButtonPrimary
             onClick={changeWorkflowInfo}
-            className="self-end border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500"
+            style={{ height: '32px' }}
+            className="self-end"
           >
-            {' '}
-            Save{' '}
-          </button>
+            Save
+          </ButtonPrimary>
         )}
       </div>
       <div
@@ -323,18 +325,12 @@ export function WorkflowDesigner() {
         >
           <Background variant={BackgroundVariant.Dots} />
           <Panel position="top-right">
-            <button
-              onClick={addStep}
-              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500 my-2 bg-white"
-            >
-              Add New Step
-            </button>
-            <button
-              onClick={saveWorkflow}
-              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500 my-2 bg-white"
-            >
+            <ButtonSecondary onClick={addStep} className="m-2">
+              + Add New Step
+            </ButtonSecondary>
+            <ButtonPrimary onClick={saveWorkflow} className="m-2">
               Save Workflow
-            </button>
+            </ButtonPrimary>
             {/*<button onClick={addConfiguration} className='bg-gray-300 mx-2 py-1 px-2'>Add Configuration</button>*/}
           </Panel>
         </ReactFlow>

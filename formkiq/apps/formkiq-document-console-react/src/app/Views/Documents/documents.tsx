@@ -15,6 +15,10 @@ import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal'
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
+import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
+import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
+import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
+import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
 import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
 import {
   ChevronLeft,
@@ -678,12 +682,12 @@ function Documents() {
         const previousFolderLevel = uri.substring(0, uri.lastIndexOf('/'));
         return (
           <span
-            className={'flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
+            className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}
           >
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
-                className="hover:text-primary-600"
+                className="text-primary-500 hover:text-primary-600"
               >
                 {siteDocumentsRootName.replace('Workspace: ', '')}:
               </Link>
@@ -720,7 +724,7 @@ function Documents() {
               </Link>
             </FolderDropWrapper>
             <p className={'flex px-1'}> / </p>
-            <span className={'flex items-center mt-1 mr-1.5 w-5'}>
+            <span className={'flex items-center mt-1 mr-1.5 w-4'}>
               <FolderOutline />
             </span>
             <span>{folderLevels[folderLevels.length - 1]}</span>
@@ -729,12 +733,13 @@ function Documents() {
       } else {
         return (
           <span
-            className={'flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
+            className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}
           >
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
-                className="hover:text-primary-600"
+                // className="hover:text-primary-600"
+                className="text-primary-500 hover:text-primary-600 text-sm font-bold"
               >
                 {siteDocumentsRootName.replace('Workspace: ', '')}:
               </Link>
@@ -787,7 +792,7 @@ function Documents() {
               targetSiteId={currentSiteId}
               className={'flex items-start'}
             >
-              <span className={'flex items-center mt-1 mr-1.5 w-5'}>
+              <span className={'flex items-center mt-1 mr-1.5 w-4'}>
                 <FolderOutline />
               </span>
               <span>{folderLevels[folderLevels.length - 1]}</span>
@@ -798,7 +803,7 @@ function Documents() {
     }
     return (
       <span
-        className={'hidden flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
+        className={'hidden flex pl-4 py-2 text-gray-500 bg-white'}
       >
         <span className="pr-1">
           {siteDocumentsRootName.replace('Workspace: ', '')}
@@ -1090,35 +1095,31 @@ function Documents() {
                 </div>
               ) : (
                 <div className="flex w-full pt-10 justify-center items-center">
-                  <a
-                    href={archiveDownloadUrl}
-                    className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 hover:border-primary-500 hover:text-primary-500"
-                  >
-                    <div className="text-lg ml-2 text-center cursor-pointer">
-                      Download Archive
-                    </div>
-                  </a>
+                  <ButtonPrimary type="button" style={{ padding: 0 }}>
+                    <a
+                      href={archiveDownloadUrl}
+                      className="w-full h-full block"
+                    >
+                      <div className="text-lg mx-4 text-center cursor-pointer">
+                        Download Archive
+                      </div>
+                    </a>
+                  </ButtonPrimary>
                 </div>
               )}
             </>
           )}
         </div>
-        <div className="h-12 flex justify-end">
+        <div className="h-12 flex justify-end mt-2">
           {!isCompressButtonDisabled && (
-            <button
-              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-primary-500 hover:text-primary-500"
-              onClick={compressDocuments}
-            >
+            <ButtonPrimary onClick={compressDocuments} type="button">
               <span>Compress</span>
-            </button>
+            </ButtonPrimary>
           )}
           {archiveStatus === ARCHIVE_STATUSES.COMPLETE && (
-            <button
-              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-primary-500 hover:text-primary-500"
-              onClick={ClearPendingArchive}
-            >
+            <ButtonGhost onClick={ClearPendingArchive} type="button">
               <span>Done</span>
-            </button>
+            </ButtonGhost>
           )}
         </div>
       </div>
@@ -1148,10 +1149,7 @@ function Documents() {
             <div className="grow">{foldersPath(subfolderUri)}</div>
             <div className="flex items-center gap-4 pr-8 z-10">
               {archiveStatus !== ARCHIVE_STATUSES.COMPLETE && (
-                <button
-                  className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500`}
-                  onClick={ToggleArchiveTab}
-                >
+                <ButtonSecondary onClick={ToggleArchiveTab} type="button">
                   {isArchiveTabExpanded ? (
                     <>
                       <span>Minimize Archive</span>
@@ -1165,22 +1163,19 @@ function Documents() {
                       )}
                     </>
                   )}
-                </button>
+                </ButtonSecondary>
               )}
               {isArchiveTabExpanded &&
                 archiveStatus === ARCHIVE_STATUSES.INITIAL && (
-                  <button
-                    className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500`}
-                    onClick={ClearPendingArchive}
-                  >
+                  <ButtonTertiary onClick={ClearPendingArchive} type="button">
                     Cancel Archive Creation
-                  </button>
+                  </ButtonTertiary>
                 )}
               <div
                 className={
                   (isTagFilterExpanded
                     ? 'text-primary-500 '
-                    : 'text-gray-400 ') + ' w-5 cursor-pointer'
+                    : 'text-neutral-900 ') + ' w-5 cursor-pointer'
                 }
                 onClick={(event) => {
                   if (filterTag && filterTag.length) {
