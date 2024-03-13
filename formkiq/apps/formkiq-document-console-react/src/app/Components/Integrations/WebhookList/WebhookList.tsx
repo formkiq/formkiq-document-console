@@ -35,15 +35,15 @@ export function WebhookList({
       )}
       <div className="mt-4 mb-8">
         <table className="w-full border-collapse text-sm">
-          <thead className="bg-slate-100 text-left font-bold border-slate-300">
+          <thead className="bg-slate-100 text-left font-bold border-slate-300 text-transparent">
             <tr>
-              <th className="w-1/8 border-b border-t p-4 pl-8 py-3">
+              <th className="w-1/8 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Name
               </th>
-              <th className="w-3/4 border-b border-t p-4 py-3 ">
+              <th className="w-3/4 border-b border-t p-4 py-3  bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 URL
               </th>
-              <th className="w-1/8 border-b border-t p-4 pr-8 py-3 ">
+              <th className="w-1/8 border-b border-t p-4 pr-8 py-3  bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Actions
               </th>
             </tr>
