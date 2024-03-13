@@ -20,6 +20,9 @@ import {
 import { RequestStatus } from '../../helpers/types/document';
 import { Ruleset } from '../../helpers/types/rulesets';
 import RulesetsTable from './rulesetsTable';
+import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
+import ButtonPrimary from "../../Components/Generic/Buttons/ButtonPrimary";
+import ButtonGhost from "../../Components/Generic/Buttons/ButtonGhost";
 
 function Rulesets() {
   const { user } = useAuthenticatedState();
@@ -196,12 +199,12 @@ function Rulesets() {
         }}
       >
         <div className="w-full p-2 flex justify-end">
-          <button
+          <ButtonPrimaryGradient
             onClick={() => setIsRulesetEditTabVisible(true)}
-            className="bg-gray-200 hover:bg-gray-300  font-bold py-2 px-4 rounded"
+            style={{height: '40px',}}
           >
-            Create New Ruleset
-          </button>
+            + Create New Ruleset
+          </ButtonPrimaryGradient>
         </div>
 
         {isRulesetEditTabVisible && (
@@ -272,7 +275,7 @@ const RulesetEditingTab = ({
           required={true}
           autoFocus={true}
           min="0"
-          className="w-52 p-2 border-2 border-gray-300 rounded"
+          className="w-52 p-2 border border-neutral-300 rounded"
         />
       </div>
       <div className="flex flex-col justify-start gap-2">
@@ -296,7 +299,7 @@ const RulesetEditingTab = ({
           required={true}
           inputMode="numeric"
           pattern="[0-9]*"
-          className="w-24 p-2 border-2 border-gray-300 rounded"
+          className="w-24 p-2 border border-neutral-300 rounded"
         />
       </div>
 
@@ -319,7 +322,7 @@ const RulesetEditingTab = ({
             })
           }
           required={true}
-          className="w-24 p-2 border-2 border-gray-300 rounded"
+          className="w-24 p-2 border border-neutral-300 rounded"
         />
       </div>
 
@@ -333,7 +336,7 @@ const RulesetEditingTab = ({
         <select
           name="status"
           id="status"
-          className="w-36 p-2 border-2 border-gray-300 rounded"
+          className="w-36 p-2 border border-neutral-300 rounded"
           value={rulesetValue.ruleset.status}
           onChange={(e) =>
             setRulesetValue({
@@ -345,20 +348,19 @@ const RulesetEditingTab = ({
           <option value="INACTIVE">INACTIVE</option>
         </select>
       </div>
-
-      <button
-        className="bg-primary-500 hover:bg-primary-600 active:bg-primary-400 text-white font-bold py-2 px-4 rounded"
-        type="submit"
-      >
-        {' '}
-        Save
-      </button>
-      <button
-        className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded"
-        onClick={onCancelEdit}
-      >
-        Cancel
-      </button>
+      <div className="flex flex-row gap-2 h-[42px]">
+        <ButtonPrimary
+          type="submit"
+        >
+          Save
+        </ButtonPrimary>
+        <ButtonGhost
+          type="button"
+          onClick={onCancelEdit}
+        >
+          Cancel
+        </ButtonGhost>
+      </div>
     </form>
   );
 };

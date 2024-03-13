@@ -6,6 +6,7 @@ import {
   closeDialog,
 } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
+import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 
 function GlobalNotificationDialog() {
   const dispatch = useAppDispatch();
@@ -50,14 +51,14 @@ function GlobalNotificationDialog() {
                   {dialogTitle}
                 </Dialog.Title>
 
-                <div className="flex w-full justify-center pt-5">
-                  <button
+                <div className="flex w-full justify-center mt-5 h-9">
+                  <ButtonPrimaryGradient
                     onClick={onClose}
                     type="button"
-                    className="mr-2 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                    className="mr-2 font-semibold cursor-pointer focus:outline-none w-20"
                   >
                     OK
-                  </button>
+                  </ButtonPrimaryGradient>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

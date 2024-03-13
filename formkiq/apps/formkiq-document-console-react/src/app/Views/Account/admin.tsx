@@ -1,15 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Close, Plus, Save, Trash } from '../../Components/Icons/icons';
+import {useEffect, useMemo, useState} from 'react';
+import {Helmet} from 'react-helmet-async';
+import {Close, Plus, Save, Trash} from '../../Components/Icons/icons';
 import RegoEditor from '../../Components/TextEditors/RegoEditor';
-import { useAuthenticatedState } from '../../Store/reducers/auth';
-import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
-import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
-import { useAppDispatch } from '../../Store/store';
-import { DocumentsService } from '../../helpers/services/documentsService';
+import {useAuthenticatedState} from '../../Store/reducers/auth';
+import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
+import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
+import {useAppDispatch} from '../../Store/store';
+import {DocumentsService} from '../../helpers/services/documentsService';
+import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
+import ButtonSecondary from "../../Components/Generic/Buttons/ButtonSecondary";
+import ButtonPrimary from "../../Components/Generic/Buttons/ButtonPrimary";
+import ButtonGhost from "../../Components/Generic/Buttons/ButtonGhost";
 
 export function Admin() {
-  const { user } = useAuthenticatedState();
+  const {user} = useAuthenticatedState();
   const sites = useMemo(() => {
     let userSite = null;
     let defaultSite = null;
@@ -250,35 +254,35 @@ export function Admin() {
         <h6 className="w-full my-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
           Configure Open Policy Agent
         </h6>
-        <>
-          <button
-            onClick={toggleInput}
-            className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500 whitespace-nowrap"
-          >
-            Add Policy{' '}
-            <div className="w-4 ml-2">
-              <Plus />
-            </div>
-          </button>
+        <div className="flex gap-2 items-center">
           <button
             onClick={onSave}
-            className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500"
+            className="w-7 h-7 hover:text-primary-500 my-[3px]"
+            title="Save"
           >
-            Save{' '}
-            <div className="w-5 ml-2">
-              <Save />
-            </div>
+            <Save/>
+            <span className="sr-only">Save</span>
           </button>
           <button
             onClick={onDelete}
-            className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500"
+            className="w-6 h-6 hover:text-primary-500 my-[3px]"
+            title="Delete"
           >
-            Delete{' '}
-            <div className="w-3 ml-2">
-              <Trash />
-            </div>
+            <Trash/>
+            <span className="sr-only">Delete</span>
           </button>
-        </>
+          <div className='h-6 w-px border-r border-neutral-300'></div>
+          <ButtonPrimaryGradient
+            onClick={toggleInput}
+            className="flex items-center"
+            style={{height: '32px'}}
+          >
+            Add Policy{' '}
+            <div className="w-4 ml-2">
+              <Plus/>
+            </div>
+          </ButtonPrimaryGradient>
+        </div>
       </div>
 
       {
@@ -295,22 +299,18 @@ export function Admin() {
                   value={newSiteId}
                 />
               </div>
-              <div className="flex justify-start items-center">
-                <button
+              <div className="flex justify-start items-center h-9">
+                <ButtonPrimary
                   onClick={addPolicy}
-                  className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500 whitespace-nowrap"
+                  className=" ml-2 whitespace-nowrap"
                 >
                   Create
-                </button>
-                <button
+                </ButtonPrimary>
+                <ButtonGhost
                   onClick={toggleInput}
-                  className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-400 border-gray-300 hover:border-primary-500 hover:text-primary-500 whitespace-nowrap"
-                >
-                  Cancel{' '}
-                  <div className="w-4 ml-2">
-                    <Close />
-                  </div>
-                </button>
+                  className="ml-2 flex items-center"
+                > Cancel
+                </ButtonGhost>
               </div>
             </div>
           ) : (

@@ -754,7 +754,7 @@ export function Sidebar() {
             </li>
             {integrationsExpanded && (
               <>
-                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/workflows"
                     className={({isActive}) =>
@@ -766,7 +766,7 @@ export function Sidebar() {
                   >
                     <div
                       className={
-                        'w-full text-sm font-bold flex items-center pl-5 '
+                        'w-full text-sm font-bold flex items-center pl-5  py-2 '
                       }
                     >
                       <div className="w-4 flex items-center mr-2">
@@ -776,7 +776,7 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex mt-6 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/queues"
                     className={({isActive}) =>
@@ -788,7 +788,7 @@ export function Sidebar() {
                   >
                     <div
                       className={
-                        'w-full text-sm font-bold flex items-center pl-5 '
+                        'w-full text-sm font-bold flex items-center pl-5  py-2 '
                       }
                     >
                       <div className="w-4 flex items-center mr-2">
@@ -798,7 +798,7 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="mt-4 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="mt-2 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"
                     data-test-id="nav-api-explorer"
@@ -1186,7 +1186,7 @@ export function Sidebar() {
       <div
         className={
           (sidebarExpanded ? 'w-64' : 'w-14') +
-          ' border-r border-neutral-300 fixed flex h-full flex-wrap items-start justify-start overflow-y-auto'
+          ' border-r border-neutral-300 fixed flex h-full flex-wrap items-start justify-start overflow-y-auto bg-neutral-100'
         }
       >
         <div
@@ -1242,7 +1242,7 @@ export function Sidebar() {
               {!isSiteReadOnly && (
                 <div className="flex flex-col w-full justify-center mb-4 px-4 gap-2">
                   <ButtonPrimaryGradient
-                    className={(isSidebarExpanded ? ' mr-1 rounded-none' : 'mb-1 rounded-full') + " flex justify-center items-center w-full"}
+                    className={(isSidebarExpanded ? ' mr-1 rounded-md' : 'mb-1 rounded-full') + " flex justify-center items-center w-full"}
                     style={{
                       height: isSidebarExpanded ? "32px" : "28px",
                       width: isSidebarExpanded ? "100%" : "28px",
@@ -1273,7 +1273,7 @@ export function Sidebar() {
                     </div>
                   </ButtonPrimaryGradient>
                   <ButtonTertiary
-                    className={(isSidebarExpanded ? ' mr-1 rounded-none' : 'mb-1 rounded-full') + " flex justify-center items-center w-full"}
+                    className={(isSidebarExpanded ? ' mr-1 rounded-md' : 'mb-1 rounded-full') + " flex justify-center items-center w-full"}
                     style={{
                       height: isSidebarExpanded ? "32px" : "28px",
                       width: isSidebarExpanded ? "100%" : "28px",

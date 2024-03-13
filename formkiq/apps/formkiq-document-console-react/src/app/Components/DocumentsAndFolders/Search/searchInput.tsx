@@ -188,7 +188,7 @@ export default function SearchInput({
       <div className="flex items-center">
         <div
           _ngcontent-wxp-c51=""
-          className="grow md:flex md:items-center rounded-md mt-2 mb-4 mt-2.5 relative bg-gray-100 "
+          className="grow md:flex md:items-center rounded-md mt-2 mb-4 mt-2.5 relative bg-neutral-100 "
         >
           <div className="w-4 ml-2">
             <Search></Search>
@@ -201,13 +201,13 @@ export default function SearchInput({
             aria-label="text"
             type="text"
             placeholder="Search"
-            className="block w-full appearance-none bg-transparent py-2 pl-4 pr-12 text-base text-slate-900 placeholder:text-slate-600 focus:outline-none sm:text-sm sm:leading-6 border-none focus:outline-none focus:ring-0"
+            className="block w-full appearance-none bg-transparent py-2 pl-4 pr-12 text-base text-neutral-900 placeholder:text-neutral-600 focus:outline-none sm:text-sm sm:leading-6 border-none focus:outline-none focus:ring-0"
           />
         </div>
         <div className="grow-0 ml-2 -mt-1">
           {useAdvancedSearch && (
             <button
-              className="bg-gray-100 border hover:bg-gray-200 text-smaller text-gray-600 font-semibold pt-2 pb-1.5 px-2 rounded"
+              className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"
               onClick={(event) => onAdvancedSearchModalClick(event)}
             >
               <div className="w-4">
@@ -227,25 +227,25 @@ export default function SearchInput({
             {useAdvancedSearch && (
               <>
                 <li
-                  className="flex items-center p-4 hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center p-4 hover:bg-neutral-100 cursor-pointer"
                   onClick={SearchForFoldersOnly}
                 >
                   <span className={'mr-2'}>
                     <Search></Search>
                   </span>
-                  <span className="whitespace-nowrap text-base text-slate-900">
+                  <span className="whitespace-nowrap text-base text-neutral-900">
                     {' '}
                     Search folders for {value}
                   </span>
                 </li>
                 <li
-                  className="flex items-center p-4 hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center p-4 hover:bg-neutral-100 cursor-pointer"
                   onClick={SearchForFilesOnly}
                 >
                   <span className={'mr-2'}>
                     <Search></Search>
                   </span>
-                  <span className="whitespace-nowrap text-base text-slate-900">
+                  <span className="whitespace-nowrap text-base text-neutral-900">
                     {' '}
                     Search files for {value}
                   </span>

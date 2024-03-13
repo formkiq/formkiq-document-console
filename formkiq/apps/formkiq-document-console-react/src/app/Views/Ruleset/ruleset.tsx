@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
+import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
+import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
 import { Close, Plus } from '../../Components/Icons/icons';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
@@ -21,6 +23,8 @@ import {
 import { RequestStatus } from '../../helpers/types/document';
 import { Rule } from '../../helpers/types/rulesets';
 import RulesTable from './rulesTable';
+import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
+import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
 
 function Ruleset() {
   const { user } = useAuthenticatedState();
@@ -205,12 +209,12 @@ function Ruleset() {
         }}
       >
         <div className="w-full p-2 flex justify-end">
-          <button
+          <ButtonPrimaryGradient
             onClick={() => setIsRuleEditTabVisible(true)}
-            className="bg-gray-200 hover:bg-gray-300  font-bold py-2 px-4 rounded"
+            style={{ height: '40px' }}
           >
-            Create New Rule
-          </button>
+            + Create New Rule
+          </ButtonPrimaryGradient>
         </div>
         {isRuleEditTabVisible && (
           <RuleEditingTab
@@ -328,7 +332,7 @@ const RuleEditingTab = ({
         <div className="flex flex-col justify-start gap-2">
           <label
             htmlFor="description"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-bold text-neutral-900"
           >
             Description
           </label>
@@ -345,13 +349,13 @@ const RuleEditingTab = ({
             minLength={1}
             required={true}
             autoFocus={true}
-            className="w-64 p-2 border-2 border-gray-300 rounded"
+            className="w-64 p-2 border border-neutral-300 rounded"
           />
         </div>
         <div className="flex flex-col justify-start gap-2">
           <label
             htmlFor="priority"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-bold text-neutral-900"
           >
             Priority
           </label>
@@ -369,20 +373,20 @@ const RuleEditingTab = ({
             required={true}
             inputMode="numeric"
             pattern="[0-9]*"
-            className="w-24 p-2 border-2 border-gray-300 rounded"
+            className="w-24 p-2 border border-neutral-300 rounded"
           />
         </div>
         <div className="flex flex-col justify-start gap-2">
           <label
             htmlFor="status"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-bold text-neutral-900"
           >
             Status
           </label>
           <select
             name="status"
             id="status"
-            className="w-36 p-2 border-2 border-gray-300 rounded"
+            className="w-36 p-2 border border-neutral-300 rounded"
             value={ruleValue.rule.status}
             onChange={(e) =>
               setRuleValue({
@@ -399,7 +403,7 @@ const RuleEditingTab = ({
         <div className="flex flex-col justify-start gap-2">
           <label
             htmlFor="workflowId"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-bold text-neutral-900"
           >
             Workflow to Trigger
           </label>
@@ -407,7 +411,7 @@ const RuleEditingTab = ({
             aria-label="Workflow to Trigger"
             value={ruleValue.rule.workflowId}
             name="workflowId"
-            className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+            className="appearance-none -md relative block w-full px-3 py-3 border border-neutral-300 placeholder-gray-500 text-gray-900 -t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 rounded"
             onChange={(e) =>
               setRuleValue({
                 rule: { ...ruleValue.rule, workflowId: e.target.value },
@@ -435,13 +439,13 @@ const RuleEditingTab = ({
             <div className="flex flex-col justify-start gap-2">
               <label
                 htmlFor="attribute"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-bold text-neutral-900"
               >
                 Attribute
               </label>
               <select
                 name="attribute"
-                className="w-36 p-2 border-2 border-gray-300 rounded"
+                className="w-36 p-2 border border-neutral-300 rounded"
                 value={ruleValue.rule.conditions.must[index].attribute}
                 onChange={(e) => onConditionsChange(e, index, 'attribute')}
               >
@@ -455,7 +459,7 @@ const RuleEditingTab = ({
             <div className="flex flex-col justify-start gap-2">
               <label
                 htmlFor="fieldName"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-bold text-neutral-900"
               >
                 Field Name
               </label>
@@ -467,20 +471,20 @@ const RuleEditingTab = ({
                 onChange={(e) => onConditionsChange(e, index, 'fieldName')}
                 minLength={1}
                 required={true}
-                className="w-52 p-2 border-2 border-gray-300 rounded"
+                className="w-52 p-2 border border-neutral-300 rounded"
               />
             </div>
 
             <div className="flex flex-col justify-start gap-2">
               <label
                 htmlFor="operation"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-bold text-neutral-900"
               >
                 Operation
               </label>
               <select
                 name="operation"
-                className="w-36 p-2 border-2 border-gray-300 rounded"
+                className="w-36 p-2 border border-neutral-300 rounded"
                 value={ruleValue.rule.conditions.must[index].operation}
                 onChange={(e) => onConditionsChange(e, index, 'operation')}
               >
@@ -492,7 +496,7 @@ const RuleEditingTab = ({
             <div className="flex flex-col justify-start gap-2">
               <label
                 htmlFor="value"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-bold text-neutral-900"
               >
                 Value
               </label>
@@ -502,7 +506,7 @@ const RuleEditingTab = ({
                 type="text"
                 value={ruleValue.rule.conditions.must[index].value}
                 onChange={(e) => onConditionsChange(e, index, 'value')}
-                className="w-52 p-2 border-2 border-gray-300 rounded"
+                className="w-52 p-2 border border-neutral-300 rounded"
               />
             </div>
 
@@ -517,7 +521,7 @@ const RuleEditingTab = ({
                   },
                 });
               }}
-              className="w-5 text-gray-700 mb-2 hover:text-primary-500 cursor-pointer focus:outline-none focus:text-primary-500 active:text-primary-500 transition-all duration-300 ease-in-out"
+              className="w-5 text-neutral-900 mb-2 hover:text-primary-500 cursor-pointer focus:outline-none focus:text-primary-500 active:text-primary-500 transition-all duration-300 ease-in-out"
               type="button"
               aria-label="Delete condition"
             >
@@ -527,30 +531,23 @@ const RuleEditingTab = ({
         );
       })}
       <div className="">
-        <button
+        <ButtonTertiary
           onClick={addCondition}
-          className="flex flex-row justify-start items-end gap-2 p-2 hover:text-primary-500"
+          type="button"
+          className="flex flex-row justify-start items-end gap-2 p-2 my-2 hover:text-primary-500"
+          style={{ backgroundColor: '#ffffff' }}
         >
           <div className="w-5">
             <Plus />
           </div>
           Add Condition
-        </button>
+        </ButtonTertiary>
       </div>
-      <div className="flex flex-col lg:flex-row justify-start items-end gap-2 p-2">
-        <button
-          className="bg-primary-500 hover:bg-primary-600 active:bg-primary-400 text-white font-bold py-2 px-4 rounded"
-          type="submit"
-        >
-          {' '}
-          Save
-        </button>
-        <button
-          className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded"
-          onClick={onCancelEdit}
-        >
+      <div className="flex flex-row gap-2 h-[42px] ml-2 mb-2">
+        <ButtonPrimary type="submit">Save</ButtonPrimary>
+        <ButtonGhost type="button" onClick={onCancelEdit}>
           Cancel
-        </button>
+        </ButtonGhost>
       </div>
     </form>
   );

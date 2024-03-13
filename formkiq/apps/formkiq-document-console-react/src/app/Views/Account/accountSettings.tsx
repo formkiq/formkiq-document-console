@@ -226,7 +226,7 @@ export function AccountSettings() {
           <input
             type="submit"
             value={'Update Configuration for Site "' + currentSiteId + '"'}
-            className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+            className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-8 rounded-md flex cursor-pointer focus:outline-none"
           />
         </div>
       </form>

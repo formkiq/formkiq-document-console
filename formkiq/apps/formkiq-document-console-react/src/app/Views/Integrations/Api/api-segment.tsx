@@ -16,7 +16,7 @@ export const ApiSegment = (props: ApiSegmentProps) => {
   return (
     <>
       <div
-        className="w-full flex self-start text-gray-400 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap py-4 cursor-pointer"
+        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap py-4 cursor-pointer"
         onClick={toggleExpanded}
         data-test-id={typeof props.title === 'string' ? props.title?.replace(/ /g, '-') : undefined}
       >

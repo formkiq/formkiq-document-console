@@ -1665,7 +1665,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
           <div className="ml-4">
             <button
               data-test-id="apiItem-fetch"
-              className={`px-2 md:px-4 font-semibold px-4 py-1 rounded-2xl
+              className={`px-2 md:px-4 font-semibold px-4 py-1 rounded-md
                   ${
                     state.isValidForm
                       ? 'cursor-pointer bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white'

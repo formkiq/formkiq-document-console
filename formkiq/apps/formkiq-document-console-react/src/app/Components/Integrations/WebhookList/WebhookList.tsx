@@ -1,4 +1,4 @@
-import { Plus } from '../../Icons/icons';
+import {Plus, Trash} from '../../Icons/icons';
 
 type Props = {
   siteId: string;
@@ -24,7 +24,7 @@ export function WebhookList({
       {!isSiteReadOnly && (
         <div className="mt-4 flex px-4">
           <button
-            className="flex bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
+            className="flex bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-md flex cursor-pointer focus:outline-none py-2 px-4"
             data-test-id="create-webhook"
             onClick={(event) => onNewClick(event, siteId)}
           >
@@ -35,15 +35,15 @@ export function WebhookList({
       )}
       <div className="mt-4 mb-8">
         <table className="w-full border-collapse text-sm">
-          <thead>
+          <thead className="bg-slate-100 text-left font-bold border-slate-300">
             <tr>
-              <th className="w-1/8 border-b nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+              <th className="w-1/8 border-b border-t p-4 pl-8 py-3">
                 Name
               </th>
-              <th className="w-3/4 border-b nodark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+              <th className="w-3/4 border-b border-t p-4 py-3 ">
                 URL
               </th>
-              <th className="w-1/8 border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+              <th className="w-1/8 border-b border-t p-4 pr-8 py-3 ">
                 Actions
               </th>
             </tr>
@@ -53,20 +53,21 @@ export function WebhookList({
               <>
                 {(webhooks as any).map((webhook: any, i: number) => {
                   return (
-                    <tr key={i} data-test-id={`webhook-${webhook.name}`}>
-                      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400">
+                    <tr key={i} data-test-id={`webhook-${webhook.name}`} className="border-slate-300 text-neutral-900">
+                      <td className="border-b p-4 pl-8">
                         {webhook.name}
                       </td>
-                      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 text-slate-500 nodark:text-slate-400">
+                      <td className="border-b p-4 ">
                         {webhook.url}
                       </td>
-                      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400">
+                      <td className="border-b p-4 pr-8 ">
                         <button
                           onClick={onDeleteClick(webhook.id, siteId)}
                           data-test-id="delete-webhook"
-                          className="bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                          className="w-4 h-auto  mr-3 hover:text-primary-500 my-[3px]"
                         >
-                          Delete
+                          <Trash />
+                          <span className="sr-only">Delete</span>
                         </button>
                       </td>
                     </tr>

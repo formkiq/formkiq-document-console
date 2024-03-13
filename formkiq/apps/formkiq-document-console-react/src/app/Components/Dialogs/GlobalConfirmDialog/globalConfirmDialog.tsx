@@ -6,6 +6,8 @@ import {
   hideDialog,
 } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
+import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
+import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
 
 function GlobalConfirmDialog() {
   const dispatch = useAppDispatch();
@@ -62,23 +64,22 @@ function GlobalConfirmDialog() {
                   {dialogTitle}
                 </Dialog.Title>
 
-                <div className="flex w-full justify-center pt-5">
-                  <button
+                <div className="flex w-full justify-center mt-5 h-9">
+                  <ButtonPrimaryGradient
                     onClick={onConfirm}
                     type="button"
                     data-test-id="global-modal-ok"
-                    className="mr-2 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                    className="mr-2 font-semibold cursor-pointer focus:outline-none w-20"
                   >
                     OK
-                  </button>
-                  <button
+                  </ButtonPrimaryGradient>
+                  <ButtonGhost
                     type="button"
                     data-test-id="global-modal-cancel"
-                    className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
                     onClick={onClose}
                   >
                     Cancel
-                  </button>
+                  </ButtonGhost>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

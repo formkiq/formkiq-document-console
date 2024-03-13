@@ -33,7 +33,6 @@ function RegoEditor({
       editor.on('change', (instance) => {
         // Handle Rego code changes
         const updatedRegoCode = instance.getValue();
-        console.log(updatedRegoCode);
         onChange(updatedRegoCode);
       });
     }

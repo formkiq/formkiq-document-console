@@ -24,7 +24,6 @@ import {
 } from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
-import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
 import {
   Info,
   Minus,
@@ -439,18 +438,18 @@ function DocumentListLine({
           <div className="flex">
             {folder === 'deleted' ? (
               <>
-                <ButtonTertiary
+                <ButtonSecondary
                   type="button"
                   onClick={restoreDocument}
                   className=" mr-2"
-                  style={{ height: '32px' }}
+                  style={{height: '32px'}}
                 >
                   Restore
-                </ButtonTertiary>
+                </ButtonSecondary>
                 <ButtonSecondary
                   type="button"
                   onClick={onPermanentDeleteClick}
-                  className="mr-2"
+                  className="mr-2 hover:bg-red-50"
                   style={{
                     borderColor: '#ef4444',
                     color: '#ef4444',

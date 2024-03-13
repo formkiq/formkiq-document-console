@@ -1168,7 +1168,7 @@ function Documents() {
               {isArchiveTabExpanded &&
                 archiveStatus === ARCHIVE_STATUSES.INITIAL && (
                   <ButtonTertiary onClick={ClearPendingArchive} type="button">
-                    Cancel Archive Creation
+                    Cancel
                   </ButtonTertiary>
                 )}
               <div
@@ -1236,7 +1236,7 @@ function Documents() {
           </div>
         </div>
         {infoDocumentId.length ? (
-          <div className="h-[calc(100vh-3.68rem)] flex w-72 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 border-l border-gray-300">
+          <div className="h-[calc(100vh-3.68rem)] flex w-72 bg-white border-l border-neutral-300">
             <div className="flex-1 inline-block">
               {currentDocument ? (
                 <div className="flex flex-wrap justify-center">
@@ -1331,7 +1331,7 @@ function Documents() {
                     }
                   >
                     {currentDocument && (currentDocument as IDocument).path && (
-                      <dl className="p-4 pr-6 pt-2 text-medsmall text-gray-600">
+                      <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
                         <div className="flex flex-col pb-3">
                           <dt className="mb-1">Location</dt>
                           <dd className="font-semibold text-sm text-primary-600 hover:text-primary-400">
@@ -1635,7 +1635,7 @@ function Documents() {
                     )}
                     <div className="mt-4 w-full flex justify-center">
                       <button
-                        className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                        className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
                         onClick={DownloadDocument}
                       >
                         <span className="">Download</span>
@@ -1710,7 +1710,7 @@ function Documents() {
                       </dl>
                       <div className="mt-2 flex justify-center">
                         <button
-                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
                           onClick={(event) => {
                             const documentLine: ILine = {
                               lineType: 'document',
@@ -1733,7 +1733,7 @@ function Documents() {
                       </div>
                       <div className="mt-2 flex justify-center">
                         <button
-                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
                           onClick={(event) => {
                             const documentLine: ILine = {
                               lineType: 'document',

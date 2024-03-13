@@ -179,7 +179,7 @@ export function Workflows() {
         {userSite && (
           <>
             <div
-              className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
+              className="w-full flex self-start text-neutral-900 hover:text-neutral-600 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
               onClick={toggleUserSiteExpand}
             >
               <div className="flex justify-end mt-3 mr-1">
@@ -207,7 +207,7 @@ export function Workflows() {
         {defaultSite && defaultSite.siteId && (
           <>
             <div
-              className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
+              className="w-full flex self-start text-neutral-900 hover:text-neutral-600 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
               onClick={toggleDefaultSiteExpand}
             >
               <div className="flex justify-end mt-3 mr-1">
@@ -245,7 +245,7 @@ export function Workflows() {
         {workspaceSites.length > 0 && (
           <>
             <div
-              className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
+              className="w-full flex self-start text-neutral-900 hover:text-neutral-600 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
               onClick={toggleWorkspacesExpand}
             >
               <div className="flex justify-end mt-3 mr-1">
