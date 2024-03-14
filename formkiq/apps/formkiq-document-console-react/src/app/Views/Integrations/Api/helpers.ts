@@ -1192,6 +1192,8 @@ export const postConfigurationApiItem = {
   requiresPostJson: true,
   requiresAuthentication: true,
   requiresSite: true,
+  defaultPostJsonValue:
+    '{"chatGptApiKey": "ABC","maxContentLengthBytes": "1000000","maxDocuments": "1000","maxWebhooks": "10","notificationEmail": "<email>"}',
   license: 'Core',
 };
 
@@ -1203,7 +1205,7 @@ export const getConfigurationOpaPoliciesApiItem = {
   hasNoParams: true,
   requiresAuthentication: true,
   requiresSite: true,
-  license: 'Core',
+  license: 'Pro|Enterprise',
 };
 
 /*
@@ -1228,7 +1230,9 @@ export const putConfigurationOpaPolicyApiItem = {
   username: 'Cognito User',
   requiresAuthentication: true,
   requiresSite: true,
-  license: 'Core',
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"policy": "POLICY GOES HERE","siteId": "default"}',
+  license: 'Pro|Enterprise',
 };
 
 export const deleteConfigurationOpaPolicyApiItem = {
@@ -1239,7 +1243,7 @@ export const deleteConfigurationOpaPolicyApiItem = {
   username: 'Cognito User',
   requiresAuthentication: true,
   requiresSite: true,
-  license: 'Core',
+  license: 'Pro|Enterprise',
 };
 
 export const getApiKeysApiItem = {

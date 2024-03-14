@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { Mode } from 'vanilla-jsoneditor';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
 import { getFormInput } from '../../../helpers/services/toolService';
 import { ArrowBottom, ArrowRight } from '../../Icons/icons';
+import { JSONEditorReact } from '../../TextEditors/JsonEditor';
 
 function updateRequestsFromForm(
   state: any,
   setState: any,
   { apiItem, user, documentApi }: any,
-  formRef: any
+  formRef: any,
+  jsonContent: any
 ) {
   let host = documentApi;
   if (host.substring(host.length - 1) === '/') {
@@ -17,6 +20,11 @@ function updateRequestsFromForm(
   }
   let path = apiItem.path;
   let postJson = '';
+  if (jsonContent.text) {
+    if (getFormInput(formRef, 'postJson') !== undefined) {
+      getFormInput(formRef, 'postJson').value = jsonContent.text;
+    }
+  }
 
   if (apiItem.requiresDocumentID) {
     if (getFormInput(formRef, 'documentID')?.validity?.valid) {
@@ -359,6 +367,7 @@ function updateRequestsFromForm(
     ) {
       params.set('next', getFormInput(formRef, 'next')?.value);
     }
+
     if (getFormInput(formRef, 'postJson')?.validity?.valid) {
       postJson = getFormInput(formRef, 'postJson')?.value;
     } else if (apiItem.requiresIndexType) {
@@ -579,13 +588,28 @@ function updateFormValidity(state: any, setState: any, formRef: any) {
     isValidForm: res,
   });
 }
-function getApiItem(props: any, state: any, setState: any, formRef: any) {
+function getApiItem(
+  props: any,
+  state: any,
+  setState: any,
+  formRef: any,
+  jsonContent: any
+) {
   const { apiItem, sites } = props;
   const onFormChange = (ev: any) => {
-    updateRequestsFromForm(state, setState, props, formRef);
+    updateRequestsFromForm(state, setState, props, formRef, jsonContent);
   };
   const onTabClick = (tab: string) => () => {
     setState({ ...state, currentRequestTab: tab });
+  };
+
+  const handleJsonChange = (value: any) => {
+    if (value.text) {
+      if (getFormInput(formRef, 'postJson') !== undefined) {
+        getFormInput(formRef, 'postJson').value = value.text;
+        updateRequestsFromForm(state, setState, props, formRef, value);
+      }
+    }
   };
 
   const renderResponseStatusClasses = (responseStatus: number) => {
@@ -1009,15 +1033,21 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
             )}
 
             {apiItem.requiresPostJson && (
-              <div className="md:flex md:items-center mx-4 mb-4 relative">
-                <div className="w-full md:w-1/4">
-                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    JSON to POST
+              <div className="flex flex-wrap items-center justify-start ml-4 mb-4 relative">
+                <div className="w-full">
+                  <label className="block w-full mt-4 mb-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                    JSON to POST/PATCH
                   </label>
                 </div>
-                <div className="w-full md:w-3/4">
+                <div className="w-full">
+                  <JSONEditorReact
+                    content={jsonContent}
+                    mode={Mode.text}
+                    onChange={handleJsonChange}
+                  />
+
                   <textarea
-                    aria-label="JSON to POST"
+                    aria-label="JSON to POST/PATCH"
                     name="postJson"
                     defaultValue={apiItem.defaultPostJsonValue}
                     className="appearance-none font-mono rounded-md relative block w-full h-72 px-3 py-3 border border-gray-600
@@ -1740,13 +1770,35 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     isValidForm: false,
   });
   const formRef = useRef(null);
+  let formattedJson = '';
+  if (
+    props.apiItem.defaultPostJsonValue &&
+    props.apiItem.defaultPostJsonValue.length
+  ) {
+    let jsonObject;
+    try {
+      jsonObject = JSON.parse(props.apiItem.defaultPostJsonValue);
+    } catch (e: any) {
+      console.log('invalid JSON object');
+    }
+    if (jsonObject) {
+      formattedJson = JSON.stringify(jsonObject, null, 2);
+    } else {
+      formattedJson = props.apiItem.defaultPostJsonValue;
+    }
+  }
+  const [jsonContent, setJsonContent] = useState({
+    text: formattedJson,
+    json: undefined,
+  });
   useEffect(() => {
     if (formRef?.current) {
       updateRequestsFromForm(
         state,
         setState,
         { ...props, user, documentApi },
-        formRef
+        formRef,
+        jsonContent
       );
     }
   }, []);
@@ -1759,7 +1811,13 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     >
       {itemHeader(isOpened, setOpened, props.apiItem)}
       <div className={`${isOpened ? '' : 'hidden'} border-b mb-2`}>
-        {getApiItem({ documentApi, user, ...props }, state, setState, formRef)}
+        {getApiItem(
+          { documentApi, user, ...props },
+          state,
+          setState,
+          formRef,
+          jsonContent
+        )}
       </div>
     </div>
   );
