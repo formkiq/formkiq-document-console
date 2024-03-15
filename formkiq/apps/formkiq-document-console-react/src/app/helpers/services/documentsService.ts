@@ -324,13 +324,13 @@ export class DocumentsService {
         tags: customIncludeTags,
       },
     };
-    return this.getFormkiqClient().searchApi.search(
-      searchBody,
+    return this.getFormkiqClient().searchApi.search({
+      searchParameters: searchBody,
       siteId,
       previous,
       next,
-      limit
-    );
+      limit,
+    });
   }
 
   @formkiqAPIHandler
@@ -370,12 +370,12 @@ export class DocumentsService {
         tags: customIncludeTags,
       },
     };
-    return this.getFormkiqClient().searchApi.search(
-      searchBody,
+    return this.getFormkiqClient().searchApi.search({
+      searchParameters: searchBody,
       siteId,
       previous,
-      next
-    );
+      next,
+    });
   }
 
   @formkiqAPIHandler
@@ -415,12 +415,12 @@ export class DocumentsService {
         tags: customIncludeTags,
       },
     };
-    return this.getFormkiqClient().searchApi.search(
-      searchBody,
+    return this.getFormkiqClient().searchApi.search({
+      searchParameters: searchBody,
       siteId,
       previous,
-      next
-    );
+      next,
+    });
   }
 
   @formkiqAPIHandler
@@ -454,12 +454,12 @@ export class DocumentsService {
         tags: customIncludeTags,
       },
     };
-    return this.getFormkiqClient().searchApi.search(
-      searchBody,
+    return this.getFormkiqClient().searchApi.search({
+      searchParameters: searchBody,
       siteId,
       previous,
-      next
-    );
+      next,
+    });
   }
 
   @formkiqAPIHandler
@@ -494,12 +494,12 @@ export class DocumentsService {
         tags: customIncludeTags,
       },
     };
-    return this.getFormkiqClient().searchApi.search(
-      searchBody,
+    return this.getFormkiqClient().searchApi.search({
+      searchParameters: searchBody,
       siteId,
       previous,
-      next
-    );
+      next,
+    });
     // TODO: add tag handling (use search endpoint instead?)
     //return this.getFormkiqClient().documentsApi.getDocuments()
   }
@@ -623,7 +623,10 @@ export class DocumentsService {
           tags: customIncludeTags,
         },
       };
-      return this.getFormkiqClient().searchApi.search(searchBody, siteId);
+      return this.getFormkiqClient().searchApi.search({
+        searchParameters: searchBody,
+        siteId,
+      });
     } else {
       const searchBody = {
         query: {
@@ -634,10 +637,10 @@ export class DocumentsService {
           tags: customIncludeTags,
         },
       };
-      return this.getFormkiqClient().searchApi.searchFulltext(
-        searchBody,
-        siteId
-      );
+      return this.getFormkiqClient().searchApi.searchFulltext({
+        documentFulltextSearchBody: searchBody,
+        siteId,
+      });
     }
   }
 
@@ -676,7 +679,10 @@ export class DocumentsService {
         },
       },
     };
-    return this.getFormkiqClient().searchApi.searchFulltext(searchBody, siteId);
+    return this.getFormkiqClient().searchApi.searchFulltext({
+      documentFulltextSearchBody: searchBody,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1029,7 +1035,11 @@ export class DocumentsService {
       siteId = this.determineSiteId();
     }
     // TODO: allow paging
-    return this.getFormkiqClient().searchApi.searchIndices('tags', siteId, 100);
+    return this.getFormkiqClient().searchApi.searchIndices({
+      indexType: 'tags',
+      siteId,
+      limit: 100,
+    });
   }
 
   @formkiqAPIHandler
@@ -1038,11 +1048,11 @@ export class DocumentsService {
       siteId = this.determineSiteId();
     }
     // TODO: allow paging
-    return this.getFormkiqClient().searchApi.searchIndices(
-      'folders',
+    return this.getFormkiqClient().searchApi.searchIndices({
+      indexType: 'folders',
       siteId,
-      100
-    );
+      limit: 100,
+    });
   }
 
   @formkiqAPIHandler
