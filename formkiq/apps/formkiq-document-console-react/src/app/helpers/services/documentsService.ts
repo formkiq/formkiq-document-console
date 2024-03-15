@@ -72,9 +72,9 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static getDocuments(): Promise<any> {
-    return this.getFormkiqClient().documentsApi.getDocuments(
-      this.determineSiteId()
-    );
+    return this.getFormkiqClient().documentsApi.getDocuments({
+      siteId: this.determineSiteId(),
+    });
   }
 
   @formkiqAPIHandler
@@ -82,7 +82,10 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.getDocument(id, siteId);
+    return this.getFormkiqClient().documentsApi.getDocument({
+      documentId: id,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -102,7 +105,10 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.deleteDocument(id, siteId);
+    return this.getFormkiqClient().documentsApi.deleteDocument({
+      documentId: id,
+      siteId,
+    });
   }
 
   public static uploadDocuments(
@@ -232,9 +238,11 @@ export class DocumentsService {
       actions,
     };
     return await this.getFormkiqClient().documentsApi.getSignedUrlForNewDocumentUploadWithBody(
-      uploadBody,
-      siteId,
-      contentLength
+      {
+        uploadBody,
+        siteId,
+        contentLength,
+      }
     );
   }
 
@@ -248,10 +256,11 @@ export class DocumentsService {
       siteId = this.determineSiteId();
     }
     return await this.getFormkiqClient().documentsApi.getSignedUrlForDocumentReplacementUpload(
-      documentId,
-      null,
-      siteId,
-      file.size
+      {
+        documentId,
+        siteId,
+        contentLength: file.size,
+      }
     );
   }
 
@@ -263,10 +272,10 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.postDocumentCompress(
+    return this.getFormkiqClient().documentsApi.postDocumentCompress({
       documentIds,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -516,11 +525,11 @@ export class DocumentsService {
     const documentParams = {
       path: newDocumentPath,
     };
-    return this.getFormkiqClient().documentsApi.updateDocument(
+    return this.getFormkiqClient().documentsApi.updateDocument({
       documentId,
-      documentParams,
-      siteId
-    );
+      addOrUpdateDocumentParameters: documentParams,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -535,11 +544,11 @@ export class DocumentsService {
     if (folder.length > -1) {
       folder = folder + '/';
     }
-    return this.getFormkiqClient().documentsApi.moveDocument(
-      path,
-      folder,
-      siteId
-    );
+    return this.getFormkiqClient().documentsApi.moveDocument({
+      source: path,
+      target: folder,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -556,7 +565,7 @@ export class DocumentsService {
       path = folder;
     }
     path += '/' + newFolderName + '/';
-    return this.getFormkiqClient().documentsApi.createFolder(path, siteId);
+    return this.getFormkiqClient().documentsApi.createFolder({ path, siteId });
   }
 
   @formkiqAPIHandler
@@ -568,7 +577,10 @@ export class DocumentsService {
       siteId = this.determineSiteId();
     }
     indexKey = indexKey.replace('#', '%23');
-    return this.getFormkiqClient().documentsApi.deleteFolder(indexKey, siteId);
+    return this.getFormkiqClient().documentsApi.deleteFolder({
+      indexKey,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -687,12 +699,12 @@ export class DocumentsService {
         value: newValue,
       };
     }
-    return this.getFormkiqClient().documentsApi.updateDocumentTag(
+    return this.getFormkiqClient().documentsApi.updateDocumentTag({
       documentId,
       tagKey,
-      body,
-      siteId
-    );
+      tagValues: body,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -717,12 +729,12 @@ export class DocumentsService {
       };
     }
 
-    return this.getFormkiqClient().documentsApi.updateDocumentTag(
+    return this.getFormkiqClient().documentsApi.updateDocumentTag({
       documentId,
       tagKey,
-      body,
-      siteId
-    );
+      tagValues: body,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -762,12 +774,12 @@ export class DocumentsService {
       }
     }
 
-    return this.getFormkiqClient().documentsApi.updateDocumentTag(
+    return this.getFormkiqClient().documentsApi.updateDocumentTag({
       documentId,
       tagKey,
-      body,
-      siteId
-    );
+      tagValues: body,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -807,11 +819,11 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.deleteDocumentTag(
+    return this.getFormkiqClient().documentsApi.deleteDocumentTag({
       documentId,
       tagKey,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -823,11 +835,11 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.getDocumentTags(
+    return this.getFormkiqClient().documentsApi.getDocumentTags({
       documentId,
       siteId,
-      limit
-    );
+      limit,
+    });
   }
 
   @formkiqAPIHandler
@@ -838,10 +850,10 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.getDocumentAccessAttributes(
+    return this.getFormkiqClient().documentsApi.getDocumentAccessAttributes({
       siteId,
-      documentId
-    );
+      documentId,
+    });
   }
 
   // TODO: add other access attribute functions
@@ -854,10 +866,10 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.getDocumentVersions(
+    return this.getFormkiqClient().documentsApi.getDocumentVersions({
       documentId,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -869,11 +881,11 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.putDocumentVersion(
+    return this.getFormkiqClient().documentsApi.putDocumentVersion({
       documentId,
       versionKey,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -884,10 +896,10 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.getDocumentActions(
+    return this.getFormkiqClient().documentsApi.getDocumentActions({
       documentId,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -899,11 +911,11 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.postDocumentActions(
+    return this.getFormkiqClient().documentsApi.postDocumentActions({
       documentId,
       actions,
-      siteId
-    );
+      siteId,
+    });
   }
 
   // TODO: replace this PATCH with actions-specific PUT, once available
@@ -919,11 +931,11 @@ export class DocumentsService {
     const documentParams = {
       actions,
     };
-    return this.getFormkiqClient().documentsApi.updateDocument(
+    return this.getFormkiqClient().documentsApi.updateDocument({
       documentId,
-      documentParams,
-      siteId
-    );
+      addOrUpdateDocumentParameters: documentParams,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -936,12 +948,12 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.getDocumentUrl(
+    return this.getFormkiqClient().documentsApi.getDocumentUrl({
       documentId,
       versionKey,
       inline,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -952,10 +964,10 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.editDocumentWithOnlyoffice(
+    return this.getFormkiqClient().documentsApi.editDocumentWithOnlyoffice({
       documentId,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -967,11 +979,11 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.createDocumentWithOnlyoffice(
+    return this.getFormkiqClient().documentsApi.createDocumentWithOnlyoffice({
       extension,
       path,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1004,11 +1016,11 @@ export class DocumentsService {
         value: data.value,
       };
     }
-    return this.getFormkiqClient().documentsApi.addDocumentTag(
+    return this.getFormkiqClient().documentsApi.addDocumentTag({
       documentId,
-      body,
-      siteId
-    );
+      addDocumentTagParameters: body,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1287,7 +1299,7 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.getESignatureConfig(siteId);
+    return this.getFormkiqClient().documentsApi.getESignatureConfig({ siteId });
   }
 
   @formkiqAPIHandler
@@ -1300,12 +1312,12 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.setESignatureConfig(
+    return this.getFormkiqClient().documentsApi.setESignatureConfig({
       siteId,
       privateKey,
       userId,
-      clientId
-    );
+      clientId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1320,15 +1332,15 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.sendForDocusignESignature(
+    return this.getFormkiqClient().documentsApi.sendForDocusignESignature({
       documentId,
       siteId,
       emailSubject,
       status,
-      eSignatureConfigParams.developmentMode,
+      developmentMode: eSignatureConfigParams.developmentMode,
       signers,
-      carbonCopies
-    );
+      carbonCopies,
+    });
   }
 
   @formkiqAPIHandler
