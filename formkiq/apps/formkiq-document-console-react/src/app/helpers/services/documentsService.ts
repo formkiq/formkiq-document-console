@@ -1162,7 +1162,7 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().webhooksApi.getWebhooks(siteId);
+    return this.getFormkiqClient().webhooksApi.getWebhooks({ siteId });
   }
 
   @formkiqAPIHandler
@@ -1170,7 +1170,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().webhooksApi.addWebhook({ name }, siteId);
+    return this.getFormkiqClient().webhooksApi.addWebhook({
+      addWebhookParameters: { name },
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1178,7 +1181,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().webhooksApi.deleteWebhook(webhookId, siteId);
+    return this.getFormkiqClient().webhooksApi.deleteWebhook({
+      webhookId,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
