@@ -1366,7 +1366,11 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().rulesetsApi.getRulesets(siteId, next, limit);
+    return this.getFormkiqClient().rulesetsApi.getRulesets({
+      siteId,
+      next,
+      limit,
+    });
   }
 
   @formkiqAPIHandler
@@ -1377,7 +1381,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().rulesetsApi.getRuleset(rulesetId, siteId);
+    return this.getFormkiqClient().rulesetsApi.getRuleset({
+      rulesetId,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1388,10 +1395,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().rulesetsApi.addRuleset(
+    return this.getFormkiqClient().rulesetsApi.addRuleset({
       addRulesetParameters,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1403,11 +1410,11 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().rulesetsApi.patchRuleset(
+    return this.getFormkiqClient().rulesetsApi.patchRuleset({
       rulesetId,
       addRulesetParameters,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1418,7 +1425,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().rulesetsApi.deleteRuleset(rulesetId, siteId);
+    return this.getFormkiqClient().rulesetsApi.deleteRuleset({
+      rulesetId,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1431,12 +1441,12 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().rulesetsApi.getRules(
+    return this.getFormkiqClient().rulesetsApi.getRules({
       rulesetId,
       siteId,
       next,
-      limit
-    );
+      limit,
+    });
   }
 
   @formkiqAPIHandler
@@ -1448,11 +1458,11 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().rulesetsApi.addRule(
+    return this.getFormkiqClient().rulesetsApi.addRule({
       rulesetId,
       addRuleParameters,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1464,11 +1474,11 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().rulesetsApi.getRule(
+    return this.getFormkiqClient().rulesetsApi.getRule({
       rulesetId,
       ruleId,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1481,12 +1491,12 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().rulesetsApi.patchRule(
+    return this.getFormkiqClient().rulesetsApi.patchRule({
       rulesetId,
       ruleId,
       addRuleParameters,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1498,10 +1508,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().rulesetsApi.deleteRule(
+    return this.getFormkiqClient().rulesetsApi.deleteRule({
       rulesetId,
       ruleId,
-      siteId
-    );
+      siteId,
+    });
   }
 }
