@@ -1,23 +1,37 @@
-import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
-import { useAppDispatch } from '../../../Store/store';
-import { DocumentsService } from '../../../helpers/services/documentsService';
-import { Plus, Trash } from '../../Icons/icons';
+import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
+import {useAppDispatch} from '../../../Store/store';
+import {DocumentsService} from '../../../helpers/services/documentsService';
+import {Plus} from '../../Icons/icons';
 import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
+import WorkflowsActionsPopover from "./workflowActionsPopover";
+import ButtonSecondary from "../../Generic/Buttons/ButtonSecondary";
+import {useState} from "react";
+
 type Props = {
   siteId: string;
   isSiteReadOnly: boolean;
   onNewClick: any;
   workflows: null | [];
   onDelete: (workflowId: string, siteId: string) => void;
+  handleDuplicateClick: (workflowId: string, siteId: string) => void;
+  handleCopyToClipBoard: (workflowId: string, siteId: string) => void;
+  showTooltipId: string;
+  handleDownloadClick: (workflowId: string, siteId: string) => void;
+  // importWorkflow: any
 };
 
 export function WorkflowList({
-  siteId,
-  isSiteReadOnly,
-  onNewClick,
-  workflows,
-  onDelete,
-}: Props) {
+                               siteId,
+                               isSiteReadOnly,
+                               onNewClick,
+                               workflows,
+                               onDelete,
+                               handleDuplicateClick,
+                               handleCopyToClipBoard,
+                               showTooltipId,
+                               handleDownloadClick,
+                               // importWorkflow,
+                             }: Props) {
   const dispatch = useAppDispatch();
   const onDeleteClick = (workflowId: string, siteId: string) => () => {
     onDelete(workflowId, siteId);
@@ -47,10 +61,55 @@ export function WorkflowList({
     });
   };
 
+  const isValidString = (text: string) => {
+    try {
+      JSON.parse(text);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  };
+
+  const importWorkflow = (event: any) => {
+    console.log('importing')
+    const reader = new FileReader();
+    reader.readAsText(event.target.files[0], "UTF-8");
+    reader.onload = (e) => {
+      if (!isValidString(e.target?.result as string)) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Invalid JSON',
+          })
+        );
+        event.target.value = ''
+        return
+      }
+      const workflow = JSON.parse(e.target?.result as string);
+      DocumentsService.addWorkflow(workflow, siteId).then((response) => {
+        if (!response.workflowId) {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: response.errors[0].error,
+            })
+          );
+          event.target.value = ''
+          return
+        }
+
+        window.location.href =
+          siteId === 'default'
+            ? `/workflows/designer?workflowId=${response.workflowId}`
+            : `/workspaces/${siteId}/workflows/designer?workflowId=${response.workflowId}`;
+        event.target.value = ''
+      });
+    }
+  }
+
+
   return (
     <>
       {!isSiteReadOnly && (
-        <div className="mt-4 flex px-4">
+        <div className="mt-4 flex px-4 gap-2">
           <ButtonPrimaryGradient
             data-test-id="create-workflow"
             onClick={createNewWorkflow}
@@ -60,6 +119,12 @@ export function WorkflowList({
             <span>Create new</span>
             <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
           </ButtonPrimaryGradient>
+          <input type="file" id={"import-workflow" + siteId} accept=".json" className='hidden'
+                 onChange={importWorkflow}/>
+          <label htmlFor={"import-workflow" + siteId}
+                 className="h-9 bg-white text-neutral-900 border border-primary-500 px-4 font-bold whitespace-nowrap hover:text-primary-500 transition duration-100 rounded-md flex items-center justify-center">
+            <span>Import (JSON)</span>
+          </label>
           <button
             className="flex hidden bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
             data-test-id="create-workflow"
@@ -115,17 +180,14 @@ export function WorkflowList({
                     <td
                       className="border-b border-neutral-300 nodark:border-slate-700 p-4 pr-8 text-neutral-900 nodark:text-slate-400">
                       <div className="flex items-center">
-                        <button
-                          onClick={onDeleteClick(workflow.workflowId, siteId)}
-                          data-test-id="delete-workflow"
-                          className="ml-2"
-
-                        >
-                          <div className="h-5 hover:text-primary-500 transition duration-100">
-                            <Trash/>
-                            <span className="sr-only">Delete</span>
-                          </div>
-                        </button>
+                        <WorkflowsActionsPopover workflow={workflow}
+                                                 siteId={siteId}
+                                                 handleDuplicateClick={handleDuplicateClick}
+                                                 handleCopyToClipBoard={handleCopyToClipBoard}
+                                                 handleDownloadClick={handleDownloadClick}
+                                                 onDeleteClick={onDeleteClick}
+                                                 showTooltipId={showTooltipId}
+                        />
                       </div>
                     </td>
                   </tr>
@@ -147,3 +209,5 @@ export function WorkflowList({
 }
 
 export default WorkflowList;
+
+
