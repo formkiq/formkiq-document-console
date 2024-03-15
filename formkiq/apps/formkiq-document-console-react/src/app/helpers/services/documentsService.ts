@@ -1047,7 +1047,9 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async getConfiguration(siteId: string): Promise<any> {
-    return this.getFormkiqClient().configurationApi.getConfiguration(siteId);
+    return this.getFormkiqClient().configurationApi.getConfiguration({
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1055,10 +1057,10 @@ export class DocumentsService {
     configuration: any,
     siteId: string
   ): Promise<any> {
-    return this.getFormkiqClient().configurationApi.updateConfiguration(
-      configuration,
-      siteId
-    );
+    return this.getFormkiqClient().configurationApi.updateConfiguration({
+      updateConfigurationParameters: configuration,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1067,7 +1069,9 @@ export class DocumentsService {
   ): Promise<any> {
     console.log(siteId, 'getOpenPolicyAgent');
     return this.getFormkiqClient().configurationApi.getOpenPolicyAgentConfiguration(
-      siteId
+      {
+        siteId,
+      }
     );
   }
 
@@ -1077,15 +1081,15 @@ export class DocumentsService {
   ): Promise<any> {
     console.log(siteId, 'getOpenPolicyAgent');
     return this.getFormkiqClient().configurationApi.getOpenPolicyAgentConfigurations(
-      siteId
+      { siteId }
     );
   }
 
   @formkiqAPIHandler
   public static async deleteOpenPolicyAgent(siteId: string): Promise<any> {
-    return this.getFormkiqClient().configurationApi.deleteOpenPolicyAgent(
-      siteId
-    );
+    return this.getFormkiqClient().configurationApi.deleteOpenPolicyAgent({
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1093,10 +1097,10 @@ export class DocumentsService {
     updateConfigurationParameters: string,
     siteId: string
   ): Promise<any> {
-    return this.getFormkiqClient().configurationApi.configureOpenPolicyAgent(
+    return this.getFormkiqClient().configurationApi.configureOpenPolicyAgent({
       updateConfigurationParameters,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1114,7 +1118,7 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().configurationApi.getApiKeys(siteId);
+    return this.getFormkiqClient().configurationApi.getApiKeys({ siteId });
   }
 
   @formkiqAPIHandler
@@ -1126,10 +1130,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().configurationApi.addApiKey(
-      { name, permissions },
-      siteId
-    );
+    return this.getFormkiqClient().configurationApi.addApiKey({
+      addApiKeyParameters: { name, permissions },
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1137,10 +1141,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().configurationApi.deleteApiKey(
+    return this.getFormkiqClient().configurationApi.deleteApiKey({
       apiKey,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
