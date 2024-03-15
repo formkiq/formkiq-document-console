@@ -1198,13 +1198,13 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().workflowsApi.getWorkflows(
+    return this.getFormkiqClient().workflowsApi.getWorkflows({
       siteId,
       status,
       previous,
       next,
-      limit
-    );
+      limit,
+    });
   }
 
   @formkiqAPIHandler
@@ -1215,7 +1215,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().workflowsApi.getWorkflow(workflowId, siteId);
+    return this.getFormkiqClient().workflowsApi.getWorkflow({
+      workflowId,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1223,7 +1226,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().workflowsApi.addWorkflow(workflow, siteId);
+    return this.getFormkiqClient().workflowsApi.addWorkflow({
+      addWorkflowParameters: workflow,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1236,11 +1242,11 @@ export class DocumentsService {
       siteId = this.determineSiteId();
     }
 
-    return this.getFormkiqClient().workflowsApi.putWorkflow(
+    return this.getFormkiqClient().workflowsApi.putWorkflow({
       workflowId,
       addWorkflowParameters,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1251,10 +1257,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().workflowsApi.deleteWorkflow(
+    return this.getFormkiqClient().workflowsApi.deleteWorkflow({
       workflowId,
-      siteId
-    );
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1267,12 +1273,12 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().workflowsApi.getQueues(
+    return this.getFormkiqClient().workflowsApi.getQueues({
       siteId,
       previous,
       next,
-      limit
-    );
+      limit,
+    });
   }
 
   @formkiqAPIHandler
@@ -1280,7 +1286,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().workflowsApi.addQueue({ name }, siteId);
+    return this.getFormkiqClient().workflowsApi.addQueue({
+      addQueueParameters: { name },
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1291,7 +1300,10 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().workflowsApi.deleteQueue(queueId, siteId);
+    return this.getFormkiqClient().workflowsApi.deleteQueue({
+      queueId,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -1305,13 +1317,13 @@ export class DocumentsService {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().workflowsApi.getDocumentsInQueue(
+    return this.getFormkiqClient().workflowsApi.getDocumentsInQueue({
       queueId,
       siteId,
       limit,
       next,
-      previous
-    );
+      previous,
+    });
   }
 
   @formkiqAPIHandler
