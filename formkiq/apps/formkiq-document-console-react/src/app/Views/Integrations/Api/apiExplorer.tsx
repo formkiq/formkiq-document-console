@@ -109,7 +109,7 @@ import {
   putDocumentTagApiItem,
   putDocumentVersionApiItem,
   putWorkflowsApiItem,
-  searchDocumentQueryApiItem,
+  searchDocumentQueryApiItem, getPdfUploadUrlApiItem, getPdfDetailsApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -552,6 +552,21 @@ export function ApiExplorer() {
                 <ApiItem apiItem={getCaseTaskDocumentsApiItem} sites={sites} />
                 <ApiItem apiItem={getCaseNigosApiItem} sites={sites} />
                 <ApiItem apiItem={getCaseNigoDocumentsApiItem} sites={sites} />
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Examine Objects">
+            <div className="ml-2 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem
+                  apiItem={getPdfUploadUrlApiItem}
+                  sites={sites}
+                />
+                <ApiItem
+                  apiItem={getPdfDetailsApiItem}
+                  sites={sites}
+                />
               </div>
             </div>
           </ApiSegment>

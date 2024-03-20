@@ -15,6 +15,7 @@ export interface ApiItem {
   requiresCaseID: boolean;
   requiresTaskID: boolean;
   requiresNigoID: boolean;
+  requiresObjectId: boolean;
   requiresTagKey: boolean;
   allowsIndexKey: boolean;
   requiresIndexKey: boolean;
@@ -1498,5 +1499,26 @@ export const getCaseNigoDocumentsApiItem = {
   requiresAuthentication: true,
   requiresCaseID: true,
   requiresNigoID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getPdfUploadUrlApiItem = {
+  method: 'GET',
+  path: '/objects/examine/pdf',
+  description: 'Get Signed URL for PDF Object Upload of a document to be examined by calling GET /objects/examine/{id}/pdf',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getPdfDetailsApiItem = {
+  method: 'GET',
+  path: '/objects/examine/ OBJECT_ID /pdf',
+  description: 'Get PDF details. File must have been uploaded previously using the GET /objects/examine/pdf API.',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresObjectID: true,
   license: 'Pro|Enterprise',
 };
