@@ -1532,4 +1532,19 @@ export class DocumentsService {
       siteId,
     });
   }
+
+  @formkiqAPIHandler
+  public static async getPdfUploadUrl(
+    siteId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getPdfUploadUrl({siteId});
+  }
+
+  @formkiqAPIHandler
+  public static async getPdfDetails(
+    siteId: string,
+    objectId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getPdfDetails({siteId, objectId});
+  }
 }
