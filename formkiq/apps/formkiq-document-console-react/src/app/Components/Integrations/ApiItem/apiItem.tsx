@@ -1513,7 +1513,7 @@ function getApiItem(
               </div>
             )}
 
-            {apiItem.hasPagingTokens && (
+            {(apiItem.hasPagingTokens || apiItem.hasOnlyNextPagingToken) && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
