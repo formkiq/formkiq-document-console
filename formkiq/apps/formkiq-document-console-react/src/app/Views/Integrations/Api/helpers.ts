@@ -27,6 +27,7 @@ export interface ApiItem {
   allowsDate: boolean;
   allowsLimit: boolean;
   hasPagingTokens: boolean;
+  hasOnlyNextPagingToken: boolean;
   allowsPath: boolean;
   showDeprecationMessage: boolean;
   deprecationMessage: string;
@@ -123,6 +124,8 @@ export const getDocumentActionsApiItem = {
   allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  hasOnlyNextPagingToken: true,
+  allowsLimit: true,
   license: 'Core',
 };
 
