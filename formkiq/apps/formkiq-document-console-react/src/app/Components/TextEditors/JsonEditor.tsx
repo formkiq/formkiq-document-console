@@ -9,7 +9,9 @@ export const JSONEditorReact: React.FC<JSONEditorPropsOptional> = (props) => {
     // create editor
     refEditor.current = new JSONEditor({
       target: refContainer.current!,
-      props: {},
+      props: {
+        readOnly: props.readOnly ?? false,
+      },
     });
 
     if (refContainer.current) {

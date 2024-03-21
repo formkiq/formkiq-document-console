@@ -1532,4 +1532,22 @@ export class DocumentsService {
       siteId,
     });
   }
+
+  @formkiqAPIHandler
+  public static async getExaminePdfUploadUrl(siteId: string): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getExaminePdfUploadUrl({
+      siteId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getExaminePdfDetails(
+    siteId: string,
+    objectId: string
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getExaminePdfDetails({
+      siteId,
+      objectId,
+    });
+  }
 }
