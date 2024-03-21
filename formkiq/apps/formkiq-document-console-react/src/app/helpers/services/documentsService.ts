@@ -1534,17 +1534,20 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getPdfUploadUrl(
-    siteId: string,
-  ): Promise<any> {
-    return this.getFormkiqClient().documentsApi.getPdfUploadUrl({siteId});
+  public static async getExaminePdfUploadUrl(siteId: string): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getExaminePdfUploadUrl({
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
-  public static async getPdfDetails(
+  public static async getExaminePdfDetails(
     siteId: string,
-    objectId: string,
+    objectId: string
   ): Promise<any> {
-    return this.getFormkiqClient().documentsApi.getPdfDetails({siteId, objectId});
+    return this.getFormkiqClient().documentsApi.getExaminePdfDetails({
+      siteId,
+      objectId,
+    });
   }
 }

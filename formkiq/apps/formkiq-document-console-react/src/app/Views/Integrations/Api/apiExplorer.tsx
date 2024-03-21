@@ -52,6 +52,8 @@ import {
   getDocumentVersionsApiItem,
   getDocumentsApiItem,
   getDocumentsInQueueApiItem,
+  getExaminePdfDetailsApiItem,
+  getExaminePdfUploadUrlApiItem,
   getFoldersApiItem,
   getNewDocumentUploadApiItem,
   getQueueApiItem,
@@ -109,7 +111,7 @@ import {
   putDocumentTagApiItem,
   putDocumentVersionApiItem,
   putWorkflowsApiItem,
-  searchDocumentQueryApiItem, getPdfUploadUrlApiItem, getPdfDetailsApiItem,
+  searchDocumentQueryApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -560,13 +562,10 @@ export function ApiExplorer() {
               <div className="w-4 border-l"></div>
               <div className="grow">
                 <ApiItem
-                  apiItem={getPdfUploadUrlApiItem}
+                  apiItem={getExaminePdfUploadUrlApiItem}
                   sites={sites}
                 />
-                <ApiItem
-                  apiItem={getPdfDetailsApiItem}
-                  sites={sites}
-                />
+                <ApiItem apiItem={getExaminePdfDetailsApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>

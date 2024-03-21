@@ -1502,20 +1502,22 @@ export const getCaseNigoDocumentsApiItem = {
   license: 'Pro|Enterprise',
 };
 
-export const getPdfUploadUrlApiItem = {
+export const getExaminePdfUploadUrlApiItem = {
   method: 'GET',
   path: '/objects/examine/pdf',
-  description: 'Get Signed URL for PDF Object Upload of a document to be examined by calling GET /objects/examine/{id}/pdf',
+  description:
+    'Get Signed URL for PDF Object Upload of a document to be examined by calling GET /objects/examine/{id}/pdf',
   username: 'Cognito User',
   requiresSite: true,
   requiresAuthentication: true,
   license: 'Pro|Enterprise',
 };
 
-export const getPdfDetailsApiItem = {
+export const getExaminePdfDetailsApiItem = {
   method: 'GET',
   path: '/objects/examine/ OBJECT_ID /pdf',
-  description: 'Get PDF details. File must have been uploaded previously using the GET /objects/examine/pdf API.',
+  description:
+    'Get PDF details from examine. File must have been uploaded previously using the GET /objects/examine/pdf API.',
   username: 'Cognito User',
   requiresSite: true,
   requiresAuthentication: true,
