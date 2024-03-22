@@ -78,7 +78,7 @@ export const deleteRuleset = createAsyncThunk(
       if (response.status === 200) {
         thunkAPI.dispatch(
           setRulesets({
-            rulesets: rulesets.filter(
+            tagSchemas: rulesets.filter(
               (ruleset: Ruleset) => ruleset.rulesetId !== rulesetId
             ),
           })
@@ -156,8 +156,8 @@ export const deleteRule = createAsyncThunk(
   }
 );
 
-export const workflowsSlice = createSlice({
-  name: 'workflows',
+export const rulesetsSlice = createSlice({
+  name: 'rulesets',
   initialState: defaultState,
   reducers: {
     setRulesetsLoadingStatusPending: (state) => {
@@ -214,8 +214,8 @@ export const {
   setRulesetsLoadingStatusPending,
   setRules,
   setRule,
-} = workflowsSlice.actions;
+} = rulesetsSlice.actions;
 
 export const RulesetsState = (state: RootState) => state.rulesetsState;
 
-export default workflowsSlice.reducer;
+export default rulesetsSlice.reducer;

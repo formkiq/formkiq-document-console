@@ -1534,7 +1534,9 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getExaminePdfUploadUrl(siteId: string): Promise<any> {
+  public static async getExaminePdfUploadUrl(
+    siteId: string
+  ): Promise<any> {
     return this.getFormkiqClient().documentsApi.getExaminePdfUploadUrl({
       siteId,
     });
@@ -1548,6 +1550,80 @@ export class DocumentsService {
     return this.getFormkiqClient().documentsApi.getExaminePdfDetails({
       siteId,
       objectId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getTagSchemas(
+    siteId: string,
+    next = null,
+    limit = 20
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().tagSchemasApi.getTagSchemas({
+      siteId,
+      next,
+      limit,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getTagSchema(
+    tagSchemaId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().tagSchemasApi.getTagSchema({
+      tagSchemaId,
+      siteId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async addTagSchema(
+    addTagSchemaParameters: any,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().tagSchemasApi.addTagSchema({
+      addTagSchemaParameters,
+      siteId,
+    });
+  }
+
+  // @formkiqAPIHandler
+  // public static async updateTagSchema(
+  //   tagSchemaId: string,
+  //   addTagSchemaParameters: any,
+  //   siteId: string
+  // ): Promise<any> {
+  //   if (!siteId) {
+  //     siteId = this.determineSiteId();
+  //   }
+  //   return this.getFormkiqClient().tagSchemasApi.patchTagSchema({
+  //     tagSchemaId,
+  //     addTagSchemaParameters,
+  //     siteId,
+  //   });
+  // }
+
+  @formkiqAPIHandler
+  public static async deleteTagSchema(
+    tagSchemaId: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().tagSchemasApi.deleteTagSchema({
+      tagSchemaId,
+      siteId,
     });
   }
 }
