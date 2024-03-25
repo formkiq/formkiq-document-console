@@ -64,6 +64,7 @@
     "@projectstorm/react-diagrams": "^7.0.3",
     "@reduxjs/toolkit": "^1.9.7",
     "@syncfusion/ej2-react-inputs": "20.1.61",
+    "@tailwindcss/forms": "^0.5.7",
     "codemirror": "^5.65.16",
     "codemirror-rego": "^1.2.3",
     "core-js": "^3.33.1",

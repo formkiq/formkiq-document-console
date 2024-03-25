@@ -8,7 +8,7 @@ export interface TagSchema {
 }
 
 export interface TagSchemaTags {
-  compositeKeys: {[key:string]:string[]}[];
+  compositeKeys: {key:string[]}[];
   required: {
     key: string;
     defaultValues: string[];
