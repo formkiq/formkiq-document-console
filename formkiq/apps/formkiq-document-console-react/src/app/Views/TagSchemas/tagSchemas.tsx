@@ -240,8 +240,8 @@ const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
           {/*>*/}
           {/*  + Create New Ruleset*/}
           {/*</ButtonPrimaryGradient>*/}
-          <button onClick={() => setIsCreateDialogOpen(true)} className="bg-gray-200 hover:bg-gray-300  font-bold py-2 px-4 rounded">
-              + Create New Tag Schema
+          <button onClick={() => setIsCreateDialogOpen(true)} className="h-10 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white px-4 rounded-md font-bold">
+              + CREATE NEW
           </button>
         </div>
 

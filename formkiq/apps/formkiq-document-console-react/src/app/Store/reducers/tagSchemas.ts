@@ -88,20 +88,6 @@ export const fetchTagSchema = createAsyncThunk(
   }
 );
 
-export const addTagSchema = createAsyncThunk(
-  'tagSchemas/addTagSchema',
-  async (data: any, thunkAPI) => {
-    const {siteId, tagSchema} = data;
-    await DocumentsService.addTagSchema(tagSchema, siteId).then((response) => {
-        if (response) {
-          fetchTagSchemas({siteId, limit: 20, page: 1});
-        }
-      }
-    );
-  }
-)
-
-
 export const tagSchemasSlice = createSlice({
   name: 'tagSchemas',
   initialState: defaultState,
