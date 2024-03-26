@@ -14,7 +14,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import {setTagSchema, TagSchemasState} from "../../Store/reducers/tagSchemas";
-import {Pencil, Spinner, Trash} from "../../Components/Icons/icons";
+import {Close, Pencil, Spinner, Trash} from "../../Components/Icons/icons";
 import {TagSchema as TagSchemaType} from "../../helpers/types/tagSchemas";
 import TagSchemaMenu from "../../Components/TagSchemas/TagSchemaMenu";
 import CompositeKeysTable from "../../Components/TagSchemas/tables/compositeKeysTable";
@@ -168,6 +168,11 @@ function TagSchema() {
       setContent(value);
     }
   }
+  const closeEditor = () => {
+    searchParams.delete("editor")
+    setSearchParams(searchParams)
+
+  }
 
   return (
     <>
@@ -182,30 +187,38 @@ function TagSchema() {
               height: `calc(100vh - 3.68rem)`,
             }}
           >
-            <div className="w-full p-2 flex justify-end gap-2 mt-2 pr-4">
-              {/*Uncomment when update method is ready.*/}
+            <div className="w-full py-2 flex justify-between gap-2 mt-2 px-4">
+              <div className="flex gap-2 items-end">
+                <button onClick={closeEditor}
+                        className="h-8 text-neutral-900 bg-neutral-200 hover:bg-neutral-300 rounded-md p-2 flex items-center gap-2 mr-2 whitespace-nowrap font-bold text-sm"
+                        title="Close Editor"
+                >
+                  Close Editor
+                  <div className="w-4 h-4"><Close/></div>
+                </button>
+                <NavLink to={"/tag-schemas"} className="h-6 text-neutral-900 hover:text-primary-500 "
+                >
+                  Return to Tag Schemas
+                </NavLink>
+              </div>
 
-              {/*<button*/}
-              {/*  onClick={saveSchemaInEditor}*/}
-              {/*  className="h-7 w-7 text-neutral-900 hover:text-primary-500"*/}
-              {/*  title="Save"*/}
-              {/*>*/}
-              {/*  <Save/>*/}
-              {/*</button>*/}
-              <button className="h-6 text-neutral-900 hover:text-primary-500" title="Delete Tag Schema" type="button"
-                      onClick={onDeleteClick}><Trash/>
-              </button>
+              <div className="flex gap-2">
+                {/*Uncomment when update method is ready.*/}
 
-              <NavLink
-                to={"/tag-schemas/" + tagSchemaId}
-                className="h-7 w-7 text-neutral-900 hover:text-primary-500"
-                title="Open in table view"
-              >
-                <Pencil/>
-              </NavLink>
-
-
+                {/*<button*/}
+                {/*  onClick={saveSchemaInEditor}*/}
+                {/*  className="h-7 w-7 text-neutral-900 hover:text-primary-500"*/}
+                {/*  title="Save"*/}
+                {/*>*/}
+                {/*  <Save/>*/}
+                {/*</button>*/}
+                <button className="h-6 text-neutral-900 hover:text-primary-500" title="Delete Tag Schema" type="button"
+                        onClick={onDeleteClick}><Trash/>
+                </button>
+              </div>
             </div>
+
+
             <div className=" inline-block h-full">
               <JSONEditorReact
                 content={content}
