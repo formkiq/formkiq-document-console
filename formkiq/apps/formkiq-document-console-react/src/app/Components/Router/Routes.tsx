@@ -52,6 +52,7 @@ const Admin = React.lazy(() => import('../../Views/Account/admin'));
 const ObjectExamineTool = React.lazy(() => import('../../Views/Account/objectExamineTool'));
 
 const TagSchemas = React.lazy(() => import('../../Views/TagSchemas/tagSchemas'));
+const TagSchema = React.lazy(() => import('../../Views/TagSchemas/tagSchema'));
 
 
 
@@ -156,6 +157,7 @@ const RoutesMapper = () => {
       <Route path="/rulesets/:id/rule/:ruleId" element={<Rule />}></Route>
 
       <Route path="/tag-schemas" element={<TagSchemas />}></Route>
+      <Route path="/tag-schemas/:tagSchemaId" element={<TagSchema />}></Route>
 
       <Route
         path="/workspaces/:siteId/workflows/designer"

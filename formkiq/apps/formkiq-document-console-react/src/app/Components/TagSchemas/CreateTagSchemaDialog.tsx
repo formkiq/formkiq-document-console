@@ -33,14 +33,17 @@ function CreateTagSchemaDialog({isOpen, setIsOpen, siteId}: CreateCaseModalProps
     }
   }
   const [tagSchema, setTagSchema] = useState(initialTagSchemaValue)
+
   const [compositeKey, setCompositeKey] = useState<string>("")
   const [compositeKeys, setCompositeKeys] = useState<string[]>([])
+
   const [requiredKey, setRequiredKey] = useState<string>("")
-  const [optionalKey, setOptionalKey] = useState<string>("")
   const [requiredDefaultValue, setRequiredDefaultValue] = useState<string>("")
   const [requiredDefaultValues, setRequiredDefaultValues] = useState<string[]>([])
   const [requiredAllowedValue, setRequiredAllowedValue] = useState<string>("")
   const [requiredAllowedValues, setRequiredAllowedValues] = useState<string[]>([])
+
+  const [optionalKey, setOptionalKey] = useState<string>("")
   const [optionalDefaultValue, setOptionalDefaultValue] = useState<string>("")
   const [optionalDefaultValues, setOptionalDefaultValues] = useState<string[]>([])
   const [optionalAllowedValue, setOptionalAllowedValue] = useState<string>("")
@@ -72,6 +75,7 @@ function CreateTagSchemaDialog({isOpen, setIsOpen, siteId}: CreateCaseModalProps
     }
   }
 
+  // methods for composite keys
   const addCompositeKey = () => {
     if (compositeKey.length === 0) {
       return

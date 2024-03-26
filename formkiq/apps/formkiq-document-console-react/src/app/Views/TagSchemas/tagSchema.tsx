@@ -1,29 +1,31 @@
-import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useSelector } from 'react-redux';
-import { useLocation, useParams } from 'react-router-dom';
-import { Mode } from 'vanilla-jsoneditor';
-import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
-import { useAuthenticatedState } from '../../Store/reducers/auth';
-import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
-import {
-  RulesetsState,
-  fetchRule,
-  fetchRules,
-} from '../../Store/reducers/rulesets';
-import { useAppDispatch } from '../../Store/store';
-import { DocumentsService } from '../../helpers/services/documentsService';
+import {useEffect, useState} from 'react';
+import {Helmet} from 'react-helmet-async';
+import {useSelector} from 'react-redux';
+import {NavLink, useLocation, useNavigate, useParams, useSearchParams} from 'react-router-dom';
+import {Mode} from 'vanilla-jsoneditor';
+import {JSONEditorReact} from '../../Components/TextEditors/JsonEditor';
+import {useAuthenticatedState} from '../../Store/reducers/auth';
+import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
+import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
+import {useAppDispatch} from '../../Store/store';
+import {DocumentsService} from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
+import {setTagSchema, TagSchemasState} from "../../Store/reducers/tagSchemas";
+import {Pencil, Spinner, Trash} from "../../Components/Icons/icons";
+import {TagSchema as TagSchemaType} from "../../helpers/types/tagSchemas";
+import TagSchemaMenu from "../../Components/TagSchemas/TagSchemaMenu";
+import CompositeKeysTable from "../../Components/TagSchemas/tables/compositeKeysTable";
+import TagsTable from "../../Components/TagSchemas/tables/tagsTable";
 
 function TagSchema() {
-  const { user } = useAuthenticatedState();
-  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
+  const {user} = useAuthenticatedState();
+  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const { siteId } = getCurrentSiteInfo(
+  const {siteId} = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -32,38 +34,37 @@ function TagSchema() {
     workspaceSites
   );
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
-  const { id, ruleId } = useParams();
-  const [rulesetId, setRulesetId] = useState(id || '');
-  const [currentRuleId, setCurrentRuleId] = useState(ruleId || '');
+  const {tagSchemaId} = useParams();
+  const [searchParams, setSearchParams] = useSearchParams()
+  const editor = searchParams.get('editor')
 
-  const { rule } = useSelector(RulesetsState);
+  const {tagSchema} = useSelector(TagSchemasState);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
 
   useEffect(() => {
-    dispatch(fetchRule({ ruleId, rulesetId: id, siteId: currentSiteId }));
+    if (!tagSchemaId) {
+      return;
+    }
+    DocumentsService.getTagSchema(tagSchemaId, currentSiteId).then(
+      (res) => {
+        dispatch(setTagSchema(res))
+      })
   }, []);
-
-  useEffect(() => {
-    if (id) {
-      setRulesetId(id);
-    }
-    if (ruleId) {
-      setCurrentRuleId(ruleId);
-    }
-  }, [id, currentRuleId]);
 
   // JSON editor
   const [content, setContent] = useState({
     text: undefined,
-    json: rule,
+    json: tagSchema,
   });
 
   useEffect(() => {
     setContent({
       text: undefined,
-      json: rule,
+      json: tagSchema,
     });
-  }, [rule]);
+  }, [tagSchema]);
 
   const isValidString = (text: string) => {
     try {
@@ -83,7 +84,8 @@ function TagSchema() {
     return true;
   };
 
-  const onRuleSave = (ruleId: string) => {
+
+  const updateTagSchema = (tagSchema: TagSchemaType) => {
     function onResponse(res: any) {
       if (res.status === 200) {
         dispatch(
@@ -91,7 +93,6 @@ function TagSchema() {
             dialogTitle: 'Rule saved successfully',
           })
         );
-        dispatch(fetchRules({ siteId: currentSiteId, rulesetId }));
       } else if (res.errors && res.errors.length > 0) {
         dispatch(
           openNotificationDialog({
@@ -106,83 +107,133 @@ function TagSchema() {
         dispatch(
           openNotificationDialog({
             dialogTitle:
-              'Error happened while saving rule. Please try again later',
+              'Error happened while saving tag schema. Please try again later',
           })
         );
       }
     }
 
+    if (tagSchemaId) {
+      // TODO: update tag schema when update method is  ready.
+      // DocumentsService.updateTagSchema(tagSchemaId, {tagSchema}, currentSiteId).then(res => {
+      //       onResponse(res)
+      //       if (res.status === 200) {
+      //           dispatch(setTagSchema(res))
+      //       } else {
+      //           dispatch(openNotificationDialog({dialogTitle: res.errors[0].error}))
+      //       }
+      //   })
+    }
+  }
+
+  const saveSchemaInEditor = () => {
     if (content.json && isValidJSON(content.json)) {
-      DocumentsService.updateRule(
-        rulesetId,
-        ruleId,
-        { rule: content.json },
-        currentSiteId
-      ).then((res) => {
-        onResponse(res);
-      });
+      updateTagSchema(content.json)
     } else if (content.text && isValidString(content.text)) {
-      DocumentsService.updateRule(
-        rulesetId,
-        ruleId,
-        { rule: JSON.parse(content.text) },
-        currentSiteId
-      ).then((res) => {
-        onResponse(res);
-      });
+      updateTagSchema(content.text)
     } else {
       dispatch(
         openNotificationDialog({
-          dialogTitle: 'Please enter valid Open Policy value',
+          dialogTitle: 'Please enter valid tag schema value',
         })
       );
     }
-  };
+  }
+
+  const onDeleteClick = () => {
+    if (!tagSchemaId) {
+      return;
+    }
+    const deleteTagSchema = () => {
+      DocumentsService.deleteTagSchema(tagSchemaId, currentSiteId).then(res => {
+        if (res.status === 200) {
+          navigate('/tag-schemas');
+        } else {
+          dispatch(openNotificationDialog({dialogTitle: "Tag Schema delete failed. Please try again later."}))
+        }
+      })
+    }
+
+    dispatch(openConfirmationDialog({
+        dialogTitle: "Are you sure you want to delete this Tag Schema?",
+        callback: deleteTagSchema
+      })
+    )
+  }
+
   const handleChange = (value: any) => {
     if (value.json) {
       setContent(value);
     } else if (value.text) {
       setContent(value);
     }
-  };
+  }
 
   return (
     <>
       <Helmet>
         <title>Tag Schema</title>
       </Helmet>
-      {/*<div*/}
-      {/*  className="flex flex-col "*/}
-      {/*  style={{*/}
-      {/*    height: `calc(100vh - 3.68rem)`,*/}
-      {/*  }}*/}
-      {/*>*/}
-      {/*  <div className="w-full p-2 flex justify-end gap-2">*/}
-      {/*    <button*/}
-      {/*      onClick={() => onRuleSave(currentRuleId)}*/}
-      {/*      className="bg-gray-200 hover:bg-gray-300  font-bold py-2 px-4 rounded"*/}
-      {/*    >*/}
-      {/*      Save*/}
-      {/*    </button>*/}
 
-      {/*    <a*/}
-      {/*      href={pathname.split('/').slice(0, -2).join('/')}*/}
-      {/*      className="bg-gray-200 hover:bg-gray-300 font-bold py-2 px-4 rounded"*/}
-      {/*    >*/}
-      {/*      Return to Ruleset*/}
-      {/*    </a>*/}
-      {/*  </div>*/}
-      {/*  <div className=" inline-block h-full">*/}
-      {/*    <JSONEditorReact*/}
-      {/*      content={content}*/}
-      {/*      mode={Mode.text}*/}
-      {/*      onChange={handleChange}*/}
-      {/*    />*/}
-      {/*  </div>*/}
-      {/*</div>*/}
-      <div className="flex flex-col p-4 gap-2">
+      {tagSchema ? (editor ?
+          <div
+            className="flex flex-col "
+            style={{
+              height: `calc(100vh - 3.68rem)`,
+            }}
+          >
+            <div className="w-full p-2 flex justify-end gap-2 mt-2 pr-4">
+              {/*Uncomment when update method is ready.*/}
 
-      </div>
+              {/*<button*/}
+              {/*  onClick={saveSchemaInEditor}*/}
+              {/*  className="h-7 w-7 text-neutral-900 hover:text-primary-500"*/}
+              {/*  title="Save"*/}
+              {/*>*/}
+              {/*  <Save/>*/}
+              {/*</button>*/}
+              <button className="h-6 text-neutral-900 hover:text-primary-500" title="Delete Tag Schema" type="button"
+                      onClick={onDeleteClick}><Trash/>
+              </button>
+
+              <NavLink
+                to={"/tag-schemas/" + tagSchemaId}
+                className="h-7 w-7 text-neutral-900 hover:text-primary-500"
+                title="Open in table view"
+              >
+                <Pencil/>
+              </NavLink>
+
+
+            </div>
+            <div className=" inline-block h-full">
+              <JSONEditorReact
+                content={content}
+                mode={Mode.text}
+                onChange={handleChange}
+              />
+            </div>
+          </div> : <div className="p-4">
+            <TagSchemaMenu tagSchema={tagSchema} updateTagSchema={updateTagSchema}
+                           deleteTagSchema={onDeleteClick}/>
+            <p className="text-neutral-900 text-md font-bold my-4">
+              Composite Keys
+            </p>
+            <CompositeKeysTable compositeKeys={tagSchema.tags.compositeKeys}/>
+
+            <p className="text-neutral-900 text-md font-bold my-4">
+              Required Tags
+            </p>
+            <TagsTable tags={tagSchema.tags.required}/>
+
+            <p className="text-neutral-900 text-md font-bold my-4">
+              Optional Tags
+            </p>
+            <TagsTable tags={tagSchema.tags.optional}/>
+
+          </div>)
+        : <Spinner/>}
+
     </>
   );
 }

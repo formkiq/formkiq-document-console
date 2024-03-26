@@ -1,4 +1,4 @@
-import {Link, useLocation} from 'react-router-dom';
+import {Link, NavLink, useLocation} from 'react-router-dom';
 import {Edit, Trash} from '../../Components/Icons/icons';
 import {formatDate} from '../../helpers/services/toolService';
 import {TagSchema} from "../../helpers/types/tagSchemas";
@@ -35,18 +35,6 @@ function TagSchemasTable({
           className=" w-full border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
           Date
         </th>
-        {/*<th*/}
-        {/*  className=" border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">*/}
-        {/*  Priority*/}
-        {/*</th>*/}
-        {/*<th*/}
-        {/*  className="border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">*/}
-        {/*  Version*/}
-        {/*</th>*/}
-        {/*<th*/}
-        {/*  className="border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">*/}
-        {/*  Status*/}
-        {/*</th>*/}
         <th
           className=" w-full border-b border-t p-4 pr-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-right">
           Actions
@@ -73,24 +61,15 @@ function TagSchemasTable({
                 <td className="border-b p-4 ">
                   {formatDate(tagSchema.insertedDate)}
                 </td>
-                {/*<td className="border-b p-4 ">*/}
-                {/*  {tagSchema.priority}*/}
-                {/*</td>*/}
-                {/*<td className="border-b p-4">*/}
-                {/*  {tagSchema.version}*/}
-                {/*</td>*/}
-                {/*<td className="border-b p-4">*/}
-                {/*  {tagSchema.status}*/}
-                {/*</td>*/}
 
                 <td className="border-b border-neutral-300 p-4 pr-8">
                   <div className="flex items-center justify-end">
-                    <button
-                      onClick={() => showRulesetEditTab(tagSchema.tagSchemaId)}
+                    <NavLink
+                      to={`/tag-schemas/${tagSchema.tagSchemaId}?editor=true`}
                       className="w-4 h-auto text-neutral-900  mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
                     >
                       <Edit/>
-                    </button>
+                    </NavLink>
                     <button
                       onClick={() => onTagSchemaDelete(tagSchema.tagSchemaId)}
                       className="w-3 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
