@@ -6,7 +6,7 @@ type TagsTableProps = {
   }[]
 }
 
-function CompositeKeysTable({tags}: TagsTableProps) {
+function TagsTable({tags}: TagsTableProps) {
   return (
     <table
       className="w-full border-collapse text-sm table-fixed border border-neutral-300 "
@@ -41,7 +41,7 @@ function CompositeKeysTable({tags}: TagsTableProps) {
         <tr className="text-neutral-900 border-neutral-300">
           <td className="w-6 text-center border-b"></td>
           <td className=" text-center border-b p-4">
-            No Tags Has Been Added Yet
+            No tags have been added yet
           </td>
         </tr>}
       </tbody>
@@ -49,4 +49,4 @@ function CompositeKeysTable({tags}: TagsTableProps) {
   );
 }
 
-export default CompositeKeysTable;
+export default TagsTable;

@@ -29,7 +29,7 @@ function CompositeKeysTable({compositeKeys}: CompositeKeysTableProps) {
         <tr className="text-neutral-900 border-neutral-300">
           <td className="w-6 text-center border-b"></td>
           <td className=" text-center border-b p-4">
-            No Composite Keys Has Been Added Yet
+            No composite keys have been added yet
           </td>
         </tr>}
       </tbody>

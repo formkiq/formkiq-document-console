@@ -85,7 +85,7 @@ function TagSchemasTable({
       ) : (
         <tr>
           <td colSpan={6} className="text-center p-2">
-            No Tag Schemas have been found
+            No tag schemas have been added yet
           </td>
         </tr>
       )}
