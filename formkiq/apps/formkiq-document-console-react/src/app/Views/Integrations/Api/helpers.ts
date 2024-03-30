@@ -1179,7 +1179,7 @@ export const getVersionApiItem = {
 
 export const getConfigurationApiItem = {
   method: 'GET',
-  path: '/configuration',
+  path: '/sites/ SITE_ID /configuration',
   description: 'Returns the current configuration',
   username: 'Cognito User',
   hasNoParams: true,
@@ -1190,7 +1190,7 @@ export const getConfigurationApiItem = {
 
 export const postConfigurationApiItem = {
   method: 'PATCH',
-  path: '/configuration',
+  path: '/sites/ SITE_ID /configuration',
   description: 'Updates the current configuration',
   username: 'Cognito User',
   requiresPostJson: true,
@@ -1203,19 +1203,17 @@ export const postConfigurationApiItem = {
 
 export const getConfigurationOpaPoliciesApiItem = {
   method: 'GET',
-  path: '/configuration/opa',
+  path: '/sites/opa/accessPolicies',
   description: 'Returns all Open Policy Agent (OPA) access policies',
   username: 'Cognito User',
   hasNoParams: true,
   requiresAuthentication: true,
-  requiresSite: true,
   license: 'Pro|Enterprise',
 };
 
-/*
 export const getConfigurationOpaPolicyApiItem = {
   method: 'GET',
-  path: '/configuration/opa',
+  path: '/sites/ SITE_ID /opa/accessPolicy',
   description:
     "Returns the current site's Open Policy Agent (OPA) access policy",
   username: 'Cognito User',
@@ -1224,16 +1222,16 @@ export const getConfigurationOpaPolicyApiItem = {
   requiresSite: true,
   license: 'Core',
 };
-*/
 
+// NOTE: this endpoint will be updated soon
 export const putConfigurationOpaPolicyApiItem = {
   method: 'PUT',
-  path: '/configuration/opa',
+  path: '/sites/opa/accessPolicies',
   description:
     "Updates the current site's Open Policy Agent (OPA) access policy",
   username: 'Cognito User',
   requiresAuthentication: true,
-  requiresSite: true,
+  /*requiresSite: true,*/
   requiresPostJson: true,
   defaultPostJsonValue: '{"policy": "POLICY GOES HERE","siteId": "default"}',
   license: 'Pro|Enterprise',
@@ -1241,7 +1239,7 @@ export const putConfigurationOpaPolicyApiItem = {
 
 export const deleteConfigurationOpaPolicyApiItem = {
   method: 'DELETE',
-  path: '/configuration/opa',
+  path: '/sites/ SITE_ID /opa/accessPolicy',
   description:
     "Deletes the current site's Open Policy Agent (OPA) access policy",
   username: 'Cognito User',
@@ -1252,27 +1250,30 @@ export const deleteConfigurationOpaPolicyApiItem = {
 
 export const getApiKeysApiItem = {
   method: 'GET',
-  path: '/configuration/apiKeys',
+  path: '/sites/ SITE_ID /apiKeys',
   description: 'Gets the current api keys',
   username: 'Cognito User',
   requiresAuthentication: true,
+  requiresSite: true,
   license: 'Core',
 };
 
 export const postApiKeysApiItem = {
   method: 'POST',
-  path: '/configuration/apiKeys',
+  path: '/sites/ SITE_ID /apiKeys',
   description: 'Sets the current api keys',
   username: 'Cognito User',
   requiresAuthentication: true,
+  requiresSite: true,
   license: 'Core',
 };
 export const deleteApiKeyApiItem = {
   method: 'DELETE',
-  path: '/configuration/apiKeys/ API_KEY ',
+  path: '/sites/ SITE_ID /apiKeys/ API_KEY ',
   description: 'Deletes an api key',
   username: 'Cognito User',
   requiresAuthentication: true,
+  requiresSite: true,
   license: 'Core',
 };
 
