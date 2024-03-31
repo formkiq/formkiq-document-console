@@ -47,7 +47,7 @@ const Ruleset = React.lazy(() => import('../../Views/Ruleset/ruleset'));
 
 const Rule = React.lazy(() => import('../../Views/Ruleset/rule'));
 const AccessControl = React.lazy(
-  () => import('../../Views/Account/acccessControl')
+  () => import('../../Views/Account/accessControl')
 );
 const ObjectExamineTool = React.lazy(
   () => import('../../Views/Account/objectExamineTool')

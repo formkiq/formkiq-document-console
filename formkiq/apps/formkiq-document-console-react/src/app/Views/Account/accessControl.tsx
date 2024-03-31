@@ -90,7 +90,7 @@ export function AccessControl() {
     }
     const body = `{"policy": ${JSON.stringify(
       editorText
-    )}, "siteId": "${newSiteId}"}`;
+    )}, "siteId": "${currentSiteId}"}`;
     DocumentsService.configureOpenPolicyAgent(body, currentSiteId).then(
       (res) => {
         if (res.status === 200) {
