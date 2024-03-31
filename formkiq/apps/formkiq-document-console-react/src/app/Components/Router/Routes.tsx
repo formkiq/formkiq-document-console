@@ -46,8 +46,12 @@ const Rulesets = React.lazy(() => import('../../Views/Ruleset/rulesets'));
 const Ruleset = React.lazy(() => import('../../Views/Ruleset/ruleset'));
 
 const Rule = React.lazy(() => import('../../Views/Ruleset/rule'));
-const Admin = React.lazy(() => import('../../Views/Account/admin'));
-const ObjectExamineTool = React.lazy(() => import('../../Views/Account/objectExamineTool'));
+const AccessControl = React.lazy(
+  () => import('../../Views/Account/accessControl')
+);
+const ObjectExamineTool = React.lazy(
+  () => import('../../Views/Account/objectExamineTool')
+);
 
 const RoutesMapper = () => {
   return (
@@ -164,8 +168,11 @@ const RoutesMapper = () => {
       <Route path="/integrations/apiKeys" element={<ApiKeys />}></Route>
       <Route path="/integrations/webhooks" element={<Webhooks />}></Route>
       <Route path="/account/settings" element={<AccountSettings />}></Route>
-      <Route path="/account/admin" element={<Admin />}></Route>
-      <Route path="/object-examine-tool" element={<ObjectExamineTool />}></Route>
+      <Route path="/account/accessControl" element={<AccessControl />}></Route>
+      <Route
+        path="/object-examine-tool"
+        element={<ObjectExamineTool />}
+      ></Route>
       <Route path="*" element={<Page404 />}></Route>
     </Routes>
   );

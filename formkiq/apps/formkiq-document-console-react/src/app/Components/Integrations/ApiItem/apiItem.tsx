@@ -26,6 +26,21 @@ function updateRequestsFromForm(
     }
   }
 
+  if (apiItem.requiresSite) {
+    if (
+      getFormInput(formRef, 'siteID')?.value &&
+      getFormInput(formRef, 'siteID')?.validity?.valid &&
+      getFormInput(formRef, 'siteID')?.value.length > 0
+    ) {
+      if (apiItem.path.indexOf(' SITE_ID ') > -1) {
+        path = path.replace(
+          ' SITE_ID ',
+          getFormInput(formRef, 'siteID')?.value
+        );
+      }
+    }
+  }
+
   if (apiItem.requiresDocumentID) {
     if (getFormInput(formRef, 'documentID')?.validity?.valid) {
       path = path.replace(
@@ -206,7 +221,9 @@ function updateRequestsFromForm(
       getFormInput(formRef, 'siteID')?.validity?.valid &&
       getFormInput(formRef, 'siteID')?.value.length > 0
     ) {
-      params.set('siteId', getFormInput(formRef, 'siteID')?.value);
+      if (apiItem.path.indexOf(' SITE_ID ') === -1) {
+        params.set('siteId', getFormInput(formRef, 'siteID')?.value);
+      }
     }
     if (
       getFormInput(formRef, 'shareKey')?.value &&

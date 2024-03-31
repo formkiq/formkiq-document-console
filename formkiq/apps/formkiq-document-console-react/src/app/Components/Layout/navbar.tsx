@@ -474,7 +474,8 @@ function Navbar() {
                             {pathname.indexOf('/account/settings') > -1 && (
                               <span>Settings</span>
                             )}
-                            {pathname.indexOf('/account/admin') > -1 && (
+                            {pathname.indexOf('/account/accessControl') >
+                              -1 && (
                               <div className="w-5">
                                 <Admin />
                               </div>
@@ -649,10 +650,10 @@ function Navbar() {
                       </li>
                       <li onClick={ToggleAccountSettings}>
                         <Link
-                          to="/account/admin"
+                          to="/account/accessControl"
                           className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
                         >
-                          Admin
+                          Access Control
                         </Link>
                       </li>
                       <li>
