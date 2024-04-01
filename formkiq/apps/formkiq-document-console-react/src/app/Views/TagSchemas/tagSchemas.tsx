@@ -233,6 +233,14 @@ function TagSchemas() {
             + NEW
           </button>
         </div>
+        <div className="text-base p-4 font-semibold">
+          NOTE: Schemas are currently not editable; if a schema is not yet in
+          use, you can delete the new schema and re-create with your changes.
+          Once in use, schemas can not be changed.
+          <span className="block font-normal">
+            (at least, not with the current version of FormKiQ)
+          </span>
+        </div>
         <div
           className="flex-1 inline-block overflow-y-scroll overflow-x-auto h-full"
           id="rulesetsScrollPane"
