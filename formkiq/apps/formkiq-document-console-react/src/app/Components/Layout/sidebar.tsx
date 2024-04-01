@@ -1337,8 +1337,14 @@ export function Sidebar() {
               </ul>
             </nav>
             {formkiqVersion && formkiqVersion.type && isSidebarExpanded && (
-              <div className="text-xxs absolute bottom-0 w-full flex justify-center items-end -mt-1 mb-4">
-                {formkiqVersion.type.toUpperCase()} v{formkiqVersion.version}
+              <div className="text-xs fixed left-0 bottom-0 flex justify-start items-end -mt-1 pl-4 mb-2 bg-neutral-100">
+                FormKiQ
+                {formkiqVersion.type === 'enterprise' ? (
+                  <span>&nbsp;Enterprise&nbsp;</span>
+                ) : (
+                  <span>&nbsp;Core&nbsp;</span>
+                )}
+                v{formkiqVersion.version}
               </div>
             )}
           </>
