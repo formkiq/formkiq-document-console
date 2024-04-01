@@ -1256,7 +1256,7 @@ export function Sidebar() {
         ></div>
         {user && (
           <>
-            <nav className="grow mt-16">
+            <nav className="grow mt-16 mb-8">
               {!isSiteReadOnly && (
                 <div className="flex flex-wrap w-full justify-center mb-4 pl-0.5">
                   <ButtonPrimaryGradient
@@ -1337,7 +1337,7 @@ export function Sidebar() {
               </ul>
             </nav>
             {formkiqVersion && formkiqVersion.type && isSidebarExpanded && (
-              <div className="text-xs fixed left-0 bottom-0 flex justify-start items-end -mt-1 pl-4 mb-2 bg-neutral-100">
+              <div className="text-xs fixed left-0 bottom-0 flex justify-start items-end pl-4 mb-2 bg-neutral-100">
                 FormKiQ
                 {formkiqVersion.type === 'enterprise' ? (
                   <span>&nbsp;Enterprise&nbsp;</span>
