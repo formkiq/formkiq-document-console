@@ -23,6 +23,8 @@ import {
 import { IFolder } from '../../helpers/types/folder';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
+import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
+import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 import {
   Api,
   ApiKey,
@@ -262,7 +264,7 @@ export function Sidebar() {
         <>
           <span className="hidden pl-6 pl-8 pl-10 pl-12 pl-14 pl-16 pl-18 pl-20 pl-22 pl-24 pl-26"></span>
           {currentSiteId === folderSiteId && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-neutral-900">
               {folderLevels.length ? (
                 <>
                   {folderLevels.map((folderSnippet: string, i: number) => {
@@ -273,8 +275,8 @@ export function Sidebar() {
                         key={i}
                         className={
                           (i === folderLevels.length - 1
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
+                            ? 'text-primary-600 bg-neutral-200 '
+                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
                           ' p-1 pl-' +
                           paddingLeft +
                           ' flex justify-start'
@@ -311,14 +313,14 @@ export function Sidebar() {
         {isSidebarExpanded ? (
           <>
             <li
-              className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
               onClick={toggleDocumentsExpand}
               data-test-id="expand-documents"
             >
               <div className="flex justify-end mt-2 mr-1">
                 {documentsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
-              <div className="uppercase font-semibold text-xs">
+              <div className="uppercase font-bold text-sm">
                 Documents & Folders
               </div>
             </li>
@@ -333,18 +335,16 @@ export function Sidebar() {
                         end
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
-                          ' w-full text-sm font-medium flex'
+                            ? 'text-primary-600 bg-neutral-200 '
+                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                          ' w-full text-sm font-bold flex'
                         }
                       >
                         <FolderDropWrapper
                           folder={''}
                           sourceSiteId={currentSiteId}
                           targetSiteId={user?.email || ''}
-                          className={
-                            'w-full text-sm font-medium flex pl-5 py-2'
-                          }
+                          className={'w-full text-sm font-bold flex pl-5 py-2'}
                         >
                           <div className="w-4 flex items-center mr-2">
                             <Documents />
@@ -363,17 +363,17 @@ export function Sidebar() {
                     {currentSiteId === user?.email && (
                       <>
                         <li
-                          className="hidden w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
+                          className="hidden w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
                           onClick={toggleUserSiteDocumentQueuesExpand}
                         >
-                          <div className="flex justify-end mt-2 mr-1">
+                          <div className="flex justify-end mt-3 mr-1">
                             {userSiteDocumentQueuesExpanded ? (
                               <ArrowBottom />
                             ) : (
                               <ArrowRight />
                             )}
                           </div>
-                          <div className="pl-1 uppercase text-xs">Queues</div>
+                          <div className="pl-1 font-bold text-sm">Queues</div>
                         </li>
                         {userSiteDocumentQueuesExpanded &&
                           userSiteDocumentQueues.map(
@@ -388,9 +388,9 @@ export function Sidebar() {
                                       end
                                       className={({ isActive }) =>
                                         (isActive
-                                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                                          : 'text-gray-500 bg-white ') +
-                                        ' w-full text-sm font-medium flex'
+                                          ? 'text-primary-600 bg-neutral-200 '
+                                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                                        ' w-full text-sm font-bold flex'
                                       }
                                     >
                                       <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
@@ -435,18 +435,16 @@ export function Sidebar() {
                         end
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
-                          ' w-full text-sm font-medium flex'
+                            ? 'text-primary-600 bg-neutral-200 '
+                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                          ' w-full text-sm font-bold flex'
                         }
                       >
                         <FolderDropWrapper
                           folder={''}
                           sourceSiteId={currentSiteId}
                           targetSiteId={'default'}
-                          className={
-                            'w-full text-sm font-medium flex pl-5 py-2 '
-                          }
+                          className={'w-full text-sm font-bold flex pl-5 py-2 '}
                         >
                           {hasUserSite ? (
                             <div className="w-4 flex flex-wrap items-center mr-2">
@@ -482,17 +480,19 @@ export function Sidebar() {
                     {currentSiteId === 'default' && (
                       <>
                         <li
-                          className="hidden w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
+                          className="hidden w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
                           onClick={toggleDefaultSiteDocumentQueuesExpand}
                         >
-                          <div className="flex justify-end mt-2 mr-1">
+                          <div className="flex justify-end mt-3 mr-1">
                             {defaultSiteDocumentQueuesExpanded ? (
                               <ArrowBottom />
                             ) : (
                               <ArrowRight />
                             )}
                           </div>
-                          <div className="pl-1 uppercase text-xs">Queues</div>
+                          <div className="pl-1 uppercase font-bold text-sm">
+                            Queues
+                          </div>
                         </li>
                         {defaultSiteDocumentQueuesExpanded &&
                           defaultSiteDocumentQueues.map(
@@ -511,9 +511,9 @@ export function Sidebar() {
                                       end
                                       className={({ isActive }) =>
                                         (isActive
-                                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                                          : 'text-gray-500 bg-white ') +
-                                        ' w-full text-sm font-medium flex'
+                                          ? 'text-primary-600 bg-neutral-200 '
+                                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                                        ' w-full text-sm font-bold flex'
                                       }
                                     >
                                       <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
@@ -550,17 +550,19 @@ export function Sidebar() {
                   <>
                     {(hasUserSite || hasDefaultSite) && (
                       <li
-                        className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+                        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
                         onClick={toggleWorkspacesExpand}
                       >
-                        <div className="flex justify-end mt-2 mr-1">
+                        <div className="flex justify-end mt-3 mr-1">
                           {workspacesExpanded ? (
                             <ArrowBottom />
                           ) : (
                             <ArrowRight />
                           )}
                         </div>
-                        <div className="pl-1 uppercase text-xs">Workspaces</div>
+                        <div className="pl-1 uppercase font-bold text-sm">
+                          Workspaces
+                        </div>
                       </li>
                     )}
                     {(workspacesExpanded ||
@@ -574,9 +576,9 @@ export function Sidebar() {
                                 end
                                 className={({ isActive }) =>
                                   (isActive
-                                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                                    : 'text-gray-500 bg-white ') +
-                                  ' w-full text-sm font-medium flex'
+                                    ? 'text-primary-600 bg-neutral-200 '
+                                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
+                                  ' w-full text-sm font-bold flex'
                                 }
                               >
                                 <FolderDropWrapper
@@ -584,7 +586,7 @@ export function Sidebar() {
                                   sourceSiteId={currentSiteId}
                                   targetSiteId={site.siteId}
                                   className={
-                                    'w-full text-sm font-medium flex pl-5 py-2 '
+                                    'w-full text-sm font-bold flex pl-5 py-2 '
                                   }
                                 >
                                   <div className="w-5 flex flex-wrap items-center mr-2">
@@ -609,17 +611,17 @@ export function Sidebar() {
                             {currentSiteId === site.siteId && (
                               <>
                                 <li
-                                  className="hidden w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap pt-2 pl-8 px-4 pb-2 cursor-pointer"
+                                  className="hidden w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap pt-2 pl-8 px-4 pb-2 cursor-pointer"
                                   onClick={toggleOtherSiteDocumentQueuesExpand}
                                 >
-                                  <div className="flex justify-end mt-2 mr-1">
+                                  <div className="flex justify-end mt-3 mr-1">
                                     {otherSiteDocumentQueuesExpanded ? (
                                       <ArrowBottom />
                                     ) : (
                                       <ArrowRight />
                                     )}
                                   </div>
-                                  <div className="pl-1 uppercase text-xs">
+                                  <div className="pl-1 uppercase font-bold text-sm">
                                     Queues
                                   </div>
                                 </li>
@@ -639,9 +641,9 @@ export function Sidebar() {
                                               end
                                               className={({ isActive }) =>
                                                 (isActive
-                                                  ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                                                  : 'text-gray-500 bg-white ') +
-                                                ' w-full text-sm font-medium flex'
+                                                  ? 'text-primary-600 bg-neutral-200 '
+                                                  : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
+                                                ' w-full text-sm font-bold flex'
                                               }
                                             >
                                               <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
@@ -689,15 +691,13 @@ export function Sidebar() {
                         to={`${specialFoldersRootUri}/folders/favorites`}
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
-                          ' w-full text-sm font-medium flex '
+                            ? 'text-primary-600 bg-neutral-200 '
+                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
+                          ' w-full text-sm font-bold flex '
                         }
                       >
                         <div
-                          className={
-                            'w-full text-sm font-medium flex pl-5 py-2 '
-                          }
+                          className={'w-full text-sm font-bold flex pl-5 py-2 '}
                         >
                           <div className="w-4 flex items-center mr-2">
                             <Star />
@@ -713,14 +713,14 @@ export function Sidebar() {
                           to={`${specialFoldersRootUri}/folders/deleted`}
                           className={({ isActive }) =>
                             (isActive
-                              ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                              : 'text-gray-500 bg-white ') +
-                            ' w-full text-sm font-medium flex '
+                              ? 'text-primary-600 bg-neutral-200 '
+                              : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
+                            ' w-full text-sm font-bold flex '
                           }
                         >
                           <div
                             className={
-                              'w-full text-sm font-medium flex pl-5 py-2 '
+                              'w-full text-sm font-bold flex pl-5 py-2 '
                             }
                           >
                             <div className="w-4 h-4 flex items-center mr-2">
@@ -734,37 +734,37 @@ export function Sidebar() {
                   </>
                 )}
                 <div className="flex w-full">
-                  <div className="w-full mt-2 border-b"></div>
+                  <div className="w-full mt-2 border-b border-neutral-300"></div>
                 </div>
               </>
             )}
             <li
-              className="mt-2 w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              className="mt-2 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
               data-test-id="expand-integrations"
               onClick={toggleIntegrationsExpand}
             >
               <div className="flex justify-end mt-2 mr-1">
                 {integrationsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
-              <div className="uppercase font-semibold text-xs mb-2">
+              <div className="uppercase font-bold text-sm mb-2">
                 Workflows & Integrations
               </div>
             </li>
             {integrationsExpanded && (
               <>
-                <li className="w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/workflows"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
                     <div
                       className={
-                        'w-full text-sm font-medium flex items-center pl-5 '
+                        'w-full text-sm font-bold flex items-center pl-5  py-2 '
                       }
                     >
                       <div className="w-4 flex items-center mr-2">
@@ -774,19 +774,19 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex mt-6 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/queues"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
                     <div
                       className={
-                        'w-full text-sm font-medium flex items-center pl-5 '
+                        'w-full text-sm font-bold flex items-center pl-5  py-2 '
                       }
                     >
                       <div className="w-4 flex items-center mr-2">
@@ -796,20 +796,18 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="mt-4 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="mt-2 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"
                     data-test-id="nav-api-explorer"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
                       <div className="w-4 flex items-center mr-2">
                         <Api />
                       </div>
@@ -823,14 +821,12 @@ export function Sidebar() {
                     data-test-id="nav-api-keys"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2'}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-2'}>
                       <div className="w-4 flex items-center mr-2">
                         <ApiKey />
                       </div>
@@ -844,14 +840,12 @@ export function Sidebar() {
                     data-test-id="nav-rulesets"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
                       <div className="w-4 flex items-center mr-2">
                         <Rules />
                       </div>
@@ -861,22 +855,39 @@ export function Sidebar() {
                 </li>
                 <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to="/integrations/webhooks"
-                    data-test-id="nav-webhooks"
+                    to="/object-examine-tool"
+                    data-test-id="nav-object-examine"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
                       <div className="w-4 flex items-center mr-2">
-                        <Webhook />
+                        <Examine />
                       </div>
-                      <div>Inbound Webhooks</div>
+                      <div>Object Examine Tool</div>
+                    </div>
+                  </NavLink>
+                </li>
+                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                  <NavLink
+                    to="/schemas"
+                    data-test-id="nav-tag-schema"
+                    className={({ isActive }) =>
+                      (isActive
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
+                    }
+                  >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
+                      <div className="w-4 flex items-center mr-2">
+                        <Schema />
+                      </div>
+                      <div>Schemas</div>
                     </div>
                   </NavLink>
                 </li>
@@ -925,14 +936,14 @@ export function Sidebar() {
                 </li>
 
                 <div className="flex w-full">
-                  <div className="w-full mt-4 border-b"></div>
+                  <div className="w-full mt-4 border-b border-neutral-300"></div>
                 </div>
               </>
             )}
             {useAccountAndSettings && (
               <>
                 <li
-                  className="mt-4 w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+                  className="mt-4 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
                   onClick={toggleSettingsExpand}
                 >
                   <div className="flex justify-end mt-2 mr-1">
@@ -949,14 +960,12 @@ export function Sidebar() {
                         to="/account"
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
-                          ' w-full text-sm font-medium flex '
+                            ? 'text-primary-600 bg-neutral-200 '
+                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                          ' w-full text-sm font-bold flex '
                         }
                       >
-                        <div
-                          className={'w-full text-sm font-medium flex pl-5 '}
-                        >
+                        <div className={'w-full text-sm font-bold flex pl-5 '}>
                           <div className="w-4 flex items-center mr-2">
                             <UserIcon />
                           </div>
@@ -969,14 +978,12 @@ export function Sidebar() {
                         to="/settings"
                         className={({ isActive }) =>
                           (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
-                          ' w-full text-sm font-medium flex '
+                            ? 'text-primary-600 bg-neutral-200 '
+                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                          ' w-full text-sm font-bold flex '
                         }
                       >
-                        <div
-                          className={'w-full text-sm font-medium flex pl-5 '}
-                        >
+                        <div className={'w-full text-sm font-bold flex pl-5 '}>
                           <div className="w-4 flex items-center mr-2">
                             <Settings />
                           </div>
@@ -998,16 +1005,16 @@ export function Sidebar() {
                   end
                   className={({ isActive }) =>
                     (isActive
-                      ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                      : 'text-gray-500 bg-white ') +
-                    ' w-full text-sm font-medium flex '
+                      ? 'text-primary-600 bg-neutral-200 '
+                      : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                    ' w-full text-sm font-bold flex '
                   }
                 >
                   <FolderDropWrapper
                     folder={''}
                     sourceSiteId={currentSiteId}
                     targetSiteId={user?.email || ''}
-                    className={'w-full text-sm font-medium flex pl-5 py-4 '}
+                    className={'w-full text-sm font-bold flex pl-5 py-4 '}
                   >
                     <div className="w-4 flex items-center mr-2">
                       <Documents />
@@ -1023,16 +1030,16 @@ export function Sidebar() {
                   end
                   className={({ isActive }) =>
                     (isActive
-                      ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                      : 'text-gray-500 bg-white ') +
-                    ' w-full text-sm font-medium flex '
+                      ? 'text-primary-600 bg-neutral-200 '
+                      : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                    ' w-full text-sm font-bold flex '
                   }
                 >
                   <FolderDropWrapper
                     folder={''}
                     sourceSiteId={currentSiteId}
                     targetSiteId={'default'}
-                    className={'w-full text-sm font-medium flex pl-5 py-3 '}
+                    className={'w-full text-sm font-bold flex pl-5 py-3 '}
                   >
                     {hasUserSite ? (
                       <div className="w-4 flex flex-wrap items-center mr-2">
@@ -1053,7 +1060,7 @@ export function Sidebar() {
               </li>
             )}
             {hasWorkspaces && (
-              <div className="w-full text-sm font-medium flex pl-5 py-3 bg-white mb-4">
+              <div className="w-full text-sm font-bold flex pl-5 py-3 bg-neutral-100 mb-4">
                 <div
                   className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
                   onClick={onWorkspacesClick}
@@ -1069,14 +1076,12 @@ export function Sidebar() {
                     to={`${specialFoldersRootUri}/folders/favorites`}
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-4 '}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                       <div className="w-4 flex items-center mr-2">
                         <Star />
                       </div>
@@ -1089,13 +1094,13 @@ export function Sidebar() {
                       to={`${specialFoldersRootUri}/folders/deleted`}
                       className={({ isActive }) =>
                         (isActive
-                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                          : 'text-gray-500 bg-white ') +
-                        ' w-full text-sm font-medium flex '
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
                       }
                     >
                       <div
-                        className={'w-full text-sm font-medium flex pl-5 py-4 '}
+                        className={'w-full text-sm font-bold flex pl-5 py-4 '}
                       >
                         <div className="w-4 h-4 flex items-center mr-2">
                           <Trash />
@@ -1107,21 +1112,21 @@ export function Sidebar() {
               </>
             )}
             <div className="flex w-full">
-              <div className="w-full mt-2 mx-2 border-b"></div>
+              <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>
             </div>
             <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/workflows"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                    : 'text-gray-500 bg-white ') +
-                  ' w-full text-sm font-medium flex '
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
                 }
               >
                 <div
                   className={
-                    'w-full text-sm font-medium flex items-center pl-5 py-4 '
+                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
@@ -1135,14 +1140,14 @@ export function Sidebar() {
                 to="/queues"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                    : 'text-gray-500 bg-white ') +
-                  ' w-full text-sm font-medium flex '
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
                 }
               >
                 <div
                   className={
-                    'w-full text-sm font-medium flex items-center pl-5 py-4 '
+                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
@@ -1156,12 +1161,12 @@ export function Sidebar() {
                 to="/integrations/api"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                    : 'text-gray-500 bg-white ') +
-                  ' w-full text-sm font-medium flex '
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
                 }
               >
-                <div className={'w-full text-sm font-medium flex pl-5 py-4 '}>
+                <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                   <div className="w-4 flex items-center mr-2">
                     <Api />
                   </div>
@@ -1173,12 +1178,12 @@ export function Sidebar() {
                 to="/integrations/webhooks"
                 className={({ isActive }) =>
                   (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                    : 'text-gray-500 bg-white ') +
-                  ' w-full text-sm font-medium flex '
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
                 }
               >
-                <div className={'w-full text-sm font-medium flex pl-5 py-4 '}>
+                <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                   <div className="w-4 flex items-center mr-2">
                     <Webhook />
                   </div>
@@ -1188,21 +1193,19 @@ export function Sidebar() {
             {useAccountAndSettings && (
               <>
                 <div className="flex w-full">
-                  <div className="w-full mt-2 mx-2 border-b"></div>
+                  <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>
                 </div>
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/account"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-4 '}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                       <div className="w-4 flex items-center mr-2">
                         <UserIcon />
                       </div>
@@ -1214,14 +1217,12 @@ export function Sidebar() {
                     to="/settings"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-4 '}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                       <div className="w-4 flex items-center mr-2">
                         <Settings />
                       </div>
@@ -1237,11 +1238,16 @@ export function Sidebar() {
   };
 
   return (
-    <div className={(sidebarExpanded ? 'w-64' : 'w-14') + ' h-screen relative'}>
+    <div
+      className={
+        (sidebarExpanded ? 'w-64' : 'w-14') +
+        ' h-screen relative bg-neutral-100'
+      }
+    >
       <div
         className={
           (sidebarExpanded ? 'w-64' : 'w-14') +
-          ' border-r fixed flex h-full flex-wrap items-start justify-start overflow-y-scroll'
+          ' border-r border-neutral-300 fixed flex h-full flex-wrap items-start justify-start overflow-y-auto bg-neutral-100'
         }
       >
         <div
@@ -1276,7 +1282,7 @@ export function Sidebar() {
           <div
             className={
               (sidebarExpanded ? 'justify-end mr-2 ' : 'justify-end mr-2') +
-              ' text-gray-600 hover:text-coreOrange-500 flex mt-2 cursor-pointer '
+              ' text-neutral-900 hover:text-primary-500 flex mt-2 cursor-pointer '
             }
             onClick={toggleSidebarExpand}
           >
@@ -1288,7 +1294,7 @@ export function Sidebar() {
         <div
           className={
             (sidebarExpanded ? 'w-62' : 'w-12') +
-            ' flex flex-wrap fixed bg-white '
+            ' flex flex-wrap fixed bg-neutral-100 '
           }
         ></div>
         {user && (
@@ -1296,12 +1302,19 @@ export function Sidebar() {
             <nav className="grow mt-16">
               {!isSiteReadOnly && (
                 <div className="flex flex-wrap w-full justify-center mb-4">
-                  <button
+                  <ButtonPrimaryGradient
                     className={
-                      (isSidebarExpanded ? ' mr-1 ' : 'mb-1 ') +
-                      ' bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'
+                      (isSidebarExpanded
+                        ? ' mr-1 rounded-md'
+                        : 'mb-1 rounded-full') +
+                      ' flex justify-center items-center w-full'
                     }
-                    onClick={(event) => {
+                    style={{
+                      height: isSidebarExpanded ? '32px' : '28px',
+                      width: isSidebarExpanded ? '100%' : '28px',
+                      padding: isSidebarExpanded ? '16px' : '0px',
+                    }}
+                    onClick={() => {
                       // TODO: create more consistent check on site location
                       if (
                         pathname.indexOf('/workflows') > -1 ||
@@ -1324,11 +1337,21 @@ export function Sidebar() {
                     >
                       {Plus()}
                     </div>
-                  </button>
-                  <button
-                    className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                  </ButtonPrimaryGradient>
+                  <ButtonTertiary
+                    className={
+                      (isSidebarExpanded
+                        ? ' mr-1 rounded-md'
+                        : 'mb-1 rounded-full') +
+                      ' flex justify-center items-center w-full'
+                    }
+                    style={{
+                      height: isSidebarExpanded ? '32px' : '28px',
+                      width: isSidebarExpanded ? '100%' : '28px',
+                      padding: isSidebarExpanded ? '16px' : '0px',
+                    }}
                     data-test-id="upload-document"
-                    onClick={(event) => {
+                    onClick={() => {
                       // TODO: create more consistent check on site location
                       if (
                         pathname.indexOf('/workflows') > -1 ||
@@ -1349,7 +1372,7 @@ export function Sidebar() {
                     >
                       {Upload()}
                     </div>
-                  </button>
+                  </ButtonTertiary>
                 </div>
               )}
               <ul className="flex lg:flex-col gap-1">

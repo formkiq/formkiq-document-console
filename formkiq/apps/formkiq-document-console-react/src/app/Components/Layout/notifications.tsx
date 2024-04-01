@@ -1,4 +1,10 @@
-import { Close, EnvelopeClose, EnvelopeOpen, NotificationUnread, NotificationRead } from '../Icons/icons';
+import {
+  Close,
+  EnvelopeClose,
+  EnvelopeOpen,
+  NotificationRead,
+  NotificationUnread,
+} from '../Icons/icons';
 
 export default function Notifications(ToggleNotifications: any) {
   return (
@@ -18,7 +24,7 @@ export default function Notifications(ToggleNotifications: any) {
         <div className="w-full border-b"></div>
       </div>
       <div className="flex w-full px-8 py-3">
-        <div className="grow text-xs text-coreOrange-500">
+        <div className="grow text-xs text-primary-500">
           &#10003; Mark all as read
         </div>
         <div className="w-20 text-xs text-gray-400">Delete all</div>
@@ -29,12 +35,12 @@ export default function Notifications(ToggleNotifications: any) {
       <ul>
         <li className="flex w-full border-b px-8 py-3 bg-gray-100">
           <div className="w-16 flex">
-            <div className="w-8 h-8 flex justify-center text-white items-center bg-coreOrange-500 rounded-full">
+            <div className="w-8 h-8 flex justify-center text-white items-center bg-primary-500 rounded-full">
               <EnvelopeClose />
             </div>
           </div>
           <div className="grow text-sm mx-2">
-            <span className="font-semibold text-coreOrange-500">
+            <span className="font-semibold text-primary-500">
               Luis Cairampoma
             </span>
             &nbsp; created file &nbsp;
@@ -42,7 +48,7 @@ export default function Notifications(ToggleNotifications: any) {
               Screen Shot 2022- 06-20 at 4.15.56 PM.png
             </span>
             &nbsp; in &nbsp;
-            <span className="italic text-coreOrange-500">
+            <span className="italic text-primary-500">
               Assure Sign (Don't change)
             </span>
           </div>
@@ -59,7 +65,7 @@ export default function Notifications(ToggleNotifications: any) {
             </div>
           </div>
           <div className="grow text-sm mx-2">
-            <span className="font-semibold text-coreOrange-500">
+            <span className="font-semibold text-primary-500">
               Luis Cairampoma
             </span>
             &nbsp; created file &nbsp;
@@ -67,7 +73,7 @@ export default function Notifications(ToggleNotifications: any) {
               Screen Shot 2022- 06-20 at 4.15.56 PM.png
             </span>
             &nbsp; in &nbsp;
-            <span className="italic text-coreOrange-500">
+            <span className="italic text-primary-500">
               Assure Sign (Don't change)
             </span>
           </div>

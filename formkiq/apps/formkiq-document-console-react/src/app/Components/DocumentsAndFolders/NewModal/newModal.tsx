@@ -374,7 +374,7 @@ export default function NewModal({
                           data-test-id="new-document-modal-create"
                           type="submit"
                           value="Create"
-                          className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white font-semibold py-2 px-4 rounded mr-2"
+                          className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded mr-2"
                         />
                         <button
                           onClick={closeDialog}

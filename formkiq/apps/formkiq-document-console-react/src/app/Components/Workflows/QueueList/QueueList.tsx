@@ -1,4 +1,6 @@
-import { Plus } from '../../Icons/icons';
+import {Plus, Trash} from '../../Icons/icons';
+import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
+import ButtonSecondary from "../../Generic/Buttons/ButtonSecondary";
 
 type Props = {
   siteId: string;
@@ -23,47 +25,50 @@ export function QueueList({
     <>
       {!isSiteReadOnly && (
         <div className="mt-4 flex px-4">
-          <button
-            className="flex bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
+          <ButtonPrimaryGradient
             data-test-id="create-queue"
-            onClick={(event) => onNewClick(event, siteId)}
+            onClick={(event:any) => onNewClick(event, siteId)}
+            className="flex items-center"
+            style={{height: '36px'}}
           >
             <span>Create new</span>
             <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
-          </button>
+          </ButtonPrimaryGradient>
         </div>
       )}
       <div className="mt-4 mb-8">
         <table className="w-full border-collapse text-sm">
-          <thead>
+          <thead className="bg-neutral-100 border-neutral-300 font-bold text-transparent text-left">
             <tr>
-              <th className="w-1/8 border-b nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+              <th className="w-1/8 border-b p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Name
               </th>
-              <th className="w-1/8 border-b nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+              <th className="w-1/8 border-b p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white nodark:bg-slate-800">
+          <tbody className="bg-white">
             {queues && (queues as any).length ? (
               <>
                 {(queues as any).map((queue: any, i: number) => {
                   return (
-                    <tr key={i} data-test-id={`queue-${queue.name}`}>
-                      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400">
+                    <tr key={i} data-test-id={`queue-${queue.name}`} className="border-neutral-300 text-neutral-900">
+                      <td className="border-b  p-4 pl-8 ">
                         {queue.name}
                       </td>
-                      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400 flex">
-                        <button className="mx-1 bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none">
+                      <td className="border-b  p-4 pr-8 flex gap-2">
+                        <ButtonSecondary
+                        style={{height:'32px'}}>
                           View
-                        </button>
+                        </ButtonSecondary>
                         <button
                           onClick={onDeleteClick(queue.queueId, siteId)}
                           data-test-id="delete-queue"
-                          className="mx-1 bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                          className="w-3 h-auto  mr-3 hover:text-primary-500 my-[3px]"
                         >
-                          Delete
+                          <Trash />
+                          <span className="sr-only">Delete</span>
                         </button>
                       </td>
                     </tr>

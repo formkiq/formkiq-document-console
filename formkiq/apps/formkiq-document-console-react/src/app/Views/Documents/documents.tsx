@@ -15,7 +15,11 @@ import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal'
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
-import { CopyButton } from '../../Components/Generic/CopyButton';
+import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
+import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
+import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
+import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
+import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
 import {
   ChevronLeft,
   ChevronRight,
@@ -677,13 +681,11 @@ function Documents() {
       if (folderLevels.length > 3) {
         const previousFolderLevel = uri.substring(0, uri.lastIndexOf('/'));
         return (
-          <span
-            className={'flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
-          >
+          <span className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}>
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
-                className="hover:text-coreOrange-600"
+                className="text-primary-500 hover:text-primary-600"
               >
                 {siteDocumentsRootName.replace('Workspace: ', '')}:
               </Link>
@@ -720,7 +722,7 @@ function Documents() {
               </Link>
             </FolderDropWrapper>
             <p className={'flex px-1'}> / </p>
-            <span className={'flex items-center mt-1 mr-1.5 w-5'}>
+            <span className={'flex items-center mt-1 mr-1.5 w-4'}>
               <FolderOutline />
             </span>
             <span>{folderLevels[folderLevels.length - 1]}</span>
@@ -728,13 +730,12 @@ function Documents() {
         );
       } else {
         return (
-          <span
-            className={'flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
-          >
+          <span className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}>
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
-                className="hover:text-coreOrange-600"
+                // className="hover:text-primary-600"
+                className="text-primary-500 hover:text-primary-600 text-sm font-bold"
               >
                 {siteDocumentsRootName.replace('Workspace: ', '')}:
               </Link>
@@ -750,7 +751,7 @@ function Documents() {
                 >
                   <Link
                     to={`${currentDocumentsRootUri}/folders/` + folderLevels[0]}
-                    className="hover:text-coreOrange-600"
+                    className="hover:text-primary-600"
                   >
                     {folderLevels[0]}
                   </Link>
@@ -773,7 +774,7 @@ function Documents() {
                       '/' +
                       folderLevels[folderLevels.length - 2]
                     }
-                    className="hover:text-coreOrange-600"
+                    className="hover:text-primary-600"
                   >
                     {folderLevels[folderLevels.length - 2]}
                   </Link>
@@ -787,7 +788,7 @@ function Documents() {
               targetSiteId={currentSiteId}
               className={'flex items-start'}
             >
-              <span className={'flex items-center mt-1 mr-1.5 w-5'}>
+              <span className={'flex items-center mt-1 mr-1.5 w-4'}>
                 <FolderOutline />
               </span>
               <span>{folderLevels[folderLevels.length - 1]}</span>
@@ -797,9 +798,7 @@ function Documents() {
       }
     }
     return (
-      <span
-        className={'hidden flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
-      >
+      <span className={'hidden flex pl-4 py-2 text-gray-500 bg-white'}>
         <span className="pr-1">
           {siteDocumentsRootName.replace('Workspace: ', '')}
         </span>
@@ -871,7 +870,7 @@ function Documents() {
                       key={i}
                       className={
                         (filterTag === primaryTag
-                          ? 'bg-coreOrange-500 text-white'
+                          ? 'bg-primary-500 text-white'
                           : `bg-${tagColor}-200 text-black`) +
                         ' text-xs p-1 px-2 mx-1 cursor-pointer'
                       }
@@ -1018,7 +1017,7 @@ function Documents() {
                 {pendingArchive.map((file: IDocument) => (
                   <div key={file.documentId} className="flex flex-row p-2">
                     <button
-                      className="w-6 mr-2 text-gray-400 cursor-pointer hover:text-coreOrange-500"
+                      className="w-6 mr-2 text-gray-400 cursor-pointer hover:text-primary-500"
                       onClick={() => deleteFromPendingArchive(file)}
                     >
                       <Close />
@@ -1042,14 +1041,14 @@ function Documents() {
                     >
                       <span>
                         {file.path.substring(file.path.lastIndexOf('/') + 1)
-                          .length > 40 ? (
+                          .length > 50 ? (
                           <span className="tracking-tightest text-clip overflow-hidden">
                             {file.path.substring(
                               file.path.lastIndexOf('/') + 1,
-                              file.path.lastIndexOf('/') + 50
+                              file.path.lastIndexOf('/') + 60
                             )}
                             {file.path.substring(file.path.lastIndexOf('/') + 1)
-                              .length > 50 && <span>...</span>}
+                              .length > 60 && <span>...</span>}
                           </span>
                         ) : (
                           <span>
@@ -1090,35 +1089,31 @@ function Documents() {
                 </div>
               ) : (
                 <div className="flex w-full pt-10 justify-center items-center">
-                  <a
-                    href={archiveDownloadUrl}
-                    className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-coreOrange-500 hover:text-coreOrange-500"
-                  >
-                    <div className="text-lg ml-2 text-center cursor-pointer">
-                      Download Archive
-                    </div>
-                  </a>
+                  <ButtonPrimary type="button" style={{ padding: 0 }}>
+                    <a
+                      href={archiveDownloadUrl}
+                      className="w-full h-full block"
+                    >
+                      <div className="text-lg mx-4 text-center cursor-pointer">
+                        Download Archive
+                      </div>
+                    </a>
+                  </ButtonPrimary>
                 </div>
               )}
             </>
           )}
         </div>
-        <div className="h-12 flex justify-end">
+        <div className="h-12 flex justify-end mt-2">
           {!isCompressButtonDisabled && (
-            <button
-              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-coreOrange-500 hover:text-coreOrange-500"
-              onClick={compressDocuments}
-            >
+            <ButtonPrimary onClick={compressDocuments} type="button">
               <span>Compress</span>
-            </button>
+            </ButtonPrimary>
           )}
           {archiveStatus === ARCHIVE_STATUSES.COMPLETE && (
-            <button
-              className="border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 self-end mt-2 cursor-pointer hover:border-coreOrange-500 hover:text-coreOrange-500"
-              onClick={ClearPendingArchive}
-            >
+            <ButtonGhost onClick={ClearPendingArchive} type="button">
               <span>Done</span>
-            </button>
+            </ButtonGhost>
           )}
         </div>
       </div>
@@ -1148,10 +1143,7 @@ function Documents() {
             <div className="grow">{foldersPath(subfolderUri)}</div>
             <div className="flex items-center gap-4 pr-8 z-10">
               {archiveStatus !== ARCHIVE_STATUSES.COMPLETE && (
-                <button
-                  className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500`}
-                  onClick={ToggleArchiveTab}
-                >
+                <ButtonSecondary onClick={ToggleArchiveTab} type="button">
                   {isArchiveTabExpanded ? (
                     <>
                       <span>Minimize Archive</span>
@@ -1165,22 +1157,19 @@ function Documents() {
                       )}
                     </>
                   )}
-                </button>
+                </ButtonSecondary>
               )}
               {isArchiveTabExpanded &&
                 archiveStatus === ARCHIVE_STATUSES.INITIAL && (
-                  <button
-                    className={`border-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500`}
-                    onClick={ClearPendingArchive}
-                  >
-                    Cancel Archive Creation
-                  </button>
+                  <ButtonTertiary onClick={ClearPendingArchive} type="button">
+                    Cancel
+                  </ButtonTertiary>
                 )}
               <div
                 className={
                   (isTagFilterExpanded
-                    ? 'text-coreOrange-500 '
-                    : 'text-gray-400 ') + ' w-5 cursor-pointer'
+                    ? 'text-primary-500 '
+                    : 'text-neutral-900 ') + ' w-5 cursor-pointer'
                 }
                 onClick={(event) => {
                   if (filterTag && filterTag.length) {
@@ -1241,7 +1230,7 @@ function Documents() {
           </div>
         </div>
         {infoDocumentId.length ? (
-          <div className="h-[calc(100vh-3.68rem)] flex w-72 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 border-l border-gray-300">
+          <div className="h-[calc(100vh-3.68rem)] flex w-72 bg-white border-l border-neutral-300">
             <div className="flex-1 inline-block">
               {currentDocument ? (
                 <div className="flex flex-wrap justify-center">
@@ -1253,7 +1242,7 @@ function Documents() {
                         className="w-12 h-12"
                       />
                     </div>
-                    <div className="grow-0 w-52 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+                    <div className="grow-0 w-52 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                       {(currentDocument as IDocument).path}
                       {isCurrentDocumentSoftDeleted && (
                         <small className="block text-red-500 uppercase">
@@ -1283,7 +1272,7 @@ function Documents() {
                       <div
                         className={
                           (infoDocumentView === 'info'
-                            ? 'text-coreOrange-500 '
+                            ? 'text-primary-500 '
                             : 'text-gray-400 ') + ' text-center'
                         }
                       >
@@ -1293,7 +1282,7 @@ function Documents() {
                         <hr
                           className={
                             (infoDocumentView === 'info'
-                              ? 'border-coreOrange-500 '
+                              ? 'border-primary-500 '
                               : 'border-transparent ') +
                             ' w-1/2 rounded-xl border-b border'
                           }
@@ -1310,7 +1299,7 @@ function Documents() {
                         <div
                           className={
                             (infoDocumentView === 'history'
-                              ? 'text-coreOrange-500 '
+                              ? 'text-primary-500 '
                               : 'text-gray-400 ') + ' text-center'
                           }
                         >
@@ -1320,7 +1309,7 @@ function Documents() {
                           <hr
                             className={
                               (infoDocumentView === 'history'
-                                ? 'border-coreOrange-500 '
+                                ? 'border-primary-500 '
                                 : 'border-transparent ') +
                               ' w-1/2 rounded-xl border-b border'
                             }
@@ -1336,10 +1325,10 @@ function Documents() {
                     }
                   >
                     {currentDocument && (currentDocument as IDocument).path && (
-                      <dl className="p-4 pr-6 pt-2 text-medsmall text-gray-600">
+                      <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
                         <div className="flex flex-col pb-3">
                           <dt className="mb-1">Location</dt>
-                          <dd className="font-semibold text-sm text-coreOrange-600 hover:text-coreOrange-400">
+                          <dd className="font-semibold text-sm text-primary-600 hover:text-primary-400">
                             {(currentDocument as IDocument).path.substring(
                               0,
                               (currentDocument as IDocument).path.lastIndexOf(
@@ -1429,12 +1418,12 @@ function Documents() {
                         <div className="w-68 flex mr-3 border-b"></div>
                         <div className="flex flex-col pt-3">
                           <dt className="mb-1 flex justify-between">
-                            <span className="text-sm font-semibold text-coreOrange-500">
+                            <span className="text-sm font-semibold text-primary-500">
                               Tags
                             </span>
                             {!isSiteReadOnly && (
                               <div
-                                className="w-3/5 flex font-semibold text-coreOrange-500 cursor-pointer"
+                                className="w-3/5 flex font-semibold text-primary-500 cursor-pointer"
                                 onClick={(event) =>
                                   setInfoTagEditMode(!infoTagEditMode)
                                 }
@@ -1528,11 +1517,11 @@ function Documents() {
                           </div>
                         )}
                         <div className="w-68 flex mt-3 mr-3 border-b"></div>
-                        <div className="pt-3 flex justify-between text-sm font-semibold text-coreOrange-500">
+                        <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
                           Metadata
                           {!isSiteReadOnly && (
                             <div
-                              className="w-3/5 flex text-medsmall font-semibold text-coreOrange-500 cursor-pointer"
+                              className="w-3/5 flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
                                 onEditTagsAndMetadataModalClick(event, {
                                   lineType: 'document',
@@ -1604,7 +1593,7 @@ function Documents() {
                         <div className="w-68 flex mt-3 mr-3 border-b"></div>
                         <div className="flex flex-col pt-3">
                           <dt className="mb-1 flex justify-between">
-                            <span className="text-sm font-semibold text-coreOrange-500">
+                            <span className="text-sm font-semibold text-primary-500">
                               Access Attributes
                             </span>
                           </dt>
@@ -1640,7 +1629,7 @@ function Documents() {
                     )}
                     <div className="mt-4 w-full flex justify-center">
                       <button
-                        className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                        className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
                         onClick={DownloadDocument}
                       >
                         <span className="">Download</span>
@@ -1665,7 +1654,7 @@ function Documents() {
                           <dd className="font-semibold text-sm">
                             Current version added
                             <div
-                              className="font-medium pt-1 ml-12 flex text-coreOrange-500 cursor-pointer"
+                              className="font-medium pt-1 ml-12 flex text-primary-500 cursor-pointer"
                               onClick={(event) => {
                                 viewDocumentVersion('');
                               }}
@@ -1697,7 +1686,7 @@ function Documents() {
                                       </span>
                                     )}
                                     <div
-                                      className="font-medium pt-1 ml-12 flex text-coreOrange-500 cursor-pointer"
+                                      className="font-medium pt-1 ml-12 flex text-primary-500 cursor-pointer"
                                       onClick={(event) => {
                                         viewDocumentVersion(version.versionKey);
                                       }}
@@ -1715,7 +1704,7 @@ function Documents() {
                       </dl>
                       <div className="mt-2 flex justify-center">
                         <button
-                          className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
                           onClick={(event) => {
                             const documentLine: ILine = {
                               lineType: 'document',
@@ -1738,7 +1727,7 @@ function Documents() {
                       </div>
                       <div className="mt-2 flex justify-center">
                         <button
-                          className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
+                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
                           onClick={(event) => {
                             const documentLine: ILine = {
                               lineType: 'document',
@@ -1770,7 +1759,7 @@ function Documents() {
                             (currentDocument as IDocument).contentType
                           ) > -1 && (
                             <button
-                              className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                              className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
                               onClick={viewDocument}
                             >
                               <span className="">Edit</span>
@@ -1782,7 +1771,7 @@ function Documents() {
                             (currentDocument as IDocument).contentType
                           ) > -1 && (
                             <button
-                              className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                              className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
                               onClick={viewDocument}
                             >
                               <span className="">View</span>
@@ -1790,7 +1779,7 @@ function Documents() {
                             </button>
                           )}
                         <button
-                          className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md cursor-pointer"
+                          className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md cursor-pointer"
                           onClick={DownloadDocument}
                         >
                           <span className="">Download</span>
@@ -1798,7 +1787,7 @@ function Documents() {
                         </button>
                         {isCurrentDocumentSoftDeleted ? (
                           <button
-                            className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                            className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
                             onClick={restoreDocument(
                               currentDocument,
                               currentSiteId,
@@ -1814,7 +1803,7 @@ function Documents() {
                           <>
                             {useSoftDelete && (
                               <button
-                                className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                                className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
                                 onClick={onDeleteDocument(
                                   currentDocument,
                                   null

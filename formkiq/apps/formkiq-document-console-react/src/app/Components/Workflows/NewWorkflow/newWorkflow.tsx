@@ -189,7 +189,7 @@ export default function NewWorkflowModal({
                           type="submit"
                           value="Create"
                           data-test-id="confirm-workflow-creation"
-                          className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white font-semibold py-2 px-4 rounded-2xl mr-2"
+                          className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-2xl mr-2"
                         />
                         <button
                           onClick={closeDialog}

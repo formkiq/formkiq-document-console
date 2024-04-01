@@ -144,7 +144,7 @@ export default function AddTag({
           <input
             type="submit"
             value="Add"
-            className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-xs font-semibold py-1.5 px-3 rounded-2xl flex cursor-pointer"
+            className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-xs font-semibold py-1.5 px-3 rounded-2xl flex cursor-pointer"
           />
         </div>
       </div>

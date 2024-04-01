@@ -198,7 +198,7 @@ export default function DocumentVersionsModal({
               <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-4/5">
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="flex w-full items-center">
-                    <div className="font-semibold grow text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 inline-block pr-6">
+                    <div className="font-semibold grow text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 inline-block pr-6">
                       Document Versions
                       <span className="block"></span>
                     </div>
@@ -226,22 +226,22 @@ export default function DocumentVersionsModal({
                     <table className="border-collapse table-auto w-full text-sm">
                       <thead>
                         <tr>
-                          <th className="w-20 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="w-20 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Version
                           </th>
-                          <th className="w-48 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="w-48 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Path
                           </th>
-                          <th className="w-32 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="w-32 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Created
                           </th>
-                          <th className="w-32 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="w-32 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Last modified
                           </th>
-                          <th className="w-64 border-b font-medium p-2 pr-4 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="w-64 border-b font-medium p-2 pr-4 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Content Type
                           </th>
-                          <th className="border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Actions
                           </th>
                         </tr>
@@ -339,7 +339,7 @@ export default function DocumentVersionsModal({
                   <div className="w-full flex justify-center mt-4">
                     <button
                       ref={doneButtonRef}
-                      className="flex items-center bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                      className="flex items-center bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
                       onClick={closeDialog}
                     >
                       Done

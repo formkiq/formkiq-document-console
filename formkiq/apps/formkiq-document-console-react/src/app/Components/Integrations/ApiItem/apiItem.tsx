@@ -554,8 +554,8 @@ function itemHeader(isOpened: boolean, setOpened: any, apiItem: any) {
         onClick={onHeaderClick}
         className={
           (isOpened
-            ? 'text-coreOrange-500 text-lg '
-            : 'text-gray-900 hover:text-coreOrange-500 text-base ') +
+            ? 'text-primary-500 text-lg '
+            : 'text-gray-900 hover:text-primary-500 text-base ') +
           ' ml-2 tracking-tight leading-10 font-bold cursor-pointer'
         }
       >
@@ -565,7 +565,7 @@ function itemHeader(isOpened: boolean, setOpened: any, apiItem: any) {
           <span className="text-red-500">(deprecated)</span>
         )}
         {apiItem.license === 'Core' && (
-          <span className="mx-2 p-1 bg-coreOrange-500 text-white uppercase text-xs">
+          <span className="mx-2 p-1 bg-primary-500 text-white uppercase text-xs">
             {apiItem.license}
           </span>
         )}
@@ -697,7 +697,7 @@ function getApiItem(
   return (
     <div className="flex flex-col">
       {apiItem.description && apiItem.description.length && (
-        <div className="ml-2 w-2/3 font-bold text-lg text-coreOrange-500 mb-4">
+        <div className="ml-2 w-2/3 font-bold text-lg text-primary-500 mb-4">
           <h3>{apiItem.description}</h3>
           {apiItem.showDeprecationMessage && (
             <>
@@ -1733,10 +1733,10 @@ function getApiItem(
           <div className="ml-4">
             <button
               data-test-id="apiItem-fetch"
-              className={`px-2 md:px-4 font-semibold px-4 py-1 rounded-2xl
+              className={`px-2 md:px-4 font-semibold px-4 py-1 rounded-md
                   ${
                     state.isValidForm
-                      ? 'cursor-pointer bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white'
+                      ? 'cursor-pointer bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white'
                       : 'cursor-default bg-gray-200 text-gray-400'
                   }`}
               onClick={onFetchClick(state)}

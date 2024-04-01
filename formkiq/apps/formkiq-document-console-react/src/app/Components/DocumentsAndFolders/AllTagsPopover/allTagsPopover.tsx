@@ -107,7 +107,7 @@ export default function AllTagsPopover({
                         key={i}
                         className={
                           (filterTag === tagKey.value
-                            ? 'bg-coreOrange-500 text-white'
+                            ? 'bg-primary-500 text-white'
                             : `bg-${tagColor}-200 text-black`) +
                           ' text-xs p-1 px-2 mx-1 mb-0.5 cursor-pointer'
                         }

@@ -1,6 +1,6 @@
-import { Tooltip } from 'react-tooltip';
-import { CopyIcon } from '../Icons/icons';
 import { useState } from 'react';
+import { Tooltip } from 'react-tooltip';
+import { CopyIcon } from '../../Icons/icons';
 
 export type CopyButtonProps = {
   value: string;

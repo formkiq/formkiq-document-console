@@ -17,6 +17,7 @@ import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
+import ButtonPrimary from "../../Components/Generic/Buttons/ButtonPrimary";
 
 function Rule() {
   const { user } = useAuthenticatedState();
@@ -158,16 +159,15 @@ function Rule() {
         }}
       >
         <div className="w-full p-2 flex justify-end gap-2">
-          <button
+          <ButtonPrimary
             onClick={() => onRuleSave(currentRuleId)}
-            className="bg-gray-200 hover:bg-gray-300  font-bold py-2 px-4 rounded"
           >
             Save
-          </button>
+          </ButtonPrimary>
 
           <a
             href={pathname.split('/').slice(0, -2).join('/')}
-            className="bg-gray-200 hover:bg-gray-300 font-bold py-2 px-4 rounded"
+            className="border border-neutral-900 hover:text-primary-500 font-bold py-2 px-4 rounded-md"
           >
             Return to Ruleset
           </a>

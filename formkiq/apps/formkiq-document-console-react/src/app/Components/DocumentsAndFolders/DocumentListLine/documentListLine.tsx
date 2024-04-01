@@ -23,6 +23,7 @@ import {
   isTagValueIncludes,
 } from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
+import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import {
   Info,
   Minus,
@@ -245,7 +246,7 @@ function DocumentListLine({
         ref={drag}
         style={{ opacity, visibility: isDragging ? 'hidden' : 'inherit' }}
       >
-        <td className={`text-gray-800 table-cell pl-${leftOffset} relative`}>
+        <td className={`text-neutral-900 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
             {isArchiveTabExpanded &&
               (archiveStatus === 'INITIAL' || archiveStatus === 'COMPLETE') &&
@@ -259,7 +260,7 @@ function DocumentListLine({
                   }
                 >
                   <div
-                    className="w-4 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
+                    className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 "
                     data-test-id="delete-action"
                     onClick={
                       addToPendingArchive
@@ -280,7 +281,7 @@ function DocumentListLine({
                   }
                 >
                   <div
-                    className="w-4 h-auto text-gray-400 cursor-pointer hover:text-coreOrange-500 "
+                    className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 "
                     data-test-id="delete-action"
                     onClick={
                       deleteFromPendingArchive
@@ -325,14 +326,14 @@ function DocumentListLine({
                 ) : (
                   <span>
                     {file.path.substring(file.path.lastIndexOf('/') + 1)
-                      .length > 40 ? (
+                      .length > 50 ? (
                       <span className="tracking-tightest text-clip overflow-hidden">
                         {file.path.substring(
                           file.path.lastIndexOf('/') + 1,
-                          file.path.lastIndexOf('/') + 50
+                          file.path.lastIndexOf('/') + 60
                         )}
                         {file.path.substring(file.path.lastIndexOf('/') + 1)
-                          .length > 50 && <span>...</span>}
+                          .length > 60 && <span>...</span>}
                       </span>
                     ) : (
                       <span>
@@ -390,7 +391,7 @@ function DocumentListLine({
                       })}
                 </div>
                 <div className="flex">
-                  <div className="w-4 h-4 text-gray-400 ml-2 -mt-1 cursor-pointer">
+                  <div className="w-4 h-4 text-neutral-900 ml-2 -mt-1 cursor-pointer hover:text-primary-500">
                     <DocumentTagsPopover
                       value={{
                         lineType: 'document',
@@ -408,53 +409,61 @@ function DocumentListLine({
             </div>
             <Link
               to={`#id=${file.documentId}`}
-              className="w-5 pt-0.5 text-gray-400 mr-1 cursor-pointer hover:text-coreOrange-500"
+              className="w-5 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
             >
               <Info />
             </Link>
             {folder !== 'deleted' && !isSiteReadOnly && (
               <div
                 onClick={toggleFavorite}
-                className="w-3 text-gray-400 mr-4 cursor-pointer px-2 box-content"
+                className="w-5 text-neutral-900  mr-4 cursor-pointer px-2 box-content hover:text-primary-500"
               >
                 {isFavorited ? StarFilled() : Star()}
               </div>
             )}
           </div>
         </td>
-        <td className="w-38 p-2 pt-3 text-gray-800 block tracking-tight lg:table-cell relative lg:static">
+        <td className="w-38 p-2 pt-3 text-neutral-900 block tracking-tight lg:table-cell relative lg:static">
           {formatDate(file.lastModifiedDate)}
         </td>
-        <td className="w-24 p-2 pt-3 text-gray-800 block tracking-tight lg:table-cell relative lg:static">
+        <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-tight lg:table-cell relative lg:static">
           {formatBytes(file.contentLength)}
         </td>
         {useIndividualSharing && (
-          <td className="w-24 p-2 pt-3 text-gray-800 block tracking-tight lg:table-cell relative lg:static">
+          <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-tight lg:table-cell relative lg:static">
             Private
           </td>
         )}
-        <td className="w-28 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
+        <td className="w-28 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static">
           <div className="flex">
             {folder === 'deleted' ? (
               <>
-                <button
+                <ButtonSecondary
+                  type="button"
                   onClick={restoreDocument}
-                  className="flex items-center mr-2 bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-6 rounded-2xl flex cursor-pointer focus:outline-none"
+                  className=" mr-2"
+                  style={{ height: '32px' }}
                 >
                   Restore
-                </button>
-                <button
+                </ButtonSecondary>
+                <ButtonSecondary
+                  type="button"
                   onClick={onPermanentDeleteClick}
-                  className="flex items-center bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer focus:outline-none"
+                  className="mr-2 hover:bg-red-50"
+                  style={{
+                    borderColor: '#ef4444',
+                    color: '#ef4444',
+                    height: '32px',
+                  }}
                 >
                   Delete Permanently
-                </button>
+                </ButtonSecondary>
               </>
             ) : (
               <>
                 {useIndividualSharing && (
                   <div
-                    className="w-6 h-auto text-gray-400 mr-2 cursor-pointer"
+                    className="w-6 h-auto text-neutral-900 mr-2 cursor-pointer"
                     onClick={(event) =>
                       onShareClick(event, {
                         lineType: 'document',
@@ -468,7 +477,7 @@ function DocumentListLine({
                 {!isSiteReadOnly && (
                   <>
                     <div
-                      className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
+                      className="w-3 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
                       data-test-id="delete-action"
                       onClick={
                         useSoftDelete ? onDeleteClick : onPermanentDeleteClick
@@ -478,7 +487,7 @@ function DocumentListLine({
                     </div>
                   </>
                 )}
-                <div className="w-5 pt-0.5 h-auto text-gray-400 cursor-pointer">
+                <div className="w-5 pt-0.5 h-auto text-neutral-900 cursor-pointer">
                   <DocumentActionsPopover
                     value={{
                       lineType: 'document',
@@ -514,7 +523,7 @@ function DocumentListLine({
       </tr>
       <tr>
         <td colSpan={6} className="p-0 m-0 overflow-hidden">
-          <div className="w-full border-t ml-4 h-0"></div>
+          <div className="w-full border-t border-neutral-300 ml-4 h-0"></div>
         </td>
       </tr>
     </>

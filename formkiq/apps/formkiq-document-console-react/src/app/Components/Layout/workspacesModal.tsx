@@ -68,7 +68,7 @@ export default function WorkspacesModal({
                               onClick={closeDialog}
                               className={({ isActive }) =>
                                 (isActive
-                                  ? 'text-coreOrange-500 bg-gray-100 '
+                                  ? 'text-primary-500 bg-gray-100 '
                                   : 'text-gray-500') +
                                 ' w-full text-sm font-medium flex bg-white'
                               }

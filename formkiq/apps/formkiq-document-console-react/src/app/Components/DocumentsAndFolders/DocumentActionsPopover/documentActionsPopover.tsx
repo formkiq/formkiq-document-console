@@ -97,7 +97,7 @@ export default function DocumentActionsPopover({
         <button
           ref={setReferenceRef as any}
           onClick={handleDropdownClick}
-          className="w-20 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+          className="w-20 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
         >
           <span className="w-5 pt-1">{MoreActions()}</span>
         </button>
@@ -105,7 +105,7 @@ export default function DocumentActionsPopover({
         <button
           ref={setReferenceRef as any}
           onClick={handleDropdownClick}
-          className="w-5"
+          className="w-5 hover:text-primary-500"
         >
           <MoreActions />
         </button>
@@ -117,7 +117,7 @@ export default function DocumentActionsPopover({
           {...attributes['popper']}
           className={`bg-white border-gray-100 border shadow-xl z-10 rounded-xl w-64 text-sm p-2`}
         >
-          <ul className="text-gray-800">
+          <ul className="text-neutral-900">
             {useIndividualSharing && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
@@ -143,7 +143,7 @@ export default function DocumentActionsPopover({
             {line.lineType === 'document' && !isSiteReadOnly && (
               <li className="py-1 px-2 hover:bg-gray-100 cursor-pointer">
                 <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-4 text-gray-400">{Star()}</span>
+                  <span className="mr-2 w-4 text-neutral-900">{Star()}</span>
                   <span>Mark as favorite</span>
                 </span>
               </li>
@@ -206,7 +206,7 @@ export default function DocumentActionsPopover({
                 }
               >
                 <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-4 text-gray-400">{Rename()}</span>
+                  <span className="mr-2 w-4 text-neutral-900">{Rename()}</span>
                   <span>Rename</span>
                 </span>
               </li>
@@ -223,7 +223,7 @@ export default function DocumentActionsPopover({
                 }
               >
                 <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-3.5 text-gray-400">{History()}</span>
+                  <span className="mr-2 w-3.5 text-neutral-900">{History()}</span>
                   <span>Versions</span>
                   <span
                     className="ml-auto"
@@ -246,7 +246,7 @@ export default function DocumentActionsPopover({
                 }
               >
                 <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-3.5 text-gray-400">{Workflow()}</span>
+                  <span className="mr-2 w-3.5 text-neutral-900">{Workflow()}</span>
                   <span>Workflows</span>
                   <span
                     className="ml-auto"
@@ -329,7 +329,7 @@ export default function DocumentActionsPopover({
                 >
                   <span className={'flex items-baseline'}>
                     <span
-                      className="mr-2 text-gray-400"
+                      className="mr-2 text-neutral-900"
                       style={{ width: '15px', height: '13px' }}
                     >
                       {Tag()}

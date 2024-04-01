@@ -61,7 +61,7 @@ export function RequestPasswordChange() {
       <div className="flex flex-col lg:flex-row">
         <div className="mt-8 h-screen flex-1 bg-white p-5">
           <div className="font-bold text-lg text-center mb-8">
-            <span className="text-transparent text-2xl bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+            <span className="text-transparent text-2xl bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
               {pathname === '/forgot-password'
                 ? 'Forgot Your Password?'
                 : 'Your temporary password has expired.'}
@@ -101,14 +101,11 @@ export function RequestPasswordChange() {
               <input
                 type="submit"
                 value="Reset Password"
-                className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
               />
             </div>
             <div className="mt-8 w-full text-center">
-              <a
-                className="underline hover:text-coreOrange-500"
-                href="/sign-in"
-              >
+              <a className="underline hover:text-primary-500" href="/sign-in">
                 Back to Sign In
               </a>
             </div>

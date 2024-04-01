@@ -27,7 +27,7 @@ const uploadProcessLine = (fileData: IFileUploadData, i: number) => {
       <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400">
         <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
           <div
-            className="bg-coreOrange-600 h-2.5 rounded-full"
+            className="bg-primary-600 h-2.5 rounded-full"
             style={{
               width: `${Math.round(
                 (fileData.uploadedSize / fileData.originalFile.size) * 100
@@ -556,7 +556,7 @@ export default function UploadModal({
                       <button
                         type="button"
                         data-test-id="upload"
-                        className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-coreOrange-500 px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-coreOrange-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                        className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-primary-500 px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                         onClick={uploadFiles}
                       >
                         Upload
