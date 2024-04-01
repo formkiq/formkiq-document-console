@@ -1351,3 +1351,47 @@ export function Rule() {
     </svg>
   );
 }
+
+export function Examine() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="100%"
+         height="100%"
+         viewBox="0 0 2048 2048">
+      <path fill="currentColor"
+            d="M1033 1280q-14 30-21 62t-13 66H384v-128zm-649 384v-128h613q5 33 14 65t23 63zm-128 256h1349l127 128H128V0h1115l549 549v568q-29-26-61-47t-67-37V640h-512V128H256zM1280 219v293h293zm24 805q-109 41-187 128H384v-128zM384 512h640v128H384zm1152 256v128H384V768zm512 1216q0 26-19 45t-45 19q-26 0-45-19l-291-290q-39 26-84 39t-92 14q-66 0-124-25t-102-68t-69-102t-25-125q0-66 25-124t68-101t102-69t125-26q66 0 124 25t101 69t69 102t26 124q0 47-13 92t-40 84l290 291q19 19 19 45m-768-512q0 40 15 75t41 61t61 41t75 15q40 0 75-15t61-41t41-61t15-75q0-40-15-75t-41-61t-61-41t-75-15q-40 0-75 15t-61 41t-41 61t-15 75"/>
+    </svg>);
+}
+
+export function Schema() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%"
+         height="100%" viewBox="0 0 24 24">
+      <path fill="currentColor"
+            d="M4 23v-6h2.5v-2H4V9h2.5V7H4V1h7v6H8.5v2H11v2h3V9h7v6h-7v-2h-3v2H8.5v2H11v6zm2-2h3v-2H6zm0-8h3v-2H6zm10 0h3v-2h-3zM6 5h3V3H6zm1.5 15"/>
+    </svg>
+  )
+}
+
+export function Pencil() {
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g clipPath="url(#clip0_3911_6243)">
+        <path d="M16.875 16.8752H7.49995L3.16479 12.54" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+              strokeLinejoin="round"/>
+        <path d="M12.8125 7.1875L5.3125 14.6875" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+              strokeLinejoin="round"/>
+        <path
+          d="M7.5 16.8751H3.75C3.58424 16.8751 3.42527 16.8093 3.30806 16.692C3.19085 16.5748 3.125 16.4159 3.125 16.2501V12.7587C3.12508 12.5932 3.19082 12.4344 3.30781 12.3173L12.9422 2.68291C13.0594 2.56579 13.2183 2.5 13.384 2.5C13.5497 2.5 13.7086 2.56579 13.8258 2.68291L17.3172 6.17198C17.4343 6.28917 17.5001 6.44808 17.5001 6.61377C17.5001 6.77946 17.4343 6.93837 17.3172 7.05557L7.5 16.8751Z"
+          stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M10.625 5L15 9.375" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+              strokeLinejoin="round"/>
+      </g>
+      <defs>
+        <clipPath id="clip0_3911_6243">
+          <rect width="20" height="20"/>
+        </clipPath>
+      </defs>
+    </svg>
+  )
+}

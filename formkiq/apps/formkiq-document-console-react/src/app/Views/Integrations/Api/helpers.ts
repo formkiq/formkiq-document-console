@@ -15,6 +15,7 @@ export interface ApiItem {
   requiresCaseID: boolean;
   requiresTaskID: boolean;
   requiresNigoID: boolean;
+  requiresObjectId: boolean;
   requiresTagKey: boolean;
   allowsIndexKey: boolean;
   requiresIndexKey: boolean;
@@ -26,6 +27,7 @@ export interface ApiItem {
   allowsDate: boolean;
   allowsLimit: boolean;
   hasPagingTokens: boolean;
+  hasOnlyNextPagingToken: boolean;
   allowsPath: boolean;
   showDeprecationMessage: boolean;
   deprecationMessage: string;
@@ -122,6 +124,8 @@ export const getDocumentActionsApiItem = {
   allowsShareKey: true,
   requiresAuthentication: true,
   requiresDocumentID: true,
+  hasOnlyNextPagingToken: true,
+  allowsLimit: true,
   license: 'Core',
 };
 
@@ -1175,7 +1179,7 @@ export const getVersionApiItem = {
 
 export const getConfigurationApiItem = {
   method: 'GET',
-  path: '/configuration',
+  path: '/sites/ SITE_ID /configuration',
   description: 'Returns the current configuration',
   username: 'Cognito User',
   hasNoParams: true,
@@ -1186,30 +1190,30 @@ export const getConfigurationApiItem = {
 
 export const postConfigurationApiItem = {
   method: 'PATCH',
-  path: '/configuration',
+  path: '/sites/ SITE_ID /configuration',
   description: 'Updates the current configuration',
   username: 'Cognito User',
   requiresPostJson: true,
   requiresAuthentication: true,
   requiresSite: true,
+  defaultPostJsonValue:
+    '{"chatGptApiKey": "ABC","maxContentLengthBytes": "1000000","maxDocuments": "1000","maxWebhooks": "10","notificationEmail": "<email>"}',
   license: 'Core',
 };
 
 export const getConfigurationOpaPoliciesApiItem = {
   method: 'GET',
-  path: '/configuration/opa',
+  path: '/sites/opa/accessPolicies',
   description: 'Returns all Open Policy Agent (OPA) access policies',
   username: 'Cognito User',
   hasNoParams: true,
   requiresAuthentication: true,
-  requiresSite: true,
-  license: 'Core',
+  license: 'Pro|Enterprise',
 };
 
-/*
 export const getConfigurationOpaPolicyApiItem = {
   method: 'GET',
-  path: '/configuration/opa',
+  path: '/sites/ SITE_ID /opa/accessPolicy',
   description:
     "Returns the current site's Open Policy Agent (OPA) access policy",
   username: 'Cognito User',
@@ -1218,53 +1222,58 @@ export const getConfigurationOpaPolicyApiItem = {
   requiresSite: true,
   license: 'Core',
 };
-*/
 
+// NOTE: this endpoint will be updated soon
 export const putConfigurationOpaPolicyApiItem = {
   method: 'PUT',
-  path: '/configuration/opa',
+  path: '/sites/opa/accessPolicies',
   description:
     "Updates the current site's Open Policy Agent (OPA) access policy",
   username: 'Cognito User',
   requiresAuthentication: true,
-  requiresSite: true,
-  license: 'Core',
+  /*requiresSite: true,*/
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"policy": "POLICY GOES HERE","siteId": "default"}',
+  license: 'Pro|Enterprise',
 };
 
 export const deleteConfigurationOpaPolicyApiItem = {
   method: 'DELETE',
-  path: '/configuration/opa',
+  path: '/sites/ SITE_ID /opa/accessPolicy',
   description:
     "Deletes the current site's Open Policy Agent (OPA) access policy",
   username: 'Cognito User',
   requiresAuthentication: true,
   requiresSite: true,
-  license: 'Core',
+  license: 'Pro|Enterprise',
 };
 
 export const getApiKeysApiItem = {
   method: 'GET',
-  path: '/configuration/apiKeys',
+  path: '/sites/ SITE_ID /apiKeys',
   description: 'Gets the current api keys',
   username: 'Cognito User',
   requiresAuthentication: true,
+  requiresSite: true,
   license: 'Core',
 };
 
 export const postApiKeysApiItem = {
   method: 'POST',
-  path: '/configuration/apiKeys',
+  path: '/sites/ SITE_ID /apiKeys',
   description: 'Sets the current api keys',
   username: 'Cognito User',
   requiresAuthentication: true,
+  requiresSite: true,
   license: 'Core',
 };
 export const deleteApiKeyApiItem = {
   method: 'DELETE',
-  path: '/configuration/apiKeys/ API_KEY ',
+  path: '/sites/ SITE_ID /apiKeys/ API_KEY ',
   description: 'Deletes an api key',
   username: 'Cognito User',
   requiresAuthentication: true,
+  requiresSite: true,
   license: 'Core',
 };
 
@@ -1494,5 +1503,28 @@ export const getCaseNigoDocumentsApiItem = {
   requiresAuthentication: true,
   requiresCaseID: true,
   requiresNigoID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getExaminePdfUploadUrlApiItem = {
+  method: 'GET',
+  path: '/objects/examine/pdf',
+  description:
+    'Get Signed URL for PDF Object Upload of a document to be examined by calling GET /objects/examine/{id}/pdf',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getExaminePdfDetailsApiItem = {
+  method: 'GET',
+  path: '/objects/examine/ OBJECT_ID /pdf',
+  description:
+    'Get PDF details from examine. File must have been uploaded previously using the GET /objects/examine/pdf API.',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresObjectID: true,
   license: 'Pro|Enterprise',
 };
