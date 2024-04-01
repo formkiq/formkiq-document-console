@@ -859,14 +859,12 @@ export function Sidebar() {
                     data-test-id="nav-object-examine"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
                       <div className="w-4 flex items-center mr-2">
                         <Examine />
                       </div>
@@ -880,14 +878,12 @@ export function Sidebar() {
                     data-test-id="nav-tag-schema"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
                       <div className="w-4 flex items-center mr-2">
                         <Schema />
                       </div>

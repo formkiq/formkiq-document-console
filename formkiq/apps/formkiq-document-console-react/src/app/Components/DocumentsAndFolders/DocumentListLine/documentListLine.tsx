@@ -326,14 +326,14 @@ function DocumentListLine({
                 ) : (
                   <span>
                     {file.path.substring(file.path.lastIndexOf('/') + 1)
-                      .length > 40 ? (
+                      .length > 50 ? (
                       <span className="tracking-tightest text-clip overflow-hidden">
                         {file.path.substring(
                           file.path.lastIndexOf('/') + 1,
-                          file.path.lastIndexOf('/') + 50
+                          file.path.lastIndexOf('/') + 60
                         )}
                         {file.path.substring(file.path.lastIndexOf('/') + 1)
-                          .length > 50 && <span>...</span>}
+                          .length > 60 && <span>...</span>}
                       </span>
                     ) : (
                       <span>
@@ -442,7 +442,7 @@ function DocumentListLine({
                   type="button"
                   onClick={restoreDocument}
                   className=" mr-2"
-                  style={{height: '32px'}}
+                  style={{ height: '32px' }}
                 >
                   Restore
                 </ButtonSecondary>

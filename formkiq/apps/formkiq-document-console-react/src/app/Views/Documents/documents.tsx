@@ -681,9 +681,7 @@ function Documents() {
       if (folderLevels.length > 3) {
         const previousFolderLevel = uri.substring(0, uri.lastIndexOf('/'));
         return (
-          <span
-            className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}
-          >
+          <span className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}>
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
@@ -732,9 +730,7 @@ function Documents() {
         );
       } else {
         return (
-          <span
-            className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}
-          >
+          <span className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}>
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
@@ -802,9 +798,7 @@ function Documents() {
       }
     }
     return (
-      <span
-        className={'hidden flex pl-4 py-2 text-gray-500 bg-white'}
-      >
+      <span className={'hidden flex pl-4 py-2 text-gray-500 bg-white'}>
         <span className="pr-1">
           {siteDocumentsRootName.replace('Workspace: ', '')}
         </span>
@@ -1047,14 +1041,14 @@ function Documents() {
                     >
                       <span>
                         {file.path.substring(file.path.lastIndexOf('/') + 1)
-                          .length > 40 ? (
+                          .length > 50 ? (
                           <span className="tracking-tightest text-clip overflow-hidden">
                             {file.path.substring(
                               file.path.lastIndexOf('/') + 1,
-                              file.path.lastIndexOf('/') + 50
+                              file.path.lastIndexOf('/') + 60
                             )}
                             {file.path.substring(file.path.lastIndexOf('/') + 1)
-                              .length > 50 && <span>...</span>}
+                              .length > 60 && <span>...</span>}
                           </span>
                         ) : (
                           <span>
