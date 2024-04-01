@@ -556,7 +556,7 @@ function itemHeader(isOpened: boolean, setOpened: any, apiItem: any) {
           (isOpened
             ? 'text-primary-500 text-lg '
             : 'text-gray-900 hover:text-primary-500 text-base ') +
-          ' ml-2 tracking-tight leading-10 font-bold cursor-pointer'
+          ' ml-2 tracking-normal leading-10 font-bold cursor-pointer'
         }
       >
         <span>{apiItem.method} </span>
@@ -718,7 +718,7 @@ function getApiItem(
             {apiItem.requiresSite && (
               <>
                 <div>
-                  <h6 className="w-full ml-4 my-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                  <h6 className="w-full ml-4 my-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     Site
                   </h6>
                 </div>
@@ -750,7 +750,7 @@ function getApiItem(
             {apiItem.requiresAuthentication && (
               <>
                 <div>
-                  <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                  <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     Authentication
                   </h6>
                 </div>
@@ -774,7 +774,7 @@ function getApiItem(
             )}
             {!apiItem.hasNoParams && (
               <div>
-                <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                   Parameters
                 </h6>
               </div>
@@ -1052,7 +1052,7 @@ function getApiItem(
             {apiItem.requiresPostJson && (
               <div className="flex flex-wrap items-center justify-start ml-4 mb-4 relative">
                 <div className="w-full">
-                  <label className="block w-full mt-4 mb-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                  <label className="block w-full mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     JSON to POST/PATCH
                   </label>
                 </div>
@@ -1665,7 +1665,7 @@ function getApiItem(
         <li className="relative mt-10 sm:mt-2 md:mt-0">
           <div className="flex flex-rows w-full">
             <div className="grow-0">
-              <h6 className="ml-4 mr-4 mb-4 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+              <h6 className="ml-4 mr-4 mb-4 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                 Request
               </h6>
             </div>
@@ -1768,7 +1768,7 @@ function getApiItem(
               )}
               {state.responseData && (
                 <div>
-                  <h6 className="mr-4 mt-4 mb-2 md:mb-4 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                  <h6 className="mr-4 mt-4 mb-2 md:mb-4 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     Response
                   </h6>
                   <textarea

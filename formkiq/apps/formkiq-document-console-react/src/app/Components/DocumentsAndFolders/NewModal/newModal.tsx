@@ -199,7 +199,7 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <Upload />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Upload a New File
                       </div>
                     </div>
@@ -217,7 +217,7 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <Upload />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Upload a New Folder
                       </div>
                     </div>
@@ -276,7 +276,7 @@ export default function NewModal({
                               alt="pptx icon"
                             />
                           </div>
-                          <div className="w-full tracking-tight text-sm text-center mb-2">
+                          <div className="w-full tracking-normal text-sm text-center mb-2">
                             MS PowerPoint Document
                           </div>
                         </div>
@@ -295,7 +295,7 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <Workflow />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Workflow
                       </div>
                     </div>
@@ -312,7 +312,7 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <Webhook />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Inbound Webhook (Receive Documents)
                       </div>
                     </div>
@@ -327,7 +327,7 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <External />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Outbound Webhook (Workflow Action)
                       </div>
                     </div>

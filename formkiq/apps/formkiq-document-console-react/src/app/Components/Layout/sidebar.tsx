@@ -309,11 +309,11 @@ export function Sidebar() {
 
   const SidebarItems = () => {
     return (
-      <div className="tracking-tight">
+      <div className="tracking-normal">
         {isSidebarExpanded ? (
           <>
             <li
-              className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
               onClick={toggleDocumentsExpand}
               data-test-id="expand-documents"
             >
@@ -397,7 +397,7 @@ export function Sidebar() {
                                         <Queue />
                                       </div>
                                       <div>
-                                        <span className="tracking-tightest">
+                                        <span className="tracking-tighter">
                                           {queue.name.length > 28 ? (
                                             <span>
                                               {queue.name.substring(0, 28)}...
@@ -520,7 +520,7 @@ export function Sidebar() {
                                         <Queue />
                                       </div>
                                       <div>
-                                        <span className="tracking-tightest">
+                                        <span className="tracking-tighter">
                                           {queue.name.length > 28 ? (
                                             <span>
                                               {queue.name.substring(0, 28)}...
@@ -550,7 +550,7 @@ export function Sidebar() {
                   <>
                     {(hasUserSite || hasDefaultSite) && (
                       <li
-                        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+                        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
                         onClick={toggleWorkspacesExpand}
                       >
                         <div className="flex justify-end mt-3 mr-1">
@@ -570,7 +570,7 @@ export function Sidebar() {
                       workspaceSites.map((site: any, i: number) => {
                         return (
                           <span key={i}>
-                            <li className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                            <li className="pl-2 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                               <NavLink
                                 to={'/workspaces/' + site.siteId}
                                 end
@@ -650,7 +650,7 @@ export function Sidebar() {
                                                 <Queue />
                                               </div>
                                               <div>
-                                                <span className="tracking-tightest">
+                                                <span className="tracking-tighter">
                                                   {queue.name.length > 26 ? (
                                                     <span>
                                                       {queue.name.substring(
@@ -739,7 +739,7 @@ export function Sidebar() {
               </>
             )}
             <li
-              className="mt-2 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              className="mt-2 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
               data-test-id="expand-integrations"
               onClick={toggleIntegrationsExpand}
             >
@@ -892,49 +892,6 @@ export function Sidebar() {
                   </NavLink>
                 </li>
 
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/object-examine-tool"
-                    data-test-id="nav-object-examine"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
-                    }
-                  >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <Examine />
-                      </div>
-                      <div>Object Examine Tool</div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/schemas"
-                    data-test-id="nav-tag-schema"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
-                    }
-                  >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <Schema />
-                      </div>
-                      <div>Schemas</div>
-                    </div>
-                  </NavLink>
-                </li>
-
                 <div className="flex w-full">
                   <div className="w-full mt-4 border-b border-neutral-300"></div>
                 </div>
@@ -943,7 +900,7 @@ export function Sidebar() {
             {useAccountAndSettings && (
               <>
                 <li
-                  className="mt-4 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+                  className="mt-4 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
                   onClick={toggleSettingsExpand}
                 >
                   <div className="flex justify-end mt-2 mr-1">
@@ -1253,7 +1210,7 @@ export function Sidebar() {
         <div
           className={
             (sidebarExpanded ? 'w-64' : 'w-10') +
-            ' flex fixed z-30 justify-between mt-2.5'
+            ' flex fixed z-30 justify-between mt-2.5 bg-neutral-100'
           }
         >
           <Link to="/">
@@ -1301,7 +1258,7 @@ export function Sidebar() {
           <>
             <nav className="grow mt-16">
               {!isSiteReadOnly && (
-                <div className="flex flex-wrap w-full justify-center mb-4">
+                <div className="flex flex-wrap w-full justify-center mb-4 pl-0.5">
                   <ButtonPrimaryGradient
                     className={
                       (isSidebarExpanded
@@ -1380,8 +1337,14 @@ export function Sidebar() {
               </ul>
             </nav>
             {formkiqVersion && formkiqVersion.type && isSidebarExpanded && (
-              <div className="text-xxs absolute bottom-0 w-full flex justify-center items-end -mt-1 mb-4">
-                {formkiqVersion.type.toUpperCase()} v{formkiqVersion.version}
+              <div className="text-xs fixed left-0 bottom-0 flex justify-start items-end -mt-1 pl-4 mb-2 bg-neutral-100">
+                FormKiQ
+                {formkiqVersion.type === 'enterprise' ? (
+                  <span>&nbsp;Enterprise&nbsp;</span>
+                ) : (
+                  <span>&nbsp;Core&nbsp;</span>
+                )}
+                v{formkiqVersion.version}
               </div>
             )}
           </>

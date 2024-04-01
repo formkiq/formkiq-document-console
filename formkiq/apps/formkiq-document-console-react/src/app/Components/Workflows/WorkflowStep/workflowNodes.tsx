@@ -236,7 +236,7 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
           props.selected && 'border-2 border-gray-500 bo'
         } hover:shadow`}
       >
-        <div className="p-1 tracking-tight font-bold bg-blue-100 flex border-t border-gray-700 border flex-row items-start">
+        <div className="p-1 tracking-normal font-bold bg-blue-100 flex border-t border-gray-700 border flex-row items-start">
           <div className="w-6 mr-1 mt-1">{icon}</div>
           {parametersInfo.title}
         </div>
@@ -412,10 +412,7 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
         <TextInputs newStep={newStep} setNewStep={setNewStep} />
         <CheckBoxes newStep={newStep} setNewStep={setNewStep} />
         {!isAddButtonDisabled && newStep !== null && (
-          <ButtonGhost
-            className="nodrag mt-4"
-            onClick={() => onAdd(newStep)}
-          >
+          <ButtonGhost className="nodrag mt-4" onClick={() => onAdd(newStep)}>
             Save
           </ButtonGhost>
         )}

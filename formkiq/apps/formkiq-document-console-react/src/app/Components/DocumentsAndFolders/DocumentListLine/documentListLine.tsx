@@ -241,7 +241,7 @@ function DocumentListLine({
   return (
     <>
       <tr
-        className={`text-sm tracking-tight`}
+        className={`text-sm tracking-normal`}
         data-test-id={`${file.path}`}
         ref={drag}
         style={{ opacity, visibility: isDragging ? 'hidden' : 'inherit' }}
@@ -327,7 +327,7 @@ function DocumentListLine({
                   <span>
                     {file.path.substring(file.path.lastIndexOf('/') + 1)
                       .length > 50 ? (
-                      <span className="tracking-tightest text-clip overflow-hidden">
+                      <span className="tracking-tighter text-clip overflow-hidden">
                         {file.path.substring(
                           file.path.lastIndexOf('/') + 1,
                           file.path.lastIndexOf('/') + 60
@@ -423,14 +423,14 @@ function DocumentListLine({
             )}
           </div>
         </td>
-        <td className="w-38 p-2 pt-3 text-neutral-900 block tracking-tight lg:table-cell relative lg:static">
+        <td className="w-38 p-2 pt-3 text-neutral-900 block tracking-normal lg:table-cell relative lg:static">
           {formatDate(file.lastModifiedDate)}
         </td>
-        <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-tight lg:table-cell relative lg:static">
+        <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-normal lg:table-cell relative lg:static">
           {formatBytes(file.contentLength)}
         </td>
         {useIndividualSharing && (
-          <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-tight lg:table-cell relative lg:static">
+          <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-normal lg:table-cell relative lg:static">
             Private
           </td>
         )}

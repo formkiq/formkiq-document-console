@@ -124,7 +124,7 @@ export function AccountSettings() {
         onSubmit={handleSubmit(onSubmit)}
       >
         <div>
-          <h6 className="w-full ml-4 my-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+          <h6 className="w-full ml-4 my-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
             Site Configuration
           </h6>
         </div>

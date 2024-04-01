@@ -1042,7 +1042,7 @@ function Documents() {
                       <span>
                         {file.path.substring(file.path.lastIndexOf('/') + 1)
                           .length > 50 ? (
-                          <span className="tracking-tightest text-clip overflow-hidden">
+                          <span className="tracking-tighter text-clip overflow-hidden">
                             {file.path.substring(
                               file.path.lastIndexOf('/') + 1,
                               file.path.lastIndexOf('/') + 60
@@ -1725,7 +1725,7 @@ function Documents() {
                           Versions
                         </button>
                       </div>
-                      <div className="mt-2 flex justify-center">
+                      <div className="hidden mt-2 flex justify-center">
                         <button
                           className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
                           onClick={(event) => {

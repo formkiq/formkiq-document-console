@@ -220,7 +220,7 @@ function FolderListLine({
       >
         <tbody>
           <FolderDropWrapper
-            className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-tight"
+            className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-normal"
             wrapper={trElem}
             folder={folderPath}
             sourceSiteId={currentSiteId}
