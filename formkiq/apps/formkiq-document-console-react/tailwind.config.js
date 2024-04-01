@@ -245,6 +245,8 @@ module.exports = {
         ],
       },
       fontSize: {
+        sm: '15px',
+        base: '17px',
         smaller: '0.8125rem',
         xxs: '0.625rem',
         medsmall: '0.75rem',

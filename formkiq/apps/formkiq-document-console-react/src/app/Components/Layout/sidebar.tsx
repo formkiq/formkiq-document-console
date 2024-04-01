@@ -313,7 +313,7 @@ export function Sidebar() {
         {isSidebarExpanded ? (
           <>
             <li
-              className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
               onClick={toggleDocumentsExpand}
               data-test-id="expand-documents"
             >
@@ -550,7 +550,7 @@ export function Sidebar() {
                   <>
                     {(hasUserSite || hasDefaultSite) && (
                       <li
-                        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+                        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
                         onClick={toggleWorkspacesExpand}
                       >
                         <div className="flex justify-end mt-3 mr-1">
@@ -570,7 +570,7 @@ export function Sidebar() {
                       workspaceSites.map((site: any, i: number) => {
                         return (
                           <span key={i}>
-                            <li className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                            <li className="pl-2 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                               <NavLink
                                 to={'/workspaces/' + site.siteId}
                                 end
@@ -739,7 +739,7 @@ export function Sidebar() {
               </>
             )}
             <li
-              className="mt-2 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              className="mt-2 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
               data-test-id="expand-integrations"
               onClick={toggleIntegrationsExpand}
             >
@@ -878,14 +878,12 @@ export function Sidebar() {
                     data-test-id="nav-tag-schema"
                     className={({ isActive }) =>
                       (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
                       <div className="w-4 flex items-center mr-2">
                         <Schema />
                       </div>
@@ -902,7 +900,7 @@ export function Sidebar() {
             {useAccountAndSettings && (
               <>
                 <li
-                  className="mt-4 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+                  className="mt-4 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
                   onClick={toggleSettingsExpand}
                 >
                   <div className="flex justify-end mt-2 mr-1">
