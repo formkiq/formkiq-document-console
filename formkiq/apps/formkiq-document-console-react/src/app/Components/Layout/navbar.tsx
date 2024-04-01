@@ -25,6 +25,8 @@ import {
   ApiKey,
   Bell,
   Documents,
+  Examine,
+  Queue,
   Recent,
   Rules,
   Schema,
@@ -372,15 +374,22 @@ function Navbar() {
                   ) : (
                     <>
                       {locationPrefix === '/workflows' ||
+                      locationPrefix === '/queues' ||
                       locationPrefix === '/integrations' ||
                       locationPrefix === '/account' ||
                       locationPrefix === '/schemas' ||
+                      locationPrefix === '/object-examine-tool' ||
                       locationPrefix === 'rulesets' ? (
                         <>
                           <div className="w-6 mr-1 text-coreOrange-600">
                             {pathname.indexOf('/workflows') > -1 && (
                               <div className="w-5">
                                 <Workflow />
+                              </div>
+                            )}
+                            {pathname.indexOf('/queues') > -1 && (
+                              <div className="w-5">
+                                <Queue />
                               </div>
                             )}
                             {pathname.indexOf('/rulesets') > -1 && (
@@ -391,6 +400,11 @@ function Navbar() {
                             {pathname.indexOf('/schemas') > -1 && (
                               <div className="w-5">
                                 <Schema />
+                              </div>
+                            )}
+                            {pathname.indexOf('/object-examine-tool') > -1 && (
+                              <div className="w-5">
+                                <Examine />
                               </div>
                             )}
 
@@ -419,6 +433,11 @@ function Navbar() {
                             )}
                             {pathname.indexOf('/rulesets') > -1 && (
                               <span>Rulesets</span>
+                            )}
+                            {pathname.indexOf('/accessControl') > -1 && (
+                              <div className="w-5">
+                                <Admin />
+                              </div>
                             )}
                           </div>
 
@@ -471,11 +490,17 @@ function Navbar() {
                             {pathname.indexOf('/workflows') > -1 && (
                               <span>Workflows</span>
                             )}
+                            {pathname.indexOf('/queues') > -1 && (
+                              <span>Queues</span>
+                            )}
                             {pathname.indexOf('/integrations/api') > -1 &&
                               pathname.indexOf('/integrations/apiKeys') ===
                                 -1 && <span>API Explorer</span>}
                             {pathname.indexOf('/integrations/apiKeys') > -1 && (
                               <span>API Keys</span>
+                            )}
+                            {pathname.indexOf('/object-examine-tool') > -1 && (
+                              <span>Examine PDF</span>
                             )}
                             {pathname.indexOf('/integrations/webhooks') >
                               -1 && <span>Inbound Webhooks</span>}
@@ -483,11 +508,7 @@ function Navbar() {
                               <span>Settings</span>
                             )}
                             {pathname.indexOf('/account/accessControl') >
-                              -1 && (
-                              <div className="w-5">
-                                <Admin />
-                              </div>
-                            )}
+                              -1 && <span>Access Control (OPA)</span>}
                             {pathname.indexOf('/schemas') > -1 && (
                               <span>Schemas</span>
                             )}
