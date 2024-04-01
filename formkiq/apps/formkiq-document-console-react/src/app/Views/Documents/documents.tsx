@@ -1725,7 +1725,7 @@ function Documents() {
                           Versions
                         </button>
                       </div>
-                      <div className="mt-2 flex justify-center">
+                      <div className="hidden mt-2 flex justify-center">
                         <button
                           className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
                           onClick={(event) => {
