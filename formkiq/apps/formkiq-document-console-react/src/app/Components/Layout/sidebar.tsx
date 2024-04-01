@@ -837,7 +837,7 @@ export function Sidebar() {
                 <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/rulesets"
-                    data-test-id="rulesets"
+                    data-test-id="nav-rulesets"
                     className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '
@@ -884,6 +884,49 @@ export function Sidebar() {
                     }
                   >
                     <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
+                      <div className="w-4 flex items-center mr-2">
+                        <Schema />
+                      </div>
+                      <div>Schemas</div>
+                    </div>
+                  </NavLink>
+                </li>
+
+                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                  <NavLink
+                    to="/object-examine-tool"
+                    data-test-id="nav-object-examine"
+                    className={({ isActive }) =>
+                      (isActive
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
+                    }
+                  >
+                    <div
+                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
+                    >
+                      <div className="w-4 flex items-center mr-2">
+                        <Examine />
+                      </div>
+                      <div>Object Examine Tool</div>
+                    </div>
+                  </NavLink>
+                </li>
+                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                  <NavLink
+                    to="/schemas"
+                    data-test-id="nav-tag-schema"
+                    className={({ isActive }) =>
+                      (isActive
+                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
+                        : 'text-gray-500 bg-white ') +
+                      ' w-full text-sm font-medium flex '
+                    }
+                  >
+                    <div
+                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
+                    >
                       <div className="w-4 flex items-center mr-2">
                         <Schema />
                       </div>

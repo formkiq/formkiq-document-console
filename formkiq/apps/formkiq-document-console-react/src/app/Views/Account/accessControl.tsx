@@ -8,7 +8,7 @@ import { openDialog as openNotificationDialog } from '../../Store/reducers/globa
 import { useAppDispatch } from '../../Store/store';
 import { DocumentsService } from '../../helpers/services/documentsService';
 
-export function Admin() {
+export function AccessControl() {
   const { user } = useAuthenticatedState();
   const sites = useMemo(() => {
     let userSite = null;
@@ -80,6 +80,14 @@ export function Admin() {
 
   // Save edited policy
   const onSave = () => {
+    if (!isDirty) {
+      dispatch(
+        openNotificationDialog({
+          dialogTitle: 'No changes detected. Save aborted.',
+        })
+      );
+      return;
+    }
     const body = `{"policy": ${JSON.stringify(
       editorText
     )}, "siteId": "${currentSiteId}"}`;
@@ -214,7 +222,7 @@ export function Admin() {
     )}, "siteId": "${newSiteId}"}`;
     DocumentsService.configureOpenPolicyAgent(body, newSiteId).then((res) => {
       if (res.status === 200) {
-        DocumentsService.getOpenPolicyAgentConfigurations(currentSiteId).then(
+        DocumentsService.getOpenPolicyAgentConfiguration(currentSiteId).then(
           (res) => {
             if (res.status === 200) {
               setPolicies(res.opaPolicies);
@@ -248,7 +256,7 @@ export function Admin() {
       </Helmet>
       <div className="flex justify-between p-2">
         <h6 className="w-full my-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
-          Configure Open Policy Agent
+          Access Control: Configure Open Policy Agent
         </h6>
         <>
           <button
@@ -344,4 +352,4 @@ export function Admin() {
   );
 }
 
-export default Admin;
+export default AccessControl;
