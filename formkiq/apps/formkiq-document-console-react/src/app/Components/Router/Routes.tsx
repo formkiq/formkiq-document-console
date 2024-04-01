@@ -49,12 +49,14 @@ const Rule = React.lazy(() => import('../../Views/Ruleset/rule'));
 
 const Admin = React.lazy(() => import('../../Views/Account/admin'));
 
-const ObjectExamineTool = React.lazy(() => import('../../Views/Account/objectExamineTool'));
+const ObjectExamineTool = React.lazy(
+  () => import('../../Views/Account/objectExamineTool')
+);
 
-const TagSchemas = React.lazy(() => import('../../Views/TagSchemas/tagSchemas'));
+const TagSchemas = React.lazy(
+  () => import('../../Views/TagSchemas/tagSchemas')
+);
 const TagSchema = React.lazy(() => import('../../Views/TagSchemas/tagSchema'));
-
-
 
 const RoutesMapper = () => {
   return (
@@ -156,8 +158,8 @@ const RoutesMapper = () => {
       <Route path="/rulesets/:id" element={<Ruleset />}></Route>
       <Route path="/rulesets/:id/rule/:ruleId" element={<Rule />}></Route>
 
-      <Route path="/tag-schemas" element={<TagSchemas />}></Route>
-      <Route path="/tag-schemas/:tagSchemaId" element={<TagSchema />}></Route>
+      <Route path="/schemas" element={<TagSchemas />}></Route>
+      <Route path="/schemas/:tagSchemaId" element={<TagSchema />}></Route>
 
       <Route
         path="/workspaces/:siteId/workflows/designer"
@@ -175,7 +177,10 @@ const RoutesMapper = () => {
       <Route path="/integrations/webhooks" element={<Webhooks />}></Route>
       <Route path="/account/settings" element={<AccountSettings />}></Route>
       <Route path="/account/admin" element={<Admin />}></Route>
-      <Route path="/object-examine-tool" element={<ObjectExamineTool />}></Route>
+      <Route
+        path="/object-examine-tool"
+        element={<ObjectExamineTool />}
+      ></Route>
       <Route path="*" element={<Page404 />}></Route>
     </Routes>
   );

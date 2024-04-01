@@ -896,7 +896,7 @@ export function Sidebar() {
                       className={'w-full text-sm font-medium flex pl-5 py-2 '}
                     >
                       <div className="w-4 flex items-center mr-2">
-                        <Examine/>
+                        <Examine />
                       </div>
                       <div>Object Examine Tool</div>
                     </div>
@@ -904,7 +904,7 @@ export function Sidebar() {
                 </li>
                 <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to="/tag-schemas"
+                    to="/schemas"
                     data-test-id="nav-tag-schema"
                     className={({ isActive }) =>
                       (isActive
@@ -917,9 +917,9 @@ export function Sidebar() {
                       className={'w-full text-sm font-medium flex pl-5 py-2 '}
                     >
                       <div className="w-4 flex items-center mr-2">
-                        <Schema/>
+                        <Schema />
                       </div>
-                      <div>Tag Schemas</div>
+                      <div>Schemas</div>
                     </div>
                   </NavLink>
                 </li>

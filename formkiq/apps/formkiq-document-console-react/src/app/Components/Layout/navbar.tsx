@@ -374,7 +374,7 @@ function Navbar() {
                       {locationPrefix === '/workflows' ||
                       locationPrefix === '/integrations' ||
                       locationPrefix === '/account' ||
-                      locationPrefix === '/tag-schemas' ||
+                      locationPrefix === '/schemas' ||
                       locationPrefix === 'rulesets' ? (
                         <>
                           <div className="w-6 mr-1 text-coreOrange-600">
@@ -388,7 +388,7 @@ function Navbar() {
                                 <Rules />
                               </div>
                             )}
-                            {pathname.indexOf('/tag-schemas') > -1 && (
+                            {pathname.indexOf('/schemas') > -1 && (
                               <div className="w-5">
                                 <Schema />
                               </div>
@@ -487,10 +487,9 @@ function Navbar() {
                                 <Admin />
                               </div>
                             )}
-                            {pathname.indexOf('/tag-schemas') > -1 && (
-                              <span>Tag Schemas</span>
+                            {pathname.indexOf('/schemas') > -1 && (
+                              <span>Schemas</span>
                             )}
-
                           </div>
                         </>
                       ) : (

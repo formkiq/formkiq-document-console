@@ -1,36 +1,36 @@
-import {useCallback, useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {useLocation} from 'react-router-dom';
-import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../Store/store';
-import {DocumentsService} from '../../helpers/services/documentsService';
+import { useCallback, useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import CreateTagSchemaDialog from '../../Components/TagSchemas/createTagSchemaDialog/CreateTagSchemaDialog';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import {
+  TagSchemasState,
+  deleteTagSchema,
+  fetchTagSchemas,
+  setTagSchemasLoadingStatusPending,
+} from '../../Store/reducers/tagSchemas';
+import { useAppDispatch } from '../../Store/store';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import {RequestStatus} from '../../helpers/types/document';
+import { RequestStatus } from '../../helpers/types/document';
+import { TagSchema } from '../../helpers/types/tagSchemas';
 import TagSchemasTable from './tagSchemasTable';
-import {
-  deleteTagSchema,
-  fetchTagSchemas,
-  setTagSchemasLoadingStatusPending,
-  TagSchemasState
-} from "../../Store/reducers/tagSchemas";
-import {TagSchema} from "../../helpers/types/tagSchemas";
-import CreateTagSchemaDialog from "../../Components/TagSchemas/createTagSchemaDialog/CreateTagSchemaDialog";
 // import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
 // import ButtonPrimary from "../../Components/Generic/Buttons/ButtonPrimary";
 // import ButtonGhost from "../../Components/Generic/Buttons/ButtonGhost";
 
 function TagSchemas() {
-  const {user} = useAuthenticatedState();
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { user } = useAuthenticatedState();
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId} = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -49,7 +49,9 @@ function TagSchemas() {
   const dispatch = useAppDispatch();
   const [isRulesetEditTabVisible, setIsRulesetEditTabVisible] = useState(false);
 
-  const [newTagSchemaValue, setNewTagSchemaValue] = useState<{ tagSchema: TagSchema } | null>(null);
+  const [newTagSchemaValue, setNewTagSchemaValue] = useState<{
+    tagSchema: TagSchema;
+  } | null>(null);
 
   // update siteId
   useEffect(() => {
@@ -66,7 +68,7 @@ function TagSchemas() {
 
   // update rulesets when different siteId selected
   useEffect(() => {
-    dispatch(fetchTagSchemas({siteId: currentSiteId}));
+    dispatch(fetchTagSchemas({ siteId: currentSiteId }));
   }, [currentSiteId]);
 
   // load more rulesets when table reaches bottom
@@ -115,7 +117,11 @@ function TagSchemas() {
         dialogTitle: 'Are you sure you want to delete this TagSchema?',
         callback: () => {
           dispatch(
-            deleteTagSchema({tagSchemaId, siteId: currentSiteId, tagSchemas: tagSchemas})
+            deleteTagSchema({
+              tagSchemaId,
+              siteId: currentSiteId,
+              tagSchemas: tagSchemas,
+            })
           );
         },
       })
@@ -148,7 +154,7 @@ function TagSchemas() {
       DocumentsService.addTagSchema(newTagSchemaValue, currentSiteId).then(
         (res) => {
           if (res.status === 200) {
-            dispatch(fetchTagSchemas({siteId: currentSiteId}));
+            dispatch(fetchTagSchemas({ siteId: currentSiteId }));
             setIsRulesetEditTabVisible(false);
             setNewTagSchemaValue(null);
           } else {
@@ -166,11 +172,13 @@ function TagSchemas() {
 
   // Open tab to create/edit ruleset
   const showRulesetEditTab = (rulesetId: string) => {
-    const tagSchema = tagSchemas.find((tagSchema) => tagSchema.tagSchemaId === rulesetId);
+    const tagSchema = tagSchemas.find(
+      (tagSchema) => tagSchema.tagSchemaId === rulesetId
+    );
     if (!tagSchema) {
       return;
     }
-    setNewTagSchemaValue({tagSchema});
+    setNewTagSchemaValue({ tagSchema });
     setIsRulesetEditTabVisible(true);
   };
 
@@ -179,48 +187,37 @@ function TagSchemas() {
     setNewTagSchemaValue(null);
   }
   const tempTagSchema = {
-    "name": "string updated",
-    "tags": {
-      "compositeKeys": [
+    name: 'string updated',
+    tags: {
+      compositeKeys: [
         {
-          "key": [
-            "string"
-          ]
-        }
+          key: ['string'],
+        },
       ],
-      "required": [
+      required: [
         {
-          "key": "string",
-          "defaultValues": [
-            "string"
-          ],
-          "allowedValues": [
-            "string"
-          ]
-        }
+          key: 'string',
+          defaultValues: ['string'],
+          allowedValues: ['string'],
+        },
       ],
-      "optional": [
+      optional: [
         {
-          "key": "string",
-          "defaultValues": [
-            "string"
-          ],
-          "allowedValues": [
-            "string"
-          ]
-        }
+          key: 'string',
+          defaultValues: ['string'],
+          allowedValues: ['string'],
+        },
       ],
-      "allowAdditionalTags": true
-    }
-  }
+      allowAdditionalTags: true,
+    },
+  };
 
-
-const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   return (
     <>
       <Helmet>
-        <title>Tag Schemas</title>
+        <title>Schemas</title>
       </Helmet>
       <div
         className="flex flex-col "
@@ -229,8 +226,11 @@ const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
         }}
       >
         <div className="w-full p-2 flex justify-start">
-          <button onClick={() => setIsCreateDialogOpen(true)} className="h-10 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white px-4 rounded-md font-bold">
-              + NEW
+          <button
+            onClick={() => setIsCreateDialogOpen(true)}
+            className="h-10 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white px-4 rounded-md font-bold"
+          >
+            + NEW
           </button>
         </div>
         <div
@@ -245,7 +245,11 @@ const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
           />
         </div>
       </div>
-      <CreateTagSchemaDialog isOpen={isCreateDialogOpen} setIsOpen={setIsCreateDialogOpen} siteId={currentSiteId}/>
+      <CreateTagSchemaDialog
+        isOpen={isCreateDialogOpen}
+        setIsOpen={setIsCreateDialogOpen}
+        siteId={currentSiteId}
+      />
     </>
   );
 }

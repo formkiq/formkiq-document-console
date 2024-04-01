@@ -1,31 +1,37 @@
-import {useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {NavLink, useLocation, useNavigate, useParams, useSearchParams} from 'react-router-dom';
-import {Mode} from 'vanilla-jsoneditor';
-import {JSONEditorReact} from '../../Components/TextEditors/JsonEditor';
-import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
-import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
-import {useAppDispatch} from '../../Store/store';
-import {DocumentsService} from '../../helpers/services/documentsService';
+import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import {
+  NavLink,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
+import { Mode } from 'vanilla-jsoneditor';
+import { Close, Spinner, Trash } from '../../Components/Icons/icons';
+import TagSchemaMenu from '../../Components/TagSchemas/TagSchemaMenu';
+import CompositeKeysTable from '../../Components/TagSchemas/tables/compositeKeysTable';
+import TagsTable from '../../Components/TagSchemas/tables/tagsTable';
+import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import { TagSchemasState, setTagSchema } from '../../Store/reducers/tagSchemas';
+import { useAppDispatch } from '../../Store/store';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import {setTagSchema, TagSchemasState} from "../../Store/reducers/tagSchemas";
-import {Close, Spinner, Trash} from "../../Components/Icons/icons";
-import {TagSchema as TagSchemaType} from "../../helpers/types/tagSchemas";
-import TagSchemaMenu from "../../Components/TagSchemas/TagSchemaMenu";
-import CompositeKeysTable from "../../Components/TagSchemas/tables/compositeKeysTable";
-import TagsTable from "../../Components/TagSchemas/tables/tagsTable";
+import { TagSchema as TagSchemaType } from '../../helpers/types/tagSchemas';
 
 function TagSchema() {
-  const {user} = useAuthenticatedState();
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { user } = useAuthenticatedState();
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId} = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -34,23 +40,21 @@ function TagSchema() {
     workspaceSites
   );
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
-  const {tagSchemaId} = useParams();
-  const [searchParams, setSearchParams] = useSearchParams()
-  const editor = searchParams.get('editor')
+  const { tagSchemaId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const editor = searchParams.get('editor');
 
-  const {tagSchema} = useSelector(TagSchemasState);
+  const { tagSchema } = useSelector(TagSchemasState);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
 
   useEffect(() => {
     if (!tagSchemaId) {
       return;
     }
-    DocumentsService.getTagSchema(tagSchemaId, currentSiteId).then(
-      (res) => {
-        dispatch(setTagSchema(res))
-      })
+    DocumentsService.getTagSchema(tagSchemaId, currentSiteId).then((res) => {
+      dispatch(setTagSchema(res));
+    });
   }, []);
 
   // JSON editor
@@ -83,7 +87,6 @@ function TagSchema() {
     }
     return true;
   };
-
 
   const updateTagSchema = (tagSchema: TagSchemaType) => {
     function onResponse(res: any) {
@@ -124,13 +127,13 @@ function TagSchema() {
       //       }
       //   })
     }
-  }
+  };
 
   const saveSchemaInEditor = () => {
     if (content.json && isValidJSON(content.json)) {
-      updateTagSchema(content.json)
+      updateTagSchema(content.json);
     } else if (content.text && isValidString(content.text)) {
-      updateTagSchema(content.text)
+      updateTagSchema(content.text);
     } else {
       dispatch(
         openNotificationDialog({
@@ -138,28 +141,35 @@ function TagSchema() {
         })
       );
     }
-  }
+  };
 
   const onDeleteClick = () => {
     if (!tagSchemaId) {
       return;
     }
     const deleteTagSchema = () => {
-      DocumentsService.deleteTagSchema(tagSchemaId, currentSiteId).then(res => {
-        if (res.status === 200) {
-          navigate('/tag-schemas');
-        } else {
-          dispatch(openNotificationDialog({dialogTitle: "Tag Schema delete failed. Please try again later."}))
+      DocumentsService.deleteTagSchema(tagSchemaId, currentSiteId).then(
+        (res) => {
+          if (res.status === 200) {
+            navigate('/schemas');
+          } else {
+            dispatch(
+              openNotificationDialog({
+                dialogTitle: 'Schema delete failed. Please try again later.',
+              })
+            );
+          }
         }
-      })
-    }
+      );
+    };
 
-    dispatch(openConfirmationDialog({
-        dialogTitle: "Are you sure you want to delete this Tag Schema?",
-        callback: deleteTagSchema
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: 'Are you sure you want to delete this Schema?',
+        callback: deleteTagSchema,
       })
-    )
-  }
+    );
+  };
 
   const handleChange = (value: any) => {
     if (value.json) {
@@ -167,20 +177,20 @@ function TagSchema() {
     } else if (value.text) {
       setContent(value);
     }
-  }
+  };
   const closeEditor = () => {
-    searchParams.delete("editor")
-    setSearchParams(searchParams)
-
-  }
+    searchParams.delete('editor');
+    setSearchParams(searchParams);
+  };
 
   return (
     <>
       <Helmet>
-        <title>Tag Schema</title>
+        <title>Schema</title>
       </Helmet>
 
-      {tagSchema ? (editor ?
+      {tagSchema ? (
+        editor ? (
           <div
             className="flex flex-col "
             style={{
@@ -189,16 +199,21 @@ function TagSchema() {
           >
             <div className="w-full py-2 flex justify-between gap-2 mt-2 px-4">
               <div className="flex gap-2 items-end">
-                <button onClick={closeEditor}
-                        className="h-8 text-neutral-900 bg-neutral-200 hover:bg-neutral-300 rounded-md p-2 flex items-center gap-2 mr-2 whitespace-nowrap font-bold text-sm"
-                        title="Close Editor"
+                <button
+                  onClick={closeEditor}
+                  className="h-8 text-neutral-900 bg-neutral-200 hover:bg-neutral-300 rounded-md p-2 flex items-center gap-2 mr-2 whitespace-nowrap font-bold text-sm"
+                  title="Close Editor"
                 >
                   Close Editor
-                  <div className="w-4 h-4"><Close/></div>
+                  <div className="w-4 h-4">
+                    <Close />
+                  </div>
                 </button>
-                <NavLink to={"/tag-schemas"} className="h-6 text-neutral-900 hover:text-primary-500 "
+                <NavLink
+                  to={'/schemas'}
+                  className="h-6 text-neutral-900 hover:text-primary-500 "
                 >
-                  Return to Tag Schemas
+                  Return to Schemas
                 </NavLink>
               </div>
 
@@ -212,12 +227,16 @@ function TagSchema() {
                 {/*>*/}
                 {/*  <Save/>*/}
                 {/*</button>*/}
-                <button className="h-6 text-neutral-900 hover:text-primary-500" title="Delete Tag Schema" type="button"
-                        onClick={onDeleteClick}><Trash/>
+                <button
+                  className="h-6 text-neutral-900 hover:text-primary-500"
+                  title="Delete Schema"
+                  type="button"
+                  onClick={onDeleteClick}
+                >
+                  <Trash />
                 </button>
               </div>
             </div>
-
 
             <div className=" inline-block h-full">
               <JSONEditorReact
@@ -226,27 +245,33 @@ function TagSchema() {
                 onChange={handleChange}
               />
             </div>
-          </div> : <div className="p-4">
-            <TagSchemaMenu tagSchema={tagSchema} updateTagSchema={updateTagSchema}
-                           deleteTagSchema={onDeleteClick}/>
+          </div>
+        ) : (
+          <div className="p-4">
+            <TagSchemaMenu
+              tagSchema={tagSchema}
+              updateTagSchema={updateTagSchema}
+              deleteTagSchema={onDeleteClick}
+            />
             <p className="text-neutral-900 text-md font-bold my-4">
               Composite Keys
             </p>
-            <CompositeKeysTable compositeKeys={tagSchema.tags.compositeKeys}/>
+            <CompositeKeysTable compositeKeys={tagSchema.tags.compositeKeys} />
 
             <p className="text-neutral-900 text-md font-bold my-4">
               Required Tags
             </p>
-            <TagsTable tags={tagSchema.tags.required}/>
+            <TagsTable tags={tagSchema.tags.required} />
 
             <p className="text-neutral-900 text-md font-bold my-4">
               Optional Tags
             </p>
-            <TagsTable tags={tagSchema.tags.optional}/>
-
-          </div>)
-        : <Spinner/>}
-
+            <TagsTable tags={tagSchema.tags.optional} />
+          </div>
+        )
+      ) : (
+        <Spinner />
+      )}
     </>
   );
 }
