@@ -27,6 +27,7 @@ import {
   Documents,
   Recent,
   Rules,
+  Schema,
   Settings,
   Share,
   ShareHand,
@@ -373,6 +374,7 @@ function Navbar() {
                       {locationPrefix === '/workflows' ||
                       locationPrefix === '/integrations' ||
                       locationPrefix === '/account' ||
+                      locationPrefix === '/schemas' ||
                       locationPrefix === 'rulesets' ? (
                         <>
                           <div className="w-6 mr-1 text-coreOrange-600">
@@ -386,6 +388,12 @@ function Navbar() {
                                 <Rules />
                               </div>
                             )}
+                            {pathname.indexOf('/schemas') > -1 && (
+                              <div className="w-5">
+                                <Schema />
+                              </div>
+                            )}
+
                             {pathname.indexOf('/integrations/api') > -1 &&
                               pathname.indexOf('/integrations/apiKeys') ===
                                 -1 && (
@@ -479,6 +487,9 @@ function Navbar() {
                               <div className="w-5">
                                 <Admin />
                               </div>
+                            )}
+                            {pathname.indexOf('/schemas') > -1 && (
+                              <span>Schemas</span>
                             )}
                           </div>
                         </>

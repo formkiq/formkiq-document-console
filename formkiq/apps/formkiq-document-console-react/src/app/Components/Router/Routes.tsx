@@ -49,9 +49,15 @@ const Rule = React.lazy(() => import('../../Views/Ruleset/rule'));
 const AccessControl = React.lazy(
   () => import('../../Views/Account/accessControl')
 );
+
 const ObjectExamineTool = React.lazy(
   () => import('../../Views/Account/objectExamineTool')
 );
+
+const TagSchemas = React.lazy(
+  () => import('../../Views/TagSchemas/tagSchemas')
+);
+const TagSchema = React.lazy(() => import('../../Views/TagSchemas/tagSchema'));
 
 const RoutesMapper = () => {
   return (
@@ -152,6 +158,9 @@ const RoutesMapper = () => {
       ></Route>
       <Route path="/rulesets/:id" element={<Ruleset />}></Route>
       <Route path="/rulesets/:id/rule/:ruleId" element={<Rule />}></Route>
+
+      <Route path="/schemas" element={<TagSchemas />}></Route>
+      <Route path="/schemas/:tagSchemaId" element={<TagSchema />}></Route>
 
       <Route
         path="/workspaces/:siteId/workflows/designer"
