@@ -14,4 +14,8 @@ export const WorkflowsAndIntegrationsPrefixes: string[] = [
   '/object-examine-tool',
 ];
 
-export const AccountAndSettingsPrefixes: string[] = ['/account', '/settings'];
+export const AccountAndSettingsPrefixes: string[] = [
+  '/account',
+  '/settings',
+  '/access-control',
+];
