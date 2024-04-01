@@ -20,7 +20,7 @@ function TagsTable({tags}: TagsTableProps) {
           className=" w-full  border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">Key
         </th>
         <th
-          className=" w-full  border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">Default Values
+          className=" w-full  border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">Default Value
         </th>
         <th
           className=" w-full  border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">Allowed Values

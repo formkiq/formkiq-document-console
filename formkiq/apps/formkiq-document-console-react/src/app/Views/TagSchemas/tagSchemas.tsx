@@ -20,7 +20,7 @@ import {
   TagSchemasState
 } from "../../Store/reducers/tagSchemas";
 import {TagSchema} from "../../helpers/types/tagSchemas";
-import CreateTagSchemaDialog from "../../Components/TagSchemas/CreateTagSchemaDialog";
+import CreateTagSchemaDialog from "../../Components/TagSchemas/createTagSchemaDialog/CreateTagSchemaDialog";
 // import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
 // import ButtonPrimary from "../../Components/Generic/Buttons/ButtonPrimary";
 // import ButtonGhost from "../../Components/Generic/Buttons/ButtonGhost";

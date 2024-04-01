@@ -14,7 +14,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import {setTagSchema, TagSchemasState} from "../../Store/reducers/tagSchemas";
-import {Close, Pencil, Spinner, Trash} from "../../Components/Icons/icons";
+import {Close, Spinner, Trash} from "../../Components/Icons/icons";
 import {TagSchema as TagSchemaType} from "../../helpers/types/tagSchemas";
 import TagSchemaMenu from "../../Components/TagSchemas/TagSchemaMenu";
 import CompositeKeysTable from "../../Components/TagSchemas/tables/compositeKeysTable";
