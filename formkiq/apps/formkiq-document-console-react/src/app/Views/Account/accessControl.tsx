@@ -255,7 +255,7 @@ export function AccessControl() {
         <title>Admin</title>
       </Helmet>
       <div className="flex justify-between p-2">
-        <h6 className="w-full my-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+        <h6 className="w-full my-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
           Access Control: Configure Open Policy Agent
         </h6>
         <>

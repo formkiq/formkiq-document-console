@@ -1042,7 +1042,7 @@ function Documents() {
                       <span>
                         {file.path.substring(file.path.lastIndexOf('/') + 1)
                           .length > 50 ? (
-                          <span className="tracking-tightest text-clip overflow-hidden">
+                          <span className="tracking-tighter text-clip overflow-hidden">
                             {file.path.substring(
                               file.path.lastIndexOf('/') + 1,
                               file.path.lastIndexOf('/') + 60

@@ -110,7 +110,7 @@ export function ObjectExamineTool() {
         <title>Examine PDF</title>
       </Helmet>
       <div className="flex flex-col p-2">
-        <h3 className="w-full my-2 text-xl tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+        <h3 className="w-full my-2 text-xl tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
           Examine PDF
         </h3>
         <div className="p-4 max-w-screen-lg font-semibold mb-4">

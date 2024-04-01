@@ -309,7 +309,7 @@ export function Sidebar() {
 
   const SidebarItems = () => {
     return (
-      <div className="tracking-tight">
+      <div className="tracking-normal">
         {isSidebarExpanded ? (
           <>
             <li
@@ -397,7 +397,7 @@ export function Sidebar() {
                                         <Queue />
                                       </div>
                                       <div>
-                                        <span className="tracking-tightest">
+                                        <span className="tracking-tighter">
                                           {queue.name.length > 28 ? (
                                             <span>
                                               {queue.name.substring(0, 28)}...
@@ -520,7 +520,7 @@ export function Sidebar() {
                                         <Queue />
                                       </div>
                                       <div>
-                                        <span className="tracking-tightest">
+                                        <span className="tracking-tighter">
                                           {queue.name.length > 28 ? (
                                             <span>
                                               {queue.name.substring(0, 28)}...
@@ -650,7 +650,7 @@ export function Sidebar() {
                                                 <Queue />
                                               </div>
                                               <div>
-                                                <span className="tracking-tightest">
+                                                <span className="tracking-tighter">
                                                   {queue.name.length > 26 ? (
                                                     <span>
                                                       {queue.name.substring(
@@ -865,47 +865,6 @@ export function Sidebar() {
                     }
                   >
                     <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
-                      <div className="w-4 flex items-center mr-2">
-                        <Examine />
-                      </div>
-                      <div>Object Examine Tool</div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/schemas"
-                    data-test-id="nav-tag-schema"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
-                      <div className="w-4 flex items-center mr-2">
-                        <Schema />
-                      </div>
-                      <div>Schemas</div>
-                    </div>
-                  </NavLink>
-                </li>
-
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/object-examine-tool"
-                    data-test-id="nav-object-examine"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
-                    }
-                  >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
                       <div className="w-4 flex items-center mr-2">
                         <Examine />
                       </div>
@@ -1253,7 +1212,7 @@ export function Sidebar() {
         <div
           className={
             (sidebarExpanded ? 'w-64' : 'w-10') +
-            ' flex fixed z-30 justify-between mt-2.5'
+            ' flex fixed z-30 justify-between mt-2.5 bg-neutral-100'
           }
         >
           <Link to="/">
@@ -1301,7 +1260,7 @@ export function Sidebar() {
           <>
             <nav className="grow mt-16">
               {!isSiteReadOnly && (
-                <div className="flex flex-wrap w-full justify-center mb-4">
+                <div className="flex flex-wrap w-full justify-center mb-4 pl-0.5">
                   <ButtonPrimaryGradient
                     className={
                       (isSidebarExpanded
