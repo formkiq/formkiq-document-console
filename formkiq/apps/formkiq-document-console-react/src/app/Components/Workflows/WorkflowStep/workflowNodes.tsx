@@ -142,7 +142,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
     decisions: ['APPROVE', 'REJECT'],
   },
   QUEUE: {
-    title: 'Review / Approval Queue',
+    title: 'Review / Approval Queue (DO NOT USE)',
     textInputParameters: {
       queueId: 'Queue Id',
     },
