@@ -1,7 +1,10 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
+import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
+import { CopyButton } from '../../Generic/Buttons/CopyButton';
 import { Close } from '../../Icons/icons';
 
 export default function DocumentWorkflowsModal({
@@ -20,6 +23,7 @@ export default function DocumentWorkflowsModal({
   value: ILine | null;
 }) {
   const [workflows, setWorkflows] = useState(null);
+  const [documentWorkflows, setDocumentWorkflows] = useState(null);
   const dispatch = useAppDispatch();
   const closeDialog = () => {
     onClose();
@@ -28,112 +32,48 @@ export default function DocumentWorkflowsModal({
   const doneButtonRef = useRef() as React.MutableRefObject<HTMLButtonElement>;
 
   useEffect(() => {
+    updateDocumentWorkflows();
     updateWorkflows();
   }, [value]);
 
   const updateWorkflows = () => {
     if (value) {
-      /*
-      setVersions(null);
-      DocumentsService.getDocumentById(value.documentId as string, siteId).then(
-        (docResponse) => {
-          DocumentsService.getDocumentVersions(
-            value.documentId as string,
-            siteId
-          ).then((data) => {
-            const vers = data?.documents.map((doc: any) => {
-              doc.insertedDate = moment(doc.insertedDate).format(
-                'YYYY-MM-DD HH:mm'
-              );
-              doc.lastModifiedDate = moment(doc.lastModifiedDate).format(
-                'YYYY-MM-DD HH:mm'
-              );
-              return doc;
-            });
-            docResponse.insertedDate = moment(docResponse.insertedDate).format(
-              'YYYY-MM-DD HH:mm'
-            );
-            docResponse.lastModifiedDate = moment(
-              docResponse.lastModifiedDate
-            ).format('YYYY-MM-DD HH:mm');
-            vers.unshift(docResponse);
-            setVersions(vers);
-          });
-        }
-      );
-      */
-    }
-  };
-  /*
-  const viewDocumentVersion = (event: any, versionKey: string) => {
-    if (value) {
-      if (versionKey !== undefined) {
-        window.open(
-          `${window.location.origin}${documentsRootUri}/${value.documentId}/view?versionKey=${versionKey}`
-        );
-        // navigate(`/documents/${value.documentId}/view?versionKey=${versionKey}`)
-      } else {
-        window.open(
-          `${window.location.origin}${documentsRootUri}/${value.documentId}/view`
-        );
-        // navigate(`/documents/${value.documentId}/view`)
-      }
-    }
-  };
-  const downloadDocumentVersion = (event: any, versionKey: string) => {
-    if (value) {
-      let downloadVersionKey = '';
-      if (versionKey && versionKey.length) {
-        downloadVersionKey = versionKey;
-      }
-      DocumentsService.getDocumentUrl(
-        value.documentId,
-        siteId,
-        downloadVersionKey,
-        false
-      ).then((urlResponse: any) => {
-        if (urlResponse.url) {
-          window.location.href = urlResponse.url;
-        }
+      DocumentsService.getWorkflows(siteId).then((workflowsResponse) => {
+        setWorkflows(workflowsResponse.workflows);
       });
     }
   };
-  */
 
-  /*
-  const openDeleteDialog = useCallback(
-    (versionKey: string) => {
-      const deleteVersion = () => {
-        if (value) {
-          DocumentsService.deleteDocumentVersion(
-            value.documentId,
-            versionKey
-          ).catch((err) => {
-            console.error('Failed to delete document version: ', err);
-          });
-        }
-      };
-
-      dispatch(
-        openDialog({
-          callback: deleteVersion,
-          dialogTitle: 'Are you sure you want to delete this document version?',
-        })
-      );
-    },
-    [dispatch, value]
-  );
-  */
-
-  /*
-  const revertDocumentVersion = (event: any, versionKey: string) => {
+  const updateDocumentWorkflows = () => {
     if (value) {
-      DocumentsService.putDocumentVersion(
+      DocumentsService.getWorkflowsInDocument(siteId, value.documentId).then(
+        (workflowsResponse) => {
+          console.log(workflowsResponse.workflows);
+          setDocumentWorkflows(workflowsResponse.workflows);
+        }
+      );
+    }
+  };
+
+  const triggerWorkflow = (event: any) => {
+    console.log('gg');
+    console.log(value);
+    if (value) {
+      console.log(event.target);
+      const workflowToTriggerSelect: HTMLSelectElement =
+        document.getElementById('workflowToTriggerSelect') as HTMLSelectElement;
+      if (workflowToTriggerSelect.selectedIndex === -1) {
+        return;
+      }
+      const workflowId =
+        workflowToTriggerSelect.options[workflowToTriggerSelect.selectedIndex]
+          .value;
+      DocumentsService.addWorkflowToDocument(
+        siteId,
         value.documentId,
-        versionKey,
-        siteId
-      ).then((urlResponse: any) => {
-        if (urlResponse.status === '400') {
+        workflowId
+      ).then((addResponse: any) => {
+        if (addResponse.status === '400' || addResponse.status === '500') {
           dispatch(
             openDialog({
               dialogTitle:
@@ -141,12 +81,12 @@ export default function DocumentWorkflowsModal({
             })
           );
         } else {
-          updateVersions();
+          console.log(addResponse);
+          updateDocumentWorkflows();
         }
       });
     }
   };
-  */
 
   return (
     <Transition.Root show={isOpened} as={Fragment}>
@@ -199,30 +139,92 @@ export default function DocumentWorkflowsModal({
                       <thead>
                         <tr>
                           <th className="w-20 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
-                            Workflow
+                            ID
+                          </th>
+                          <th className="w-20 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
+                            Name
+                          </th>
+                          <th className="w-20 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
+                            Status
+                          </th>
+                          <th className="w-20 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
+                            Current Step
                           </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {workflows && (workflows as []).length === 0 && (
-                          <tr>
-                            <td colSpan={3} className="p-2 text-center">
-                              No workflows have been assigned to this document.
-                            </td>
-                          </tr>
-                        )}
-                        {workflows &&
-                          (workflows as []).map((workflow: any, i: number) => {
-                            return (
-                              <tr key={i}>
-                                <td className="border-b text-xs border-slate-100 nodark:border-slate-700 p-2 pr-2 text-slate-500 nodark:text-slate-400">
-                                  <span>{workflow.name}</span>
-                                </td>
-                              </tr>
-                            );
-                          })}
+                        {documentWorkflows &&
+                          (documentWorkflows as []).length === 0 && (
+                            <tr>
+                              <td colSpan={3} className="p-2 text-center">
+                                No workflows have been assigned to this
+                                document.
+                              </td>
+                            </tr>
+                          )}
+                        {documentWorkflows &&
+                          (documentWorkflows as []).map(
+                            (workflow: any, i: number) => {
+                              return (
+                                <tr key={i}>
+                                  <td className="border-b text-xs border-slate-100 nodark:border-slate-700 p-2 pr-2 text-slate-500 nodark:text-slate-400">
+                                    <span className="pr-2">
+                                      {workflow.workflowId}
+                                    </span>
+                                    <CopyButton value={workflow.workflowId} />
+                                  </td>
+                                  <td className="border-b border-slate-100 nodark:border-slate-700 p-2 pr-2 text-slate-500 nodark:text-slate-400">
+                                    <span>{workflow.name}</span>
+                                  </td>
+                                  <td className="border-b border-slate-100 nodark:border-slate-700 p-2 pr-2 text-slate-500 nodark:text-slate-400">
+                                    <span>{workflow.status}</span>
+                                  </td>
+                                  <td className="border-b border-slate-100 nodark:border-slate-700 p-2 pr-2 text-slate-500 nodark:text-slate-400">
+                                    <span>{workflow.currentStepId}</span>
+                                  </td>
+                                </tr>
+                              );
+                            }
+                          )}
                       </tbody>
                     </table>
+                    <div className="my-4 border-t border-b pt-4 flex justify-center">
+                      {workflows && (workflows as []).length === 0 && (
+                        <div>No workflows are available to this document.</div>
+                      )}
+                      {workflows && (
+                        <>
+                          <div className="font-bold pt-1 pr-2">
+                            Trigger Workflow:
+                          </div>
+                          <div>
+                            <select id="workflowToTriggerSelect">
+                              {workflows &&
+                                (workflows as []).map(
+                                  (workflow: any, i: number) => {
+                                    return (
+                                      <option
+                                        key={i}
+                                        value={workflow.workflowId}
+                                      >
+                                        {workflow.name} (#{workflow.workflowId})
+                                      </option>
+                                    );
+                                  }
+                                )}
+                            </select>
+                          </div>
+                          <div className="pl-2">
+                            <button
+                              className="flex items-center bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                              onClick={triggerWorkflow}
+                            >
+                              Go
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div className="w-full flex justify-center mt-4">
                     <button

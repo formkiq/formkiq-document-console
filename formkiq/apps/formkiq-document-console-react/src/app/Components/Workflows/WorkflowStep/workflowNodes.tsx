@@ -59,7 +59,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
   DOCUMENTTAGGING: {
     title: 'Intelligent Document Classification',
     textInputParameters: {
-      tags: '	Comma-deliminted list of keywords',
+      tags: '	Comma-delimited list of keywords',
     },
     selectParameters: {
       engine: {
@@ -73,7 +73,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
     decisions: ['APPROVE'],
   },
   NOTIFICATION: {
-    title: 'Send Notification',
+    title: 'Send Notification (requires "FROM" address in SES)',
     textInputParameters: {
       notificationEmail: 'Notification Email',
       notificationToCc: 'Notification Carbon Copy',
@@ -143,7 +143,9 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
   },
   QUEUE: {
     title: 'Review / Approval Queue',
-    textInputParameters: {},
+    textInputParameters: {
+      queueId: 'Queue Id',
+    },
     selectParameters: {},
     checkboxParameters: {},
     decisions: ['APPROVE', 'REJECT'],
@@ -359,7 +361,6 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
     id: props.id,
     name: props.data.label,
   };
-
   editedStep.type = 'defaultNode';
   editedStep.parameters = props.data?.parameters;
 

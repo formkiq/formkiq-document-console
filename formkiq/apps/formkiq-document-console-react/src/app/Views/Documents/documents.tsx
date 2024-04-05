@@ -1636,6 +1636,29 @@ function Documents() {
                         <span className="w-7 pl-1 -mt-0.5">{Download()}</span>
                       </button>
                     </div>
+                    <div className="mt-2 flex justify-center">
+                      <button
+                        className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
+                        onClick={(event) => {
+                          const documentLine: ILine = {
+                            lineType: 'document',
+                            folder: '',
+                            documentId: infoDocumentId,
+                            documentInstance: currentDocument,
+                            folderInstance: null,
+                          };
+                          onDocumentWorkflowsModalClick(event, documentLine);
+                        }}
+                      >
+                        View
+                        {isSiteReadOnly ? (
+                          <span>&nbsp;</span>
+                        ) : (
+                          <span>&nbsp;/ Assign&nbsp;</span>
+                        )}
+                        Workflows
+                      </button>
+                    </div>
                   </div>
                   <div
                     className={
@@ -1723,29 +1746,6 @@ function Documents() {
                             <span>&nbsp;/ Edit&nbsp;</span>
                           )}
                           Versions
-                        </button>
-                      </div>
-                      <div className="hidden mt-2 flex justify-center">
-                        <button
-                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
-                          onClick={(event) => {
-                            const documentLine: ILine = {
-                              lineType: 'document',
-                              folder: '',
-                              documentId: infoDocumentId,
-                              documentInstance: currentDocument,
-                              folderInstance: null,
-                            };
-                            onDocumentWorkflowsModalClick(event, documentLine);
-                          }}
-                        >
-                          View
-                          {isSiteReadOnly ? (
-                            <span>&nbsp;</span>
-                          ) : (
-                            <span>&nbsp;/ Assign&nbsp;</span>
-                          )}
-                          Workflows
                         </button>
                       </div>
                     </span>

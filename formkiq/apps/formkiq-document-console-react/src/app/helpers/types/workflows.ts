@@ -53,13 +53,14 @@ export type WorkflowStepActionParameters = {
   notificationText?: string;
   notificationHtml?: string;
   tags?: string;
-  queueName?: string;
+  queueId?: string;
 };
 export type WorkflowStep = {
   stepId: string;
-  action: {
+  action?: {
     type: WorkflowStepActionType;
     parameters?: WorkflowStepActionParameters;
+    queueId?: string;
   };
   queue?: {
     queueId: string;

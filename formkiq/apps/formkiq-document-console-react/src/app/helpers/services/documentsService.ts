@@ -1260,6 +1260,58 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getDocumentsInWorkflow(
+    siteId: string,
+    workflowId: string,
+    limit = 20,
+    next = null
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getDocumentsInWorkflow({
+      siteId,
+      workflowId,
+      limit,
+      next,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getWorkflowsInDocument(
+    siteId: string,
+    documentId: string,
+    limit = 20,
+    next = null
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.getWorkflowsInDocument({
+      siteId,
+      documentId,
+      limit,
+      next,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async addWorkflowToDocument(
+    siteId: string,
+    documentId: string,
+    workflowId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.addWorkflowToDocument({
+      siteId,
+      documentId,
+      workflowId,
+    });
+  }
+
+  @formkiqAPIHandler
   public static async getQueues(
     siteId: string,
     previous = null,
@@ -1530,9 +1582,7 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getExaminePdfUploadUrl(
-    siteId: string
-  ): Promise<any> {
+  public static async getExaminePdfUploadUrl(siteId: string): Promise<any> {
     return this.getFormkiqClient().documentsApi.getExaminePdfUploadUrl({
       siteId,
     });

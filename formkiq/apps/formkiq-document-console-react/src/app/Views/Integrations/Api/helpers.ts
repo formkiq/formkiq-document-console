@@ -1004,6 +1004,19 @@ export const deleteWorkflowApiItem = {
   license: 'Pro|Enterprise',
 };
 
+export const getDocumentsInWorkflowApiItem = {
+  method: 'GET',
+  path: '/workflows/ WORKFLOW_ID /documents',
+  description: 'Returns a list of documents in a specified workflow',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresWorkflowID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
 export const getQueuesApiItem = {
   method: 'GET',
   path: '/queues',

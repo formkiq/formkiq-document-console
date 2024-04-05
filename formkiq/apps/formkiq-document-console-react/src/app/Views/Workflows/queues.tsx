@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { ArrowBottom, ArrowRight } from '../../Components/Icons/icons';
 import NewQueueModal from '../../Components/Workflows/NewQueue/newQueue';
 import QueueList from '../../Components/Workflows/QueueList/QueueList';
@@ -16,6 +17,7 @@ type QueueItem = {
 };
 export function Queues() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   let userSite: any = null;
   let defaultSite: any = null;
   const workspaceSites: any[] = [];
@@ -136,6 +138,18 @@ export function Queues() {
     }
   };
 
+  const viewQueue = (queueId: string, siteId: string) => {
+    let rootUri = '';
+    if (userSite && siteId === userSite.siteId) {
+      rootUri = '/my-documents';
+    } else if (siteId === defaultSite.siteId) {
+      rootUri = '/documents';
+    } else {
+      rootUri = `/workspaces/${siteId}`;
+    }
+    navigate(`${rootUri}/queues/${queueId}`);
+  };
+
   const deleteQueue = (queueId: string, siteId: string) => {
     const deleteFunc = async () => {
       setUserSiteQueues(null);
@@ -190,6 +204,7 @@ export function Queues() {
                 siteId={userSite.siteId}
                 queues={userSiteQueues}
                 isSiteReadOnly={userSite.readonly}
+                onView={viewQueue}
                 onDelete={deleteQueue}
                 onNewClick={onNewClick}
               ></QueueList>
@@ -226,6 +241,7 @@ export function Queues() {
             {defaultSiteExpanded && (
               <QueueList
                 queues={defaultSiteQueues}
+                onView={viewQueue}
                 onDelete={deleteQueue}
                 siteId={defaultSite.siteId}
                 isSiteReadOnly={defaultSite.readonly}
@@ -260,6 +276,7 @@ export function Queues() {
                         queues={item.queues}
                         siteId={item.siteId}
                         isSiteReadOnly={item.readonly}
+                        onView={viewQueue}
                         onDelete={deleteQueue}
                         onNewClick={onNewClick}
                       ></QueueList>
