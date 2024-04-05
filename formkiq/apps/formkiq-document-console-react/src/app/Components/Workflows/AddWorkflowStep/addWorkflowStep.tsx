@@ -13,7 +13,6 @@ export default function AddWorkflowStep({ onAdd }: { onAdd: any }) {
   };
 
   const toggleStepAction = (val: any) => {
-    console.log(val);
     switch (val) {
       case 'Approval':
         document

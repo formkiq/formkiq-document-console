@@ -53,6 +53,7 @@ export function AccountSettings() {
         setValue('maxDocuments', response.maxDocuments);
         setValue('maxContentLengthBytes', response.maxContentLengthBytes);
         setValue('maxWebhooks', response.maxWebhooks);
+        setValue('notificationEmail', response.notificationEmail);
         setValue('chatGptApiKey', response.chatGptApiKey);
       }
     });
@@ -199,6 +200,23 @@ export function AccountSettings() {
               aria-label="Maximum Number of Webhooks"
               type="text"
               {...register('maxWebhooks')}
+              className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                  placeholder-gray-500 text-gray-900 rounded-t-md
+                  focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+            />
+          </div>
+        </div>
+        <div className="md:flex md:items-center mx-4 mb-4 relative">
+          <div className="w-full md:w-1/4">
+            <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+              Notification Email:
+            </label>
+          </div>
+          <div className="w-full md:w-3/4">
+            <input
+              aria-label="Notification Email"
+              type="text"
+              {...register('notificationEmail')}
               className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
                   placeholder-gray-500 text-gray-900 rounded-t-md
                   focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"

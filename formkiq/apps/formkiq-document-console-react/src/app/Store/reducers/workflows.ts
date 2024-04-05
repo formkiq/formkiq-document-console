@@ -40,8 +40,8 @@ function workflowToNodes(workflow: Workflow) {
     nodes.push({
       id: step.stepId,
       data: {
-        label: step.action.type,
-        parameters: step.action.parameters,
+        label: step.action?.type || '',
+        parameters: step.action?.parameters,
       },
       position: { x: 0, y: 0 },
       type: 'defaultNode',
@@ -50,7 +50,7 @@ function workflowToNodes(workflow: Workflow) {
     if (!step.decisions) {
       continue;
     }
-    console.log(step.decisions, 'decisions');
+    //console.log(step.decisions, 'decisions');
     for (const decision of step.decisions) {
       edges.push({
         id: decision.type + step.stepId,
@@ -72,7 +72,6 @@ const nodesToWorkflow = (
   workflow: Workflow
 ) => {
   const stepsMap: Record<string, WorkflowStep> = {};
-
   const newWorkflow: Workflow = {
     ...workflow,
     steps: Object.keys(stepsMap).map((key) => stepsMap[key] as WorkflowStep),
@@ -93,6 +92,14 @@ const nodesToWorkflow = (
         parameters: node.data.parameters,
       },
     };
+    // NOTE: queueId is top-level, not within parameters
+    if (node.data.parameters?.queueId) {
+      step.queue = {
+        queueId: node.data.parameters.queueId,
+        approvalGroups: [''],
+      };
+      delete step.action;
+    }
     stepsMap[step.stepId] = step;
   }
 
@@ -116,6 +123,7 @@ const nodesToWorkflow = (
   newWorkflow.steps = Object.keys(stepsMap).map(
     (key) => stepsMap[key] as WorkflowStep
   );
+
   return newWorkflow;
 };
 

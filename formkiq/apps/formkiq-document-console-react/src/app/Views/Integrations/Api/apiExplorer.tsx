@@ -52,6 +52,7 @@ import {
   getDocumentVersionsApiItem,
   getDocumentsApiItem,
   getDocumentsInQueueApiItem,
+  getDocumentsInWorkflowApiItem,
   getExaminePdfDetailsApiItem,
   getExaminePdfUploadUrlApiItem,
   getFoldersApiItem,
@@ -484,6 +485,10 @@ export function ApiExplorer() {
                 <ApiItem apiItem={putWorkflowsApiItem} sites={sites} />
                 <ApiItem apiItem={deleteWorkflowApiItem} sites={sites} />
                 <ApiItem apiItem={postDocumentWorkflowApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={getDocumentsInWorkflowApiItem}
+                  sites={sites}
+                />
                 <ApiItem apiItem={getQueuesApiItem} sites={sites} />
                 <ApiItem apiItem={postQueuesApiItem} sites={sites} />
                 <ApiItem apiItem={getQueueApiItem} sites={sites} />

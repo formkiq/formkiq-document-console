@@ -223,7 +223,9 @@ export default function DocumentActionsPopover({
                 }
               >
                 <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-3.5 text-neutral-900">{History()}</span>
+                  <span className="mr-2 w-3.5 text-neutral-900">
+                    {History()}
+                  </span>
                   <span>Versions</span>
                   <span
                     className="ml-auto"
@@ -236,7 +238,7 @@ export default function DocumentActionsPopover({
             )}
             {line.lineType === 'document' && (
               <li
-                className="hidden py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
                   onDocumentWorkflowsModalClick(event, {
                     lineType: line.lineType,
@@ -246,7 +248,9 @@ export default function DocumentActionsPopover({
                 }
               >
                 <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-3.5 text-neutral-900">{Workflow()}</span>
+                  <span className="mr-2 w-3.5 text-neutral-900">
+                    {Workflow()}
+                  </span>
                   <span>Workflows</span>
                   <span
                     className="ml-auto"
