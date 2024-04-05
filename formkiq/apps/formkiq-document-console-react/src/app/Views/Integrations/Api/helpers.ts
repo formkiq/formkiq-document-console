@@ -10,11 +10,11 @@ export interface ApiItem {
   requiresDocumentID: boolean;
   requiresWebhookID: boolean;
   requiresWorkflowID: boolean;
-  requiresRulesetID: boolean;
-  requiresRuleID: boolean;
   requiresCaseID: boolean;
   requiresTaskID: boolean;
   requiresNigoID: boolean;
+  requiresRulesetID: boolean;
+  requiresRuleID: boolean;
   requiresObjectId: boolean;
   requiresTagKey: boolean;
   allowsIndexKey: boolean;
@@ -1227,6 +1227,245 @@ export const deleteApiKeyApiItem = {
   license: 'Core',
 };
 
+export const getCasesApiItem = {
+  method: 'GET',
+  path: '/cases',
+  description: 'Returns a list of the Cases',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const postCaseApiItem = {
+  method: 'POST',
+  path: '/cases',
+  description: 'Create a new case',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: "{\"case\":{\"insertedDate\":\"2024-04-05T17:11:31+0000\",\"name\":\"CaseName\",\"description\":\"string\",\"status\":\"NEW\",\"startDate\":\"2024-04-09T04:00:00.000Z\",\"endDate\":\"2024-04-09T04:00:00.000Z\",\"tasks\":[{\"name\":\"New Task\",\"description\":\"New Task Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}],\"nigos\":[{\"name\":\"New NIGO\",\"description\":\"New NIGO Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}]}}",
+  license: 'Pro|Enterprise',
+};
+
+export const getCaseApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID ',
+  description: "Returns a Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const patchCaseApiItem = {
+  method: 'PATCH',
+  path: '/cases/ CASE_ID ',
+  description: "Updates a Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: "{\"case\":{\"insertedDate\":\"2024-04-05T17:11:31+0000\",\"name\":\"CaseName\",\"description\":\"string\",\"status\":\"NEW\",\"startDate\":\"2024-04-09T04:00:00.000Z\",\"endDate\":\"2024-04-09T04:00:00.000Z\",\"tasks\":[{\"name\":\"New Task\",\"description\":\"New Task Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}],\"nigos\":[{\"name\":\"New NIGO\",\"description\":\"New NIGO Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}]}}",
+  license: 'Pro|Enterprise',
+}
+export const deleteCaseApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID ',
+  description: "Deletes a Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  license: 'Pro|Enterprise',
+}
+
+export const getCaseDocumentsApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /documents',
+  description: "Returns documents in a Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+}
+
+export const deleteCaseDocumentApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID /documents/ DOCUMENT_ID ',
+  description: "Deletes a document in a Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresDocumentID: true,
+  license: 'Pro|Enterprise',
+}
+
+export const getTaskApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /tasks/ TASK_ID ',
+  description: "Returns a Task in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  license: 'Pro|Enterprise',
+}
+
+export const patchTaskApiItem = {
+  method: 'PATCH',
+  path: '/cases/ CASE_ID /tasks/ TASK_ID ',
+  description: "Updates a Task in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  defaultPostJsonValue: "{\"task\":{\"name\":\"New Task\",\"description\":\"New Task Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}}",
+  license: 'Pro|Enterprise',
+}
+
+export const deleteTaskApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID /tasks/ TASK_ID ',
+  description: "Deletes a Task in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  license: 'Pro|Enterprise',
+}
+
+export const getTaskDocumentsApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /tasks/ TASK_ID /documents',
+  description: "Returns a list documents in a Task",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+}
+
+export const deleteTaskDocumentApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID /tasks/ TASK_ID /documents/ DOCUMENT_ID ',
+  description: "Deletes a document in a Task",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  requiresDocumentID: true,
+  license: 'Pro|Enterprise',
+}
+
+// break
+
+export const getNigoApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /nigos/ NIGO_ID ',
+  description: "Returns a NIGO in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  license: 'Pro|Enterprise',
+}
+
+export const patchNigoApiItem = {
+  method: 'PATCH',
+  path: '/cases/ CASE_ID /nigos/ NIGO_ID ',
+  description: "Updates a NIGO in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  defaultPostJsonValue: "{\"nigo\":{\"name\":\"New NIGO\",\"description\":\"New Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}}",
+  license: 'Pro|Enterprise',
+}
+
+export const deleteNigoApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID /nigos/ NIGO_ID ',
+  description: "Deletes a NIGO in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  license: 'Pro|Enterprise',
+}
+
+export const getNigoDocumentsApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /nigos/ NIGO_ID /documents',
+  description: "Returns a list documents in a NIGO",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+}
+
+export const deleteNigoDocumentApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID /nigos/ NIGO_ID /documents/ DOCUMENT_ID ',
+  description: "Deletes a document in a NIGO",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  requiresDocumentID: true,
+  license: 'Pro|Enterprise',
+}
+
+export const getTasksApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /tasks',
+  description: "Returns a list of Tasks in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+}
+
+export const getNigosApiItem = {
+  method: 'GET',
+  path: '/cases/ NIGO_ID /tasks',
+  description: "Returns a list of NIGOs in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+}
+
 export const getRulesetsApiItem = {
   method: 'GET',
   path: '/rulesets',
@@ -1349,110 +1588,6 @@ export const deleteRuleApiItem = {
   requiresAuthentication: true,
   requiresRulesetID: true,
   requiresRuleID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCasesApiItem = {
-  method: 'GET',
-  path: '/cases',
-  description: 'Returns a list of cases',
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  allowsLimit: true,
-  hasPagingTokens: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID ',
-  description: "Returns a case's details, i.e., its metadata",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseDocumentsApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /documents',
-  description: "Returns a case's documents",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseTasksApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /tasks',
-  description: "Returns a case's tasks",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseTaskApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /tasks/ TASK_ID ',
-  description: "Returns a case's tasks",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  requiresTaskID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseTaskDocumentsApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /tasks/ TASK_ID /documents',
-  description: "Returns a specific Task's documents from the specified case",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  requiresTaskID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseNigosApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /nigos',
-  description: 'Returns a specific task from the specified case',
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseNigoApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /nigos/ NIGO_ID ',
-  description: 'Returns a specific NIGO from the specified case',
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  requiresNigoID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseNigoDocumentsApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /nigos/ NIGO_ID /documents',
-  description: "Returns a specific NIGO's documents from the specified case",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  requiresNigoID: true,
   license: 'Pro|Enterprise',
 };
 

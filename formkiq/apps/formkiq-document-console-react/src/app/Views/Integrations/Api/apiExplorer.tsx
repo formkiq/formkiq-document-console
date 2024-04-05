@@ -38,13 +38,6 @@ import {
   getApiKeysApiItem,
   getAttributeApiItem,
   getAttributesApiItem,
-  getCaseApiItem,
-  getCaseDocumentsApiItem,
-  getCaseNigoDocumentsApiItem,
-  getCaseNigosApiItem,
-  getCaseTaskDocumentsApiItem,
-  getCaseTasksApiItem,
-  getCasesApiItem,
   getConfigurationApiItem,
   getConfigurationOpaPoliciesApiItem,
   getConfigurationOpaPolicyApiItem,
@@ -146,6 +139,22 @@ import {
   putWorkflowsApiItem,
   restoreDocumentApiItem,
   searchDocumentQueryApiItem,
+  getCasesApiItem,
+  patchCaseApiItem,
+  getCaseApiItem,
+  postCaseApiItem,
+  getCaseDocumentsApiItem,
+  deleteCaseApiItem,
+  deleteCaseDocumentApiItem,
+  getTaskApiItem,
+  getNigosApiItem,
+  getTasksApiItem,
+  patchTaskApiItem,
+  deleteTaskApiItem,
+  getTaskDocumentsApiItem,
+  deleteTaskDocumentApiItem,
+  getNigoApiItem,
+  deleteNigoDocumentApiItem, getNigoDocumentsApiItem, deleteNigoApiItem, patchNigoApiItem,
   getMappingsApiItem,
   postMappingApiItem,
   deleteMappingApiItem,
@@ -696,17 +705,30 @@ export function ApiExplorer() {
               </div>
             </div>
           </ApiSegment>
+
           <ApiSegment title="Cases">
             <div className="ml-2 mb-4 flex flex-cols">
               <div className="w-4 border-l"></div>
               <div className="grow">
                 <ApiItem apiItem={getCasesApiItem} sites={sites} />
+                <ApiItem apiItem={postCaseApiItem} sites={sites} />
                 <ApiItem apiItem={getCaseApiItem} sites={sites} />
+                <ApiItem apiItem={patchCaseApiItem} sites={sites} />
+                <ApiItem apiItem={deleteCaseApiItem} sites={sites} />
                 <ApiItem apiItem={getCaseDocumentsApiItem} sites={sites} />
-                <ApiItem apiItem={getCaseTasksApiItem} sites={sites} />
-                <ApiItem apiItem={getCaseTaskDocumentsApiItem} sites={sites} />
-                <ApiItem apiItem={getCaseNigosApiItem} sites={sites} />
-                <ApiItem apiItem={getCaseNigoDocumentsApiItem} sites={sites} />
+                <ApiItem apiItem={deleteCaseDocumentApiItem} sites={sites} />
+                <ApiItem apiItem={getTaskApiItem} sites={sites} />
+                <ApiItem apiItem={patchTaskApiItem} sites={sites} />
+                <ApiItem apiItem={deleteTaskApiItem} sites={sites} />
+                <ApiItem apiItem={getTaskDocumentsApiItem} sites={sites} />
+                <ApiItem apiItem={deleteTaskDocumentApiItem} sites={sites} />
+                <ApiItem apiItem={getNigoApiItem} sites={sites} />
+                <ApiItem apiItem={patchNigoApiItem} sites={sites} />
+                <ApiItem apiItem={deleteNigoApiItem} sites={sites} />
+                <ApiItem apiItem={getNigoDocumentsApiItem} sites={sites} />
+                <ApiItem apiItem={deleteNigoDocumentApiItem} sites={sites} />
+                <ApiItem apiItem={getTasksApiItem} sites={sites} />
+                <ApiItem apiItem={getNigosApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>
