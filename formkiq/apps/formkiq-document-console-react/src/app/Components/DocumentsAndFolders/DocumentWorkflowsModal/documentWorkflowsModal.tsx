@@ -48,7 +48,6 @@ export default function DocumentWorkflowsModal({
     if (value) {
       DocumentsService.getWorkflowsInDocument(siteId, value.documentId).then(
         (workflowsResponse) => {
-          console.log(workflowsResponse.workflows);
           setDocumentWorkflows(workflowsResponse.workflows);
         }
       );
@@ -56,10 +55,7 @@ export default function DocumentWorkflowsModal({
   };
 
   const triggerWorkflow = (event: any) => {
-    console.log('gg');
-    console.log(value);
     if (value) {
-      console.log(event.target);
       const workflowToTriggerSelect: HTMLSelectElement =
         document.getElementById('workflowToTriggerSelect') as HTMLSelectElement;
       if (workflowToTriggerSelect.selectedIndex === -1) {
@@ -81,7 +77,6 @@ export default function DocumentWorkflowsModal({
             })
           );
         } else {
-          console.log(addResponse);
           updateDocumentWorkflows();
         }
       });
