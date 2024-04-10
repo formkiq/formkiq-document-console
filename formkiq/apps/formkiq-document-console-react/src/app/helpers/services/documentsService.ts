@@ -1330,6 +1330,32 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getQueue(
+    siteId: string,
+    queueId: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getQueue({
+      siteId,
+      queueId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getGroups(
+    siteId: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getGroups({
+      siteId,
+    });
+  }
+
+  @formkiqAPIHandler
   public static async addQueue(name: string, siteId: string): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();

@@ -1,19 +1,19 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {
   Edge,
   MarkerType,
   applyEdgeChanges,
   applyNodeChanges,
 } from 'reactflow';
-import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
-import { DocumentsService } from '../../helpers/services/documentsService';
+import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
+import {DocumentsService} from '../../helpers/services/documentsService';
 import {
   DecisionType,
   NodeType,
   Workflow,
-  WorkflowStep,
+  WorkflowStep, WorkflowStepActionType,
 } from '../../helpers/types/workflows';
-import { RootState } from '../store';
+import {RootState} from '../store';
 
 export interface WorkflowsState {
   nodes: NodeType[];
@@ -37,20 +37,29 @@ function workflowToNodes(workflow: Workflow) {
   const edges: Edge[] = [];
 
   for (const step of workflow.steps) {
+
+    let label: WorkflowStepActionType | "" = "";
+    if (step.queue) {
+      label = "QUEUE";
+    }
+    if (step.action) {
+      label = step.action.type;
+    }
     nodes.push({
       id: step.stepId,
       data: {
-        label: step.action?.type || '',
+        label: label,
         parameters: step.action?.parameters,
+        queue: step.queue,
       },
-      position: { x: 0, y: 0 },
+      position: {x: 0, y: 0},
       type: 'defaultNode',
     });
 
     if (!step.decisions) {
       continue;
     }
-    //console.log(step.decisions, 'decisions');
+
     for (const decision of step.decisions) {
       edges.push({
         id: decision.type + step.stepId,
@@ -58,12 +67,12 @@ function workflowToNodes(workflow: Workflow) {
         target: decision.nextStepId,
         sourceHandle: decision.type === 'APPROVE' ? 'approve' : 'reject',
         targetHandle: 'a',
-        markerEnd: { type: MarkerType.Arrow },
+        markerEnd: {type: MarkerType.Arrow},
       });
     }
   }
-
-  return { nodes, edges };
+  console.log(nodes, 'nodes workflowToNodes')
+  return {nodes, edges};
 }
 
 const nodesToWorkflow = (
@@ -82,6 +91,7 @@ const nodesToWorkflow = (
   }
 
   for (const node of nodes) {
+    console.log(node, 'node')
     if (node.data.label === '') {
       continue;
     }
@@ -91,13 +101,11 @@ const nodesToWorkflow = (
         type: node.data.label,
         parameters: node.data.parameters,
       },
+      decisions: [],
     };
     // NOTE: queueId is top-level, not within parameters
-    if (node.data.parameters?.queueId) {
-      step.queue = {
-        queueId: node.data.parameters.queueId,
-        approvalGroups: [''],
-      };
+    if (node.data.queue) {
+      step.queue = node.data.queue;
       delete step.action;
     }
     stepsMap[step.stepId] = step;
@@ -123,18 +131,18 @@ const nodesToWorkflow = (
   newWorkflow.steps = Object.keys(stepsMap).map(
     (key) => stepsMap[key] as WorkflowStep
   );
-
+  console.log(newWorkflow, 'newWorkflow')
   return newWorkflow;
 };
 
 export const fetchWorkflow = createAsyncThunk(
   'workflows/fetchWorkflow',
   async (data: any, thunkAPI) => {
-    const { siteId, workflowId } = data;
+    const {siteId, workflowId} = data;
     await DocumentsService.getWorkflow(workflowId, siteId).then(
       (response: Workflow) => {
         thunkAPI.dispatch(setWorkflow(response));
-        const { nodes, edges } = workflowToNodes(response);
+        const {nodes, edges} = workflowToNodes(response);
         thunkAPI.dispatch(setNodes(nodes));
         thunkAPI.dispatch(setEdges(edges));
       }
@@ -145,15 +153,15 @@ export const fetchWorkflow = createAsyncThunk(
 export const updateWorkflowSteps = createAsyncThunk(
   'workflows/updateWorkflow',
   async (data: any, thunkAPI) => {
-    const { siteId, workflowId } = data;
-    const { workflowsState } = thunkAPI.getState() as RootState;
-    const { nodes, edges, workflow } = workflowsState;
+    const {siteId, workflowId} = data;
+    const {workflowsState} = thunkAPI.getState() as RootState;
+    const {nodes, edges, workflow} = workflowsState;
     const newWorkflow: Workflow = nodesToWorkflow(nodes, edges, workflow);
     await DocumentsService.putWorkflow(workflowId, newWorkflow, siteId).then(
       (response) => {
         if (response.status === 400) {
           thunkAPI.dispatch(
-            openNotificationDialog({ dialogTitle: response.errors[0].error })
+            openNotificationDialog({dialogTitle: response.errors[0].error})
           );
         }
         thunkAPI.dispatch(setWorkflow(newWorkflow));
