@@ -1,29 +1,34 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { DocumentsService } from '../../helpers/services/documentsService';
-import { RequestStatus, Queue } from '../../helpers/types/queues';
+import {RequestStatus, Queue, Group} from '../../helpers/types/queues';
 import { RootState } from '../store';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
 interface QueuesState {
   queues: Queue[];
-  queue: Queue;
-  loadingStatus: keyof typeof RequestStatus;
-  nextToken: string | null;
-  currentSearchPage: number;
-  isLastSearchPageLoaded: boolean;
+  groups: Group[];
+  queuesLoadingStatus: keyof typeof RequestStatus;
+  groupsLoadingStatus: keyof typeof RequestStatus;
+  nextQueuesToken: string | null;
+  nextGroupsToken: string | null;
+  currentQueuesSearchPage: number;
+  currentGroupsSearchPage: number;
+  isLastGroupsSearchPageLoaded: boolean;
+  isLastQueuesSearchPageLoaded: boolean;
   isLoadingMore: boolean;
 }
 
 const defaultState: QueuesState = {
   queues: [],
-  queue: {
-    queueId: '',
-    name: '',
-  },
-  loadingStatus: RequestStatus.fulfilled,
-  nextToken: null,
-  currentSearchPage: 1,
-  isLastSearchPageLoaded: false,
+  groups: [],
+  groupsLoadingStatus: RequestStatus.fulfilled,
+  queuesLoadingStatus: RequestStatus.fulfilled,
+  nextQueuesToken: null,
+  nextGroupsToken: null,
+  currentQueuesSearchPage: 1,
+  currentGroupsSearchPage: 1,
+  isLastGroupsSearchPageLoaded: false,
+  isLastQueuesSearchPageLoaded:false,
   isLoadingMore: false,
 };
 
@@ -77,6 +82,34 @@ export const deleteQueue = createAsyncThunk(
   }
 );
 
+export const fetchGroups = createAsyncThunk(
+  'groups/fetchGroups',
+  async (data: any, thunkAPI) => {
+    const { siteId, nextToken, limit, page } = data;
+    await DocumentsService.getGroups(siteId, nextToken, limit).then(
+      (response) => {
+        if (response) {
+          const data = {
+            siteId,
+            groups: response.groups,
+            isLoadingMore: false,
+            isLastSearchPageLoaded: false,
+            next: response.next,
+            page,
+          };
+          if (page > 1) {
+            data.isLoadingMore = true;
+          }
+          if (response.documents?.length === 0) {
+            data.isLastSearchPageLoaded = true;
+          }
+          thunkAPI.dispatch(setGroups(data));
+        }
+      }
+    );
+  }
+);
+
 export const queuesSlice = createSlice({
   name: 'queues',
   initialState: defaultState,
@@ -84,31 +117,47 @@ export const queuesSlice = createSlice({
     setQueuesLoadingStatusPending: (state) => {
       return {
         ...state,
-        loadingStatus: RequestStatus.pending,
+        queuesLoadingStatus: RequestStatus.pending,
       };
     },
 
     setQueues: (state, action) => {
       const { queues, isLoadingMore, next, page } = action.payload;
-      let { isLastSearchPageLoaded = false } = action.payload;
-      isLastSearchPageLoaded = !next;
+      const isLastSearchPageLoaded = !next;
       if (queues) {
         if (isLoadingMore) {
           state.queues = state.queues.concat(queues);
         } else {
           state.queues = queues;
         }
-        state.nextToken = next;
-        state.isLastSearchPageLoaded = isLastSearchPageLoaded;
+        state.nextQueuesToken = next;
+        state.isLastQueuesSearchPageLoaded = isLastSearchPageLoaded;
       }
-      state.loadingStatus = RequestStatus.fulfilled;
+      state.queuesLoadingStatus = RequestStatus.fulfilled;
     },
+
+    setGroups: (state, action) => {
+      const { groups,isLoadingMore, next, } = action.payload;
+      const isLastSearchPageLoaded = !next;
+      if (groups) {
+        if (isLoadingMore) {
+              state.groups = state.groups.concat(groups);
+          } else {
+              state.groups = groups;
+          }
+          state.nextGroupsToken = next;
+          state.isLastGroupsSearchPageLoaded = isLastSearchPageLoaded;
+          state.groupsLoadingStatus = RequestStatus.fulfilled;
+      }
+
+    }
   },
 });
 
 export const {
   setQueues,
   setQueuesLoadingStatusPending,
+  setGroups,
 } = queuesSlice.actions;
 
 export const QueuesState = (state: RootState) => state.queuesState;

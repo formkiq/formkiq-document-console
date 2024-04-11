@@ -6,10 +6,7 @@ export interface Step {
   type?: string;
   position?: { x: number; y: number };
   parameters?: WorkflowStepActionParameters;
-  queue?: {
-    queueId: string,
-    approvalGroups: string[],
-  }
+  queue?: Queue;
 }
 
 export type WorkflowNodeProps = {
@@ -29,7 +26,7 @@ export type NodeType = {
 };
 
 type Queue = {
-  queueId: string;
+  queueId?: string;
   approvalGroups?: string[];
 }
 
