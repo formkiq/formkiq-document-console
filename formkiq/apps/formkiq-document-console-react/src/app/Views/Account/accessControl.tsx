@@ -261,7 +261,7 @@ export function AccessControl() {
         <>
           <button
             onClick={toggleInput}
-            className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500 whitespace-nowrap"
+            className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500 whitespace-nowrap"
           >
             Add Policy{' '}
             <div className="w-4 ml-2">
@@ -270,7 +270,7 @@ export function AccessControl() {
           </button>
           <button
             onClick={onSave}
-            className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500"
+            className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500"
           >
             Save{' '}
             <div className="w-5 ml-2">
@@ -279,7 +279,7 @@ export function AccessControl() {
           </button>
           <button
             onClick={onDelete}
-            className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500"
+            className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500"
           >
             Delete{' '}
             <div className="w-3 ml-2">
@@ -306,13 +306,13 @@ export function AccessControl() {
               <div className="flex justify-start items-center">
                 <button
                   onClick={addPolicy}
-                  className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-coreOrange-500 hover:text-coreOrange-500 whitespace-nowrap"
+                  className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500 whitespace-nowrap"
                 >
                   Create
                 </button>
                 <button
                   onClick={toggleInput}
-                  className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-400 border-gray-300 hover:border-coreOrange-500 hover:text-coreOrange-500 whitespace-nowrap"
+                  className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-400 border-gray-300 hover:border-primary-500 hover:text-primary-500 whitespace-nowrap"
                 >
                   Cancel{' '}
                   <div className="w-4 ml-2">

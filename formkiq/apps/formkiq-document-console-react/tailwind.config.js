@@ -322,6 +322,14 @@ module.exports = {
         '7/8': '87.5%',
         '43px': '43px',
       },
+      width: {
+        logo: '244px',
+        logoCollapsed: '120px',
+      },
+      height: {
+        logo: '80px',
+        logoCollapsed: '42px',
+      },
     },
   },
   plugins: [require('@tailwindcss/forms')],

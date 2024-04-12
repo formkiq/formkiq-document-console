@@ -278,22 +278,16 @@ function Navbar() {
               >
                 {!isSidebarExpanded && (
                   <div className="w-40">
-                    <div className="absolute top-0 pt-2.5">
-                      <picture>
-                        <source
-                          srcSet="/assets/img/png/formkiq-wordmark.webp"
-                          type="image/webp"
-                        />
-                        <source
-                          srcSet="/assets/img/png/formkiq-wordmark.png"
-                          type="image/png"
-                        />
-                        <img
-                          src="/assets/img/png/formkiq-wordmark.png"
-                          className="ml-6 mt-2 w-28 mb-2.5"
-                          alt="FormKiQ"
-                        />
-                      </picture>
+                    <div className="absolute top-0 pt-2">
+                      <div className="p-2 w-logoCollapsed h-logoCollapsed flex items-center">
+                        <picture>
+                          <source
+                            srcSet="/assets/img/png/brand-logo-small.png"
+                            type="image/png"
+                          />
+                          <img src="/assets/img/png/brand-logo-small.png" />
+                        </picture>
+                      </div>
                     </div>
                   </div>
                 )}

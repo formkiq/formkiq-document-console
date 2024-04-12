@@ -114,7 +114,7 @@ function TagSchemas() {
   const onTagSchemaDelete = (tagSchemaId: string) => {
     dispatch(
       openConfirmationDialog({
-        dialogTitle: 'Are you sure you want to delete this TagSchema?',
+        dialogTitle: 'Are you sure you want to delete this schema?',
         callback: () => {
           dispatch(
             deleteTagSchema({

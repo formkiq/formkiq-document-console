@@ -1210,27 +1210,21 @@ export function Sidebar() {
         <div
           className={
             (sidebarExpanded ? 'w-64' : 'w-10') +
-            ' flex fixed z-30 justify-between mt-2.5 bg-neutral-100'
+            ' flex fixed z-30 justify-between h-logo bg-neutral-100'
           }
         >
           <Link to="/">
             {sidebarExpanded ? (
               <>
-                <picture>
-                  <source
-                    srcSet="/assets/img/png/formkiq-wordmark.webp"
-                    type="image/webp"
-                  />
-                  <source
-                    srcSet="/assets/img/png/formkiq-wordmark.png"
-                    type="image/png"
-                  />
-                  <img
-                    src="/assets/img/png/formkiq-wordmark.png"
-                    className="ml-6 mt-2 w-28 mb-2.5"
-                    alt="FormKiQ"
-                  />
-                </picture>
+                <div className="w-logo h-logo flex justify-center items-center">
+                  <picture>
+                    <source
+                      srcSet="/assets/img/png/brand-logo.png"
+                      type="image/png"
+                    />
+                    <img src="/assets/img/png/brand-logo.png" />
+                  </picture>
+                </div>
               </>
             ) : (
               <></>
@@ -1238,7 +1232,9 @@ export function Sidebar() {
           </Link>
           <div
             className={
-              (sidebarExpanded ? 'justify-end mr-2 ' : 'justify-end mr-2') +
+              (sidebarExpanded
+                ? 'justify-end -ml-2 mr-2 '
+                : 'justify-end mr-2 ') +
               ' text-neutral-900 hover:text-primary-500 flex mt-2 cursor-pointer '
             }
             onClick={toggleSidebarExpand}
@@ -1256,7 +1252,7 @@ export function Sidebar() {
         ></div>
         {user && (
           <>
-            <nav className="grow mt-16 mb-8">
+            <nav className="grow mt-20 mb-8 pt-4">
               {!isSiteReadOnly && (
                 <div className="flex flex-wrap w-full justify-center mb-4 pl-0.5">
                   <ButtonPrimaryGradient

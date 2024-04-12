@@ -55,7 +55,7 @@ function CaseMenu({
 
         <div className="flex gap-2">
           <button
-            className="h-6 text-gray-900 hover:text-coreOrange-500"
+            className="h-6 text-gray-900 hover:text-primary-500"
             title="Delete Schema"
             type="button"
             onClick={deleteTagSchema}
