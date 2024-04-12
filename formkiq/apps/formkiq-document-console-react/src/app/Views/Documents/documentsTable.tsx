@@ -33,6 +33,7 @@ type DocumentTableProps = {
   onMoveModalClick: (event: any, value: ILine | null) => void;
   onDocumentVersionsModalClick: (event: any, value: ILine | null) => void;
   onDocumentWorkflowsModalClick: (event: any, value: ILine | null) => void;
+  onDocumentReviewModalClick: (event: any, value: ILine | null) => void;
   onEditTagsAndMetadataModalClick: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
@@ -58,6 +59,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     filterTag,
     onDocumentVersionsModalClick,
     onDocumentWorkflowsModalClick,
+    onDocumentReviewModalClick: onDocumentReviewModalClick,
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
@@ -198,6 +200,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onMoveModalClick={onMoveModalClick}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
+                onDocumentReviewModalClick={onDocumentReviewModalClick}
                 onESignaturesModalClick={onESignaturesModalClick}
                 onTagChange={onTagChange}
                 filterTag={filterTag}
@@ -246,6 +249,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     filterTag,
     onDocumentVersionsModalClick,
     onDocumentWorkflowsModalClick,
+    onDocumentReviewModalClick,
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
@@ -275,6 +279,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               onMoveModalClick={onMoveModalClick}
               onDocumentVersionsModalClick={onDocumentVersionsModalClick}
               onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
+              onDocumentReviewModalClick={onDocumentReviewModalClick}
               onESignaturesModalClick={onESignaturesModalClick}
               onTagChange={onTagChange}
               onRestoreDocument={onRestoreDocument}

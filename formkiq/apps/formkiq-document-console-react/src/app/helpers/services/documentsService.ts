@@ -1704,4 +1704,23 @@ export class DocumentsService {
       siteId,
     });
   }
+
+  @formkiqAPIHandler
+  public static async addDecisionToDocumentWorkflow(
+    siteId: string,
+    documentId: string,
+    workflowId: string,
+    addDecisionParameters: any
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.addDecisionToDocumentWorkflow({
+      siteId,
+      documentId,
+      workflowId,
+      addDecisionParameters,
+    });
+  }
+
 }

@@ -50,6 +50,7 @@ function DocumentListLine({
   onMoveModalClick,
   onDocumentVersionsModalClick,
   onDocumentWorkflowsModalClick,
+                            onDocumentReviewModalClick,
   onESignaturesModalClick,
   onTagChange,
   leftOffset = 0,
@@ -72,6 +73,7 @@ function DocumentListLine({
   onMoveModalClick: any;
   onDocumentVersionsModalClick: any;
   onDocumentWorkflowsModalClick: any;
+  onDocumentReviewModalClick: any;
   onESignaturesModalClick: any;
   onTagChange: any;
   filterTag: string | null;
@@ -509,6 +511,7 @@ function DocumentListLine({
                     onDocumentWorkflowsModalClick={
                       onDocumentWorkflowsModalClick
                     }
+                    onDocumentReviewModalClick={onDocumentReviewModalClick}
                     onESignaturesModalClick={onESignaturesModalClick}
                     user={user}
                     useIndividualSharing={useIndividualSharing}

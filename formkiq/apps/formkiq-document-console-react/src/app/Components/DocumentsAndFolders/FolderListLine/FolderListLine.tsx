@@ -33,6 +33,7 @@ interface IProps {
   onMoveModalClick: any;
   onDocumentVersionsModalClick: any;
   onDocumentWorkflowsModalClick: any;
+  onDocumentReviewModalClick:any;
   onESignaturesModalClick: any;
   onTagChange: any;
   filterTag: string | null;
@@ -55,6 +56,7 @@ function FolderListLine({
   onMoveModalClick,
   onDocumentVersionsModalClick,
   onDocumentWorkflowsModalClick,
+                          onDocumentReviewModalClick,
   onESignaturesModalClick,
   onRestoreDocument,
   onDeleteDocument,
@@ -134,6 +136,7 @@ function FolderListLine({
                       onDocumentWorkflowsModalClick={
                         onDocumentWorkflowsModalClick
                       }
+                      onDocumentReviewModalClick={onDocumentReviewModalClick}
                       onESignaturesModalClick={onESignaturesModalClick}
                       onRestoreDocument={onRestoreDocument}
                       onDeleteDocument={onDeleteDocument}
@@ -168,6 +171,7 @@ function FolderListLine({
                   onMoveModalClick={onMoveModalClick}
                   onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                   onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
+                  onDocumentReviewModalClick={onDocumentReviewModalClick}
                   onESignaturesModalClick={onESignaturesModalClick}
                   onTagChange={onTagChange}
                   filterTag={filterTag}
@@ -331,6 +335,7 @@ function FolderListLine({
                         onDocumentWorkflowsModalClick={
                           onDocumentWorkflowsModalClick
                         }
+                        onDocumentReviewModalClick={onDocumentReviewModalClick}
                         onESignaturesModalClick={onESignaturesModalClick}
                         user={user}
                         useIndividualSharing={useIndividualSharing}
