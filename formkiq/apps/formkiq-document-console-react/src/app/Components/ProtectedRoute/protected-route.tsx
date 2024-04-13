@@ -19,6 +19,8 @@ const ProtectedRoute = (props: { children: any }) => {
     const searchParams = search.replace('?', '').split('&') as any[];
     let isRegistrationConfirmation = false;
     let isDemo = false;
+    let isSsoLogin = false;
+    let ssoCode = '';
     searchParams.forEach((param: string) => {
       if (
         param === 'userStatus=NEW_PASSWORD_REQUIRED' ||
@@ -29,6 +31,10 @@ const ProtectedRoute = (props: { children: any }) => {
       } else if (param === 'demo=tryformkiq') {
         isDemo = true;
         return;
+      } else if (param.indexOf('code') > -1) {
+        isSsoLogin = true;
+        ssoCode = param.split('=')[1];
+        return;
       }
     });
     if (isRegistrationConfirmation) {
@@ -36,6 +42,8 @@ const ProtectedRoute = (props: { children: any }) => {
       return;
     } else if (isDemo) {
       return <Navigate to="/sign-in?demo=tryformkiq" />;
+    } else if (isSsoLogin) {
+      return <Navigate to={'/sso-sign-in?code=' + ssoCode} />;
     }
     if (!user) {
       return <Navigate to="/sign-in" />;
