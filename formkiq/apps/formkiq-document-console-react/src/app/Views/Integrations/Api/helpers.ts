@@ -981,7 +981,7 @@ export const postWorkflowsApiItem = {
 
 export const putWorkflowsApiItem = {
   method: 'PUT',
-  path: '/workflows/ WORKFLOW_ID',
+  path: '/workflows/ WORKFLOW_ID ',
   description: 'Updates (by replacing) a workflow',
   username: 'Cognito User',
   requiresSite: true,
@@ -1091,7 +1091,7 @@ export const getWorkflowsInDocumentApiItem = {
 
 export const getWorkflowByIdInDocumentApiItem = {
   method: 'GET',
-  path: '/documents/ DOCUMENT_ID /workflows/ WORKFLOW_ID',
+  path: '/documents/ DOCUMENT_ID /workflows/ WORKFLOW_ID ',
   description: 'Returns a workflow by ID that has been assigned to a document',
   username: 'Cognito User',
   requiresSite: true,

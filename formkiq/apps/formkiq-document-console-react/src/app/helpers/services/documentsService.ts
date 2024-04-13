@@ -1330,6 +1330,38 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getQueue(
+    siteId: string,
+    queueId: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getQueue({
+      siteId,
+      queueId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getGroups(
+    siteId: string,
+    previous = null,
+    next = null,
+    limit = 20
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().workflowsApi.getGroups({
+      siteId,
+      previous,
+      next,
+      limit,
+    });
+  }
+
+  @formkiqAPIHandler
   public static async addQueue(name: string, siteId: string): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
@@ -1672,4 +1704,23 @@ export class DocumentsService {
       siteId,
     });
   }
+
+  @formkiqAPIHandler
+  public static async addDecisionToDocumentWorkflow(
+    siteId: string,
+    documentId: string,
+    workflowId: string,
+    addDecisionParameters: any
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.addDecisionToDocumentWorkflow({
+      siteId,
+      documentId,
+      workflowId,
+      addDecisionParameters,
+    });
+  }
+
 }

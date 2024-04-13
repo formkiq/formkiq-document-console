@@ -1,4 +1,4 @@
-import { Position } from 'reactflow';
+import {Position} from 'reactflow';
 
 export interface Step {
   id: string;
@@ -6,6 +6,7 @@ export interface Step {
   type?: string;
   position?: { x: number; y: number };
   parameters?: WorkflowStepActionParameters;
+  queue?: Queue;
 }
 
 export type WorkflowNodeProps = {
@@ -13,6 +14,7 @@ export type WorkflowNodeProps = {
   parameters?: WorkflowStepActionParameters;
   sourceId?: string | null;
   sourceHandleId?: string | null;
+  queue?: Queue;
 };
 
 export type NodeType = {
@@ -22,6 +24,11 @@ export type NodeType = {
   type?: string;
   targetPosition?: Position;
 };
+
+type Queue = {
+  queueId?: string;
+  approvalGroups?: string[];
+}
 
 type WorkflowStatus = 'ACTIVE' | 'INACTIVE';
 export type WorkflowStepActionType =
@@ -53,7 +60,6 @@ export type WorkflowStepActionParameters = {
   notificationText?: string;
   notificationHtml?: string;
   tags?: string;
-  queueId?: string;
 };
 export type WorkflowStep = {
   stepId: string;
@@ -62,10 +68,7 @@ export type WorkflowStep = {
     parameters?: WorkflowStepActionParameters;
     queueId?: string;
   };
-  queue?: {
-    queueId: string;
-    approvalGroups?: string[];
-  };
+  queue?: Queue;
   decisions?: {
     type: DecisionType;
     nextStepId: string;
@@ -103,4 +106,6 @@ export type parametersInnerType = {
   selectParameters: Record<string, parametersDoubleInnerType>;
   checkboxParameters: Record<string, string>;
   decisions: DecisionType[];
+  queue?: boolean;
+  approvalGroups?: boolean;
 };

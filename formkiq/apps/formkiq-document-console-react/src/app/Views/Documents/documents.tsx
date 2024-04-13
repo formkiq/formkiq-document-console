@@ -76,6 +76,7 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
+import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentReviewModal/DocumentReviewModal';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -185,6 +186,10 @@ function Documents() {
     useState(false);
   const [eSignaturesModalValue, setESignaturesModalValue] =
     useState<ILine | null>(null);
+  const [documentReviewModalValue, setDocumentReviewModalValue] =
+    useState<ILine | null>(null);
+  const [isDocumentReviewModalOpened, setDocumentReviewModalOpened] =
+    useState(false);
   const [isESignaturesModalOpened, setESignaturesModalOpened] = useState(false);
   const [newModalValue, setNewModalValue] = useState<ILine | null>(null);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
@@ -563,6 +568,13 @@ function Documents() {
   const onESignaturesModalClose = () => {
     setESignaturesModalValue(null);
     setESignaturesModalOpened(false);
+  };
+  const onDocumentReviewModalClick = (event: any, value: ILine | null) => {
+    setDocumentReviewModalValue(value);
+    setDocumentReviewModalOpened(true);
+  };
+  const onDocumentReviewModalClose = () => {
+    setDocumentReviewModalOpened(false);
   };
   const onTagChange = (event: any, value: ILine | null) => {
     dispatch(setDocuments({ documents: null }));
@@ -1219,6 +1231,7 @@ function Documents() {
                 filterTag={filterTag}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
+                onDocumentReviewModalClick={onDocumentReviewModalClick}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
                 isArchiveTabExpanded={isArchiveTabExpanded}
@@ -1938,6 +1951,12 @@ function Documents() {
         folder={subfolderUri}
         documentId={folderUploadModalDocumentId}
         isFolderUpload={true}
+      />
+      <DocumentReviewModal
+        isOpened={isDocumentReviewModalOpened}
+        onClose={onDocumentReviewModalClose}
+        siteId={currentSiteId}
+        value={documentReviewModalValue}
       />
     </>
   );

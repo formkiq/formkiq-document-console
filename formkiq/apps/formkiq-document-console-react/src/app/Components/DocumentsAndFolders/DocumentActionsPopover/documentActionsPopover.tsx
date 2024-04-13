@@ -5,6 +5,7 @@ import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import {
   ArrowRight,
+  Checkmark,
   Copy,
   Download,
   History,
@@ -18,6 +19,7 @@ import {
   Trash,
   Workflow,
 } from '../../Icons/icons';
+import {useLocation} from "react-router-dom";
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
@@ -49,6 +51,7 @@ export default function DocumentActionsPopover({
   onMoveModalClick,
   onDocumentVersionsModalClick,
   onDocumentWorkflowsModalClick,
+  onDocumentReviewModalClick,
   onESignaturesModalClick,
   onInfoPage,
   user,
@@ -61,6 +64,7 @@ export default function DocumentActionsPopover({
   const [referenceRef, setReferenceRef] = useState(null);
   const [popperRef, setPopperRef] = useState(null);
   const wrapperRef = useRef(null);
+  const {pathname} = useLocation();
   useOutsideAlerter(wrapperRef, setVisibility);
   const { styles, attributes } = usePopper(referenceRef, popperRef, {
     placement: 'bottom-start',
@@ -261,6 +265,33 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
+
+            {(line.lineType === 'document' && pathname.indexOf('/queues') > -1) && (
+              <li
+                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                onClick={(event) =>
+                  onDocumentReviewModalClick(event, {
+                    lineType: line.lineType,
+                    documentId: line.documentId,
+                    folder: line.folder,
+                  })
+                }
+              >
+                <span className={'flex items-baseline'}>
+                  <span className="mr-2 w-3.5 text-neutral-900">
+                    <Checkmark/>
+                  </span>
+                  <span>Review</span>
+                  <span
+                    className="ml-auto"
+                    style={{width: '15px', height: '13px'}}
+                  >
+                    {ArrowRight()}
+                  </span>
+                </span>
+              </li>
+            )}
+
             {line.lineType === 'document' && !isSiteReadOnly && (
               <div className="w-4/5 my-2 mx-6 border-b"></div>
             )}
