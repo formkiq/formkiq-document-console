@@ -1,15 +1,35 @@
-import {Listbox} from '@headlessui/react';
-import {ChangeEvent, useCallback, useEffect, useMemo, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {Edge, Handle, NodeProps, Position} from 'reactflow';
-import {v4 as uuid} from 'uuid';
+import { Listbox } from '@headlessui/react';
+import React, {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { Edge, Handle, NodeProps, Position } from 'reactflow';
+import { v4 as uuid } from 'uuid';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
+import {
+  fetchGroups,
+  fetchQueues,
+  setQueuesLoadingStatusPending,
+} from '../../../Store/reducers/queues';
 import {
   addEdge,
   addNode,
   editNode,
   removeNode,
 } from '../../../Store/reducers/workflows';
-import type {RootState} from '../../../Store/store';
+import type { RootState } from '../../../Store/store';
+import { useAppDispatch } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import {
+  getCurrentSiteInfo,
+  getUserSites,
+} from '../../../helpers/services/toolService';
+import { RequestStatus } from '../../../helpers/types/document';
 import {
   NodeType,
   Step,
@@ -22,7 +42,8 @@ import {
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import {
   Antivirus,
-  ArrowRight, Check, Checkmark,
+  ArrowRight,
+  Check,
   ChevronRight,
   Documents,
   Edit,
@@ -39,23 +60,15 @@ import {
   DefaultTargetHandle,
   OneConditionSourceHandle,
 } from '../Handles/handles';
-import {fetchGroups, fetchQueues, setQueuesLoadingStatusPending} from "../../../Store/reducers/queues";
-import {useAppDispatch} from "../../../Store/store";
-import {getCurrentSiteInfo, getUserSites} from "../../../helpers/services/toolService";
-import {useAuthenticatedState} from "../../../Store/reducers/auth";
-import {useLocation} from "react-router-dom";
-import {RequestStatus} from "../../../helpers/types/document";
-import {DocumentsService} from "../../../helpers/services/documentsService";
-import React from 'react';
 
 const iconMap = {
-  ANTIVIRUS: <Antivirus/>,
-  OCR: <Documents/>,
-  QUEUE: <Wildcard/>,
-  DOCUMENTTAGGING: <IntelligentClassification/>,
-  NOTIFICATION: <EnvelopeClose/>,
-  FULLTEXT: <Search/>,
-  WEBHOOK: <Rule/>,
+  ANTIVIRUS: <Antivirus />,
+  OCR: <Documents />,
+  QUEUE: <Wildcard />,
+  DOCUMENTTAGGING: <IntelligentClassification />,
+  NOTIFICATION: <EnvelopeClose />,
+  FULLTEXT: <Search />,
+  WEBHOOK: <Rule />,
 };
 
 const getIcon = (name: keyof typeof iconMap) => iconMap[name];
@@ -67,7 +80,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
   DOCUMENTTAGGING: {
     title: 'Intelligent Document Classification',
     textInputParameters: {
-      tags: '	Comma-delimited list of keywords',
+      tags: 'Comma-delimited list of keywords',
     },
     selectParameters: {
       engine: {
@@ -112,7 +125,10 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
   },
   OCR: {
     title: 'Optical Character Recognition (OCR)',
-    textInputParameters: {},
+    textInputParameters: {
+      ocrNumberOfPages:
+        'Number of Pages to Process (from start) -- use "-1" for no limit',
+    },
     selectParameters: {
       ocrParseTypes: {
         description: 'OCR Parsing strategy to use',
@@ -161,12 +177,11 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
 };
 
 export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
-
-  const {user} = useAuthenticatedState();
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { user } = useAuthenticatedState();
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId} = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -175,7 +190,7 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
     workspaceSites
   );
   const data = props.data;
-  const icon = getIcon(data.label as keyof typeof iconMap) || <ArrowRight/>;
+  const icon = getIcon(data.label as keyof typeof iconMap) || <ArrowRight />;
   const dispatch = useAppDispatch();
   const edges: Edge[] = useSelector(
     (state: RootState) => state.workflowsState.edges
@@ -206,8 +221,8 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
       const id = getNodeId();
       const newNode = {
         id,
-        position: {x: x + 300, y: y},
-        data: {label: ''},
+        position: { x: x + 300, y: y },
+        data: { label: '' },
         type: 'creatorNode',
       };
       const newEdge = {
@@ -223,7 +238,7 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
   };
 
   const openNodeEditor = () => {
-    dispatch(editNode({id: props.id, changes: {type: 'creatorNode'}}));
+    dispatch(editNode({ id: props.id, changes: { type: 'creatorNode' } }));
   };
 
   const nodeName = data.label as keyof typeof parametersMap;
@@ -237,32 +252,30 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
   const [groups, setGroups] = useState<string[] | null>(null);
 
   useEffect(() => {
-
     if (!data.queue) return;
     if (data.queue.queueId) {
       DocumentsService.getQueue(siteId, data.queue.queueId).then((res) => {
-        if (res.status === 200)
-          setQueue(res.name);
-      })
+        if (res.status === 200) setQueue(res.name);
+      });
     }
-  }, [data.queue])
-  
+  }, [data.queue]);
+
   return (
     <>
-      <DefaultTargetHandle type="target" id="a" position={Position.Left}/>
+      <DefaultTargetHandle type="target" id="a" position={Position.Left} />
       {props.selected && parametersInfo?.title && (
         <div className="absolute top-[-30px] right-0 flex flex-row gap-2 ">
           <div
             className="w-6 h-6 rounded-full border-2 bg-white text-gray-400  p-1 cursor-pointer  border-gray-400 hover:text-gray-600 hover:border-gray-600 hover:bg-gray-100 nodrag"
             onClick={openNodeEditor}
           >
-            <Edit/>
+            <Edit />
           </div>
           <div
             className="w-6 h-6 rounded-full border-2 bg-white text-gray-400  p-1 cursor-pointer border-gray-400 hover:text-gray-600 hover:border-gray-600 hover:bg-gray-100 nodrag"
             onClick={() => dispatch(removeNode(props.id))}
           >
-            <Trash/>
+            <Trash />
           </div>
         </div>
       )}
@@ -271,8 +284,7 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
           props.selected && 'border-2 border-gray-500 bo'
         } hover:shadow`}
       >
-        <div
-          className="p-1 tracking-normal font-bold bg-blue-100 flex border-t border-gray-700 border flex-row items-start">
+        <div className="p-1 tracking-normal font-bold bg-blue-100 flex border-t border-gray-700 border flex-row items-start">
           <div className="w-6 mr-1 mt-1">{icon}</div>
           {parametersInfo.title}
         </div>
@@ -295,8 +307,8 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
                             parametersInfo.selectParameters[key].options[
                               data.parameters[
                                 key as keyof WorkflowStepActionParameters
-                                ] as string
-                              ]}
+                              ] as string
+                            ]}
                         </span>
                       </div>
                     </div>
@@ -311,10 +323,10 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
                         {data?.parameters &&
                           (data.parameters[
                             key as keyof WorkflowStepActionParameters
-                            ] === ''
+                          ] === ''
                             ? '-'
                             : data.parameters[
-                              key as keyof WorkflowStepActionParameters
+                                key as keyof WorkflowStepActionParameters
                               ])}
                       </span>
                     </div>
@@ -330,10 +342,10 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
                         {data?.parameters &&
                           (data.parameters[
                             key as keyof WorkflowStepActionParameters
-                            ] === 'true' ||
+                          ] === 'true' ||
                           data.parameters[
                             key as keyof WorkflowStepActionParameters
-                            ] === true
+                          ] === true
                             ? 'Yes'
                             : 'No')}
                       </span>
@@ -345,18 +357,25 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
           </>
         )}
         {/*Queue*/}
-        {parametersInfo.queue && (<>
+        {parametersInfo.queue && (
+          <>
             <div className="my-2">
               <div className="text-gray-600 text-sm">
                 Queue:{' '}
-                <span className="text-sm text-gray-800 font-medium ">{queue ? queue : "-"}</span>
+                <span className="text-sm text-gray-800 font-medium ">
+                  {queue ? queue : '-'}
+                </span>
               </div>
             </div>
             <div className="my-2">
               <div className="text-gray-600 text-sm">
                 Approval Groups:{' '}
-                <span
-                  className="text-sm text-gray-800 font-medium ">{(data?.queue?.approvalGroups && data.queue.approvalGroups.length > 0 ) ? data.queue.approvalGroups.join(', ') : "-"}</span>
+                <span className="text-sm text-gray-800 font-medium ">
+                  {data?.queue?.approvalGroups &&
+                  data.queue.approvalGroups.length > 0
+                    ? data.queue.approvalGroups.join(', ')
+                    : '-'}
+                </span>
               </div>
             </div>
           </>
@@ -397,10 +416,10 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
       {isHandleConnectable && (
         <div
           className="w-6 mt-6 rounded-full bg-green-400 text-white hover:border-green-700 p-1  cursor-pointer absolute right-[-36px] border-2 border-white hover:text-green-700 nodrag"
-          style={{top: 'calc(50% - 12px)'}}
+          style={{ top: 'calc(50% - 12px)' }}
           onClick={addCreatorNode}
         >
-          <Plus/>
+          <Plus />
         </div>
       )}
     </>
@@ -408,12 +427,11 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
 };
 
 export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
-
-  const {user} = useAuthenticatedState();
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { user } = useAuthenticatedState();
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId} = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -463,25 +481,33 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
     if (step.queue) {
       newNode.data.queue = step.queue;
     }
-    dispatch(editNode({id: props.id, changes: newNode}));
+    dispatch(editNode({ id: props.id, changes: newNode }));
     setNewStep(null);
   };
 
   return (
     <>
-      <Handle type="target" position={Position.Left} id="a"/>
+      <Handle type="target" position={Position.Left} id="a" />
       <div
         className={`w-72 bg-gray-200 min-h-16 rounded-md p-2  shadow-sm box-content ${
           props.selected && 'border-2 border-gray-500'
         } hover:shadow`}
       >
         <div className="mb-2">Step Editor</div>
-        <NodeNameSelector newStep={newStep} setNewStep={setNewStep}/>
-        <ParametersSelectors newStep={newStep} setNewStep={setNewStep}/>
-        <TextInputs newStep={newStep} setNewStep={setNewStep}/>
-        <CheckBoxes newStep={newStep} setNewStep={setNewStep}/>
-        <QueueSelector newStep={newStep} setNewStep={setNewStep} siteId={siteId}/>
-        <ApprovalGroupsSelector newStep={newStep} setNewStep={setNewStep} siteId={siteId}/>
+        <NodeNameSelector newStep={newStep} setNewStep={setNewStep} />
+        <ParametersSelectors newStep={newStep} setNewStep={setNewStep} />
+        <TextInputs newStep={newStep} setNewStep={setNewStep} />
+        <CheckBoxes newStep={newStep} setNewStep={setNewStep} />
+        <QueueSelector
+          newStep={newStep}
+          setNewStep={setNewStep}
+          siteId={siteId}
+        />
+        <ApprovalGroupsSelector
+          newStep={newStep}
+          setNewStep={setNewStep}
+          siteId={siteId}
+        />
 
         {!isAddButtonDisabled && newStep !== null && (
           <ButtonGhost className="nodrag mt-4" onClick={() => onAdd(newStep)}>
@@ -494,9 +520,9 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
 };
 
 const NodeNameSelector = ({
-                            newStep,
-                            setNewStep,
-                          }: {
+  newStep,
+  setNewStep,
+}: {
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
 }) => {
@@ -549,7 +575,7 @@ const NodeNameSelector = ({
     parametersMap
   ).map((key) => ({
     [key as WorkflowStepActionType]:
-    parametersMap[key as WorkflowStepActionType].title,
+      parametersMap[key as WorkflowStepActionType].title,
   }));
 
   let stepName = 'Select Step...';
@@ -559,22 +585,20 @@ const NodeNameSelector = ({
 
   return (
     <Listbox value="" onChange={selectStepName}>
-      <Listbox.Button
-        className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag">
+      <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag">
         <span className="block truncate">{stepName}</span>
         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
           <div className="rotate-90 w-4">
-            <ChevronRight/>
+            <ChevronRight />
           </div>
         </span>
       </Listbox.Button>
-      <Listbox.Options
-        className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel">
+      <Listbox.Options className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel">
         {stepsNames.map((step) => (
           <Listbox.Option
             key={Object.keys(step)[0]}
             value={Object.keys(step)[0]}
-            className={({active}) =>
+            className={({ active }) =>
               `relative cursor-default select-none py-2 pl-10 pr-4 ${
                 active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
               }`
@@ -589,9 +613,9 @@ const NodeNameSelector = ({
 };
 
 const ParametersSelectors = ({
-                               newStep,
-                               setNewStep,
-                             }: {
+  newStep,
+  setNewStep,
+}: {
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
 }) => {
@@ -628,8 +652,8 @@ const ParametersSelectors = ({
       return selectors[selectorKey as WorkflowStepActionType].options[
         newStep.parameters[
           selectorKey as keyof typeof newStep.parameters
-          ] as WorkflowStepActionType
-        ];
+        ] as WorkflowStepActionType
+      ];
     } else {
       return 'Select ...';
     }
@@ -651,26 +675,24 @@ const ParametersSelectors = ({
                 handleSelectStepParameter(value, selectorKey)
               }
             >
-              <Listbox.Button
-                className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag nowheel">
+              <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag nowheel">
                 <span className="block truncate">
                   {parameterValue(selectorKey)}
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                   <div className="rotate-90 w-4">
-                    <ChevronRight/>
+                    <ChevronRight />
                   </div>
                 </span>
               </Listbox.Button>
-              <Listbox.Options
-                className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel">
+              <Listbox.Options className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel">
                 {Object.keys(
                   selectors[selectorKey as WorkflowStepActionType].options
                 ).map((optionKey) => (
                   <Listbox.Option
                     key={optionKey}
                     value={optionKey}
-                    className={({active}) =>
+                    className={({ active }) =>
                       `relative cursor-default select-none py-2 pl-10 pr-4 ${
                         active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
                       }`
@@ -679,7 +701,7 @@ const ParametersSelectors = ({
                     {
                       selectors[selectorKey as WorkflowStepActionType].options[
                         optionKey
-                        ]
+                      ]
                     }
                   </Listbox.Option>
                 ))}
@@ -691,24 +713,22 @@ const ParametersSelectors = ({
   );
 };
 
-
 const QueueSelector = ({
-                         newStep,
-                         setNewStep,
-                         siteId,
-                       }: {
+  newStep,
+  setNewStep,
+  siteId,
+}: {
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
   siteId: string;
 }) => {
-
   const {
     queues,
     nextQueuesToken,
     queuesLoadingStatus,
     currentQueuesSearchPage,
     isLastQueuesSearchPageLoaded,
-    isLoadingMore
+    isLoadingMore,
   } = useSelector((state: RootState) => state.queuesState);
 
   const dispatch = useAppDispatch();
@@ -717,44 +737,45 @@ const QueueSelector = ({
 
   // load queues
   useEffect(() => {
-    if (newStep && parametersMap[newStep.name as WorkflowStepActionType]?.queue) {
+    if (
+      newStep &&
+      parametersMap[newStep.name as WorkflowStepActionType]?.queue
+    ) {
       setIsQueueSelectorOpen(true);
-      dispatch(fetchQueues({siteId}));
+      dispatch(fetchQueues({ siteId }));
     } else {
       setIsQueueSelectorOpen(false);
     }
-
   }, [newStep, siteId]);
 
   // update selected queue name
   useEffect(() => {
-    const newStepQueue = queues.find((queue) => queue.queueId === newStep?.queue?.queueId)?.name
+    const newStepQueue = queues.find(
+      (queue) => queue.queueId === newStep?.queue?.queueId
+    )?.name;
     if (newStepQueue) {
-      setQueueValue(newStepQueue)
+      setQueueValue(newStepQueue);
     } else {
-      setQueueValue('Select...')
+      setQueueValue('Select...');
     }
-  }, [newStep, queues])
+  }, [newStep, queues]);
 
-  const handleSelectQueue = (
-    id: string
-  ) => {
+  const handleSelectQueue = (id: string) => {
     if (!newStep) return;
-    const step: Step = {...newStep}
+    const step: Step = { ...newStep };
     if (step.queue) {
       step.queue = {
         ...step.queue,
         queueId: id,
-      }
+      };
     } else {
       step.queue = {
         queueId: id,
         approvalGroups: [],
-      }
+      };
     }
     setNewStep(step);
   };
-
 
   // load more queues when table reaches bottom
   const trackScrolling = useCallback(async () => {
@@ -797,68 +818,66 @@ const QueueSelector = ({
 
   return (
     <>
-      {(isQueueSelectorOpen) && ((queues && queues.length > 0) ?
-
-        <div>
-          <div className="text-sm text-gray-800 mt-4 mb-2">
-            Queue:
-          </div>
-          <Listbox
-            value=""
-            onChange={(value: string) =>
-              handleSelectQueue(value)
-            }
-          >
-            <Listbox.Button
-              className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag nowheel">
-                <span className="block truncate">
-                  {queueValue}
-                </span>
-              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+      {isQueueSelectorOpen &&
+        (queues && queues.length > 0 ? (
+          <div>
+            <div className="text-sm text-gray-800 mt-4 mb-2">Queue:</div>
+            <Listbox
+              value=""
+              onChange={(value: string) => handleSelectQueue(value)}
+            >
+              <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag nowheel">
+                <span className="block truncate">{queueValue}</span>
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                   <div className="rotate-90 w-4">
-                    <ChevronRight/>
+                    <ChevronRight />
                   </div>
                 </span>
-            </Listbox.Button>
-            <Listbox.Options id="queuesScrollPane" onScroll={handleScroll}
-                             className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel">
-              {queues.map((queue) => (
-                <Listbox.Option
-                  key={queue.queueId}
-                  value={queue.queueId}
-                  className={({active}) =>
-                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                      active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
-                    }`
-                  }
-                >
-                  {queue.name}
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </Listbox>
-        </div> : <p> No queues found. </p>)}
+              </Listbox.Button>
+              <Listbox.Options
+                id="queuesScrollPane"
+                onScroll={handleScroll}
+                className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel"
+              >
+                {queues.map((queue) => (
+                  <Listbox.Option
+                    key={queue.queueId}
+                    value={queue.queueId}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                        active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
+                      }`
+                    }
+                  >
+                    {queue.name}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </Listbox>
+          </div>
+        ) : (
+          <p> No queues found. </p>
+        ))}
     </>
   );
 };
 
 const ApprovalGroupsSelector = ({
-                                  newStep,
-                                  setNewStep,
-                                  siteId,
-                                }: {
+  newStep,
+  setNewStep,
+  siteId,
+}: {
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
   siteId: string;
 }) => {
-
   const {
     groups,
     nextGroupsToken,
     groupsLoadingStatus,
     currentGroupsSearchPage,
     isLastGroupsSearchPageLoaded,
-    isLoadingMore
+    isLoadingMore,
   } = useSelector((state: RootState) => state.queuesState);
 
   const dispatch = useAppDispatch();
@@ -867,44 +886,45 @@ const ApprovalGroupsSelector = ({
 
   // load queues
   useEffect(() => {
-    if (newStep && parametersMap[newStep.name as WorkflowStepActionType]?.approvalGroups) {
+    if (
+      newStep &&
+      parametersMap[newStep.name as WorkflowStepActionType]?.approvalGroups
+    ) {
       setIsGroupsSelectorOpen(true);
-      dispatch(fetchGroups({siteId}));
+      dispatch(fetchGroups({ siteId }));
     } else {
       setIsGroupsSelectorOpen(false);
     }
-
   }, [newStep, siteId]);
 
   // update selected groups
   useEffect(() => {
-    const newStepGroups = groups.filter((group) => newStep?.queue?.approvalGroups?.includes(group.name))
+    const newStepGroups = groups.filter((group) =>
+      newStep?.queue?.approvalGroups?.includes(group.name)
+    );
 
     if (newStepGroups.length > 0) {
-      setSelectedGroups(newStepGroups.map((group) => group.name))
+      setSelectedGroups(newStepGroups.map((group) => group.name));
     } else {
-      setSelectedGroups([])
+      setSelectedGroups([]);
     }
-  }, [newStep, groups])
+  }, [newStep, groups]);
 
-  const handleSelectGroups = (
-    groups: string[]
-  ) => {
+  const handleSelectGroups = (groups: string[]) => {
     if (!newStep) return;
-    const step: Step = {...newStep}
+    const step: Step = { ...newStep };
     if (step.queue) {
       step.queue = {
         ...step.queue,
-        approvalGroups: groups
-      }
+        approvalGroups: groups,
+      };
     } else {
       step.queue = {
         approvalGroups: groups,
-      }
+      };
     }
     setNewStep(step);
   };
-
 
   // load more queues when table reaches bottom
   const trackScrolling = useCallback(async () => {
@@ -947,63 +967,68 @@ const ApprovalGroupsSelector = ({
 
   return (
     <>
-      {(isGroupsSelectorOpen) && ((groups && groups.length > 0) ?
-
-        <div>
-          <div className="text-sm text-gray-800 mt-4 mb-2">
-            Approval Groups:
-          </div>
-          <Listbox
-            value={selectedGroups}
-            onChange={(value: string[]) =>
-              handleSelectGroups(value)
-            }
-            multiple
-          >
-            <Listbox.Button
-              className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag nowheel">
-              <span
-                className="block truncate">{selectedGroups.length > 0 ? selectedGroups.join(', ') : 'Select ...'}</span>
-              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+      {isGroupsSelectorOpen &&
+        (groups && groups.length > 0 ? (
+          <div>
+            <div className="text-sm text-gray-800 mt-4 mb-2">
+              Approval Groups:
+            </div>
+            <Listbox
+              value={selectedGroups}
+              onChange={(value: string[]) => handleSelectGroups(value)}
+              multiple
+            >
+              <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag nowheel">
+                <span className="block truncate">
+                  {selectedGroups.length > 0
+                    ? selectedGroups.join(', ')
+                    : 'Select ...'}
+                </span>
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                   <div className="rotate-90 w-4">
-                    <ChevronRight/>
+                    <ChevronRight />
                   </div>
                 </span>
-            </Listbox.Button>
-            <Listbox.Options id="groupsScrollPane" onScroll={handleScroll}
-                             className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel">
-              {groups.map((group) => (
-                <Listbox.Option
-                  key={group.name}
-                  value={group.name}
-                  className={({active}) =>
-                    `relative cursor-default select-none py-2 px-4 ${
-                      active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
-                    }`
-                  }
-                >
-                  {({active, selected}) => (
-                    <div className="flex item-center justify-start"
-                    >
-                      <div className="w-5 h-5 mr-2">
-                        {selected && <Check/>}
+              </Listbox.Button>
+              <Listbox.Options
+                id="groupsScrollPane"
+                onScroll={handleScroll}
+                className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel"
+              >
+                {groups.map((group) => (
+                  <Listbox.Option
+                    key={group.name}
+                    value={group.name}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 px-4 ${
+                        active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
+                      }`
+                    }
+                  >
+                    {({ active, selected }) => (
+                      <div className="flex item-center justify-start">
+                        <div className="w-5 h-5 mr-2">
+                          {selected && <Check />}
+                        </div>
+                        {group.name}
                       </div>
-                      {group.name}
-                    </div>
-                  )}
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </Listbox>
-        </div> : <p> No Groups found. </p>)}
+                    )}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </Listbox>
+          </div>
+        ) : (
+          <p> No Groups found. </p>
+        ))}
     </>
   );
 };
 
 const TextInputs = ({
-                      newStep,
-                      setNewStep,
-                    }: {
+  newStep,
+  setNewStep,
+}: {
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
 }) => {
@@ -1039,7 +1064,7 @@ const TextInputs = ({
     ) {
       return newStep.parameters[
         textInputKey as keyof typeof newStep.parameters
-        ] as WorkflowStepActionType;
+      ] as WorkflowStepActionType;
     } else {
       return '';
     }
@@ -1071,9 +1096,9 @@ const TextInputs = ({
 };
 
 const CheckBoxes = ({
-                      newStep,
-                      setNewStep,
-                    }: {
+  newStep,
+  setNewStep,
+}: {
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
 }) => {
@@ -1109,7 +1134,7 @@ const CheckBoxes = ({
     ) {
       return newStep.parameters[
         checkBoxesKey as keyof typeof newStep.parameters
-        ] as boolean;
+      ] as boolean;
     } else {
       return false;
     }
