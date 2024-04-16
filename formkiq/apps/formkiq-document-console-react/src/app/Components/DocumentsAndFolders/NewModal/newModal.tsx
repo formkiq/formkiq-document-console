@@ -22,12 +22,14 @@ export default function NewModal({
   siteId,
   formkiqVersion,
   value,
+  onDocumentDataChange,
 }: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
   formkiqVersion: any;
   value: ILine | null;
+  onDocumentDataChange: any;
 }) {
   const {
     register,
@@ -54,8 +56,8 @@ export default function NewModal({
     setItemToCreate('');
     setFormActive(false);
     reset();
+    onDocumentDataChange();
     onClose();
-    window.location.reload();
   };
 
   const onNewFolderClick = (event: any, value: ILine | null) => {

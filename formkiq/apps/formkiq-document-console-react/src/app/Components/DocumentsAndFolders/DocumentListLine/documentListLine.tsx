@@ -10,10 +10,6 @@ import {
   removeDocumentTag,
 } from '../../../Store/reducers/documentsList';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
-import {
-  closeDialog as closeProgressDialog,
-  openDialog as openProgressDialog,
-} from '../../../Store/reducers/globalProgressControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import {
@@ -112,11 +108,9 @@ function DocumentListLine({
   const onPermanentDeleteClick = () => {
     const deleteFunc = () => {
       DocumentsService.deleteDocument(file.documentId, siteId).then(() => {
-        dispatch(openProgressDialog({ dialogTitle: 'Deleting...' }));
         setTimeout(() => {
-          closeProgressDialog();
-          window.location.reload();
-        }, 2000);
+          onDocumentDataChange();
+        }, 1000);
         /*
         if (useSoftDelete) {
           navigate(
