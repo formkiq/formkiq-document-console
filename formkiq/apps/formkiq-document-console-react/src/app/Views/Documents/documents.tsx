@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
+import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentReviewModal/DocumentReviewModal';
 import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
 import DocumentWorkflowsModal from '../../Components/DocumentsAndFolders/DocumentWorkflowsModal/documentWorkflowsModal';
 import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
@@ -76,7 +77,6 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentReviewModal/DocumentReviewModal';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -499,7 +499,7 @@ function Documents() {
           updateTags();
         });
         setTimeout(() => {
-          onTagChange(null, null);
+          onDocumentDataChange(null, null);
         }, 500);
       };
       dispatch(
@@ -576,7 +576,7 @@ function Documents() {
   const onDocumentReviewModalClose = () => {
     setDocumentReviewModalOpened(false);
   };
-  const onTagChange = (event: any, value: ILine | null) => {
+  const onDocumentDataChange = (event: any, value: ILine | null) => {
     dispatch(setDocuments({ documents: null }));
     dispatch(
       fetchDocuments({
@@ -1223,7 +1223,7 @@ function Documents() {
                 currentSiteId={currentSiteId}
                 currentDocumentsRootUri={currentDocumentsRootUri}
                 onESignaturesModalClick={onESignaturesModalClick}
-                onTagChange={onTagChange}
+                onDocumentDataChange={onDocumentDataChange}
                 isSiteReadOnly={isSiteReadOnly}
                 onEditTagsAndMetadataModalClick={
                   onEditTagsAndMetadataModalClick
@@ -1522,7 +1522,7 @@ function Documents() {
                                 documentInstance: currentDocument as IDocument,
                                 folderInstance: null,
                               }}
-                              onTagChange={onTagChange}
+                              onDocumentDataChange={onDocumentDataChange}
                               updateTags={updateTags}
                               siteId={currentSiteId}
                               tagColors={tagColors}
@@ -1888,7 +1888,7 @@ function Documents() {
         siteId={currentSiteId}
         getValue={getEditTagsAndMetadataModalValue}
         value={editTagsAndMetadataModalValue}
-        onTagChange={onTagChange}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <DocumentVersionsModal
         isOpened={isDocumentVersionsModalOpened}
@@ -1942,6 +1942,7 @@ function Documents() {
         folder={subfolderUri}
         documentId={uploadModalDocumentId}
         isFolderUpload={false}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <UploadModal
         isOpened={isFolderUploadModalOpened}
@@ -1951,6 +1952,7 @@ function Documents() {
         folder={subfolderUri}
         documentId={folderUploadModalDocumentId}
         isFolderUpload={true}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <DocumentReviewModal
         isOpened={isDocumentReviewModalOpened}
