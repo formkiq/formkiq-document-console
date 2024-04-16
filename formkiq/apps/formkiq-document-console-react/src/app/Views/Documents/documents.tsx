@@ -1920,12 +1920,14 @@ function Documents() {
         siteId={currentSiteId}
         formkiqVersion={formkiqVersion}
         value={newModalValue}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <RenameModal
         isOpened={isRenameModalOpened}
         onClose={onRenameModalClose}
         siteId={currentSiteId}
         value={renameModalValue}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <MoveModal
         isOpened={isMoveModalOpened}
