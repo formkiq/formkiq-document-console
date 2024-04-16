@@ -33,9 +33,9 @@ interface IProps {
   onMoveModalClick: any;
   onDocumentVersionsModalClick: any;
   onDocumentWorkflowsModalClick: any;
-  onDocumentReviewModalClick:any;
+  onDocumentReviewModalClick: any;
   onESignaturesModalClick: any;
-  onTagChange: any;
+  onDocumentDataChange: any;
   filterTag: string | null;
   isArchiveTabExpanded?: boolean;
   addToPendingArchive?: (file: IDocument) => void;
@@ -56,11 +56,11 @@ function FolderListLine({
   onMoveModalClick,
   onDocumentVersionsModalClick,
   onDocumentWorkflowsModalClick,
-                          onDocumentReviewModalClick,
+  onDocumentReviewModalClick,
   onESignaturesModalClick,
   onRestoreDocument,
   onDeleteDocument,
-  onTagChange,
+  onDocumentDataChange,
   filterTag,
   isArchiveTabExpanded,
   addToPendingArchive,
@@ -140,7 +140,7 @@ function FolderListLine({
                       onESignaturesModalClick={onESignaturesModalClick}
                       onRestoreDocument={onRestoreDocument}
                       onDeleteDocument={onDeleteDocument}
-                      onTagChange={onTagChange}
+                      onDocumentDataChange={onDocumentDataChange}
                       filterTag={filterTag}
                       isArchiveTabExpanded={isArchiveTabExpanded}
                       archiveStatus={archiveStatus}
@@ -173,7 +173,7 @@ function FolderListLine({
                   onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                   onDocumentReviewModalClick={onDocumentReviewModalClick}
                   onESignaturesModalClick={onESignaturesModalClick}
-                  onTagChange={onTagChange}
+                  onDocumentDataChange={onDocumentDataChange}
                   filterTag={filterTag}
                   leftOffset={4}
                   isArchiveTabExpanded={isArchiveTabExpanded}

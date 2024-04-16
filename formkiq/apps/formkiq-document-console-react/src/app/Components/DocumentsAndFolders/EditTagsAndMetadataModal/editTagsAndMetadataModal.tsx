@@ -15,14 +15,14 @@ export default function EditTagsAndMetadataModal({
   siteId,
   getValue,
   value,
-  onTagChange,
+  onDocumentDataChange,
 }: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
   getValue: any;
   value: ILine | null;
-  onTagChange: any;
+  onDocumentDataChange: any;
 }) {
   const [allTags, setAlltags] = useState(null);
   const {
@@ -65,7 +65,7 @@ export default function EditTagsAndMetadataModal({
       ).then(() => {
         updateTags();
         setTimeout(() => {
-          onTagChange(value);
+          onDocumentDataChange(value);
         }, 500);
       });
     };
@@ -93,7 +93,7 @@ export default function EditTagsAndMetadataModal({
       (response) => {
         updateTags();
         setTimeout(() => {
-          onTagChange(value);
+          onDocumentDataChange(value);
         }, 500);
       }
     );
@@ -109,7 +109,7 @@ export default function EditTagsAndMetadataModal({
     ).then(() => {
       updateTags();
       setTimeout(() => {
-        onTagChange(value);
+        onDocumentDataChange(value);
       }, 500);
     });
   };

@@ -32,7 +32,7 @@ export default function DocumentTagsPopover({
   isSiteReadOnly,
   value,
   tagColors,
-  onTagChange,
+  onDocumentDataChange,
 }: any) {
   const line: ILine = value;
   const [visible, setVisibility] = useState(false);
@@ -78,7 +78,7 @@ export default function DocumentTagsPopover({
         tagKey
       ).then(() => {
         setTimeout(() => {
-          onTagChange(value);
+          onDocumentDataChange(value);
         }, 500);
       });
     };
@@ -257,7 +257,7 @@ export default function DocumentTagsPopover({
             <div className="mt-4 flex justify-center items-center w-full">
               <AddTag
                 line={line}
-                onTagChange={onTagChange}
+                onDocumentDataChange={onDocumentDataChange}
                 updateTags={updateTags}
                 siteId={siteId}
                 tagColors={tagColors}

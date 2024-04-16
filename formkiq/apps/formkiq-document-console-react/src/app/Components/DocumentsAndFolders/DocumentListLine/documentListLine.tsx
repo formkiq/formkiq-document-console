@@ -50,9 +50,9 @@ function DocumentListLine({
   onMoveModalClick,
   onDocumentVersionsModalClick,
   onDocumentWorkflowsModalClick,
-                            onDocumentReviewModalClick,
+  onDocumentReviewModalClick,
   onESignaturesModalClick,
-  onTagChange,
+  onDocumentDataChange,
   leftOffset = 0,
   isArchiveTabExpanded,
   addToPendingArchive,
@@ -75,7 +75,7 @@ function DocumentListLine({
   onDocumentWorkflowsModalClick: any;
   onDocumentReviewModalClick: any;
   onESignaturesModalClick: any;
-  onTagChange: any;
+  onDocumentDataChange: any;
   filterTag: string | null;
   leftOffset?: number;
   isArchiveTabExpanded?: boolean;
@@ -400,7 +400,7 @@ function DocumentListLine({
                         folder: folder,
                         documentId: file.documentId,
                       }}
-                      onTagChange={onTagChange}
+                      onDocumentDataChange={onDocumentDataChange}
                       siteId={siteId}
                       isSiteReadOnly={isSiteReadOnly}
                       tagColors={tagColors}

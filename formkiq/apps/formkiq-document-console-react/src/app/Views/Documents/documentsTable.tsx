@@ -26,7 +26,7 @@ type DocumentTableProps = {
   currentSiteId: string;
   currentDocumentsRootUri: string;
   isSiteReadOnly: boolean;
-  onTagChange: (event: any, value: ILine | null) => void;
+  onDocumentDataChange: (event: any, value: ILine | null) => void;
   onESignaturesModalClick: (event: any, value: ILine | null) => void;
   onShareClick: (event: any, value: ILine | null) => void;
   onRenameModalClick: (event: any, value: ILine | null) => void;
@@ -53,7 +53,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onShareClick,
     onRenameModalClick,
     currentSiteId,
-    onTagChange,
+    onDocumentDataChange,
     onESignaturesModalClick,
     currentDocumentsRootUri,
     filterTag,
@@ -202,7 +202,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                 onDocumentReviewModalClick={onDocumentReviewModalClick}
                 onESignaturesModalClick={onESignaturesModalClick}
-                onTagChange={onTagChange}
+                onDocumentDataChange={onDocumentDataChange}
                 filterTag={filterTag}
                 isArchiveTabExpanded={isArchiveTabExpanded}
                 archiveStatus={archiveStatus}
@@ -243,7 +243,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     onShareClick,
     onRenameModalClick,
     currentSiteId,
-    onTagChange,
+    onDocumentDataChange,
     onESignaturesModalClick,
     currentDocumentsRootUri,
     filterTag,
@@ -281,7 +281,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
               onDocumentReviewModalClick={onDocumentReviewModalClick}
               onESignaturesModalClick={onESignaturesModalClick}
-              onTagChange={onTagChange}
+              onDocumentDataChange={onDocumentDataChange}
               onRestoreDocument={onRestoreDocument}
               onDeleteDocument={onDeleteDocument}
               filterTag={filterTag}

@@ -79,6 +79,7 @@ export default function UploadModal({
   folder,
   documentId,
   isFolderUpload,
+  onDocumentDataChange,
 }: {
   isOpened: boolean;
   onClose: any;
@@ -87,6 +88,7 @@ export default function UploadModal({
   folder: string;
   documentId: string;
   isFolderUpload: boolean;
+  onDocumentDataChange: any;
 }) {
   const dispatch = useAppDispatch();
   const cancelButtonRef = useRef(null);
@@ -156,7 +158,6 @@ export default function UploadModal({
   const closeDialog = () => {
     setUploaded([]);
     onClose();
-    window.location.reload();
   };
 
   const onprogress = function (data: IFileUploadData) {
@@ -209,6 +210,7 @@ export default function UploadModal({
                 });
               }
               setUploaded([...uploadedDocs, ...uploaded]);
+              onDocumentDataChange();
             }
           );
         });
@@ -318,6 +320,7 @@ export default function UploadModal({
               });
 
               setUploaded([...uploadedDocs, ...uploaded]);
+              onDocumentDataChange();
             }
           );
         });
@@ -471,6 +474,7 @@ export default function UploadModal({
                         selected={onFilesSelected}
                         multiple={allowMultipleFiles}
                         directoryUpload={isFolderUpload}
+                        maxFileSize={5e9}
                       />
                     </div>
                     <div className="flex flex-wrap">
