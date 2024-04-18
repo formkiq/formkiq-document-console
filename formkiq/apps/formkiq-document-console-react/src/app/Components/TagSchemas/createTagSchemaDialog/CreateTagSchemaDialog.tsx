@@ -358,7 +358,7 @@ function CreateTagSchemaDialog({
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-row justify-start flex-wrap gap-2 ">
                           {compositeKeys.map((key: string) => (
-                            <div className="bg-neutral-300 py-1.5 px-3 text-xs font-bold uppercase text-neutral-900 rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2">
+                            <div className="bg-neutral-300 py-1.5 px-3 text-xs font-bold text-neutral-900 rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2">
                               <span className="text-ellipsis overflow-hidden">
                                 {key}
                               </span>

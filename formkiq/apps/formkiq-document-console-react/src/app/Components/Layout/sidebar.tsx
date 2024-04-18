@@ -1338,7 +1338,7 @@ export function Sidebar() {
                 {formkiqVersion.type === 'enterprise' ? (
                   <span>&nbsp;Enterprise&nbsp;</span>
                 ) : (
-                  <span>&nbsp;Core&nbsp;</span>
+                  <span>&nbsp;</span>
                 )}
                 v{formkiqVersion.version}
               </div>
