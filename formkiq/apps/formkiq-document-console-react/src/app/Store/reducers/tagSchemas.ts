@@ -1,8 +1,8 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {DocumentsService} from '../../helpers/services/documentsService';
-import {RootState} from '../store';
-import {openDialog as openNotificationDialog} from './globalNotificationControls';
-import {TagSchema, RequestStatus} from "../../helpers/types/tagSchemas";
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { RequestStatus, TagSchema } from '../../helpers/types/tagSchemas';
+import { RootState } from '../store';
+import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
 interface TagSchemasState {
   tagSchemas: TagSchema[];
@@ -27,11 +27,10 @@ const defaultState: TagSchemasState = {
 export const fetchTagSchemas = createAsyncThunk(
   'tagSchemas/fetchTagSchemas',
   async (data: any, thunkAPI) => {
-    const {siteId, nextToken, limit, page} = data;
+    const { siteId, nextToken, limit, page } = data;
     await DocumentsService.getTagSchemas(siteId, nextToken, limit).then(
       (response) => {
         if (response) {
-          console.log(response, 'response')
           const data = {
             siteId,
             tagSchemas: response.schemas,
@@ -56,30 +55,33 @@ export const fetchTagSchemas = createAsyncThunk(
 export const deleteTagSchema = createAsyncThunk(
   'tagSchemas/deleteTagSchema',
   async (data: any, thunkAPI) => {
-    const {siteId, tagSchemaId, tagSchemas} = data;
-    await DocumentsService.deleteTagSchema(tagSchemaId, siteId).then((response) => {
-      if (response.status === 200) {
-        thunkAPI.dispatch(
-          setTagSchemas({
-            tagSchemas: tagSchemas.filter(
-              (tagSchema: TagSchema) => tagSchema.tagSchemaId !== tagSchemaId
-            ),
-          })
-        );
-      } else {
-        thunkAPI.dispatch(
-          openNotificationDialog({dialogTitle: response.message})
-        );
+    const { siteId, tagSchemaId, tagSchemas } = data;
+    await DocumentsService.deleteTagSchema(tagSchemaId, siteId).then(
+      (response) => {
+        if (response.status === 200) {
+          thunkAPI.dispatch(
+            setTagSchemas({
+              tagSchemas: tagSchemas.filter(
+                (tagSchema: TagSchema) => tagSchema.tagSchemaId !== tagSchemaId
+              ),
+            })
+          );
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({ dialogTitle: response.message })
+          );
+        }
       }
-    });
+    );
   }
 );
 
 export const fetchTagSchema = createAsyncThunk(
   'tagSchemas/fetchTagSchema',
   async (data: any, thunkAPI) => {
-    const {siteId, tagSchemaId,} = data;
-    await DocumentsService.getTagSchema(tagSchemaId, siteId).then((response) => {
+    const { siteId, tagSchemaId } = data;
+    await DocumentsService.getTagSchema(tagSchemaId, siteId).then(
+      (response) => {
         if (response) {
           thunkAPI.dispatch(setTagSchema(response));
         }
@@ -100,8 +102,8 @@ export const tagSchemasSlice = createSlice({
     },
 
     setTagSchemas: (state, action) => {
-      const {tagSchemas, isLoadingMore, next, page} = action.payload;
-      let {isLastSearchPageLoaded = false} = action.payload;
+      const { tagSchemas, isLoadingMore, next, page } = action.payload;
+      let { isLastSearchPageLoaded = false } = action.payload;
       isLastSearchPageLoaded = !next;
       if (tagSchemas) {
         if (isLoadingMore) {
@@ -117,7 +119,7 @@ export const tagSchemasSlice = createSlice({
     },
 
     setTagSchema: (state, action) => {
-      const {tagSchema} = action.payload;
+      const { tagSchema } = action.payload;
       state.tagSchema = tagSchema;
       return state;
     },

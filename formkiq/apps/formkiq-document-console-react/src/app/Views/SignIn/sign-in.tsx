@@ -3,14 +3,10 @@ import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { Spinner, Windows } from '../../Components/Icons/icons';
-import { ConfigService } from '../../helpers/services/configService';
-import { DocumentsService } from '../../helpers/services/documentsService';
-import { LocalStorage } from '../../helpers/tools/useLocalStorage';
-import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
 import { login } from '../../Store/reducers/auth';
 import {
-  configInitialState,
   ConfigState,
+  configInitialState,
   setAuthApi,
   setBrand,
   setClientId,
@@ -24,6 +20,10 @@ import {
 import { setFormkiqClient } from '../../Store/reducers/data';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
+import { ConfigService } from '../../helpers/services/configService';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { LocalStorage } from '../../helpers/tools/useLocalStorage';
+import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
 
 const storage: LocalStorage = LocalStorage.Instance;
 
@@ -114,18 +114,7 @@ export function SignIn() {
           }),
         };
       }
-      console.log(authApi);
-      console.log(options);
-      if (ssoCode) {
-        await fetch(authApi + '/login', options)
-          .then((r) =>
-            r.json().then((data) => ({ httpStatus: r.status, body: data }))
-          )
-          .then((obj) => {
-            console.log(obj);
-          });
-        //window.location.href = '/';
-      } else if (useAuthApiForSignIn) {
+      if (useAuthApiForSignIn) {
         await fetch(authApi + '/login', options)
           .then((r) =>
             r.json().then((data) => ({ httpStatus: r.status, body: data }))

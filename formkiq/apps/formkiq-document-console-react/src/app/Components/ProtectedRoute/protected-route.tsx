@@ -17,6 +17,7 @@ const ProtectedRoute = (props: { children: any }) => {
   const [searchParams] = useSearchParams();
 
   const { user } = useSelector(AuthState);
+  const ssoCode = searchParams.get('code');
   if (index < 0) {
     // if not public location
     const searchParams = search.replace('?', '').split('&') as any[];
@@ -42,7 +43,11 @@ const ProtectedRoute = (props: { children: any }) => {
       return <Navigate to="/sign-in?demo=tryformkiq" />;
     }
     if (!user) {
-      return <Navigate to="/sign-in" />;
+      if (ssoCode && pathname !== '/sso-sign-in') {
+        return <Navigate to={'/sso-sign-in?code=' + ssoCode} />;
+      } else {
+        return <Navigate to="/sign-in" />;
+      }
     }
   } else {
     const ssoCode = searchParams.get('code');
