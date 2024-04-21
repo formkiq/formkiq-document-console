@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import SsoSignIn from '../../Views/SignIn/sso-sign-in';
 import Queues from '../../Views/Workflows/queues';
 import WorkflowDesigner from '../../Views/Workflows/workflowDesigner';
 
@@ -63,6 +64,7 @@ const RoutesMapper = () => {
   return (
     <Routes>
       <Route path="/sign-in" element={<SignIn />}></Route>
+      <Route path="/sso-sign-in" element={<SsoSignIn />}></Route>
       <Route
         path="/forgot-password"
         element={<RequestPasswordChange />}

@@ -40,9 +40,15 @@ export function SignIn() {
   const { search } = useLocation();
   const searchParams = search.replace('?', '').split('&') as any[];
   let isDemo = false;
+  let isSsoLogin = false;
+  let ssoCode = '';
   searchParams.forEach((param: string) => {
     if (param === 'demo=tryformkiq') {
       isDemo = true;
+      return;
+    } else if (param.indexOf('code=') > -1) {
+      isSsoLogin = true;
+      ssoCode = param.split('=')[1];
       return;
     }
   });
@@ -91,13 +97,23 @@ export function SignIn() {
       );
     });
     if (formkiqClient) {
-      const options: RequestInit = {
-        method: 'POST',
-        body: JSON.stringify({
-          username: data.email,
-          password: data.password,
-        }),
-      };
+      let options: RequestInit;
+      if (isSsoLogin) {
+        options = {
+          method: 'POST',
+          body: JSON.stringify({
+            code: data.code,
+          }),
+        };
+      } else {
+        options = {
+          method: 'POST',
+          body: JSON.stringify({
+            username: data.email,
+            password: data.password,
+          }),
+        };
+      }
       if (useAuthApiForSignIn) {
         await fetch(authApi + '/login', options)
           .then((r) =>
