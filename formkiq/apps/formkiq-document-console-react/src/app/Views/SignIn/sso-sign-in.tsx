@@ -1,6 +1,11 @@
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import { ConfigService } from '../../helpers/services/configService';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { LocalStorage } from '../../helpers/tools/useLocalStorage';
+import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
 import { login } from '../../Store/reducers/auth';
 import {
   configInitialState,
@@ -17,36 +22,18 @@ import {
 import { setFormkiqClient } from '../../Store/reducers/data';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
-import { ConfigService } from '../../helpers/services/configService';
-import { DocumentsService } from '../../helpers/services/documentsService';
-import { LocalStorage } from '../../helpers/tools/useLocalStorage';
-import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
 
 const storage: LocalStorage = LocalStorage.Instance;
 
 export function SsoSignIn() {
   const {
-    register,
     formState: { errors },
-    handleSubmit,
   } = useForm();
 
   const dispatch = useAppDispatch();
-  const { search } = useLocation();
-  const searchParams = search.replace('?', '').split('&') as any[];
-  let isDemo = false;
-  let isSsoLogin = false;
-  let ssoCode = '';
-  searchParams.forEach((param: string) => {
-    if (param === 'demo=tryformkiq') {
-      isDemo = true;
-      return;
-    } else if (param.indexOf('code=') > -1) {
-      isSsoLogin = true;
-      ssoCode = param.split('=')[1];
-      return;
-    }
-  });
+
+  const [searchParams] = useSearchParams();
+  const code = searchParams.get('code');
 
   const customAuthSubmit = async (data: any) => {
     storage.setConfig(configInitialState);
@@ -97,7 +84,6 @@ export function SsoSignIn() {
             code: data.code,
           }),
         };
-        return;
         fetch(authApi + '/login', options)
           .then((r) =>
             r.json().then((data) => ({ httpStatus: r.status, body: data }))
@@ -156,12 +142,14 @@ export function SsoSignIn() {
     return;
   };
 
-  if (isSsoLogin) {
-    const signInData = {
-      code: ssoCode,
-    };
-    customAuthSubmit(signInData);
-  }
+  useEffect(() => {
+    if (code) {
+      const signInData = {
+        code,
+      };
+      customAuthSubmit(signInData);
+    }
+  }, [code]);
 
   return (
     <>

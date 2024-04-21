@@ -1,9 +1,10 @@
 import { useSelector } from 'react-redux';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { AuthState } from '../../Store/reducers/auth';
 
 const publicLocations: string[] = [
   '/sign-in',
+  '/sso-sign-in',
   '/forgot-password',
   '/reset-password',
   '/change-password',
@@ -13,14 +14,15 @@ const publicLocations: string[] = [
 const ProtectedRoute = (props: { children: any }) => {
   const { pathname, search } = useLocation();
   const index = publicLocations.indexOf(decodeURI(pathname));
+  const [searchParams] = useSearchParams();
+
   const { user } = useSelector(AuthState);
   if (index < 0) {
     // if not public location
     const searchParams = search.replace('?', '').split('&') as any[];
     let isRegistrationConfirmation = false;
     let isDemo = false;
-    let isSsoLogin = false;
-    let ssoCode = '';
+
     searchParams.forEach((param: string) => {
       if (
         param === 'userStatus=NEW_PASSWORD_REQUIRED' ||
@@ -31,10 +33,6 @@ const ProtectedRoute = (props: { children: any }) => {
       } else if (param === 'demo=tryformkiq') {
         isDemo = true;
         return;
-      } else if (param.indexOf('code') > -1) {
-        isSsoLogin = true;
-        ssoCode = param.split('=')[1];
-        return;
       }
     });
     if (isRegistrationConfirmation) {
@@ -42,15 +40,16 @@ const ProtectedRoute = (props: { children: any }) => {
       return;
     } else if (isDemo) {
       return <Navigate to="/sign-in?demo=tryformkiq" />;
-    } else if (isSsoLogin) {
-      return <Navigate to={'/sso-sign-in?code=' + ssoCode} />;
     }
     if (!user) {
       return <Navigate to="/sign-in" />;
     }
   } else {
+    const ssoCode = searchParams.get('code');
     if (user) {
       return <Navigate to="/" />;
+    } else if (ssoCode && pathname !== '/sso-sign-in') {
+      return <Navigate to={'/sso-sign-in?code=' + ssoCode} />;
     }
   }
   return props.children;
