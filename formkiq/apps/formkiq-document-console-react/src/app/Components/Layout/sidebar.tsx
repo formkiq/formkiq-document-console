@@ -747,55 +747,60 @@ export function Sidebar() {
                 {integrationsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="uppercase font-bold text-sm mb-2">
-                Workflows & Integrations
+                {formkiqVersion.type !== 'core' && <span>Workflows & </span>}
+                Integrations
               </div>
             </li>
             {integrationsExpanded && (
               <>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/workflows"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div
-                      className={
-                        'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                {formkiqVersion.type !== 'core' && (
+                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/workflows"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
+                        ' w-full text-sm font-bold flex '
                       }
                     >
-                      <div className="w-4 flex items-center mr-2">
-                        <Workflow />
+                      <div
+                        className={
+                          'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                        }
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <Workflow />
+                        </div>
+                        <div>Workflows</div>
                       </div>
-                      <div>Workflows</div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/queues"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div
-                      className={
-                        'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                    </NavLink>
+                  </li>
+                )}
+                {formkiqVersion.type !== 'core' && (
+                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/queues"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
                       }
                     >
-                      <div className="w-4 flex items-center mr-2">
-                        <Queue />
+                      <div
+                        className={
+                          'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                        }
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <Queue />
+                        </div>
+                        <div>Queues</div>
                       </div>
-                      <div>Queues</div>
-                    </div>
-                  </NavLink>
-                </li>
+                    </NavLink>
+                  </li>
+                )}
                 <li className="mt-2 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"
@@ -834,25 +839,29 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/rulesets"
-                    data-test-id="nav-rulesets"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
-                      <div className="w-4 flex items-center mr-2">
-                        <Rules />
+                {formkiqVersion.type !== 'core' && (
+                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/rulesets"
+                      data-test-id="nav-rulesets"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
+                      }
+                    >
+                      <div
+                        className={'w-full text-sm font-bold flex pl-5 py-2 '}
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <Rules />
+                        </div>
+                        <div>Rulesets</div>
                       </div>
-                      <div>Rulesets</div>
-                    </div>
-                  </NavLink>
-                </li>
+                    </NavLink>
+                  </li>
+                )}
                 <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/object-examine-tool"
@@ -872,26 +881,29 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/schemas"
-                    data-test-id="nav-tag-schema"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
-                      <div className="w-4 flex items-center mr-2">
-                        <Schema />
+                {formkiqVersion.type !== 'core' && (
+                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/schemas"
+                      data-test-id="nav-tag-schema"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
+                      }
+                    >
+                      <div
+                        className={'w-full text-sm font-bold flex pl-5 py-2 '}
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <Schema />
+                        </div>
+                        <div>Schemas</div>
                       </div>
-                      <div>Schemas</div>
-                    </div>
-                  </NavLink>
-                </li>
-
+                    </NavLink>
+                  </li>
+                )}
                 <div className="flex w-full">
                   <div className="w-full mt-4 border-b border-neutral-300"></div>
                 </div>

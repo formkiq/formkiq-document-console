@@ -64,7 +64,8 @@ function Navbar() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(AuthState);
-  const { useNotifications, isSidebarExpanded } = useSelector(ConfigState);
+  const { formkiqVersion, useNotifications, isSidebarExpanded } =
+    useSelector(ConfigState);
   const { currentDocumentPath } = useSelector(DataCacheState);
 
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
@@ -674,14 +675,16 @@ function Navbar() {
                           Settings
                         </Link>
                       </li>
-                      <li onClick={ToggleAccountSettings}>
-                        <Link
-                          to="/account/accessControl"
-                          className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                        >
-                          Access Control
-                        </Link>
-                      </li>
+                      {formkiqVersion.type !== 'core' && (
+                        <li onClick={ToggleAccountSettings}>
+                          <Link
+                            to="/account/accessControl"
+                            className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
+                          >
+                            Access Control
+                          </Link>
+                        </li>
+                      )}
                       <li>
                         <Link
                           onClick={signOut}

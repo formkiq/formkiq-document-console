@@ -1604,40 +1604,42 @@ function Documents() {
                             }
                           )}
                         <div className="w-68 flex mt-3 mr-3 border-b"></div>
-                        <div className="flex flex-col pt-3">
-                          <dt className="mb-1 flex justify-between">
-                            <span className="text-sm font-semibold text-primary-500">
-                              Access Attributes
-                            </span>
-                          </dt>
-                          <dd className="text-sm">
-                            {currentDocumentAccessAttributes &&
-                              (currentDocumentAccessAttributes as []).map(
-                                (attribute: any, i: number) => {
-                                  return (
-                                    <div key={i} className="">
-                                      <div className="pt-1 pr-1 flex items-center">
-                                        <div className={`h-5.5 pr-1 `}>
-                                          <span className="block text-xs">
-                                            {attribute.key}
-                                          </span>
-                                          <span className="font-semibold">
-                                            {attribute.stringValue}
-                                          </span>
-                                          <span className="font-semibold">
-                                            {attribute.numberValue}
-                                          </span>
-                                          <span className="font-semibold">
-                                            {attribute.booleanValue}
-                                          </span>
+                        {formkiqVersion.type !== 'core' && (
+                          <div className="flex flex-col pt-3">
+                            <dt className="mb-1 flex justify-between">
+                              <span className="text-sm font-semibold text-primary-500">
+                                Access Attributes
+                              </span>
+                            </dt>
+                            <dd className="text-sm">
+                              {currentDocumentAccessAttributes &&
+                                (currentDocumentAccessAttributes as []).map(
+                                  (attribute: any, i: number) => {
+                                    return (
+                                      <div key={i} className="">
+                                        <div className="pt-1 pr-1 flex items-center">
+                                          <div className={`h-5.5 pr-1 `}>
+                                            <span className="block text-xs">
+                                              {attribute.key}
+                                            </span>
+                                            <span className="font-semibold">
+                                              {attribute.stringValue}
+                                            </span>
+                                            <span className="font-semibold">
+                                              {attribute.numberValue}
+                                            </span>
+                                            <span className="font-semibold">
+                                              {attribute.booleanValue}
+                                            </span>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  );
-                                }
-                              )}
-                          </dd>
-                        </div>
+                                    );
+                                  }
+                                )}
+                            </dd>
+                          </div>
+                        )}
                       </dl>
                     )}
                     <div className="mt-4 w-full flex justify-center">
@@ -1649,29 +1651,31 @@ function Documents() {
                         <span className="w-7 pl-1 -mt-0.5">{Download()}</span>
                       </button>
                     </div>
-                    <div className="mt-2 flex justify-center">
-                      <button
-                        className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
-                        onClick={(event) => {
-                          const documentLine: ILine = {
-                            lineType: 'document',
-                            folder: '',
-                            documentId: infoDocumentId,
-                            documentInstance: currentDocument,
-                            folderInstance: null,
-                          };
-                          onDocumentWorkflowsModalClick(event, documentLine);
-                        }}
-                      >
-                        View
-                        {isSiteReadOnly ? (
-                          <span>&nbsp;</span>
-                        ) : (
-                          <span>&nbsp;/ Assign&nbsp;</span>
-                        )}
-                        Workflows
-                      </button>
-                    </div>
+                    {formkiqVersion.type !== 'core' && (
+                      <div className="mt-2 flex justify-center">
+                        <button
+                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
+                          onClick={(event) => {
+                            const documentLine: ILine = {
+                              lineType: 'document',
+                              folder: '',
+                              documentId: infoDocumentId,
+                              documentInstance: currentDocument,
+                              folderInstance: null,
+                            };
+                            onDocumentWorkflowsModalClick(event, documentLine);
+                          }}
+                        >
+                          View
+                          {isSiteReadOnly ? (
+                            <span>&nbsp;</span>
+                          ) : (
+                            <span>&nbsp;/ Assign&nbsp;</span>
+                          )}
+                          Workflows
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div
                     className={

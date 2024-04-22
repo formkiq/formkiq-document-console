@@ -1527,7 +1527,7 @@ export const getExaminePdfUploadUrlApiItem = {
   username: 'Cognito User',
   requiresSite: true,
   requiresAuthentication: true,
-  license: 'Pro|Enterprise',
+  license: 'Core',
 };
 
 export const getExaminePdfDetailsApiItem = {
@@ -1539,5 +1539,5 @@ export const getExaminePdfDetailsApiItem = {
   requiresSite: true,
   requiresAuthentication: true,
   requiresObjectID: true,
-  license: 'Pro|Enterprise',
+  license: 'Core',
 };
