@@ -102,12 +102,23 @@ export function AccountSettings() {
           );
           closeDialog();
         } else {
+          let message = '';
+          if (
+            response.status === 400 &&
+            response.message.indexOf('missing required body parameters') > -1
+          ) {
+            message = ' has no settings to save.';
+          } else {
+            message =
+              ' did not update correctly. Please contact your document management system administrator for more info.';
+          }
           dispatch(
             openDialog({
               dialogTitle:
                 'Site Configuration for site "' +
                 currentSiteId +
-                '" did not update correctly. Please contact your document management system administrator for more info.',
+                '" ' +
+                message,
             })
           );
         }

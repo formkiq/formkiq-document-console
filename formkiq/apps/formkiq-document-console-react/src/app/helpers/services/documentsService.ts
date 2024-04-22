@@ -611,10 +611,7 @@ export class DocumentsService {
         customIncludeTags.push(allTag.value);
       }
     });
-    if (
-      formkiqVersion.modules.indexOf('opensearch') === -1 &&
-      formkiqVersion.modules.indexOf('typesense') === -1
-    ) {
+    if (formkiqVersion.modules.indexOf('opensearch') === -1) {
       const searchBody = {
         query: {
           text: searchText + '*',
@@ -1330,10 +1327,7 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getQueue(
-    siteId: string,
-    queueId: string,
-  ): Promise<any> {
+  public static async getQueue(siteId: string, queueId: string): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
@@ -1722,5 +1716,4 @@ export class DocumentsService {
       addDecisionParameters,
     });
   }
-
 }
