@@ -102,7 +102,7 @@ export type parametersDoubleInnerType = {
 };
 export type parametersInnerType = {
   title: string;
-  textInputParameters: Record<string, string>;
+  textInputParameters: Record<string, {title: string, editDescription?: string, defaultValue?: string}>;
   selectParameters: Record<string, parametersDoubleInnerType>;
   checkboxParameters: Record<string, string>;
   decisions: DecisionType[];
