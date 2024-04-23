@@ -18,6 +18,7 @@ const ProtectedRoute = (props: { children: any }) => {
 
   const { user } = useSelector(AuthState);
   const ssoCode = searchParams.get('code');
+  const userStatus = searchParams.get('userStatus');
   if (index < 0) {
     // if not public location
     const searchParams = search.replace('?', '').split('&') as any[];
@@ -43,7 +44,7 @@ const ProtectedRoute = (props: { children: any }) => {
       return <Navigate to="/sign-in?demo=tryformkiq" />;
     }
     if (!user) {
-      if (ssoCode && pathname !== '/sso-sign-in') {
+      if (ssoCode && !userStatus?.length && pathname !== '/sso-sign-in') {
         return <Navigate to={'/sso-sign-in?code=' + ssoCode} />;
       } else {
         return <Navigate to="/sign-in" />;
@@ -51,9 +52,10 @@ const ProtectedRoute = (props: { children: any }) => {
     }
   } else {
     const ssoCode = searchParams.get('code');
+    const userStatus = searchParams.get('userStatus');
     if (user) {
       return <Navigate to="/" />;
-    } else if (ssoCode && pathname !== '/sso-sign-in') {
+    } else if (ssoCode && !userStatus?.length && pathname !== '/sso-sign-in') {
       return <Navigate to={'/sso-sign-in?code=' + ssoCode} />;
     }
   }
