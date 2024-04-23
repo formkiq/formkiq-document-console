@@ -55,6 +55,7 @@ import TextInputs from "./NodeComponents/TextInputs";
 import CheckBoxes from "./NodeComponents/Checkboxes";
 import QueueSelector from "./NodeComponents/QueueSelector";
 import ApprovalGroupsSelector from "./NodeComponents/ApprovalGroupsSelector";
+import NumberInputs from './NodeComponents/NumberInputs';
 
 const iconMap = {
   ANTIVIRUS: <Antivirus />,
@@ -77,6 +78,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
     textInputParameters: {
       tags: {title:'Comma-delimited list of keywords'},
     },
+    numberInputParameters: {},
     selectParameters: {
       engine: {
         description: 'Tagging Engine to use',
@@ -98,6 +100,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
       notificationText: {title:'Notification Text'},
       notificationHtml: {title:'Notification HTML'},
     },
+    numberInputParameters: {},
     selectParameters: {
       notificationType: {
         description: 'Type of Notification',
@@ -114,17 +117,20 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
     textInputParameters: {
       url: {title:'Webhook URL'},
     },
+    numberInputParameters: {},
     selectParameters: {},
     checkboxParameters: {},
     decisions: ['APPROVE'],
   },
   OCR: {
     title: 'Optical Character Recognition (OCR)',
-    textInputParameters: {
+    textInputParameters: {},
+    numberInputParameters: {
       ocrNumberOfPages: {
         title: 'Number of Pages to Process (from start)',
         editDescription: '(from start) - use "-1" for no limit',
-        defaultValue: '-1',
+        defaultValue: -1,
+        min:-1,
       },
     },
     selectParameters: {
@@ -152,6 +158,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
   FULLTEXT: {
     title: 'Fulltext Search',
     textInputParameters: {},
+    numberInputParameters: {},
     selectParameters: {},
     checkboxParameters: {},
     decisions: ['APPROVE'],
@@ -159,6 +166,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
   ANTIVIRUS: {
     title: 'Anti-Malware Scan',
     textInputParameters: {},
+    numberInputParameters: {},
     selectParameters: {},
     checkboxParameters: {},
     decisions: ['APPROVE', 'REJECT'],
@@ -166,6 +174,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
   QUEUE: {
     title: 'Review / Approval Queue (DO NOT USE)',
     textInputParameters: {},
+    numberInputParameters: {},
     selectParameters: {},
     checkboxParameters: {},
     decisions: ['APPROVE', 'REJECT'],
@@ -327,6 +336,25 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
                                 key as keyof WorkflowStepActionParameters
                               ])}
                       </span>
+                    </div>
+                  </div>
+                )}
+
+                {/*Number input parameters*/}
+                {parametersInfo.numberInputParameters[key] && (
+                  <div className="my-2">
+                    <div className="text-gray-600 text-sm">
+                      {parametersInfo.numberInputParameters[key].title}:{' '}
+                      <span className="text-sm text-gray-800 font-medium ">
+                        {data?.parameters &&
+                          (data.parameters[
+                            key as keyof WorkflowStepActionParameters
+                            ] === ''
+                            ? '-'
+                            : data.parameters[
+                              key as keyof WorkflowStepActionParameters
+                              ])}
+                              </span>
                     </div>
                   </div>
                 )}
@@ -495,6 +523,7 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
         <NodeNameSelector newStep={newStep} setNewStep={setNewStep} />
         <ParametersSelectors newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>
         <TextInputs newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>
+        <NumberInputs newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>
         <CheckBoxes newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>
         <QueueSelector
           newStep={newStep}
@@ -553,10 +582,30 @@ const NodeNameSelector = ({
     }
 
     for (const textInputParameter in stepParameters.textInputParameters) {
-      step.parameters = {
-        ...step.parameters,
-        [textInputParameter]: '',
-      };
+      if (stepParameters.textInputParameters[textInputParameter].defaultValue) {
+        step.parameters = {
+          ...step.parameters,
+          [textInputParameter]: stepParameters.textInputParameters[textInputParameter].defaultValue,
+        }
+      } else {
+        step.parameters = {
+          ...step.parameters,
+          [textInputParameter]: '',
+        };
+      }
+    }
+    for (const numberInputParameter in stepParameters.numberInputParameters) {
+      if (stepParameters.numberInputParameters[numberInputParameter].defaultValue) {
+        step.parameters = {
+          ...step.parameters,
+          [numberInputParameter]: stepParameters.numberInputParameters[numberInputParameter].defaultValue,
+        }
+      } else {
+        step.parameters = {
+          ...step.parameters,
+          [numberInputParameter]: 0,
+        };
+      }
     }
 
     for (const checkboxParameter in stepParameters.checkboxParameters) {
