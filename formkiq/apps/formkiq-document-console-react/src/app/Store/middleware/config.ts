@@ -4,6 +4,7 @@ import {
   setAuthApi,
   setBrand,
   setClientId,
+  setCognitoSingleSignOnUrl,
   setCustomAuthorizerUrl,
   setDocumentApi,
   setFormkiqVersion,
@@ -31,6 +32,9 @@ const updateConfig = async (action: any) => {
         break;
       case 'config/setClientId':
         config.clientId = action.payload;
+        break;
+      case 'config/setCognitoSingleSignOnUrl':
+        config.cognitoSingleSignOnUrl = action.payload;
         break;
       case 'config/setUserAuthenticationType':
         config.userAuthenticationType = action.payload;
@@ -68,6 +72,7 @@ configMiddleware.startListening({
     setDocumentApi,
     setUserPoolId,
     setClientId,
+    setCognitoSingleSignOnUrl,
     setUserAuthenticationType,
     setAuthApi,
     setUseAuthApiForSignIn,

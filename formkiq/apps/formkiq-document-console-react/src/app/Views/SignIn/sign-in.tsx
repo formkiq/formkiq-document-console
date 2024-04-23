@@ -10,6 +10,7 @@ import {
   setAuthApi,
   setBrand,
   setClientId,
+  setCognitoSingleSignOnUrl,
   setCustomAuthorizerUrl,
   setDocumentApi,
   setFormkiqVersion,
@@ -34,8 +35,11 @@ export function SignIn() {
     handleSubmit,
   } = useForm();
 
-  const { userAuthenticationType, customAuthorizerUrl } =
-    useSelector(ConfigState);
+  const {
+    userAuthenticationType,
+    cognitoSingleSignOnUrl,
+    customAuthorizerUrl,
+  } = useSelector(ConfigState);
   const dispatch = useAppDispatch();
   const { search } = useLocation();
   const searchParams = search.replace('?', '').split('&') as any[];
@@ -67,6 +71,9 @@ export function SignIn() {
       }
       if (config.clientId) {
         dispatch(setClientId(config.clientId));
+      }
+      if (config.cognitoSingleSignOnUrl) {
+        dispatch(setCognitoSingleSignOnUrl(config.cognitoSingleSignOnUrl));
       }
       if (config.userAuthentication) {
         dispatch(setUserAuthenticationType(config.userAuthentication));
@@ -294,8 +301,25 @@ export function SignIn() {
       <Helmet>
         <title>Sign In</title>
       </Helmet>
-      <div className="flex flex-col lg:flex-row">
-        <div className="w-full mt-8 justify-center bg-white p-5">
+      <div className="flex flex-col lg:flex-row justify-center flex-wrap">
+        <div className="w-full flex justify-center mt-8">
+          <h1 className="font-bold text-2xl text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+            Sign In
+          </h1>
+        </div>
+        <div className="w-2/3 mt-8 mx-10 justify-center p-2 border border-gray-400 rounded-md text-gray-900 font-semibold bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300">
+          {cognitoSingleSignOnUrl && cognitoSingleSignOnUrl.length && (
+            <div className="w-full flex justify-center py-8 border-b border-gray-400 mb-8">
+              <button
+                className="w-48 flex bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                onClick={(event) => {
+                  window.location.href = `${cognitoSingleSignOnUrl}`;
+                }}
+              >
+                Single Sign-On
+              </button>
+            </div>
+          )}
           <div className="font-bold text-lg text-center mb-4">
             <div className="w-full flex justify-center mb-2">
               {userAuthenticationType === 'activedirectory' && (
@@ -304,17 +328,15 @@ export function SignIn() {
                 </span>
               )}
             </div>
-            <span className="text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
-              Sign In
-            </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600"></span>
             {userAuthenticationType === 'activedirectory' && (
               <>
-                <span> with Active Directory</span>
+                <span> Sign In with Active Directory</span>
               </>
             )}
             {userAuthenticationType !== 'cognito' &&
               userAuthenticationType !== 'activedirectory' && (
-                <span> using External Provider</span>
+                <span> Sign In using External Provider</span>
               )}
           </div>
           {userAuthenticationType === 'cognito' && !isDemo ? (

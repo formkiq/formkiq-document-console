@@ -8,6 +8,7 @@ import {
   setAuthApi,
   setBrand,
   setClientId,
+  setCognitoSingleSignOnUrl,
   setCustomAuthorizerUrl,
   setDocumentApi,
   setFormkiqVersion,
@@ -49,6 +50,9 @@ export function SsoSignIn() {
       }
       if (config.clientId) {
         dispatch(setClientId(config.clientId));
+      }
+      if (config.cognitoSingleSignOnUrl) {
+        dispatch(setCognitoSingleSignOnUrl(config.cognitoSingleSignOnUrl));
       }
       if (config.userAuthentication) {
         dispatch(setUserAuthenticationType(config.userAuthentication));
