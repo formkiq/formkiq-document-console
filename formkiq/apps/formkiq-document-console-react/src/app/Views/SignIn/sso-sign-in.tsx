@@ -102,6 +102,7 @@ export function SsoSignIn() {
                 sites: [],
                 defaultSiteId: null,
                 currentSiteId: null,
+                isAdmin: false,
               };
               formkiqClient.rebuildCognitoClient(
                 user?.email,
@@ -115,9 +116,17 @@ export function SsoSignIn() {
                 dispatch(setFormkiqVersion(versionResponse));
                 DocumentsService.getSites().then((sitesResponse: any) => {
                   if (sitesResponse.sites && sitesResponse.sites.length) {
+                    let isAdmin = false;
                     sitesResponse.sites.forEach((site: any) => {
                       if (site.siteId === 'default') {
                         user.defaultSiteId = site.siteId;
+                      }
+                      if (
+                        site.permissions &&
+                        site.permissions.indexOf('ADMIN') > -1
+                      ) {
+                        // NOTE: admin is instance-wide, so any ADMIN permission means instance-wide admin atm
+                        isAdmin = true;
                       }
                     });
                     if (!user.defaultSiteId) {
@@ -125,6 +134,7 @@ export function SsoSignIn() {
                     }
                     user.currentSiteId = user.defaultSiteId;
                     user.sites = sitesResponse.sites;
+                    user.isAdmin = isAdmin;
                   }
                   if (user.sites.length) {
                     dispatch(login(user));

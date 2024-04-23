@@ -127,7 +127,6 @@ export function SignIn() {
             r.json().then((data) => ({ httpStatus: r.status, body: data }))
           )
           .then((obj) => {
-            console.log(obj);
             if (obj.body.AuthenticationResult) {
               const user = {
                 email: data.email,
@@ -137,6 +136,7 @@ export function SignIn() {
                 sites: [],
                 defaultSiteId: null,
                 currentSiteId: null,
+                isAdmin: false,
               };
               formkiqClient.rebuildCognitoClient(
                 user?.email,
@@ -149,10 +149,18 @@ export function SignIn() {
               DocumentsService.getVersion().then((versionResponse: any) => {
                 dispatch(setFormkiqVersion(versionResponse));
                 DocumentsService.getSites().then((sitesResponse: any) => {
+                  let isAdmin = false;
                   if (sitesResponse.sites && sitesResponse.sites.length) {
                     sitesResponse.sites.forEach((site: any) => {
                       if (site.siteId === 'default') {
                         user.defaultSiteId = site.siteId;
+                      }
+                      if (
+                        site.permissions &&
+                        site.permissions.indexOf('ADMIN') > -1
+                      ) {
+                        // NOTE: admin is instance-wide, so any ADMIN permission means instance-wide admin atm
+                        isAdmin = true;
                       }
                     });
                     if (!user.defaultSiteId) {
@@ -160,6 +168,7 @@ export function SignIn() {
                     }
                     user.currentSiteId = user.defaultSiteId;
                     user.sites = sitesResponse.sites;
+                    user.isAdmin = isAdmin;
                   }
                   if (user.sites.length) {
                     dispatch(login(user));
@@ -219,15 +228,24 @@ export function SignIn() {
                 sites: [],
                 defaultSiteId: null,
                 currentSiteId: null,
+                isAdmin: false,
               };
               // TODO: add promise, make requests concurrently
               DocumentsService.getVersion().then((versionResponse: any) => {
                 dispatch(setFormkiqVersion(versionResponse));
                 DocumentsService.getSites().then((sitesResponse: any) => {
                   if (sitesResponse.sites && sitesResponse.sites.length) {
+                    let isAdmin = false;
                     sitesResponse.sites.forEach((site: any) => {
                       if (site.siteId === 'default') {
                         user.defaultSiteId = site.siteId;
+                      }
+                      if (
+                        site.permissions &&
+                        site.permissions.indexOf('ADMIN') > -1
+                      ) {
+                        // NOTE: admin is instance-wide, so any ADMIN permission means instance-wide admin atm
+                        isAdmin = true;
                       }
                     });
                     if (!user.defaultSiteId) {
@@ -235,6 +253,7 @@ export function SignIn() {
                     }
                     user.currentSiteId = user.defaultSiteId;
                     user.sites = sitesResponse.sites;
+                    user.isAdmin = isAdmin;
                   }
                   if (user.sites.length) {
                     dispatch(login(user));

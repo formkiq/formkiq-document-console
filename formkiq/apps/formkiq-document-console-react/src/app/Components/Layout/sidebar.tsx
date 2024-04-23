@@ -820,25 +820,29 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/integrations/apiKeys"
-                    data-test-id="nav-api-keys"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-2'}>
-                      <div className="w-4 flex items-center mr-2">
-                        <ApiKey />
+                {user?.isAdmin && (
+                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/integrations/apiKeys"
+                      data-test-id="nav-api-keys"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
+                      }
+                    >
+                      <div
+                        className={'w-full text-sm font-bold flex pl-5 py-2'}
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <ApiKey />
+                        </div>
+                        <div>API Keys</div>
                       </div>
-                      <div>API Keys</div>
-                    </div>
-                  </NavLink>
-                </li>
+                    </NavLink>
+                  </li>
+                )}
                 {formkiqVersion.type !== 'core' && (
                   <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
