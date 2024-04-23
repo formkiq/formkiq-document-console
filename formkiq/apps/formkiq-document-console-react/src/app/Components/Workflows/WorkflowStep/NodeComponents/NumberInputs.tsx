@@ -10,7 +10,7 @@ const NumberInputs = ({
   setNewStep: (step: Step | null) => void;
   parametersMap: any;
 }) => {
-  let numberInputs: { [key: string]: { title: string, editDescription?: string } } | Record<string, never> = {};
+  let numberInputs: { [key: string]: { title: string, editDescription?: string, defaultValue?: string} } | Record<string, never> = {};
   if (newStep !== null && newStep.name) {
     numberInputs =
       parametersMap[newStep?.name as WorkflowStepActionType]

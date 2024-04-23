@@ -10,7 +10,7 @@ const CheckBoxes = ({
   setNewStep: (step: Step | null) => void;
   parametersMap:any;
 }) => {
-  let checkBoxes: { [key: string]: string } | Record<string, never> = {};
+  let checkBoxes: { [key: string]: { title: string, editDescription?: string, defaultValue?: string } } | Record<string, never> = {};
 
   if (newStep !== null && newStep.name) {
     checkBoxes =
@@ -43,24 +43,12 @@ const CheckBoxes = ({
       return newStep.parameters[
         checkBoxesKey as keyof typeof newStep.parameters
         ] as boolean;
+    } else if (parametersMap[newStep?.name as WorkflowStepActionType].checkboxParameters[checkBoxesKey].defaultValue) {
+      return parametersMap[newStep?.name as WorkflowStepActionType].checkboxParameters[checkBoxesKey].defaultValue;
     } else {
       return false;
     }
   };
-
-  useEffect(() => {
-    checkBoxesNames.forEach((checkBoxKey) => {
-      if (!newStep) return;
-      const step: Step = {
-        ...newStep,
-        parameters: {
-          ...newStep.parameters,
-          [checkBoxKey]: false,
-        },
-      };
-      setNewStep(step);
-    });
-  }, []);
 
   return (
     <>
@@ -78,8 +66,11 @@ const CheckBoxes = ({
               onChange={(event) => handleCheckBoxInput(event, checkBoxKey)}
             />
             <label htmlFor={checkBoxKey} className="ml-2 text-sm text-gray-800">
-              {checkBoxes[checkBoxKey as WorkflowStepActionType]}
+              {checkBoxes[checkBoxKey as WorkflowStepActionType].title}
             </label>
+            {checkBoxes[checkBoxKey as WorkflowStepActionType]?.editDescription &&
+              <div className="text-xs text-neutral-700 mb-2">
+                {checkBoxes[checkBoxKey as WorkflowStepActionType].editDescription}</div>}
           </div>
         ))}
     </>

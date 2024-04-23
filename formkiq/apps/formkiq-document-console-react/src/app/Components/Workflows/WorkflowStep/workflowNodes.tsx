@@ -151,7 +151,9 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
       },
     },
     checkboxParameters: {
-      addPdfDetectedCharactersAsText: 'PDF Documents convert images to text',
+      addPdfDetectedCharactersAsText: {
+        title:'PDF Documents convert images to text',
+      },
     },
     decisions: ['APPROVE'],
   },
@@ -363,7 +365,7 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
                 {parametersInfo.checkboxParameters[key] && (
                   <div className="my-2">
                     <div className="text-gray-600 text-sm">
-                      {parametersInfo.checkboxParameters[key]}:{' '}
+                      {parametersInfo.checkboxParameters[key].title}:{' '}
                       <span className="text-sm text-gray-800 font-medium ">
                         {data?.parameters &&
                           (data.parameters[
@@ -609,10 +611,17 @@ const NodeNameSelector = ({
     }
 
     for (const checkboxParameter in stepParameters.checkboxParameters) {
-      step.parameters = {
-        ...step.parameters,
-        [checkboxParameter]: false,
-      };
+      if (stepParameters.checkboxParameters[checkboxParameter].defaultValue) {
+        step.parameters = {
+              ...step.parameters,
+              [checkboxParameter]: stepParameters.checkboxParameters[checkboxParameter].defaultValue,
+          }
+      } else {
+          step.parameters = {
+              ...step.parameters,
+              [checkboxParameter]: false,
+          };
+      }
     }
 
     setNewStep(step);
