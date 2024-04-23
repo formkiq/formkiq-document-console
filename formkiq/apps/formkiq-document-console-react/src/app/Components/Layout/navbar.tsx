@@ -667,15 +667,17 @@ function Navbar() {
                   </button>
                   {showAccountDropdown && (
                     <ul className="dropdown-menu min-w-max absolute bg-white right-0 text-base z-50 float-right list-none text-left rounded-lg border  border-neutral-300 mt-2.5">
-                      <li onClick={ToggleAccountSettings}>
-                        <Link
-                          to="/account/settings"
-                          className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                        >
-                          Settings
-                        </Link>
-                      </li>
-                      {formkiqVersion.type !== 'core' && (
+                      {user.isAdmin && (
+                        <li onClick={ToggleAccountSettings}>
+                          <Link
+                            to="/account/settings"
+                            className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
+                          >
+                            Settings
+                          </Link>
+                        </li>
+                      )}
+                      {formkiqVersion.type !== 'core' && user.isAdmin && (
                         <li onClick={ToggleAccountSettings}>
                           <Link
                             to="/account/accessControl"
