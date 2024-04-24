@@ -249,42 +249,36 @@ function DocumentListLine({
               (pendingArchive.indexOf(file) === -1 ? (
                 <div
                   className={
-                    `py-2 ml-3 ` +
+                    `py-2 ml-2 px-1 cursor-pointer text-neutral-900 hover:text-primary-500 ` +
                     (lineSubfolderLevel === pageSubfolderLevel
-                      ? '-mr-2'
+                      ? '-mr-1'
                       : 'mr-2')
                   }
+                  onClick={
+                    addToPendingArchive
+                      ? () => addToPendingArchive(file)
+                      : undefined
+                  }
                 >
-                  <div
-                    className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 "
-                    data-test-id="delete-action"
-                    onClick={
-                      addToPendingArchive
-                        ? () => addToPendingArchive(file)
-                        : undefined
-                    }
-                  >
+                  <div className="w-4 h-auto ">
                     <Plus />
                   </div>
                 </div>
               ) : (
                 <div
                   className={
-                    `py-2 ml-3 ` +
+                    `py-2 ml-2 px-1 cursor-pointer text-neutral-900 hover:text-primary-500 ` +
                     (lineSubfolderLevel === pageSubfolderLevel
-                      ? '-mr-2'
+                      ? '-mr-1'
                       : 'mr-2')
                   }
+                  onClick={
+                    deleteFromPendingArchive
+                      ? () => deleteFromPendingArchive(file)
+                      : undefined
+                  }
                 >
-                  <div
-                    className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 "
-                    data-test-id="delete-action"
-                    onClick={
-                      deleteFromPendingArchive
-                        ? () => deleteFromPendingArchive(file)
-                        : undefined
-                    }
-                  >
+                  <div className="w-4 h-auto" data-test-id="delete-action">
                     <Minus />
                   </div>
                 </div>
