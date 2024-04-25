@@ -159,9 +159,14 @@ export const updateWorkflowSteps = createAsyncThunk(
     const newWorkflow: Workflow = nodesToWorkflow(nodes, edges, workflow);
     await DocumentsService.putWorkflow(workflowId, newWorkflow, siteId).then(
       (response) => {
-        if (response.status === 400) {
+        if (response.status === 200) {
           thunkAPI.dispatch(
-            openNotificationDialog({dialogTitle: response.errors[0].error})
+            openNotificationDialog({dialogTitle: "Workflow was saved successfully"})
+          );
+        } else {
+          const errors = response.errors.map((error: any) => error.error).join('\n');
+          thunkAPI.dispatch(
+            openNotificationDialog({dialogTitle: errors})
           );
         }
         thunkAPI.dispatch(setWorkflow(newWorkflow));
