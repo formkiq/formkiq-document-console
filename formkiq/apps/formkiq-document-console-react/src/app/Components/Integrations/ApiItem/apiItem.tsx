@@ -12,8 +12,8 @@ function updateRequestsFromForm(
   setState: any,
   { apiItem, user, documentApi }: any,
   formRef: any,
-  jsonContent: any,
-  setJsonContent: any,
+  requestJsonContent: any,
+  setRequestJsonContent: any,
 ) {
   let host = documentApi;
   if (host.substring(host.length - 1) === '/') {
@@ -22,16 +22,15 @@ function updateRequestsFromForm(
   let path = apiItem.path;
   let postJson = '';
 
-  // NOTE: removed JSON EDITOR temporarily due to issues
-  if (jsonContent.text) {
+  if (requestJsonContent.text) {
     if (getFormInput(formRef, 'postJson') !== undefined) {
-      getFormInput(formRef, 'postJson').value = jsonContent.text;
-      setJsonContent({text: jsonContent.text});
+      getFormInput(formRef, 'postJson').value = requestJsonContent.text;
+      setRequestJsonContent({text: requestJsonContent.text});
     }
-  } else if (jsonContent.json) {
+  } else if (requestJsonContent.json) {
     if (getFormInput(formRef, 'postJson') !== undefined) {
-      getFormInput(formRef, 'postJson').value = JSON.stringify(jsonContent.json);
-      setJsonContent({json: jsonContent.json});
+      getFormInput(formRef, 'postJson').value = JSON.stringify(requestJsonContent.json);
+      setRequestJsonContent({json: requestJsonContent.json});
     }
   }
 
@@ -614,10 +613,11 @@ function updateFormValidity(state: any, setState: any, formRef: any) {
     isValidForm: res,
   });
 }
-function getApiItem(props: any, state: any, setState: any, formRef: any, jsonContent: any, setJsonContent: any, editorMode: any, setEditorMode: any) {
-  const { apiItem, sites } = props;
+
+function getApiItem(props: any, state: any, setState: any, formRef: any, requestJsonContent: any, setRequestJsonContent: any, requestEditorMode: any, setRequestEditorMode: any, responseEditorMode: any, setResponseEditorMode: any) {
+  const {apiItem, sites} = props;
   const onFormChange = (ev: any) => {
-    updateRequestsFromForm(state, setState, props, formRef, jsonContent, setJsonContent);
+    updateRequestsFromForm(state, setState, props, formRef, requestJsonContent, setRequestJsonContent);
   };
   const onTabClick = (tab: string) => () => {
     setState({ ...state, currentRequestTab: tab });
@@ -627,18 +627,22 @@ function getApiItem(props: any, state: any, setState: any, formRef: any, jsonCon
     if (value.text) {
       if (getFormInput(formRef, 'postJson') !== undefined) {
         getFormInput(formRef, 'postJson').value = value.text;
-        updateRequestsFromForm(state, setState, props, formRef, value, setJsonContent);
+        updateRequestsFromForm(state, setState, props, formRef, value, setRequestJsonContent);
       }
     } else if (value.json) {
       if (getFormInput(formRef, 'postJson') !== undefined) {
         getFormInput(formRef, 'postJson').value = JSON.stringify(value.json);
-        updateRequestsFromForm(state, setState, props, formRef, value, setJsonContent);
+        updateRequestsFromForm(state, setState, props, formRef, value, setRequestJsonContent);
       }
     }
   };
 
-  const handleEditorModeChange = (value: any) => {
-    setEditorMode(value)
+  const handleRequestEditorModeChange = (value: any) => {
+    setRequestEditorMode(value)
+  }
+
+  const handleResponseEditorModeChange = (value: any) => {
+    setResponseEditorMode(value)
   }
 
   const renderResponseStatusClasses = (responseStatus: number) => {
@@ -1070,10 +1074,10 @@ function getApiItem(props: any, state: any, setState: any, formRef: any, jsonCon
                 </div>
                 <div className="w-full">
                   <JSONEditorReact
-                    content={jsonContent}
-                    mode={editorMode}
+                    content={requestJsonContent}
+                    mode={requestEditorMode}
                     onChange={handleJsonChange}
-                    onChangeMode={handleEditorModeChange}
+                    onChangeMode={handleRequestEditorModeChange}
                   />
                   <textarea
                     aria-label="JSON to POST/PATCH"
@@ -1783,6 +1787,14 @@ function getApiItem(props: any, state: any, setState: any, formRef: any, jsonCon
                   <h6 className="mr-4 mt-4 mb-2 md:mb-4 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     Response
                   </h6>
+                  <div className="h-72 mb-[-56px]">
+                    <JSONEditorReact
+                      content={{json: JSON.parse(state.responseData), text: undefined}}
+                      mode={responseEditorMode}
+                      onChangeMode={handleResponseEditorModeChange}
+                      readOnly={true}
+                    />
+                  </div>
                   <textarea
                     aria-label="Response"
                     data-test-id="apiItem-response-data"
@@ -1790,7 +1802,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any, jsonCon
                     rows={8}
                     readOnly={true}
                     value={state.responseData}
-                    className={`appearance-none rounded-md text-small text-mono relative block w-full px-3 py-3 border border-gray-600
+                    className={`hidden appearance-none rounded-md text-small text-mono relative block w-full px-3 py-3 border border-gray-600
                         font-mono placeholder-gray-500 text-gray-900 rounded-t-md
                         focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 ${
                           state.isErrorResponse ? 'bg-red-200' : ''
@@ -1838,12 +1850,13 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     }
   }
 
-  const [jsonContent, setJsonContent] = useState({
+  const [requestJsonContent, setRequestJsonContent] = useState({
     text: formattedJson,
     json: undefined,
   });
 
-  const [editorMode, setEditorMode] = useState(Mode.text)
+  const [requestEditorMode, setRequestEditorMode] = useState(Mode.text)
+  const [responseEditorMode, setResponseEditorMode] = useState(Mode.text)
   useEffect(() => {
     if (formRef?.current) {
       updateRequestsFromForm(
@@ -1851,8 +1864,8 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
         setState,
         {...props, user, documentApi},
         formRef,
-        jsonContent,
-        setJsonContent,
+        requestJsonContent,
+        setRequestJsonContent,
       );
     }
   }, []);
@@ -1865,7 +1878,10 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     >
       {itemHeader(isOpened, setOpened, props.apiItem)}
       <div className={`${isOpened ? '' : 'hidden'} border-b mb-2`}>
-        {getApiItem({ documentApi, user, ...props }, state, setState, formRef, jsonContent, setJsonContent, editorMode, setEditorMode)}
+        {getApiItem({
+          documentApi,
+          user, ...props
+        }, state, setState, formRef, requestJsonContent, setRequestJsonContent, requestEditorMode, setRequestEditorMode, responseEditorMode, setResponseEditorMode)}
       </div>
     </div>
   );
