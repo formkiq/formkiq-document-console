@@ -405,6 +405,7 @@ function Documents() {
   }, [pathname]);
 
   useEffect(() => {
+    dispatch(setDocumentLoadingStatusPending());
     dispatch(
       fetchDocuments({
         siteId: currentSiteId,
