@@ -212,7 +212,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
             ))}
           </tbody>
         </table>
-        {loadingStatus === RequestStatus.pending && (
+        {(loadingStatus === RequestStatus.pending && documents.length > 0)&& (
           <div className="absolute bottom-0 w-full flex justify-center">
             <Spinner />
           </div>
