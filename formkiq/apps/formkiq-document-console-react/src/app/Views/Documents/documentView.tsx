@@ -115,16 +115,39 @@ export function DocumentView() {
               setDocumentContent(urlResponse.url);
             });
           } else {
-            const url =
-              currentDocumentsRootUri +
-              '/folders/' +
-              (response as IDocument).path.substring(
-                0,
-                (response as IDocument).path.lastIndexOf('/')
-              ) +
-              '#id=' +
-              id;
-            navigate(url);
+            let viewVersionKey = '';
+            if (versionKey && versionKey.length) {
+              viewVersionKey = versionKey;
+            }
+            DocumentsService.getDocumentUrl(
+              id,
+              currentSiteId,
+              viewVersionKey,
+              false
+            ).then((urlResponse: any) => {
+              const a = window.document.createElement('a');
+              a.style.display = 'none';
+              a.href = urlResponse.url;
+              a.download = response.path.substring(
+                response.path.lastIndexOf('/') + 1
+              );
+              window.document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(urlResponse.url);
+              const url =
+                currentDocumentsRootUri +
+                '/folders/' +
+                (response as IDocument).path.substring(
+                  0,
+                  (response as IDocument).path.lastIndexOf('/')
+                ) +
+                '#id=' +
+                id;
+              setTimeout(() => {
+                navigate(url);
+              }, 200);
+            });
           }
         }
       );
@@ -200,7 +223,12 @@ export function DocumentView() {
                   </div>
                 )}
                 {ooConfig && (
-                  <div className="w-full h-full" id="onlyofficeContainer"></div>
+                  <div className="relative w-full h-full mt-3">
+                    <div
+                      className="w-full h-full"
+                      id="onlyofficeContainer"
+                    ></div>
+                  </div>
                 )}
               </>
             ) : (
