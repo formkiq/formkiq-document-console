@@ -54,6 +54,7 @@ function DocumentListLine({
   addToPendingArchive,
   deleteFromPendingArchive,
   archiveStatus,
+  infoDocumentId
 }: {
   file: any;
   folder: any;
@@ -78,6 +79,7 @@ function DocumentListLine({
   addToPendingArchive?: (file: IDocument) => void;
   deleteFromPendingArchive?: (file: IDocument) => void;
   archiveStatus?: string;
+  infoDocumentId?:string
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
@@ -237,7 +239,7 @@ function DocumentListLine({
   return (
     <>
       <tr
-        className={`text-sm tracking-normal`}
+        className={`text-sm tracking-normal ${(infoDocumentId===file.documentId)&& "bg-neutral-100"}`}
         data-test-id={`${file.path}`}
         ref={drag}
         style={{ opacity, visibility: isDragging ? 'hidden' : 'inherit' }}

@@ -42,6 +42,7 @@ type DocumentTableProps = {
   deleteFromPendingArchive: (file: IDocument) => void;
   archiveStatus: string;
   trackScrolling: () => void;
+  infoDocumentId:  string;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -68,6 +69,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     deleteFromPendingArchive,
     archiveStatus,
     trackScrolling,
+    infoDocumentId,
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
@@ -208,6 +210,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 archiveStatus={archiveStatus}
                 addToPendingArchive={addToPendingArchive}
                 deleteFromPendingArchive={deleteFromPendingArchive}
+                infoDocumentId={infoDocumentId}
               />
             ))}
           </tbody>

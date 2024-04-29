@@ -1238,6 +1238,7 @@ function Documents() {
                 addToPendingArchive={addToPendingArchive}
                 deleteFromPendingArchive={deleteFromPendingArchive}
                 archiveStatus={archiveStatus}
+                infoDocumentId={infoDocumentId}
               />
             </div>
           </div>
