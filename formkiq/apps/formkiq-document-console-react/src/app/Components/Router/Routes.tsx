@@ -162,7 +162,10 @@ const RoutesMapper = () => {
       <Route path="/rulesets/:id/rule/:ruleId" element={<Rule />}></Route>
 
       <Route path="/schemas" element={<TagSchemas />}></Route>
+      <Route path="/schemas/workspaces/:siteId" element={<TagSchemas />}></Route>
+      <Route path="/schemas/workspaces/:siteId/:tagSchemaId" element={<TagSchema />}></Route>
       <Route path="/schemas/:tagSchemaId" element={<TagSchema />}></Route>
+
 
       <Route
         path="/workspaces/:siteId/workflows/designer"
