@@ -43,6 +43,7 @@ type DocumentTableProps = {
   archiveStatus: string;
   trackScrolling: () => void;
   infoDocumentId:  string;
+  onDocumentInfoClick: () => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -70,6 +71,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     archiveStatus,
     trackScrolling,
     infoDocumentId,
+    onDocumentInfoClick,
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
@@ -211,6 +213,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 addToPendingArchive={addToPendingArchive}
                 deleteFromPendingArchive={deleteFromPendingArchive}
                 infoDocumentId={infoDocumentId}
+                onDocumentInfoClick={onDocumentInfoClick}
               />
             ))}
           </tbody>

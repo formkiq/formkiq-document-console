@@ -257,7 +257,7 @@ function Documents() {
     setDocumentListOffsetTop(isTagFilterExpanded ? 0 : 45);
   }, [isTagFilterExpanded]);
 
-  useEffect(() => {
+  function onDocumentInfoClick() {
     DocumentsService.getAllTagKeys(currentSiteId).then((response: any) => {
       const allTagData = {
         allTags: response?.values,
@@ -276,6 +276,10 @@ function Documents() {
       );
     }
     dispatch(setCurrentDocumentPath(''));
+  }
+
+  useEffect(() => {
+    onDocumentInfoClick();
   }, [infoDocumentId]);
 
   useEffect(() => {
@@ -1239,6 +1243,7 @@ function Documents() {
                 deleteFromPendingArchive={deleteFromPendingArchive}
                 archiveStatus={archiveStatus}
                 infoDocumentId={infoDocumentId}
+                onDocumentInfoClick={onDocumentInfoClick}
               />
             </div>
           </div>

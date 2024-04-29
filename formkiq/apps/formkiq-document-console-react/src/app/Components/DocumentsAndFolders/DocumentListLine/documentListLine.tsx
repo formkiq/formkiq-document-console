@@ -54,7 +54,8 @@ function DocumentListLine({
   addToPendingArchive,
   deleteFromPendingArchive,
   archiveStatus,
-  infoDocumentId
+  infoDocumentId,
+  onDocumentInfoClick,
 }: {
   file: any;
   folder: any;
@@ -80,6 +81,7 @@ function DocumentListLine({
   deleteFromPendingArchive?: (file: IDocument) => void;
   archiveStatus?: string;
   infoDocumentId?:string
+  onDocumentInfoClick?: () => void;
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
@@ -234,6 +236,13 @@ function DocumentListLine({
   let lineSubfolderLevel = 0;
   if (file.path.indexOf('/') > -1) {
     lineSubfolderLevel = file.path.split('/').length - 1;
+  }
+
+  function onInfoClick() {
+    if (!onDocumentInfoClick) return
+    if (infoDocumentId === file.documentId) {
+      onDocumentInfoClick();
+    }
   }
 
   return (
@@ -402,6 +411,7 @@ function DocumentListLine({
             <Link
               to={`#id=${file.documentId}`}
               className="w-5 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
+              onClick={onInfoClick}
             >
               <Info />
             </Link>
