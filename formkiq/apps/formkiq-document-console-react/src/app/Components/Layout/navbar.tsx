@@ -436,7 +436,35 @@ function Navbar() {
                             )}
                           </div>
 
-                          {pathname.indexOf('/rulesets') > -1 &&
+                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
+                            {pathname.indexOf('/workflows') > -1 && (
+                              <span>Workflows</span>
+                            )}
+                            {pathname.indexOf('/queues') > -1 && (
+                              <span>Queues</span>
+                            )}
+                            {pathname.indexOf('/integrations/api') > -1 &&
+                              pathname.indexOf('/integrations/apiKeys') ===
+                                -1 && <span>API Explorer</span>}
+                            {pathname.indexOf('/integrations/apiKeys') > -1 && (
+                              <span>API Keys</span>
+                            )}
+                            {pathname.indexOf('/object-examine-tool') > -1 && (
+                              <span>Examine PDF</span>
+                            )}
+                            {pathname.indexOf('/integrations/webhooks') >
+                              -1 && <span>Inbound Webhooks</span>}
+                            {pathname.indexOf('/account/settings') > -1 && (
+                              <span>Settings</span>
+                            )}
+                            {pathname.indexOf('/account/accessControl') >
+                              -1 && <span>Access Control (OPA)</span>}
+                            {pathname.indexOf('/schemas') > -1 && (
+                              <span>Schemas</span>
+                            )}
+                          </div>
+                          {(pathname.indexOf('/rulesets') > -1||
+                              pathname.indexOf('/schemas') > -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
                               (hasDefaultSite && hasWorkspaces) ||
@@ -480,34 +508,6 @@ function Navbar() {
                                 )}
                               </select>
                             )}
-
-                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
-                            {pathname.indexOf('/workflows') > -1 && (
-                              <span>Workflows</span>
-                            )}
-                            {pathname.indexOf('/queues') > -1 && (
-                              <span>Queues</span>
-                            )}
-                            {pathname.indexOf('/integrations/api') > -1 &&
-                              pathname.indexOf('/integrations/apiKeys') ===
-                                -1 && <span>API Explorer</span>}
-                            {pathname.indexOf('/integrations/apiKeys') > -1 && (
-                              <span>API Keys</span>
-                            )}
-                            {pathname.indexOf('/object-examine-tool') > -1 && (
-                              <span>Examine PDF</span>
-                            )}
-                            {pathname.indexOf('/integrations/webhooks') >
-                              -1 && <span>Inbound Webhooks</span>}
-                            {pathname.indexOf('/account/settings') > -1 && (
-                              <span>Settings</span>
-                            )}
-                            {pathname.indexOf('/account/accessControl') >
-                              -1 && <span>Access Control (OPA)</span>}
-                            {pathname.indexOf('/schemas') > -1 && (
-                              <span>Schemas</span>
-                            )}
-                          </div>
                         </>
                       ) : (
                         <>
