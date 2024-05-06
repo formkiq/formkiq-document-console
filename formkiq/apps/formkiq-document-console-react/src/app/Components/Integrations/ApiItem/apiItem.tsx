@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { Mode } from 'vanilla-jsoneditor';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
 import { getFormInput } from '../../../helpers/services/toolService';
 import { ArrowBottom, ArrowRight } from '../../Icons/icons';
 import { JSONEditorReact } from '../../TextEditors/JsonEditor';
-import { Mode } from 'vanilla-jsoneditor';
 
 function updateRequestsFromForm(
   state: any,
@@ -13,7 +13,7 @@ function updateRequestsFromForm(
   { apiItem, user, documentApi }: any,
   formRef: any,
   requestJsonContent: any,
-  setRequestJsonContent: any,
+  setRequestJsonContent: any
 ) {
   let host = documentApi;
   if (host.substring(host.length - 1) === '/') {
@@ -25,12 +25,14 @@ function updateRequestsFromForm(
   if (requestJsonContent.text) {
     if (getFormInput(formRef, 'postJson') !== undefined) {
       getFormInput(formRef, 'postJson').value = requestJsonContent.text;
-      setRequestJsonContent({text: requestJsonContent.text});
+      setRequestJsonContent({ text: requestJsonContent.text });
     }
   } else if (requestJsonContent.json) {
     if (getFormInput(formRef, 'postJson') !== undefined) {
-      getFormInput(formRef, 'postJson').value = JSON.stringify(requestJsonContent.json);
-      setRequestJsonContent({json: requestJsonContent.json});
+      getFormInput(formRef, 'postJson').value = JSON.stringify(
+        requestJsonContent.json
+      );
+      setRequestJsonContent({ json: requestJsonContent.json });
     }
   }
 
@@ -614,10 +616,28 @@ function updateFormValidity(state: any, setState: any, formRef: any) {
   });
 }
 
-function getApiItem(props: any, state: any, setState: any, formRef: any, requestJsonContent: any, setRequestJsonContent: any, requestEditorMode: any, setRequestEditorMode: any, responseEditorMode: any, setResponseEditorMode: any) {
-  const {apiItem, sites} = props;
+function getApiItem(
+  props: any,
+  state: any,
+  setState: any,
+  formRef: any,
+  requestJsonContent: any,
+  setRequestJsonContent: any,
+  requestEditorMode: any,
+  setRequestEditorMode: any,
+  responseEditorMode: any,
+  setResponseEditorMode: any
+) {
+  const { apiItem, sites } = props;
   const onFormChange = (ev: any) => {
-    updateRequestsFromForm(state, setState, props, formRef, requestJsonContent, setRequestJsonContent);
+    updateRequestsFromForm(
+      state,
+      setState,
+      props,
+      formRef,
+      requestJsonContent,
+      setRequestJsonContent
+    );
   };
   const onTabClick = (tab: string) => () => {
     setState({ ...state, currentRequestTab: tab });
@@ -627,23 +647,37 @@ function getApiItem(props: any, state: any, setState: any, formRef: any, request
     if (value.text) {
       if (getFormInput(formRef, 'postJson') !== undefined) {
         getFormInput(formRef, 'postJson').value = value.text;
-        updateRequestsFromForm(state, setState, props, formRef, value, setRequestJsonContent);
+        updateRequestsFromForm(
+          state,
+          setState,
+          props,
+          formRef,
+          value,
+          setRequestJsonContent
+        );
       }
     } else if (value.json) {
       if (getFormInput(formRef, 'postJson') !== undefined) {
         getFormInput(formRef, 'postJson').value = JSON.stringify(value.json);
-        updateRequestsFromForm(state, setState, props, formRef, value, setRequestJsonContent);
+        updateRequestsFromForm(
+          state,
+          setState,
+          props,
+          formRef,
+          value,
+          setRequestJsonContent
+        );
       }
     }
   };
 
   const handleRequestEditorModeChange = (value: any) => {
-    setRequestEditorMode(value)
-  }
+    setRequestEditorMode(value);
+  };
 
   const handleResponseEditorModeChange = (value: any) => {
-    setResponseEditorMode(value)
-  }
+    setResponseEditorMode(value);
+  };
 
   const renderResponseStatusClasses = (responseStatus: number) => {
     switch (responseStatus) {
@@ -1725,7 +1759,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any, request
                 rows={8}
                 readOnly={true}
                 value={state.httpRequest}
-                className={`appearance-none rounded-md text-base relative block w-full px-3 py-3 border border-gray-600
+                className={`appearance-none rounded-md text-sm relative block w-full px-3 py-3 border border-gray-600
                       font-mono placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 ${
                         state.currentRequestTab === 'curl' ? 'hidden' : ''
@@ -1738,7 +1772,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any, request
                 rows={8}
                 readOnly={true}
                 value={state.curlRequest}
-                className={`appearance-none rounded-md text-base relative block w-full px-3 py-3 border border-gray-600
+                className={`appearance-none rounded-md text-sm relative block w-full px-3 py-3 border border-gray-600
                       font-mono placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 ${
                         state.currentRequestTab === 'http' ? 'hidden' : ''
@@ -1789,7 +1823,10 @@ function getApiItem(props: any, state: any, setState: any, formRef: any, request
                   </h6>
                   <div className="h-72 mb-[-56px]">
                     <JSONEditorReact
-                      content={{json: JSON.parse(state.responseData), text: undefined}}
+                      content={{
+                        json: JSON.parse(state.responseData),
+                        text: undefined,
+                      }}
                       mode={responseEditorMode}
                       onChangeMode={handleResponseEditorModeChange}
                       readOnly={true}
@@ -1855,17 +1892,17 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     json: undefined,
   });
 
-  const [requestEditorMode, setRequestEditorMode] = useState(Mode.text)
-  const [responseEditorMode, setResponseEditorMode] = useState(Mode.text)
+  const [requestEditorMode, setRequestEditorMode] = useState(Mode.text);
+  const [responseEditorMode, setResponseEditorMode] = useState(Mode.text);
   useEffect(() => {
     if (formRef?.current) {
       updateRequestsFromForm(
         state,
         setState,
-        {...props, user, documentApi},
+        { ...props, user, documentApi },
         formRef,
         requestJsonContent,
-        setRequestJsonContent,
+        setRequestJsonContent
       );
     }
   }, []);
@@ -1878,10 +1915,22 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     >
       {itemHeader(isOpened, setOpened, props.apiItem)}
       <div className={`${isOpened ? '' : 'hidden'} border-b mb-2`}>
-        {getApiItem({
-          documentApi,
-          user, ...props
-        }, state, setState, formRef, requestJsonContent, setRequestJsonContent, requestEditorMode, setRequestEditorMode, responseEditorMode, setResponseEditorMode)}
+        {getApiItem(
+          {
+            documentApi,
+            user,
+            ...props,
+          },
+          state,
+          setState,
+          formRef,
+          requestJsonContent,
+          setRequestJsonContent,
+          requestEditorMode,
+          setRequestEditorMode,
+          responseEditorMode,
+          setResponseEditorMode
+        )}
       </div>
     </div>
   );
