@@ -11,6 +11,7 @@ export const JSONEditorReact: React.FC<JSONEditorPropsOptional> = (props) => {
       target: refContainer.current!,
       props: {
         readOnly: props.readOnly ?? false,
+        ...props,
       },
     });
 
