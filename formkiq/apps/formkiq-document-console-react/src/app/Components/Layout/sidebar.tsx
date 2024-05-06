@@ -1349,15 +1349,30 @@ export function Sidebar() {
               </ul>
             </nav>
             {formkiqVersion && formkiqVersion.type && isSidebarExpanded && (
-              <div className="text-xs fixed left-0 bottom-0 flex justify-start items-end pl-4 mb-2 bg-neutral-100">
-                FormKiQ
-                {formkiqVersion.type === 'enterprise' ? (
-                  <span>&nbsp;Enterprise&nbsp;</span>
-                ) : (
-                  <span>&nbsp;</span>
-                )}
-                v{formkiqVersion.version}
-              </div>
+              <>
+                <div className="group text-xs fixed left-0 bottom-0 flex justify-start items-end pl-4 mb-2 bg-neutral-100">
+                  FormKiQ
+                  {formkiqVersion.type === 'enterprise' ? (
+                    <span>&nbsp;Enterprise&nbsp;</span>
+                  ) : (
+                    <span>&nbsp;</span>
+                  )}
+                  v{formkiqVersion.version}
+                  <div className="modulePane absolute invisible group-hover:visible bottom-full w-full mb-2">
+                    {formkiqVersion.modules &&
+                      formkiqVersion.modules.length && (
+                        <h3 className="font-semibold mb-1">Modules:</h3>
+                      )}
+                    {formkiqVersion.modules.map((module: string, i: number) => {
+                      return (
+                        <div key={i} className="bg-white p-1">
+                          {module.toUpperCase()}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
             )}
           </>
         )}
