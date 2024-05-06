@@ -46,7 +46,7 @@ function GlobalNotificationDialog() {
                 <Dialog.Title
                   as="h3"
                   data-test-id="modal-title"
-                  className="text-base font-medium text-center leading-6 pb-2 text-gray-900 pr-2"
+                  className="text-base font-medium text-center leading-6 pb-2 text-gray-900 pr-2 whitespace-pre-line"
                 >
                   {dialogTitle}
                 </Dialog.Title>
