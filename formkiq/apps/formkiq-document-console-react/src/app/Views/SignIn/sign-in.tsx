@@ -25,10 +25,12 @@ import { ConfigService } from '../../helpers/services/configService';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { LocalStorage } from '../../helpers/tools/useLocalStorage';
 import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
+import { useState } from 'react';
 
 const storage: LocalStorage = LocalStorage.Instance;
 
 export function SignIn() {
+  const [isSpinnerDisplayed, setIsSpinnerDisplayed] = useState(false)
   const {
     register,
     formState: { errors },
@@ -59,6 +61,7 @@ export function SignIn() {
 
   const onSubmit = async (data: any) => {
     storage.setConfig(configInitialState);
+    setIsSpinnerDisplayed(true);
     let formkiqClient: any = null;
     let authApi = '';
     let useAuthApiForSignIn = false;
@@ -173,6 +176,7 @@ export function SignIn() {
                   if (user.sites.length) {
                     dispatch(login(user));
                   } else {
+                    setIsSpinnerDisplayed(false);
                     dispatch(
                       openDialog({
                         dialogTitle:
@@ -183,6 +187,7 @@ export function SignIn() {
                 });
               });
             } else {
+              setIsSpinnerDisplayed(false);
               if (obj.body.code) {
                 switch (obj.body.code) {
                   case 'NotAuthorizedException':
@@ -258,6 +263,7 @@ export function SignIn() {
                   if (user.sites.length) {
                     dispatch(login(user));
                   } else {
+                    setIsSpinnerDisplayed(false);
                     dispatch(
                       openDialog({
                         dialogTitle:
@@ -268,6 +274,7 @@ export function SignIn() {
                 });
               });
             } else {
+              setIsSpinnerDisplayed(false);
               if (response.cognitoErrorCode) {
                 switch (response.cognitoErrorCode) {
                   case 'NotAuthorizedException':
@@ -410,13 +417,14 @@ export function SignIn() {
                   />
                 </div>
               </div>
-              <div className="mt-5 sm:mt-8 flex justify-center">
+              <div className="mt-5 sm:mt-8 flex justify-center relative">
                 <input
                   type="submit"
                   data-test-id="sign-in"
                   value="Sign In"
-                  className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                  className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-md flex cursor-pointer focus:outline-none"
                 />
+                {isSpinnerDisplayed&&<div className="absolute" style={{right: 'calc(50% - 110px)', top:'5px'}}><Spinner/></div>}
               </div>
               <div className="mt-8 w-full text-center">
                 <a

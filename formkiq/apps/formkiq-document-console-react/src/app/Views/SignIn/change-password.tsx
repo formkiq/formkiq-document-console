@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
@@ -9,8 +9,10 @@ import { DataCacheState } from '../../Store/reducers/data';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
 import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
+import { Spinner } from '../../Components/Icons/icons';
 
 export function ChangePassword() {
+  const [isSpinnerDisplayed, setIsSpinnerDisplayed] = useState(false)
   const {
     register,
     formState: { errors },
@@ -31,6 +33,7 @@ export function ChangePassword() {
   const { documentApi, userPoolId, clientId } = useSelector(ConfigState);
 
   const onSubmit = async (data: any) => {
+    setIsSpinnerDisplayed(true)
     let newformkiqClient = formkiqClient;
     if (!formkiqClient.apiClient) {
       newformkiqClient = new FormkiqClient(documentApi, userPoolId, clientId);
@@ -46,6 +49,7 @@ export function ChangePassword() {
     await newformkiqClient.documentsApi.apiClient.cognitoClient
       .confirmPassword(email, verificationCode, data.newPassword)
       .then((response: any) => {
+        setIsSpinnerDisplayed(false)
         if (response.cognitoErrorCode) {
           dispatch(
             openDialog({
@@ -133,14 +137,13 @@ export function ChangePassword() {
                 )}
               </div>
             </div>
-            <div className="mt-5 sm:mt-8 flex justify-center">
+            <div className="mt-5 sm:mt-8 flex justify-center relative">
               <input
                 type="submit"
                 value="Set New Password"
-                className="px-8 cursor-pointer py-3 mx-1 border border-transparent text-base leading-6 font-medium rounded-md shadow
-                  text-white bg-primary-500 hover:bg-primary-400 focus:outline-none focus:shadow-outline
-                  transition duration-150 ease-in-out md:py-4 md:text-lg md:px-10"
+                className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-md flex cursor-pointer focus:outline-none"
               />
+              {isSpinnerDisplayed&&<div className="absolute" style={{right: 'calc(50% - 160px)', top:'5px'}}><Spinner/></div>}
             </div>
             <div className="mt-8 w-full text-center">
               <a className="underline" href="/sign-in">
