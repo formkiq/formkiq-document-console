@@ -50,21 +50,25 @@ import {
   DefaultTargetHandle,
   OneConditionSourceHandle,
 } from '../Handles/handles';
-import ParametersSelectors from "./NodeComponents/ParametersSelectors";
-import TextInputs from "./NodeComponents/TextInputs";
-import CheckBoxes from "./NodeComponents/Checkboxes";
+// import ParametersSelectors from "./NodeComponents/ParametersSelectors";
+// import TextInputs from "./NodeComponents/TextInputs";
+// import CheckBoxes from "./NodeComponents/Checkboxes";
 import QueueSelector from "./NodeComponents/QueueSelector";
 import ApprovalGroupsSelector from "./NodeComponents/ApprovalGroupsSelector";
-import NumberInputs from './NodeComponents/NumberInputs';
+// import NumberInputs from './NodeComponents/NumberInputs';
+import DocumentTagging from './Steps/DocumentTagging';
+import Notification from './Steps/Notification';
+import Webhook from './Steps/Webhook';
+import Ocr  from './Steps/Ocr'
 
 const iconMap = {
-  ANTIVIRUS: <Antivirus />,
-  OCR: <Documents />,
-  QUEUE: <Wildcard />,
-  DOCUMENTTAGGING: <IntelligentClassification />,
-  NOTIFICATION: <EnvelopeClose />,
-  FULLTEXT: <Search />,
-  WEBHOOK: <Rule />,
+  ANTIVIRUS: <Antivirus/>,
+  OCR: <Documents/>,
+  QUEUE: <Wildcard/>,
+  DOCUMENTTAGGING: <IntelligentClassification/>,
+  NOTIFICATION: <EnvelopeClose/>,
+  FULLTEXT: <Search/>,
+  WEBHOOK: <Rule/>,
 };
 
 const getIcon = (name: keyof typeof iconMap) => iconMap[name];
@@ -76,7 +80,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
   DOCUMENTTAGGING: {
     title: 'Intelligent Document Classification',
     textInputParameters: {
-      tags: {title:'Comma-delimited list of keywords'},
+      tags: {title: 'Comma-delimited list of keywords'},
     },
     numberInputParameters: {},
     selectParameters: {
@@ -115,7 +119,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
   WEBHOOK: {
     title: 'Webhook',
     textInputParameters: {
-      url: {title:'Webhook URL'},
+      url: {title: 'Webhook URL'},
     },
     numberInputParameters: {},
     selectParameters: {},
@@ -130,7 +134,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
         title: 'Number of Pages to Process (from start)',
         editDescription: '(from start) - use "-1" for no limit',
         defaultValue: -1,
-        min:-1,
+        min: -1,
       },
     },
     selectParameters: {
@@ -152,7 +156,7 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
     },
     checkboxParameters: {
       addPdfDetectedCharactersAsText: {
-        title:'PDF Documents convert images to text',
+        title: 'PDF Documents convert images to text',
       },
     },
     decisions: ['APPROVE'],
@@ -186,11 +190,11 @@ const parametersMap: Record<WorkflowStepActionType, parametersInnerType> = {
 };
 
 export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
-  const { user } = useAuthenticatedState();
-  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
+  const {user} = useAuthenticatedState();
+  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const { siteId } = getCurrentSiteInfo(
+  const {siteId} = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -199,7 +203,7 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
     workspaceSites
   );
   const data = props.data;
-  const icon = getIcon(data.label as keyof typeof iconMap) || <ArrowRight />;
+  const icon = getIcon(data.label as keyof typeof iconMap) || <ArrowRight/>;
   const dispatch = useAppDispatch();
   const edges: Edge[] = useSelector(
     (state: RootState) => state.workflowsState.edges
@@ -230,8 +234,8 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
       const id = getNodeId();
       const newNode = {
         id,
-        position: { x: x + 300, y: y },
-        data: { label: '' },
+        position: {x: x + 300, y: y},
+        data: {label: ''},
         type: 'creatorNode',
       };
       const newEdge = {
@@ -247,7 +251,7 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
   };
 
   const openNodeEditor = () => {
-    dispatch(editNode({ id: props.id, changes: { type: 'creatorNode' } }));
+    dispatch(editNode({id: props.id, changes: {type: 'creatorNode'}}));
   };
 
   const nodeName = data.label as keyof typeof parametersMap;
@@ -258,7 +262,6 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
   const [queue, setQueue] = useState<string | null>(null);
-  // const [groups, setGroups] = useState<string[] | null>(null);
 
   useEffect(() => {
     if (!data.queue) return;
@@ -271,20 +274,20 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
 
   return (
     <>
-      <DefaultTargetHandle type="target" id="a" position={Position.Left} />
+      <DefaultTargetHandle type="target" id="a" position={Position.Left}/>
       {props.selected && parametersInfo?.title && (
         <div className="absolute top-[-30px] right-0 flex flex-row gap-2 ">
           <div
             className="w-6 h-6 rounded-full border-2 bg-white text-gray-400  p-1 cursor-pointer  border-gray-400 hover:text-gray-600 hover:border-gray-600 hover:bg-gray-100 nodrag"
             onClick={openNodeEditor}
           >
-            <Edit />
+            <Edit/>
           </div>
           <div
             className="w-6 h-6 rounded-full border-2 bg-white text-gray-400  p-1 cursor-pointer border-gray-400 hover:text-gray-600 hover:border-gray-600 hover:bg-gray-100 nodrag"
             onClick={() => dispatch(removeNode(props.id))}
           >
-            <Trash />
+            <Trash/>
           </div>
         </div>
       )}
@@ -293,13 +296,26 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
           props.selected && 'border-2 border-gray-500 bo'
         } hover:shadow`}
       >
-        <div className="p-1 tracking-normal font-bold bg-blue-100 flex border-t border-gray-700 border flex-row items-start">
+        <div
+          className="p-1 tracking-normal font-bold bg-blue-100 flex border-t border-gray-700 border flex-row items-start">
           <div className="w-6 mr-1 mt-1">{icon}</div>
           {parametersInfo.title}
         </div>
         {data?.parameters && (
           <div className="h-px bg-gray-400 my-1.5 w-full"></div>
         )}
+        {data?.label === 'DOCUMENTTAGGING' && (
+          <DocumentTagging isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+        )}
+        {data?.label === 'NOTIFICATION' && (
+          <Notification isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+        )}
+        {data?.label === 'WEBHOOK' && (
+          <Webhook isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+        )}
+        {data?.label === 'OCR' && (
+              <Ocr isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+          )}
 
         {data?.parameters && Object.keys(data.parameters).length > 0 && (
           <>
@@ -316,8 +332,8 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
                             parametersInfo.selectParameters[key].options[
                               data.parameters[
                                 key as keyof WorkflowStepActionParameters
-                              ] as string
-                            ]}
+                                ] as string
+                              ]}
                         </span>
                       </div>
                     </div>
@@ -332,10 +348,10 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
                         {data?.parameters &&
                           (data.parameters[
                             key as keyof WorkflowStepActionParameters
-                          ] === ''
+                            ] === ''
                             ? '-'
                             : data.parameters[
-                                key as keyof WorkflowStepActionParameters
+                              key as keyof WorkflowStepActionParameters
                               ])}
                       </span>
                     </div>
@@ -370,10 +386,10 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
                         {data?.parameters &&
                           (data.parameters[
                             key as keyof WorkflowStepActionParameters
-                          ] === 'true' ||
+                            ] === 'true' ||
                           data.parameters[
                             key as keyof WorkflowStepActionParameters
-                          ] === true
+                            ] === true
                             ? 'Yes'
                             : 'No')}
                       </span>
@@ -410,15 +426,15 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
         )}
       </div>
 
-      {parametersInfo.decisions.length === 1 && (
-        <DefaultSourceHandle
-          type="source"
-          position={Position.Right}
-          id="approve"
-          maxConnections={1}
-          nodeId={props.id}
-        ></DefaultSourceHandle>
-      )}
+      {/*{parametersInfo.decisions.length === 1 && (*/}
+      {/*  <DefaultSourceHandle*/}
+      {/*    type="source"*/}
+      {/*    position={Position.Right}*/}
+      {/*    id="approve"*/}
+      {/*    maxConnections={1}*/}
+      {/*    nodeId={props.id}*/}
+      {/*  ></DefaultSourceHandle>*/}
+      {/*)}*/}
 
       {parametersInfo.decisions.length === 2 && (
         <>
@@ -441,25 +457,25 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
         </>
       )}
 
-      {isHandleConnectable && (
-        <div
-          className="w-6 mt-6 rounded-full bg-green-400 text-white hover:border-green-700 p-1  cursor-pointer absolute right-[-36px] border-2 border-white hover:text-green-700 nodrag"
-          style={{ top: 'calc(50% - 12px)' }}
-          onClick={addCreatorNode}
-        >
-          <Plus />
-        </div>
-      )}
+      {/*{isHandleConnectable && (*/}
+      {/*  <div*/}
+      {/*    className="w-6 mt-6 rounded-full bg-green-400 text-white hover:border-green-700 p-1  cursor-pointer absolute right-[-36px] border-2 border-white hover:text-green-700 nodrag"*/}
+      {/*    style={{ top: 'calc(50% - 12px)' }}*/}
+      {/*    onClick={addCreatorNode}*/}
+      {/*  >*/}
+      {/*    <Plus />*/}
+      {/*  </div>*/}
+      {/*)}*/}
     </>
   );
 };
 
 export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
-  const { user } = useAuthenticatedState();
-  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
+  const {user} = useAuthenticatedState();
+  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const { siteId } = getCurrentSiteInfo(
+  const {siteId} = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -509,24 +525,38 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
     if (step.queue) {
       newNode.data.queue = step.queue;
     }
-    dispatch(editNode({ id: props.id, changes: newNode }));
+    dispatch(editNode({id: props.id, changes: newNode}));
     setNewStep(null);
   };
-
   return (
     <>
-      <Handle type="target" position={Position.Left} id="a" />
+      <Handle type="target" position={Position.Left} id="a"/>
       <div
         className={`w-72 bg-gray-200 min-h-16 rounded-md p-2  shadow-sm box-content ${
           props.selected && 'border-2 border-gray-500'
         } hover:shadow`}
       >
         <div className="mb-2">Step Editor</div>
-        <NodeNameSelector newStep={newStep} setNewStep={setNewStep} />
-        <ParametersSelectors newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>
-        <TextInputs newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>
-        <NumberInputs newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>
-        <CheckBoxes newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>
+        <NodeNameSelector newStep={newStep} setNewStep={setNewStep}/>
+
+        {newStep?.name === 'DOCUMENTTAGGING' && (
+          <DocumentTagging newStep={newStep} setNewStep={setNewStep} isEditing={true}/>
+        )}
+        {newStep?.name === 'NOTIFICATION' && (
+          <Notification newStep={newStep} setNewStep={setNewStep} isEditing={true}/>
+        )}
+        {newStep?.name === 'WEBHOOK' && (
+          <Webhook newStep={newStep} setNewStep={setNewStep} isEditing={true}/>
+        )}
+        {newStep?.name === 'OCR' && (
+              <Ocr newStep={newStep} setNewStep={setNewStep} isEditing={true}/>
+          )}
+
+
+        {/*<ParametersSelectors newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>*/}
+        {/*<TextInputs newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>*/}
+        {/*<NumberInputs newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>*/}
+        {/*<CheckBoxes newStep={newStep} setNewStep={setNewStep} parametersMap={parametersMap}/>*/}
         <QueueSelector
           newStep={newStep}
           setNewStep={setNewStep}
@@ -549,9 +579,9 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
 };
 
 const NodeNameSelector = ({
-  newStep,
-  setNewStep,
-}: {
+                            newStep,
+                            setNewStep,
+                          }: {
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
 }) => {
@@ -613,14 +643,14 @@ const NodeNameSelector = ({
     for (const checkboxParameter in stepParameters.checkboxParameters) {
       if (stepParameters.checkboxParameters[checkboxParameter].defaultValue) {
         step.parameters = {
-              ...step.parameters,
-              [checkboxParameter]: stepParameters.checkboxParameters[checkboxParameter].defaultValue,
-          }
+          ...step.parameters,
+          [checkboxParameter]: stepParameters.checkboxParameters[checkboxParameter].defaultValue,
+        }
       } else {
-          step.parameters = {
-              ...step.parameters,
-              [checkboxParameter]: false,
-          };
+        step.parameters = {
+          ...step.parameters,
+          [checkboxParameter]: false,
+        };
       }
     }
 
@@ -631,7 +661,7 @@ const NodeNameSelector = ({
     parametersMap
   ).map((key) => ({
     [key as WorkflowStepActionType]:
-      parametersMap[key as WorkflowStepActionType].title,
+    parametersMap[key as WorkflowStepActionType].title,
   }));
 
   let stepName = 'Select Step...';
@@ -641,20 +671,22 @@ const NodeNameSelector = ({
 
   return (
     <Listbox value="" onChange={selectStepName}>
-      <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag">
+      <Listbox.Button
+        className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag">
         <span className="block truncate">{stepName}</span>
         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
           <div className="rotate-90 w-4">
-            <ChevronRight />
+            <ChevronRight/>
           </div>
         </span>
       </Listbox.Button>
-      <Listbox.Options className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel">
+      <Listbox.Options
+        className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel">
         {stepsNames.map((step) => (
           <Listbox.Option
             key={Object.keys(step)[0]}
             value={Object.keys(step)[0]}
-            className={({ active }) =>
+            className={({active}) =>
               `relative cursor-default select-none py-2 pl-10 pr-4 ${
                 active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
               }`
