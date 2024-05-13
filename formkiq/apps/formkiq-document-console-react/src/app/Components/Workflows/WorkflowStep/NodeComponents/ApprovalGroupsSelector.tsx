@@ -1,22 +1,26 @@
-import { Listbox } from "@headlessui/react";
-import { RequestStatus } from "../../../../helpers/types/queues";
-import { Step, WorkflowStepActionType } from "../../../../helpers/types/workflows";
-import {fetchGroups, fetchQueues, setQueuesLoadingStatusPending } from "../../../../Store/reducers/queues";
-import { RootState, useAppDispatch } from "../../../../Store/store";
-import {useCallback, useEffect, useState } from "react";
-import { useSelector } from 'react-redux';
-import {Check, ChevronRight } from "../../../Icons/icons";
+import {Listbox} from "@headlessui/react";
+import {RequestStatus} from "../../../../helpers/types/queues";
+import {Step} from "../../../../helpers/types/workflows";
+import {fetchGroups, fetchQueues, setQueuesLoadingStatusPending} from "../../../../Store/reducers/queues";
+import {RootState, useAppDispatch} from "../../../../Store/store";
+import {useCallback, useEffect, useState} from "react";
+import {useSelector} from 'react-redux';
+import {Check, ChevronRight} from "../../../Icons/icons";
+import DisplayValue from "./DisplayValue";
 
 const ApprovalGroupsSelector = ({
                                   newStep,
                                   setNewStep,
                                   siteId,
-                                  parametersMap
+                                  isEditing,
+                                  approvalGroups,
                                 }: {
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
   siteId: string;
-  parametersMap:any
+  isEditing: boolean;
+  approvalGroups: any;
+
 }) => {
   const {
     groups,
@@ -31,14 +35,11 @@ const ApprovalGroupsSelector = ({
   const [isGroupsSelectorOpen, setIsGroupsSelectorOpen] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
 
-  // load queues
+  // load approval groups
   useEffect(() => {
-    if (
-      newStep &&
-      parametersMap[newStep.name as WorkflowStepActionType]?.approvalGroups
-    ) {
+    if (newStep) {
       setIsGroupsSelectorOpen(true);
-      dispatch(fetchGroups({ siteId }));
+      dispatch(fetchGroups({siteId}));
     } else {
       setIsGroupsSelectorOpen(false);
     }
@@ -59,7 +60,7 @@ const ApprovalGroupsSelector = ({
 
   const handleSelectGroups = (groups: string[]) => {
     if (!newStep) return;
-    const step: Step = { ...newStep };
+    const step: Step = {...newStep};
     if (step.queue) {
       step.queue = {
         ...step.queue,
@@ -113,8 +114,8 @@ const ApprovalGroupsSelector = ({
   };
 
   return (
-    <>
-      {isGroupsSelectorOpen &&
+    <>{isEditing ? (
+        isGroupsSelectorOpen &&
         (groups && groups.length > 0 ? (
           <div>
             <div className="text-sm text-gray-800 mt-4 mb-2">
@@ -125,7 +126,8 @@ const ApprovalGroupsSelector = ({
               onChange={(value: string[]) => handleSelectGroups(value)}
               multiple
             >
-              <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag nowheel">
+              <Listbox.Button
+                className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag nowheel">
                 <span className="block truncate">
                   {selectedGroups.length > 0
                     ? selectedGroups.join(', ')
@@ -133,7 +135,7 @@ const ApprovalGroupsSelector = ({
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                   <div className="rotate-90 w-4">
-                    <ChevronRight />
+                    <ChevronRight/>
                   </div>
                 </span>
               </Listbox.Button>
@@ -146,16 +148,16 @@ const ApprovalGroupsSelector = ({
                   <Listbox.Option
                     key={group.name}
                     value={group.name}
-                    className={({ active }) =>
+                    className={({active}) =>
                       `relative cursor-default select-none py-2 px-4 ${
                         active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
                       }`
                     }
                   >
-                    {({ active, selected }) => (
+                    {({active, selected}) => (
                       <div className="flex item-center justify-start">
                         <div className="w-5 h-5 mr-2">
-                          {selected && <Check />}
+                          {selected && <Check/>}
                         </div>
                         {group.name}
                       </div>
@@ -167,7 +169,10 @@ const ApprovalGroupsSelector = ({
           </div>
         ) : (
           <p> No Groups found. </p>
-        ))}
+        ))) :
+      <DisplayValue description={"Approval Groups"}
+                    value={(approvalGroups && approvalGroups.length > 0) && approvalGroups.join(', ')}/>
+    }
     </>
   );
 };

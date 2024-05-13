@@ -2,7 +2,6 @@ import {ChangeEvent} from "react";
 import DisplayValue from "./DisplayValue";
 
 const Checkbox = ({
-                    defaultValue,
                     description,
                     editDescription,
                     onChange,

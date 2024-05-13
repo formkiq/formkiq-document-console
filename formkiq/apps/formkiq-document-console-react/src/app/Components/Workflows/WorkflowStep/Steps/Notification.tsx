@@ -1,12 +1,13 @@
 import {useMemo} from "react";
 import {Position} from "reactflow";
-import {EnvelopeClose, IntelligentClassification, Plus} from "../../../Icons/icons";
+import {EnvelopeClose, Plus} from "../../../Icons/icons";
 import {DefaultSourceHandle} from "../../Handles/handles";
 import NodeTitle from "../NodeComponents/NodeTitle";
 import ParametersSelector from "../NodeComponents/ParametersSelector";
 import TextInput from "../NodeComponents/TextInput";
+import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
 
-const data1 = {
+const stepInfo = {
   title: 'Send Notification (requires "FROM" address in SES)',
   textInputParameters: {
     notificationEmail: {title: 'Notification Email'},
@@ -55,6 +56,7 @@ function Notification({newStep, setNewStep, isEditing, data, edges, id, addCreat
 
   return (
     <>
+      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}
       {!isEditing &&
         <NodeTitle icon={<EnvelopeClose />} title='Send Notification (requires "FROM" address in SES)'/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}

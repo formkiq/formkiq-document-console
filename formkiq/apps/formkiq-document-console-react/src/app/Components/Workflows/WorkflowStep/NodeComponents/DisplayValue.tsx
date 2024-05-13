@@ -6,7 +6,7 @@ function DisplayValue({description, value}: {
       <div className="text-gray-600 text-sm">
         {description}:{' '}
         <span className="text-sm text-gray-800 font-medium ">
-          {value}
+          {value?value:'-'}
         </span>
       </div>
     </div>

@@ -1,23 +1,20 @@
 import {useMemo} from "react";
 import {Position} from "reactflow";
-import {Plus, Rule} from "../../../Icons/icons";
+import {Plus, Search} from "../../../Icons/icons";
 import {DefaultSourceHandle} from "../../Handles/handles";
 import NodeTitle from "../NodeComponents/NodeTitle";
-import TextInput from "../NodeComponents/TextInput";
 import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
 
 const stepInfo = {
-  title: 'Webhook',
-  textInputParameters: {
-    url: {title:'Webhook URL'},
-  },
+  title: 'Fulltext Search',
+  textInputParameters: {},
   numberInputParameters: {},
   selectParameters: {},
   checkboxParameters: {},
   decisions: ['APPROVE'],
 }
 
-function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode}: any) {
+function FulltextSearch({newStep, setNewStep, isEditing, edges, id, addCreatorNode}: any) {
 
   const onChange = (value: any, key: any) => {
     setNewStep({
@@ -28,6 +25,7 @@ function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNod
       },
     });
   };
+
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false
   if (edges) {
@@ -37,18 +35,13 @@ function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNod
     }, [connectionsNumber, MAX_CONNECTIONS]);
   }
 
-
   return (
     <>
       {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}
-      {!isEditing && <NodeTitle icon={<Rule />} title="Webhook"/>}
+      {!isEditing &&
+        <NodeTitle icon={<Search />} title='Send Notification (requires "FROM" address in SES)'/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
 
-      <TextInput
-        description="Webhook URL"
-        onChange={(value: any) => onChange(value, 'url')}
-        selectedValue={isEditing ? (newStep?.parameters?.url) : data.parameters?.url}
-        isEditing={isEditing}/>
 
       {!isEditing && <DefaultSourceHandle
         type="source"
@@ -70,4 +63,4 @@ function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNod
   );
 }
 
-export default Webhook;
+export default FulltextSearch;

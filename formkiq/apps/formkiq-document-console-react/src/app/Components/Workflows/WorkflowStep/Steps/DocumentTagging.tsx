@@ -5,8 +5,9 @@ import {DefaultSourceHandle} from "../../Handles/handles";
 import NodeTitle from "../NodeComponents/NodeTitle";
 import ParametersSelector from "../NodeComponents/ParametersSelector";
 import TextInput from "../NodeComponents/TextInput";
+import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
 
-const data1 = {
+const stepInfo = {
   title: 'Intelligent Document Classification',
   textInputParameters: {
     tags: {title: 'Comma-delimited list of keywords'},
@@ -50,9 +51,9 @@ function DocumentTagging({newStep, setNewStep, isEditing, data, edges, id, addCr
 
   return (
     <>
+      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}
       {!isEditing && <NodeTitle icon={<IntelligentClassification/>} title="Intelligent Document Classification"/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
-
       <ParametersSelector options={engineSelectorOptions}
                           description='Tagging Engine to use'
                           onChange={(value: any) => onChange(value, 'engine')}

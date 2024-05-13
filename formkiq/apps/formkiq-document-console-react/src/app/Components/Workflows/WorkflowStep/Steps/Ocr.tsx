@@ -1,16 +1,16 @@
-import {ConfigState} from "apps/formkiq-document-console-react/src/app/Store/reducers/config";
+import {ConfigState} from "../../../../Store/reducers/config";
 import {useMemo} from "react";
 import {useSelector} from "react-redux";
 import {Position} from "reactflow";
-import {Documents, IntelligentClassification, Plus} from "../../../Icons/icons";
+import {Documents, Plus} from "../../../Icons/icons";
 import {DefaultSourceHandle} from "../../Handles/handles";
 import Checkbox from "../NodeComponents/Checkbox";
 import NodeTitle from "../NodeComponents/NodeTitle";
 import NumberInput from "../NodeComponents/NumberInput";
 import ParametersSelector from "../NodeComponents/ParametersSelector";
-import TextInput from "../NodeComponents/TextInput";
+import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
 
-const data1 = {
+const stepInfo = {
   title: 'Optical Character Recognition (OCR)',
   textInputParameters: {},
   numberInputParameters: {
@@ -51,7 +51,6 @@ function Ocr({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode}: 
   const {
     formkiqVersion,
   } = useSelector(ConfigState);
-  console.log('formkiqVersion', formkiqVersion)
 
   const ocrTypesSelectorOptions = {
     TEXT: 'Text Recognition',
@@ -92,6 +91,7 @@ function Ocr({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode}: 
 
   return (
     <>
+      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}
       {!isEditing && <NodeTitle icon={<Documents/>} title='Optical Character Recognition (OCR)'/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
       <ParametersSelector options={ocrTypesSelectorOptions}

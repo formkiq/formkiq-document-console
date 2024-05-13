@@ -1,4 +1,3 @@
-import {Step, WorkflowStepActionType} from "../../../../helpers/types/workflows";
 import {ChangeEvent} from "react";
 import DisplayValue from "./DisplayValue";
 
