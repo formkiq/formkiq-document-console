@@ -32,12 +32,13 @@ function Queue({newStep, setNewStep, isEditing, edges, id, addCreatorNode, siteI
   };
   const MAX_CONNECTIONS = 2;
   let isHandleConnectable = false
+  let connectionsNumber = MAX_CONNECTIONS
   if (edges) {
-    const connectionsNumber = edges.filter((e: any) => e.source === id).length;
-    isHandleConnectable = useMemo(() => {
-      return connectionsNumber < MAX_CONNECTIONS;
-    }, [connectionsNumber, MAX_CONNECTIONS]);
+    connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
+  isHandleConnectable = useMemo(() => {
+    return connectionsNumber < MAX_CONNECTIONS;
+  }, [connectionsNumber, MAX_CONNECTIONS]);
 
   const [queue, setQueue] = useState<string | null>(null);
 

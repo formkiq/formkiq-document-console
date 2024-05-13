@@ -1,7 +1,7 @@
 import {useMemo} from "react";
 import {Position} from "reactflow";
 import {Plus, Antivirus as AntivirusIcon} from "../../../Icons/icons";
-import { OneConditionSourceHandle} from "../../Handles/handles";
+import {OneConditionSourceHandle} from "../../Handles/handles";
 import NodeTitle from "../NodeComponents/NodeTitle";
 import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
 
@@ -28,13 +28,13 @@ function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode}: 
 
   const MAX_CONNECTIONS = 2;
   let isHandleConnectable = false
+  let connectionsNumber = MAX_CONNECTIONS
   if (edges) {
-    const connectionsNumber = edges.filter((e: any) => e.source === id).length;
-    isHandleConnectable = useMemo(() => {
-      return connectionsNumber < MAX_CONNECTIONS;
-    }, [connectionsNumber, MAX_CONNECTIONS]);
+    connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
-
+  isHandleConnectable = useMemo(() => {
+    return connectionsNumber < MAX_CONNECTIONS;
+  }, [connectionsNumber, MAX_CONNECTIONS]);
   return (
     <>
       {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}

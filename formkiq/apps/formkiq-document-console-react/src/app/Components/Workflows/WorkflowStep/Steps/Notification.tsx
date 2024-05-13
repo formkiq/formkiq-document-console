@@ -47,12 +47,13 @@ function Notification({newStep, setNewStep, isEditing, data, edges, id, addCreat
 
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false
+  let connectionsNumber = MAX_CONNECTIONS
   if (edges) {
-    const connectionsNumber = edges.filter((e: any) => e.source === id).length;
-    isHandleConnectable = useMemo(() => {
-      return connectionsNumber < MAX_CONNECTIONS;
-    }, [connectionsNumber, MAX_CONNECTIONS]);
+    connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
+  isHandleConnectable = useMemo(() => {
+    return connectionsNumber < MAX_CONNECTIONS;
+  }, [connectionsNumber, MAX_CONNECTIONS]);
 
   return (
     <>
