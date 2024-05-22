@@ -1,8 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { setCurrentActionEvent } from '../../../Store/reducers/config';
+import {useNavigate, useSearchParams} from 'react-router-dom';
+import { setCurrentActionEvent, ConfigState } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
@@ -43,6 +43,7 @@ export default function NewModal({
   const dispatch = useAppDispatch();
   const [formActive, setFormActive] = useState(true);
   const [itemToCreate, setItemToCreate] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const itemsRequiringNameField = ['folder', 'docx', 'xlsx', 'pptx'];
 
@@ -52,12 +53,19 @@ export default function NewModal({
     }
   }, [isOpened]);
 
+  const removeActionEventParam = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete('actionEvent');
+    setSearchParams(params);
+  };
+  
   const closeDialog = () => {
     setItemToCreate('');
     setFormActive(false);
     reset();
     onDocumentDataChange();
     onClose();
+    removeActionEventParam();
   };
 
   const onNewFolderClick = (event: any, value: ILine | null) => {

@@ -244,6 +244,17 @@ export function Sidebar() {
     setWorkspacesModalOpened(false);
   };
 
+  const handleAction = (action: string) => {
+    const nonDocumentPaths = ['/workflows', '/integrations', '/queues', '/account', '/rulesets', '/object-examine-tool', '/schemas'];
+    const isNonDocumentPath = nonDocumentPaths.some(path => pathname.indexOf(path) > -1);
+    if (isNonDocumentPath) {
+      window.location.href = `${currentDocumentsRootUri}?actionEvent=${action}`;
+    } else {
+      dispatch(setCurrentActionEvent(action));
+    }
+  };
+
+
   const QuickFolderList = (
     folderSiteId: string,
     folderLevels: string[],
@@ -1283,17 +1294,7 @@ export function Sidebar() {
                       width: isSidebarExpanded ? '100%' : '28px',
                       padding: isSidebarExpanded ? '16px' : '0px',
                     }}
-                    onClick={() => {
-                      // TODO: create more consistent check on site location
-                      if (
-                        pathname.indexOf('/workflows') > -1 ||
-                        pathname.indexOf('/integrations') > -1
-                      ) {
-                        window.location.href = `${currentDocumentsRootUri}?actionEvent=new`;
-                      } else {
-                        dispatch(setCurrentActionEvent('new'));
-                      }
-                    }}
+                    onClick={() => handleAction('new')}
                   >
                     {isSidebarExpanded && (
                       <span data-test-id="new-document">New</span>
@@ -1320,17 +1321,7 @@ export function Sidebar() {
                       padding: isSidebarExpanded ? '16px' : '0px',
                     }}
                     data-test-id="upload-document"
-                    onClick={() => {
-                      // TODO: create more consistent check on site location
-                      if (
-                        pathname.indexOf('/workflows') > -1 ||
-                        pathname.indexOf('/integrations') > -1
-                      ) {
-                        window.location.href = `${currentDocumentsRootUri}?actionEvent=upload`;
-                      } else {
-                        dispatch(setCurrentActionEvent('upload'));
-                      }
-                    }}
+                    onClick={() => handleAction('upload')}
                   >
                     {isSidebarExpanded && <span>Upload</span>}
                     <div
