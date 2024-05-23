@@ -1098,7 +1098,7 @@ export function Sidebar() {
             <div className="flex w-full">
               <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>
             </div>
-            <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/workflows"
                 className={({ isActive }) =>
@@ -1106,20 +1106,16 @@ export function Sidebar() {
                     ? 'text-primary-600 bg-neutral-200 '
                     : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
                   ' w-full text-sm font-bold flex '
-                }
-              >
+                }>
                 <div
-                  className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
-                  }
-                >
+                  className={'w-full text-sm font-bold flex items-center pl-5 py-4 '}>
                   <div className="w-4 flex items-center mr-2">
                     <Workflow />
                   </div>
                 </div>
               </NavLink>
             </li>
-            <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/queues"
                 className={({ isActive }) =>
@@ -1129,11 +1125,7 @@ export function Sidebar() {
                   ' w-full text-sm font-bold flex '
                 }
               >
-                <div
-                  className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
-                  }
-                >
+                <div className={'w-full text-sm font-bold flex items-center pl-5 py-4 '}>
                   <div className="w-4 flex items-center mr-2">
                     <Queue />
                   </div>
@@ -1157,6 +1149,25 @@ export function Sidebar() {
                 </div>
               </NavLink>
             </li>
+            {user?.isAdmin && (
+              <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <NavLink
+                  to="/integrations/apiKeys"
+                  className={({ isActive }) =>
+                    (isActive
+                      ? 'text-primary-600 bg-neutral-200 '
+                      : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                    ' w-full text-sm font-bold flex '
+                  }
+                >
+                  <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
+                    <div className="w-4 flex items-center mr-2">
+                      <ApiKey />
+                    </div>
+                  </div>
+                </NavLink>
+              </li>
+            )}
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/integrations/webhooks"
@@ -1170,6 +1181,57 @@ export function Sidebar() {
                 <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                   <div className="w-4 flex items-center mr-2">
                     <Webhook />
+                  </div>
+                </div>
+              </NavLink>
+            </li>
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+              <NavLink
+                to="/rulesets"
+                className={({ isActive }) =>
+                  (isActive
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
+                }>
+                <div
+                  className={'w-full text-sm font-bold flex items-center pl-5 py-4 '}>
+                  <div className="w-4 flex items-center mr-2">
+                    <Rules />
+                  </div>
+                </div>
+              </NavLink>
+            </li>
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+              <NavLink
+                to="/object-examine-tool"
+                className={({ isActive }) =>
+                  (isActive
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
+                }>
+                <div
+                  className={'w-full text-sm font-bold flex items-center pl-5 py-4 '}>
+                  <div className="w-4 flex items-center mr-2">
+                    <Examine />
+                  </div>
+                </div>
+              </NavLink>
+            </li>
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+              <NavLink
+                to="/schemas"
+                className={({ isActive }) =>
+                  (isActive
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
+                }>
+                <div
+                  className={'w-full text-sm font-bold flex items-center pl-5 py-4 '}>
+                  <div className="w-4 flex items-center mr-2">
+                    <Schema />
                   </div>
                 </div>
               </NavLink>
