@@ -68,7 +68,7 @@ export const deleteQueue = createAsyncThunk(
       if (response.status === 200) {
         thunkAPI.dispatch(
           setQueues({
-            tagSchemas: queues.filter(
+            queues: queues.filter(
               (queue: Queue) => queue.queueId !== queueId
             ),
           })
