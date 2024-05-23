@@ -250,7 +250,7 @@ export function getCurrentSiteInfo(
       }
     } else if (pathname.indexOf('/schemas') === 0) {
       if (pathname.indexOf('/schemas/workspaces') === 0) {
-        currentSiteInfo.siteId = pathname.substring(20).split('/')[0]; // 21 is the length of '/schemas/workspaces/'
+        currentSiteInfo.siteId = pathname.substring(20).split('/')[0]; // 20 is the length of '/schemas/workspaces/'
         currentSiteInfo.siteDocumentsRootName = `Workspace: ${(
           currentSiteInfo.siteId as any
         ).replaceAll('_', ' ')}`;
@@ -261,6 +261,25 @@ export function getCurrentSiteInfo(
         } else if (hasWorkspaces) {
           currentSiteInfo.siteId = workspaceSites[0].siteId;
           currentSiteInfo.siteRedirectUrl = `/schemas/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/workflows') === 0) {
+      if (pathname.indexOf('/workflows/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(22).split('/')[0]; // 22 is the length of '/workflows/workspaces/'
+        currentSiteInfo.siteDocumentsRootName = `Workspace: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Workflows';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/workflows/workspaces/${workspaceSites[0].siteId}`;
           currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
             '_',
             ' '

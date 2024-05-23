@@ -464,7 +464,8 @@ function Navbar() {
                             )}
                           </div>
                           {(pathname.indexOf('/rulesets') > -1||
-                              pathname.indexOf('/schemas') > -1) &&
+                              pathname.indexOf('/schemas') > -1 ||
+                              pathname.indexOf('/workflows') > -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
                               (hasDefaultSite && hasWorkspaces) ||

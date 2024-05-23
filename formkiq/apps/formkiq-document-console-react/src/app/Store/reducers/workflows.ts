@@ -11,7 +11,10 @@ import {
   DecisionType,
   NodeType,
   Workflow,
-  WorkflowStep, WorkflowStepActionType,
+  WorkflowStep,
+  WorkflowStepActionType,
+  RequestStatus,
+  WorkflowSummary
 } from '../../helpers/types/workflows';
 import {RootState} from '../store';
 
@@ -19,6 +22,12 @@ export interface WorkflowsState {
   nodes: NodeType[];
   edges: Edge[];
   workflow: Workflow;
+  workflows: WorkflowSummary[];
+  workflowsLoadingStatus: keyof typeof RequestStatus;
+  nextToken: string | null;
+  currentSearchPage: number;
+  isLastSearchPageLoaded: boolean;
+  isLoadingMore: boolean;
 }
 
 const defaultState: WorkflowsState = {
@@ -30,6 +39,12 @@ const defaultState: WorkflowsState = {
     status: 'INACTIVE',
     steps: [],
   },
+  workflows: [],
+  workflowsLoadingStatus: RequestStatus.fulfilled,
+  nextToken: null,
+  currentSearchPage: 1,
+  isLastSearchPageLoaded: false,
+  isLoadingMore: false,
 };
 
 function workflowToNodes(workflow: Workflow) {
@@ -174,6 +189,57 @@ export const updateWorkflowSteps = createAsyncThunk(
     );
   }
 );
+
+export const fetchWorkflows = createAsyncThunk(
+  'workflows/fetchWorkflows',
+  async (data: any, thunkAPI) => {
+    const {siteId, nextToken, limit, page} = data;
+    await DocumentsService.getWorkflows(siteId, null, null,nextToken, limit).then(
+      (response) => {
+        if (response) {
+          const data = {
+            siteId,
+            workflows: response.workflows,
+            isLoadingMore: false,
+            isLastSearchPageLoaded: false,
+            next: response.next,
+            page,
+          };
+          if (page > 1) {
+            data.isLoadingMore = true;
+          }
+          if (response.documents?.length === 0) {
+            data.isLastSearchPageLoaded = true;
+          }
+          thunkAPI.dispatch(setWorkflows(data));
+        }
+      }
+    );
+  }
+);
+
+export const deleteWorkflow = createAsyncThunk(
+  'workflows/deleteWorkflow',
+  async (data: any, thunkAPI) => {
+    const {siteId, workflowId, workflows} = data;
+    await DocumentsService.deleteWorkflow(workflowId, siteId).then((response) => {
+      if (response.status === 200) {
+        thunkAPI.dispatch(
+          setWorkflows({
+            workflows: workflows.filter(
+              (workflow: WorkflowSummary) => workflow.workflowId !== workflowId
+            ),
+          })
+        );
+      } else {
+        thunkAPI.dispatch(
+          openNotificationDialog({dialogTitle: response.message})
+        );
+      }
+    });
+  }
+);
+
 export const workflowsSlice = createSlice({
   name: 'workflows',
   initialState: defaultState,
@@ -235,6 +301,28 @@ export const workflowsSlice = createSlice({
     setWorkflow: (state, action) => {
       state.workflow = action.payload;
     },
+
+    setWorkflowsLoadingStatusPending: (state) => {
+      return {
+        ...state,
+        workflowsLoadingStatus: RequestStatus.pending,
+      };
+    },
+
+    setWorkflows: (state, action) => {
+      const {workflows, isLoadingMore, next} = action.payload;
+      const isLastSearchPageLoaded = !next;
+      if (workflows) {
+        if (isLoadingMore) {
+          state.workflows = state.workflows.concat(workflows);
+        } else {
+          state.workflows = workflows;
+        }
+        state.nextToken = next;
+        state.isLastSearchPageLoaded = isLastSearchPageLoaded;
+      }
+      state.workflowsLoadingStatus = RequestStatus.fulfilled;
+    },
   },
 });
 
@@ -249,6 +337,8 @@ export const {
   setEdges,
   editNode,
   setWorkflow,
+  setWorkflowsLoadingStatusPending,
+  setWorkflows,
 } = workflowsSlice.actions;
 
 export const WorkflowsState = (state: RootState) => state.workflowsState;
