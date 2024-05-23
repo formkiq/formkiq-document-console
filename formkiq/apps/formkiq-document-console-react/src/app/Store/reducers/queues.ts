@@ -36,7 +36,7 @@ export const fetchQueues = createAsyncThunk(
   'queues/fetchQueues',
   async (data: any, thunkAPI) => {
     const { siteId, nextToken, limit, page } = data;
-    await DocumentsService.getQueues(siteId, nextToken, limit).then(
+    await DocumentsService.getQueues(siteId,null, nextToken, limit).then(
       (response) => {
         if (response) {
           const data = {

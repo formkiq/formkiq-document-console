@@ -286,6 +286,25 @@ export function getCurrentSiteInfo(
           )}`;
         }
       }
+    } else if (pathname.indexOf('/queues') === 0) {
+      if (pathname.indexOf('/queues/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(19).split('/')[0]; // 19 is the length of '/queues/workspaces'
+        currentSiteInfo.siteDocumentsRootName = `Queue: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Queues';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/queues/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
     } else {
       if (hasDefaultSite) {
         currentSiteInfo.siteId = 'default';
