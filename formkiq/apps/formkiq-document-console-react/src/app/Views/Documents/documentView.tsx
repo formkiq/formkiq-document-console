@@ -114,6 +114,8 @@ export function DocumentView() {
             ).then((urlResponse: any) => {
               setDocumentContent(urlResponse.url);
             });
+          } else if ((response as IDocument).deepLinkPath.length) {
+            setDocumentContent((response as IDocument).deepLinkPath);
           } else {
             let viewVersionKey = '';
             if (versionKey && versionKey.length) {
@@ -190,9 +192,10 @@ export function DocumentView() {
     return (
       <div className="w-full h-full">
         {document &&
-          InlineViewableContentTypes.indexOf(
+          (InlineViewableContentTypes.indexOf(
             (document as IDocument).contentType
-          ) > -1 && (
+          ) > -1 ||
+            (document as IDocument).deepLinkPath.length) && (
             <>
               {documentContent && (
                 <iframe
