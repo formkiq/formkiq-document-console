@@ -73,7 +73,6 @@ function Ruleset() {
         must: [
           {
             attribute: 'TEXT',
-            fieldName: '',
             value: '',
             operation: 'EQ',
           },
@@ -208,10 +207,10 @@ function Ruleset() {
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-        <div className="w-full p-2 flex justify-end">
+        <div className="w-full p-2 flex">
           <ButtonPrimaryGradient
             onClick={() => setIsRuleEditTabVisible(true)}
-            style={{ height: '40px' }}
+            style={{ height: '36px' }}
           >
             + Create New Rule
           </ButtonPrimaryGradient>
@@ -233,7 +232,6 @@ function Ruleset() {
           <RulesTable
             rules={rules}
             onRuleDelete={onRuleDelete}
-            // ShowRuleCreationTab={ShowRuleCreationTab}
             showRuleEditTab={showRuleEditTab}
             setNewRuleValue={setNewRuleValue}
           />
@@ -278,6 +276,14 @@ const RuleEditingTab = ({
     DocumentsService.getWorkflows(currentSiteId, null, null, null, 100).then(
       (response: any) => {
         setWorkflows(response.workflows);
+        if (!ruleValue.rule.workflowId) {
+          setRuleValue({
+            rule: {
+              ...ruleValue.rule,
+              workflowId: response.workflows[0].workflowId,
+            },
+          })
+        }
       }
     );
   }, [currentSiteId]);
@@ -292,7 +298,6 @@ const RuleEditingTab = ({
             ...ruleValue.rule.conditions.must,
             {
               attribute: 'TEXT',
-              fieldName: '',
               value: '',
               operation: 'EQ',
             },
@@ -309,7 +314,10 @@ const RuleEditingTab = ({
         newMust[index] = { ...newMust[index], fieldName: e.target.value };
         break;
       case 'attribute':
-        newMust[index] = { ...newMust[index], attribute: e.target.value };
+        newMust[index] = {...newMust[index], attribute: e.target.value};
+        if (e.target.value !== 'FIELD') {
+            delete newMust[index].fieldName;
+        }
         break;
       case 'operation':
         newMust[index] = { ...newMust[index], operation: e.target.value };
@@ -456,24 +464,26 @@ const RuleEditingTab = ({
               </select>
             </div>
 
-            <div className="flex flex-col justify-start gap-2">
-              <label
-                htmlFor="fieldName"
-                className="block text-sm font-bold text-neutral-900"
-              >
-                Field Name
-              </label>
-              <input
-                name="fieldName"
-                placeholder="Field Name"
-                type="text"
-                value={ruleValue.rule.conditions.must[index].fieldName}
-                onChange={(e) => onConditionsChange(e, index, 'fieldName')}
-                minLength={1}
-                required={true}
-                className="w-52 p-2 border border-neutral-300 rounded"
-              />
-            </div>
+            {ruleValue.rule.conditions.must[index].attribute === "FIELD" &&
+              <div className="flex flex-col justify-start gap-2">
+                <label
+                  htmlFor="fieldName"
+                  className="block text-sm font-bold text-neutral-900"
+                >
+                  Field Name
+                </label>
+                <input
+                  name="fieldName"
+                  placeholder="Field Name"
+                  type="text"
+                  value={ruleValue.rule.conditions.must[index].fieldName}
+                  onChange={(e) => onConditionsChange(e, index, 'fieldName')}
+                  minLength={1}
+                  required={true}
+                  className="w-52 p-2 border border-neutral-300 rounded"
+                />
+              </div>}
+
 
             <div className="flex flex-col justify-start gap-2">
               <label
