@@ -77,6 +77,7 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -1649,19 +1650,21 @@ function Documents() {
                       </dl>
                     )}
                     <div className="mt-4 w-full flex justify-center">
-                      <button
-                        className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
+                      <ButtonPrimaryGradient
                         onClick={DownloadDocument}
+                        style={{height: '36px', width: '100%', margin: '0 16px'}}
                       >
-                        <span className="">Download</span>
-                        <span className="w-7 pl-1 -mt-0.5">{Download()}</span>
-                      </button>
+                        <div className="w-full flex justify-center px-4 py-1">
+                          <span className="">Download</span>
+                          <span className="w-7 pl-1">{Download()}</span>
+                        </div>
+                      </ButtonPrimaryGradient>
                     </div>
                     {formkiqVersion.type !== 'core' && (
                       <div className="mt-2 flex justify-center">
-                        <button
-                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
-                          onClick={(event) => {
+                        <ButtonSecondary
+                          style={{height: '36px', width: '100%', margin: '0 16px'}}
+                          onClick={(event:any) => {
                             const documentLine: ILine = {
                               lineType: 'document',
                               folder: '',
@@ -1679,7 +1682,7 @@ function Documents() {
                             <span>&nbsp;/ Assign&nbsp;</span>
                           )}
                           Workflows
-                        </button>
+                        </ButtonSecondary>
                       </div>
                     )}
                   </div>
@@ -1749,9 +1752,9 @@ function Documents() {
                           )}
                       </dl>
                       <div className="mt-2 flex justify-center">
-                        <button
-                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
-                          onClick={(event) => {
+                        <ButtonPrimaryGradient
+                        style={{height: '36px'}}
+                        onClick={(event: any) => {
                             const documentLine: ILine = {
                               lineType: 'document',
                               folder: '',
@@ -1769,7 +1772,7 @@ function Documents() {
                             <span>&nbsp;/ Edit&nbsp;</span>
                           )}
                           Versions
-                        </button>
+                          </ButtonPrimaryGradient>
                       </div>
                     </span>
                   </div>
@@ -1801,13 +1804,15 @@ function Documents() {
                               <span className="pl-4 pt-0.5 w-9">{View()}</span>
                             </button>
                           )}
-                        <button
-                          className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md cursor-pointer"
+                        <ButtonPrimaryGradient
                           onClick={DownloadDocument}
+                          style={{height: '36px',  width: '100%'}}
                         >
-                          <span className="">Download</span>
-                          <span className="w-7 pl-1">{Download()}</span>
-                        </button>
+                          <div className="w-full flex justify-center px-4 py-1">
+                            <span className="">Download</span>
+                            <span className="w-7 pl-1">{Download()}</span>
+                          </div>
+                        </ButtonPrimaryGradient>
                         {isCurrentDocumentSoftDeleted ? (
                           <button
                             className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"

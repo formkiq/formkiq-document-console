@@ -198,10 +198,10 @@ function Rulesets() {
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-        <div className="w-full p-2 flex justify-end">
+        <div className="w-full p-2 flex">
           <ButtonPrimaryGradient
             onClick={() => setIsRulesetEditTabVisible(true)}
-            style={{height: '40px',}}
+            style={{height: '36px'}}
           >
             + Create New Ruleset
           </ButtonPrimaryGradient>
