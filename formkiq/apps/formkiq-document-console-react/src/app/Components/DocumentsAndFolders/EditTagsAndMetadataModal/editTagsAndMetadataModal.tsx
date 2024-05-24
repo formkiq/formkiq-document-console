@@ -8,6 +8,7 @@ import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import { Close } from '../../Icons/icons';
 import EditTagsAndMetadataList from './editTagsAndMetadataList';
+import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 
 export default function EditTagsAndMetadataModal({
   isOpened,
@@ -206,7 +207,7 @@ export default function EditTagsAndMetadataModal({
                           <input
                             type="submit"
                             value="Add"
-                            className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                            className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-8 rounded-md flex cursor-pointer focus:outline-none"
                           />
                         </div>
                       </div>
@@ -218,8 +219,7 @@ export default function EditTagsAndMetadataModal({
                       </div>
                     </form>
                   </div>
-                </div>
-                <div className="bg-white mt-1 p-4 rounded-lg bg-white shadow-xl border h-full">
+
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
                       Edit Metadata/Tags
@@ -235,14 +235,13 @@ export default function EditTagsAndMetadataModal({
                     </div>
                   </div>
                   <div className="w-full flex mt-4 justify-center">
-                    <button
-                      type="button"
-                      className="flex items-center bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
-                      onClick={closeDialog}
+                    <ButtonPrimaryGradient
                       ref={doneButtonRef}
+                      className="py-2"
+                      onClick={closeDialog}
                     >
                       Done
-                    </button>
+                    </ButtonPrimaryGradient>
                   </div>
                 </div>
               </Dialog.Panel>

@@ -50,19 +50,19 @@ function tagListIem(
         <div className="flex gap-4">
           <button
             onClick={onSave}
-            className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+            className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-8 rounded-md flex cursor-pointer focus:outline-none"
           >
             Save
           </button>
           <button
             onClick={closeEdit}
-            className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+            className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-5 rounded-md flex cursor-pointer focus:outline-none"
           >
             Cancel
           </button>
           <button
             onClick={onRemove}
-            className="bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+            className="bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-md flex cursor-pointer focus:outline-none"
           >
             Remove
           </button>
@@ -72,14 +72,14 @@ function tagListIem(
     return (
       <div className="flex gap-4">
         <button
-          className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+          className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-5 rounded-md flex cursor-pointer focus:outline-none"
           onClick={toggleEdit}
         >
           Edit
         </button>
         <button
           onClick={onRemove}
-          className="bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+          className="bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold py-2 px-5 rounded-md flex cursor-pointer focus:outline-none"
         >
           Remove
         </button>
