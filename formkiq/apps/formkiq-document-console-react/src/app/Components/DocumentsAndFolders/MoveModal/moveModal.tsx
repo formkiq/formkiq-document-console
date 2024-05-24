@@ -18,12 +18,14 @@ export default function MoveModal({
   siteId,
   value,
   allTags,
+  onDocumentDataChange,
 }: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
   value: ILine | null;
   allTags: any;
+  onDocumentDataChange: any;
 }) {
   const dispatch = useAppDispatch();
   const initialFolders = {
@@ -196,6 +198,9 @@ export default function MoveModal({
             );
           }
           // TODO: add flash message ?
+          setTimeout(() => {
+            onDocumentDataChange();
+          }, 1500);
           closeDialog();
         });
       }

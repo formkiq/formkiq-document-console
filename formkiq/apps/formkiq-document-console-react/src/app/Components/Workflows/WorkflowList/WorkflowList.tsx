@@ -19,11 +19,11 @@ export function WorkflowList({
     <>
       <div
         className="flex-1 inline-block overflow-y-scroll overflow-x-auto h-full w-full"
-        id="workflowsScrollPane"
         onScroll={handleScroll}>
         <table
           className="w-full border-collapse text-sm table-auto "
-          id="workflowsScrollPane">
+          id="workflowsScrollPane"
+        >
           <thead className="sticky top-0 bg-neutral-100 z-10 text-left text-transparent">
           <tr>
             <th

@@ -1950,6 +1950,8 @@ function Documents() {
         siteId={currentSiteId}
         value={moveModalValue}
         allTags={allTags}
+        onDocumentDataChange={onDocumentDataChange}
+
       />
       <UploadModal
         isOpened={isUploadModalOpened}
