@@ -78,7 +78,7 @@ export const deleteRuleset = createAsyncThunk(
       if (response.status === 200) {
         thunkAPI.dispatch(
           setRulesets({
-            tagSchemas: rulesets.filter(
+            rulesets: rulesets.filter(
               (ruleset: Ruleset) => ruleset.rulesetId !== rulesetId
             ),
           })
