@@ -103,6 +103,9 @@ export default function NewModal({
           return;
         }
         // TODO: add file regex check
+        if(nameValue.indexOf('#') !== -1) {
+          nameValue = nameValue.replace(/#/g, '')
+        }
         // TODO: check if name exists in folder
         if (itemToCreate === 'folder') {
           DocumentsService.createFolder(value.folder, nameValue, siteId).then(
@@ -371,10 +374,11 @@ export default function NewModal({
                             type="text"
                             data-test-id="new-document-location-input"
                             className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600
-                                                    text-sm
+                                                    text-sm invalid:bg-red-200
                                                     placeholder-gray-500 text-gray-900 rounded-t-md
                                                     focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
                             placeholder="Name"
+                            pattern="[^#]*"
                             {...register('name', {
                               required: true,
                             })}
