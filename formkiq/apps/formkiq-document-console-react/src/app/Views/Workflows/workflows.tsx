@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
+import DuplicateDialog from '../../Components/Generic/Dialogs/DuplicateDialog';
 import { ArrowBottom, ArrowRight } from '../../Components/Icons/icons';
 import NewWorkflowModal from '../../Components/Workflows/NewWorkflow/newWorkflow';
 import WorkflowList from '../../Components/Workflows/WorkflowList/WorkflowList';
@@ -14,6 +15,7 @@ type WorkflowItem = {
   readonly: boolean;
   workflows: [] | null;
 };
+
 export function Workflows() {
   const dispatch = useAppDispatch();
   let userSite: any = null;
@@ -51,6 +53,12 @@ export function Workflows() {
   const [workspacesExpanded, setWorkspacesExpanded] = useState(false);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
+
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [originalName, setOriginalName] = useState('');
+  const [duplicatedWorkflow, setDuplicatedWorkflow] = useState<any>({});
+  const [showTooltipId, setShowTooltipId] = useState('');
+
   const toggleUserSiteExpand = () => {
     setUserSiteExpanded(!userSiteExpanded);
   };
@@ -159,6 +167,54 @@ export function Workflows() {
     );
   };
 
+  const handleDuplicate = (newName: string) => {
+    const newWorkflow = { ...duplicatedWorkflow, name: newName };
+    delete newWorkflow.workflowId;
+    DocumentsService.addWorkflow(newWorkflow, newModalSiteId).then(() => {
+      updateWorkflows();
+    });
+    setIsDuplicateDialogOpen(false);
+  };
+
+  const handleDuplicateClick = (workflowId: string, siteId: string) => {
+    DocumentsService.getWorkflow(workflowId, siteId).then((response) => {
+      if (response.name) {
+        setNewModalSiteId(siteId);
+        setOriginalName(response.name);
+        setIsDuplicateDialogOpen(true);
+        setDuplicatedWorkflow(response);
+      }
+    });
+  };
+
+  const handleCopyToClipBoard = (workflowId: string, siteId: string) => {
+    DocumentsService.getWorkflow(workflowId, siteId).then((response) => {
+      if (response.name) {
+        navigator.clipboard.writeText(JSON.stringify(response, null, 2));
+        setShowTooltipId(workflowId);
+        setTimeout(() => {
+          setShowTooltipId('');
+        }, 2000);
+      }
+    });
+  };
+
+  const handleDownloadClick = (workflowId: string, siteId: string) => {
+    DocumentsService.getWorkflow(workflowId, siteId).then((response) => {
+      if (response.name) {
+        const blob = new Blob([JSON.stringify(response, null, 2)], {
+          type: 'application/json',
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${response.name}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+    });
+  };
+
   return (
     <>
       <Helmet>
@@ -175,7 +231,7 @@ export function Workflows() {
           triggered by a document.
         </p>
       </div>
-      <div className="p-4">
+      <div className="p-4 mb-20">
         {userSite && (
           <>
             <div
@@ -200,6 +256,10 @@ export function Workflows() {
                 isSiteReadOnly={userSite.readonly}
                 onDelete={deleteWorkflow}
                 onNewClick={onNewClick}
+                handleDuplicateClick={handleDuplicateClick}
+                handleCopyToClipBoard={handleCopyToClipBoard}
+                showTooltipId={showTooltipId}
+                handleDownloadClick={handleDownloadClick}
               ></WorkflowList>
             )}
           </>
@@ -238,6 +298,10 @@ export function Workflows() {
                 siteId={defaultSite.siteId}
                 isSiteReadOnly={defaultSite.readonly}
                 onNewClick={onNewClick}
+                handleDuplicateClick={handleDuplicateClick}
+                handleCopyToClipBoard={handleCopyToClipBoard}
+                showTooltipId={showTooltipId}
+                handleDownloadClick={handleDownloadClick}
               ></WorkflowList>
             )}
           </>
@@ -272,6 +336,10 @@ export function Workflows() {
                         isSiteReadOnly={item.readonly}
                         onDelete={deleteWorkflow}
                         onNewClick={onNewClick}
+                        handleDuplicateClick={handleDuplicateClick}
+                        handleCopyToClipBoard={handleCopyToClipBoard}
+                        showTooltipId={showTooltipId}
+                        handleDownloadClick={handleDownloadClick}
                       ></WorkflowList>
                     </div>
                   </div>
@@ -285,6 +353,12 @@ export function Workflows() {
         onClose={onNewClose}
         updateWorkflowExpansion={updateWorkflows}
         siteId={newModalSiteId}
+      />
+      <DuplicateDialog
+        isOpen={isDuplicateDialogOpen}
+        onClose={() => setIsDuplicateDialogOpen(false)} // Can also use a separate function for clarity
+        onDuplicate={handleDuplicate}
+        initialName={originalName} // Optionally provide the original name
       />
     </>
   );
