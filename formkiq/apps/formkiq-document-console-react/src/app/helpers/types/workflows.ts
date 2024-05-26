@@ -100,12 +100,3 @@ export type parametersDoubleInnerType = {
   description: string;
   options: Record<string, string>;
 };
-export type parametersInnerType = {
-  title: string;
-  textInputParameters: Record<string, string>;
-  selectParameters: Record<string, parametersDoubleInnerType>;
-  checkboxParameters: Record<string, string>;
-  decisions: DecisionType[];
-  queue?: boolean;
-  approvalGroups?: boolean;
-};
