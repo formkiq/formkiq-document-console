@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
+import DuplicateDialog from '../../Components/Generic/Dialogs/DuplicateDialog';
 import { ArrowBottom, ArrowRight } from '../../Components/Icons/icons';
 import NewWorkflowModal from '../../Components/Workflows/NewWorkflow/newWorkflow';
 import WorkflowList from '../../Components/Workflows/WorkflowList/WorkflowList';
@@ -8,7 +9,6 @@ import { AuthState } from '../../Store/reducers/auth';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../Store/store';
 import { DocumentsService } from '../../helpers/services/documentsService';
-import DuplicateDialog from "../../Components/Generic/Dialogs/DuplicateDialog";
 
 type WorkflowItem = {
   siteId: string;
@@ -168,11 +168,11 @@ export function Workflows() {
   };
 
   const handleDuplicate = (newName: string) => {
-    const newWorkflow = {...duplicatedWorkflow, name: newName};
+    const newWorkflow = { ...duplicatedWorkflow, name: newName };
     delete newWorkflow.workflowId;
     DocumentsService.addWorkflow(newWorkflow, newModalSiteId).then(() => {
       updateWorkflows();
-    })
+    });
     setIsDuplicateDialogOpen(false);
   };
 
@@ -184,7 +184,7 @@ export function Workflows() {
         setIsDuplicateDialogOpen(true);
         setDuplicatedWorkflow(response);
       }
-    })
+    });
   };
 
   const handleCopyToClipBoard = (workflowId: string, siteId: string) => {
@@ -193,27 +193,27 @@ export function Workflows() {
         navigator.clipboard.writeText(JSON.stringify(response, null, 2));
         setShowTooltipId(workflowId);
         setTimeout(() => {
-          setShowTooltipId("");
-        }, 2000)
+          setShowTooltipId('');
+        }, 2000);
       }
-    })
-  }
+    });
+  };
 
   const handleDownloadClick = (workflowId: string, siteId: string) => {
     DocumentsService.getWorkflow(workflowId, siteId).then((response) => {
-          if (response.name) {
-              const blob = new Blob([JSON.stringify(response, null, 2)], {
-                  type: 'application/json',
-              });
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = `${response.name}.json`;
-              link.click();
-              URL.revokeObjectURL(url);
-          }
-      })
-  }
+      if (response.name) {
+        const blob = new Blob([JSON.stringify(response, null, 2)], {
+          type: 'application/json',
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${response.name}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+    });
+  };
 
   return (
     <>
@@ -231,7 +231,7 @@ export function Workflows() {
           triggered by a document.
         </p>
       </div>
-      <div className="p-4">
+      <div className="p-4 mb-20">
         {userSite && (
           <>
             <div
