@@ -13,6 +13,8 @@ import globalNotificationControls from './reducers/globalNotificationControls';
 import globalProgressControls from './reducers/globalProgressControls';
 import rulesetsState from './reducers/rulesets';
 import workflowsState from './reducers/workflows';
+import tagSchemasState from './reducers/tagSchemas';
+import queuesState from './reducers/queues';
 
 export const store = configureStore({
   reducer: {
@@ -25,6 +27,8 @@ export const store = configureStore({
     globalProgressControls,
     rulesetsState,
     workflowsState,
+    tagSchemasState,
+    queuesState
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

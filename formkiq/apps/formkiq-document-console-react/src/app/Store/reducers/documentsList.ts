@@ -86,7 +86,7 @@ export const fetchDocuments = createAsyncThunk(
           dataCache.allTags
         ).then((response: any) => {
           if (response) {
-            const temp: any = response.documents.filter(
+            const temp: any = response.documents?.filter(
               (document: IDocument) => {
                 return document.path;
               }

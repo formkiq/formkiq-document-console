@@ -7,7 +7,7 @@ import { DocumentsService } from '../../../helpers/services/documentsService';
 
 export default function AddTag({
   line,
-  onTagChange,
+  onDocumentDataChange,
   updateTags,
   siteId,
   tagColors,
@@ -41,7 +41,7 @@ export default function AddTag({
     });
     reset();
     setTimeout(() => {
-      onTagChange(line);
+      onDocumentDataChange(line);
     }, 500);
   };
 

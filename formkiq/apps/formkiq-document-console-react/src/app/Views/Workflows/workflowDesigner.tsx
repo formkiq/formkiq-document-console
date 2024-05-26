@@ -197,11 +197,11 @@ export function WorkflowDesigner() {
   );
 
   useEffect(() => {
-    console.log(edges, 'edges');
+    //console.log(edges, 'edges');
   }, [edges]);
 
   useEffect(() => {
-    console.log(nodes, 'nodes');
+    //console.log(nodes, 'nodes');
   }, [nodes]);
 
   const saveWorkflow = () => {
@@ -272,12 +272,14 @@ export function WorkflowDesigner() {
           ) : (
             <div className="text-2xl font-medium">
               {workflow.name}
-              <button
-                className="w-5 h-5 ml-2 hover:text-primary-500"
-                onClick={() => setEditWorkflowInfo(true)}
-              >
-                <Edit />
-              </button>
+              {!workflow.inUse && (
+                <button
+                  className="w-5 h-5 ml-2 hover:text-primary-500"
+                  onClick={() => setEditWorkflowInfo(true)}
+                >
+                  <Edit />
+                </button>
+              )}
             </div>
           )}
           {editWorkflowInfo ? (
@@ -329,7 +331,7 @@ export function WorkflowDesigner() {
               + Add New Step
             </ButtonSecondary>
             <ButtonPrimary onClick={saveWorkflow} className="m-2">
-              Save Workflow
+              Save Workflow Steps
             </ButtonPrimary>
             {/*<button onClick={addConfiguration} className='bg-gray-300 mx-2 py-1 px-2'>Add Configuration</button>*/}
           </Panel>

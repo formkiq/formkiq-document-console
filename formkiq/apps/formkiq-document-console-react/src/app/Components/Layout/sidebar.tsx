@@ -1,28 +1,30 @@
-import {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {Link, NavLink, useLocation} from 'react-router-dom';
-import {AuthState} from '../../Store/reducers/auth';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { AuthState } from '../../Store/reducers/auth';
 import {
   ConfigState,
   setCurrentActionEvent,
   setIsSidebarExpanded,
   setIsWorkspacesExpanded,
 } from '../../Store/reducers/config';
-import {DocumentListState} from '../../Store/reducers/documentsList';
-import {useAppDispatch} from '../../Store/store';
+import { DocumentListState } from '../../Store/reducers/documentsList';
+import { useAppDispatch } from '../../Store/store';
 import {
   AccountAndSettingsPrefixes,
   DocumentsAndFoldersPrefixes,
   WorkflowsAndIntegrationsPrefixes,
 } from '../../helpers/constants/pagePrefixes';
-import {DocumentsService} from '../../helpers/services/documentsService';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import {IFolder} from '../../helpers/types/folder';
-import {useSubfolderUri} from '../../hooks/subfolder-uri.hook';
+import { IFolder } from '../../helpers/types/folder';
+import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
+import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
+import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 import {
   Api,
   ApiKey,
@@ -31,10 +33,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Documents,
+  Examine,
   FolderOutline,
   Plus,
   Queue,
   Rules,
+  Schema,
   Settings,
   ShareHand,
   Star,
@@ -46,14 +50,12 @@ import {
   Workspace,
 } from '../Icons/icons';
 import WorkspacesModal from './workspacesModal';
-import ButtonPrimaryGradient from "../Generic/Buttons/ButtonPrimaryGradient";
-import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 
 export function Sidebar() {
   const dispatch = useAppDispatch();
 
-  const {user} = useSelector(AuthState);
-  const {folders} = useSelector(DocumentListState);
+  const { user } = useSelector(AuthState);
+  const { folders } = useSelector(DocumentListState);
   const {
     formkiqVersion,
     useAccountAndSettings,
@@ -62,10 +64,10 @@ export function Sidebar() {
     isWorkspacesExpanded,
   } = useSelector(ConfigState);
 
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId, siteDocumentsRootUri, isSiteReadOnly} = getCurrentSiteInfo(
+  const { siteId, siteDocumentsRootUri, isSiteReadOnly } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -281,7 +283,7 @@ export function Sidebar() {
                         }
                       >
                         <div className="w-4">
-                          <FolderOutline/>
+                          <FolderOutline />
                         </div>
                         <Link
                           to={`${folderBreadcrumbUrl}`}
@@ -307,16 +309,16 @@ export function Sidebar() {
 
   const SidebarItems = () => {
     return (
-      <div className="tracking-tight">
+      <div className="tracking-normal">
         {isSidebarExpanded ? (
           <>
             <li
-              className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
               onClick={toggleDocumentsExpand}
               data-test-id="expand-documents"
             >
-              <div className="flex justify-end mt-3 mr-1">
-                {documentsExpanded ? <ArrowBottom/> : <ArrowRight/>}
+              <div className="flex justify-end mt-2 mr-1">
+                {documentsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="uppercase font-bold text-sm">
                 Documents & Folders
@@ -331,7 +333,7 @@ export function Sidebar() {
                         to="/my-documents"
                         data-test-id="nav-my-documents"
                         end
-                        className={({isActive}) =>
+                        className={({ isActive }) =>
                           (isActive
                             ? 'text-primary-600 bg-neutral-200 '
                             : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -345,7 +347,7 @@ export function Sidebar() {
                           className={'w-full text-sm font-bold flex pl-5 py-2'}
                         >
                           <div className="w-4 flex items-center mr-2">
-                            <Documents/>
+                            <Documents />
                           </div>
                           <div>My Documents</div>
                         </FolderDropWrapper>
@@ -366,9 +368,9 @@ export function Sidebar() {
                         >
                           <div className="flex justify-end mt-3 mr-1">
                             {userSiteDocumentQueuesExpanded ? (
-                              <ArrowBottom/>
+                              <ArrowBottom />
                             ) : (
-                              <ArrowRight/>
+                              <ArrowRight />
                             )}
                           </div>
                           <div className="pl-1 font-bold text-sm">Queues</div>
@@ -378,14 +380,13 @@ export function Sidebar() {
                             (queue: any, i: number) => {
                               return (
                                 <span key={i}>
-                                  <li
-                                    className="pl-5 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                                  <li className="pl-5 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                                     <NavLink
                                       to={
                                         '/my-documents/queues/' + queue.queueId
                                       }
                                       end
-                                      className={({isActive}) =>
+                                      className={({ isActive }) =>
                                         (isActive
                                           ? 'text-primary-600 bg-neutral-200 '
                                           : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -393,10 +394,10 @@ export function Sidebar() {
                                       }
                                     >
                                       <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
-                                        <Queue/>
+                                        <Queue />
                                       </div>
                                       <div>
-                                        <span className="tracking-tightest">
+                                        <span className="tracking-tighter">
                                           {queue.name.length > 28 ? (
                                             <span>
                                               {queue.name.substring(0, 28)}...
@@ -432,7 +433,7 @@ export function Sidebar() {
                         to={hasUserSite ? '/team-documents' : '/documents'}
                         data-test-id="nav-team-documents"
                         end
-                        className={({isActive}) =>
+                        className={({ isActive }) =>
                           (isActive
                             ? 'text-primary-600 bg-neutral-200 '
                             : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -448,15 +449,15 @@ export function Sidebar() {
                           {hasUserSite ? (
                             <div className="w-4 flex flex-wrap items-center mr-2">
                               <div className="-mt-0.5">
-                                <Documents/>
+                                <Documents />
                               </div>
                               <div className="-mt-2.5 -ml-0.5">
-                                <ShareHand/>
+                                <ShareHand />
                               </div>
                             </div>
                           ) : (
                             <div className="w-4 flex items-center mr-2">
-                              <Documents/>
+                              <Documents />
                             </div>
                           )}
                           <div>
@@ -484,9 +485,9 @@ export function Sidebar() {
                         >
                           <div className="flex justify-end mt-3 mr-1">
                             {defaultSiteDocumentQueuesExpanded ? (
-                              <ArrowBottom/>
+                              <ArrowBottom />
                             ) : (
-                              <ArrowRight/>
+                              <ArrowRight />
                             )}
                           </div>
                           <div className="pl-1 uppercase font-bold text-sm">
@@ -498,8 +499,7 @@ export function Sidebar() {
                             (queue: any, i: number) => {
                               return (
                                 <span key={i}>
-                                  <li
-                                    className="pl-5 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                                  <li className="pl-5 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                                     <NavLink
                                       to={
                                         (hasUserSite
@@ -509,7 +509,7 @@ export function Sidebar() {
                                         queue.queueId
                                       }
                                       end
-                                      className={({isActive}) =>
+                                      className={({ isActive }) =>
                                         (isActive
                                           ? 'text-primary-600 bg-neutral-200 '
                                           : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -517,10 +517,10 @@ export function Sidebar() {
                                       }
                                     >
                                       <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
-                                        <Queue/>
+                                        <Queue />
                                       </div>
                                       <div>
-                                        <span className="tracking-tightest">
+                                        <span className="tracking-tighter">
                                           {queue.name.length > 28 ? (
                                             <span>
                                               {queue.name.substring(0, 28)}...
@@ -550,14 +550,14 @@ export function Sidebar() {
                   <>
                     {(hasUserSite || hasDefaultSite) && (
                       <li
-                        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+                        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
                         onClick={toggleWorkspacesExpand}
                       >
                         <div className="flex justify-end mt-3 mr-1">
                           {workspacesExpanded ? (
-                            <ArrowBottom/>
+                            <ArrowBottom />
                           ) : (
-                            <ArrowRight/>
+                            <ArrowRight />
                           )}
                         </div>
                         <div className="pl-1 uppercase font-bold text-sm">
@@ -566,16 +566,15 @@ export function Sidebar() {
                       </li>
                     )}
                     {(workspacesExpanded ||
-                        (!hasUserSite && !hasDefaultSite)) &&
+                      (!hasUserSite && !hasDefaultSite)) &&
                       workspaceSites.map((site: any, i: number) => {
                         return (
                           <span key={i}>
-                            <li
-                              className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                            <li className="pl-2 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                               <NavLink
                                 to={'/workspaces/' + site.siteId}
                                 end
-                                className={({isActive}) =>
+                                className={({ isActive }) =>
                                   (isActive
                                     ? 'text-primary-600 bg-neutral-200 '
                                     : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
@@ -591,7 +590,7 @@ export function Sidebar() {
                                   }
                                 >
                                   <div className="w-5 flex flex-wrap items-center mr-2">
-                                    <Workspace/>
+                                    <Workspace />
                                   </div>
                                   <div>
                                     <span>
@@ -604,7 +603,7 @@ export function Sidebar() {
                             {QuickFolderList(
                               site.siteId,
                               currentSiteId === site.siteId &&
-                              subfolderUri.length
+                                subfolderUri.length
                                 ? subfolderUri.split('/')
                                 : [],
                               folders
@@ -617,9 +616,9 @@ export function Sidebar() {
                                 >
                                   <div className="flex justify-end mt-3 mr-1">
                                     {otherSiteDocumentQueuesExpanded ? (
-                                      <ArrowBottom/>
+                                      <ArrowBottom />
                                     ) : (
-                                      <ArrowRight/>
+                                      <ArrowRight />
                                     )}
                                   </div>
                                   <div className="pl-1 uppercase font-bold text-sm">
@@ -631,8 +630,7 @@ export function Sidebar() {
                                     (queue: any, i: number) => {
                                       return (
                                         <span key={i}>
-                                          <li
-                                            className="pl-7 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                                          <li className="pl-7 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                                             <NavLink
                                               to={
                                                 '/workspaces/' +
@@ -641,7 +639,7 @@ export function Sidebar() {
                                                 queue.queueId
                                               }
                                               end
-                                              className={({isActive}) =>
+                                              className={({ isActive }) =>
                                                 (isActive
                                                   ? 'text-primary-600 bg-neutral-200 '
                                                   : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
@@ -649,10 +647,10 @@ export function Sidebar() {
                                               }
                                             >
                                               <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
-                                                <Queue/>
+                                                <Queue />
                                               </div>
                                               <div>
-                                                <span className="tracking-tightest">
+                                                <span className="tracking-tighter">
                                                   {queue.name.length > 26 ? (
                                                     <span>
                                                       {queue.name.substring(
@@ -691,7 +689,7 @@ export function Sidebar() {
                       <NavLink
                         data-test-id="nav-favorites"
                         to={`${specialFoldersRootUri}/folders/favorites`}
-                        className={({isActive}) =>
+                        className={({ isActive }) =>
                           (isActive
                             ? 'text-primary-600 bg-neutral-200 '
                             : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
@@ -702,7 +700,7 @@ export function Sidebar() {
                           className={'w-full text-sm font-bold flex pl-5 py-2 '}
                         >
                           <div className="w-4 flex items-center mr-2">
-                            <Star/>
+                            <Star />
                           </div>
                           <div>Favorites</div>
                         </div>
@@ -713,7 +711,7 @@ export function Sidebar() {
                         <NavLink
                           data-test-id="nav-trash"
                           to={`${specialFoldersRootUri}/folders/deleted`}
-                          className={({isActive}) =>
+                          className={({ isActive }) =>
                             (isActive
                               ? 'text-primary-600 bg-neutral-200 '
                               : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
@@ -726,7 +724,7 @@ export function Sidebar() {
                             }
                           >
                             <div className="w-4 h-4 flex items-center mr-2">
-                              <Trash/>
+                              <Trash />
                             </div>
                             <div>Trash</div>
                           </div>
@@ -741,68 +739,73 @@ export function Sidebar() {
               </>
             )}
             <li
-              className="mt-2 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+              className="mt-2 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
               data-test-id="expand-integrations"
               onClick={toggleIntegrationsExpand}
             >
-              <div className="flex justify-end mt-3 mr-1">
-                {integrationsExpanded ? <ArrowBottom/> : <ArrowRight/>}
+              <div className="flex justify-end mt-2 mr-1">
+                {integrationsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
               <div className="uppercase font-bold text-sm mb-2">
-                Workflows & Integrations
+                {formkiqVersion.type !== 'core' && <span>Workflows & </span>}
+                Integrations
               </div>
             </li>
             {integrationsExpanded && (
               <>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/workflows"
-                    className={({isActive}) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div
-                      className={
-                        'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                {formkiqVersion.type !== 'core' && (
+                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/workflows"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
+                        ' w-full text-sm font-bold flex '
                       }
                     >
-                      <div className="w-4 flex items-center mr-2">
-                        <Workflow/>
+                      <div
+                        className={
+                          'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                        }
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <Workflow />
+                        </div>
+                        <div>Workflows</div>
                       </div>
-                      <div>Workflows</div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/queues"
-                    className={({isActive}) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div
-                      className={
-                        'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                    </NavLink>
+                  </li>
+                )}
+                {formkiqVersion.type !== 'core' && (
+                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/queues"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
                       }
                     >
-                      <div className="w-4 flex items-center mr-2">
-                        <Queue/>
+                      <div
+                        className={
+                          'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                        }
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <Queue />
+                        </div>
+                        <div>Queues</div>
                       </div>
-                      <div>Queues</div>
-                    </div>
-                  </NavLink>
-                </li>
+                    </NavLink>
+                  </li>
+                )}
                 <li className="mt-2 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"
                     data-test-id="nav-api-explorer"
-                    className={({isActive}) =>
+                    className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '
                         : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -811,36 +814,63 @@ export function Sidebar() {
                   >
                     <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
                       <div className="w-4 flex items-center mr-2">
-                        <Api/>
+                        <Api />
                       </div>
                       <div>API Explorer</div>
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/integrations/apiKeys"
-                    data-test-id="nav-api-keys"
-                    className={({isActive}) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-2'}>
-                      <div className="w-4 flex items-center mr-2">
-                        <ApiKey/>
+                {user?.isAdmin && (
+                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/integrations/apiKeys"
+                      data-test-id="nav-api-keys"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
+                      }
+                    >
+                      <div
+                        className={'w-full text-sm font-bold flex pl-5 py-2'}
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <ApiKey />
+                        </div>
+                        <div>API Keys</div>
                       </div>
-                      <div>API Keys</div>
-                    </div>
-                  </NavLink>
-                </li>
+                    </NavLink>
+                  </li>
+                )}
+                {formkiqVersion.type !== 'core' && (
+                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/rulesets"
+                      data-test-id="nav-rulesets"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
+                      }
+                    >
+                      <div
+                        className={'w-full text-sm font-bold flex pl-5 py-2 '}
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <Rules />
+                        </div>
+                        <div>Rulesets</div>
+                      </div>
+                    </NavLink>
+                  </li>
+                )}
                 <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to="/rulesets"
-                    data-test-id="rulesets"
-                    className={({isActive}) =>
+                    to="/object-examine-tool"
+                    data-test-id="nav-object-examine"
+                    className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '
                         : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -849,31 +879,35 @@ export function Sidebar() {
                   >
                     <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
                       <div className="w-4 flex items-center mr-2">
-                        <Rules/>
+                        <Examine />
                       </div>
-                      <div>Rulesets</div>
+                      <div>Object Examine Tool</div>
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/integrations/webhooks"
-                    data-test-id="nav-webhooks"
-                    className={({isActive}) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
-                      <div className="w-4 flex items-center mr-2">
-                        <Webhook/>
+                {formkiqVersion.type !== 'core' && (
+                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/schemas"
+                      data-test-id="nav-tag-schema"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
+                      }
+                    >
+                      <div
+                        className={'w-full text-sm font-bold flex pl-5 py-2 '}
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <Schema />
+                        </div>
+                        <div>Schemas</div>
                       </div>
-                      <div>Inbound Webhooks</div>
-                    </div>
-                  </NavLink>
-                </li>
+                    </NavLink>
+                  </li>
+                )}
                 <div className="flex w-full">
                   <div className="w-full mt-4 border-b border-neutral-300"></div>
                 </div>
@@ -882,11 +916,11 @@ export function Sidebar() {
             {useAccountAndSettings && (
               <>
                 <li
-                  className="mt-4 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
+                  className="mt-4 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
                   onClick={toggleSettingsExpand}
                 >
                   <div className="flex justify-end mt-2 mr-1">
-                    {settingsExpanded ? <ArrowBottom/> : <ArrowRight/>}
+                    {settingsExpanded ? <ArrowBottom /> : <ArrowRight />}
                   </div>
                   <div className="uppercase font-semibold  text-xs">
                     Account & Settings
@@ -897,7 +931,7 @@ export function Sidebar() {
                     <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
                         to="/account"
-                        className={({isActive}) =>
+                        className={({ isActive }) =>
                           (isActive
                             ? 'text-primary-600 bg-neutral-200 '
                             : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -906,7 +940,7 @@ export function Sidebar() {
                       >
                         <div className={'w-full text-sm font-bold flex pl-5 '}>
                           <div className="w-4 flex items-center mr-2">
-                            <UserIcon/>
+                            <UserIcon />
                           </div>
                           <div>Account</div>
                         </div>
@@ -915,7 +949,7 @@ export function Sidebar() {
                     <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
                         to="/settings"
-                        className={({isActive}) =>
+                        className={({ isActive }) =>
                           (isActive
                             ? 'text-primary-600 bg-neutral-200 '
                             : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -924,7 +958,7 @@ export function Sidebar() {
                       >
                         <div className={'w-full text-sm font-bold flex pl-5 '}>
                           <div className="w-4 flex items-center mr-2">
-                            <Settings/>
+                            <Settings />
                           </div>
                           <div>Settings</div>
                         </div>
@@ -942,7 +976,7 @@ export function Sidebar() {
                 <NavLink
                   to="/my-documents"
                   end
-                  className={({isActive}) =>
+                  className={({ isActive }) =>
                     (isActive
                       ? 'text-primary-600 bg-neutral-200 '
                       : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -956,7 +990,7 @@ export function Sidebar() {
                     className={'w-full text-sm font-bold flex pl-5 py-4 '}
                   >
                     <div className="w-4 flex items-center mr-2">
-                      <Documents/>
+                      <Documents />
                     </div>
                   </FolderDropWrapper>
                 </NavLink>
@@ -967,7 +1001,7 @@ export function Sidebar() {
                 <NavLink
                   to={hasUserSite ? '/team-documents' : '/documents'}
                   end
-                  className={({isActive}) =>
+                  className={({ isActive }) =>
                     (isActive
                       ? 'text-primary-600 bg-neutral-200 '
                       : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -983,15 +1017,15 @@ export function Sidebar() {
                     {hasUserSite ? (
                       <div className="w-4 flex flex-wrap items-center mr-2">
                         <div className="-mt-0.5">
-                          <Documents/>
+                          <Documents />
                         </div>
                         <div className="-mt-2.5 -ml-0.5">
-                          <ShareHand/>
+                          <ShareHand />
                         </div>
                       </div>
                     ) : (
                       <div className="w-4 flex items-center mr-2">
-                        <Documents/>
+                        <Documents />
                       </div>
                     )}
                   </FolderDropWrapper>
@@ -1004,7 +1038,7 @@ export function Sidebar() {
                   className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
                   onClick={onWorkspacesClick}
                 >
-                  <Workspace/>
+                  <Workspace />
                 </div>
               </div>
             )}
@@ -1013,7 +1047,7 @@ export function Sidebar() {
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to={`${specialFoldersRootUri}/folders/favorites`}
-                    className={({isActive}) =>
+                    className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '
                         : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -1022,7 +1056,7 @@ export function Sidebar() {
                   >
                     <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                       <div className="w-4 flex items-center mr-2">
-                        <Star/>
+                        <Star />
                       </div>
                     </div>
                   </NavLink>
@@ -1031,7 +1065,7 @@ export function Sidebar() {
                   <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
                       to={`${specialFoldersRootUri}/folders/deleted`}
-                      className={({isActive}) =>
+                      className={({ isActive }) =>
                         (isActive
                           ? 'text-primary-600 bg-neutral-200 '
                           : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -1042,7 +1076,7 @@ export function Sidebar() {
                         className={'w-full text-sm font-bold flex pl-5 py-4 '}
                       >
                         <div className="w-4 h-4 flex items-center mr-2">
-                          <Trash/>
+                          <Trash />
                         </div>
                       </div>
                     </NavLink>
@@ -1056,7 +1090,7 @@ export function Sidebar() {
             <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/workflows"
-                className={({isActive}) =>
+                className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
                     : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -1069,7 +1103,7 @@ export function Sidebar() {
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
-                    <Workflow/>
+                    <Workflow />
                   </div>
                 </div>
               </NavLink>
@@ -1077,7 +1111,7 @@ export function Sidebar() {
             <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/queues"
-                className={({isActive}) =>
+                className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
                     : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -1090,7 +1124,7 @@ export function Sidebar() {
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
-                    <Queue/>
+                    <Queue />
                   </div>
                 </div>
               </NavLink>
@@ -1098,7 +1132,7 @@ export function Sidebar() {
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/integrations/api"
-                className={({isActive}) =>
+                className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
                     : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -1107,7 +1141,7 @@ export function Sidebar() {
               >
                 <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                   <div className="w-4 flex items-center mr-2">
-                    <Api/>
+                    <Api />
                   </div>
                 </div>
               </NavLink>
@@ -1115,7 +1149,7 @@ export function Sidebar() {
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/integrations/webhooks"
-                className={({isActive}) =>
+                className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
                     : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -1124,7 +1158,7 @@ export function Sidebar() {
               >
                 <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                   <div className="w-4 flex items-center mr-2">
-                    <Webhook/>
+                    <Webhook />
                   </div>
                 </div>
               </NavLink>
@@ -1137,7 +1171,7 @@ export function Sidebar() {
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/account"
-                    className={({isActive}) =>
+                    className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '
                         : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -1146,7 +1180,7 @@ export function Sidebar() {
                   >
                     <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                       <div className="w-4 flex items-center mr-2">
-                        <UserIcon/>
+                        <UserIcon />
                       </div>
                     </div>
                   </NavLink>
@@ -1154,7 +1188,7 @@ export function Sidebar() {
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/settings"
-                    className={({isActive}) =>
+                    className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '
                         : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
@@ -1163,7 +1197,7 @@ export function Sidebar() {
                   >
                     <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                       <div className="w-4 flex items-center mr-2">
-                        <Settings/>
+                        <Settings />
                       </div>
                     </div>
                   </NavLink>
@@ -1192,27 +1226,21 @@ export function Sidebar() {
         <div
           className={
             (sidebarExpanded ? 'w-64' : 'w-10') +
-            ' flex fixed z-30 justify-between mt-2.5'
+            ' flex fixed z-30 justify-between h-logo bg-neutral-100'
           }
         >
           <Link to="/">
             {sidebarExpanded ? (
               <>
-                <picture>
-                  <source
-                    srcSet="/assets/img/png/formkiq-wordmark.webp"
-                    type="image/webp"
-                  />
-                  <source
-                    srcSet="/assets/img/png/formkiq-wordmark.png"
-                    type="image/png"
-                  />
-                  <img
-                    src="/assets/img/png/formkiq-wordmark.png"
-                    className="ml-6 mt-2 w-28 mb-2.5"
-                    alt="FormKiQ"
-                  />
-                </picture>
+                <div className="w-logo h-logo flex justify-center items-center">
+                  <picture>
+                    <source
+                      srcSet="/assets/img/png/brand-logo.png"
+                      type="image/png"
+                    />
+                    <img src="/assets/img/png/brand-logo.png" />
+                  </picture>
+                </div>
               </>
             ) : (
               <></>
@@ -1220,13 +1248,15 @@ export function Sidebar() {
           </Link>
           <div
             className={
-              (sidebarExpanded ? 'justify-end mr-2 ' : 'justify-end mr-2') +
+              (sidebarExpanded
+                ? 'justify-end -ml-2 mr-2 '
+                : 'justify-end mr-2 ') +
               ' text-neutral-900 hover:text-primary-500 flex mt-2 cursor-pointer '
             }
             onClick={toggleSidebarExpand}
           >
             <div className={(!sidebarExpanded ? 'mt-2' : '-mt-1.5') + ' w-4'}>
-              {sidebarExpanded ? <ChevronLeft/> : <ChevronRight/>}
+              {sidebarExpanded ? <ChevronLeft /> : <ChevronRight />}
             </div>
           </div>
         </div>
@@ -1238,15 +1268,20 @@ export function Sidebar() {
         ></div>
         {user && (
           <>
-            <nav className="grow mt-16">
+            <nav className="grow mt-20 mb-8 pt-4">
               {!isSiteReadOnly && (
-                <div className="flex flex-col w-full justify-center mb-4 px-4 gap-2">
+                <div className="flex flex-wrap w-full justify-center mb-4 pl-0.5">
                   <ButtonPrimaryGradient
-                    className={(isSidebarExpanded ? ' mr-1 rounded-md' : 'mb-1 rounded-full') + " flex justify-center items-center w-full"}
+                    className={
+                      (isSidebarExpanded
+                        ? ' mr-1 rounded-md'
+                        : 'mb-1 rounded-full') +
+                      ' flex justify-center items-center w-full'
+                    }
                     style={{
-                      height: isSidebarExpanded ? "32px" : "28px",
-                      width: isSidebarExpanded ? "100%" : "28px",
-                      padding: isSidebarExpanded ? '16px' : '0px'
+                      height: isSidebarExpanded ? '32px' : '28px',
+                      width: isSidebarExpanded ? '100%' : '28px',
+                      padding: isSidebarExpanded ? '16px' : '0px',
                     }}
                     onClick={() => {
                       // TODO: create more consistent check on site location
@@ -1273,11 +1308,16 @@ export function Sidebar() {
                     </div>
                   </ButtonPrimaryGradient>
                   <ButtonTertiary
-                    className={(isSidebarExpanded ? ' mr-1 rounded-md' : 'mb-1 rounded-full') + " flex justify-center items-center w-full"}
+                    className={
+                      (isSidebarExpanded
+                        ? ' mr-1 rounded-md'
+                        : 'mb-1 rounded-full') +
+                      ' flex justify-center items-center w-full'
+                    }
                     style={{
-                      height: isSidebarExpanded ? "32px" : "28px",
-                      width: isSidebarExpanded ? "100%" : "28px",
-                      padding: isSidebarExpanded ? '16px' : '0px'
+                      height: isSidebarExpanded ? '32px' : '28px',
+                      width: isSidebarExpanded ? '100%' : '28px',
+                      padding: isSidebarExpanded ? '16px' : '0px',
                     }}
                     data-test-id="upload-document"
                     onClick={() => {
@@ -1305,13 +1345,34 @@ export function Sidebar() {
                 </div>
               )}
               <ul className="flex lg:flex-col gap-1">
-                <SidebarItems/>
+                <SidebarItems />
               </ul>
             </nav>
             {formkiqVersion && formkiqVersion.type && isSidebarExpanded && (
-              <div className="text-xxs absolute bottom-0 w-full flex justify-center items-end -mt-1 mb-4">
-                {formkiqVersion.type.toUpperCase()} v{formkiqVersion.version}
-              </div>
+              <>
+                <div className="group text-xs fixed left-0 bottom-0 flex justify-start items-end pl-4 mb-2 bg-neutral-100">
+                  FormKiQ
+                  {formkiqVersion.type === 'enterprise' ? (
+                    <span>&nbsp;Enterprise&nbsp;</span>
+                  ) : (
+                    <span>&nbsp;</span>
+                  )}
+                  v{formkiqVersion.version}
+                  <div className="modulePane absolute invisible group-hover:visible bottom-full w-full mb-2">
+                    {formkiqVersion.modules &&
+                      formkiqVersion.modules.length && (
+                        <h3 className="font-semibold mb-1">Modules:</h3>
+                      )}
+                    {formkiqVersion.modules.map((module: string, i: number) => {
+                      return (
+                        <div key={i} className="bg-white p-1">
+                          {module.toUpperCase()}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
             )}
           </>
         )}

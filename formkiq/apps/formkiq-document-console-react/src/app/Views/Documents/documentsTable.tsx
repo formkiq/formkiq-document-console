@@ -26,13 +26,14 @@ type DocumentTableProps = {
   currentSiteId: string;
   currentDocumentsRootUri: string;
   isSiteReadOnly: boolean;
-  onTagChange: (event: any, value: ILine | null) => void;
+  onDocumentDataChange: (event: any, value: ILine | null) => void;
   onESignaturesModalClick: (event: any, value: ILine | null) => void;
   onShareClick: (event: any, value: ILine | null) => void;
   onRenameModalClick: (event: any, value: ILine | null) => void;
   onMoveModalClick: (event: any, value: ILine | null) => void;
   onDocumentVersionsModalClick: (event: any, value: ILine | null) => void;
   onDocumentWorkflowsModalClick: (event: any, value: ILine | null) => void;
+  onDocumentReviewModalClick: (event: any, value: ILine | null) => void;
   onEditTagsAndMetadataModalClick: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
@@ -41,6 +42,8 @@ type DocumentTableProps = {
   deleteFromPendingArchive: (file: IDocument) => void;
   archiveStatus: string;
   trackScrolling: () => void;
+  infoDocumentId:  string;
+  onDocumentInfoClick: () => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -52,12 +55,13 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onShareClick,
     onRenameModalClick,
     currentSiteId,
-    onTagChange,
+    onDocumentDataChange,
     onESignaturesModalClick,
     currentDocumentsRootUri,
     filterTag,
     onDocumentVersionsModalClick,
     onDocumentWorkflowsModalClick,
+    onDocumentReviewModalClick: onDocumentReviewModalClick,
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
@@ -66,6 +70,8 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     deleteFromPendingArchive,
     archiveStatus,
     trackScrolling,
+    infoDocumentId,
+    onDocumentInfoClick,
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
@@ -198,18 +204,21 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onMoveModalClick={onMoveModalClick}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
+                onDocumentReviewModalClick={onDocumentReviewModalClick}
                 onESignaturesModalClick={onESignaturesModalClick}
-                onTagChange={onTagChange}
+                onDocumentDataChange={onDocumentDataChange}
                 filterTag={filterTag}
                 isArchiveTabExpanded={isArchiveTabExpanded}
                 archiveStatus={archiveStatus}
                 addToPendingArchive={addToPendingArchive}
                 deleteFromPendingArchive={deleteFromPendingArchive}
+                infoDocumentId={infoDocumentId}
+                onDocumentInfoClick={onDocumentInfoClick}
               />
             ))}
           </tbody>
         </table>
-        {loadingStatus === RequestStatus.pending && (
+        {(loadingStatus === RequestStatus.pending && documents.length > 0)&& (
           <div className="absolute bottom-0 w-full flex justify-center">
             <Spinner />
           </div>
@@ -240,12 +249,13 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     onShareClick,
     onRenameModalClick,
     currentSiteId,
-    onTagChange,
+    onDocumentDataChange,
     onESignaturesModalClick,
     currentDocumentsRootUri,
     filterTag,
     onDocumentVersionsModalClick,
     onDocumentWorkflowsModalClick,
+    onDocumentReviewModalClick,
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
@@ -275,8 +285,9 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               onMoveModalClick={onMoveModalClick}
               onDocumentVersionsModalClick={onDocumentVersionsModalClick}
               onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
+              onDocumentReviewModalClick={onDocumentReviewModalClick}
               onESignaturesModalClick={onESignaturesModalClick}
-              onTagChange={onTagChange}
+              onDocumentDataChange={onDocumentDataChange}
               onRestoreDocument={onRestoreDocument}
               onDeleteDocument={onDeleteDocument}
               filterTag={filterTag}

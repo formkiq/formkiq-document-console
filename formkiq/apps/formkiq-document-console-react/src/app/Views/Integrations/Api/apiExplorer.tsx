@@ -52,6 +52,9 @@ import {
   getDocumentVersionsApiItem,
   getDocumentsApiItem,
   getDocumentsInQueueApiItem,
+  getDocumentsInWorkflowApiItem,
+  getExaminePdfDetailsApiItem,
+  getExaminePdfUploadUrlApiItem,
   getFoldersApiItem,
   getNewDocumentUploadApiItem,
   getQueueApiItem,
@@ -482,6 +485,10 @@ export function ApiExplorer() {
                 <ApiItem apiItem={putWorkflowsApiItem} sites={sites} />
                 <ApiItem apiItem={deleteWorkflowApiItem} sites={sites} />
                 <ApiItem apiItem={postDocumentWorkflowApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={getDocumentsInWorkflowApiItem}
+                  sites={sites}
+                />
                 <ApiItem apiItem={getQueuesApiItem} sites={sites} />
                 <ApiItem apiItem={postQueuesApiItem} sites={sites} />
                 <ApiItem apiItem={getQueueApiItem} sites={sites} />
@@ -552,6 +559,18 @@ export function ApiExplorer() {
                 <ApiItem apiItem={getCaseTaskDocumentsApiItem} sites={sites} />
                 <ApiItem apiItem={getCaseNigosApiItem} sites={sites} />
                 <ApiItem apiItem={getCaseNigoDocumentsApiItem} sites={sites} />
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Examine Objects">
+            <div className="ml-2 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem
+                  apiItem={getExaminePdfUploadUrlApiItem}
+                  sites={sites}
+                />
+                <ApiItem apiItem={getExaminePdfDetailsApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>

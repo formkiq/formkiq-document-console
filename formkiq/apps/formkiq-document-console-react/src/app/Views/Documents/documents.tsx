@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
+import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentReviewModal/DocumentReviewModal';
 import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
 import DocumentWorkflowsModal from '../../Components/DocumentsAndFolders/DocumentWorkflowsModal/documentWorkflowsModal';
 import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
@@ -185,6 +186,10 @@ function Documents() {
     useState(false);
   const [eSignaturesModalValue, setESignaturesModalValue] =
     useState<ILine | null>(null);
+  const [documentReviewModalValue, setDocumentReviewModalValue] =
+    useState<ILine | null>(null);
+  const [isDocumentReviewModalOpened, setDocumentReviewModalOpened] =
+    useState(false);
   const [isESignaturesModalOpened, setESignaturesModalOpened] = useState(false);
   const [newModalValue, setNewModalValue] = useState<ILine | null>(null);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
@@ -252,7 +257,7 @@ function Documents() {
     setDocumentListOffsetTop(isTagFilterExpanded ? 0 : 45);
   }, [isTagFilterExpanded]);
 
-  useEffect(() => {
+  function onDocumentInfoClick() {
     DocumentsService.getAllTagKeys(currentSiteId).then((response: any) => {
       const allTagData = {
         allTags: response?.values,
@@ -271,6 +276,10 @@ function Documents() {
       );
     }
     dispatch(setCurrentDocumentPath(''));
+  }
+
+  useEffect(() => {
+    onDocumentInfoClick();
   }, [infoDocumentId]);
 
   useEffect(() => {
@@ -400,6 +409,7 @@ function Documents() {
   }, [pathname]);
 
   useEffect(() => {
+    dispatch(setDocumentLoadingStatusPending());
     dispatch(
       fetchDocuments({
         siteId: currentSiteId,
@@ -494,7 +504,7 @@ function Documents() {
           updateTags();
         });
         setTimeout(() => {
-          onTagChange(null, null);
+          onDocumentDataChange(null, null);
         }, 500);
       };
       dispatch(
@@ -564,7 +574,14 @@ function Documents() {
     setESignaturesModalValue(null);
     setESignaturesModalOpened(false);
   };
-  const onTagChange = (event: any, value: ILine | null) => {
+  const onDocumentReviewModalClick = (event: any, value: ILine | null) => {
+    setDocumentReviewModalValue(value);
+    setDocumentReviewModalOpened(true);
+  };
+  const onDocumentReviewModalClose = () => {
+    setDocumentReviewModalOpened(false);
+  };
+  const onDocumentDataChange = (event: any, value: ILine | null) => {
     dispatch(setDocuments({ documents: null }));
     dispatch(
       fetchDocuments({
@@ -681,9 +698,7 @@ function Documents() {
       if (folderLevels.length > 3) {
         const previousFolderLevel = uri.substring(0, uri.lastIndexOf('/'));
         return (
-          <span
-            className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}
-          >
+          <span className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}>
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
@@ -732,9 +747,7 @@ function Documents() {
         );
       } else {
         return (
-          <span
-            className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}
-          >
+          <span className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}>
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
@@ -802,9 +815,7 @@ function Documents() {
       }
     }
     return (
-      <span
-        className={'hidden flex pl-4 py-2 text-gray-500 bg-white'}
-      >
+      <span className={'hidden flex pl-4 py-2 text-gray-500 bg-white'}>
         <span className="pr-1">
           {siteDocumentsRootName.replace('Workspace: ', '')}
         </span>
@@ -1047,14 +1058,14 @@ function Documents() {
                     >
                       <span>
                         {file.path.substring(file.path.lastIndexOf('/') + 1)
-                          .length > 40 ? (
-                          <span className="tracking-tightest text-clip overflow-hidden">
+                          .length > 50 ? (
+                          <span className="tracking-tighter text-clip overflow-hidden">
                             {file.path.substring(
                               file.path.lastIndexOf('/') + 1,
-                              file.path.lastIndexOf('/') + 50
+                              file.path.lastIndexOf('/') + 60
                             )}
                             {file.path.substring(file.path.lastIndexOf('/') + 1)
-                              .length > 50 && <span>...</span>}
+                              .length > 60 && <span>...</span>}
                           </span>
                         ) : (
                           <span>
@@ -1217,7 +1228,7 @@ function Documents() {
                 currentSiteId={currentSiteId}
                 currentDocumentsRootUri={currentDocumentsRootUri}
                 onESignaturesModalClick={onESignaturesModalClick}
-                onTagChange={onTagChange}
+                onDocumentDataChange={onDocumentDataChange}
                 isSiteReadOnly={isSiteReadOnly}
                 onEditTagsAndMetadataModalClick={
                   onEditTagsAndMetadataModalClick
@@ -1225,12 +1236,15 @@ function Documents() {
                 filterTag={filterTag}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
+                onDocumentReviewModalClick={onDocumentReviewModalClick}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
                 isArchiveTabExpanded={isArchiveTabExpanded}
                 addToPendingArchive={addToPendingArchive}
                 deleteFromPendingArchive={deleteFromPendingArchive}
                 archiveStatus={archiveStatus}
+                infoDocumentId={infoDocumentId}
+                onDocumentInfoClick={onDocumentInfoClick}
               />
             </div>
           </div>
@@ -1515,7 +1529,7 @@ function Documents() {
                                 documentInstance: currentDocument as IDocument,
                                 folderInstance: null,
                               }}
-                              onTagChange={onTagChange}
+                              onDocumentDataChange={onDocumentDataChange}
                               updateTags={updateTags}
                               siteId={currentSiteId}
                               tagColors={tagColors}
@@ -1597,40 +1611,42 @@ function Documents() {
                             }
                           )}
                         <div className="w-68 flex mt-3 mr-3 border-b"></div>
-                        <div className="flex flex-col pt-3">
-                          <dt className="mb-1 flex justify-between">
-                            <span className="text-sm font-semibold text-primary-500">
-                              Access Attributes
-                            </span>
-                          </dt>
-                          <dd className="text-sm">
-                            {currentDocumentAccessAttributes &&
-                              (currentDocumentAccessAttributes as []).map(
-                                (attribute: any, i: number) => {
-                                  return (
-                                    <div key={i} className="">
-                                      <div className="pt-1 pr-1 flex items-center">
-                                        <div className={`h-5.5 pr-1 `}>
-                                          <span className="block text-xs">
-                                            {attribute.key}
-                                          </span>
-                                          <span className="font-semibold">
-                                            {attribute.stringValue}
-                                          </span>
-                                          <span className="font-semibold">
-                                            {attribute.numberValue}
-                                          </span>
-                                          <span className="font-semibold">
-                                            {attribute.booleanValue}
-                                          </span>
+                        {formkiqVersion.type !== 'core' && (
+                          <div className="flex flex-col pt-3">
+                            <dt className="mb-1 flex justify-between">
+                              <span className="text-sm font-semibold text-primary-500">
+                                Access Attributes
+                              </span>
+                            </dt>
+                            <dd className="text-sm">
+                              {currentDocumentAccessAttributes &&
+                                (currentDocumentAccessAttributes as []).map(
+                                  (attribute: any, i: number) => {
+                                    return (
+                                      <div key={i} className="">
+                                        <div className="pt-1 pr-1 flex items-center">
+                                          <div className={`h-5.5 pr-1 `}>
+                                            <span className="block text-xs">
+                                              {attribute.key}
+                                            </span>
+                                            <span className="font-semibold">
+                                              {attribute.stringValue}
+                                            </span>
+                                            <span className="font-semibold">
+                                              {attribute.numberValue}
+                                            </span>
+                                            <span className="font-semibold">
+                                              {attribute.booleanValue}
+                                            </span>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  );
-                                }
-                              )}
-                          </dd>
-                        </div>
+                                    );
+                                  }
+                                )}
+                            </dd>
+                          </div>
+                        )}
                       </dl>
                     )}
                     <div className="mt-4 w-full flex justify-center">
@@ -1642,6 +1658,31 @@ function Documents() {
                         <span className="w-7 pl-1 -mt-0.5">{Download()}</span>
                       </button>
                     </div>
+                    {formkiqVersion.type !== 'core' && (
+                      <div className="mt-2 flex justify-center">
+                        <button
+                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
+                          onClick={(event) => {
+                            const documentLine: ILine = {
+                              lineType: 'document',
+                              folder: '',
+                              documentId: infoDocumentId,
+                              documentInstance: currentDocument,
+                              folderInstance: null,
+                            };
+                            onDocumentWorkflowsModalClick(event, documentLine);
+                          }}
+                        >
+                          View
+                          {isSiteReadOnly ? (
+                            <span>&nbsp;</span>
+                          ) : (
+                            <span>&nbsp;/ Assign&nbsp;</span>
+                          )}
+                          Workflows
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div
                     className={
@@ -1729,29 +1770,6 @@ function Documents() {
                             <span>&nbsp;/ Edit&nbsp;</span>
                           )}
                           Versions
-                        </button>
-                      </div>
-                      <div className="mt-2 flex justify-center">
-                        <button
-                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
-                          onClick={(event) => {
-                            const documentLine: ILine = {
-                              lineType: 'document',
-                              folder: '',
-                              documentId: infoDocumentId,
-                              documentInstance: currentDocument,
-                              folderInstance: null,
-                            };
-                            onDocumentWorkflowsModalClick(event, documentLine);
-                          }}
-                        >
-                          View
-                          {isSiteReadOnly ? (
-                            <span>&nbsp;</span>
-                          ) : (
-                            <span>&nbsp;/ Assign&nbsp;</span>
-                          )}
-                          Workflows
                         </button>
                       </div>
                     </span>
@@ -1881,7 +1899,7 @@ function Documents() {
         siteId={currentSiteId}
         getValue={getEditTagsAndMetadataModalValue}
         value={editTagsAndMetadataModalValue}
-        onTagChange={onTagChange}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <DocumentVersionsModal
         isOpened={isDocumentVersionsModalOpened}
@@ -1913,12 +1931,14 @@ function Documents() {
         siteId={currentSiteId}
         formkiqVersion={formkiqVersion}
         value={newModalValue}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <RenameModal
         isOpened={isRenameModalOpened}
         onClose={onRenameModalClose}
         siteId={currentSiteId}
         value={renameModalValue}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <MoveModal
         isOpened={isMoveModalOpened}
@@ -1935,6 +1955,7 @@ function Documents() {
         folder={subfolderUri}
         documentId={uploadModalDocumentId}
         isFolderUpload={false}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <UploadModal
         isOpened={isFolderUploadModalOpened}
@@ -1944,6 +1965,13 @@ function Documents() {
         folder={subfolderUri}
         documentId={folderUploadModalDocumentId}
         isFolderUpload={true}
+        onDocumentDataChange={onDocumentDataChange}
+      />
+      <DocumentReviewModal
+        isOpened={isDocumentReviewModalOpened}
+        onClose={onDocumentReviewModalClose}
+        siteId={currentSiteId}
+        value={documentReviewModalValue}
       />
     </>
   );

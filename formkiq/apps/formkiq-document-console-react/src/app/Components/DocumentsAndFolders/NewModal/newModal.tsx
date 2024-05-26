@@ -22,12 +22,14 @@ export default function NewModal({
   siteId,
   formkiqVersion,
   value,
+  onDocumentDataChange,
 }: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
   formkiqVersion: any;
   value: ILine | null;
+  onDocumentDataChange: any;
 }) {
   const {
     register,
@@ -54,8 +56,8 @@ export default function NewModal({
     setItemToCreate('');
     setFormActive(false);
     reset();
+    onDocumentDataChange();
     onClose();
-    window.location.reload();
   };
 
   const onNewFolderClick = (event: any, value: ILine | null) => {
@@ -199,7 +201,7 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <Upload />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Upload a New File
                       </div>
                     </div>
@@ -217,7 +219,7 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <Upload />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Upload a New Folder
                       </div>
                     </div>
@@ -276,29 +278,31 @@ export default function NewModal({
                               alt="pptx icon"
                             />
                           </div>
-                          <div className="w-full tracking-tight text-sm text-center mb-2">
+                          <div className="w-full tracking-normal text-sm text-center mb-2">
                             MS PowerPoint Document
                           </div>
                         </div>
                       </>
                     )}
-                    <div
-                      className={`${
-                        itemToCreate === 'workflow'
-                          ? 'bg-gray-100 font-semibold border-gray-600'
-                          : 'cursor-pointer hover:bg-gray-100'
-                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
-                      onClick={(event) =>
-                        (window.location.href = '/integrations/workflows')
-                      }
-                    >
-                      <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
-                        <Workflow />
+                    {formkiqVersion.type !== 'core' && (
+                      <div
+                        className={`${
+                          itemToCreate === 'workflow'
+                            ? 'bg-gray-100 font-semibold border-gray-600'
+                            : 'cursor-pointer hover:bg-gray-100'
+                        } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                        onClick={(event) =>
+                          (window.location.href = '/integrations/workflows')
+                        }
+                      >
+                        <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
+                          <Workflow />
+                        </div>
+                        <div className="w-full tracking-normal text-sm text-center mb-2">
+                          Workflow
+                        </div>
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
-                        Workflow
-                      </div>
-                    </div>
+                    )}
                     <div
                       className={`${
                         itemToCreate === 'inbound-webhook'
@@ -312,7 +316,7 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <Webhook />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Inbound Webhook (Receive Documents)
                       </div>
                     </div>
@@ -327,7 +331,7 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <External />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Outbound Webhook (Workflow Action)
                       </div>
                     </div>

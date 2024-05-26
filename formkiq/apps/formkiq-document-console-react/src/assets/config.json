@@ -2,10 +2,10 @@
   "documentApi": "https://dzevnwtyz4.execute-api.us-east-2.amazonaws.com",
   "userPoolId": "us-east-2_PMH8inGOX",
   "clientId": "1nol56jeud98ime10tbchh8nq1",
-  "consoleVersion": "v3.1.0",
+  "consoleVersion": "v3.4.0",
   "brand": "formkiq",
   "userAuthentication": "cognito",
   "authApi": "https://nt5e3thcgl.execute-api.us-east-2.amazonaws.com",
   "cognitoHostedUi": "https://formkiq-enterprise-demo-622653865277.auth.us-east-2.amazoncognito.com",
-  "useAuthApiForSignIn": "false"
+  "useAuthApiForSignIn": "true"
 }

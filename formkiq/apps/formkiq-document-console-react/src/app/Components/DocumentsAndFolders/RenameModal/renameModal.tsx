@@ -12,11 +12,13 @@ export default function RenameModal({
   onClose,
   siteId,
   value,
+  onDocumentDataChange,
 }: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
   value: ILine | null;
+  onDocumentDataChange: any;
 }) {
   const {
     register,
@@ -74,6 +76,10 @@ export default function RenameModal({
   const closeDialog = () => {
     setFormActive(false);
     reset();
+    setTimeout(() => {
+      onDocumentDataChange();
+    }, 1500);
+
     onClose();
   };
 

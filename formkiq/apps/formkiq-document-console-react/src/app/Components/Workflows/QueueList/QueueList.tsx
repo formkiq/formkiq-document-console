@@ -1,12 +1,14 @@
-import {Plus, Trash} from '../../Icons/icons';
-import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
-import ButtonSecondary from "../../Generic/Buttons/ButtonSecondary";
+import { CopyButton } from '../../../Components/Generic/Buttons/CopyButton';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
+import { Plus, Trash } from '../../Icons/icons';
 
 type Props = {
   siteId: string;
   isSiteReadOnly: boolean;
   onNewClick: any;
   queues: null | [];
+  onView: (queueId: string, siteId: string) => void;
   onDelete: (queueId: string, siteId: string) => void;
 };
 
@@ -15,8 +17,12 @@ export function QueueList({
   isSiteReadOnly,
   onNewClick,
   queues,
+  onView,
   onDelete,
 }: Props) {
+  const onViewClick = (queueId: string, siteId: string) => () => {
+    onView(queueId, siteId);
+  };
   const onDeleteClick = (queueId: string, siteId: string) => () => {
     onDelete(queueId, siteId);
   };
@@ -27,9 +33,9 @@ export function QueueList({
         <div className="mt-4 flex px-4">
           <ButtonPrimaryGradient
             data-test-id="create-queue"
-            onClick={(event:any) => onNewClick(event, siteId)}
+            onClick={(event: any) => onNewClick(event, siteId)}
             className="flex items-center"
-            style={{height: '36px'}}
+            style={{ height: '36px' }}
           >
             <span>Create new</span>
             <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
@@ -40,6 +46,9 @@ export function QueueList({
         <table className="w-full border-collapse text-sm">
           <thead className="bg-neutral-100 border-neutral-300 font-bold text-transparent text-left">
             <tr>
+              <th className="w-1/8 border-b p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                ID
+              </th>
               <th className="w-1/8 border-b p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Name
               </th>
@@ -53,13 +62,21 @@ export function QueueList({
               <>
                 {(queues as any).map((queue: any, i: number) => {
                   return (
-                    <tr key={i} data-test-id={`queue-${queue.name}`} className="border-neutral-300 text-neutral-900">
-                      <td className="border-b  p-4 pl-8 ">
-                        {queue.name}
+                    <tr
+                      key={i}
+                      data-test-id={`queue-${queue.name}`}
+                      className="border-neutral-300 text-neutral-900"
+                    >
+                      <td className="border-b p-4 pl-8 text-xs">
+                        <span className="pr-4">{queue.queueId}</span>
+                        <CopyButton value={queue.queueId} />
                       </td>
-                      <td className="border-b  p-4 pr-8 flex gap-2">
+                      <td className="border-b p-4 pl-8 ">{queue.name}</td>
+                      <td className="border-b p-4 pr-8 flex gap-2">
                         <ButtonSecondary
-                        style={{height:'32px'}}>
+                          style={{ height: '32px' }}
+                          onClick={onViewClick(queue.queueId, siteId)}
+                        >
                           View
                         </ButtonSecondary>
                         <button

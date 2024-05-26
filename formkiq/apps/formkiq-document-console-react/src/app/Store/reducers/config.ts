@@ -13,6 +13,7 @@ export interface Config {
   authApi: string;
   useAuthApiForSignIn: boolean;
   userAuthenticationType: string;
+  cognitoSingleSignOnUrl: string;
   customAuthorizerUrl: string;
   brand: string;
   formkiqVersion: FormkiqVersion;
@@ -92,6 +93,7 @@ export const configInitialState = {
   authApi: '',
   useAuthApiForSignIn: false,
   customAuthorizerUrl: '',
+  cognitoSingleSignOnUrl: '',
   brand: 'formkiq',
   formkiqVersion: { type: '', version: '', modules: [] as any[] },
   tagColors,
@@ -143,6 +145,12 @@ export const configSlice = createSlice({
       return {
         ...state,
         clientId: action.payload,
+      };
+    },
+    setCognitoSingleSignOnUrl(state, action: PayloadAction<string>) {
+      return {
+        ...state,
+        cognitoSingleSignOnUrl: action.payload,
       };
     },
     setUserAuthenticationType(state, action: PayloadAction<string>) {
@@ -219,6 +227,7 @@ export const {
   setDocumentApi,
   setUserPoolId,
   setClientId,
+  setCognitoSingleSignOnUrl,
   setUserAuthenticationType,
   setAuthApi,
   setUseAuthApiForSignIn,

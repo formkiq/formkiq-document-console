@@ -10,10 +10,6 @@ import {
   removeDocumentTag,
 } from '../../../Store/reducers/documentsList';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
-import {
-  closeDialog as closeProgressDialog,
-  openDialog as openProgressDialog,
-} from '../../../Store/reducers/globalProgressControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import {
@@ -50,13 +46,16 @@ function DocumentListLine({
   onMoveModalClick,
   onDocumentVersionsModalClick,
   onDocumentWorkflowsModalClick,
+  onDocumentReviewModalClick,
   onESignaturesModalClick,
-  onTagChange,
+  onDocumentDataChange,
   leftOffset = 0,
   isArchiveTabExpanded,
   addToPendingArchive,
   deleteFromPendingArchive,
   archiveStatus,
+  infoDocumentId,
+  onDocumentInfoClick,
 }: {
   file: any;
   folder: any;
@@ -72,14 +71,17 @@ function DocumentListLine({
   onMoveModalClick: any;
   onDocumentVersionsModalClick: any;
   onDocumentWorkflowsModalClick: any;
+  onDocumentReviewModalClick: any;
   onESignaturesModalClick: any;
-  onTagChange: any;
+  onDocumentDataChange: any;
   filterTag: string | null;
   leftOffset?: number;
   isArchiveTabExpanded?: boolean;
   addToPendingArchive?: (file: IDocument) => void;
   deleteFromPendingArchive?: (file: IDocument) => void;
   archiveStatus?: string;
+  infoDocumentId?:string
+  onDocumentInfoClick?: () => void;
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
@@ -110,11 +112,9 @@ function DocumentListLine({
   const onPermanentDeleteClick = () => {
     const deleteFunc = () => {
       DocumentsService.deleteDocument(file.documentId, siteId).then(() => {
-        dispatch(openProgressDialog({ dialogTitle: 'Deleting...' }));
         setTimeout(() => {
-          closeProgressDialog();
-          window.location.reload();
-        }, 2000);
+          onDocumentDataChange();
+        }, 1000);
         /*
         if (useSoftDelete) {
           navigate(
@@ -238,10 +238,17 @@ function DocumentListLine({
     lineSubfolderLevel = file.path.split('/').length - 1;
   }
 
+  function onInfoClick() {
+    if (!onDocumentInfoClick) return
+    if (infoDocumentId === file.documentId) {
+      onDocumentInfoClick();
+    }
+  }
+
   return (
     <>
       <tr
-        className={`text-sm tracking-tight`}
+        className={`text-sm tracking-normal ${(infoDocumentId===file.documentId)&& "bg-neutral-100"}`}
         data-test-id={`${file.path}`}
         ref={drag}
         style={{ opacity, visibility: isDragging ? 'hidden' : 'inherit' }}
@@ -253,42 +260,36 @@ function DocumentListLine({
               (pendingArchive.indexOf(file) === -1 ? (
                 <div
                   className={
-                    `py-2 ml-3 ` +
+                    `py-2 ml-2 px-1 cursor-pointer text-neutral-900 hover:text-primary-500 ` +
                     (lineSubfolderLevel === pageSubfolderLevel
-                      ? '-mr-2'
+                      ? '-mr-1'
                       : 'mr-2')
                   }
+                  onClick={
+                    addToPendingArchive
+                      ? () => addToPendingArchive(file)
+                      : undefined
+                  }
                 >
-                  <div
-                    className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 "
-                    data-test-id="delete-action"
-                    onClick={
-                      addToPendingArchive
-                        ? () => addToPendingArchive(file)
-                        : undefined
-                    }
-                  >
+                  <div className="w-4 h-auto ">
                     <Plus />
                   </div>
                 </div>
               ) : (
                 <div
                   className={
-                    `py-2 ml-3 ` +
+                    `py-2 ml-2 px-1 cursor-pointer text-neutral-900 hover:text-primary-500 ` +
                     (lineSubfolderLevel === pageSubfolderLevel
-                      ? '-mr-2'
+                      ? '-mr-1'
                       : 'mr-2')
                   }
+                  onClick={
+                    deleteFromPendingArchive
+                      ? () => deleteFromPendingArchive(file)
+                      : undefined
+                  }
                 >
-                  <div
-                    className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 "
-                    data-test-id="delete-action"
-                    onClick={
-                      deleteFromPendingArchive
-                        ? () => deleteFromPendingArchive(file)
-                        : undefined
-                    }
-                  >
+                  <div className="w-4 h-auto" data-test-id="delete-action">
                     <Minus />
                   </div>
                 </div>
@@ -326,14 +327,14 @@ function DocumentListLine({
                 ) : (
                   <span>
                     {file.path.substring(file.path.lastIndexOf('/') + 1)
-                      .length > 40 ? (
-                      <span className="tracking-tightest text-clip overflow-hidden">
+                      .length > 50 ? (
+                      <span className="tracking-tighter text-clip overflow-hidden">
                         {file.path.substring(
                           file.path.lastIndexOf('/') + 1,
-                          file.path.lastIndexOf('/') + 50
+                          file.path.lastIndexOf('/') + 60
                         )}
                         {file.path.substring(file.path.lastIndexOf('/') + 1)
-                          .length > 50 && <span>...</span>}
+                          .length > 60 && <span>...</span>}
                       </span>
                     ) : (
                       <span>
@@ -398,7 +399,7 @@ function DocumentListLine({
                         folder: folder,
                         documentId: file.documentId,
                       }}
-                      onTagChange={onTagChange}
+                      onDocumentDataChange={onDocumentDataChange}
                       siteId={siteId}
                       isSiteReadOnly={isSiteReadOnly}
                       tagColors={tagColors}
@@ -410,6 +411,7 @@ function DocumentListLine({
             <Link
               to={`#id=${file.documentId}`}
               className="w-5 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
+              onClick={onInfoClick}
             >
               <Info />
             </Link>
@@ -423,14 +425,14 @@ function DocumentListLine({
             )}
           </div>
         </td>
-        <td className="w-38 p-2 pt-3 text-neutral-900 block tracking-tight lg:table-cell relative lg:static">
+        <td className="w-38 p-2 pt-3 text-neutral-900 block tracking-normal lg:table-cell relative lg:static">
           {formatDate(file.lastModifiedDate)}
         </td>
-        <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-tight lg:table-cell relative lg:static">
+        <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-normal lg:table-cell relative lg:static">
           {formatBytes(file.contentLength)}
         </td>
         {useIndividualSharing && (
-          <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-tight lg:table-cell relative lg:static">
+          <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-normal lg:table-cell relative lg:static">
             Private
           </td>
         )}
@@ -442,7 +444,7 @@ function DocumentListLine({
                   type="button"
                   onClick={restoreDocument}
                   className=" mr-2"
-                  style={{height: '32px'}}
+                  style={{ height: '32px' }}
                 >
                   Restore
                 </ButtonSecondary>
@@ -509,6 +511,7 @@ function DocumentListLine({
                     onDocumentWorkflowsModalClick={
                       onDocumentWorkflowsModalClick
                     }
+                    onDocumentReviewModalClick={onDocumentReviewModalClick}
                     onESignaturesModalClick={onESignaturesModalClick}
                     user={user}
                     useIndividualSharing={useIndividualSharing}

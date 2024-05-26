@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { Mode } from 'vanilla-jsoneditor';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
 import { getFormInput } from '../../../helpers/services/toolService';
 import { ArrowBottom, ArrowRight } from '../../Icons/icons';
+import { JSONEditorReact } from '../../TextEditors/JsonEditor';
 
 function updateRequestsFromForm(
   state: any,
   setState: any,
   { apiItem, user, documentApi }: any,
-  formRef: any
+  formRef: any,
+  requestJsonContent: any,
+  setRequestJsonContent: any
 ) {
   let host = documentApi;
   if (host.substring(host.length - 1) === '/') {
@@ -17,6 +21,35 @@ function updateRequestsFromForm(
   }
   let path = apiItem.path;
   let postJson = '';
+
+  if (requestJsonContent.text) {
+    if (getFormInput(formRef, 'postJson') !== undefined) {
+      getFormInput(formRef, 'postJson').value = requestJsonContent.text;
+      setRequestJsonContent({ text: requestJsonContent.text });
+    }
+  } else if (requestJsonContent.json) {
+    if (getFormInput(formRef, 'postJson') !== undefined) {
+      getFormInput(formRef, 'postJson').value = JSON.stringify(
+        requestJsonContent.json
+      );
+      setRequestJsonContent({ json: requestJsonContent.json });
+    }
+  }
+
+  if (apiItem.requiresSite) {
+    if (
+      getFormInput(formRef, 'siteID')?.value &&
+      getFormInput(formRef, 'siteID')?.validity?.valid &&
+      getFormInput(formRef, 'siteID')?.value.length > 0
+    ) {
+      if (apiItem.path.indexOf(' SITE_ID ') > -1) {
+        path = path.replace(
+          ' SITE_ID ',
+          getFormInput(formRef, 'siteID')?.value
+        );
+      }
+    }
+  }
 
   if (apiItem.requiresDocumentID) {
     if (getFormInput(formRef, 'documentID')?.validity?.valid) {
@@ -198,7 +231,9 @@ function updateRequestsFromForm(
       getFormInput(formRef, 'siteID')?.validity?.valid &&
       getFormInput(formRef, 'siteID')?.value.length > 0
     ) {
-      params.set('siteId', getFormInput(formRef, 'siteID')?.value);
+      if (apiItem.path.indexOf(' SITE_ID ') === -1) {
+        params.set('siteId', getFormInput(formRef, 'siteID')?.value);
+      }
     }
     if (
       getFormInput(formRef, 'shareKey')?.value &&
@@ -359,6 +394,7 @@ function updateRequestsFromForm(
     ) {
       params.set('next', getFormInput(formRef, 'next')?.value);
     }
+
     if (getFormInput(formRef, 'postJson')?.validity?.valid) {
       postJson = getFormInput(formRef, 'postJson')?.value;
     } else if (apiItem.requiresIndexType) {
@@ -530,7 +566,7 @@ function itemHeader(isOpened: boolean, setOpened: any, apiItem: any) {
           (isOpened
             ? 'text-primary-500 text-lg '
             : 'text-gray-900 hover:text-primary-500 text-base ') +
-          ' ml-2 tracking-tight leading-10 font-bold cursor-pointer'
+          ' ml-2 tracking-normal leading-10 font-bold cursor-pointer'
         }
       >
         <span>{apiItem.method} </span>
@@ -579,13 +615,68 @@ function updateFormValidity(state: any, setState: any, formRef: any) {
     isValidForm: res,
   });
 }
-function getApiItem(props: any, state: any, setState: any, formRef: any) {
+
+function getApiItem(
+  props: any,
+  state: any,
+  setState: any,
+  formRef: any,
+  requestJsonContent: any,
+  setRequestJsonContent: any,
+  requestEditorMode: any,
+  setRequestEditorMode: any,
+  responseEditorMode: any,
+  setResponseEditorMode: any
+) {
   const { apiItem, sites } = props;
   const onFormChange = (ev: any) => {
-    updateRequestsFromForm(state, setState, props, formRef);
+    updateRequestsFromForm(
+      state,
+      setState,
+      props,
+      formRef,
+      requestJsonContent,
+      setRequestJsonContent
+    );
   };
   const onTabClick = (tab: string) => () => {
     setState({ ...state, currentRequestTab: tab });
+  };
+
+  const handleJsonChange = (value: any) => {
+    if (value.text) {
+      if (getFormInput(formRef, 'postJson') !== undefined) {
+        getFormInput(formRef, 'postJson').value = value.text;
+        updateRequestsFromForm(
+          state,
+          setState,
+          props,
+          formRef,
+          value,
+          setRequestJsonContent
+        );
+      }
+    } else if (value.json) {
+      if (getFormInput(formRef, 'postJson') !== undefined) {
+        getFormInput(formRef, 'postJson').value = JSON.stringify(value.json);
+        updateRequestsFromForm(
+          state,
+          setState,
+          props,
+          formRef,
+          value,
+          setRequestJsonContent
+        );
+      }
+    }
+  };
+
+  const handleRequestEditorModeChange = (value: any) => {
+    setRequestEditorMode(value);
+  };
+
+  const handleResponseEditorModeChange = (value: any) => {
+    setResponseEditorMode(value);
   };
 
   const renderResponseStatusClasses = (responseStatus: number) => {
@@ -677,7 +768,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
             {apiItem.requiresSite && (
               <>
                 <div>
-                  <h6 className="w-full ml-4 my-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                  <h6 className="w-full ml-4 my-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     Site
                   </h6>
                 </div>
@@ -709,7 +800,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
             {apiItem.requiresAuthentication && (
               <>
                 <div>
-                  <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                  <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     Authentication
                   </h6>
                 </div>
@@ -733,7 +824,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
             )}
             {!apiItem.hasNoParams && (
               <div>
-                <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                   Parameters
                 </h6>
               </div>
@@ -1009,18 +1100,24 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
             )}
 
             {apiItem.requiresPostJson && (
-              <div className="md:flex md:items-center mx-4 mb-4 relative">
-                <div className="w-full md:w-1/4">
-                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    JSON to POST
+              <div className="flex flex-wrap items-center justify-start ml-4 mb-4 relative">
+                <div className="w-full">
+                  <label className="block w-full mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
+                    JSON to POST/PATCH
                   </label>
                 </div>
-                <div className="w-full md:w-3/4">
+                <div className="w-full">
+                  <JSONEditorReact
+                    content={requestJsonContent}
+                    mode={requestEditorMode}
+                    onChange={handleJsonChange}
+                    onChangeMode={handleRequestEditorModeChange}
+                  />
                   <textarea
-                    aria-label="JSON to POST"
+                    aria-label="JSON to POST/PATCH"
                     name="postJson"
                     defaultValue={apiItem.defaultPostJsonValue}
-                    className="appearance-none font-mono rounded-md relative block w-full h-72 px-3 py-3 border border-gray-600
+                    className="hidden appearance-none font-mono rounded-md relative block w-full h-72 px-3 py-3 border border-gray-600
                         placeholder-gray-500 text-gray-900 rounded-t-md
                         focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
                   ></textarea>
@@ -1483,7 +1580,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
               </div>
             )}
 
-            {apiItem.hasPagingTokens && (
+            {(apiItem.hasPagingTokens || apiItem.hasOnlyNextPagingToken) && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
@@ -1592,12 +1689,33 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 </div>
               </div>
             )}
+
+            {apiItem.requiresObjectID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    OBJECT ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="OBJECT ID"
+                    name="objectID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
           </form>
         </li>
         <li className="relative mt-10 sm:mt-2 md:mt-0">
           <div className="flex flex-rows w-full">
             <div className="grow-0">
-              <h6 className="ml-4 mr-4 mb-4 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+              <h6 className="ml-4 mr-4 mb-4 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                 Request
               </h6>
             </div>
@@ -1609,7 +1727,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 <li className="-mb-px mr-1">
                   <a
                     data-test-id="apiItem-HTTP"
-                    className={`inline-block cursor-pointer border-l border-t border-r rounded-t py-2 px-4 text-blue-dark font-semibold 
+                    className={`inline-block cursor-pointer border-l border-t border-r rounded-t py-2 px-4 text-blue-dark font-semibold
                       ${
                         state.currentRequestTab === 'http'
                           ? 'font-bold text-red-600 cursor-text'
@@ -1623,7 +1741,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 <li className="-mb-px mr-1">
                   <a
                     data-test-id="apiItem-cURL"
-                    className={`inline-block cursor-pointer border-l border-t border-r rounded-t py-2 px-4 text-blue-dark font-semibold 
+                    className={`inline-block cursor-pointer border-l border-t border-r rounded-t py-2 px-4 text-blue-dark font-semibold
                       ${
                         state.currentRequestTab === 'curl'
                           ? 'font-bold text-red-600 cursor-text'
@@ -1641,7 +1759,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 rows={8}
                 readOnly={true}
                 value={state.httpRequest}
-                className={`appearance-none rounded-md text-base relative block w-full px-3 py-3 border border-gray-600
+                className={`appearance-none rounded-md text-sm relative block w-full px-3 py-3 border border-gray-600
                       font-mono placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 ${
                         state.currentRequestTab === 'curl' ? 'hidden' : ''
@@ -1654,7 +1772,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 rows={8}
                 readOnly={true}
                 value={state.curlRequest}
-                className={`appearance-none rounded-md text-base relative block w-full px-3 py-3 border border-gray-600
+                className={`appearance-none rounded-md text-sm relative block w-full px-3 py-3 border border-gray-600
                       font-mono placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 ${
                         state.currentRequestTab === 'http' ? 'hidden' : ''
@@ -1700,9 +1818,20 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
               )}
               {state.responseData && (
                 <div>
-                  <h6 className="mr-4 mt-4 mb-2 md:mb-4 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                  <h6 className="mr-4 mt-4 mb-2 md:mb-4 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     Response
                   </h6>
+                  <div className="h-72 mb-[-56px]">
+                    <JSONEditorReact
+                      content={{
+                        json: JSON.parse(state.responseData),
+                        text: undefined,
+                      }}
+                      mode={responseEditorMode}
+                      onChangeMode={handleResponseEditorModeChange}
+                      readOnly={true}
+                    />
+                  </div>
                   <textarea
                     aria-label="Response"
                     data-test-id="apiItem-response-data"
@@ -1710,7 +1839,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                     rows={8}
                     readOnly={true}
                     value={state.responseData}
-                    className={`appearance-none rounded-md text-small text-mono relative block w-full px-3 py-3 border border-gray-600
+                    className={`hidden appearance-none rounded-md text-small text-mono relative block w-full px-3 py-3 border border-gray-600
                         font-mono placeholder-gray-500 text-gray-900 rounded-t-md
                         focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 ${
                           state.isErrorResponse ? 'bg-red-200' : ''
@@ -1740,13 +1869,40 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     isValidForm: false,
   });
   const formRef = useRef(null);
+  let formattedJson = '';
+  if (
+    props.apiItem.defaultPostJsonValue &&
+    props.apiItem.defaultPostJsonValue.length
+  ) {
+    let jsonObject;
+    try {
+      jsonObject = JSON.parse(props.apiItem.defaultPostJsonValue);
+    } catch (e: any) {
+      console.log('invalid JSON object');
+    }
+    if (jsonObject) {
+      formattedJson = JSON.stringify(jsonObject, null, 2);
+    } else {
+      formattedJson = props.apiItem.defaultPostJsonValue;
+    }
+  }
+
+  const [requestJsonContent, setRequestJsonContent] = useState({
+    text: formattedJson,
+    json: undefined,
+  });
+
+  const [requestEditorMode, setRequestEditorMode] = useState(Mode.text);
+  const [responseEditorMode, setResponseEditorMode] = useState(Mode.text);
   useEffect(() => {
     if (formRef?.current) {
       updateRequestsFromForm(
         state,
         setState,
         { ...props, user, documentApi },
-        formRef
+        formRef,
+        requestJsonContent,
+        setRequestJsonContent
       );
     }
   }, []);
@@ -1759,7 +1915,22 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     >
       {itemHeader(isOpened, setOpened, props.apiItem)}
       <div className={`${isOpened ? '' : 'hidden'} border-b mb-2`}>
-        {getApiItem({ documentApi, user, ...props }, state, setState, formRef)}
+        {getApiItem(
+          {
+            documentApi,
+            user,
+            ...props,
+          },
+          state,
+          setState,
+          formRef,
+          requestJsonContent,
+          setRequestJsonContent,
+          requestEditorMode,
+          setRequestEditorMode,
+          responseEditorMode,
+          setResponseEditorMode
+        )}
       </div>
     </div>
   );

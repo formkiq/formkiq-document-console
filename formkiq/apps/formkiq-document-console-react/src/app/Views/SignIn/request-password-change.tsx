@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import { Spinner } from '../../Components/Icons/icons';
 import { ConfigState } from '../../Store/reducers/config';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
 
 export function RequestPasswordChange() {
+  const [isSpinnerDisplayed, setIsSpinnerDisplayed] = useState(false)
   const {
     register,
     formState: { errors },
@@ -17,6 +20,7 @@ export function RequestPasswordChange() {
   const { pathname } = useLocation();
 
   const onSubmit = async (data: any) => {
+    setIsSpinnerDisplayed(true)
     const body = {
       username: data.email,
     };
@@ -32,6 +36,7 @@ export function RequestPasswordChange() {
         r.json().then((data) => ({ httpStatus: r.status, body: data }))
       )
       .then((obj) => {
+        setIsSpinnerDisplayed(false)
         if (obj.body.cognitoErrorCode) {
           dispatch(
             openDialog({
@@ -97,12 +102,13 @@ export function RequestPasswordChange() {
                 />
               </div>
             </div>
-            <div className="mt-5 sm:mt-8 flex justify-center">
+            <div className="mt-5 sm:mt-8 flex justify-center relative">
               <input
                 type="submit"
                 value="Reset Password"
-                className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-md flex cursor-pointer focus:outline-none"
               />
+              {isSpinnerDisplayed&&<div className="absolute" style={{right: 'calc(50% - 140px)', top:'5px'}}><Spinner/></div>}
             </div>
             <div className="mt-8 w-full text-center">
               <a className="underline hover:text-primary-500" href="/sign-in">

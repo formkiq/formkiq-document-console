@@ -3,10 +3,10 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
-import { toggleExpandFolder } from '../../../Store/reducers/documentsList';
+import {DocumentListState, toggleExpandFolder} from '../../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../../Store/store';
 import { formatDate } from '../../../helpers/services/toolService';
-import { IDocument } from '../../../helpers/types/document';
+import {IDocument, RequestStatus} from '../../../helpers/types/document';
 import { IFolder } from '../../../helpers/types/folder';
 import { ILine } from '../../../helpers/types/line';
 import { ArrowBottom, ArrowRight, Share, Star, Trash } from '../../Icons/icons';
@@ -33,8 +33,9 @@ interface IProps {
   onMoveModalClick: any;
   onDocumentVersionsModalClick: any;
   onDocumentWorkflowsModalClick: any;
+  onDocumentReviewModalClick: any;
   onESignaturesModalClick: any;
-  onTagChange: any;
+  onDocumentDataChange: any;
   filterTag: string | null;
   isArchiveTabExpanded?: boolean;
   addToPendingArchive?: (file: IDocument) => void;
@@ -55,16 +56,21 @@ function FolderListLine({
   onMoveModalClick,
   onDocumentVersionsModalClick,
   onDocumentWorkflowsModalClick,
+  onDocumentReviewModalClick,
   onESignaturesModalClick,
   onRestoreDocument,
   onDeleteDocument,
-  onTagChange,
+  onDocumentDataChange,
   filterTag,
   isArchiveTabExpanded,
   addToPendingArchive,
   deleteFromPendingArchive,
   archiveStatus,
 }: IProps) {
+  const {
+    loadingStatus,
+  } = useSelector(DocumentListState);
+
   let folderPath = folderInstance.path;
   if (folderInstance.path.indexOf('/') === -1) {
     folderPath =
@@ -134,10 +140,11 @@ function FolderListLine({
                       onDocumentWorkflowsModalClick={
                         onDocumentWorkflowsModalClick
                       }
+                      onDocumentReviewModalClick={onDocumentReviewModalClick}
                       onESignaturesModalClick={onESignaturesModalClick}
                       onRestoreDocument={onRestoreDocument}
                       onDeleteDocument={onDeleteDocument}
-                      onTagChange={onTagChange}
+                      onDocumentDataChange={onDocumentDataChange}
                       filterTag={filterTag}
                       isArchiveTabExpanded={isArchiveTabExpanded}
                       archiveStatus={archiveStatus}
@@ -168,8 +175,9 @@ function FolderListLine({
                   onMoveModalClick={onMoveModalClick}
                   onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                   onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
+                  onDocumentReviewModalClick={onDocumentReviewModalClick}
                   onESignaturesModalClick={onESignaturesModalClick}
-                  onTagChange={onTagChange}
+                  onDocumentDataChange={onDocumentDataChange}
                   filterTag={filterTag}
                   leftOffset={4}
                   isArchiveTabExpanded={isArchiveTabExpanded}
@@ -220,7 +228,7 @@ function FolderListLine({
       >
         <tbody>
           <FolderDropWrapper
-            className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-tight"
+            className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-normal"
             wrapper={trElem}
             folder={folderPath}
             sourceSiteId={currentSiteId}
@@ -249,7 +257,7 @@ function FolderListLine({
                 </div>
                 <div className="flex grow w-full justify-start">
                   <Link
-                    to={`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={loadingStatus===RequestStatus.pending? "#":`${currentDocumentsRootUri}/folders/${folderPath}`}
                     className="w-16 pl-1 pt-1.5 cursor-pointer"
                   >
                     <svg
@@ -266,7 +274,7 @@ function FolderListLine({
                     </svg>
                   </Link>
                   <Link
-                    to={`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={loadingStatus===RequestStatus.pending? "#":`${currentDocumentsRootUri}/folders/${folderPath}`}
                     className="cursor-pointer grow p-1"
                   >
                     {folderName}
@@ -331,6 +339,7 @@ function FolderListLine({
                         onDocumentWorkflowsModalClick={
                           onDocumentWorkflowsModalClick
                         }
+                        onDocumentReviewModalClick={onDocumentReviewModalClick}
                         onESignaturesModalClick={onESignaturesModalClick}
                         user={user}
                         useIndividualSharing={useIndividualSharing}

@@ -12,14 +12,11 @@ export const OnlyOfficeContentTypes: string[] = [
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
   'application/vnd.openxmlformats-officedocument.presentationml.template',
-  'application/vnd.oasis.opendocument.presentation'
-]
+  'application/vnd.oasis.opendocument.presentation',
+  'text/csv',
+];
 
-export const OnlyOfficeNewFileExtensions: string[] = [
-  'docx',
-  'xlsx',
-  'pptx'
-]
+export const OnlyOfficeNewFileExtensions: string[] = ['docx', 'xlsx', 'pptx'];
 
 export const InlineViewableContentTypes: string[] = [
   'application/json',
@@ -39,7 +36,7 @@ export const InlineViewableContentTypes: string[] = [
   'video/mp4',
   'video/ogg',
   'video/webm',
-]
+];
 
 export const OcrContentTypes: string[] = [
   'application/pdf',
@@ -49,7 +46,7 @@ export const OcrContentTypes: string[] = [
   'image/jpeg',
   'image/tiff',
   'image/tif',
-]
+];
 
 export const ESignatureContentTypes: string[] = [
   'application/pdf',
@@ -62,4 +59,4 @@ export const ESignatureContentTypes: string[] = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
   'application/vnd.oasis.opendocument.spreadsheet',
-]
+];

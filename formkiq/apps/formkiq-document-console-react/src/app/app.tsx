@@ -6,6 +6,7 @@ import {
   setAuthApi,
   setBrand,
   setClientId,
+  setCognitoSingleSignOnUrl,
   setCustomAuthorizerUrl,
   setDocumentApi,
   setUseAuthApiForSignIn,
@@ -45,6 +46,9 @@ export const App = () => {
       }
       if (config.cognitoHostedUi) {
         dispatch(setCustomAuthorizerUrl(config.cognitoHostedUi));
+      }
+      if (config.cognitoSingleSignOnUrl) {
+        dispatch(setCognitoSingleSignOnUrl(config.cognitoSingleSignOnUrl));
       }
       if (config.brand) {
         dispatch(setBrand(config.brand));

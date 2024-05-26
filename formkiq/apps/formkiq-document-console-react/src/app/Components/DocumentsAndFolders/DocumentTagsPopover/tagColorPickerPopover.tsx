@@ -174,7 +174,6 @@ export default function TagColorPickerPopover({
                   </div>
                 );
               default:
-                console.log(tagColor.colorUri);
                 return <div key={i}></div>;
             }
             return <></>;

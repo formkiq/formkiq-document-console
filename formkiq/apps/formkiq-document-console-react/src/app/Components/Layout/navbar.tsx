@@ -25,8 +25,11 @@ import {
   ApiKey,
   Bell,
   Documents,
+  Examine,
+  Queue,
   Recent,
   Rules,
+  Schema,
   Settings,
   Share,
   ShareHand,
@@ -61,7 +64,8 @@ function Navbar() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(AuthState);
-  const { useNotifications, isSidebarExpanded } = useSelector(ConfigState);
+  const { formkiqVersion, useNotifications, isSidebarExpanded } =
+    useSelector(ConfigState);
   const { currentDocumentPath } = useSelector(DataCacheState);
 
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
@@ -275,22 +279,16 @@ function Navbar() {
               >
                 {!isSidebarExpanded && (
                   <div className="w-40">
-                    <div className="absolute top-0 pt-2.5">
-                      <picture>
-                        <source
-                          srcSet="/assets/img/png/formkiq-wordmark.webp"
-                          type="image/webp"
-                        />
-                        <source
-                          srcSet="/assets/img/png/formkiq-wordmark.png"
-                          type="image/png"
-                        />
-                        <img
-                          src="/assets/img/png/formkiq-wordmark.png"
-                          className="ml-6 mt-2 w-28 mb-2.5"
-                          alt="FormKiQ"
-                        />
-                      </picture>
+                    <div className="absolute top-0 pt-2">
+                      <div className="p-2 w-logoCollapsed h-logoCollapsed flex items-center">
+                        <picture>
+                          <source
+                            srcSet="/assets/img/png/brand-logo-small.png"
+                            type="image/png"
+                          />
+                          <img src="/assets/img/png/brand-logo-small.png" />
+                        </picture>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -371,8 +369,11 @@ function Navbar() {
                   ) : (
                     <>
                       {locationPrefix === '/workflows' ||
+                      locationPrefix === '/queues' ||
                       locationPrefix === '/integrations' ||
                       locationPrefix === '/account' ||
+                      locationPrefix === '/schemas' ||
+                      locationPrefix === '/object-examine-tool' ||
                       locationPrefix === 'rulesets' ? (
                         <>
                           <div className="w-6 mr-1 text-primary-600">
@@ -381,11 +382,27 @@ function Navbar() {
                                 <Workflow />
                               </div>
                             )}
+                            {pathname.indexOf('/queues') > -1 && (
+                              <div className="w-5">
+                                <Queue />
+                              </div>
+                            )}
                             {pathname.indexOf('/rulesets') > -1 && (
                               <div className="w-5">
                                 <Rules />
                               </div>
                             )}
+                            {pathname.indexOf('/schemas') > -1 && (
+                              <div className="w-5">
+                                <Schema />
+                              </div>
+                            )}
+                            {pathname.indexOf('/object-examine-tool') > -1 && (
+                              <div className="w-5">
+                                <Examine />
+                              </div>
+                            )}
+
                             {pathname.indexOf('/integrations/api') > -1 &&
                               pathname.indexOf('/integrations/apiKeys') ===
                                 -1 && (
@@ -412,9 +429,42 @@ function Navbar() {
                             {pathname.indexOf('/rulesets') > -1 && (
                               <span>Rulesets</span>
                             )}
+                            {pathname.indexOf('/accessControl') > -1 && (
+                              <div className="w-5">
+                                <Admin />
+                              </div>
+                            )}
                           </div>
 
-                          {pathname.indexOf('/rulesets') > -1 &&
+                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
+                            {pathname.indexOf('/workflows') > -1 && (
+                              <span>Workflows</span>
+                            )}
+                            {pathname.indexOf('/queues') > -1 && (
+                              <span>Queues</span>
+                            )}
+                            {pathname.indexOf('/integrations/api') > -1 &&
+                              pathname.indexOf('/integrations/apiKeys') ===
+                                -1 && <span>API Explorer</span>}
+                            {pathname.indexOf('/integrations/apiKeys') > -1 && (
+                              <span>API Keys</span>
+                            )}
+                            {pathname.indexOf('/object-examine-tool') > -1 && (
+                              <span>Examine PDF</span>
+                            )}
+                            {pathname.indexOf('/integrations/webhooks') >
+                              -1 && <span>Inbound Webhooks</span>}
+                            {pathname.indexOf('/account/settings') > -1 && (
+                              <span>Settings</span>
+                            )}
+                            {pathname.indexOf('/account/accessControl') >
+                              -1 && <span>Access Control (OPA)</span>}
+                            {pathname.indexOf('/schemas') > -1 && (
+                              <span>Schemas</span>
+                            )}
+                          </div>
+                          {(pathname.indexOf('/rulesets') > -1||
+                              pathname.indexOf('/schemas') > -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
                               (hasDefaultSite && hasWorkspaces) ||
@@ -458,28 +508,6 @@ function Navbar() {
                                 )}
                               </select>
                             )}
-
-                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
-                            {pathname.indexOf('/workflows') > -1 && (
-                              <span>Workflows</span>
-                            )}
-                            {pathname.indexOf('/integrations/api') > -1 &&
-                              pathname.indexOf('/integrations/apiKeys') ===
-                                -1 && <span>API Explorer</span>}
-                            {pathname.indexOf('/integrations/apiKeys') > -1 && (
-                              <span>API Keys</span>
-                            )}
-                            {pathname.indexOf('/integrations/webhooks') >
-                              -1 && <span>Inbound Webhooks</span>}
-                            {pathname.indexOf('/account/settings') > -1 && (
-                              <span>Settings</span>
-                            )}
-                            {pathname.indexOf('/account/admin') > -1 && (
-                              <div className="w-5">
-                                <Admin />
-                              </div>
-                            )}
-                          </div>
                         </>
                       ) : (
                         <>
@@ -639,22 +667,26 @@ function Navbar() {
                   </button>
                   {showAccountDropdown && (
                     <ul className="dropdown-menu min-w-max absolute bg-white right-0 text-base z-50 float-right list-none text-left rounded-lg border  border-neutral-300 mt-2.5">
-                      <li onClick={ToggleAccountSettings}>
-                        <Link
-                          to="/account/settings"
-                          className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                        >
-                          Settings
-                        </Link>
-                      </li>
-                      <li onClick={ToggleAccountSettings}>
-                        <Link
-                          to="/account/admin"
-                          className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                        >
-                          Admin
-                        </Link>
-                      </li>
+                      {user.isAdmin && (
+                        <li onClick={ToggleAccountSettings}>
+                          <Link
+                            to="/account/settings"
+                            className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
+                          >
+                            Settings
+                          </Link>
+                        </li>
+                      )}
+                      {formkiqVersion.type !== 'core' && user.isAdmin && (
+                        <li onClick={ToggleAccountSettings}>
+                          <Link
+                            to="/account/accessControl"
+                            className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
+                          >
+                            Access Control
+                          </Link>
+                        </li>
+                      )}
                       <li>
                         <Link
                           onClick={signOut}
