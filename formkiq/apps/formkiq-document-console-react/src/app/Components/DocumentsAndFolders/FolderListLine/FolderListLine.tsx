@@ -3,10 +3,10 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
-import { toggleExpandFolder } from '../../../Store/reducers/documentsList';
+import {DocumentListState, toggleExpandFolder} from '../../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../../Store/store';
 import { formatDate } from '../../../helpers/services/toolService';
-import { IDocument } from '../../../helpers/types/document';
+import {IDocument, RequestStatus} from '../../../helpers/types/document';
 import { IFolder } from '../../../helpers/types/folder';
 import { ILine } from '../../../helpers/types/line';
 import { ArrowBottom, ArrowRight, Share, Star, Trash } from '../../Icons/icons';
@@ -67,6 +67,10 @@ function FolderListLine({
   deleteFromPendingArchive,
   archiveStatus,
 }: IProps) {
+  const {
+    loadingStatus,
+  } = useSelector(DocumentListState);
+
   let folderPath = folderInstance.path;
   if (folderInstance.path.indexOf('/') === -1) {
     folderPath =
@@ -253,7 +257,7 @@ function FolderListLine({
                 </div>
                 <div className="flex grow w-full justify-start">
                   <Link
-                    to={`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={loadingStatus===RequestStatus.pending? "#":`${currentDocumentsRootUri}/folders/${folderPath}`}
                     className="w-16 pl-1 pt-1.5 cursor-pointer"
                   >
                     <svg
@@ -270,7 +274,7 @@ function FolderListLine({
                     </svg>
                   </Link>
                   <Link
-                    to={`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={loadingStatus===RequestStatus.pending? "#":`${currentDocumentsRootUri}/folders/${folderPath}`}
                     className="cursor-pointer grow p-1"
                   >
                     {folderName}
