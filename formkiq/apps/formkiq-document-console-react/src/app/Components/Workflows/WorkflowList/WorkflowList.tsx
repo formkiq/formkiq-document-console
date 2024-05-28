@@ -145,9 +145,6 @@ Props) {
           <thead className="bg-neutral-100 border-neutral-300 font-bold  text-transparent text-left ">
             <tr>
               <th className="w-1/8 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
-                ID
-              </th>
-              <th className="w-1/8 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Name
               </th>
               <th className="w-1/8 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
