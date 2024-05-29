@@ -40,9 +40,8 @@ function FulltextSearch({newStep, setNewStep, isEditing, edges, id, addCreatorNo
     <>
       {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}
       {!isEditing &&
-        <NodeTitle icon={<Search />} title='Send Notification (requires "FROM" address in SES)'/>}
+        <NodeTitle icon={<Search />} title='Fulltext Search'/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
-
 
       {!isEditing && <DefaultSourceHandle
         type="source"
@@ -51,6 +50,7 @@ function FulltextSearch({newStep, setNewStep, isEditing, edges, id, addCreatorNo
         maxConnections={1}
         nodeId={id}
       ></DefaultSourceHandle>}
+      
       {isHandleConnectable && (
         <div
           className="w-6 mt-6 rounded-full bg-green-400 text-white hover:border-green-700 p-1  cursor-pointer absolute right-[-36px] border-2 border-white hover:text-green-700 nodrag"
