@@ -178,6 +178,12 @@ export default function TagColorPickerPopover({
             }
             return <></>;
           })}
+          <div
+            className="bg-gray-200 mx-0.5 w-5 h-5 inline-flex rounded-full cursor-pointer border-2 border-gray-600 focus:outline-none focus:shadow-outline"
+            onClick={(event) => handleColorChange('default')}
+          >
+            <span className="border-l-gray-200"></span>
+          </div>
         </div>
       )}
     </div>
