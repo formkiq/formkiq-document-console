@@ -55,6 +55,7 @@ function Ocr({
   edges,
   id,
   addCreatorNode,
+  onChange
 }: any) {
   const { formkiqVersion } = useSelector(ConfigState);
 
@@ -79,15 +80,6 @@ function Ocr({
     };
   }
 
-  const onChange = (value: any, key: any) => {
-    setNewStep({
-      ...newStep,
-      parameters: {
-        ...newStep.parameters,
-        [key]: value,
-      },
-    });
-  };
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false;
   let connectionsNumber = MAX_CONNECTIONS;

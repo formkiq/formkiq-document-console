@@ -14,17 +14,7 @@ const stepInfo = {
   decisions: ['APPROVE'],
 }
 
-function FulltextSearch({newStep, setNewStep, isEditing, edges, id, addCreatorNode}: any) {
-
-  const onChange = (value: any, key: any) => {
-    setNewStep({
-      ...newStep,
-      parameters: {
-        ...newStep.parameters,
-        [key]: value,
-      },
-    });
-  };
+function FulltextSearch({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange}: any) {
 
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false

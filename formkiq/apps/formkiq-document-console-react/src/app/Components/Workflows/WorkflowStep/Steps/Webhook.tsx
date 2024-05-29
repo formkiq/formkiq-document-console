@@ -17,17 +17,7 @@ const stepInfo = {
   decisions: ['APPROVE'],
 }
 
-function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode}: any) {
-
-  const onChange = (value: any, key: any) => {
-    setNewStep({
-      ...newStep,
-      parameters: {
-        ...newStep.parameters,
-        [key]: value,
-      },
-    });
-  };
+function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange}: any) {
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false
   let connectionsNumber = MAX_CONNECTIONS

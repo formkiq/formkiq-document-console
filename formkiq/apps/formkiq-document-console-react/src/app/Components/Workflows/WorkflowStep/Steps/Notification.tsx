@@ -30,20 +30,10 @@ const stepInfo = {
   decisions: ['APPROVE'],
 }
 
-function Notification({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode}: any) {
+function Notification({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange}: any) {
   const notificationTypeSelectorOptions = {
     email: 'Email',
   }
-
-  const onChange = (value: any, key: any) => {
-    setNewStep({
-      ...newStep,
-      parameters: {
-        ...newStep.parameters,
-        [key]: value,
-      },
-    });
-  };
 
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false

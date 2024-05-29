@@ -1,5 +1,5 @@
 import {Step, WorkflowStepActionType} from "../../../../helpers/types/workflows";
-import {ChangeEvent} from "react";
+import {ChangeEvent, useEffect} from "react";
 import DisplayValue from "./DisplayValue";
 
 const TextInput = ({
@@ -13,6 +13,7 @@ const TextInput = ({
 ) => {
 
   const handleTextInput = (name: string) => {
+    if(!onChange) return;
     onChange(name)
   };
 
@@ -25,6 +26,13 @@ const TextInput = ({
       return '';
     }
   };
+
+  // if default value set, update the step
+  useEffect(() => {
+    if (defaultValue && isEditing) {
+      handleTextInput(defaultValue);
+    }
+  }, [defaultValue]);
 
   return (
     <>{isEditing ? <>
