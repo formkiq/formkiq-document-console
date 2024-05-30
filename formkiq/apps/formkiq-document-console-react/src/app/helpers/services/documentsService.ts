@@ -1716,4 +1716,167 @@ export class DocumentsService {
       addDecisionParameters,
     });
   }
+
+  @formkiqAPIHandler
+  public static async getAttributes(
+      siteId: string,
+      next = null,
+      limit = 20
+  ): Promise<any> {
+      if (!siteId) {
+          siteId = this.determineSiteId();
+      }
+      return this.getFormkiqClient().documentsApi.getAttributes({
+          siteId,
+          next,
+          limit,
+      });
+  }
+
+  @formkiqAPIHandler
+  public static async addAttribute(
+      siteId: string,
+      addAttributeParameters: any,
+  ): Promise<any> {
+      if (!siteId) {
+          siteId = this.determineSiteId();
+      }
+      return this.getFormkiqClient().documentsApi.addAttribute({
+        siteId,
+        addAttributeParameters,
+      });
+  }
+
+  @formkiqAPIHandler
+    public static async getAttribute(
+        siteId: string,
+        key: string,
+    ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.getAttribute({
+      siteId,
+      key,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteAttribute(
+      siteId: string,
+      key: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.deleteAttribute({
+      siteId,
+      key,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getDocumentAttributes(
+      siteId: string,
+      next = null,
+      limit = 20,
+      documentId: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.getDocumentAttributes({
+      siteId,
+      limit,
+      documentId,
+      next,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async addDocumentAttribute(
+      siteId: string,
+      ws: string,
+      documentId: string,
+      addDocumentAttributeParameters: any,
+  ): Promise<any> {
+      if (!siteId) {
+          siteId = this.determineSiteId();
+      }
+      return this.getFormkiqClient().documentsApi.addDocumentAttribute({
+          siteId,
+          ws,
+          documentId,
+          addDocumentAttributeParameters,
+      });
+  }
+
+  @formkiqAPIHandler
+    public static async setDocumentAttribute(
+      siteId: string,
+      documentId: string,
+      setDocumentAttributeParameters: any,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.setDocumentAttribute({
+      siteId,
+      documentId,
+      setDocumentAttributeParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async setDocumentAttributeValue(
+      siteId: string,
+      documentId: string,
+      attributeKey: string,
+      setDocumentsAttributeValueParameters: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.setDocumentAttributeValue({
+      siteId,
+      documentId,
+      attributeKey,
+      setDocumentsAttributeValueParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteDocumentAttribute(
+      siteId: string,
+      documentId: string,
+      attributeKey: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.deleteDocumentAttribute({
+      siteId,
+      documentId,
+      attributeKey,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteDocumentAttributeValue(
+      siteId: string,
+      documentId: string,
+      attributeKey: string,
+      attributeValue: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.deleteDocumentAttributeValue({
+      siteId,
+      documentId,
+      attributeKey,
+      attributeValue,
+    });
+  }
+
 }
