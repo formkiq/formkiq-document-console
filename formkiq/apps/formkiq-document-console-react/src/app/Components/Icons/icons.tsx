@@ -40,8 +40,16 @@ export function Checkmark() {
 
 export function Check() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24">
-      <path fill="currentColor" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"/>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 24 24"
+    >
+      <path
+        fill="currentColor"
+        d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"
+      />
     </svg>
   );
 }
@@ -201,11 +209,38 @@ export function Trash() {
     <svg
       width="100%"
       height="100%"
-      viewBox="0 0 10 12"
-      className="fill-current"
+      viewBox="0 0 24 24"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M7.66659 4V10.6667H2.33325V4H7.66659ZM6.66659 0H3.33325L2.66659 0.666667H0.333252V2H9.66659V0.666667H7.33325L6.66659 0ZM8.99992 2.66667H0.999919V10.6667C0.999919 11.4 1.59992 12 2.33325 12H7.66659C8.39992 12 8.99992 11.4 8.99992 10.6667V2.66667Z" />
+      <path
+        d="M20 5V21C20 22.1046 19.1046 23 18 23H6C4.89543 23 4 22.1046 4 21V5"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M1 5H23"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M15 10V18"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M9 10V18"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M16 4V3C16 1.89543 15.1046 1 14 1H10C8.89543 1 8 1.89543 8 3V4"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
     </svg>
   );
 }
@@ -381,8 +416,18 @@ export function Copy() {
   return (
     <svg width="100%" height="100%" viewBox="0 0 12 12" className="fill-current">
       <path
-        d="M10.3421 10.9091H3.97368V3.27273H10.3421M10.3421 2.18182H3.97368C3.66659 2.18182 3.37208 2.29675 3.15493 2.50134C2.93778 2.70592 2.81579 2.9834 2.81579 3.27273V10.9091C2.81579 11.1984 2.93778 11.4759 3.15493 11.6805C3.37208 11.8851 3.66659 12 3.97368 12H10.3421C10.6492 12 10.9437 11.8851 11.1609 11.6805C11.378 11.4759 11.5 11.1984 11.5 10.9091V3.27273C11.5 2.9834 11.378 2.70592 11.1609 2.50134C10.9437 2.29675 10.6492 2.18182 10.3421 2.18182ZM8.60526 0H1.65789C1.3508 0 1.05629 0.114935 0.839139 0.31952C0.621992 0.524105 0.5 0.801582 0.5 1.09091V8.72727H1.65789V1.09091H8.60526V0Z"
-        fill="#4B4E5E"
+        d="M5 5.99849V22.0003C5 22.5526 5.44772 23 6 23H22C22.5523 23 23 22.5523 23 22V6C23 5.44772 22.5523 5 22 5H6C5.44772 5 5 5.4462 5 5.99849Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M1 17C1 16.6466 1 8.46341 1 2.99795C1 1.89338 1.89543 1 3 1H17"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -565,18 +610,46 @@ export function Upload() {
 
 export function Download() {
   return (
-    <svg x="0px" y="0px" viewBox="0 0 50 50" className="fill-current">
-      <path
-        d="M11,32.996c-0.553,0-1,0.448-1,1v6.133c0,0.552,0.447,1,1,1h28c0.553,0,1-0.448,1-1v-6.133
-	c0-0.552-0.447-1-1-1s-1,0.448-1,1v5.133H12v-5.133C12,33.444,11.553,32.996,11,32.996z"
-      />
-      <path
-        d="M25,9.129c-0.553,0-1,0.448-1,1v21.51l-6.343-6.127c-0.395-0.384-1.03-0.373-1.413,0.024
-	c-0.384,0.397-0.373,1.03,0.024,1.414l8.023,7.751c0.001,0.001,0.001,0.001,0.002,0.002l0.012,0.011
-	c0.037,0.036,0.084,0.051,0.124,0.08c0.062,0.045,0.12,0.095,0.192,0.124c0.121,0.05,0.249,0.076,0.378,0.076
-	s0.257-0.027,0.378-0.076c0.067-0.027,0.12-0.074,0.178-0.115c0.046-0.031,0.098-0.05,0.139-0.09l8.036-7.765
-	c0.396-0.384,0.407-1.017,0.023-1.414c-0.384-0.397-1.017-0.408-1.414-0.024L26,31.639v-21.51C26,9.577,25.553,9.129,25,9.129z"
-      />
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 18 19"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clipPath="url(#clip0_3911_6143)">
+        <path
+          d="M9 10.1875V2.3125"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M17 12V16.375C17 16.5408 16.9234 16.6997 16.787 16.8169C16.6506 16.9342 16.4656 17 16.2727 17H1.72727C1.53439 17 1.3494 16.9342 1.21301 16.8169C1.07662 16.6997 1 16.5408 1 16.375V12"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M11.8125 9.375L9 12.1875L6.1875 9.375"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_3911_6143">
+          <rect
+            width="18"
+            height="18"
+            fill="white"
+            transform="translate(0 0.5)"
+          />
+        </clipPath>
+      </defs>
     </svg>
   );
 }
@@ -1238,6 +1311,7 @@ export function Admin() {
     </svg>
   );
 }
+
 export function Save() {
   return (
     <svg

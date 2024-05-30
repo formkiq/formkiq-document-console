@@ -1,13 +1,14 @@
-import {CopyButton} from '../../../Components/Generic/Buttons/CopyButton';
-import {Edit, View} from '../../Icons/icons';
-import WorkflowsActionsPopover from "./workflowActionsPopover";
+ 
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import WorkflowsActionsPopover from './workflowActionsPopover';
 import ButtonSecondary from "../../Generic/Buttons/ButtonSecondary";
+import { CopyButton } from '../../../Components/Generic/Buttons/CopyButton';
+import { Edit, Plus, View } from '../../Icons/icons';
 import {useState} from "react";
-import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../../Store/store';
-import {DocumentsService} from '../../../helpers/services/documentsService';
-import {Plus} from '../../Icons/icons';
-
+  
 type Props = {
   siteId: string;
   workflows: null | [];
@@ -17,10 +18,11 @@ type Props = {
   handleCopyToClipBoard: (workflowId: string, siteId: string) => void;
   showTooltipId: string;
   handleDownloadClick: (workflowId: string, siteId: string) => void;
-};
+
 
 export function WorkflowList({
                                siteId,
+                               isSiteReadOnly,
                                workflows,
                                onDelete,
                                handleScroll,
@@ -29,10 +31,56 @@ export function WorkflowList({
                                showTooltipId,
                                handleDownloadClick,
                              }: Props) {
+        const dispatch = useAppDispatch();
+
   const onDeleteClick = (workflowId: string, siteId: string) => () => {
       onDelete(workflowId, siteId);}
 
 
+
+  const isValidString = (text: string) => {
+    try {
+      JSON.parse(text);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  };
+
+  const importWorkflow = (event: any) => {
+    console.log('importing');
+    const reader = new FileReader();
+    reader.readAsText(event.target.files[0], 'UTF-8');
+    reader.onload = (e) => {
+      if (!isValidString(e.target?.result as string)) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Invalid JSON',
+          })
+        );
+        event.target.value = '';
+        return;
+      }
+      const workflow = JSON.parse(e.target?.result as string);
+      DocumentsService.addWorkflow(workflow, siteId).then((response) => {
+        if (!response.workflowId) {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: response.errors[0].error,
+            })
+          );
+          event.target.value = '';
+          return;
+        }
+
+        window.location.href =
+          siteId === 'default'
+            ? `/workflows/designer?workflowId=${response.workflowId}`
+            : `/workspaces/${siteId}/workflows/designer?workflowId=${response.workflowId}`;
+        event.target.value = '';
+      });
+    };
+  };
 
   return (
     <>
@@ -121,21 +169,29 @@ export function WorkflowList({
                             )}
                           </div>
                         </a>
-                        {/*{!workflow.inUse && (*/}
-                        {/*  <button*/}
-                        {/*    onClick={() => onDelete(*/}
-                        {/*      workflow.workflowId,*/}
-                        {/*      siteId*/}
-                        {/*    )}*/}
-                        {/*    data-test-id="delete-workflow"*/}
-                        {/*    className="ml-2"*/}
-                        {/*  >*/}
-                        {/*    <div className="h-5 hover:text-primary-500 transition duration-100">*/}
-                        {/*      <Trash/>*/}
-                        {/*      <span className="sr-only">Delete</span>*/}
-                        {/*    </div>*/}
-                        {/*  </button>*/}
-                        {/*)}*/}
+
+                          <div className="h-5 hover:text-primary-500 transition duration-100 pr-2">
+                            <a
+                              href={
+                                siteId === 'default'
+                                  ? `/workflows/designer?workflowId=${workflow.workflowId}`
+                                  : `/workspaces/${siteId}/workflows/designer?workflowId=${workflow.workflowId}`
+                              }
+                              data-test-id="delete-workflow"
+                            >
+                              {workflow.inUse ? (
+                                <>
+                                  <View />
+                                  <span className="sr-only">View</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Edit />
+                                  <span className="sr-only">Edit</span>
+                                </>
+                              )}
+                            </a>
+                          </div>
                         <WorkflowsActionsPopover workflow={workflow}
                                                  siteId={siteId}
                                                  handleDuplicateClick={handleDuplicateClick}
@@ -158,6 +214,7 @@ export function WorkflowList({
               </td>
             </tr>
           )}
+
           </tbody>
         </table>
       </div>

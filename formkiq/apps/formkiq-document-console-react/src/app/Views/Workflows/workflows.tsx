@@ -2,6 +2,7 @@ import {useCallback, useEffect, useState} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {useSelector} from 'react-redux';
 import {ArrowBottom, ArrowRight, Plus} from '../../Components/Icons/icons';
+import DuplicateDialog from '../../Components/Generic/Dialogs/DuplicateDialog';
 import NewWorkflowModal from '../../Components/Workflows/NewWorkflow/newWorkflow';
 import WorkflowList from '../../Components/Workflows/WorkflowList/WorkflowList';
 import {AuthState} from '../../Store/reducers/auth';
@@ -93,6 +94,7 @@ export function Workflows() {
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
   }, [pathname]);
 
+
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
     setNewModalOpened(true);
@@ -174,6 +176,7 @@ export function Workflows() {
     );
   };
 
+
   const createNewWorkflow = () => {
     const workflow = {
       name: 'New Workflow',
@@ -198,12 +201,13 @@ export function Workflows() {
     });
   };
 
+
   const handleDuplicate = (newName: string) => {
-    const newWorkflow = {...duplicatedWorkflow, name: newName};
+    const newWorkflow = { ...duplicatedWorkflow, name: newName };
     delete newWorkflow.workflowId;
     DocumentsService.addWorkflow(newWorkflow, newModalSiteId).then(() => {
       updateWorkflows();
-    })
+    });
     setIsDuplicateDialogOpen(false);
   };
 
@@ -215,7 +219,8 @@ export function Workflows() {
         setIsDuplicateDialogOpen(true);
         setDuplicatedWorkflow(response);
       }
-    })
+
+    });
   };
 
   const handleCopyToClipBoard = (workflowId: string, siteId: string) => {
@@ -224,11 +229,12 @@ export function Workflows() {
         navigator.clipboard.writeText(JSON.stringify(response, null, 2));
         setShowTooltipId(workflowId);
         setTimeout(() => {
-          setShowTooltipId("");
-        }, 2000)
+          setShowTooltipId('');
+        }, 2000);
       }
-    })
-  }
+    });
+  };
+
 
   const handleDownloadClick = (workflowId: string, siteId: string) => {
     DocumentsService.getWorkflow(workflowId, siteId).then((response) => {
@@ -243,6 +249,7 @@ export function Workflows() {
         link.click();
         URL.revokeObjectURL(url);
       }
+
     })
   }
 
@@ -290,11 +297,13 @@ export function Workflows() {
     }
   }
 
+
   return (
     <>
       <Helmet>
         <title>Workflows</title>
       </Helmet>
+
 
       <div className="flex" style={{
         height: `calc(100vh - 3.68rem)`,
@@ -353,6 +362,7 @@ export function Workflows() {
             ></WorkflowList>
           </div>
         </div>
+
       </div>
       <NewWorkflowModal
         isOpened={isNewModalOpened}
