@@ -1,19 +1,38 @@
 import {CopyButton} from '../../../Components/Generic/Buttons/CopyButton';
-import {Edit, Trash, View} from '../../Icons/icons';
+import {Edit, View} from '../../Icons/icons';
+import WorkflowsActionsPopover from "./workflowActionsPopover";
+import ButtonSecondary from "../../Generic/Buttons/ButtonSecondary";
+import {useState} from "react";
+import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
+import {useAppDispatch} from '../../../Store/store';
+import {DocumentsService} from '../../../helpers/services/documentsService';
+import {Plus} from '../../Icons/icons';
 
 type Props = {
   siteId: string;
   workflows: null | [];
   onDelete: (workflowId: string, siteId: string) => void;
   handleScroll: (event: any) => void;
+  handleDuplicateClick: (workflowId: string, siteId: string) => void;
+  handleCopyToClipBoard: (workflowId: string, siteId: string) => void;
+  showTooltipId: string;
+  handleDownloadClick: (workflowId: string, siteId: string) => void;
 };
 
 export function WorkflowList({
                                siteId,
                                workflows,
                                onDelete,
-                               handleScroll
+                               handleScroll,
+                               handleDuplicateClick,
+                               handleCopyToClipBoard,
+                               showTooltipId,
+                               handleDownloadClick,
                              }: Props) {
+  const onDeleteClick = (workflowId: string, siteId: string) => () => {
+      onDelete(workflowId, siteId);}
+
+
 
   return (
     <>
@@ -86,7 +105,6 @@ export function WorkflowList({
                               ? `/workflows/designer?workflowId=${workflow.workflowId}`
                               : `/workspaces/${siteId}/workflows/designer?workflowId=${workflow.workflowId}`
                           }
-                          data-test-id="delete-workflow"
                           className="ml-2"
                         >
                           <div className="h-5 hover:text-primary-500 transition duration-100">
@@ -103,23 +121,32 @@ export function WorkflowList({
                             )}
                           </div>
                         </a>
-                        {!workflow.inUse && (
-                          <button
-                            onClick={() => onDelete(
-                              workflow.workflowId,
-                              siteId
-                            )}
-                            data-test-id="delete-workflow"
-                            className="ml-2"
-                          >
-                            <div className="h-5 hover:text-primary-500 transition duration-100">
-                              <Trash/>
-                              <span className="sr-only">Delete</span>
-                            </div>
-                          </button>
-                        )}
+                        {/*{!workflow.inUse && (*/}
+                        {/*  <button*/}
+                        {/*    onClick={() => onDelete(*/}
+                        {/*      workflow.workflowId,*/}
+                        {/*      siteId*/}
+                        {/*    )}*/}
+                        {/*    data-test-id="delete-workflow"*/}
+                        {/*    className="ml-2"*/}
+                        {/*  >*/}
+                        {/*    <div className="h-5 hover:text-primary-500 transition duration-100">*/}
+                        {/*      <Trash/>*/}
+                        {/*      <span className="sr-only">Delete</span>*/}
+                        {/*    </div>*/}
+                        {/*  </button>*/}
+                        {/*)}*/}
+                        <WorkflowsActionsPopover workflow={workflow}
+                                                 siteId={siteId}
+                                                 handleDuplicateClick={handleDuplicateClick}
+                                                 handleCopyToClipBoard={handleCopyToClipBoard}
+                                                 handleDownloadClick={handleDownloadClick}
+                                                 onDeleteClick={onDeleteClick}
+                                                 showTooltipId={showTooltipId}
+                        />
                       </div>
                     </td>
+
                   </tr>
                 );
               })}

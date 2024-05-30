@@ -20,6 +20,7 @@ import {
 import {RequestStatus} from "../../helpers/types/document";
 import {openDialog as openNotificationDialog} from "../../Store/reducers/globalNotificationControls";
 import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
+import DuplicateDialog from "../../Components/Generic/Dialogs/DuplicateDialog";
 
 
 type WorkflowItem = {
@@ -63,6 +64,11 @@ export function Workflows() {
 
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
+
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [originalName, setOriginalName] = useState('');
+  const [duplicatedWorkflow, setDuplicatedWorkflow] = useState<any>({});
+  const [showTooltipId, setShowTooltipId] = useState('');
 
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -192,6 +198,98 @@ export function Workflows() {
     });
   };
 
+  const handleDuplicate = (newName: string) => {
+    const newWorkflow = {...duplicatedWorkflow, name: newName};
+    delete newWorkflow.workflowId;
+    DocumentsService.addWorkflow(newWorkflow, newModalSiteId).then(() => {
+      updateWorkflows();
+    })
+    setIsDuplicateDialogOpen(false);
+  };
+
+  const handleDuplicateClick = (workflowId: string, siteId: string) => {
+    DocumentsService.getWorkflow(workflowId, siteId).then((response) => {
+      if (response.name) {
+        setNewModalSiteId(siteId);
+        setOriginalName(response.name);
+        setIsDuplicateDialogOpen(true);
+        setDuplicatedWorkflow(response);
+      }
+    })
+  };
+
+  const handleCopyToClipBoard = (workflowId: string, siteId: string) => {
+    DocumentsService.getWorkflow(workflowId, siteId).then((response) => {
+      if (response.name) {
+        navigator.clipboard.writeText(JSON.stringify(response, null, 2));
+        setShowTooltipId(workflowId);
+        setTimeout(() => {
+          setShowTooltipId("");
+        }, 2000)
+      }
+    })
+  }
+
+  const handleDownloadClick = (workflowId: string, siteId: string) => {
+    DocumentsService.getWorkflow(workflowId, siteId).then((response) => {
+      if (response.name) {
+        const blob = new Blob([JSON.stringify(response, null, 2)], {
+          type: 'application/json',
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${response.name}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+    })
+  }
+
+  const isValidString = (text: string) => {
+    try {
+      JSON.parse(text);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  };
+
+  const importWorkflow = (event: any) => {
+    console.log('importing')
+    const reader = new FileReader();
+    reader.readAsText(event.target.files[0], "UTF-8");
+    reader.onload = (e) => {
+      if (!isValidString(e.target?.result as string)) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Invalid JSON',
+          })
+        );
+        event.target.value = ''
+        return
+      }
+      const workflow = JSON.parse(e.target?.result as string);
+      DocumentsService.addWorkflow(workflow, siteId).then((response) => {
+        if (!response.workflowId) {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: response.errors[0].error,
+            })
+          );
+          event.target.value = ''
+          return
+        }
+
+        window.location.href =
+          siteId === 'default'
+            ? `/workflows/designer?workflowId=${response.workflowId}`
+            : `/workspaces/${siteId}/workflows/designer?workflowId=${response.workflowId}`;
+        event.target.value = ''
+      });
+    }
+  }
+
   return (
     <>
       <Helmet>
@@ -214,7 +312,7 @@ export function Workflows() {
             </p>
           </div>
           {!isSiteReadOnly && (
-            <div className="mb-4 flex px-4">
+            <div className="mb-4 flex px-4 gap-2">
               <ButtonPrimaryGradient
                 data-test-id="create-workflow"
                 onClick={createNewWorkflow}
@@ -224,6 +322,14 @@ export function Workflows() {
                 <span>Create new</span>
                 <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
               </ButtonPrimaryGradient>
+
+              <input type="file" id={"import-workflow" + siteId} accept=".json" className='hidden'
+                     onChange={importWorkflow}/>
+              <label htmlFor={"import-workflow" + siteId}
+                     className="h-9 bg-white text-neutral-900 border border-primary-500 px-4 font-bold whitespace-nowrap hover:text-primary-500 transition duration-100 rounded-md flex items-center justify-center">
+                <span>Import (JSON)</span>
+              </label>
+
               <button
                 className="flex hidden bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
                 data-test-id="create-workflow"
@@ -240,6 +346,10 @@ export function Workflows() {
               onDelete={onWorkflowDelete}
               siteId={currentSiteId}
               handleScroll={handleScroll}
+              handleDuplicateClick={handleDuplicateClick}
+              handleCopyToClipBoard={handleCopyToClipBoard}
+              showTooltipId={showTooltipId}
+              handleDownloadClick={handleDownloadClick}
             ></WorkflowList>
           </div>
         </div>
@@ -249,6 +359,12 @@ export function Workflows() {
         onClose={onNewClose}
         updateWorkflowExpansion={updateWorkflows}
         siteId={newModalSiteId}
+      />
+      <DuplicateDialog
+        isOpen={isDuplicateDialogOpen}
+        onClose={() => setIsDuplicateDialogOpen(false)} // Can also use a separate function for clarity
+        onDuplicate={handleDuplicate}
+        initialName={originalName} // Optionally provide the original name
       />
     </>
   );

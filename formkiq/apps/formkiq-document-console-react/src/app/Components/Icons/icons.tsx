@@ -379,7 +379,7 @@ export function Move() {
 
 export function Copy() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" className="fill-current">
+    <svg width="100%" height="100%" viewBox="0 0 12 12" className="fill-current">
       <path
         d="M10.3421 10.9091H3.97368V3.27273H10.3421M10.3421 2.18182H3.97368C3.66659 2.18182 3.37208 2.29675 3.15493 2.50134C2.93778 2.70592 2.81579 2.9834 2.81579 3.27273V10.9091C2.81579 11.1984 2.93778 11.4759 3.15493 11.6805C3.37208 11.8851 3.66659 12 3.97368 12H10.3421C10.6492 12 10.9437 11.8851 11.1609 11.6805C11.378 11.4759 11.5 11.1984 11.5 10.9091V3.27273C11.5 2.9834 11.378 2.70592 11.1609 2.50134C10.9437 2.29675 10.6492 2.18182 10.3421 2.18182ZM8.60526 0H1.65789C1.3508 0 1.05629 0.114935 0.839139 0.31952C0.621992 0.524105 0.5 0.801582 0.5 1.09091V8.72727H1.65789V1.09091H8.60526V0Z"
         fill="#4B4E5E"
@@ -1441,6 +1441,26 @@ export function Pencil() {
           <rect width="20" height="20" />
         </clipPath>
       </defs>
+    </svg>
+  );
+}
+
+export function CopyToClipboard() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%"
+         height="100%" viewBox="0 0 36 36">
+      <path fill="currentColor"
+            d="M22.6 4h-1.05a3.89 3.89 0 0 0-7.31 0h-.84A2.41 2.41 0 0 0 11 6.4V10h14V6.4A2.41 2.41 0 0 0 22.6 4m.4 4H13V6.25a.25.25 0 0 1 .25-.25h2.69l.12-1.11a1.24 1.24 0 0 1 .55-.89a2 2 0 0 1 3.15 1.18l.09.84h2.9a.25.25 0 0 1 .25.25Z"
+            className="clr-i-outline clr-i-outline-path-1"/>
+      <path fill="currentColor"
+            d="M33.25 18.06H21.33l2.84-2.83a1 1 0 1 0-1.42-1.42l-5.25 5.25l5.25 5.25a1 1 0 0 0 .71.29a1 1 0 0 0 .71-1.7l-2.84-2.84h11.92a1 1 0 0 0 0-2"
+            className="clr-i-outline clr-i-outline-path-2"/>
+      <path fill="currentColor" d="M29 16h2V6.68A1.66 1.66 0 0 0 29.35 5h-2.27v2H29Z"
+            className="clr-i-outline clr-i-outline-path-3"/>
+      <path fill="currentColor"
+            d="M29 31H7V7h2V5H6.64A1.66 1.66 0 0 0 5 6.67v24.65A1.66 1.66 0 0 0 6.65 33h22.71A1.66 1.66 0 0 0 31 31.33v-9.27h-2Z"
+            className="clr-i-outline clr-i-outline-path-4"/>
+      <path fill="none" d="M0 0h36v36H0z"/>
     </svg>
   );
 }
