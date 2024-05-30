@@ -1,4 +1,4 @@
- 
+
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
@@ -8,7 +8,7 @@ import ButtonSecondary from "../../Generic/Buttons/ButtonSecondary";
 import { CopyButton } from '../../../Components/Generic/Buttons/CopyButton';
 import { Edit, Plus, View } from '../../Icons/icons';
 import {useState} from "react";
-  
+
 type Props = {
   siteId: string;
   workflows: null | [];
@@ -18,7 +18,8 @@ type Props = {
   handleCopyToClipBoard: (workflowId: string, siteId: string) => void;
   showTooltipId: string;
   handleDownloadClick: (workflowId: string, siteId: string) => void;
-
+  isSiteReadOnly: boolean;
+}
 
 export function WorkflowList({
                                siteId,
@@ -169,29 +170,6 @@ export function WorkflowList({
                             )}
                           </div>
                         </a>
-
-                          <div className="h-5 hover:text-primary-500 transition duration-100 pr-2">
-                            <a
-                              href={
-                                siteId === 'default'
-                                  ? `/workflows/designer?workflowId=${workflow.workflowId}`
-                                  : `/workspaces/${siteId}/workflows/designer?workflowId=${workflow.workflowId}`
-                              }
-                              data-test-id="delete-workflow"
-                            >
-                              {workflow.inUse ? (
-                                <>
-                                  <View />
-                                  <span className="sr-only">View</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Edit />
-                                  <span className="sr-only">Edit</span>
-                                </>
-                              )}
-                            </a>
-                          </div>
                         <WorkflowsActionsPopover workflow={workflow}
                                                  siteId={siteId}
                                                  handleDuplicateClick={handleDuplicateClick}
@@ -214,7 +192,6 @@ export function WorkflowList({
               </td>
             </tr>
           )}
-
           </tbody>
         </table>
       </div>

@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {useSelector} from 'react-redux';
-import {ArrowBottom, ArrowRight, Plus} from '../../Components/Icons/icons';
+import {Plus} from '../../Components/Icons/icons';
 import DuplicateDialog from '../../Components/Generic/Dialogs/DuplicateDialog';
 import NewWorkflowModal from '../../Components/Workflows/NewWorkflow/newWorkflow';
 import WorkflowList from '../../Components/Workflows/WorkflowList/WorkflowList';
@@ -11,7 +11,6 @@ import {useAppDispatch} from '../../Store/store';
 import {DocumentsService} from '../../helpers/services/documentsService';
 import {useLocation, useNavigate} from "react-router-dom";
 import {getCurrentSiteInfo, getUserSites} from "../../helpers/services/toolService";
-import {DocumentListState, fetchDocuments} from "../../Store/reducers/documentsList";
 import {
   deleteWorkflow,
   fetchWorkflows,
@@ -21,14 +20,7 @@ import {
 import {RequestStatus} from "../../helpers/types/document";
 import {openDialog as openNotificationDialog} from "../../Store/reducers/globalNotificationControls";
 import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
-import DuplicateDialog from "../../Components/Generic/Dialogs/DuplicateDialog";
 
-
-type WorkflowItem = {
-  siteId: string;
-  readonly: boolean;
-  workflows: [] | null;
-};
 
 export function Workflows() {
   const dispatch = useAppDispatch();
@@ -359,6 +351,7 @@ export function Workflows() {
               handleCopyToClipBoard={handleCopyToClipBoard}
               showTooltipId={showTooltipId}
               handleDownloadClick={handleDownloadClick}
+              isSiteReadOnly={isSiteReadOnly}
             ></WorkflowList>
           </div>
         </div>

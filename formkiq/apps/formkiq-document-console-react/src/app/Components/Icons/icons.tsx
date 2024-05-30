@@ -414,21 +414,9 @@ export function Move() {
 
 export function Copy() {
   return (
-    <svg width="100%" height="100%" viewBox="0 0 12 12" className="fill-current">
-      <path
-        d="M5 5.99849V22.0003C5 22.5526 5.44772 23 6 23H22C22.5523 23 23 22.5523 23 22V6C23 5.44772 22.5523 5 22 5H6C5.44772 5 5 5.4462 5 5.99849Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M1 17C1 16.6466 1 8.46341 1 2.99795C1 1.89338 1.89543 1 3 1H17"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 5.99849V22.0003C5 22.5526 5.44772 23 6 23H22C22.5523 23 23 22.5523 23 22V6C23 5.44772 22.5523 5 22 5H6C5.44772 5 5 5.4462 5 5.99849Z" stroke="#171C26" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M1 17C1 16.6466 1 8.46341 1 2.99795C1 1.89338 1.89543 1 3 1H17" stroke="#171C26" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
