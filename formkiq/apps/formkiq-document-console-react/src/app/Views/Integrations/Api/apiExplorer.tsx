@@ -113,6 +113,17 @@ import {
   putDocumentVersionApiItem,
   putWorkflowsApiItem,
   searchDocumentQueryApiItem,
+  getAttributesApiItem,
+  postAttributeApiItem,
+  getAttributeApiItem,
+  deleteAttributeApiItem,
+  getDocumentAttributesApiItem,
+  postDocumentAttributesApiItem,
+  putDocumentAttributesApiItem,
+  getDocumentAttributeApiItem,
+  deleteDocumentAttributeApiItem,
+  deleteDocumentAttributeValueApiItem,
+  putDocumentAttributeApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -400,6 +411,20 @@ export function ApiExplorer() {
                     </div>
                   </div>
                 </ApiSegment>
+                <ApiSegment title="Document Attributes">
+                    <div className="ml-2 flex flex-cols">
+                        <div className="w-4 border-l"></div>
+                        <div className="grow">
+                            <ApiItem apiItem={getDocumentAttributesApiItem} sites={sites} />
+                            <ApiItem apiItem={postDocumentAttributesApiItem} sites={sites} />
+                            <ApiItem apiItem={putDocumentAttributesApiItem} sites={sites} />
+                            <ApiItem apiItem={getDocumentAttributeApiItem} sites={sites} />
+                            <ApiItem apiItem={putDocumentAttributeApiItem} sites={sites} />
+                            <ApiItem apiItem={deleteDocumentAttributeApiItem} sites={sites} />
+                            <ApiItem apiItem={deleteDocumentAttributeValueApiItem} sites={sites} />
+                        </div>
+                    </div>
+                </ApiSegment>
               </div>
             </div>
           </ApiSegment>
@@ -573,6 +598,17 @@ export function ApiExplorer() {
                 <ApiItem apiItem={getExaminePdfDetailsApiItem} sites={sites} />
               </div>
             </div>
+          </ApiSegment>
+          <ApiSegment title="Attributes">
+              <div className="ml-2 flex flex-cols">
+                  <div className="w-4 border-l"></div>
+                  <div className="grow">
+                      <ApiItem apiItem={getAttributesApiItem} sites={sites} />
+                      <ApiItem apiItem={postAttributeApiItem} sites={sites} />
+                      <ApiItem apiItem={getAttributeApiItem} sites={sites} />
+                      <ApiItem apiItem={deleteAttributeApiItem} sites={sites} />
+                  </div>
+              </div>
           </ApiSegment>
         </div>
       </div>

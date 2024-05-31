@@ -1794,36 +1794,52 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async addDocumentAttribute(
+  public static async addDocumentAttributes(
       siteId: string,
       ws: string,
       documentId: string,
       addDocumentAttributeParameters: any,
   ): Promise<any> {
-      if (!siteId) {
-          siteId = this.determineSiteId();
-      }
-      return this.getFormkiqClient().documentsApi.addDocumentAttribute({
-          siteId,
-          ws,
-          documentId,
-          addDocumentAttributeParameters,
-      });
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.addDocumentAttributes({
+      siteId,
+      ws,
+      documentId,
+      addDocumentAttributeParameters,
+    });
   }
 
   @formkiqAPIHandler
-    public static async setDocumentAttribute(
+  public static async setDocumentAttributes(
       siteId: string,
       documentId: string,
-      setDocumentAttributeParameters: any,
+      setDocumentAttributesParameters: any,
   ): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().documentsApi.setDocumentAttribute({
+    return this.getFormkiqClient().documentsApi.setDocumentAttributes({
       siteId,
       documentId,
-      setDocumentAttributeParameters,
+      setDocumentAttributesParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getDocumentAttribute(
+      siteId: string,
+      documentId: string,
+      attributeKey: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.getDocumentAttribute({
+      siteId,
+      documentId,
+      attributeKey,
     });
   }
 

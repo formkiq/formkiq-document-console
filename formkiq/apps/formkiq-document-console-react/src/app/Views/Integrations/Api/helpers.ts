@@ -23,6 +23,9 @@ export interface ApiItem {
   requiresFileUpload: boolean;
   requiresIndexType: boolean;
   requiresQueueId: boolean;
+  requiresAttributeKey: boolean;
+  requiresAttributeValue: boolean;
+  requiresWS: boolean;
   allowsVersionKey: boolean;
   allowsDate: boolean;
   allowsLimit: boolean;
@@ -1540,4 +1543,141 @@ export const getExaminePdfDetailsApiItem = {
   requiresAuthentication: true,
   requiresObjectID: true,
   license: 'Core',
+};
+
+export const getAttributesApiItem = {
+    method: 'GET',
+    path: '/attributes',
+    description: 'Returns a list of attributes',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
+    license: 'Core',
+};
+
+export const postAttributeApiItem = {
+    method: 'POST',
+    path: '/attributes',
+    description: 'Create a new attribute',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"attribute": { "key": "string", "dataType": "STRING", "type": "STANDARD" }}',
+    license: 'Core',
+};
+
+export const getAttributeApiItem = {
+    method: 'GET',
+    path: '/attributes/ ATTRIBUTE_KEY ',
+    description: 'Returns an attribute',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    requiresAttributeKey: true,
+    license: 'Core',
+};
+
+export const deleteAttributeApiItem = {
+    method: 'DELETE',
+    path: '/attributes/ ATTRIBUTE_KEY ',
+    description: 'Deletes an attribute',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    requiresAttributeKey: true,
+    license: 'Core',
+};
+
+export const getDocumentAttributesApiItem = {
+    method: 'GET',
+    path: '/documents/ DOCUMENT_ID /attributes',
+    description: 'Returns a list of attributes for a document',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
+    license: 'Core',
+};
+
+export const postDocumentAttributesApiItem = {
+    method: 'POST',
+    path: '/documents/ DOCUMENT_ID /attributes',
+    description: 'Create a new attribute for a document',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    requiresWS: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"attributes": [{"key": "string", "stringValue": "string", "stringValues": ["string"], "numberValue": 0, "numberValues": [0], "booleanValue": true}]}',
+    license: 'Core',
+};
+
+export const putDocumentAttributesApiItem = {
+    method: 'PUT',
+    path: '/documents/ DOCUMENT_ID /attributes ',
+    description: 'Updates an attribute for a document',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"attributes": [{"key": "string", "stringValue": "string", "stringValues": ["string"], "numberValue": 0, "numberValues": [0], "booleanValue": true}]}',
+    license: 'Core',
+};
+
+export const getDocumentAttributeApiItem = {
+    method: 'GET',
+    path: '/documents/ DOCUMENT_ID /attributes/ ATTRIBUTE_KEY ',
+    description: 'Returns an attribute for a document',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    requiresAttributeKey: true,
+    license: 'Core',
+};
+
+export const putDocumentAttributeApiItem = {
+    method: 'PUT',
+    path: '/documents/ DOCUMENT_ID /attributes/ ATTRIBUTE_KEY ',
+    description: 'Updates an attribute for a document',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    requiresAttributeKey: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"attribute": {"stringValue": "string", "stringValues": ["string"], "numberValue": 0, "numberValues": [0], "booleanValue": true}}',
+    license: 'Core',
+};
+
+export const deleteDocumentAttributeApiItem =  {
+    method: 'DELETE',
+    path: '/documents/ DOCUMENT_ID /attributes/ ATTRIBUTE_KEY ',
+    description: 'Deletes an attribute for a document',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    requiresAttributeKey: true,
+    license: 'Core',
+};
+
+export const deleteDocumentAttributeValueApiItem = {
+    method: 'DELETE',
+    path: '/documents/ DOCUMENT_ID /attributes/ ATTRIBUTE_KEY / ATTRIBUTE_VALUE ',
+    description: 'Deletes an attribute value for a document',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    requiresAttributeKey: true,
+    requiresAttributeValue: true,
+    license: 'Core',
 };

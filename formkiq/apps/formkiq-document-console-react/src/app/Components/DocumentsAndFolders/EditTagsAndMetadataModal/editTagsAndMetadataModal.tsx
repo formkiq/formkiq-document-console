@@ -218,8 +218,6 @@ export default function EditTagsAndMetadataModal({
                       </div>
                     </form>
                   </div>
-                </div>
-                <div className="bg-white mt-1 p-4 rounded-lg bg-white shadow-xl border h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
                       Edit Metadata/Tags
