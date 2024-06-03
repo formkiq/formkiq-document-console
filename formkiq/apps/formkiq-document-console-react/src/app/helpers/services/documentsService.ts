@@ -942,6 +942,25 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async patchDocumentDetails(
+      documentId: string,
+      details: any,
+      siteId = ''
+  ): Promise<any> {
+      if (!siteId || !siteId.length) {
+          siteId = this.determineSiteId();
+      }
+      const documentParams = {
+          ...details,
+      };
+      return this.getFormkiqClient().documentsApi.updateDocument({
+          documentId,
+          addOrUpdateDocumentParameters: documentParams,
+          siteId,
+      });
+  }
+
+  @formkiqAPIHandler
   public static async getDocumentUrl(
     documentId: string,
     siteId = '',
@@ -1798,7 +1817,7 @@ export class DocumentsService {
       siteId: string,
       ws: string,
       documentId: string,
-      addDocumentAttributeParameters: any,
+      addDocumentAttributesParameters: any,
   ): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
@@ -1807,7 +1826,7 @@ export class DocumentsService {
       siteId,
       ws,
       documentId,
-      addDocumentAttributeParameters,
+      addDocumentAttributesParameters,
     });
   }
 
