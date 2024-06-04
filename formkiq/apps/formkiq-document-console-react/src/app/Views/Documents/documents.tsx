@@ -10,7 +10,7 @@ import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentRe
 import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
 import DocumentWorkflowsModal from '../../Components/DocumentsAndFolders/DocumentWorkflowsModal/documentWorkflowsModal';
 import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
-import EditTagsAndMetadataModal from '../../Components/DocumentsAndFolders/EditTagsAndMetadataModal/editTagsAndMetadataModal';
+import EditAttributesModal from '../../Components/DocumentsAndFolders/EditAttributesModal/editAttributesModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
@@ -150,7 +150,7 @@ function Documents() {
   const [infoTagEditMode, setInfoTagEditMode] = useState(false);
   // NOTE: not fully implemented;
   // using the edit metadata modal for now, to be replaced with new system to indicate diff between tag, metadata, and versioned metadata
-  const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
+  // const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
   const [currentDocument, setCurrentDocument]: [IDocument | null, any] =
     useState(null);
   const [currentDocumentTags, setCurrentDocumentTags]: [
@@ -172,9 +172,9 @@ function Documents() {
     useState('');
   const [shareModalValue, setShareModalValue] = useState<ILine | null>(null);
   const [isShareModalOpened, setShareModalOpened] = useState(false);
-  const [editTagsAndMetadataModalValue, setEditTagsAndMetadataModalValue] =
+  const [editAttributesModalValue, setEditAttributesModalValue] =
     useState<ILine | null>(null);
-  const [isEditTagsAndMetadataModalOpened, setEditTagsAndMetadataModalOpened] =
+  const [isEditAttributesModalOpened, setEditAttributesModalOpened] =
     useState(false);
   const [documentVersionsModalValue, setDocumentVersionsModalValue] =
     useState<ILine | null>(null);
@@ -541,16 +541,16 @@ function Documents() {
   const onFolderUploadClose = () => {
     setFolderUploadModalOpened(false);
   };
-  const onEditTagsAndMetadataModalClick = (event: any, value: ILine | null) => {
-    setEditTagsAndMetadataModalValue(value);
-    setEditTagsAndMetadataModalOpened(true);
+  const onEditAttributesModalClick = (event: any, value: ILine | null) => {
+    setEditAttributesModalValue(value);
+    setEditAttributesModalOpened(true);
   };
-  const onEditTagsAndMetadataModalClose = () => {
-    setEditTagsAndMetadataModalOpened(false);
+  const onEditAttributesModalClose = () => {
+    setEditAttributesModalOpened(false);
     updateTags();
   };
-  const getEditTagsAndMetadataModalValue = () => {
-    return editTagsAndMetadataModalValue;
+  const getEditAttributesModalValue = () => {
+    return editAttributesModalValue;
   };
   const onDocumentVersionsModalClick = (event: any, value: ILine | null) => {
     setDocumentVersionsModalValue(value);
@@ -1231,7 +1231,7 @@ function Documents() {
                 onDocumentDataChange={onDocumentDataChange}
                 isSiteReadOnly={isSiteReadOnly}
                 onEditTagsAndMetadataModalClick={
-                  onEditTagsAndMetadataModalClick
+                  onEditAttributesModalClick
                 }
                 filterTag={filterTag}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
@@ -1436,114 +1436,15 @@ function Documents() {
                           </dd>
                         </div>
                         <div className="w-68 flex mr-3 border-b"></div>
-                        <div className="flex flex-col pt-3">
-                          <dt className="mb-1 flex justify-between">
-                            <span className="text-sm font-semibold text-primary-500">
-                              Tags
-                            </span>
-                            {!isSiteReadOnly && (
-                              <div
-                                className="w-3/5 flex font-semibold text-primary-500 cursor-pointer"
-                                onClick={(event) =>
-                                  setInfoTagEditMode(!infoTagEditMode)
-                                }
-                              >
-                                {infoTagEditMode ? (
-                                  <>
-                                    <div className="w-4 pt-0.5">
-                                      <ChevronLeft />
-                                    </div>
-                                    <span>cancel edit</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span>edit tags</span>
-                                    <div className="w-4 pt-0.5">
-                                      <ChevronRight />
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            )}
-                          </dt>
-                          <dd className="text-sm">
-                            {currentDocumentTags &&
-                              (currentDocumentTags as []).map(
-                                (tag: any, i: number) => {
-                                  let isKeyOnlyTag = false;
-                                  if (
-                                    (tag.value !== undefined &&
-                                      tag.value.length === 0) ||
-                                    (tag.values !== undefined &&
-                                      tag.values.length === 0)
-                                  ) {
-                                    isKeyOnlyTag = true;
-                                  }
-                                  let tagColor = 'gray';
-                                  if (tagColors) {
-                                    tagColors.forEach((color: any) => {
-                                      if (color.tagKeys.indexOf(tag.key) > -1) {
-                                        tagColor = color.colorUri;
-                                        return;
-                                      }
-                                    });
-                                  }
-                                  return (
-                                    <div key={i} className="inline">
-                                      {isKeyOnlyTag && (
-                                        <div className="pt-0.5 pr-1 flex items-center">
-                                          <div
-                                            className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}
-                                          >
-                                            {tag.key}
-                                            {infoTagEditMode && (
-                                              <button
-                                                className="pl-2 font-semibold hover:text-red-600"
-                                                onClick={(event) =>
-                                                  onTagDelete(tag.key)
-                                                }
-                                              >
-                                                x
-                                              </button>
-                                            )}
-                                          </div>
-                                          <div
-                                            className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                                          ></div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                }
-                              )}
-                          </dd>
-                        </div>
-                        {infoTagEditMode && (
-                          <div className="flex mt-2">
-                            <AddTag
-                              line={{
-                                lineType: 'document',
-                                folder: subfolderUri,
-                                documentId: (currentDocument as IDocument)
-                                  .documentId,
-                                documentInstance: currentDocument as IDocument,
-                                folderInstance: null,
-                              }}
-                              onDocumentDataChange={onDocumentDataChange}
-                              updateTags={updateTags}
-                              siteId={currentSiteId}
-                              tagColors={tagColors}
-                            />
-                          </div>
-                        )}
-                        <div className="w-68 flex mt-3 mr-3 border-b"></div>
+                        {/*start Attributes*/}
+
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
-                          Metadata
+                          Attributes
                           {!isSiteReadOnly && (
                             <div
                               className="w-3/5 flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
-                                onEditTagsAndMetadataModalClick(event, {
+                                onEditAttributesModalClick(event, {
                                   lineType: 'document',
                                   folder: subfolderUri,
                                   documentId: (currentDocument as IDocument)
@@ -1554,21 +1455,146 @@ function Documents() {
                                 })
                               }
                             >
-                              {infoMetadataEditMode ? (
                                 <>
-                                  <div className="w-4 pt-0.5">
-                                    <ChevronLeft />
-                                  </div>
-                                  <span>cancel edit</span>
-                                </>
-                              ) : (
-                                <>
-                                  <span>add/edit metadata</span>
+                                  <span>add/edit attributes</span>
                                   <div className="w-4 pt-0.5">
                                     <ChevronRight />
                                   </div>
                                 </>
+                            </div>
+                          )}
+                        </div>
+
+                        {/*end*/}
+                        {/*start Tags*/}
+
+                        {allTags.length > 0 && <>
+                          <div className="flex flex-col pt-3">
+                            <dt className="mb-1 flex justify-between">
+                            <span className="text-sm font-semibold text-primary-500">
+                              Tags
+                            </span>
+                              {!isSiteReadOnly && (
+                                <div
+                                  className="w-3/5 flex font-semibold text-primary-500 cursor-pointer"
+                                  onClick={(event) =>
+                                    setInfoTagEditMode(!infoTagEditMode)
+                                  }
+                                >
+                                  {infoTagEditMode ? (
+                                    <>
+                                      <div className="w-4 pt-0.5">
+                                        <ChevronLeft />
+                                      </div>
+                                      <span>cancel edit</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span>edit tags</span>
+                                      <div className="w-4 pt-0.5">
+                                        <ChevronRight />
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
                               )}
+                            </dt>
+                            <dd className="text-sm">
+                              {currentDocumentTags &&
+                                (currentDocumentTags as []).map(
+                                  (tag: any, i: number) => {
+                                    let isKeyOnlyTag = false;
+                                    if (
+                                      (tag.value !== undefined &&
+                                        tag.value.length === 0) ||
+                                      (tag.values !== undefined &&
+                                        tag.values.length === 0)
+                                    ) {
+                                      isKeyOnlyTag = true;
+                                    }
+                                    let tagColor = 'gray';
+                                    if (tagColors) {
+                                      tagColors.forEach((color: any) => {
+                                        if (color.tagKeys.indexOf(tag.key) > -1) {
+                                          tagColor = color.colorUri;
+                                          return;
+                                        }
+                                      });
+                                    }
+                                    return (
+                                      <div key={i} className="inline">
+                                        {isKeyOnlyTag && (
+                                          <div className="pt-0.5 pr-1 flex items-center">
+                                            <div
+                                              className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}
+                                            >
+                                              {tag.key}
+                                              {infoTagEditMode && (
+                                                <button
+                                                  className="pl-2 font-semibold hover:text-red-600"
+                                                  onClick={(event) =>
+                                                    onTagDelete(tag.key)
+                                                  }
+                                                >
+                                                  x
+                                                </button>
+                                              )}
+                                            </div>
+                                            <div
+                                              className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                                            ></div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  }
+                                )}
+                            </dd>
+                          </div>
+                          {infoTagEditMode && (
+                            <div className="flex mt-2">
+                              <AddTag
+                                line={{
+                                  lineType: 'document',
+                                  folder: subfolderUri,
+                                  documentId: (currentDocument as IDocument)
+                                    .documentId,
+                                  documentInstance: currentDocument as IDocument,
+                                  folderInstance: null,
+                                }}
+                                onDocumentDataChange={onDocumentDataChange}
+                                updateTags={updateTags}
+                                siteId={currentSiteId}
+                                tagColors={tagColors}
+                              />
+                            </div>
+                          )}
+                          <div className="w-68 flex mt-3 mr-3 border-b"></div></>}
+
+                        {/*end*/}
+                        <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
+                          Metadata
+                          {!isSiteReadOnly && (
+                            <div
+                              className="w-3/5 flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                              onClick={(event) =>
+                                onEditAttributesModalClick(event, {
+                                  lineType: 'document',
+                                  folder: subfolderUri,
+                                  documentId: (currentDocument as IDocument)
+                                    .documentId,
+                                  documentInstance:
+                                    currentDocument as IDocument,
+                                  folderInstance: null,
+                                })
+                              }
+                            >
+                              <>
+                                <span>add/edit metadata</span>
+                                <div className="w-4 pt-0.5">
+                                  <ChevronRight />
+                                </div>
+                              </>
                             </div>
                           )}
                         </div>
@@ -1611,42 +1637,42 @@ function Documents() {
                             }
                           )}
                         <div className="w-68 flex mt-3 mr-3 border-b"></div>
-                        {formkiqVersion.type !== 'core' && (
-                          <div className="flex flex-col pt-3">
-                            <dt className="mb-1 flex justify-between">
-                              <span className="text-sm font-semibold text-primary-500">
-                                Access Attributes
-                              </span>
-                            </dt>
-                            <dd className="text-sm">
-                              {currentDocumentAccessAttributes &&
-                                (currentDocumentAccessAttributes as []).map(
-                                  (attribute: any, i: number) => {
-                                    return (
-                                      <div key={i} className="">
-                                        <div className="pt-1 pr-1 flex items-center">
-                                          <div className={`h-5.5 pr-1 `}>
-                                            <span className="block text-xs">
-                                              {attribute.key}
-                                            </span>
-                                            <span className="font-semibold">
-                                              {attribute.stringValue}
-                                            </span>
-                                            <span className="font-semibold">
-                                              {attribute.numberValue}
-                                            </span>
-                                            <span className="font-semibold">
-                                              {attribute.booleanValue}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                )}
-                            </dd>
-                          </div>
-                        )}
+                        {/*{formkiqVersion.type !== 'core' && (*/}
+                        {/*  <div className="flex flex-col pt-3">*/}
+                        {/*    <dt className="mb-1 flex justify-between">*/}
+                        {/*      <span className="text-sm font-semibold text-primary-500">*/}
+                        {/*        Access Attributes*/}
+                        {/*      </span>*/}
+                        {/*    </dt>*/}
+                        {/*    <dd className="text-sm">*/}
+                        {/*      {currentDocumentAccessAttributes &&*/}
+                        {/*        (currentDocumentAccessAttributes as []).map(*/}
+                        {/*          (attribute: any, i: number) => {*/}
+                        {/*            return (*/}
+                        {/*              <div key={i} className="">*/}
+                        {/*                <div className="pt-1 pr-1 flex items-center">*/}
+                        {/*                  <div className={`h-5.5 pr-1 `}>*/}
+                        {/*                    <span className="block text-xs">*/}
+                        {/*                      {attribute.key}*/}
+                        {/*                    </span>*/}
+                        {/*                    <span className="font-semibold">*/}
+                        {/*                      {attribute.stringValue}*/}
+                        {/*                    </span>*/}
+                        {/*                    <span className="font-semibold">*/}
+                        {/*                      {attribute.numberValue}*/}
+                        {/*                    </span>*/}
+                        {/*                    <span className="font-semibold">*/}
+                        {/*                      {attribute.booleanValue}*/}
+                        {/*                    </span>*/}
+                        {/*                  </div>*/}
+                        {/*                </div>*/}
+                        {/*              </div>*/}
+                        {/*            );*/}
+                        {/*          }*/}
+                        {/*        )}*/}
+                        {/*    </dd>*/}
+                        {/*  </div>*/}
+                        {/*)}*/}
                       </dl>
                     )}
                     <div className="mt-4 w-full flex justify-center">
@@ -1856,7 +1882,7 @@ function Documents() {
                             onDeleteClick={deleteFolder(currentDocument)}
                             onShareClick={onShareClick}
                             onEditTagsAndMetadataModalClick={
-                              onEditTagsAndMetadataModalClick
+                              onEditAttributesModalClick
                             }
                             onRenameModalClick={onRenameModalClick}
                             onMoveModalClick={onMoveModalClick}
@@ -1893,12 +1919,12 @@ function Documents() {
         getValue={getShareModalValue}
         value={shareModalValue}
       />
-      <EditTagsAndMetadataModal
-        isOpened={isEditTagsAndMetadataModalOpened}
-        onClose={onEditTagsAndMetadataModalClose}
+      <EditAttributesModal
+        isOpened={isEditAttributesModalOpened}
+        onClose={onEditAttributesModalClose}
         siteId={currentSiteId}
-        getValue={getEditTagsAndMetadataModalValue}
-        value={editTagsAndMetadataModalValue}
+        getValue={getEditAttributesModalValue}
+        value={editAttributesModalValue}
         onDocumentDataChange={onDocumentDataChange}
       />
       <DocumentVersionsModal

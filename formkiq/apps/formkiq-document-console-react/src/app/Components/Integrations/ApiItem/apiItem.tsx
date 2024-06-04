@@ -417,7 +417,6 @@ function updateRequestsFromForm(
         getFormInput(formRef, 'webSocket')?.value &&
         getFormInput(formRef, 'webSocket')?.validity?.valid
     ){
-      console.log('webSocket', getFormInput(formRef, 'webSocket')?.value, getFormInput(formRef, 'webSocket')?.checked, );
       params.set('ws', getFormInput(formRef, 'webSocket')?.checked);
     }
 

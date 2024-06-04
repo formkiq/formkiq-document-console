@@ -99,7 +99,7 @@ function tagListIem(
         />
       );
     } else {
-      return tag.value ? tag.value : editingTags[index].inputValue;
+      return tag.value ? tag.value : (editingTags[index]?.inputValue ? editingTags[index].inputValue:"");
     }
   };
 
