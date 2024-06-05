@@ -4,8 +4,8 @@ export enum RequestStatus {
   rejected = 'rejected',
 }
 
-type AttributeDataType = "STRING"| "NUMBER"|"BOOLEAN"| "KEY_ONLY"| "COMPOSITE_STRING";
-type AttributeType = "STANDARD"|"OPA";
+export type AttributeDataType = "STRING"| "NUMBER"|"BOOLEAN"| "KEY_ONLY"| "COMPOSITE_STRING";
+export type AttributeType = "STANDARD"|"OPA";
 
 export type Attribute = {
   key: string;

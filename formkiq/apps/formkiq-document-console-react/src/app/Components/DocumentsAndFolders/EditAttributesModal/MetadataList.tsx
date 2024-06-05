@@ -17,30 +17,30 @@ function MetadataList({metadata, onEdit}: { metadata: any, onEdit: any }) {
     <div>
       {metadata ? (
         <div className="overflow-auto max-h-64">
-          <table className="border-collapse table-fixed w-full text-sm">
-            <thead>
+          <table className="border border-neutral-300 border-collapse table-fixed w-full text-sm">
+            <thead className="sticky top-0 bg-white font-bold py-3 bg-neutral-100">
             <tr>
               <th
-                className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Path
               </th>
               <th
-                className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 DeepLinkPath
               </th>
               <th
-                className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Content-Type
               </th>
               <th
-                className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Filesize
               </th>
             </tr>
             </thead>
 
             <tbody className="bg-white nodark:bg-slate-800">
-            <tr>
+            <tr className="border-t border-neutral-300">
               <td className="p-4 text-start w-52 truncate">{metadata.path}</td>
               <td className="p-4 text-start">{(isEditingDeeplinkPath ?
                 <div className='flex items-start gap-2'><input type="text" value={deeplinkPath}

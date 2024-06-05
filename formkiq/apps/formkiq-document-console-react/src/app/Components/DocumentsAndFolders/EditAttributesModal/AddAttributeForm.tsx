@@ -1,38 +1,65 @@
 import RadioListbox from "../../Generic/Listboxes/RadioListbox";
-import {useSelector} from "react-redux";
-import {AttributesState} from "../../../Store/reducers/attributes";
-import {useEffect, useState} from "react";
+import {fetchAllAttributes} from "../../../Store/reducers/attributes";
+import {useRef, useState} from "react";
+import {Attribute, AttributeDataType, AttributeType} from "../../../helpers/types/attributes";
+import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
+import {openDialog as openNotificationDialog} from "../../../Store/reducers/globalNotificationControls";
+import {DocumentsService} from "../../../helpers/services/documentsService";
+import {useForm} from "react-hook-form";
+import {useAppDispatch} from "../../../Store/store";
+import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
 
-function AddAttributeForm({onAddAttributeSubmit, register, handleSubmit, addTagFormRef, siteId}: any) {
+function AddAttributeForm({onDocumentDataChange, siteId, value, onClose}: any) {
+  const [selectedAttributeDataType, setSelectedAttributeDataType] = useState<AttributeDataType | "">("")
+  const [selectedAttributeType, setSelectedAttributeType] = useState<AttributeType | "">("")
 
   const {
-    allAttributes,
-    allAttributesNextToken,
-    allAttributesLoadingStatus,
-    allAttributesCurrentSearchPage,
-    allAttributesIsLastSearchPageLoaded,
-  } = useSelector(AttributesState)
+    register,
+    formState: {errors},
+    handleSubmit,
+    reset,
+  } = useForm();
+  const dispatch = useAppDispatch();
+  const addTagFormRef = useRef<HTMLFormElement>(null);
 
+  const onAddAttributeSubmit = async (data: any) => {
 
-  const [attributeKeys, setAttributeKeys] = useState<string[]>([])
-  const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>("")
+    if (!selectedAttributeDataType || !selectedAttributeType) {
+      dispatch(
+        openNotificationDialog({
+          dialogTitle: 'Please select attribute data type and attribute type',
+        })
+      );
+      return;
+    }
 
-  useEffect(() => {
-    console.log(allAttributes,'keys')
-      if (!allAttributes || allAttributes.length === 0) return
-      const keys = allAttributes.map(item => item.key)
-      setAttributeKeys(keys)
+    const newAttribute: { attribute: Attribute } = {
+      attribute: {
+        key: data.key,
+        dataType: selectedAttributeDataType,
+        type: selectedAttributeType
+      }
+    }
 
-  }, [allAttributes])
+    DocumentsService.addAttribute(siteId, newAttribute).then(
+      (response) => {
+        if (response.status !== 200) {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Failed to add attribute',
+            })
+          );
+          return;
+        }
+        dispatch(fetchAllAttributes({siteId, page: 1, limit: 50}))
+        onDocumentDataChange(value);
+      })
+    reset();
+    onClose();
+  };
 
-  useEffect(() => {
-      dispatch(fetchAllAttributes({
-          siteId: siteId,
-          page: 1,
-          search: ''
-      }))
-  }, [])
-
+  const attributeTypes = ["STRING", "NUMBER", "BOOLEAN", "KEY_ONLY", "COMPOSITE_STRING"];
+  const types = ["STANDARD", "OPA"];
 
   return (
     <>
@@ -42,53 +69,37 @@ function AddAttributeForm({onAddAttributeSubmit, register, handleSubmit, addTagF
           className="w-full"
           ref={addTagFormRef}
         >
-          <div className="flex items-start mx-4 mb-4 relative w-full">
-
-            <div className="w-52 mr-2">
-              <RadioListbox values={attributeKeys} titles ={attributeKeys} selectedValue={selectedAttributeKey} setSelectedValue={setSelectedAttributeKey}/>
+          <div className="flex items-start mx-2 mb-4 relative w-full h-8">
+            <div className="mr-2 h-8">
+              <input type="text" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
+                     {...register('key', {required: true})}
+                     placeholder="Key"/>
             </div>
-            {/*<div className="w-48 mr-2">*/}
-            {/*  <input*/}
-            {/*    aria-label="Tag Key"*/}
-            {/*    type="text"*/}
-            {/*    required*/}
-            {/*    className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600*/}
-            {/*                                  text-sm*/}
-            {/*                                  placeholder-gray-500 text-gray-900 rounded-t-md*/}
-            {/*                                  focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"*/}
-            {/*    placeholder="key"*/}
-            {/*    {...register('key', {*/}
-            {/*      required: true,*/}
-            {/*    })}*/}
-            {/*  />*/}
-            {/*</div>*/}
-            {/*<div className="grow">*/}
-            {/*  <input*/}
-            {/*    type="text"*/}
-            {/*    aria-label="Tag Value"*/}
-            {/*    className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600*/}
-            {/*                                  text-sm*/}
-            {/*                                  placeholder-gray-500 text-gray-900 rounded-t-md*/}
-            {/*                                  focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"*/}
-            {/*    placeholder="value (optional)"*/}
-            {/*    {...register('value', {*/}
-            {/*      required: false,*/}
-            {/*    })}*/}
-            {/*  />*/}
-            {/*</div>*/}
-            <div className="flex w-48 justify-start ml-2">
-              <input
-                type="submit"
-                value="Add"
-                className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+
+            <div className="mr-2 h-8">
+              <RadioListbox values={attributeTypes}
+                            titles={attributeTypes}
+                            selectedValue={selectedAttributeDataType}
+                            setSelectedValue={setSelectedAttributeDataType}
+                            placeholderText="Select Data Type"
               />
             </div>
-          </div>
-          <div className="flex justify-center w-full">
-            <div className="text-sm text-gray-400">
-              You can add multiple values by separating each value
-              with a comma
+
+            <div className="mr-2 h-8">
+              <RadioListbox values={types}
+                            titles={types}
+                            selectedValue={selectedAttributeType}
+                            setSelectedValue={setSelectedAttributeType}
+                            placeholderText="Select Type"
+              />
             </div>
+
+            <ButtonPrimaryGradient
+              type="submit"
+              title="Create"
+              className="mr-2">Create</ButtonPrimaryGradient>
+
+            <ButtonGhost onClick={onClose}> Cancel </ButtonGhost>
           </div>
         </form>
       </div>

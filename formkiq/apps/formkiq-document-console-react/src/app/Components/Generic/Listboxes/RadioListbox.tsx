@@ -9,10 +9,18 @@ type RadioListboxPropsType = {
   setSelectedValue: (value: any) => void
   icon?: () => JSX.Element
   iconsColor?: string[]
+  placeholderText?: string
 };
 
-function RadioListbox({values, titles, selectedValue, setSelectedValue, icon, iconsColor}: RadioListboxPropsType) {
-
+function RadioListbox({
+                        values,
+                        titles,
+                        selectedValue,
+                        setSelectedValue,
+                        icon,
+                        iconsColor,
+                        placeholderText
+                      }: RadioListboxPropsType) {
   return (
     <div className='relative h-full'>
       <Listbox value={selectedValue} onChange={setSelectedValue}>
@@ -24,7 +32,8 @@ function RadioListbox({values, titles, selectedValue, setSelectedValue, icon, ic
                             minWidth: '12px',
                             color: iconsColor ? iconsColor[values.indexOf(selectedValue)] : '#cbd5e1'
                           }}>{icon()}</div>}
-            <span className="block truncate">{titles[values.indexOf(selectedValue)]}</span>
+            <span
+              className="block truncate">{(values.indexOf(selectedValue) === -1 && placeholderText) ? placeholderText : titles[values.indexOf(selectedValue)]}</span>
           </div>
           <div className="w-3 text-neutral-500" style={{minWidth: '12px'}}>{<ChevronDown/>}</div>
         </Listbox.Button>

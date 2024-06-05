@@ -104,14 +104,14 @@ function tagListIem(
   };
 
   return (
-    <tr key={index}>
-      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400">
+    <tr key={index} className="border-t border-neutral-300">
+      <td className="p-4">
         {tag.key}
       </td>
-      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400">
+      <td className="p-4">
         {tagValue()}
       </td>
-      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400">
+      <td className="p-4">
         {actionButtons()}
       </td>
     </tr>
@@ -151,17 +151,17 @@ export default function EditTagsAndMetadataList({
   }, [tags]);
   if (tags) {
     return tags.length > 0 ? (
-      <div className="overflow-auto max-h-64 overflow-y-scroll">
-        <table className="border-collapse table-auto w-full text-sm">
-          <thead>
+      <div className="overflow-auto max-h-64 overflow-y-auto">
+        <table className="border border-neutral-300 border-collapse table-auto w-full text-sm">
+          <thead className="sticky top-0 bg-white font-bold py-3 bg-neutral-100">
             <tr>
-              <th className="w-52 border-b font-medium p-4 pl-8 pt-0 pb-3 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+              <th className="w-52 p-4 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Key
               </th>
-              <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+              <th className="p-4 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Value
               </th>
-              <th className="w-100 border-b font-medium p-4 pr-8 pt-0 pb-3 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+              <th className="w-100 p-4 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Actions
               </th>
             </tr>

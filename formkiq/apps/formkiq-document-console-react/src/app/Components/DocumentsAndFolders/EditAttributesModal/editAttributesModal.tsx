@@ -17,7 +17,7 @@ import {useSelector} from 'react-redux';
 import {RequestStatus} from "../../../helpers/types/document";
 import MetadataList from "./MetadataList";
 import AttributesList from "./AttributesList";
-import AddAttributeForm from './AddAttributeForm';
+import AddDocumentAttributeForm from './AddDocumentAttributeForm';
 
 
 export default function EditAttributesModal({
@@ -36,19 +36,14 @@ export default function EditAttributesModal({
   onDocumentDataChange: any;
 }) {
   const [allTags, setAlltags] = useState(null);
-  const {
-    register,
-    formState: {errors},
-    handleSubmit,
-    reset,
-  } = useForm();
+
   const doneButtonRef = useRef(null);
   const dispatch = useAppDispatch();
-  const addTagFormRef = useRef<HTMLFormElement>(null);
+
   const closeDialog = () => {
-    reset();
     onClose();
   };
+
   useEffect(() => {
     updateTags();
   }, [value]);
@@ -160,13 +155,11 @@ export default function EditAttributesModal({
   }, [documentAttributesNextToken, documentAttributesLoadingStatus, documentAttributesIsLastSearchPageLoaded]);
 
   const handleScroll = (event: any) => {
-    console.log('scrolling')
     const el = event.target;
     // Track scroll when table reaches bottom
     if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
       if (el.scrollTop > 0) {
         trackScrolling();
-        console.log('scroll bottom')
       }
     }
   };
@@ -217,67 +210,6 @@ export default function EditAttributesModal({
   //   reset();
   // };
 
-  const onAddAttributeSubmit = async (data: any) => {
-    if (
-      data.key.indexOf('/') > -1 ||
-      (data.value && data.value.indexOf('/') > -1)
-    ) {
-      dispatch(
-        openNotificationDialog({
-          dialogTitle:
-            'Attributes cannot contain forward slashes.',
-        })
-      );
-      return;
-    }
-
-    const documentAttributes = {
-      "attributes": [
-        {
-          "key": data.key,
-          "stringValue": data.value,
-        }
-      ]
-    }
-
-    const addDocumentAttributes = (documentId: string, attributes: any) => {
-      DocumentsService.addDocumentAttributes(siteId, "false", documentId, attributes).then(
-        (response) => {
-          updateTags();
-          setTimeout(() => {
-            onDocumentDataChange(value);
-          }, 500);
-        }
-      )
-    }
-
-
-    DocumentsService.getAttribute(siteId, data.key).then(
-      (res) => {
-        // if attribute exists, add it to document
-        if (res.status === 200) {
-          addDocumentAttributes(getValue().documentId, documentAttributes)
-        } else {
-          // create attribute first, then add it to document
-          const attributeParameters = {
-            "attribute": {
-              "key": data.key,
-              "dataType": "STRING",
-              "type": "STANDARD"
-            }
-          }
-          DocumentsService.addAttribute(siteId, attributeParameters).then(
-            (response) => {
-              if (response.status === 200) {
-                addDocumentAttributes(getValue().documentId, documentAttributes)
-              }
-            })
-        }
-      }
-    )
-    reset();
-  };
-
   const onTagEdit = (tagKey: string, newValue: string) => {
     setAlltags(null);
     DocumentsService.updateDocumentTag(
@@ -293,6 +225,46 @@ export default function EditAttributesModal({
     });
   };
 
+  const deleteDocumentAttribute = (key: string) => {
+    if (!value?.documentId) {
+      return;
+    }
+
+    const deleteAttribute = () => {
+      DocumentsService.deleteDocumentAttribute(siteId, value?.documentId, key).then(() => {
+        dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}));
+        setTimeout(() => {
+          onDocumentDataChange(value);
+        }, 500);
+      });
+    };
+
+    dispatch(
+      openDialog({
+        callback: deleteAttribute,
+        dialogTitle: "Are you sure you want to delete attribute '" + key + "' from the document?",
+      })
+    );
+  }
+
+  function editAttribute(attributeKey: string, attributeValue: any) {
+    if (!value?.documentId) return;
+    DocumentsService.setDocumentAttributeValue(siteId, value?.documentId, attributeKey, attributeValue).then((res) => {
+      if (res.status !== 200) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Error updating attribute',
+          })
+        );
+        return;
+      }
+      dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}));
+      setTimeout(() => {
+        onDocumentDataChange(value);
+      }, 500);
+    });
+
+  }
 
   return (
     <Transition.Root show={isOpened} as={Fragment}>
@@ -329,7 +301,7 @@ export default function EditAttributesModal({
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
 
                   <div className="flex w-full items-center">
-                    <div className="font-semibold grow text-lg pr-6">
+                    <div className="font-semibold grow text-lg ml-2">
                       <span
                         className="inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                         Add Attribute
@@ -342,11 +314,17 @@ export default function EditAttributesModal({
                       <Close/>
                     </div>
                   </div>
-                  <AddAttributeForm closeDialog={closeDialog}
-                                    onAddAttributeSubmit={onAddAttributeSubmit}
-                                    register={register}
-                                    handleSubmit={handleSubmit}
-                                    addTagFormRef={addTagFormRef}/>
+                  <AddDocumentAttributeForm
+                    onDocumentDataChange={onDocumentDataChange}
+                    siteId={siteId}
+                    value={value}
+                    getValue={getValue}
+                    // closeDialog={closeDialog}
+                    //                 onAddAttributeSubmit={onAddAttributeSubmit}
+                    //                 register={register}
+                    //                 handleSubmit={handleSubmit}
+                    //                 addTagFormRef={addTagFormRef}
+                  />
                   {/*<div className="mt-2 flex justify-center items-center w-full">*/}
                   {/*  <form*/}
                   {/*    onSubmit={handleSubmit(onAddAttributeSubmit)}*/}
@@ -402,26 +380,31 @@ export default function EditAttributesModal({
 
                   <div className="flex w-full items-center mt-2">
                     <div
-                      className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
+                      className=" ml-2 font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
                       Attributes
                     </div>
                   </div>
 
                   <div className="flex w-full mt-4">
-                    <div className="w-full mt-2 mx-6 border-b">
-                      <AttributesList attributes={documentAttributes} handleScroll={handleScroll}/>
+                    <div className="w-full mt-2 mx-2">
+                      test
+                      <AttributesList attributes={documentAttributes}
+                                      handleScroll={handleScroll}
+                                      deleteDocumentAttribute={deleteDocumentAttribute}
+                                      editAttribute={editAttribute}
+                      />
                     </div>
                   </div>
 
                   <div className="flex w-full items-center mt-2">
                     <div
-                      className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
+                      className="ml-2 font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
                       Document Metadata
                     </div>
                   </div>
 
                   <div className="flex w-full mt-4">
-                    <div className="w-full mt-2 mx-6 border-b">
+                    <div className="w-full mt-2 mx-2">
                       <MetadataList
                         metadata={metadata}
                         onEdit={onMetadataEdit}
@@ -431,12 +414,12 @@ export default function EditAttributesModal({
                   {allTags && (allTags as any[]).length > 0 && <>
                     <div className="flex w-full items-center mt-2">
                       <div
-                        className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
+                        className="ml-2 font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
                         Edit Tags
                       </div>
                     </div>
                     <div className="flex w-full mt-4">
-                      <div className="w-full mt-2 mx-6 border-b">
+                      <div className="w-full mt-2 mx-2">
                         <EditTagsAndMetadataList
                           tags={allTags}
                           onEdit={onTagEdit}
