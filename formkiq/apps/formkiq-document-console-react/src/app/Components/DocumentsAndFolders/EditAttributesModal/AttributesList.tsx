@@ -1,6 +1,8 @@
 import {DocumentAttribute} from "../../../helpers/types/attributes";
-import {Pencil, Trash} from "../../Icons/icons";
+import {Close, Pencil, Trash} from "../../Icons/icons";
 import {useEffect, useState} from "react";
+import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
+import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
 
 function AttributesList({
                           attributes,
@@ -11,23 +13,63 @@ function AttributesList({
   attributes: DocumentAttribute[],
   handleScroll: (event: any) => void,
   deleteDocumentAttribute: (key: string) => void,
-  editAttribute: (key: string, value: any) => void
+  editAttribute: (key: string, newValue: any, valuesToDelete: any[]) => void
 }) {
 
   const [editAttributeKey, setEditAttributeKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<any>(null);
+  const [valuesToDelete, setValuesToDelete] = useState<any[]>([]);
 
-  const handleEditAttribute = (attribute: DocumentAttribute) => {
+  function handleEditAttribute(attribute: DocumentAttribute) {
     setEditAttributeKey(attribute.key);
     const value = attribute?.stringValue || attribute?.stringValues || attribute?.numberValue || attribute?.numberValues || attribute?.booleanValue
     setEditValue(value);
+    setValuesToDelete([])
+  }
+
+  function deleteValue(event: any, value: string | number) {
+    setValuesToDelete([...valuesToDelete, value])
+    setEditValue(editValue.filter((item: string | number) => item !== value))
+  }
+
+  function reset() {
+    setEditAttributeKey(null)
+    setEditValue(null)
+    setValuesToDelete([])
+  }
+
+  function saveEditAttribute(attribute: DocumentAttribute) {
+    const newAttributeValue: { attribute: DocumentAttribute } = {
+      attribute: {
+        key: attribute.key,
+      }
+    }
+    if (attribute?.stringValue) {
+      newAttributeValue.attribute.stringValue = editValue
+    }
+    if (attribute?.stringValues) {
+      newAttributeValue.attribute.stringValues = editValue
+    }
+    if (attribute?.numberValue) {
+      newAttributeValue.attribute.numberValue = editValue
+    }
+    if (attribute?.numberValues) {
+      newAttributeValue.attribute.numberValues = editValue
+    }
+    if (attribute?.booleanValue) {
+      newAttributeValue.attribute.booleanValue = editValue
+    }
+
+    editAttribute(attribute.key, newAttributeValue, valuesToDelete);
+    reset()
   }
 
   return (
     <div>
       {attributes.length > 0 ? (
         <div className="overflow-auto max-h-64" onScroll={handleScroll}>
-          <table className="border border-neutral-300 border-collapse table-auto w-full text-sm" id="documentAttributesScrollPane">
+          <table className="border border-neutral-300 border-collapse table-auto w-full text-sm"
+                 id="documentAttributesScrollPane">
             <thead className="sticky top-0 bg-white font-bold py-3 bg-neutral-100">
             <tr>
               <th
@@ -47,21 +89,75 @@ function AttributesList({
             {attributes.map((attribute, index) => (
               <tr key={index} className="border-t border-neutral-300">
                 <td className="p-4 text-start w-52 truncate">{attribute.key}</td>
-                {attribute?.stringValue && <td className="p-4 text-start">{attribute.stringValue}</td>}
-                {attribute?.stringValues && <td className="p-4 text-start">{attribute.stringValues.join(', ')}</td>}
-                {attribute?.numberValue && <td className="p-4 text-start">{attribute.numberValue}</td>}
-                {attribute?.numberValues && <td className="p-4 text-start">{attribute.numberValues.join(', ')}</td>}
-                {attribute?.booleanValue !== undefined &&
-                  <td className="p-4 text-start">{attribute.booleanValue ? 'true' : 'false'}</td>}
+                <td className="p-4 text-start">
+
+                  {editAttributeKey === attribute.key && (<>
+                    {attribute?.stringValue &&
+                      <input type="text" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
+                             required placeholder="Value" onChange={(e) => setEditValue(e.target.value)}
+                             value={editValue}/>}
+
+                    {attribute?.numberValue &&
+                      <input type="number" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
+                             required placeholder="Value" onChange={(e) => setEditValue(e.target.value)}
+                             value={editValue}/>}
+
+                    <div className="flex flex-row justify-start flex-wrap gap-2 items-end">
+                      {attribute?.stringValues && editValue.map((value: string, index: number) => (
+                        <div key={"stringValue" + index}
+                             className="cursor-pointer py-1.5 px-3 text-xs font-bold uppercase rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
+                          <span className="text-ellipsis overflow-hidden">{value}</span>
+                          <button title="Remove Value" type="button" className="w-4 h-4 min-w-4 text-neutral-900"
+                                  onClick={(e) => deleteValue(e, value)}>
+                            <Close/>
+                          </button>
+                        </div>))}
+
+                      {attribute?.numberValues &&
+                        editValue.map((value: number, index: number) => (
+                          <div key={"numberValue" + index}
+                               className="cursor-pointer py-1.5 px-3 text-xs font-bold uppercase rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
+                            <span className="text-ellipsis overflow-hidden">{value}</span>
+                            <button title="Remove Value" type="button" className="w-4 h-4 min-w-4 text-neutral-900"
+                                    onClick={(e) => deleteValue(e, value)}>
+                              <Close/>
+                            </button>
+                          </div>))}
+
+                      {attribute?.booleanValue && <input type="checkbox"
+                                                         className='appearance-none text-primary-600 bg-neutral-100 border-neutral-300 rounded focus:ring-primary-500 focus:ring-2 h-4 w-4 border border-neutral-300 text-sm rounded-md '
+                                                         checked={editValue}
+                                                         onChange={(e) => setEditValue(e.target.checked)}/>}
+                    </div>
+                  </>)}
+
+                  {editAttributeKey !== attribute.key && <>
+                    {attribute?.stringValue && attribute.stringValue}
+                    {attribute?.stringValues && attribute.stringValues.join(', ')}
+                    {attribute?.numberValue && attribute.numberValue}
+                    {attribute?.numberValues && attribute.numberValues.join(', ')}
+                    {attribute?.booleanValue !== undefined &&
+                      (attribute.booleanValue ? 'true' : 'false')}
+                  </>}
+                </td>
                 <td className="p-4 text-end">
-                  <button className="w-4 h-4 hover:text-primary-500 mr-2" type="button"
-                          onClick={() => handleEditAttribute(attribute)}>
-                    <Pencil/>
-                  </button>
-                  <button className="w-4 h-4 hover:text-primary-500 mr-2" type="button"
-                          onClick={() => deleteDocumentAttribute(attribute.key)}>
-                    <Trash/>
-                  </button>
+                  {editAttributeKey === attribute.key ? <> <ButtonPrimaryGradient
+                    onClick={() => {
+                      saveEditAttribute(attribute)
+                    }}>Save</ButtonPrimaryGradient>
+                    <ButtonGhost className="ml-2" onClick={reset}>
+                      Cancel
+                    </ButtonGhost>
+                  </> : <>
+                    <button className="w-4 h-4 hover:text-primary-500 mr-2" type="button"
+                            onClick={() => handleEditAttribute(attribute)}>
+                      <Pencil/>
+                    </button>
+                    <button className="w-4 h-4 hover:text-primary-500 mr-2" type="button"
+                            onClick={() => deleteDocumentAttribute(attribute.key)}>
+                      <Trash/>
+                    </button>
+                  </>}
                 </td>
               </tr>
             ))}
@@ -71,7 +167,7 @@ function AttributesList({
       ) : (
         <div className="text-center mt-4">
           <div role="status">
-            <div className="overflow-x-auto relative">No metadata found</div>
+            <div className="overflow-x-auto relative h-44">No document attributes found</div>
           </div>
         </div>
       )}

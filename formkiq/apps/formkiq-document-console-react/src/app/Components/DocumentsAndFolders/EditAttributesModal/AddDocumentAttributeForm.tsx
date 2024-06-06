@@ -46,7 +46,7 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
   const onAddAttributeSubmit = async (data: any) => {
     console.log(data, 'data')
     let documentAttributes = {}
-    if (data.stringValue) { // TODO: add other types
+    if (data.stringValue) {
       if (data.stringValue.indexOf('/') > -1) {
         dispatch(
           openNotificationDialog({
@@ -73,7 +73,7 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
       }
     }
 
-    if (selectedAttribute.dataType === "BOOLEAN") {
+    if (selectedAttribute?.dataType === "BOOLEAN") {
       documentAttributes = {
         attributes: [{
           key: selectedAttributeKey,
@@ -81,7 +81,7 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
         }]
       }
     }
-    if (selectedAttribute.dataType === 'KEY_ONLY') {
+    if (selectedAttribute?.dataType === 'KEY_ONLY') {
       documentAttributes = {
         attributes: [{
           key: selectedAttributeKey,
@@ -89,35 +89,14 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
       }
     }
 
-
-    // const addDocumentAttributes = (documentId: string, attributes: any) => {
     DocumentsService.addDocumentAttributes(siteId, "false", getValue().documentId, documentAttributes).then(
       () => {
         dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}))
         setTimeout(() => {
           onDocumentDataChange(value);
         }, 500);
-      }
-    )
-    // }
+      })
 
-    // DocumentsService.getAttribute(siteId, selectedAttributeKey).then(
-    //   (res) => {
-    //     console.log(res, 'res')
-    //     // if attribute exists, add it to document
-    //     if (res.status === 200) {
-    //       addDocumentAttributes(getValue().documentId, documentAttributes)
-    //     } else {
-    //       // create attribute first, then add it to document
-    //       DocumentsService.addAttribute(siteId, attributeParameters).then(
-    //         (response) => {
-    //           if (response.status === 200) {
-    //             addDocumentAttributes(getValue().documentId, documentAttributes)
-    //           }
-    //         })
-    //     }
-    //   }
-    // )
     reset();
   };
 
@@ -170,12 +149,12 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
           </div>
         </form>
       </div>
-      <div className="mt-2 flex justify-center items-center w-full">
+      <div className="flex w-full">
         {!isAddAttributeFormOpen && <button
           onClick={() => {
             setIsAddAttributeFormOpen(true)
           }}
-          className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer"> + Create New Attribute
+          className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer ml-2"> + Create New Attribute
         </button>}
         {isAddAttributeFormOpen && <AddAttributeForm
           siteId={siteId}

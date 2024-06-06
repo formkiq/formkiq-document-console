@@ -1,6 +1,7 @@
 import {formatBytes} from "../../../helpers/services/toolService";
 import {useState} from "react";
 import {Pencil} from "../../Icons/icons";
+import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 
 function MetadataList({metadata, onEdit}: { metadata: any, onEdit: any }) {
 
@@ -21,7 +22,7 @@ function MetadataList({metadata, onEdit}: { metadata: any, onEdit: any }) {
             <thead className="sticky top-0 bg-white font-bold py-3 bg-neutral-100">
             <tr>
               <th
-                className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                className="w-48 p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Path
               </th>
               <th
@@ -29,11 +30,11 @@ function MetadataList({metadata, onEdit}: { metadata: any, onEdit: any }) {
                 DeepLinkPath
               </th>
               <th
-                className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                className="w-36 p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Content-Type
               </th>
               <th
-                className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                className="w-24 p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Filesize
               </th>
             </tr>
@@ -41,13 +42,13 @@ function MetadataList({metadata, onEdit}: { metadata: any, onEdit: any }) {
 
             <tbody className="bg-white nodark:bg-slate-800">
             <tr className="border-t border-neutral-300">
-              <td className="p-4 text-start w-52 truncate">{metadata.path}</td>
-              <td className="p-4 text-start">{(isEditingDeeplinkPath ?
+              <td className="p-4 text-start truncate">{metadata.path}</td>
+              <td className="p-4 text-start ">{(isEditingDeeplinkPath ?
                 <div className='flex items-start gap-2'><input type="text" value={deeplinkPath}
-                                                               className="border border-neutral-300 rounded-md h-6"
+                                                               className="border border-neutral-300 rounded-md h-6 w-36"
                                                                placeholder="Deep Link Path"
                                                                onChange={e => setDeeplinkPath(e.target.value)}/>
-                  <button onClick={handleSaveDeeplinkPath}>Save</button>
+                  <ButtonPrimaryGradient onClick={handleSaveDeeplinkPath}>Save</ButtonPrimaryGradient>
                 </div> : <span className='flex items-start gap-2'>{metadata?.deepLinkPath ? metadata?.deepLinkPath :
                   <span className="text-neutral-500 w-72 truncate">No deeplink found</span>}
                   <button type="button" className="h-4 w-4 min-w-4 mt-1"
