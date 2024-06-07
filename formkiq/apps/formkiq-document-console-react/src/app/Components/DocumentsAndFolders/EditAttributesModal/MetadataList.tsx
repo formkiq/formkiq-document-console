@@ -13,6 +13,11 @@ function MetadataList({metadata, onEdit}: { metadata: any, onEdit: any }) {
     setIsEditingDeeplinkPath(false);
   }
 
+  const startEditingDeeplinkPath = () => {
+      setDeeplinkPath(metadata?.deepLinkPath || '');
+      setIsEditingDeeplinkPath(true);
+  }
+
 
   return (
     <div>
@@ -52,7 +57,7 @@ function MetadataList({metadata, onEdit}: { metadata: any, onEdit: any }) {
                 </div> : <span className='flex items-start gap-2'>{metadata?.deepLinkPath ? metadata?.deepLinkPath :
                   <span className="text-neutral-500 w-72 truncate">No deeplink found</span>}
                   <button type="button" className="h-4 w-4 min-w-4 mt-1"
-                          onClick={() => setIsEditingDeeplinkPath(true)}><Pencil/></button></span>)}</td>
+                          onClick={startEditingDeeplinkPath}><Pencil/></button></span>)}</td>
               <td className="p-4 text-start">{metadata.contentType}</td>
               <td className="p-4 text-start">{formatBytes(metadata.contentLength)}</td>
             </tr>
