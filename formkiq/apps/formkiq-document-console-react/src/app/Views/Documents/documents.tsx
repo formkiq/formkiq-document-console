@@ -77,6 +77,8 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
+import {AttributesState, fetchAllAttributes} from "../../Store/reducers/attributes";
+import {Attribute} from "../../helpers/types/attributes";
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -100,6 +102,7 @@ function Documents() {
     pendingArchive,
   } = useSelector(ConfigState);
   const { allTags } = useSelector(DataCacheState);
+  const {allAttributes} = useSelector(AttributesState);
 
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
@@ -107,6 +110,7 @@ function Documents() {
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
   const filterTag = new URLSearchParams(search).get('filterTag');
+  const filterAttribute = new URLSearchParams(search).get('filterAttribute');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
   const { hash } = useLocation();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
@@ -230,6 +234,7 @@ function Documents() {
             subfolderUri,
             queueId,
             filterTag,
+            filterAttribute,
             nextToken,
           })
         );
@@ -245,6 +250,7 @@ function Documents() {
               subfolderUri,
               queueId,
               filterTag,
+              filterAttribute,
               page: currentSearchPage + 1,
             })
           );
@@ -343,6 +349,10 @@ function Documents() {
     }
   }, [currentActionEvent, actionEvent]);
 
+  useEffect(() => {
+    dispatch(fetchAllAttributes({siteId: currentSiteId, limit: 50, page: 1}));
+  }, []);
+
   const updateTags = () => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentTags(infoDocumentId, currentSiteId).then(
@@ -419,6 +429,7 @@ function Documents() {
         subfolderUri,
         queueId,
         filterTag,
+        filterAttribute,
       })
     );
   }, [
@@ -429,6 +440,7 @@ function Documents() {
     subfolderUri,
     queueId,
     filterTag,
+    filterAttribute,
     formkiqVersion,
   ]);
 
@@ -592,6 +604,7 @@ function Documents() {
         queueId,
         subfolderUri,
         filterTag,
+        filterAttribute,
       })
     );
   };
@@ -692,6 +705,52 @@ function Documents() {
     }
   };
 
+  const onFilterAttribute = (event: any, attribute: string) => {
+    if (filterAttribute === attribute) {
+      if (subfolderUri && subfolderUri.length) {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      } else {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      }
+    } else {
+      if (subfolderUri && subfolderUri.length) {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
+            search: `?filterAttribute=${attribute}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      } else {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}`,
+            search: `?filterAttribute=${attribute}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      }
+    }
+  }
+
   const foldersPath = (uri: string) => {
     if (uri) {
       const folderLevels = uri.split('/');
@@ -751,7 +810,6 @@ function Documents() {
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
-                // className="hover:text-primary-600"
                 className="text-primary-500 hover:text-primary-600 text-sm font-bold"
               >
                 {siteDocumentsRootName.replace('Workspace: ', '')}:
@@ -828,6 +886,15 @@ function Documents() {
     let showAllTagsPopover = true;
     const minTagsToShowForFilter = 3;
     tagsToCheck = tagsToCheck.concat(TagsForFilterAndDisplay);
+
+    const keyOnlyAttributes = allAttributes.filter((attribute: Attribute) => attribute.dataType === "KEY_ONLY")
+    const keyOnlyAttributesKeys: { value: string }[] = []
+    if (keyOnlyAttributes.length > 0) {
+      keyOnlyAttributes.forEach((attribute: Attribute) => {
+        keyOnlyAttributesKeys.push({value: attribute.key})
+      })
+    }
+
     if (
       filterTag &&
       filterTag.length &&
@@ -835,6 +902,15 @@ function Documents() {
     ) {
       tagsToCheck.push(filterTag);
     }
+
+    if (
+        filterAttribute &&
+        filterAttribute.length &&
+        tagsToCheck.indexOf(filterAttribute) === -1
+    ) {
+        tagsToCheck.push(filterAttribute);
+    }
+
     if (tagsToCheck.length === 0) {
       const tagsToConsider = allTags.filter((tag: any) => {
         return (
@@ -843,6 +919,7 @@ function Documents() {
           tag.value.indexOf('untagged') !== 0
         );
       });
+      tagsToConsider.unshift(...keyOnlyAttributesKeys);
       const numberOfTagsToAdd =
         tagsToConsider.length > minTagsToShowForFilter
           ? minTagsToShowForFilter
@@ -854,7 +931,14 @@ function Documents() {
         tagsToCheck.push(tagsToConsider[i].value);
       }
     }
-    return (
+
+    const onFilter = (event: any, value: string, index: number) => {
+      if (!keyOnlyAttributesKeys || keyOnlyAttributesKeys.length === 0) onFilterTag(event, value);
+      if (index< keyOnlyAttributesKeys.length) onFilterAttribute(event, value);
+    }
+
+
+      return (
       <div className="flex items-center justify-start">
         <div className="w-1/3 pl-4">
           {useFileFilter && (
@@ -886,12 +970,12 @@ function Documents() {
                     <li
                       key={i}
                       className={
-                        (filterTag === primaryTag
+                        (filterTag === primaryTag || filterAttribute === primaryTag
                           ? 'bg-primary-500 text-white'
                           : `bg-${tagColor}-200 text-black`) +
                         ' text-xs p-1 px-2 mx-1 cursor-pointer'
                       }
-                      onClick={(event) => onFilterTag(event, primaryTag)}
+                      onClick={(event) => onFilter(event, primaryTag, i)}
                     >
                       {primaryTag}
                     </li>
@@ -903,7 +987,10 @@ function Documents() {
                   siteId={currentSiteId}
                   tagColors={tagColors}
                   onFilterTag={onFilterTag}
+                  onFilterAttribute={onFilterAttribute}
                   filterTag={filterTag}
+                  filterAttribute={filterAttribute}
+                  allAttributes={allAttributes}
                 />
               )}
             </>
@@ -1436,7 +1523,6 @@ function Documents() {
                           </dd>
                         </div>
                         <div className="w-68 flex mr-3 border-b"></div>
-                        {/*start Attributes*/}
 
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
                           Attributes
@@ -1455,224 +1541,15 @@ function Documents() {
                                 })
                               }
                             >
-                                <>
-                                  <span>add/edit attributes</span>
-                                  <div className="w-4 pt-0.5">
-                                    <ChevronRight />
-                                  </div>
-                                </>
-                            </div>
-                          )}
-                        </div>
-
-                        {/*end*/}
-                        {/*start Tags*/}
-
-                        {allTags.length > 0 && <>
-                          <div className="flex flex-col pt-3">
-                            <dt className="mb-1 flex justify-between">
-                            <span className="text-sm font-semibold text-primary-500">
-                              Tags
-                            </span>
-                              {!isSiteReadOnly && (
-                                <div
-                                  className="w-3/5 flex font-semibold text-primary-500 cursor-pointer"
-                                  onClick={(event) =>
-                                    setInfoTagEditMode(!infoTagEditMode)
-                                  }
-                                >
-                                  {infoTagEditMode ? (
-                                    <>
-                                      <div className="w-4 pt-0.5">
-                                        <ChevronLeft />
-                                      </div>
-                                      <span>cancel edit</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span>edit tags</span>
-                                      <div className="w-4 pt-0.5">
-                                        <ChevronRight />
-                                      </div>
-                                    </>
-                                  )}
-                                </div>
-                              )}
-                            </dt>
-                            <dd className="text-sm">
-                              {currentDocumentTags &&
-                                (currentDocumentTags as []).map(
-                                  (tag: any, i: number) => {
-                                    let isKeyOnlyTag = false;
-                                    if (
-                                      (tag.value !== undefined &&
-                                        tag.value.length === 0) ||
-                                      (tag.values !== undefined &&
-                                        tag.values.length === 0)
-                                    ) {
-                                      isKeyOnlyTag = true;
-                                    }
-                                    let tagColor = 'gray';
-                                    if (tagColors) {
-                                      tagColors.forEach((color: any) => {
-                                        if (color.tagKeys.indexOf(tag.key) > -1) {
-                                          tagColor = color.colorUri;
-                                          return;
-                                        }
-                                      });
-                                    }
-                                    return (
-                                      <div key={i} className="inline">
-                                        {isKeyOnlyTag && (
-                                          <div className="pt-0.5 pr-1 flex items-center">
-                                            <div
-                                              className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}
-                                            >
-                                              {tag.key}
-                                              {infoTagEditMode && (
-                                                <button
-                                                  className="pl-2 font-semibold hover:text-red-600"
-                                                  onClick={(event) =>
-                                                    onTagDelete(tag.key)
-                                                  }
-                                                >
-                                                  x
-                                                </button>
-                                              )}
-                                            </div>
-                                            <div
-                                              className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                                            ></div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  }
-                                )}
-                            </dd>
-                          </div>
-                          {infoTagEditMode && (
-                            <div className="flex mt-2">
-                              <AddTag
-                                line={{
-                                  lineType: 'document',
-                                  folder: subfolderUri,
-                                  documentId: (currentDocument as IDocument)
-                                    .documentId,
-                                  documentInstance: currentDocument as IDocument,
-                                  folderInstance: null,
-                                }}
-                                onDocumentDataChange={onDocumentDataChange}
-                                updateTags={updateTags}
-                                siteId={currentSiteId}
-                                tagColors={tagColors}
-                              />
-                            </div>
-                          )}
-                          <div className="w-68 flex mt-3 mr-3 border-b"></div></>}
-
-                        {/*end*/}
-                        <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
-                          Metadata
-                          {!isSiteReadOnly && (
-                            <div
-                              className="w-3/5 flex text-medsmall font-semibold text-primary-500 cursor-pointer"
-                              onClick={(event) =>
-                                onEditAttributesModalClick(event, {
-                                  lineType: 'document',
-                                  folder: subfolderUri,
-                                  documentId: (currentDocument as IDocument)
-                                    .documentId,
-                                  documentInstance:
-                                    currentDocument as IDocument,
-                                  folderInstance: null,
-                                })
-                              }
-                            >
                               <>
-                                <span>add/edit metadata</span>
+                                <span>add/edit attributes</span>
                                 <div className="w-4 pt-0.5">
-                                  <ChevronRight />
+                                  <ChevronRight/>
                                 </div>
                               </>
                             </div>
                           )}
                         </div>
-                        {currentDocumentTags &&
-                          (currentDocumentTags as []).map(
-                            (tag: any, i: number) => {
-                              let isKeyOnlyTag = false;
-                              if (
-                                (tag.value !== undefined &&
-                                  tag.value.length === 0) ||
-                                (tag.values !== undefined &&
-                                  tag.values.length === 0)
-                              ) {
-                                isKeyOnlyTag = true;
-                              }
-                              return (
-                                <div
-                                  key={i}
-                                  className={
-                                    (isKeyOnlyTag ? 'hidden' : 'inline') +
-                                    ' flex flex-col pt-3'
-                                  }
-                                >
-                                  <dt className="mb-1">{tag.key}</dt>
-                                  <dd className="font-semibold text-sm">
-                                    {tag.value && <span>{tag.value}</span>}
-                                    {tag.values !== undefined &&
-                                      tag.values.map(
-                                        (value: any, j: number) => {
-                                          return (
-                                            <span className="block">
-                                              {value}
-                                            </span>
-                                          );
-                                        }
-                                      )}
-                                  </dd>
-                                </div>
-                              );
-                            }
-                          )}
-                        <div className="w-68 flex mt-3 mr-3 border-b"></div>
-                        {/*{formkiqVersion.type !== 'core' && (*/}
-                        {/*  <div className="flex flex-col pt-3">*/}
-                        {/*    <dt className="mb-1 flex justify-between">*/}
-                        {/*      <span className="text-sm font-semibold text-primary-500">*/}
-                        {/*        Access Attributes*/}
-                        {/*      </span>*/}
-                        {/*    </dt>*/}
-                        {/*    <dd className="text-sm">*/}
-                        {/*      {currentDocumentAccessAttributes &&*/}
-                        {/*        (currentDocumentAccessAttributes as []).map(*/}
-                        {/*          (attribute: any, i: number) => {*/}
-                        {/*            return (*/}
-                        {/*              <div key={i} className="">*/}
-                        {/*                <div className="pt-1 pr-1 flex items-center">*/}
-                        {/*                  <div className={`h-5.5 pr-1 `}>*/}
-                        {/*                    <span className="block text-xs">*/}
-                        {/*                      {attribute.key}*/}
-                        {/*                    </span>*/}
-                        {/*                    <span className="font-semibold">*/}
-                        {/*                      {attribute.stringValue}*/}
-                        {/*                    </span>*/}
-                        {/*                    <span className="font-semibold">*/}
-                        {/*                      {attribute.numberValue}*/}
-                        {/*                    </span>*/}
-                        {/*                    <span className="font-semibold">*/}
-                        {/*                      {attribute.booleanValue}*/}
-                        {/*                    </span>*/}
-                        {/*                  </div>*/}
-                        {/*                </div>*/}
-                        {/*              </div>*/}
-                        {/*            );*/}
-                        {/*          }*/}
-                        {/*        )}*/}
-                        {/*    </dd>*/}
-                        {/*  </div>*/}
-                        {/*)}*/}
                       </dl>
                     )}
                     <div className="mt-4 w-full flex justify-center">

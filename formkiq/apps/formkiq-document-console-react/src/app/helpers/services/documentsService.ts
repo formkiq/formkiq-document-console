@@ -286,7 +286,8 @@ export class DocumentsService {
     previous = null,
     next = null,
     limit = 20,
-    allTags = [] as any[]
+    allTags = [] as any[],
+    attribute: string | null = null,
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -322,6 +323,7 @@ export class DocumentsService {
       },
       responseFields: {
         tags: customIncludeTags,
+        attributes:[attribute],
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -337,6 +339,7 @@ export class DocumentsService {
   public static async getDocumentsSharedWithMe(
     siteId = '',
     tag: string | null = null,
+    attribute: string | null = null,
     previous = null,
     next = null
   ): Promise<any> {
@@ -368,6 +371,7 @@ export class DocumentsService {
       },
       responseFields: {
         tags: customIncludeTags,
+        attributes: [attribute],
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -382,6 +386,7 @@ export class DocumentsService {
   public static async getDocumentsFavoritedByMe(
     siteId = '',
     tag: string | null = null,
+    attribute: string | null = null,
     previous = null,
     next = null
   ): Promise<any> {
@@ -413,6 +418,7 @@ export class DocumentsService {
       },
       responseFields: {
         tags: customIncludeTags,
+        attributes: [attribute],
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -427,6 +433,7 @@ export class DocumentsService {
   public static async getDeletedDocuments(
     siteId = '',
     tag: string | null = null,
+    attribute: string | null = null,
     previous = null,
     next = null
   ): Promise<any> {
@@ -452,6 +459,7 @@ export class DocumentsService {
       },
       responseFields: {
         tags: customIncludeTags,
+        attributes: [attribute],
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -466,6 +474,7 @@ export class DocumentsService {
   public static async getAllDocuments(
     siteId = '',
     tag: string | null = null,
+    attribute: string | null = null,
     previous = null,
     next = null
   ): Promise<any> {
@@ -492,6 +501,7 @@ export class DocumentsService {
       },
       responseFields: {
         tags: customIncludeTags,
+        attributes: [attribute],
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -590,7 +600,8 @@ export class DocumentsService {
     tag: string | null = null,
     searchText: string,
     page = 1,
-    allTags = [] as any[]
+    allTags = [] as any[],
+    attribute : string | null = null,
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -618,6 +629,7 @@ export class DocumentsService {
         },
         responseFields: {
           tags: customIncludeTags,
+          attributes: [attribute],
         },
       };
       return this.getFormkiqClient().searchApi.search({
@@ -632,6 +644,7 @@ export class DocumentsService {
         },
         responseFields: {
           tags: customIncludeTags,
+          attributes: [attribute],
         },
       };
       return this.getFormkiqClient().searchApi.searchFulltext({
@@ -645,6 +658,7 @@ export class DocumentsService {
   public static async searchDocumentsInFolder(
     siteId = '',
     tag: string | null = null,
+    attribute: string | null = null,
     searchText: string,
     folder: string,
     page: number
@@ -673,6 +687,7 @@ export class DocumentsService {
         page: page,
         responseFields: {
           tags: customIncludeTags,
+          attributes: [attribute],
         },
       },
     };

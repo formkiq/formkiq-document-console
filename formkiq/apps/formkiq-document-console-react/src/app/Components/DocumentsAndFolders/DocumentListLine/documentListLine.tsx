@@ -31,6 +31,7 @@ import {
 } from '../../Icons/icons';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
+import {DocumentAttribute} from "../../../helpers/types/attributes";
 
 function DocumentListLine({
   file,
@@ -87,7 +88,23 @@ function DocumentListLine({
   const [timeoutId, setTimeOutId] = useState(null);
   const dispatch = useAppDispatch();
 
-  const { user } = useAuthenticatedState();
+  const {user} = useAuthenticatedState();
+  const [keyOnlyAttributesKeys, setKeyOnlyAttributesKeys] = useState<string[]>([])
+
+  useEffect(() => {
+      DocumentsService.getDocumentAttributes(siteId,null,20,file.documentId).then((response) => {
+        const attributes = response.attributes;
+        if (!attributes || attributes.length === 0) return;
+        const keyOnlyAttributes: DocumentAttribute[] = []
+        attributes.forEach((attribute:DocumentAttribute) => {
+            if (attribute.key && !attribute.stringValue && !attribute.numberValue && !attribute.booleanValue && !attribute.stringValues && !attribute.numberValues) {
+                keyOnlyAttributes.push(attribute);
+            }
+        });
+        if (!keyOnlyAttributes || keyOnlyAttributes.length === 0) return;
+        setKeyOnlyAttributesKeys(keyOnlyAttributes.map(attribute => attribute.key));
+      })
+  }, [file])
 
   const {
     formkiqVersion,
@@ -346,6 +363,19 @@ function DocumentListLine({
               </Link>
               <div className="grow flex items-center justify-end pt-1.5 pr-4">
                 <div className="flex flex-wrap justify-end w-52">
+                  {keyOnlyAttributesKeys && keyOnlyAttributesKeys.map((attributeKey, i) => <div
+                    className="pt-0.5 pr-1 flex" key={"attribute_"+i}>
+                      <div
+                        className={`h-5.5 pl-2 rounded-l-md pr-1 bg-gray-200 whitespace-nowrap`}
+                      >
+                        {attributeKey}
+                      </div>
+                      <div
+                        className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-gray-200`}
+                      ></div>
+                    </div>
+                  )}
+
                   {file.tags &&
                     Object.getOwnPropertyNames(file.tags)
                       .sort() // This will sort the property names alphabetically

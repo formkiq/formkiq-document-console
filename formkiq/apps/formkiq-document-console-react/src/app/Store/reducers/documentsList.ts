@@ -26,6 +26,7 @@ export const fetchDocuments = createAsyncThunk(
       subfolderUri,
       queueId,
       filterTag,
+      filterAttribute,
       nextToken,
       page,
       documents,
@@ -33,6 +34,7 @@ export const fetchDocuments = createAsyncThunk(
     } = data;
     const user = (thunkAPI.getState() as any)?.authState.user;
     const tagParam = filterTag ? filterTag.split(':')[0] : null;
+    const attributeParam = filterAttribute ? filterAttribute : null;
     const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
     const dateDiff =
       new Date().getTime() - dataCache.tagsLastRefreshed.getTime();
@@ -53,6 +55,7 @@ export const fetchDocuments = createAsyncThunk(
         DocumentsService.searchDocumentsInFolder(
           siteId,
           tagParam,
+          attributeParam,
           searchWord,
           searchFolder,
           page
@@ -83,7 +86,8 @@ export const fetchDocuments = createAsyncThunk(
           tagParam,
           searchWord,
           page,
-          dataCache.allTags
+          dataCache.allTags,
+          attributeParam,
         ).then((response: any) => {
           if (response) {
             const temp: any = response.documents?.filter(
@@ -150,6 +154,7 @@ export const fetchDocuments = createAsyncThunk(
           DocumentsService.getDocumentsSharedWithMe(
             siteId,
             tagParam,
+            attributeParam,
             null,
             nextToken
           ).then((response: any) => {
@@ -177,6 +182,7 @@ export const fetchDocuments = createAsyncThunk(
           DocumentsService.getDocumentsFavoritedByMe(
             siteId,
             tagParam,
+            attributeParam,
             null,
             nextToken
           ).then((response: any) => {
@@ -204,6 +210,7 @@ export const fetchDocuments = createAsyncThunk(
           DocumentsService.getDeletedDocuments(
             siteId,
             tagParam,
+            attributeParam,
             null,
             nextToken
           ).then((response: any) => {
@@ -231,6 +238,7 @@ export const fetchDocuments = createAsyncThunk(
           DocumentsService.getAllDocuments(
             siteId,
             tagParam,
+            attributeParam,
             null,
             nextToken
           ).then((response: any) => {
@@ -263,8 +271,9 @@ export const fetchDocuments = createAsyncThunk(
             null,
             nextToken,
             20,
-            dataCache.allTags
-          ).then((response: any) => {
+            dataCache.allTags,
+            attributeParam,
+        ).then((response: any) => {
             if (response) {
               const data = {
                 siteId,
@@ -295,7 +304,8 @@ export const fetchDocuments = createAsyncThunk(
           null,
           nextToken,
           20,
-          dataCache.allTags
+          dataCache.allTags,
+          attributeParam,
         ).then((response: any) => {
           if (response) {
             const data = {
