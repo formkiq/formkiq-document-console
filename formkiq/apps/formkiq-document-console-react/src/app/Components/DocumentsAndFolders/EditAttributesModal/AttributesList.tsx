@@ -1,6 +1,6 @@
 import {DocumentAttribute} from "../../../helpers/types/attributes";
 import {Close, Pencil, Trash} from "../../Icons/icons";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
 

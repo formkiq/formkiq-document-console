@@ -7,6 +7,8 @@ import {ILine} from '../../../helpers/types/line';
 import {Close, Spinner, Tag} from '../../Icons/icons';
 import AddTag from '../AddTag/addTag';
 import {DocumentAttribute} from "../../../helpers/types/attributes";
+import TagColorPickerPopover from './tagColorPickerPopover';
+import { setTagColors } from '../../../Store/reducers/config';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
@@ -50,9 +52,56 @@ export default function DocumentTagsPopover({
     'path',
   ];
 
-  useEffect(() => {
-    // updateTags()
-  }, [line]);
+  const toggleTagColorEdit = () => {
+    setIsTagColorEditMode(!isTagColorEditMode);
+  };
+  const onTagColorChange = (tagKey: string, colorUri: string) => {
+    const replacementTagColors = [...tagColors];
+    let previousColorUri = '';
+    let previousColorIndex = -1;
+    let previousTagKeyIndex = -1;
+    let newColorIndex = -1;
+    replacementTagColors.forEach((tagColor: any, i: number) => {
+      if (tagColor.colorUri === colorUri) {
+        newColorIndex = i;
+      }
+      if (tagColor.tagKeys.indexOf(tagKey) > -1) {
+        previousColorIndex = i;
+        previousTagKeyIndex = tagColor.tagKeys.indexOf(tagKey);
+        if (tagColor.colorUri !== colorUri) {
+          previousColorUri = colorUri;
+        }
+      }
+    });
+    if (previousColorIndex > -1) {
+      if (previousColorUri.length) {
+        const previousColorTagKeys = [
+          ...replacementTagColors[previousColorIndex].tagKeys,
+        ];
+        previousColorTagKeys.splice(previousTagKeyIndex, 1);
+        const newColorTagKeys = [
+          ...replacementTagColors[newColorIndex].tagKeys,
+        ];
+        newColorTagKeys.push(tagKey);
+        replacementTagColors[previousColorIndex] = {
+          colorUri: replacementTagColors[previousColorIndex].colorUri,
+          tagKeys: previousColorTagKeys,
+        };
+        replacementTagColors[newColorIndex] = {
+          colorUri: replacementTagColors[newColorIndex].colorUri,
+          tagKeys: newColorTagKeys,
+        };
+      }
+    } else {
+      const newColorTagKeys = [...replacementTagColors[newColorIndex].tagKeys];
+      newColorTagKeys.push(tagKey);
+      replacementTagColors[newColorIndex] = {
+        colorUri: replacementTagColors[newColorIndex].colorUri,
+        tagKeys: newColorTagKeys,
+      };
+    }
+    dispatch(setTagColors(replacementTagColors));
+  };
 
   const updateTags = () => {
     if (line) {
@@ -60,6 +109,7 @@ export default function DocumentTagsPopover({
       setIsLoading(true);
       DocumentsService.getDocumentTags(line.documentId as string, siteId).then(
         (data) => {
+          console.log('got tags',data)
           setAllTags(
             data?.tags.filter((tag: any) => {
               return systemTags.indexOf(tag.key) === -1;
@@ -110,6 +160,7 @@ export default function DocumentTagsPopover({
 
   function handleDropdownClick(event: any) {
     updateTags();
+    updateAttributes();
     if (visible) {
       setIsTagColorEditMode(false);
     }
@@ -132,13 +183,6 @@ export default function DocumentTagsPopover({
     });
   }
 
-  useEffect(() => {
-    updateAttributes();
-  }, []);
-
-  useEffect(() => {
-    updateAttributes()
-  }, [value]);
 
   function onDocumentAttributeDelete(key: string) {
 
@@ -174,6 +218,18 @@ export default function DocumentTagsPopover({
         >
           <div className="mb-2 flex items-center">
             <h2 className="grow text-base font-semibold">Attributes</h2>
+            {!isSiteReadOnly && (
+              <button
+                className="bg-white border text-xs p-1 px-2 mx-1 mt-1 cursor-pointer hover:bg-gray-100"
+                onClick={toggleTagColorEdit}
+              >
+                {isTagColorEditMode ? (
+                  <>End Tag Color Edit</>
+                ) : (
+                  <>Edit Tag Colors</>
+                )}
+              </button>
+            )}
           </div>
           <div className="flex flex-wrap">
             {(isLoading || isAttributesLoading) && (
@@ -183,12 +239,27 @@ export default function DocumentTagsPopover({
             )}
 
             {keyOnlyAttributesKeys.length > 0 && keyOnlyAttributesKeys.map((key: any, i: number) => {
+              let tagColor = 'gray';
+              if (tagColors) {
+                tagColors.forEach((color: any) => {
+                  if (color.tagKeys.indexOf(key) > -1) {
+                    tagColor = color.colorUri;
+                    return;
+                  }
+                });
+              }
               return (
                 <div key={i} className="inline">
                   <div className="pt-0.5 pr-1 flex items-center">
                     <div
-                      className={`h-5.5 rounded-l-md pr-1 bg-gray-200 flex items-center`}
-                    >
+                      className={`h-5.5 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}
+                    >                          {isTagColorEditMode && (
+                      <TagColorPickerPopover
+                        onColorChange={onTagColorChange}
+                        tagKey={key}
+                        tagColors={tagColors}
+                      />
+                    )}
                       <span className="p-2">{key}</span>
                       {!isSiteReadOnly && (
                         <button
@@ -202,7 +273,7 @@ export default function DocumentTagsPopover({
                       )}
                     </div>
                     <div
-                      className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-gray-200`}
+                      className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
                     ></div>
                   </div>
                 </div>);
@@ -233,6 +304,13 @@ export default function DocumentTagsPopover({
                         <div
                           className={`h-5.5 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}
                         >
+                          {isTagColorEditMode && (
+                            <TagColorPickerPopover
+                              onColorChange={onTagColorChange}
+                              tagKey={tag.key}
+                              tagColors={tagColors}
+                            />
+                          )}
                           <span className="p-2">{tag.key}</span>
                           {!isSiteReadOnly && (
                             <button

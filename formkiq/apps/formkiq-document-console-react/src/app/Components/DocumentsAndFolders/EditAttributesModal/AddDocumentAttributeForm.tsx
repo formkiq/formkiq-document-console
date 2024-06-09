@@ -1,6 +1,5 @@
 import RadioListbox from "../../Generic/Listboxes/RadioListbox";
 import {useSelector} from "react-redux";
-import {AttributesState, fetchDocumentAttributes} from "../../../Store/reducers/attributes";
 import {useEffect, useRef, useState} from "react";
 import {Attribute} from "../../../helpers/types/attributes";
 import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
@@ -9,13 +8,10 @@ import {DocumentsService} from "../../../helpers/services/documentsService";
 import {useForm} from "react-hook-form";
 import {useAppDispatch} from "../../../Store/store";
 import AddAttributeForm from "./AddAttributeForm";
+import {DataCacheState} from "../../../Store/reducers/data";
 
 function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue}: any) {
-
-  const {
-    allAttributes,
-  } = useSelector(AttributesState)
-
+  const { allAttributes } = useSelector(DataCacheState);
   const [attributeKeys, setAttributeKeys] = useState<string[]>([])
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(null)
   const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>("")
@@ -91,7 +87,6 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
 
     DocumentsService.addDocumentAttributes(siteId, "false", getValue().documentId, documentAttributes).then(
       () => {
-        dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}))
         setTimeout(() => {
           onDocumentDataChange(value);
         }, 500);

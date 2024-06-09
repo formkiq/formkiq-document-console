@@ -288,6 +288,7 @@ export class DocumentsService {
     limit = 20,
     allTags = [] as any[],
     attribute: string | null = null,
+    allAttributes = [] as any[]
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -314,6 +315,27 @@ export class DocumentsService {
         customIncludeTags.push(allTag.value);
       }
     });
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
+    if(attribute){
+      const searchBody = {
+          query: {
+            attribute:{
+                key:attribute
+              }
+          },
+        responseFields: {
+          tags: customIncludeTags,
+          attributes: attributesKeys
+        },
+      };
+      return this.getFormkiqClient().searchApi.search({
+        searchParameters: searchBody,
+        siteId,
+        previous,
+        next,
+        limit,
+      });
+    }
     const searchBody = {
       query: {
         meta: {
@@ -323,7 +345,7 @@ export class DocumentsService {
       },
       responseFields: {
         tags: customIncludeTags,
-        attributes:[attribute],
+        attributes: attributesKeys
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -339,9 +361,10 @@ export class DocumentsService {
   public static async getDocumentsSharedWithMe(
     siteId = '',
     tag: string | null = null,
-    attribute: string | null = null,
     previous = null,
-    next = null
+    next = null,
+    attribute: string | null = null,
+    allAttributes = [] as any[]
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -362,16 +385,18 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
     const searchBody = {
       query: {
         tag: {
           key: 'sysSharedWith',
           eq: (user as any).email,
         },
+        attribute: attribute?{key:attribute}:null,
       },
       responseFields: {
         tags: customIncludeTags,
-        attributes: [attribute],
+        attributes: attributesKeys
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -386,9 +411,10 @@ export class DocumentsService {
   public static async getDocumentsFavoritedByMe(
     siteId = '',
     tag: string | null = null,
-    attribute: string | null = null,
     previous = null,
-    next = null
+    next = null,
+    attribute: string | null = null,
+    allAttributes = [] as any[]
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -409,16 +435,18 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
     const searchBody = {
       query: {
         tag: {
           key: 'sysFavoritedBy',
           eq: folderValue,
         },
+        attribute: attribute?{key:attribute}:null,
       },
       responseFields: {
         tags: customIncludeTags,
-        attributes: [attribute],
+        attributes: attributesKeys
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -433,9 +461,10 @@ export class DocumentsService {
   public static async getDeletedDocuments(
     siteId = '',
     tag: string | null = null,
-    attribute: string | null = null,
     previous = null,
-    next = null
+    next = null,
+    attribute: string | null = null,
+    allAttributes = [] as any[]
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -451,15 +480,17 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
     const searchBody = {
       query: {
         tag: {
           key: 'sysDeletedBy',
         },
+        attribute: attribute?{key:attribute}:null,
       },
       responseFields: {
         tags: customIncludeTags,
-        attributes: [attribute],
+        attributes: attributesKeys
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -474,9 +505,10 @@ export class DocumentsService {
   public static async getAllDocuments(
     siteId = '',
     tag: string | null = null,
-    attribute: string | null = null,
     previous = null,
-    next = null
+    next = null,
+    attribute: string | null = null,
+    allAttributes = [] as any[]
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -492,6 +524,26 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
+    if (attribute) {
+        const searchBody = {
+            query: {
+                attribute: {
+                    key: attribute,
+                },
+            },
+            responseFields: {
+                tags: customIncludeTags,
+                attributes: attributesKeys
+            },
+        };
+        return this.getFormkiqClient().searchApi.search({
+            searchParameters: searchBody,
+            siteId,
+            previous,
+            next,
+        });
+    }
     const searchBody = {
       query: {
         meta: {
@@ -501,7 +553,7 @@ export class DocumentsService {
       },
       responseFields: {
         tags: customIncludeTags,
-        attributes: [attribute],
+        attributes: attributesKeys
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -601,7 +653,7 @@ export class DocumentsService {
     searchText: string,
     page = 1,
     allTags = [] as any[],
-    attribute : string | null = null,
+    allAttributes = [] as any[],
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -629,7 +681,7 @@ export class DocumentsService {
         },
         responseFields: {
           tags: customIncludeTags,
-          attributes: [attribute],
+          attributes: allAttributes,
         },
       };
       return this.getFormkiqClient().searchApi.search({
@@ -644,7 +696,7 @@ export class DocumentsService {
         },
         responseFields: {
           tags: customIncludeTags,
-          attributes: [attribute],
+          attributes:allAttributes,
         },
       };
       return this.getFormkiqClient().searchApi.searchFulltext({
@@ -658,10 +710,10 @@ export class DocumentsService {
   public static async searchDocumentsInFolder(
     siteId = '',
     tag: string | null = null,
-    attribute: string | null = null,
     searchText: string,
     folder: string,
-    page: number
+    page: number,
+    allAttributes = [] as any[],
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -677,6 +729,7 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
+
     const searchBody = {
       query: {
         text: searchText + '*',
@@ -687,7 +740,7 @@ export class DocumentsService {
         page: page,
         responseFields: {
           tags: customIncludeTags,
-          attributes: [attribute],
+          attributes: allAttributes,
         },
       },
     };

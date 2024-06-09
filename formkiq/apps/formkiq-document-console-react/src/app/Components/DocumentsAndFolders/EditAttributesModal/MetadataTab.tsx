@@ -4,34 +4,22 @@ import {openDialog as openNotificationDialog} from "../../../Store/reducers/glob
 import {useAppDispatch} from "../../../Store/store";
 import {useEffect, useState} from "react";
 
-function MetadataTab({value, siteId,onDocumentDataChange}:any) {
+function MetadataTab({value, siteId, onDocumentDataChange}: any) {
 
   const dispatch = useAppDispatch();
   const [metadata, setMetadata] = useState<any>(null)
 
   const updateMetadata = () => {
-    if (value?.documentInstance) {
+    DocumentsService.getDocumentById(value?.documentId as string, siteId).then((res) => {
       const newMetadata = {
-        path: value?.documentInstance?.path as string,
-        deepLinkPath: value?.documentInstance?.deepLinkPath as string,
-        contentType: value?.documentInstance?.contentType as string,
-        filesize: value?.documentInstance?.contentLength as number,
+        path: res?.path as string,
+        deepLinkPath: res?.deepLinkPath as string,
+        contentType: res?.contentType as string,
+        filesize: res?.contentLength as number,
+
       }
       setMetadata(newMetadata)
-    }
-
-    if (!value?.documentInstance) {
-      DocumentsService.getDocumentById(value?.documentId as string, siteId).then((res) => {
-        const newMetadata = {
-          path: res?.path as string,
-          deepLinkPath: res?.deepLinkPath as string,
-          contentType: res?.contentType as string,
-          filesize: res?.contentLength as number,
-
-        }
-        setMetadata(newMetadata)
-      })
-    }
+    })
   }
 
   useEffect(() => {
@@ -51,7 +39,7 @@ function MetadataTab({value, siteId,onDocumentDataChange}:any) {
         }
         setTimeout(() => {
           onDocumentDataChange(value);
-          updateMetadata();
+          updateMetadata()
         }, 500);
       });
     }

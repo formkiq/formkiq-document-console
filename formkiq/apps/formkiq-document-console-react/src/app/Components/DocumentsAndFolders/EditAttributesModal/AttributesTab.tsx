@@ -3,7 +3,7 @@ import AttributesList from "./AttributesList";
 import {useCallback, useEffect} from "react";
 import {RequestStatus} from "../../../helpers/types/document";
 import {
-  AttributesState, fetchAllAttributes,
+  AttributesState,
   fetchDocumentAttributes,
   setDocumentAttributesLoadingStatusPending
 } from "../../../Store/reducers/attributes";
@@ -28,7 +28,6 @@ function AttributesTab({onDocumentDataChange, siteId, value, getValue}: any) {
       return;
     }
     dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}));
-    dispatch(fetchAllAttributes({siteId, page: 1, limit: 50}));
   }, [value]);
 
   // load more documentAttributes when table reaches bottom

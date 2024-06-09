@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentReviewModal/DocumentReviewModal';
@@ -43,6 +42,7 @@ import {
 } from '../../Store/reducers/config';
 import {
   DataCacheState,
+  setAllAttributes,
   setAllTags,
   setCurrentDocumentPath,
 } from '../../Store/reducers/data';
@@ -77,7 +77,6 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import {AttributesState, fetchAllAttributes} from "../../Store/reducers/attributes";
 import {Attribute} from "../../helpers/types/attributes";
 
 function Documents() {
@@ -101,9 +100,7 @@ function Documents() {
     useSoftDelete,
     pendingArchive,
   } = useSelector(ConfigState);
-  const { allTags } = useSelector(DataCacheState);
-  const {allAttributes} = useSelector(AttributesState);
-
+  const { allTags, allAttributes } = useSelector(DataCacheState);
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
   const search = useLocation().search;
@@ -272,6 +269,15 @@ function Documents() {
       };
       dispatch(setAllTags(allTagData));
     });
+    DocumentsService.getAttributes(currentSiteId).then((response: any) => {
+        const allAttributeData = {
+            allAttributes: response?.attributes,
+            attributesLastRefreshed: new Date(),
+            attributesSiteId: currentSiteId,
+        };
+        dispatch(setAllAttributes(allAttributeData));
+    });
+
     if (infoDocumentId.length) {
       DocumentsService.getDocumentById(infoDocumentId, currentSiteId).then(
         (response: any) => {
@@ -349,9 +355,26 @@ function Documents() {
     }
   }, [currentActionEvent, actionEvent]);
 
+
+  function updateAllAttributes (){
+    DocumentsService.getAttributes(currentSiteId).then((response: any) => {
+        const allAttributeData = {
+            allAttributes: response?.attributes,
+            attributesLastRefreshed: new Date(),
+            attributesSiteId: currentSiteId,
+        };
+        dispatch(setAllAttributes(allAttributeData));
+    });
+  }
+  // load all attributes initially
   useEffect(() => {
-    dispatch(fetchAllAttributes({siteId: currentSiteId, limit: 50, page: 1}));
+    updateAllAttributes()
   }, []);
+
+  // update all attributes when switching sites
+  useEffect(() => {
+    updateAllAttributes()
+  }, [currentSiteId]);
 
   const updateTags = () => {
     if (infoDocumentId.length) {
@@ -660,7 +683,7 @@ function Documents() {
     }
   };
   const onFilterTag = (event: any, tag: string) => {
-    if (filterTag === tag) {
+    if (filterTag === tag || filterAttribute===tag) {
       if (subfolderUri && subfolderUri.length) {
         navigate(
           {
@@ -706,7 +729,7 @@ function Documents() {
   };
 
   const onFilterAttribute = (event: any, attribute: string) => {
-    if (filterAttribute === attribute) {
+    if (filterAttribute === attribute || filterTag===attribute) {
       if (subfolderUri && subfolderUri.length) {
         navigate(
           {

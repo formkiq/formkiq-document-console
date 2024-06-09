@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { IDocumentTag } from '../../../helpers/types/documentTag';
-import { Spinner } from '../../Icons/icons';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import {Pencil, Spinner, Trash} from '../../Icons/icons';
+import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
 
 type TagProps = {
   isOpened: boolean;
@@ -47,41 +49,42 @@ function tagListIem(
   const actionButtons = () => {
     if (editingTags[index]?.isOpened) {
       return (
-        <div className="flex gap-4">
-          <button
+        <div className="flex gap-4 h-6 items-center justify-end">
+          <ButtonPrimaryGradient
             onClick={onSave}
-            className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold h-8 py-1 px-8 rounded-md flex cursor-pointer focus:outline-none"
           >
             Save
-          </button>
-          <button
+          </ButtonPrimaryGradient>
+          <ButtonGhost
             onClick={closeEdit}
-            className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold h-8 py-1 px-5 rounded-md flex cursor-pointer focus:outline-none"
           >
             Cancel
-          </button>
+          </ButtonGhost>
           <button
             onClick={onRemove}
-            className="bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold h-8 py-1 px-5 rounded-md flex cursor-pointer focus:outline-none"
+            title="Remove"
+            className="h-4"
           >
-            Remove
+            <Trash/>
           </button>
         </div>
       );
     }
     return (
-      <div className="flex gap-4">
+      <div className="flex gap-4 items-center justify-end">
         <button
-          className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold h-8 py-1 px-5 rounded-md flex cursor-pointer focus:outline-none"
+          className="h-4"
+          title="Edit"
           onClick={toggleEdit}
         >
-          Edit
+          <Pencil/>
         </button>
         <button
           onClick={onRemove}
-          className="bg-gradient-to-l from-red-500 via-rose-500 to-red-600 hover:from-red-600 hover:via-rose-600 hover:to-red-700 text-white text-sm font-semibold h-8 py-1 px-5 rounded-md flex cursor-pointer focus:outline-none"
+          title="Remove"
+          className="h-4"
         >
-          Remove
+          <Trash/>
         </button>
       </div>
     );
@@ -161,7 +164,7 @@ export default function EditTagsAndMetadataList({
               <th className="p-4 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                 Value
               </th>
-              <th className="w-100 p-4 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+              <th className="w-100 p-4 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-end">
                 Actions
               </th>
             </tr>

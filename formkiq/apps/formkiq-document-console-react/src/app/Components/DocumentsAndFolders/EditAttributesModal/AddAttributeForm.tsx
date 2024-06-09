@@ -1,5 +1,4 @@
 import RadioListbox from "../../Generic/Listboxes/RadioListbox";
-import {fetchAllAttributes} from "../../../Store/reducers/attributes";
 import {useRef, useState} from "react";
 import {Attribute, AttributeDataType, AttributeType} from "../../../helpers/types/attributes";
 import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
@@ -51,7 +50,6 @@ function AddAttributeForm({onDocumentDataChange, siteId, value, onClose}: any) {
           );
           return;
         }
-        dispatch(fetchAllAttributes({siteId, page: 1, limit: 50}))
         onDocumentDataChange(value);
       })
     reset();

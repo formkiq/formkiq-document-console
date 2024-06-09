@@ -5,8 +5,8 @@ import {useAppDispatch} from '../../../Store/store';
 import {TagsForFilterAndDisplay} from '../../../helpers/constants/primaryTags';
 import {DocumentsService} from '../../../helpers/services/documentsService';
 import {Attribute} from "../../../helpers/types/attributes";
-import {AttributesState, fetchAllAttributes} from "../../../Store/reducers/attributes";
 import {useSelector} from "react-redux";
+import {DataCacheState, setAllAttributes} from "../../../Store/reducers/data";
 
 export default function AddTag({
                                  line,
@@ -29,12 +29,20 @@ export default function AddTag({
   const [typeaheadVisible, setTypeaheadVisible] = useState(false);
   const [typeaheadTagKeys, setTypeaheadTagKeys] = useState([]);
 
-  const {allAttributes} = useSelector(AttributesState);
+  const { allTags, allAttributes } = useSelector(DataCacheState);
 
   const updateAllAttributes = () => {
-    dispatch(fetchAllAttributes({siteId, page: 1, limit: 50}))
-  };
-
+    DocumentsService.getAttributes(siteId).then((response) => {
+      if(response.status === 200){
+        const allAttributeData = {
+          allAttributes: response?.attributes,
+          attributesLastRefreshed: new Date(),
+          attributesSiteId: siteId,
+        };
+        dispatch(setAllAttributes(allAttributeData))
+      }
+    })
+  }
   const onAddAttributeSubmit = async (data: any) => {
     if (data.key.indexOf('/') > -1) {
       dispatch(

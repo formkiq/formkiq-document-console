@@ -109,13 +109,22 @@ export default function AllTagsPopover({
                 <>
                   {allAttributesKeys &&
                     (allAttributesKeys as any).map((attribute: any, i: number) => {
+                      let tagColor = 'gray';
+                      if (tagColors) {
+                        tagColors.forEach((color: any) => {
+                          if (color.tagKeys.indexOf(attribute.value) > -1) {
+                            tagColor = color.colorUri;
+                            return;
+                          }
+                        });
+                      }
                       return (
                         <li
                           key={i}
                           className={
                             (filterAttribute === attribute.value
                               ? 'bg-primary-500 text-white'
-                              : 'bg-gray-200 text-black') +
+                              : `bg-${tagColor}-200 text-black`) +
                             ' text-xs p-1 px-2 mx-1 mb-0.5 cursor-pointer'
                           }
                           onClick={(event) => {
