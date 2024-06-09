@@ -158,10 +158,6 @@ function Documents() {
     IDocumentTag[] | null,
     any
   ] = useState([]);
-  const [currentDocumentAccessAttributes, setCurrentDocumentAccessAttributes]: [
-    IDocumentTag[] | null,
-    any
-  ] = useState([]);
   const [currentDocumentVersions, setCurrentDocumentVersions] = useState(null);
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
@@ -407,14 +403,6 @@ function Documents() {
           }
         });
       }
-      DocumentsService.getDocumentAccessAttributes(
-        currentSiteId,
-        infoDocumentId
-      ).then((response: any) => {
-        if (response) {
-          setCurrentDocumentAccessAttributes(response.accessAttributes);
-        }
-      });
     }
   };
 
