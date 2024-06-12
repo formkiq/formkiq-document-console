@@ -112,7 +112,9 @@ import {
   putDocumentTagApiItem,
   putDocumentVersionApiItem,
   putWorkflowsApiItem,
-  searchDocumentQueryApiItem,
+  searchDocumentQueryApiItem, 
+  getConfigurationOpaPolicyApiItem, 
+  getConfigurationOpaPolicyItemsApiItem,
   getAttributesApiItem,
   postAttributeApiItem,
   getAttributeApiItem,
@@ -542,6 +544,14 @@ export function ApiExplorer() {
                 <ApiItem apiItem={postConfigurationApiItem} sites={sites} />
                 <ApiItem
                   apiItem={getConfigurationOpaPoliciesApiItem}
+                  sites={sites}
+                />
+                <ApiItem
+                  apiItem={getConfigurationOpaPolicyApiItem}
+                  sites={sites}
+                />
+                <ApiItem
+                  apiItem={getConfigurationOpaPolicyItemsApiItem}
                   sites={sites}
                 />
                 <ApiItem
