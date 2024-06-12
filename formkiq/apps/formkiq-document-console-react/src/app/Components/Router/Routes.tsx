@@ -50,6 +50,9 @@ const Rule = React.lazy(() => import('../../Views/Ruleset/rule'));
 const AccessControl = React.lazy(
   () => import('../../Views/Account/accessControl')
 );
+const ManagePolicy = React.lazy(
+    () => import('../../Views/Account/managePolicy')
+);
 
 const ObjectExamineTool = React.lazy(
   () => import('../../Views/Account/objectExamineTool')
@@ -183,6 +186,7 @@ const RoutesMapper = () => {
       <Route path="/integrations/webhooks" element={<Webhooks />}></Route>
       <Route path="/account/settings" element={<AccountSettings />}></Route>
       <Route path="/account/accessControl" element={<AccessControl />}></Route>
+      <Route path="/account/accessControl/:siteId" element={<ManagePolicy />}></Route>
       <Route
         path="/object-examine-tool"
         element={<ObjectExamineTool />}
