@@ -112,8 +112,8 @@ import {
   putDocumentTagApiItem,
   putDocumentVersionApiItem,
   putWorkflowsApiItem,
-  searchDocumentQueryApiItem, 
-  getConfigurationOpaPolicyApiItem, 
+  searchDocumentQueryApiItem,
+  getConfigurationOpaPolicyApiItem,
   getConfigurationOpaPolicyItemsApiItem,
   getAttributesApiItem,
   postAttributeApiItem,
@@ -125,7 +125,7 @@ import {
   getDocumentAttributeApiItem,
   deleteDocumentAttributeApiItem,
   deleteDocumentAttributeValueApiItem,
-  putDocumentAttributeApiItem,
+  putDocumentAttributeApiItem, getGroupsApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -619,6 +619,14 @@ export function ApiExplorer() {
                       <ApiItem apiItem={deleteAttributeApiItem} sites={sites} />
                   </div>
               </div>
+          </ApiSegment>
+          <ApiSegment title="User Management">
+            <div className="ml-2 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={getGroupsApiItem} sites={sites} />
+              </div>
+            </div>
           </ApiSegment>
         </div>
       </div>

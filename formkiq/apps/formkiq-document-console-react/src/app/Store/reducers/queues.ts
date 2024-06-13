@@ -86,7 +86,7 @@ export const fetchGroups = createAsyncThunk(
   'groups/fetchGroups',
   async (data: any, thunkAPI) => {
     const { siteId, nextToken, limit, page } = data;
-    await DocumentsService.getGroups(siteId, nextToken, limit).then(
+    await DocumentsService.getGroups(siteId, null, nextToken, limit).then(
       (response) => {
         if (response) {
           const data = {
@@ -149,7 +149,13 @@ export const queuesSlice = createSlice({
           state.isLastGroupsSearchPageLoaded = isLastSearchPageLoaded;
           state.groupsLoadingStatus = RequestStatus.fulfilled;
       }
+    },
 
+    setGroupsLoadingStatusPending: (state) => {
+      return {
+        ...state,
+        groupsLoadingStatus: RequestStatus.pending,
+      };
     }
   },
 });
@@ -158,6 +164,7 @@ export const {
   setQueues,
   setQueuesLoadingStatusPending,
   setGroups,
+  setGroupsLoadingStatusPending,
 } = queuesSlice.actions;
 
 export const QueuesState = (state: RootState) => state.queuesState;

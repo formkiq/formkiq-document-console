@@ -40,7 +40,6 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
   const addTagFormRef = useRef<HTMLFormElement>(null);
 
   const onAddAttributeSubmit = async (data: any) => {
-    console.log(data, 'data')
     let documentAttributes = {}
     if (data.stringValue) {
       if (data.stringValue.indexOf('/') > -1) {

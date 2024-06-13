@@ -1,8 +1,13 @@
 import {Dialog, Transition} from '@headlessui/react';
 import {Fragment, useEffect, useRef, useState} from 'react';
-import {Close} from '../Icons/icons';
+import {CheckedRadio, Close, UncheckedRadio} from '../Icons/icons';
 import {useAppDispatch} from "../../Store/store";
 import RadioListbox from "../Generic/Listboxes/RadioListbox";
+import GroupsSelect from "./GroupsSelect";
+import {useSelector} from "react-redux";
+import {DataCacheState, setAllAttributes} from "../../Store/reducers/data";
+import {Attribute} from "../../helpers/types/attributes";
+import {DocumentsService} from "../../helpers/services/documentsService";
 
 export default function EditAttributesModal({
                                               isOpened,
@@ -13,16 +18,91 @@ export default function EditAttributesModal({
   onClose: any;
   siteId: string;
 }) {
+  const numberAttributeCriteria = [
+    {key: 'eq', title: 'Equal'},
+    {key: 'neq', title: 'Not Equal'},
+    {key: 'gt', title: 'Greater Than'},
+    {key: 'gte', title: 'Greater Than or Equal'},
+    {key: 'lt', title: 'Less Than'},
+    {key: 'lte', title: 'Less Than or Equal'},
+  ]
+
+  const stringAttributeCriteria = [
+    {key: 'eq', title: 'Equal'},
+    {key: 'neq', title: 'Not Equal'},
+  ]
   const [allTags, setAlltags] = useState(null);
   const [selectedTab, setSelectedTab] = useState<'attributes' | 'metadata' | 'tags'>('attributes');
   const policyItemsTypes = ["ALLOW"]
-  const [selectedPolicyType, setSelectedPolicyType] = useState('ALLOW');
+  const [selectedPolicyType, setSelectedPolicyType] = useState<string>('ALLOW');
+  const [selectedAllRoles, setSelectedAllRoles] = useState<string[]>([]);
+  const [selectedAnyRoles, setSelectedAnyRoles] = useState<string[]>([]);
+  const [selectedTypeOfRoles, setSelectedTypeOfRoles] = useState<string>("allRoles");
+  const {allAttributes} = useSelector(DataCacheState);
+  const [attributeKeys, setAttributeKeys] = useState<string[]>([])
+  const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(null)
+  const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>("")
+  const [isAddAttributeFormOpen, setIsAddAttributeFormOpen] = useState<boolean>(false)
+  const [newAttribute, setNewAttribute] = useState<any>(null)
+  const [attributeCriteria, setAttributeCriteria] = useState<{ key: string, title: string }[]>(stringAttributeCriteria)
+  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string>("eq")
+  const [newAttributeValue, setNewAttributeValue] = useState<string | number>("")
+
   const doneButtonRef = useRef(null);
   const closeDialog = () => {
     onClose();
   };
   const dispatch = useAppDispatch();
 
+  function onSelectedTypeOfRolesChange(event: any) {
+    setSelectedTypeOfRoles(event.target.value);
+  }
+
+  const updateAllAttributes = () => {
+    DocumentsService.getAttributes(siteId).then((response) => {
+      if (response.status === 200) {
+        const allAttributeData = {
+          allAttributes: response?.attributes,
+          attributesLastRefreshed: new Date(),
+          attributesSiteId: siteId,
+        };
+        dispatch(setAllAttributes(allAttributeData))
+      }
+    })
+  }
+
+  useEffect(() => {
+    updateAllAttributes()
+  }, [])
+
+  useEffect(() => {
+    if (!allAttributes || allAttributes.length === 0) return;
+    const opaAttributes = allAttributes.filter((attribute) => attribute.type === "OPA")
+    if (!opaAttributes || opaAttributes.length === 0) return;
+    const keys = opaAttributes.map(item => item.key)
+    setAttributeKeys(keys)
+  }, [allAttributes])
+
+  useEffect(() => {
+    if (!selectedAttributeKey) return
+    const attribute = allAttributes.find(item => item.key === selectedAttributeKey)
+    if (!attribute) return
+    setSelectedAttribute(attribute)
+
+  }, [selectedAttributeKey])
+
+  useEffect(() => {
+    if (!selectedAttribute) return
+    if (selectedAttribute.dataType === "NUMBER") {
+      setAttributeCriteria(numberAttributeCriteria);
+      setSelectedAttributeCriteria("eq")
+      setNewAttributeValue(0)
+    } else if (selectedAttribute.dataType === "STRING") {
+      setAttributeCriteria(stringAttributeCriteria)
+      setSelectedAttributeCriteria("eq")
+      setNewAttributeValue("")
+    }
+  }, [selectedAttribute])
 
   return (
     <Transition.Root show={isOpened} as={Fragment}>
@@ -56,9 +136,9 @@ export default function EditAttributesModal({
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-1/2">
-                <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
+                <div className="bg-white p-6 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="w-full flex justify-between items-center">
-                    <Dialog.Title className="text-2xl font-bold mb-4 mx-2">
+                    <Dialog.Title className="text-2xl font-bold mb-4">
                       Create New OPA Access Policy Item
                     </Dialog.Title>
                     <div
@@ -68,105 +148,79 @@ export default function EditAttributesModal({
                       <Close/>
                     </div>
                   </div>
-                  <RadioListbox values={policyItemsTypes} titles={policyItemsTypes} selectedValue={selectedPolicyType}
-                                setSelectedValue={setSelectedPolicyType}/>
+                  <div className="h-8 flex gap-2 items-center w-full mt-2">
+                    <h6 className="text-md font-bold">Policy Type</h6>
+                    <RadioListbox values={policyItemsTypes} titles={policyItemsTypes} selectedValue={selectedPolicyType}
+                                  setSelectedValue={setSelectedPolicyType}/>
+                  </div>
+                  <div className="flex gap-2 items-center justify-even w-full mt-2">
+                    <div className="flex gap-2 flex-col w-full mt-2">
+                      <div className="relative">
+                        <input type="radio" name="roles" value="allRoles" checked={selectedTypeOfRoles === "allRoles"}
+                               onChange={onSelectedTypeOfRolesChange}
+                               className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"/>
+                        <label className="flex items-center gap-2 w-full">
+                          <div className="w-4">{selectedTypeOfRoles === "allRoles" ? <CheckedRadio/> :
+                            <UncheckedRadio/>}</div>
+                          <span className="block truncate font-bold text-sm">User must match all roles:</span>
+                        </label>
+                      </div>
+                      <div className="h-8 w-full">
+                        <GroupsSelect selectedGroups={selectedAllRoles} setSelectedGroups={setSelectedAllRoles}
+                                      siteId={siteId}/></div>
+                    </div>
 
+                    <h6 className="text-sm font-bold mx-8">OR</h6>
 
-                  {/*<div className="mt-4">*/}
-                  {/*  <AddAttributeForm*/}
-                  {/*    onDocumentDataChange={()=>{}}*/}
-                  {/*    siteId={siteId}*/}
-                  {/*    value={value}*/}
-                  {/*    getValue={getValue}*/}
-                  {/*  />*/}
-
-                  {/*  <div className="w-full mt-4 mx-2">*/}
-                  {/*    <AttributesList attributes={documentAttributes}*/}
-                  {/*                    handleScroll={handleScroll}*/}
-                  {/*                    deleteDocumentAttribute={deleteDocumentAttribute}*/}
-                  {/*                    editAttribute={editAttribute}*/}
-                  {/*    />*/}
-                  {/*  </div>*/}
-                  {/*</div>*/}
-
-
-                  {/*<div className="flex flex-row justify-start gap-2 text-sm font-bold">*/}
-                  {/*  <button*/}
-                  {/*    type="button"*/}
-                  {/*    className="h-8 px-4"*/}
-                  {/*    style={{*/}
-                  {/*      borderBottom:*/}
-                  {/*        selectedTab === 'attributes'*/}
-                  {/*          ? '1px solid #171C26'*/}
-                  {/*          : '1px solid transparent',*/}
-                  {/*      color:*/}
-                  {/*        selectedTab === 'attributes' ? '#171C26' : '#68758D',*/}
-                  {/*    }}*/}
-                  {/*    onClick={() => setSelectedTab('attributes')}*/}
-                  {/*  >*/}
-                  {/*    ATTRIBUTES*/}
-                  {/*  </button>*/}
-                  {/*  <button*/}
-                  {/*    type="button"*/}
-                  {/*    className="h-8 px-4"*/}
-                  {/*    style={{*/}
-                  {/*      borderBottom:*/}
-                  {/*        selectedTab === 'metadata'*/}
-                  {/*          ? '1px solid #171C26'*/}
-                  {/*          : '1px solid transparent',*/}
-                  {/*      color:*/}
-                  {/*        selectedTab === 'metadata' ? '#171C26' : '#68758D',*/}
-                  {/*    }}*/}
-                  {/*    onClick={() => setSelectedTab('metadata')}*/}
-                  {/*  >*/}
-                  {/*    METADATA*/}
-                  {/*  </button>*/}
-                  {/*  {allTags && (allTags as any[]).length > 0 &&*/}
-                  {/*    <button*/}
-                  {/*      type="button"*/}
-                  {/*      className="h-8 px-4"*/}
-                  {/*      style={{*/}
-                  {/*        borderBottom:*/}
-                  {/*          selectedTab === 'tags'*/}
-                  {/*            ? '1px solid #171C26'*/}
-                  {/*            : '1px solid transparent',*/}
-                  {/*        color: selectedTab === 'tags' ? '#171C26' : '#68758D',*/}
-                  {/*      }}*/}
-                  {/*      onClick={() => setSelectedTab('tags')}*/}
-                  {/*    >*/}
-                  {/*      TAGS*/}
-                  {/*    </button>}*/}
-                  {/*</div>*/}
-
-                  {/*{selectedTab === 'attributes' && (*/}
-                  {/*  <AttributesTab*/}
-                  {/*    onDocumentDataChange={onDocumentDataChange}*/}
-                  {/*    siteId={siteId}*/}
-                  {/*    value={value}*/}
-                  {/*    getValue={getValue}*/}
-                  {/*  />*/}
-                  {/*)}*/}
-
-                  {/*{selectedTab === 'metadata' && (*/}
-                  {/*  <MetadataTab*/}
-                  {/*    siteId={siteId}*/}
-                  {/*    value={value}*/}
-                  {/*    onDocumentDataChange={onDocumentDataChange}*/}
-                  {/*  />*/}
-                  {/*)}*/}
-
-                  {/*{allTags && (allTags as any[]).length > 0 && selectedTab === 'tags' && <TagsTab*/}
-                  {/*  onDocumentDataChange={onDocumentDataChange}*/}
-                  {/*  siteId={siteId}*/}
-                  {/*  value={value}*/}
-                  {/*  getValue={getValue}*/}
-                  {/*  allTags={allTags}*/}
-                  {/*  setSelectedTab={setSelectedTab}*/}
-                  {/*  onTagEdit={onTagEdit}*/}
-                  {/*  setAlltags={setAlltags}*/}
-                  {/*  updateTags={updateTags}*/}
-                  {/*/>}*/}
-
+                    <div className="flex gap-2 flex-col w-full mt-2">
+                      <div className="relative">
+                        <input type="radio" name="roles" value="anyRoles" checked={selectedTypeOfRoles === "anyRoles"}
+                               onChange={onSelectedTypeOfRolesChange}
+                               className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"/>
+                        <label className="flex items-center gap-2 w-full">
+                          <div className="w-4">{selectedTypeOfRoles === "anyRoles" ? <CheckedRadio/> :
+                            <UncheckedRadio/>}</div>
+                          <span className="block truncate font-bold text-sm">User must match any role:</span>
+                        </label>
+                      </div>
+                      <div className="h-8 w-full">
+                        <GroupsSelect selectedGroups={selectedAnyRoles} setSelectedGroups={setSelectedAnyRoles}
+                                      siteId={siteId}/></div>
+                    </div>
+                  </div>
+                  {!isAddAttributeFormOpen && <button
+                    onClick={() => {
+                      setIsAddAttributeFormOpen(true)
+                    }}
+                    className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer ml-2 mt-2"> + Add
+                    Attribute
+                  </button>}
+                  {isAddAttributeFormOpen && <>
+                    <h6 className="text-md font-bold mt-4">Attributes</h6>
+                    <div className="w-full flex gap-2 mt-2">
+                      <div className="h-8">
+                        <RadioListbox values={attributeKeys}
+                                      titles={attributeKeys}
+                                      selectedValue={selectedAttributeKey}
+                                      setSelectedValue={setSelectedAttributeKey}
+                                      placeholderText="Select Attribute"
+                        /></div>
+                      <div className="h-8">
+                        <RadioListbox values={attributeCriteria.map(item => item.key)}
+                                      titles={attributeCriteria.map(item => item.title)}
+                                      selectedValue={selectedAttributeCriteria}
+                                      setSelectedValue={setSelectedAttributeCriteria}
+                        /></div>
+                      <input type={selectedAttribute && selectedAttribute.dataType === "NUMBER" ? "number" : "text"}
+                             className="h-8 px-4 border border-neutral-300 text-sm rounded-md" placeholder="Value"
+                             value={newAttributeValue}
+                             onChange={(e) => {
+                               setNewAttributeValue(e.target.value)
+                             }}
+                      />
+                    </div>
+                  </>}
+                  <div className="h-52"></div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

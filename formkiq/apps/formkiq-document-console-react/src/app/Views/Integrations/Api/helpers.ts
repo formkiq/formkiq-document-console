@@ -1694,3 +1694,15 @@ export const deleteDocumentAttributeValueApiItem = {
     requiresAttributeValue: true,
     license: 'Core',
 };
+
+export const getGroupsApiItem = {
+    method: 'GET',
+    path: '/groups',
+    description: 'Returns the list of user groups configured in the application',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
+    license: 'Core',
+};
