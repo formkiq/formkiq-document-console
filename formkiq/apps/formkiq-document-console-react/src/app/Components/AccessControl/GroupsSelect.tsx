@@ -97,12 +97,7 @@ const GroupsSelect = ({
             <Listbox.Option
               key={group.name}
               value={group.name}
-              className={({active}) =>
-                `h-12 hover:bg-neutral-200 px-6 flex items-center text-xs " ${
-                  active ? 'bg-primary-100 text-primary-900' : 'text-neutral-900'
-                }`
-              }
-              // className="h-12 hover:bg-neutral-200 px-6 flex items-center text-xs"
+              className="h-12 hover:bg-neutral-200 px-6 flex items-center text-xs"
             >
               {({active, selected}) => (
                 <div className="relative w-full h-full flex items-center">

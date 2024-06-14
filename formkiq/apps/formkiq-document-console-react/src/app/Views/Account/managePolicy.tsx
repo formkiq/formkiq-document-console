@@ -1,35 +1,25 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Helmet} from 'react-helmet-async';
-import {Close, Pencil, Plus, Save, Trash} from '../../Components/Icons/icons';
+import {Pencil, Trash} from '../../Components/Icons/icons';
 import RegoEditor from '../../Components/TextEditors/RegoEditor';
-import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../Store/store';
 import {DocumentsService} from '../../helpers/services/documentsService';
-import RadioListbox from "../../Components/Generic/Listboxes/RadioListbox";
 import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
 import {useParams} from "react-router-dom";
 import CreatePolicyModal from '../../Components/AccessControl/CreatePolicyModal';
 
 export function AccessControl() {
   const {siteId} = useParams()
-  const [policy, setPolicy] = useState<any>(null);
-  const [allPolicies, setAllPolicies] = useState<any[]>([]);
+  const [allPolicyItems, setAllPolicyItems] = useState<any[]>([]);
   const [isCreatePolicyModalOpen, setIsCreatePolicyModalOpen] = useState<boolean>(false);
   useEffect(() => {
     if (!siteId) return;
     DocumentsService.getOpenPolicyAgentPolicyItems(siteId).then((res) => {
       if (res.status === 200 && res.policyItems.length > 0) {
-        setAllPolicies(res.policyItems);
+        setAllPolicyItems(res.policyItems);
       }
     });
   }, []);
 
-  useEffect(() => {
-    if (!allPolicies) return;
-    console.log(typeof allPolicies, 'allPolicies')
-  }, [allPolicies])
 
   function onCreatePolicyModalClose() {
     setIsCreatePolicyModalOpen(false);
@@ -45,10 +35,10 @@ export function AccessControl() {
           Site ID: {siteId}
         </h6>
         <ButtonPrimaryGradient className="h-10" onClick={() => setIsCreatePolicyModalOpen(true)}>+ Add
-          New</ButtonPrimaryGradient>
+          New Policy Item</ButtonPrimaryGradient>
       </div>
 
-      {allPolicies && allPolicies.map((policy: any, index: number) => (
+      {allPolicyItems && allPolicyItems.map((policyItem: any, index: number) => (
         <div key={"policyItem_" + index}>
           <div className="flex justify-between items-center px-2 my-2 h-8 gap-2">
             <h6 className="font-bold text-neutral-900">Policy: {index + 1}</h6>
@@ -62,13 +52,15 @@ export function AccessControl() {
             </div>
           </div>
           <RegoEditor
-            content={policy.policy}
+            content={policyItem.policy}
             readOnly="nocursor"
             onChange={() => {
             }}/>
         </div>
       ))}
-      <CreatePolicyModal isOpened={isCreatePolicyModalOpen} onClose={onCreatePolicyModalClose}
+      <CreatePolicyModal isOpened={isCreatePolicyModalOpen}
+                         onClose={onCreatePolicyModalClose}
+                         policyItems={allPolicyItems}
                          siteId={siteId ? siteId : 'default'}/>
     </>
   );
