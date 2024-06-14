@@ -14,16 +14,18 @@ import ButtonTertiary from "../Generic/Buttons/ButtonTertiary";
 import {openDialog as openNotificationDialog} from "../../Store/reducers/globalNotificationControls";
 import AddAttributeForm from "../DocumentsAndFolders/EditAttributesModal/AddAttributeForm";
 
-export default function CreatePolicyModal({
-                                              isOpened,
-                                              onClose,
-                                              siteId,
-                                              policyItems
-                                            }: {
+export default function EditPolicyModal({
+                                          isOpened,
+                                          onClose,
+                                          siteId,
+                                          policyItems,
+                                          index
+                                        }: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
   policyItems: any[];
+  index: number;
 }) {
   type OpaAttributeType = {
     key: string
@@ -64,6 +66,7 @@ export default function CreatePolicyModal({
     {key: 'eq', title: 'Equal'},
     {key: 'neq', title: 'Not Equal'},
   ]
+
 
   const policyItemsTypes = ["ALLOW"]
   const [selectedPolicyType, setSelectedPolicyType] = useState<string>('ALLOW');
@@ -150,12 +153,6 @@ export default function CreatePolicyModal({
     setMatchUsername(false)
   }
 
-  function cleanModalValues() {
-      setSelectedPolicyType("ALLOW")
-      setSelectedRoles([])
-      setSelectedTypeOfRoles("allRoles")
-  }
-
   // function onAttributeFormClose() {
   //   setIsAddAttributeFormOpen(false)
   //   cleanAttributeForm()
@@ -221,13 +218,12 @@ export default function CreatePolicyModal({
   function onCancelCreate() {
     cleanAttributeForm();
     setIsAddAttributeFormOpen(false)
-    cleanModalValues()
     onClose()
   }
 
-  function onCreatePolicy() {
+  function onSavePolicy() {
     // get all policy items
-    const newPolicyItems: any = [...policyItems]
+    let newPolicyItems: any = [...policyItems]
     newPolicyItems.forEach((item: any, i: number) => {
       newPolicyItems[i] = {
         ...item,
@@ -240,12 +236,13 @@ export default function CreatePolicyModal({
       [selectedTypeOfRoles]: selectedRoles,
       attributes: attributes
     }
-    newPolicyItems.push(newPolicyItem)
+    console.log("newPolicyItem", newPolicyItem)
+    newPolicyItems.splice(index, 1, newPolicyItem)
+    console.log("newPolicyItems", newPolicyItems)
+
     // set updated policy items
     DocumentsService.setOpenPolicyAgentPolicyItems(siteId, {policyItems: newPolicyItems}).then((response) => {
       if (response.status === 200) {
-        cleanAttributeForm()
-        cleanModalValues()
         onClose()
       } else {
         const errorsString = response.errors.map((error: any) => error.error).join(", \n")
@@ -271,6 +268,18 @@ export default function CreatePolicyModal({
   const onCreateAttributeFormClose = () => {
     setIsCreateAttributeFormOpen(false)
   }
+
+  useEffect(() => {
+    const policyItem = policyItems[index];
+    const initialRoles = policyItem?.allRoles !== undefined ? policyItem.allRoles : (policyItem?.anyRoles ? policyItem.anyRoles : [])
+    const initialTypeOfRoles = policyItem?.allRoles !== undefined ? "allRoles" : "anyRoles";
+    const initialAttributes = policyItem?.attributes ? policyItem.attributes : []
+    setSelectedRoles(initialRoles);
+    setSelectedTypeOfRoles(initialTypeOfRoles)
+    setAttributes(initialAttributes)
+
+  }, [index, policyItems]);
+
 
   return (
     <Transition.Root show={isOpened} as={Fragment}>
@@ -516,7 +525,7 @@ export default function CreatePolicyModal({
                   </div>
 
                   <div className="flex gap-2 h-8 justify-end mt-4">
-                    <ButtonPrimaryGradient type="button" onClick={onCreatePolicy}>Create</ButtonPrimaryGradient>
+                    <ButtonPrimaryGradient type="button" onClick={onSavePolicy}>Save</ButtonPrimaryGradient>
                     <ButtonGhost type="button" onClick={onCancelCreate}>Cancel</ButtonGhost>
                   </div>
 

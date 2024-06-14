@@ -7,6 +7,7 @@ import {DocumentsService} from "../../../helpers/services/documentsService";
 import {useForm} from "react-hook-form";
 import {useAppDispatch} from "../../../Store/store";
 import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
+import ButtonTertiary from "../../Generic/Buttons/ButtonTertiary";
 
 function AddAttributeForm({onDocumentDataChange, siteId, value, onClose}: any) {
   const [selectedAttributeDataType, setSelectedAttributeDataType] = useState<AttributeDataType | "">("")
@@ -92,10 +93,10 @@ function AddAttributeForm({onDocumentDataChange, siteId, value, onClose}: any) {
               />
             </div>
 
-            <ButtonPrimaryGradient
+            <ButtonTertiary
               type="submit"
               title="Create"
-              className="mr-2">Create</ButtonPrimaryGradient>
+              className="mr-2">Create</ButtonTertiary>
 
             <ButtonGhost onClick={onClose}> Cancel </ButtonGhost>
           </div>

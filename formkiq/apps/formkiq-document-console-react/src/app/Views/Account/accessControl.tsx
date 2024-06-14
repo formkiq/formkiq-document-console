@@ -50,10 +50,6 @@ export function AccessControl() {
   };
   const [policies, setPolicies] = useState<PolicyType[]>([]);
   const [isDirty, setIsDirty] = useState(false);
-  const [isInputExpanded, setIsInputExpanded] = useState(false);
-  const [newSiteId, setNewSiteId] = useState('');
-  // const DEFAULT_POLICY_TEXT =
-  //   '# Attribute-based Access Control (ABAC) version 1 \n# -------------------------------------\n# Write your policy here\n \npackage formkiq';
 
   function fetchPolicies() {
     DocumentsService.getOpenPolicyAgentPolicies().then(
@@ -83,46 +79,6 @@ export function AccessControl() {
     setIsDirty(false);
   }, []);
 
-  // Save edited policy
-  const onSave = () => {
-    if (!isDirty) {
-      dispatch(
-        openNotificationDialog({
-          dialogTitle: 'No changes detected. Save aborted.',
-        })
-      );
-      return;
-    }
-    // const body = `{"policy": ${JSON.stringify(
-    //   editorText
-    // )}, "siteId": "${currentSiteId}"}`;
-    DocumentsService.setOpenPolicyAgentPolicyItems(currentSiteId, editorText).then(
-      (res) => {
-        if (res.status === 200) {
-          dispatch(
-            openNotificationDialog({
-              dialogTitle: 'Site Configuration updated successfully.',
-            })
-          );
-          setIsDirty(false);
-          DocumentsService.getOpenPolicyAgentPolicies().then(
-            (res) => {
-              if (res.status === 200) {
-                setPolicies(res.opaPolicies);
-              }
-            }
-          );
-        } else {
-          dispatch(
-            openNotificationDialog({
-              dialogTitle:              res.errors[0].error,
-            })
-          );
-        }
-      }
-    );
-  };
-
   // Change text in editor
   const onTextChange = (value: any) => {
     setEditorText(value);
@@ -146,17 +102,6 @@ export function AccessControl() {
       }
     };
     changeSiteID(siteId);
-    // if (isDirty) {
-    //   dispatch(
-    //     openConfirmationDialog({
-    //       callback: () => changeSiteID(newSiteId),
-    //       dialogTitle:
-    //         'You have unsaved changes. Do you want to continue? You will lose your unsaved changes.',
-    //     })
-    //   );
-    // } else {
-    //   changeSiteID(newSiteId);
-    // }
   };
 
   // Delete current policy
@@ -188,101 +133,20 @@ export function AccessControl() {
     );
   };
 
-  // Show/Hide new siteId input
-  const toggleInput = () => {
-    function createDefaultPolicy() {
-      setIsInputExpanded(!isInputExpanded);
-      setNewSiteId("");
-      setPolicyText("");
-      setIsDirty(true);
-    }
-
-    if (!isInputExpanded && isDirty) {
-      dispatch(
-        openConfirmationDialog({
-          callback: () => createDefaultPolicy(),
-          dialogTitle:
-            'You have unsaved changes. Do you want to continue? You will lose your unsaved changes.',
-        })
-      );
-    } else if (!isInputExpanded && !isDirty) {
-      createDefaultPolicy();
-    } else {
-      setIsInputExpanded(!isInputExpanded);
-      setNewSiteId('');
-      if (policies.length > 0) {
-        setPolicyText(policies[0].policy);
-        setCurrentSiteId(policies[0].siteId);
-      } else {
-        setPolicyText('');
-        setCurrentSiteId('');
-      }
-      setIsDirty(false);
-    }
-  };
-
-  // Create new policy
-  function addPolicy() {
-    DocumentsService.setOpenPolicyAgentPolicyItems(newSiteId, editorText).then((res) => {
-      if (res.status === 200) {
-        DocumentsService.getOpenPolicyAgentPolicy(currentSiteId).then(
-          (res) => {
-            console.log(res, 'res')
-            if (res.status === 200) {
-              setPolicies(res.opaPolicies);
-              setPolicyText(editorText);
-              setCurrentSiteId(newSiteId);
-              setIsDirty(false);
-            }
-          }
-        );
-        dispatch(
-          openNotificationDialog({
-            dialogTitle: 'Site Configuration updated successfully.',
-          })
-        );
-        setIsInputExpanded(false);
-      } else {
-        dispatch(
-          openNotificationDialog({
-            dialogTitle:
-              res.errors[0].error,
-          })
-        );
-      }
-    });
-  }
 
   return (
     <>
       <Helmet>
         <title>Access Control</title>
       </Helmet>
-      <div className="flex justify-between p-2">
+      <div className="flex justify-between items-center gap-2 p-2">
         <h6 className="w-full my-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
           Access Control: Configure Open Policy Agent
         </h6>
         <Link to={currentSiteId}>
-          <ButtonPrimaryGradient className="h-10">ManagePolicy</ButtonPrimaryGradient>
+          <ButtonPrimaryGradient className="h-8">ManagePolicy</ButtonPrimaryGradient>
         </Link>
-        <button
-          onClick={toggleInput}
-          className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500 whitespace-nowrap"
-        >
-          Add Policy{' '}
-          <div className="w-4 ml-2">
-            <Plus />
-          </div>
-        </button>
-        <button
-          onClick={onSave}
-          className="border-2 ml-2 text-sm font-semibold py-1 px-4 rounded-full flex items-center cursor-pointer text-gray-500 border-gray-400 hover:border-primary-500 hover:text-primary-500"
-        >
-          Save{' '}
-          <div className="w-5 ml-2">
-            <Save />
-          </div>
-        </button>
+        <button className="h-6 w-6 hover:text-primary-500" onClick={onDelete}><Trash/></button>
       </div>
 
       <div className="flex justify-start items-center px-2 my-2 h-8 gap-2">
@@ -294,9 +158,7 @@ export function AccessControl() {
           setSelectedValue={onSelectSiteId}
         />
       </div>
-      <RegoEditor content={policyText} onChange={onTextChange}
-                  // readOnly="nocursor"
-      />
+      <RegoEditor content={policyText} onChange={onTextChange} readOnly="nocursor"/>
     </>
   );
 }
