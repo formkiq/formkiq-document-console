@@ -223,7 +223,7 @@ export default function EditPolicyModal({
 
   function onSavePolicy() {
     // get all policy items
-    let newPolicyItems: any = [...policyItems]
+    const newPolicyItems: any = [...policyItems]
     newPolicyItems.forEach((item: any, i: number) => {
       newPolicyItems[i] = {
         ...item,

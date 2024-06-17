@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import {Helmet} from 'react-helmet-async';
-import {Close, Plus, Save, Trash} from '../../Components/Icons/icons';
+import {Trash} from '../../Components/Icons/icons';
 import RegoEditor from '../../Components/TextEditors/RegoEditor';
 import {useAuthenticatedState} from '../../Store/reducers/auth';
 import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
