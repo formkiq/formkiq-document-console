@@ -244,6 +244,17 @@ export function Sidebar() {
     setWorkspacesModalOpened(false);
   };
 
+  const handleAction = (action: string) => {
+    const nonDocumentPaths = ['/workflows', '/integrations', '/queues', '/account', '/rulesets', '/object-examine-tool', '/schemas'];
+    const isNonDocumentPath = nonDocumentPaths.some(path => pathname.indexOf(path) > -1);
+    if (isNonDocumentPath) {
+      window.location.href = `${currentDocumentsRootUri}?actionEvent=${action}`;
+    } else {
+      dispatch(setCurrentActionEvent(action));
+    }
+  };
+
+
   const QuickFolderList = (
     folderSiteId: string,
     folderLevels: string[],
@@ -1087,7 +1098,7 @@ export function Sidebar() {
             <div className="flex w-full">
               <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>
             </div>
-            <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/workflows"
                 className={({ isActive }) =>
@@ -1095,20 +1106,16 @@ export function Sidebar() {
                     ? 'text-primary-600 bg-neutral-200 '
                     : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
                   ' w-full text-sm font-bold flex '
-                }
-              >
+                }>
                 <div
-                  className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
-                  }
-                >
+                  className={'w-full text-sm font-bold flex items-center pl-5 py-4 '}>
                   <div className="w-4 flex items-center mr-2">
                     <Workflow />
                   </div>
                 </div>
               </NavLink>
             </li>
-            <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/queues"
                 className={({ isActive }) =>
@@ -1118,11 +1125,7 @@ export function Sidebar() {
                   ' w-full text-sm font-bold flex '
                 }
               >
-                <div
-                  className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
-                  }
-                >
+                <div className={'w-full text-sm font-bold flex items-center pl-5 py-4 '}>
                   <div className="w-4 flex items-center mr-2">
                     <Queue />
                   </div>
@@ -1146,6 +1149,25 @@ export function Sidebar() {
                 </div>
               </NavLink>
             </li>
+            {user?.isAdmin && (
+              <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <NavLink
+                  to="/integrations/apiKeys"
+                  className={({ isActive }) =>
+                    (isActive
+                      ? 'text-primary-600 bg-neutral-200 '
+                      : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                    ' w-full text-sm font-bold flex '
+                  }
+                >
+                  <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
+                    <div className="w-4 flex items-center mr-2">
+                      <ApiKey />
+                    </div>
+                  </div>
+                </NavLink>
+              </li>
+            )}
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/integrations/webhooks"
@@ -1159,6 +1181,57 @@ export function Sidebar() {
                 <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
                   <div className="w-4 flex items-center mr-2">
                     <Webhook />
+                  </div>
+                </div>
+              </NavLink>
+            </li>
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+              <NavLink
+                to="/rulesets"
+                className={({ isActive }) =>
+                  (isActive
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
+                }>
+                <div
+                  className={'w-full text-sm font-bold flex items-center pl-5 py-4 '}>
+                  <div className="w-4 flex items-center mr-2">
+                    <Rules />
+                  </div>
+                </div>
+              </NavLink>
+            </li>
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+              <NavLink
+                to="/object-examine-tool"
+                className={({ isActive }) =>
+                  (isActive
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
+                }>
+                <div
+                  className={'w-full text-sm font-bold flex items-center pl-5 py-4 '}>
+                  <div className="w-4 flex items-center mr-2">
+                    <Examine />
+                  </div>
+                </div>
+              </NavLink>
+            </li>
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+              <NavLink
+                to="/schemas"
+                className={({ isActive }) =>
+                  (isActive
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
+                }>
+                <div
+                  className={'w-full text-sm font-bold flex items-center pl-5 py-4 '}>
+                  <div className="w-4 flex items-center mr-2">
+                    <Schema />
                   </div>
                 </div>
               </NavLink>
@@ -1283,17 +1356,7 @@ export function Sidebar() {
                       width: isSidebarExpanded ? '100%' : '28px',
                       padding: isSidebarExpanded ? '16px' : '0px',
                     }}
-                    onClick={() => {
-                      // TODO: create more consistent check on site location
-                      if (
-                        pathname.indexOf('/workflows') > -1 ||
-                        pathname.indexOf('/integrations') > -1
-                      ) {
-                        window.location.href = `${currentDocumentsRootUri}?actionEvent=new`;
-                      } else {
-                        dispatch(setCurrentActionEvent('new'));
-                      }
-                    }}
+                    onClick={() => handleAction('new')}
                   >
                     {isSidebarExpanded && (
                       <span data-test-id="new-document">New</span>
@@ -1320,17 +1383,7 @@ export function Sidebar() {
                       padding: isSidebarExpanded ? '16px' : '0px',
                     }}
                     data-test-id="upload-document"
-                    onClick={() => {
-                      // TODO: create more consistent check on site location
-                      if (
-                        pathname.indexOf('/workflows') > -1 ||
-                        pathname.indexOf('/integrations') > -1
-                      ) {
-                        window.location.href = `${currentDocumentsRootUri}?actionEvent=upload`;
-                      } else {
-                        dispatch(setCurrentActionEvent('upload'));
-                      }
-                    }}
+                    onClick={() => handleAction('upload')}
                   >
                     {isSidebarExpanded && <span>Upload</span>}
                     <div

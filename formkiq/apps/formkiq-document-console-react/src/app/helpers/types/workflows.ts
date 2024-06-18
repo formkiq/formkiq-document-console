@@ -82,7 +82,8 @@ export type Workflow = {
   status: WorkflowStatus;
   steps: WorkflowStep[];
 };
-type WorkflowSummary = {
+
+export type WorkflowSummary = {
   name?: string;
   workflowId?: string;
   description?: string;
@@ -100,3 +101,9 @@ export type parametersDoubleInnerType = {
   description: string;
   options: Record<string, string>;
 };
+
+export enum RequestStatus {
+  pending = 'pending',
+  fulfilled = 'fulfilled',
+  rejected = 'rejected',
+}

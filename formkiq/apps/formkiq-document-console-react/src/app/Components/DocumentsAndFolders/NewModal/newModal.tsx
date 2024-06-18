@@ -1,8 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { setCurrentActionEvent } from '../../../Store/reducers/config';
+import {useNavigate, useSearchParams} from 'react-router-dom';
+import { setCurrentActionEvent, ConfigState } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
@@ -43,6 +43,7 @@ export default function NewModal({
   const dispatch = useAppDispatch();
   const [formActive, setFormActive] = useState(true);
   const [itemToCreate, setItemToCreate] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const itemsRequiringNameField = ['folder', 'docx', 'xlsx', 'pptx'];
 
@@ -52,12 +53,19 @@ export default function NewModal({
     }
   }, [isOpened]);
 
+  const removeActionEventParam = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete('actionEvent');
+    setSearchParams(params);
+  };
+  
   const closeDialog = () => {
     setItemToCreate('');
     setFormActive(false);
     reset();
     onDocumentDataChange();
     onClose();
+    removeActionEventParam();
   };
 
   const onNewFolderClick = (event: any, value: ILine | null) => {
@@ -95,6 +103,9 @@ export default function NewModal({
           return;
         }
         // TODO: add file regex check
+        if(nameValue.indexOf('#') !== -1) {
+          nameValue = nameValue.replace(/#/g, '')
+        }
         // TODO: check if name exists in folder
         if (itemToCreate === 'folder') {
           DocumentsService.createFolder(value.folder, nameValue, siteId).then(
@@ -363,10 +374,11 @@ export default function NewModal({
                             type="text"
                             data-test-id="new-document-location-input"
                             className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600
-                                                    text-sm
+                                                    text-sm invalid:bg-red-200
                                                     placeholder-gray-500 text-gray-900 rounded-t-md
                                                     focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
                             placeholder="Name"
+                            pattern="[^#]*"
                             {...register('name', {
                               required: true,
                             })}

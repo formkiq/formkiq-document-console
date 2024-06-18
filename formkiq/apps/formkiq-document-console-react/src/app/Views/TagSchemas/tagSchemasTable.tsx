@@ -6,19 +6,19 @@ import { TagSchema } from '../../helpers/types/tagSchemas';
 type TagSchemaTableProps = {
   tagSchemas: TagSchema[];
   onTagSchemaDelete: (tagSchemaId: string) => void;
-  showRulesetEditTab: (tagSchemaId: string) => void;
+  showSchemaEditTab: (tagSchemaId: string) => void;
 };
 
 function TagSchemasTable({
   tagSchemas,
   onTagSchemaDelete,
-  showRulesetEditTab,
+  showSchemaEditTab,
 }: TagSchemaTableProps) {
   const pathname = decodeURI(useLocation().pathname);
   return (
     <table
       className="w-full border-collapse text-sm table-fixed "
-      id="rulesetsTable"
+      id="schemasScrollPane"
     >
       <thead className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
         <tr>

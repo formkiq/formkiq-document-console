@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
+import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
 import { Close, Plus } from '../../Components/Icons/icons';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
@@ -12,6 +14,7 @@ import {
   RulesetsState,
   deleteRule,
   fetchRules,
+  fetchRuleset,
   setRulesetsLoadingStatusPending,
 } from '../../Store/reducers/rulesets';
 import { useAppDispatch } from '../../Store/store';
@@ -23,8 +26,6 @@ import {
 import { RequestStatus } from '../../helpers/types/document';
 import { Rule } from '../../helpers/types/rulesets';
 import RulesTable from './rulesTable';
-import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
-import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
 
 function Ruleset() {
   const { user } = useAuthenticatedState();
@@ -44,6 +45,7 @@ function Ruleset() {
   const { id } = useParams();
   const [rulesetId, setRulesetId] = useState(id || '');
   const {
+    ruleset,
     rules,
     nextToken,
     loadingStatus,
@@ -53,6 +55,7 @@ function Ruleset() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    dispatch(fetchRuleset({ rulesetId: id, siteId: currentSiteId }));
     dispatch(fetchRules({ rulesetId: id, siteId: currentSiteId }));
   }, []);
 
@@ -73,7 +76,6 @@ function Ruleset() {
         must: [
           {
             attribute: 'TEXT',
-            fieldName: '',
             value: '',
             operation: 'EQ',
           },
@@ -208,10 +210,21 @@ function Ruleset() {
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-        <div className="w-full p-2 flex justify-end">
+        <div className="w-full p-2 flex">
+          <h3 className="text-lg font-bold mr-2">{ruleset?.description}</h3>
+          <span className="pl-2 pt-0.5">
+            <a
+              href="/rulesets"
+              className="text-sm text-primary-500 hover:text-primary-600"
+            >
+              back to rulesets
+            </a>
+          </span>
+        </div>
+        <div className="w-full p-2 flex">
           <ButtonPrimaryGradient
             onClick={() => setIsRuleEditTabVisible(true)}
-            style={{ height: '40px' }}
+            style={{ height: '36px' }}
           >
             + Create New Rule
           </ButtonPrimaryGradient>
@@ -233,7 +246,6 @@ function Ruleset() {
           <RulesTable
             rules={rules}
             onRuleDelete={onRuleDelete}
-            // ShowRuleCreationTab={ShowRuleCreationTab}
             showRuleEditTab={showRuleEditTab}
             setNewRuleValue={setNewRuleValue}
           />
@@ -278,6 +290,14 @@ const RuleEditingTab = ({
     DocumentsService.getWorkflows(currentSiteId, null, null, null, 100).then(
       (response: any) => {
         setWorkflows(response.workflows);
+        if (!ruleValue.rule.workflowId) {
+          setRuleValue({
+            rule: {
+              ...ruleValue.rule,
+              workflowId: response.workflows[0].workflowId,
+            },
+          });
+        }
       }
     );
   }, [currentSiteId]);
@@ -292,7 +312,6 @@ const RuleEditingTab = ({
             ...ruleValue.rule.conditions.must,
             {
               attribute: 'TEXT',
-              fieldName: '',
               value: '',
               operation: 'EQ',
             },
@@ -310,6 +329,9 @@ const RuleEditingTab = ({
         break;
       case 'attribute':
         newMust[index] = { ...newMust[index], attribute: e.target.value };
+        if (e.target.value !== 'FIELD') {
+          delete newMust[index].fieldName;
+        }
         break;
       case 'operation':
         newMust[index] = { ...newMust[index], operation: e.target.value };
@@ -456,24 +478,26 @@ const RuleEditingTab = ({
               </select>
             </div>
 
-            <div className="flex flex-col justify-start gap-2">
-              <label
-                htmlFor="fieldName"
-                className="block text-sm font-bold text-neutral-900"
-              >
-                Field Name
-              </label>
-              <input
-                name="fieldName"
-                placeholder="Field Name"
-                type="text"
-                value={ruleValue.rule.conditions.must[index].fieldName}
-                onChange={(e) => onConditionsChange(e, index, 'fieldName')}
-                minLength={1}
-                required={true}
-                className="w-52 p-2 border border-neutral-300 rounded"
-              />
-            </div>
+            {ruleValue.rule.conditions.must[index].attribute === 'FIELD' && (
+              <div className="flex flex-col justify-start gap-2">
+                <label
+                  htmlFor="fieldName"
+                  className="block text-sm font-bold text-neutral-900"
+                >
+                  Field Name
+                </label>
+                <input
+                  name="fieldName"
+                  placeholder="Field Name"
+                  type="text"
+                  value={ruleValue.rule.conditions.must[index].fieldName}
+                  onChange={(e) => onConditionsChange(e, index, 'fieldName')}
+                  minLength={1}
+                  required={true}
+                  className="w-52 p-2 border border-neutral-300 rounded"
+                />
+              </div>
+            )}
 
             <div className="flex flex-col justify-start gap-2">
               <label
