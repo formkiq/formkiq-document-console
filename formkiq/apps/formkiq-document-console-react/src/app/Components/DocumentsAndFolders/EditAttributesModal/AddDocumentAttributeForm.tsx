@@ -1,4 +1,3 @@
-import RadioListbox from "../../Generic/Listboxes/RadioListbox";
 import {useSelector} from "react-redux";
 import {useEffect, useRef, useState} from "react";
 import {Attribute} from "../../../helpers/types/attributes";
@@ -9,17 +8,24 @@ import {useForm} from "react-hook-form";
 import {useAppDispatch} from "../../../Store/store";
 import AddAttributeForm from "./AddAttributeForm";
 import {DataCacheState} from "../../../Store/reducers/data";
+import RadioCombobox from "../../Generic/Listboxes/RadioCombobox";
+import {fetchDocumentAttributes} from "../../../Store/reducers/attributes";
 
-function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue}: any) {
-  const { allAttributes } = useSelector(DataCacheState);
-  const [attributeKeys, setAttributeKeys] = useState<string[]>([])
+function AddDocumentAttributeForm({
+                                    onDocumentDataChange,
+                                    siteId,
+                                    value,
+                                    getValue,
+                                  }: any) {
+  const {allAttributes} = useSelector(DataCacheState);
+  const [attributeKeys, setAttributeKeys] = useState<{ key: string, title: string }[]>([])
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(null)
   const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>("")
   const [isAddAttributeFormOpen, setIsAddAttributeFormOpen] = useState<boolean>(false)
 
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return
-    const keys = allAttributes.map(item => item.key)
+    const keys = allAttributes.map((item) => ({key: item.key, title: item.key}))
     setAttributeKeys(keys)
   }, [allAttributes])
 
@@ -40,7 +46,6 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
   const addTagFormRef = useRef<HTMLFormElement>(null);
 
   const onAddAttributeSubmit = async (data: any) => {
-    console.log(data, 'data')
     let documentAttributes = {}
     if (data.stringValue) {
       if (data.stringValue.indexOf('/') > -1) {
@@ -89,6 +94,10 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
       () => {
         setTimeout(() => {
           onDocumentDataChange(value);
+          dispatch(fetchDocumentAttributes({
+            siteId,
+            documentId: value?.documentId as string,
+          }))
         }, 500);
       })
 
@@ -111,12 +120,14 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
           <div className="flex items-start mx-2 mb-4 relative w-full h-8">
             <div className="flex items-start">
               <div className="mr-2 h-8">
-                <RadioListbox values={attributeKeys}
-                              titles={attributeKeys}
-                              selectedValue={selectedAttributeKey}
-                              setSelectedValue={setSelectedAttributeKey}
-                              placeholderText="Select Attribute"
-                />
+                <RadioCombobox values={attributeKeys}
+                               selectedValue={selectedAttributeKey}
+                               setSelectedValue={setSelectedAttributeKey}
+                               placeholderText="Select Attribute"/>
+                {selectedAttribute && selectedAttribute.dataType &&
+                  <h6 className="text-xs absolute top-8 left-0 whitespace-nowrap">
+                    <span className="font-bold">Data type:{" "}</span>
+                    {selectedAttribute.dataType}</h6>}
               </div>
               <div className="mr-2 h-8">
                 {selectedAttribute && selectedAttribute.dataType === "STRING" &&
@@ -149,7 +160,7 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
           onClick={() => {
             setIsAddAttributeFormOpen(true)
           }}
-          className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer ml-2"> + Create New Attribute
+          className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer ml-2 mt-2"> + Create New Attribute
         </button>}
         {isAddAttributeFormOpen && <AddAttributeForm
           siteId={siteId}
@@ -157,6 +168,7 @@ function AddDocumentAttributeForm({onDocumentDataChange, siteId, value, getValue
           value={value}
           getValue={getValue}
           onClose={onAddAttributeFormClose}
+          setSelectedAttributeKey={setSelectedAttributeKey}
         />}
       </div>
     </>

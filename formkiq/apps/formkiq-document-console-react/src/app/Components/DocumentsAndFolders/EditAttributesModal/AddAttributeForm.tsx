@@ -7,10 +7,12 @@ import {DocumentsService} from "../../../helpers/services/documentsService";
 import {useForm} from "react-hook-form";
 import {useAppDispatch} from "../../../Store/store";
 import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
+import {ChevronDown} from "../../Icons/icons";
+import {fetchDocumentAttributes} from "../../../Store/reducers/attributes";
+import {setAllAttributes} from "../../../Store/reducers/data";
 
-function AddAttributeForm({onDocumentDataChange, siteId, value, onClose}: any) {
-  const [selectedAttributeDataType, setSelectedAttributeDataType] = useState<AttributeDataType | "">("")
-  const [selectedAttributeType, setSelectedAttributeType] = useState<AttributeType | "">("")
+function AddAttributeForm({onDocumentDataChange, siteId, value, onClose, setSelectedAttributeKey}: any) {
+  const [selectedAttributeDataType, setSelectedAttributeDataType] = useState<AttributeDataType | "">("");
 
   const {
     register,
@@ -23,10 +25,10 @@ function AddAttributeForm({onDocumentDataChange, siteId, value, onClose}: any) {
 
   const onAddAttributeSubmit = async (data: any) => {
 
-    if (!selectedAttributeDataType || !selectedAttributeType) {
+    if (!selectedAttributeDataType) {
       dispatch(
         openNotificationDialog({
-          dialogTitle: 'Please select attribute data type and attribute type',
+          dialogTitle: 'Please select attribute data type.',
         })
       );
       return;
@@ -36,9 +38,10 @@ function AddAttributeForm({onDocumentDataChange, siteId, value, onClose}: any) {
       attribute: {
         key: data.key,
         dataType: selectedAttributeDataType,
-        type: selectedAttributeType
+        type: "STANDARD"
       }
     }
+
 
     DocumentsService.addAttribute(siteId, newAttribute).then(
       (response) => {
@@ -50,14 +53,53 @@ function AddAttributeForm({onDocumentDataChange, siteId, value, onClose}: any) {
           );
           return;
         }
-        onDocumentDataChange(value);
+
+        // update allAttributes
+        DocumentsService.getAttributes(siteId).then((response) => {
+          if(response.status === 200){
+            const allAttributeData = {
+              allAttributes: response?.attributes,
+              attributesLastRefreshed: new Date(),
+              attributesSiteId: siteId,
+            };
+            dispatch(setAllAttributes(allAttributeData))
+          }
+        })
+
+        if (selectedAttributeDataType === "KEY_ONLY") {
+          setTimeout(() => {
+            const documentAttributes = {
+              attributes: [{
+                key: data.key,
+              }]
+            }
+            DocumentsService.addDocumentAttributes(siteId, "false", value?.documentId as string, documentAttributes).then((response) => {
+              if (response.status !== 201) {
+                dispatch(
+                  openNotificationDialog({
+                    dialogTitle: 'Failed to add attribute',
+                  })
+                );
+              } else {
+                onDocumentDataChange(value);
+                dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string, limit: 50}))
+              }
+            })
+          }, 500);
+
+        } else {
+          setTimeout(() => {
+            onDocumentDataChange(value);
+            setSelectedAttributeKey(data.key);
+          }, 500);
+
+        }
       })
     reset();
     onClose();
   };
 
-  const attributeTypes = ["STRING", "NUMBER", "BOOLEAN", "KEY_ONLY", "COMPOSITE_STRING"];
-  const types = ["STANDARD", "OPA"];
+  const attributeTypes = ["STRING", "NUMBER", "BOOLEAN", "KEY_ONLY"];
 
   return (
     <>
@@ -80,15 +122,6 @@ function AddAttributeForm({onDocumentDataChange, siteId, value, onClose}: any) {
                             selectedValue={selectedAttributeDataType}
                             setSelectedValue={setSelectedAttributeDataType}
                             placeholderText="Select Data Type"
-              />
-            </div>
-
-            <div className="mr-2 h-8">
-              <RadioListbox values={types}
-                            titles={types}
-                            selectedValue={selectedAttributeType}
-                            setSelectedValue={setSelectedAttributeType}
-                            placeholderText="Select Type"
               />
             </div>
 

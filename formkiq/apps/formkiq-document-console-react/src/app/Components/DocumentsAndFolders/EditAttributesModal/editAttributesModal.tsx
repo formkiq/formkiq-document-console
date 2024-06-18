@@ -41,7 +41,7 @@ export default function EditAttributesModal({
       DocumentsService.getDocumentTags(
         value.documentId as string,
         siteId,
-        50
+        100
       ).then((data) => {
         setAlltags(data?.tags);
         if (data?.tags && data?.tags?.length === 0 && selectedTab === 'tags') {
