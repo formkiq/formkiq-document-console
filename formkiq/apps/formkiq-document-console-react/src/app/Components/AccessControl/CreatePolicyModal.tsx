@@ -1,86 +1,96 @@
-import {Dialog, Transition} from '@headlessui/react';
-import {Fragment, useEffect, useRef, useState} from 'react';
-import {CheckedRadio, Close, UncheckedRadio} from '../Icons/icons';
-import {useAppDispatch} from "../../Store/store";
-import RadioListbox from "../Generic/Listboxes/RadioListbox";
-import GroupsSelect from "./GroupsSelect";
-import {useSelector} from "react-redux";
-import {DataCacheState, setAllAttributes} from "../../Store/reducers/data";
-import {Attribute} from "../../helpers/types/attributes";
-import {DocumentsService} from "../../helpers/services/documentsService";
-import ButtonPrimaryGradient from "../Generic/Buttons/ButtonPrimaryGradient";
-import ButtonGhost from "../Generic/Buttons/ButtonGhost";
-import ButtonTertiary from "../Generic/Buttons/ButtonTertiary";
-import {openDialog as openNotificationDialog} from "../../Store/reducers/globalNotificationControls";
-import AddAttributeForm from "../DocumentsAndFolders/EditAttributesModal/AddAttributeForm";
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { DataCacheState, setAllAttributes } from '../../Store/reducers/data';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../Store/store';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { Attribute } from '../../helpers/types/attributes';
+import AddAttributeForm from '../DocumentsAndFolders/EditAttributesModal/AddAttributeForm';
+import ButtonGhost from '../Generic/Buttons/ButtonGhost';
+import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
+import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
+import RadioListbox from '../Generic/Listboxes/RadioListbox';
+import { CheckedRadio, Close, UncheckedRadio } from '../Icons/icons';
+import GroupsSelect from './GroupsSelect';
 
 export default function CreatePolicyModal({
-                                              isOpened,
-                                              onClose,
-                                              siteId,
-                                              policyItems
-                                            }: {
+  isOpened,
+  onClose,
+  siteId,
+  policyItems,
+}: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
   policyItems: any[];
 }) {
   type OpaAttributeType = {
-    key: string
+    key: string;
     eq: {
       input: {
-        matchUsername: boolean
-      }
-      stringValue?: string,
-      numberValue?: number,
-      booleanValue?: boolean,
-    },
+        matchUsername: boolean;
+      };
+      stringValue?: string;
+      numberValue?: number;
+      booleanValue?: boolean;
+    };
     gt?: {
-      numberValue?: number,
-    },
+      numberValue?: number;
+    };
     gte?: {
-      numberValue?: number,
-    },
+      numberValue?: number;
+    };
     lt?: {
-      numberValue?: number,
-    },
+      numberValue?: number;
+    };
     lte?: {
-      numberValue?: number,
-    },
+      numberValue?: number;
+    };
     neq?: {
-      stringValue?: string,
-    },
-  }
+      stringValue?: string;
+    };
+  };
   const numberAttributeCriteria = [
-    {key: 'eq', title: 'Equal'},
-    {key: 'neq', title: 'Not Equal'},
-    {key: 'gt', title: 'Greater Than'},
-    {key: 'gte', title: 'Greater Than or Equal'},
-    {key: 'lt', title: 'Less Than'},
-    {key: 'lte', title: 'Less Than or Equal'},
-  ]
+    { key: 'eq', title: 'Equal' },
+    { key: 'neq', title: 'Not Equal' },
+    { key: 'gt', title: 'Greater Than' },
+    { key: 'gte', title: 'Greater Than or Equal' },
+    { key: 'lt', title: 'Less Than' },
+    { key: 'lte', title: 'Less Than or Equal' },
+  ];
 
   const stringAttributeCriteria = [
-    {key: 'eq', title: 'Equal'},
-    {key: 'neq', title: 'Not Equal'},
-  ]
+    { key: 'eq', title: 'Equal' },
+    { key: 'neq', title: 'Not Equal' },
+  ];
 
-  const policyItemsTypes = ["ALLOW"]
+  const policyItemsTypes = ['ALLOW'];
   const [selectedPolicyType, setSelectedPolicyType] = useState<string>('ALLOW');
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [selectedTypeOfRoles, setSelectedTypeOfRoles] = useState<string>("allRoles");
-  const {allAttributes} = useSelector(DataCacheState);
+  const [selectedTypeOfRoles, setSelectedTypeOfRoles] =
+    useState<string>('allRoles');
+  const { allAttributes } = useSelector(DataCacheState);
   const [attributeKeys, setAttributeKeys] = useState<string[]>([]);
-  const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(null);
-  const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>("");
-  const [isAddAttributeFormOpen, setIsAddAttributeFormOpen] = useState<boolean>(false);
-  const [attributeCriteria, setAttributeCriteria] = useState<{ key: string, title: string }[]>(stringAttributeCriteria);
-  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string | null>(null);
-  const [newAttributeValue, setNewAttributeValue] = useState<string | number | boolean>("");
+  const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
+    null
+  );
+  const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>('');
+  const [isAddAttributeFormOpen, setIsAddAttributeFormOpen] =
+    useState<boolean>(false);
+  const [attributeCriteria, setAttributeCriteria] = useState<
+    { key: string; title: string }[]
+  >(stringAttributeCriteria);
+  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<
+    string | null
+  >(null);
+  const [newAttributeValue, setNewAttributeValue] = useState<
+    string | number | boolean
+  >('');
   const [matchUsername, setMatchUsername] = useState<boolean>(false);
   const [attributes, setAttributes] = useState<OpaAttributeType[]>([]);
-  const [isCreateAttributeFormOpen, setIsCreateAttributeFormOpen] = useState<boolean>(false)
-
+  const [isCreateAttributeFormOpen, setIsCreateAttributeFormOpen] =
+    useState<boolean>(false);
 
   const doneButtonRef = useRef(null);
   const closeDialog = () => {
@@ -100,60 +110,61 @@ export default function CreatePolicyModal({
           attributesLastRefreshed: new Date(),
           attributesSiteId: siteId,
         };
-        dispatch(setAllAttributes(allAttributeData))
+        dispatch(setAllAttributes(allAttributeData));
       }
-    })
-  }
+    });
+  };
 
   useEffect(() => {
-    updateAllAttributes()
-  }, [])
+    updateAllAttributes();
+  }, []);
 
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
     // const opaAttributes = allAttributes.filter((attribute) => attribute.type === "OPA")
     // if (!opaAttributes || opaAttributes.length === 0) return;
-    const keys = allAttributes.map(item => item.key)
-    setAttributeKeys(keys)
-  }, [allAttributes])
+    const keys = allAttributes.map((item) => item.key);
+    setAttributeKeys(keys);
+  }, [allAttributes]);
 
   useEffect(() => {
-    if (!selectedAttributeKey) return
-    const attribute = allAttributes.find(item => item.key === selectedAttributeKey)
-    if (!attribute) return
-    setSelectedAttribute(attribute)
-
-  }, [selectedAttributeKey])
+    if (!selectedAttributeKey) return;
+    const attribute = allAttributes.find(
+      (item) => item.key === selectedAttributeKey
+    );
+    if (!attribute) return;
+    setSelectedAttribute(attribute);
+  }, [selectedAttributeKey]);
 
   useEffect(() => {
-    if (!selectedAttribute) return
-    if (selectedAttribute.dataType === "NUMBER") {
+    if (!selectedAttribute) return;
+    if (selectedAttribute.dataType === 'NUMBER') {
       setAttributeCriteria(numberAttributeCriteria);
-      setSelectedAttributeCriteria("eq")
-      setNewAttributeValue(0)
-    } else if (selectedAttribute.dataType === "STRING") {
-      setAttributeCriteria(stringAttributeCriteria)
-      setSelectedAttributeCriteria("eq")
-      setNewAttributeValue("")
-    } else if (selectedAttribute.dataType === "BOOLEAN") {
-      setNewAttributeValue(false)
-      setSelectedAttributeCriteria("eq")
+      setSelectedAttributeCriteria('eq');
+      setNewAttributeValue(0);
+    } else if (selectedAttribute.dataType === 'STRING') {
+      setAttributeCriteria(stringAttributeCriteria);
+      setSelectedAttributeCriteria('eq');
+      setNewAttributeValue('');
+    } else if (selectedAttribute.dataType === 'BOOLEAN') {
+      setNewAttributeValue(false);
+      setSelectedAttributeCriteria('eq');
     }
-  }, [selectedAttribute])
+  }, [selectedAttribute]);
 
   function cleanAttributeForm() {
-    setSelectedAttribute(null)
-    setSelectedAttributeKey("")
-    setNewAttributeValue("")
-    setSelectedAttributeCriteria(null)
-    setAttributeCriteria(stringAttributeCriteria)
-    setMatchUsername(false)
+    setSelectedAttribute(null);
+    setSelectedAttributeKey('');
+    setNewAttributeValue('');
+    setSelectedAttributeCriteria(null);
+    setAttributeCriteria(stringAttributeCriteria);
+    setMatchUsername(false);
   }
 
   function cleanModalValues() {
-      setSelectedPolicyType("ALLOW")
-      setSelectedRoles([])
-      setSelectedTypeOfRoles("allRoles")
+    setSelectedPolicyType('ALLOW');
+    setSelectedRoles([]);
+    setSelectedTypeOfRoles('allRoles');
   }
 
   // function onAttributeFormClose() {
@@ -163,101 +174,121 @@ export default function CreatePolicyModal({
 
   function onAddAttribute() {
     if (!selectedAttributeKey) {
-      dispatch(openNotificationDialog({dialogTitle: "Error. Please select the attribute"}))
-      return
+      dispatch(
+        openNotificationDialog({
+          dialogTitle: 'Error. Please select the attribute',
+        })
+      );
+      return;
     }
 
     let attribute: OpaAttributeType = {
       key: selectedAttributeKey,
       eq: {
         input: {
-          matchUsername
-        }
-      }
-    }
+          matchUsername,
+        },
+      },
+    };
     if (selectedAttribute && selectedAttributeCriteria) {
-
       attribute = {
         ...attribute,
         [selectedAttributeCriteria]: {
           ...attribute.eq,
-          ...(selectedAttribute.dataType === "NUMBER" && {numberValue: newAttributeValue}),
-          ...(selectedAttribute.dataType === "STRING" && {stringValue: newAttributeValue}),
-          ...(selectedAttribute.dataType === "BOOLEAN" && {booleanValue: newAttributeValue}),
-        }
-      }
+          ...(selectedAttribute.dataType === 'NUMBER' && {
+            numberValue: newAttributeValue,
+          }),
+          ...(selectedAttribute.dataType === 'STRING' && {
+            stringValue: newAttributeValue,
+          }),
+          ...(selectedAttribute.dataType === 'BOOLEAN' && {
+            booleanValue: newAttributeValue,
+          }),
+        },
+      };
     }
     setAttributes([...attributes, attribute]);
     cleanAttributeForm();
   }
 
   const renderCriteria = (item: OpaAttributeType) => {
-    if (item.eq.stringValue !== undefined || item.eq.numberValue !== undefined || item.eq.booleanValue !== undefined) return 'Equal'
-    if (item.gt) return "Greater Than";
-    if (item.gte) return "Greater Than or Equal";
-    if (item.lt) return "Less Than";
-    if (item.lte) return "Less Than or Equal";
-    if (item.neq) return "Not Equal";
-    return "-";
+    if (
+      item.eq.stringValue !== undefined ||
+      item.eq.numberValue !== undefined ||
+      item.eq.booleanValue !== undefined
+    )
+      return 'Equal';
+    if (item.gt) return 'Greater Than';
+    if (item.gte) return 'Greater Than or Equal';
+    if (item.lt) return 'Less Than';
+    if (item.lte) return 'Less Than or Equal';
+    if (item.neq) return 'Not Equal';
+    return '-';
   };
 
   const renderValue = (item: OpaAttributeType) => {
-    let result: any = "-"
+    let result: any = '-';
     numberAttributeCriteria.map((criteria) => {
-      const value: any = item[criteria.key as keyof OpaAttributeType]
+      const value: any = item[criteria.key as keyof OpaAttributeType];
       if (value) {
         if (value?.numberValue !== undefined) {
           result = value.numberValue;
         } else if (value?.stringValue !== undefined) {
           result = value.stringValue;
         } else if (value?.booleanValue !== undefined) {
-          result = value.booleanValue ? "Yes" : "No";
+          result = value.booleanValue ? 'Yes' : 'No';
         }
       }
-    })
+    });
     return result;
   };
 
   function onCancelCreate() {
     cleanAttributeForm();
-    setIsAddAttributeFormOpen(false)
-    cleanModalValues()
-    onClose()
+    setIsAddAttributeFormOpen(false);
+    cleanModalValues();
+    onClose();
   }
 
   function onCreatePolicy() {
     // get all policy items
-    const newPolicyItems: any = [...policyItems]
+    const newPolicyItems: any = [...policyItems];
     newPolicyItems.forEach((item: any, i: number) => {
       newPolicyItems[i] = {
         ...item,
-        type: "ALLOW"
-      }
-    })
+        type: 'ALLOW',
+      };
+    });
     // add new policy item to the list
     const newPolicyItem = {
       type: selectedPolicyType,
       [selectedTypeOfRoles]: selectedRoles,
-      attributes: attributes
-    }
-    newPolicyItems.push(newPolicyItem)
+      attributes: attributes,
+    };
+    newPolicyItems.push(newPolicyItem);
     // set updated policy items
-    DocumentsService.setOpenPolicyAgentPolicyItems(siteId, {policyItems: newPolicyItems}).then((response) => {
+    DocumentsService.setOpenPolicyAgentPolicyItems(siteId, {
+      policyItems: newPolicyItems,
+    }).then((response) => {
       if (response.status === 200) {
-        cleanAttributeForm()
-        cleanModalValues()
-        onClose()
+        cleanAttributeForm();
+        cleanModalValues();
+        onClose();
       } else {
-        const errorsString = response.errors.map((error: any) => error.error).join(", \n")
-        dispatch(openNotificationDialog({dialogTitle: `Error.\n ${errorsString}`}))
+        const errorsString = response.errors
+          .map((error: any) => error.error)
+          .join(', \n');
+        dispatch(
+          openNotificationDialog({ dialogTitle: `Error.\n ${errorsString}` })
+        );
       }
-    })
+    });
   }
 
   function onMatchUsernameChange() {
     if (matchUsername) {
       setSelectedAttributeCriteria(null);
-      setNewAttributeValue("");
+      setNewAttributeValue('');
     }
     setMatchUsername(!matchUsername);
   }
@@ -269,8 +300,8 @@ export default function CreatePolicyModal({
   }
 
   const onCreateAttributeFormClose = () => {
-    setIsCreateAttributeFormOpen(false)
-  }
+    setIsCreateAttributeFormOpen(false);
+  };
 
   return (
     <Transition.Root show={isOpened} as={Fragment}>
@@ -289,7 +320,7 @@ export default function CreatePolicyModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 transition-opacity"/>
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-20 overflow-y-auto">
@@ -313,14 +344,17 @@ export default function CreatePolicyModal({
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
                       onClick={closeDialog}
                     >
-                      <Close/>
+                      <Close />
                     </div>
                   </div>
                   <div className="h-8 flex gap-2 items-center w-full mt-6">
                     <h6 className="text-md font-bold">Policy Type</h6>
-                    <RadioListbox values={policyItemsTypes} titles={policyItemsTypes}
-                                  selectedValue={selectedPolicyType}
-                                  setSelectedValue={setSelectedPolicyType}/>
+                    <RadioListbox
+                      values={policyItemsTypes}
+                      titles={policyItemsTypes}
+                      selectedValue={selectedPolicyType}
+                      setSelectedValue={setSelectedPolicyType}
+                    />
                   </div>
 
                   <h2 className="text-lg font-bold mt-6">Conditions</h2>
@@ -329,33 +363,61 @@ export default function CreatePolicyModal({
                     <div className="flex gap-8 w-full mt-2">
                       <div className="flex gap-2 items-top">
                         <h6 className="text-sm font-bold">Roles</h6>
-                        <div className="h-8 ">
-                          <GroupsSelect selectedGroups={selectedRoles} setSelectedGroups={setSelectedRoles}
-                                        siteId={siteId}/></div>
+                        <div className="h-8 w-60">
+                          <GroupsSelect
+                            selectedGroups={selectedRoles}
+                            setSelectedGroups={setSelectedRoles}
+                            siteId={siteId}
+                          />
+                        </div>
                       </div>
                       <div className="flex gap-2 items-top w-full">
-                        <h6 className="text-sm font-bold whitespace-nowrap">User must match...</h6>
+                        <h6 className="text-sm font-bold whitespace-nowrap">
+                          User must match...
+                        </h6>
                         <div className="flex flex-col gap-2 w-full ">
                           <div className="relative">
-                            <input type="radio" name="roles" value="allRoles"
-                                   checked={selectedTypeOfRoles === "allRoles"}
-                                   onChange={onSelectedTypeOfRolesChange}
-                                   className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"/>
+                            <input
+                              type="radio"
+                              name="roles"
+                              value="allRoles"
+                              checked={selectedTypeOfRoles === 'allRoles'}
+                              onChange={onSelectedTypeOfRolesChange}
+                              className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"
+                            />
                             <label className="flex items-center gap-2 w-full">
-                              <div className="w-4">{selectedTypeOfRoles === "allRoles" ? <CheckedRadio/> :
-                                <UncheckedRadio/>}</div>
-                              <span className="block truncate text-sm">All roles</span>
+                              <div className="w-4">
+                                {selectedTypeOfRoles === 'allRoles' ? (
+                                  <CheckedRadio />
+                                ) : (
+                                  <UncheckedRadio />
+                                )}
+                              </div>
+                              <span className="block truncate text-sm">
+                                All roles
+                              </span>
                             </label>
                           </div>
                           <div className="relative">
-                            <input type="radio" name="roles" value="anyRoles"
-                                   checked={selectedTypeOfRoles === "anyRoles"}
-                                   onChange={onSelectedTypeOfRolesChange}
-                                   className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"/>
+                            <input
+                              type="radio"
+                              name="roles"
+                              value="anyRoles"
+                              checked={selectedTypeOfRoles === 'anyRoles'}
+                              onChange={onSelectedTypeOfRolesChange}
+                              className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"
+                            />
                             <label className="flex items-center gap-2 w-full">
-                              <div className="w-4">{selectedTypeOfRoles === "anyRoles" ? <CheckedRadio/> :
-                                <UncheckedRadio/>}</div>
-                              <span className="block truncate text-sm">Any role</span>
+                              <div className="w-4">
+                                {selectedTypeOfRoles === 'anyRoles' ? (
+                                  <CheckedRadio />
+                                ) : (
+                                  <UncheckedRadio />
+                                )}
+                              </div>
+                              <span className="block truncate text-sm">
+                                Any role
+                              </span>
                             </label>
                           </div>
                         </div>
@@ -363,163 +425,244 @@ export default function CreatePolicyModal({
                     </div>
                   </div>
 
-                  {!isAddAttributeFormOpen && <button
-                    onClick={() => {
-                      setIsAddAttributeFormOpen(true)
-                    }}
-                    className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer ml-2 mt-2"> + Add
-                    Attribute
-                  </button>}
-                  {isAddAttributeFormOpen && <>
-                    <h6 className="text-sm font-bold mt-6">Attribute Conditions</h6>
+                  {!isAddAttributeFormOpen && (
+                    <button
+                      onClick={() => {
+                        setIsAddAttributeFormOpen(true);
+                      }}
+                      className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer ml-2 mt-2"
+                    >
+                      {' '}
+                      + Add Attribute
+                    </button>
+                  )}
+                  {isAddAttributeFormOpen && (
+                    <>
+                      <h6 className="text-sm font-bold mt-6">
+                        Attribute Conditions
+                      </h6>
 
-                    <div className="w-full flex justify-between mt-2 h-8">
-                      <div className="h-8 flex gap-2 items-center">
-                        <div className="relative h-8">
-                          <RadioListbox values={attributeKeys}
-                                        titles={attributeKeys}
-                                        selectedValue={selectedAttributeKey}
-                                        setSelectedValue={setSelectedAttributeKey}
-                                        placeholderText="Select Attribute"
-                          />
-                          {selectedAttribute && <h6 className="text-xs absolute top-8 left-0 whitespace-nowrap">
-                            <span className="font-bold">Data type:{" "}</span>
-                            {selectedAttribute.dataType}</h6>}
+                      <div className="w-full flex justify-between mt-2 h-8">
+                        <div className="h-8 flex gap-2 items-center">
+                          <div className="relative h-8">
+                            <RadioListbox
+                              values={attributeKeys}
+                              titles={attributeKeys}
+                              selectedValue={selectedAttributeKey}
+                              setSelectedValue={setSelectedAttributeKey}
+                              placeholderText="Select Attribute"
+                            />
+                            {selectedAttribute && (
+                              <h6 className="text-xs absolute top-8 left-0 whitespace-nowrap">
+                                <span className="font-bold">Data type: </span>
+                                {selectedAttribute.dataType}
+                              </h6>
+                            )}
+                          </div>
+
+                          {selectedAttribute &&
+                            (selectedAttribute.dataType === 'NUMBER' ||
+                              selectedAttribute.dataType === 'STRING') && (
+                              <div className="h-8">
+                                <RadioListbox
+                                  values={attributeCriteria.map(
+                                    (item) => item.key
+                                  )}
+                                  titles={attributeCriteria.map(
+                                    (item) => item.title
+                                  )}
+                                  selectedValue={
+                                    selectedAttributeCriteria as string
+                                  }
+                                  setSelectedValue={
+                                    setSelectedAttributeCriteria
+                                  }
+                                />
+                              </div>
+                            )}
+
+                          {selectedAttribute &&
+                            selectedAttribute.dataType === 'NUMBER' && (
+                              <input
+                                type="number"
+                                required
+                                className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                                placeholder="Value"
+                                value={newAttributeValue as number}
+                                onChange={(e) => {
+                                  setNewAttributeValue(e.target.value);
+                                }}
+                              />
+                            )}
+                          {selectedAttribute &&
+                            selectedAttribute.dataType === 'STRING' && (
+                              <input
+                                type="text"
+                                required
+                                className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                                placeholder="Value"
+                                value={newAttributeValue as string}
+                                onChange={(e) => {
+                                  setNewAttributeValue(e.target.value);
+                                }}
+                              />
+                            )}
+                          {selectedAttribute &&
+                            selectedAttribute.dataType === 'BOOLEAN' && (
+                              <div className="mt-2 flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"
+                                  checked={newAttributeValue as boolean}
+                                  onChange={(e) => {
+                                    setNewAttributeValue(e.target.checked);
+                                  }}
+                                />
+                                <label className="text-sm">
+                                  {newAttributeValue ? 'TRUE' : 'FALSE'}
+                                </label>
+                              </div>
+                            )}
+                          {selectedAttribute &&
+                            selectedAttribute.dataType === 'KEY_ONLY' && (
+                              <div className="mt-2 flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  id="matchUsername"
+                                  className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"
+                                  checked={matchUsername}
+                                  onChange={onMatchUsernameChange}
+                                />
+                                <label
+                                  htmlFor="matchUsername"
+                                  onChange={onMatchUsernameChange}
+                                  className="text-sm cursor-pointer "
+                                >
+                                  Must match Username
+                                </label>
+                              </div>
+                            )}
                         </div>
-
-                        {selectedAttribute &&
-                          (selectedAttribute.dataType === "NUMBER" ||
-                            selectedAttribute.dataType === "STRING") &&
-                          <div className="h-8">
-                            <RadioListbox values={attributeCriteria.map(item => item.key)}
-                                          titles={attributeCriteria.map(item => item.title)}
-                                          selectedValue={selectedAttributeCriteria as string}
-                                          setSelectedValue={setSelectedAttributeCriteria}
-                            /></div>}
-
-                        {selectedAttribute && selectedAttribute.dataType === "NUMBER" &&
-                          <input type="number" required
-                                 className="h-8 px-4 border border-neutral-300 text-sm rounded-md" placeholder="Value"
-                                 value={newAttributeValue as number}
-                                 onChange={(e) => {
-                                   setNewAttributeValue(e.target.value)
-                                 }}
-                          />}
-                        {selectedAttribute && selectedAttribute.dataType === "STRING" &&
-                          <input type="text" required
-                                 className="h-8 px-4 border border-neutral-300 text-sm rounded-md" placeholder="Value"
-                                 value={newAttributeValue as string}
-                                 onChange={(e) => {
-                                   setNewAttributeValue(e.target.value)
-                                 }}/>}
-                        {selectedAttribute && selectedAttribute.dataType === "BOOLEAN" &&
-                          <div className="mt-2 flex items-center gap-2">
-                            <input type="checkbox"
-                                   className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"
-                                   checked={newAttributeValue as boolean}
-                                   onChange={(e) => {
-                                     setNewAttributeValue(e.target.checked)
-                                   }}/>
-                            <label className="text-sm">{newAttributeValue ? "TRUE" : "FALSE"}</label>
-                          </div>}
-                        {selectedAttribute && selectedAttribute.dataType === "KEY_ONLY" &&
-
-                          <div className="mt-2 flex items-center gap-2">
-                            <input type="checkbox" id="matchUsername"
-                                   className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"
-                                   checked={matchUsername}
-                                   onChange={onMatchUsernameChange}/>
-                            <label htmlFor="matchUsername"
-                                   onChange={onMatchUsernameChange}
-                                   className="text-sm cursor-pointer ">Must match Username</label>
-                          </div>}
+                        <div className="h-8 flex gap-2">
+                          <ButtonTertiary
+                            type="button"
+                            onClick={onAddAttribute}
+                          >
+                            + Add
+                          </ButtonTertiary>
+                        </div>
                       </div>
-                      <div className="h-8 flex gap-2">
-                        <ButtonTertiary type="button" onClick={onAddAttribute}>+ Add</ButtonTertiary>
+                      <div className="flex w-full">
+                        {!isCreateAttributeFormOpen && (
+                          <button
+                            onClick={() => {
+                              setIsCreateAttributeFormOpen(true);
+                            }}
+                            className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer mt-4"
+                          >
+                            {' '}
+                            + Create New Attribute
+                          </button>
+                        )}
+                        {isCreateAttributeFormOpen && (
+                          <div className="-ml-2 mt-4">
+                            <AddAttributeForm
+                              siteId={siteId}
+                              onDocumentDataChange={() => updateAllAttributes()}
+                              value={null}
+                              getValue={() => {}}
+                              onClose={onCreateAttributeFormClose}
+                            />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <div className="flex w-full">
-                      {!isCreateAttributeFormOpen && <button
-                        onClick={() => {
-                          setIsCreateAttributeFormOpen(true)
-                        }}
-                        className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer mt-4"> + Create New
-                        Attribute
-                      </button>}
-                      {isCreateAttributeFormOpen && <div className="-ml-2 mt-4">
-                        <AddAttributeForm
-                          siteId={siteId}
-                          onDocumentDataChange={() => updateAllAttributes()}
-                          value={null}
-                          getValue={() => {
-                          }}
-                          onClose={onCreateAttributeFormClose}
-                        />
-                      </div>}
-                    </div>
-                  </>}
+                    </>
+                  )}
                   <div className="overflow-auto max-h-64 mt-4">
                     <table className="border border-neutral-300 border-collapse table-fixed w-full text-sm">
                       <thead className="sticky top-0 bg-white font-bold py-3 bg-neutral-100">
-                      <tr>
-                        <th
-                          className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
-                          Key
-                        </th>
-                        <th
-                          className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 whitespace-nowrap">
-                          Data Type
-                        </th>
-                        <th
-                          className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 whitespace-nowrap">
-                          Match Username
-                        </th>
-                        <th
-                          className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
-                          Criteria
-                        </th>
-                        <th
-                          className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
-                          Value
-                        </th>
-                        <th></th>
-                      </tr>
+                        <tr>
+                          <th className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                            Key
+                          </th>
+                          <th className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 whitespace-nowrap">
+                            Data Type
+                          </th>
+                          <th className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 whitespace-nowrap">
+                            Match Username
+                          </th>
+                          <th className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                            Criteria
+                          </th>
+                          <th className="p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                            Value
+                          </th>
+                          <th></th>
+                        </tr>
                       </thead>
 
                       <tbody className="bg-white nodark:bg-slate-800">
-                      {attributes.length === 0 ?
-                        <tr className="border-t border-neutral-300">
-                          <td colSpan={4} className="p-4 text-center">No attributes added</td>
-                        </tr> : attributes.map((attribute, index) => (
-                          <tr key={"attribute" + index} className="border-t border-neutral-300">
-                            <td className="p-4 text-start truncate">{attribute.key}</td>
-                            <td
-                              className="p-4 text-start ">{allAttributes.find(item => item.key === attribute.key)?.dataType}</td>
-                            <td className="p-4 text-start ">{attribute.eq.input.matchUsername ? "Yes" : "No"}</td>
-                            <td
-                              className="p-4 text-start">{renderCriteria(attribute)}</td>
-                            <td
-                              className="p-4 text-start">{renderValue(attribute)}</td>
-                            <td>
-                              <button type="button" title="Remove" onClick={() => onRemoveAttribute(index)}
-                                      className="text-neutral-900 hover:text-primary-500 w-4 h-4 ml-2"
-                              >
-                                <Close/>
-                              </button>
+                        {attributes.length === 0 ? (
+                          <tr className="border-t border-neutral-300">
+                            <td colSpan={4} className="p-4 text-center">
+                              No attributes added
                             </td>
                           </tr>
-
-                        ))
-                      }
+                        ) : (
+                          attributes.map((attribute, index) => (
+                            <tr
+                              key={'attribute' + index}
+                              className="border-t border-neutral-300"
+                            >
+                              <td className="p-4 text-start truncate">
+                                {attribute.key}
+                              </td>
+                              <td className="p-4 text-start ">
+                                {
+                                  allAttributes.find(
+                                    (item) => item.key === attribute.key
+                                  )?.dataType
+                                }
+                              </td>
+                              <td className="p-4 text-start ">
+                                {attribute.eq.input.matchUsername
+                                  ? 'Yes'
+                                  : 'No'}
+                              </td>
+                              <td className="p-4 text-start">
+                                {renderCriteria(attribute)}
+                              </td>
+                              <td className="p-4 text-start">
+                                {renderValue(attribute)}
+                              </td>
+                              <td>
+                                <button
+                                  type="button"
+                                  title="Remove"
+                                  onClick={() => onRemoveAttribute(index)}
+                                  className="text-neutral-900 hover:text-primary-500 w-4 h-4 ml-2"
+                                >
+                                  <Close />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
 
                   <div className="flex gap-2 h-8 justify-end mt-4">
-                    <ButtonPrimaryGradient type="button" onClick={onCreatePolicy}>Create</ButtonPrimaryGradient>
-                    <ButtonGhost type="button" onClick={onCancelCreate}>Cancel</ButtonGhost>
+                    <ButtonPrimaryGradient
+                      type="button"
+                      onClick={onCreatePolicy}
+                    >
+                      Create
+                    </ButtonPrimaryGradient>
+                    <ButtonGhost type="button" onClick={onCancelCreate}>
+                      Cancel
+                    </ButtonGhost>
                   </div>
-
                 </div>
               </Dialog.Panel>
             </Transition.Child>

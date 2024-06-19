@@ -1,17 +1,19 @@
-import {Listbox} from "@headlessui/react";
-import {RequestStatus} from "../../helpers/types/queues";
-import {fetchGroups, setGroupsLoadingStatusPending} from "../../Store/reducers/queues";
-import {RootState, useAppDispatch} from "../../Store/store";
-import {useCallback, useEffect} from "react";
-import {useSelector} from 'react-redux';
-import {Check, CheckedRadio, ChevronDown, ChevronRight, UncheckedRadio} from "../Icons/icons";
-
+import { Listbox } from '@headlessui/react';
+import { useCallback, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import {
+  fetchGroups,
+  setGroupsLoadingStatusPending,
+} from '../../Store/reducers/queues';
+import { RootState, useAppDispatch } from '../../Store/store';
+import { RequestStatus } from '../../helpers/types/queues';
+import { CheckedRadio, ChevronDown, UncheckedRadio } from '../Icons/icons';
 
 const GroupsSelect = ({
-                        siteId,
-                        selectedGroups,
-                        setSelectedGroups,
-                      }: {
+  siteId,
+  selectedGroups,
+  setSelectedGroups,
+}: {
   siteId: string;
   selectedGroups: string[];
   setSelectedGroups: (groups: string[]) => void;
@@ -28,7 +30,7 @@ const GroupsSelect = ({
 
   // load approval groups
   useEffect(() => {
-    dispatch(fetchGroups({siteId, limit: 50}));
+    dispatch(fetchGroups({ siteId, limit: 50 }));
   }, []);
 
   const handleSelectGroups = (groups: string[]) => {
@@ -73,21 +75,22 @@ const GroupsSelect = ({
     }
   };
 
-  return (groups && groups.length > 0 ? (
-    <div id="groupsScrollPane" className='relative h-full'>
+  return groups && groups.length > 0 ? (
+    <div id="groupsScrollPane" className="relative h-full w-full">
       <Listbox
         value={selectedGroups}
         onChange={(value: string[]) => handleSelectGroups(value)}
         multiple
       >
-        <Listbox.Button
-          className="h-full max-h-8 bg-neutral-100 px-4 w-32 text-start font-medium flex flex-row justify-between items-center text-xs  rounded-md">
-                <span className="block truncate">
-                  {selectedGroups.length > 0
-                    ? selectedGroups.join(', ')
-                    : 'Select ...'}
-                </span>
-          <div className="w-3 text-neutral-500" style={{minWidth: '12px'}}>{<ChevronDown/>}</div>
+        <Listbox.Button className="h-full max-h-8 bg-neutral-100 px-4 w-full text-start font-medium flex flex-row justify-between items-center text-xs  rounded-md">
+          <span className="block truncate">
+            {selectedGroups.length > 0
+              ? selectedGroups.join(', ')
+              : 'Select ...'}
+          </span>
+          <div className="w-3 text-neutral-500" style={{ minWidth: '12px' }}>
+            {<ChevronDown />}
+          </div>
         </Listbox.Button>
         <Listbox.Options
           onScroll={handleScroll}
@@ -99,13 +102,21 @@ const GroupsSelect = ({
               value={group.name}
               className="h-12 hover:bg-neutral-200 px-6 flex items-center text-xs"
             >
-              {({active, selected}) => (
+              {({ active, selected }) => (
                 <div className="relative w-full h-full flex items-center">
-                  <input type="checkbox" name="status" value={group.name} checked={selected} readOnly
-                         className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"/>
-                  <label className="flex items-center justify-between gap-2 w-full"><span
-                    className="block truncate">{group.name}</span>
-                    <div className="w-4">{selected ? <CheckedRadio/> : <UncheckedRadio/>}</div>
+                  <input
+                    type="checkbox"
+                    name="status"
+                    value={group.name}
+                    checked={selected}
+                    readOnly
+                    className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"
+                  />
+                  <label className="flex items-center justify-between gap-2 w-full">
+                    <span className="block truncate">{group.name}</span>
+                    <div className="w-4">
+                      {selected ? <CheckedRadio /> : <UncheckedRadio />}
+                    </div>
                   </label>
                 </div>
               )}
@@ -116,7 +127,7 @@ const GroupsSelect = ({
     </div>
   ) : (
     <p> No Groups found. </p>
-  ))
+  );
 };
 
 export default GroupsSelect;
