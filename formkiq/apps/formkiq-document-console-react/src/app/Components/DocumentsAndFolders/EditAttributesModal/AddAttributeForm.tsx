@@ -1,22 +1,32 @@
-import RadioListbox from "../../Generic/Listboxes/RadioListbox";
-import {useRef, useState} from "react";
-import {Attribute, AttributeDataType, AttributeType} from "../../../helpers/types/attributes";
-import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
-import {openDialog as openNotificationDialog} from "../../../Store/reducers/globalNotificationControls";
-import {DocumentsService} from "../../../helpers/services/documentsService";
-import {useForm} from "react-hook-form";
-import {useAppDispatch} from "../../../Store/store";
-import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
-import {ChevronDown} from "../../Icons/icons";
-import {fetchDocumentAttributes} from "../../../Store/reducers/attributes";
-import {setAllAttributes} from "../../../Store/reducers/data";
+import { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
+import { setAllAttributes } from '../../../Store/reducers/data';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import {
+  Attribute,
+  AttributeDataType,
+} from '../../../helpers/types/attributes';
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
+import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
+import RadioListbox from '../../Generic/Listboxes/RadioListbox';
 
-function AddAttributeForm({onDocumentDataChange, siteId, value, onClose, setSelectedAttributeKey}: any) {
-  const [selectedAttributeDataType, setSelectedAttributeDataType] = useState<AttributeDataType | "">("");
+function AddAttributeForm({
+  onDocumentDataChange,
+  siteId,
+  value,
+  onClose,
+  setSelectedAttributeKey,
+}: any) {
+  const [selectedAttributeDataType, setSelectedAttributeDataType] = useState<
+    AttributeDataType | ''
+  >('');
 
   const {
     register,
-    formState: {errors},
+    formState: { errors },
     handleSubmit,
     reset,
   } = useForm();
@@ -24,7 +34,6 @@ function AddAttributeForm({onDocumentDataChange, siteId, value, onClose, setSele
   const addTagFormRef = useRef<HTMLFormElement>(null);
 
   const onAddAttributeSubmit = async (data: any) => {
-
     if (!selectedAttributeDataType) {
       dispatch(
         openNotificationDialog({
@@ -38,97 +47,110 @@ function AddAttributeForm({onDocumentDataChange, siteId, value, onClose, setSele
       attribute: {
         key: data.key,
         dataType: selectedAttributeDataType,
-        type: "STANDARD"
+        type: 'STANDARD',
+      },
+    };
+
+    DocumentsService.addAttribute(siteId, newAttribute).then((response) => {
+      if (response.status !== 200) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Failed to add attribute',
+          })
+        );
+        return;
       }
-    }
 
-
-    DocumentsService.addAttribute(siteId, newAttribute).then(
-      (response) => {
-        if (response.status !== 200) {
-          dispatch(
-            openNotificationDialog({
-              dialogTitle: 'Failed to add attribute',
-            })
-          );
-          return;
+      // update allAttributes
+      DocumentsService.getAttributes(siteId).then((response) => {
+        if (response.status === 200) {
+          const allAttributeData = {
+            allAttributes: response?.attributes,
+            attributesLastRefreshed: new Date(),
+            attributesSiteId: siteId,
+          };
+          dispatch(setAllAttributes(allAttributeData));
         }
+      });
 
-        // update allAttributes
-        DocumentsService.getAttributes(siteId).then((response) => {
-          if(response.status === 200){
-            const allAttributeData = {
-              allAttributes: response?.attributes,
-              attributesLastRefreshed: new Date(),
-              attributesSiteId: siteId,
-            };
-            dispatch(setAllAttributes(allAttributeData))
-          }
-        })
-
-        if (selectedAttributeDataType === "KEY_ONLY") {
-          setTimeout(() => {
-            const documentAttributes = {
-              attributes: [{
+      if (selectedAttributeDataType === 'KEY_ONLY') {
+        setTimeout(() => {
+          const documentAttributes = {
+            attributes: [
+              {
                 key: data.key,
-              }]
+              },
+            ],
+          };
+          DocumentsService.addDocumentAttributes(
+            siteId,
+            'false',
+            value?.documentId as string,
+            documentAttributes
+          ).then((response) => {
+            if (response.status !== 201) {
+              dispatch(
+                openNotificationDialog({
+                  dialogTitle: 'Failed to add attribute',
+                })
+              );
+            } else {
+              onDocumentDataChange(value);
+              dispatch(
+                fetchDocumentAttributes({
+                  siteId,
+                  documentId: value?.documentId as string,
+                  limit: 50,
+                })
+              );
             }
-            DocumentsService.addDocumentAttributes(siteId, "false", value?.documentId as string, documentAttributes).then((response) => {
-              if (response.status !== 201) {
-                dispatch(
-                  openNotificationDialog({
-                    dialogTitle: 'Failed to add attribute',
-                  })
-                );
-              } else {
-                onDocumentDataChange(value);
-                dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string, limit: 50}))
-              }
-            })
-          }, 500);
-
-        } else {
-          setTimeout(() => {
-            onDocumentDataChange(value);
-            setSelectedAttributeKey(data.key);
-          }, 500);
-
-        }
-      })
+          });
+        }, 500);
+      } else {
+        setTimeout(() => {
+          onDocumentDataChange(value);
+          setSelectedAttributeKey(data.key);
+        }, 500);
+      }
+    });
     reset();
     onClose();
   };
 
-  const attributeTypes = ["STRING", "NUMBER", "BOOLEAN", "KEY_ONLY"];
+  const attributeTypes = ['STRING', 'NUMBER', 'BOOLEAN', 'KEY_ONLY'];
 
   return (
     <>
-      <div className="mt-2 flex justify-center items-center w-full">
+      <div className="mt-2 ml-2 pt-1 pr-2 flex flex-wrap justify-center items-center w-full bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 rounded-md">
+        <div className="flex w-full p-2 pl-4 font-semibold">New Attribute</div>
         <form
           onSubmit={handleSubmit(onAddAttributeSubmit)}
           className="w-full"
           ref={addTagFormRef}
         >
           <div className="flex items-start mx-2 mb-4 relative w-full h-8">
-            <div className="mr-2 h-8">
-              <input type="text" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
-                     {...register('key', {required: true})}
-                     placeholder="Key"/>
-            </div>
-
-            <div className="mr-2 h-8">
-              <RadioListbox values={attributeTypes}
-                            titles={attributeTypes}
-                            selectedValue={selectedAttributeDataType}
-                            setSelectedValue={setSelectedAttributeDataType}
-                            placeholderText="Select Data Type"
+            <div className="mr-2 h-8 w-1/2">
+              <input
+                type="text"
+                className="h-8 px-4 border border-neutral-300 w-full text-sm rounded-md"
+                {...register('key', { required: true })}
+                placeholder="Key"
               />
             </div>
 
-            <ButtonPrimaryGradient
-              type="submit"
-              title="Create"
-              className="mr-2">Create</ButtonPrimaryGradient>
+            <div className="mr-2 h-8">
+              <RadioListbox
+                values={attributeTypes}
+                titles={attributeTypes}
+                selectedValue={selectedAttributeDataType}
+                setSelectedValue={setSelectedAttributeDataType}
+                placeholderText="Select Data Type"
+              />
+            </div>
+
+            <ButtonTertiary type="submit" title="Create" className="mr-2">
+              Create
+            </ButtonTertiary>
 
             <ButtonGhost onClick={onClose}> Cancel </ButtonGhost>
           </div>

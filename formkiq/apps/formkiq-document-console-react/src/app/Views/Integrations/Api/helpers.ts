@@ -298,6 +298,7 @@ export const postDocumentAccessAttributesApiItem = {
   license: 'Pro|Enterprise',
 };
 
+
 export const putDocumentAccessAttributesApiItem = {
   method: 'PUT',
   path: '/documents/ DOCUMENT_ID /accessAttributes',
@@ -1239,23 +1240,35 @@ export const getConfigurationOpaPolicyApiItem = {
   license: 'Core',
 };
 
+export const getConfigurationOpaPolicyItemsApiItem = {
+  method: 'GET',
+  path: '/sites/ SITE_ID /opa/accessPolicy/policyItems',
+  description:
+    "Returns the current site's Open Policy Agent (OPA) access policy",
+  username: 'Cognito User',
+  hasNoParams: true,
+  requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+};
+
 // NOTE: this endpoint will be updated soon
 export const putConfigurationOpaPolicyApiItem = {
   method: 'PUT',
-  path: '/sites/opa/accessPolicies',
+  path: '/sites/ SITE_ID /opa/accessPolicy/policyItems',
   description:
     "Updates the current site's Open Policy Agent (OPA) access policy",
   username: 'Cognito User',
   requiresAuthentication: true,
-  /*requiresSite: true,*/
+  requiresSite: true,
   requiresPostJson: true,
-  defaultPostJsonValue: '{"policy": "POLICY GOES HERE","siteId": "default"}',
+  defaultPostJsonValue: '{"policyItems": [{"type": "ALLOW","policy": "newPolicy","allRoles": ["user"]},{"type": "ALLOW","policy": "newPolicy2","allRoles": ["admin"]}]}',
   license: 'Pro|Enterprise',
 };
 
 export const deleteConfigurationOpaPolicyApiItem = {
   method: 'DELETE',
-  path: '/sites/ SITE_ID /opa/accessPolicy',
+  path: '/sites/ SITE_ID /opa/accessPolicy/policyItems',
   description:
     "Deletes the current site's Open Policy Agent (OPA) access policy",
   username: 'Cognito User',
@@ -1679,5 +1692,17 @@ export const deleteDocumentAttributeValueApiItem = {
     requiresDocumentID: true,
     requiresAttributeKey: true,
     requiresAttributeValue: true,
+    license: 'Core',
+};
+
+export const getGroupsApiItem = {
+    method: 'GET',
+    path: '/groups',
+    description: 'Returns the list of user groups configured in the application',
+    username: 'Cognito User',
+    requiresSite: true,
+    requiresAuthentication: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
     license: 'Core',
 };

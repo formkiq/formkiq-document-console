@@ -7,15 +7,16 @@ import { useEffect, useRef } from 'react';
 function RegoEditor({
   content,
   onChange,
+  readOnly = false,
 }: {
   content: string;
   onChange: (text: string) => void;
+  readOnly?: boolean|"nocursor";
 }) {
   const editorRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     let editor: CodeMirror.EditorFromTextArea | null = null;
-    // let editor:any = null;
     if (editorRef.current) {
       // Initialize CodeMirror
 
@@ -23,6 +24,7 @@ function RegoEditor({
         mode: 'rego',
         theme: 'base16-light',
         lineNumbers: true,
+        readOnly: readOnly,
       });
 
       editor.setSize('100%', '150%');

@@ -1158,37 +1158,45 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getOpenPolicyAgentConfiguration(
+  public static async getOpenPolicyAgentPolicies(
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.getOpenPolicyAgentPolicies();
+  }
+
+  @formkiqAPIHandler
+  public static async getOpenPolicyAgentPolicy(
     siteId: string
   ): Promise<any> {
-    return this.getFormkiqClient().sitesApi.getOpenPolicyAgentConfiguration({
+    return this.getFormkiqClient().sitesApi.getOpenPolicyAgentPolicies({
       siteId,
     });
   }
 
   @formkiqAPIHandler
-  public static async getOpenPolicyAgentConfigurations(
-    siteId: string
+  public static async getOpenPolicyAgentPolicyItems(
+    siteId: string,
   ): Promise<any> {
-    return this.getFormkiqClient().sitesApi.getOpenPolicyAgentConfigurations({
+    return this.getFormkiqClient().sitesApi.getOpenPolicyAgentPolicyItems({
       siteId,
     });
   }
 
   @formkiqAPIHandler
-  public static async deleteOpenPolicyAgent(siteId: string): Promise<any> {
-    return this.getFormkiqClient().sitesApi.deleteOpenPolicyAgent({
-      siteId,
-    });
-  }
-
-  @formkiqAPIHandler
-  public static async configureOpenPolicyAgent(
-    updateConfigurationParameters: string,
-    siteId: string
+  public static async setOpenPolicyAgentPolicyItems(
+    siteId: string,
+    updateConfigurationParameters: any
   ): Promise<any> {
-    return this.getFormkiqClient().sitesApi.configureOpenPolicyAgent({
+    return this.getFormkiqClient().sitesApi.setOpenPolicyAgentPolicyItems({
+      siteId,
       updateConfigurationParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteOpenPolicyAgentPolicyItems(
+    siteId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.deleteOpenPolicyAgentPolicyItems({
       siteId,
     });
   }
