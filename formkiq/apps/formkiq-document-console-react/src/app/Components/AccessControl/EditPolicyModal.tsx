@@ -114,8 +114,6 @@ export default function EditPolicyModal({
 
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
-    // const opaAttributes = allAttributes.filter((attribute) => attribute.type === "OPA")
-    // if (!opaAttributes || opaAttributes.length === 0) return;
     const keys = allAttributes.map(item => item.key)
     setAttributeKeys(keys)
   }, [allAttributes])
@@ -152,11 +150,6 @@ export default function EditPolicyModal({
     setAttributeCriteria(stringAttributeCriteria)
     setMatchUsername(false)
   }
-
-  // function onAttributeFormClose() {
-  //   setIsAddAttributeFormOpen(false)
-  //   cleanAttributeForm()
-  // }
 
   function onAddAttribute() {
     if (!selectedAttributeKey) {
@@ -215,7 +208,7 @@ export default function EditPolicyModal({
     return result;
   };
 
-  function onCancelCreate() {
+  function onCancelEdit() {
     cleanAttributeForm();
     setIsAddAttributeFormOpen(false)
     onClose()
@@ -236,9 +229,7 @@ export default function EditPolicyModal({
       [selectedTypeOfRoles]: selectedRoles,
       attributes: attributes
     }
-    console.log("newPolicyItem", newPolicyItem)
     newPolicyItems.splice(index, 1, newPolicyItem)
-    console.log("newPolicyItems", newPolicyItems)
 
     // set updated policy items
     DocumentsService.setOpenPolicyAgentPolicyItems(siteId, {policyItems: newPolicyItems}).then((response) => {
@@ -316,7 +307,7 @@ export default function EditPolicyModal({
                 <div className="bg-white p-6 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="w-full flex justify-between items-center">
                     <Dialog.Title className="text-2xl font-bold">
-                      Create New OPA Access Policy Item
+                      Edit OPA Access Policy Item
                     </Dialog.Title>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
@@ -526,7 +517,7 @@ export default function EditPolicyModal({
 
                   <div className="flex gap-2 h-8 justify-end mt-4">
                     <ButtonPrimaryGradient type="button" onClick={onSavePolicy}>Save</ButtonPrimaryGradient>
-                    <ButtonGhost type="button" onClick={onCancelCreate}>Cancel</ButtonGhost>
+                    <ButtonGhost type="button" onClick={onCancelEdit}>Cancel</ButtonGhost>
                   </div>
 
                 </div>
