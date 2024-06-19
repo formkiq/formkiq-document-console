@@ -147,16 +147,6 @@ function AddAttributeForm({
               />
             </div>
 
-            <div className="mr-2 h-8">
-              <RadioListbox
-                values={types}
-                titles={types}
-                selectedValue={selectedAttributeType}
-                setSelectedValue={setSelectedAttributeType}
-                placeholderText="Select Type"
-              />
-            </div>
-
             <ButtonTertiary type="submit" title="Create" className="mr-2">
               Create
             </ButtonTertiary>
