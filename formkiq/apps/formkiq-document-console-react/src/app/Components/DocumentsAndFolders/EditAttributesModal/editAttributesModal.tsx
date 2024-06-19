@@ -1,21 +1,20 @@
-import {Dialog, Transition} from '@headlessui/react';
-import {Fragment, useEffect, useRef, useState} from 'react';
-import {DocumentsService} from '../../../helpers/services/documentsService';
-import {ILine} from '../../../helpers/types/line';
-import {Close} from '../../Icons/icons';
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { ILine } from '../../../helpers/types/line';
+import { Close } from '../../Icons/icons';
 import AttributesTab from './AttributesTab';
-import MetadataTab from "./MetadataTab";
-import TagsTab from "./TagsTab";
-
+import MetadataTab from './MetadataTab';
+import TagsTab from './TagsTab';
 
 export default function EditAttributesModal({
-                                              isOpened,
-                                              onClose,
-                                              siteId,
-                                              getValue,
-                                              value,
-                                              onDocumentDataChange,
-                                            }: {
+  isOpened,
+  onClose,
+  siteId,
+  getValue,
+  value,
+  onDocumentDataChange,
+}: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
@@ -24,7 +23,9 @@ export default function EditAttributesModal({
   onDocumentDataChange: any;
 }) {
   const [allTags, setAlltags] = useState(null);
-  const [selectedTab, setSelectedTab] = useState<'attributes' | 'metadata' | 'tags'>('attributes');
+  const [selectedTab, setSelectedTab] = useState<
+    'attributes' | 'metadata' | 'tags'
+  >('attributes');
 
   const doneButtonRef = useRef(null);
   const closeDialog = () => {
@@ -66,7 +67,6 @@ export default function EditAttributesModal({
     });
   };
 
-
   return (
     <Transition.Root show={isOpened} as={Fragment}>
       <Dialog
@@ -84,7 +84,7 @@ export default function EditAttributesModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 transition-opacity"/>
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-20 overflow-y-auto">
@@ -108,7 +108,7 @@ export default function EditAttributesModal({
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
                       onClick={closeDialog}
                     >
-                      <Close/>
+                      <Close />
                     </div>
                   </div>
 
@@ -143,7 +143,7 @@ export default function EditAttributesModal({
                     >
                       METADATA
                     </button>
-                    {allTags && (allTags as any[]).length > 0 &&
+                    {allTags && (allTags as any[]).length > 0 && (
                       <button
                         type="button"
                         className="h-8 px-4"
@@ -157,7 +157,9 @@ export default function EditAttributesModal({
                         onClick={() => setSelectedTab('tags')}
                       >
                         TAGS
-                      </button>}
+                        <span className="text-xs pl-2">(Legacy)</span>
+                      </button>
+                    )}
                   </div>
 
                   {selectedTab === 'attributes' && (
@@ -177,18 +179,21 @@ export default function EditAttributesModal({
                     />
                   )}
 
-                  {allTags && (allTags as any[]).length > 0 && selectedTab === 'tags' && <TagsTab
-                    onDocumentDataChange={onDocumentDataChange}
-                    siteId={siteId}
-                    value={value}
-                    getValue={getValue}
-                    allTags={allTags}
-                    setSelectedTab={setSelectedTab}
-                    onTagEdit={onTagEdit}
-                    setAlltags={setAlltags}
-                    updateTags={updateTags}
-                  />}
-
+                  {allTags &&
+                    (allTags as any[]).length > 0 &&
+                    selectedTab === 'tags' && (
+                      <TagsTab
+                        onDocumentDataChange={onDocumentDataChange}
+                        siteId={siteId}
+                        value={value}
+                        getValue={getValue}
+                        allTags={allTags}
+                        setSelectedTab={setSelectedTab}
+                        onTagEdit={onTagEdit}
+                        setAlltags={setAlltags}
+                        updateTags={updateTags}
+                      />
+                    )}
                 </div>
               </Dialog.Panel>
             </Transition.Child>
