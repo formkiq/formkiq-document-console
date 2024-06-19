@@ -87,7 +87,9 @@ function DocumentListLine({
   const [timeoutId, setTimeOutId] = useState(null);
   const dispatch = useAppDispatch();
 
-  const { user } = useAuthenticatedState();
+  const {user} = useAuthenticatedState();
+  const [keyOnlyAttributesKeys, setKeyOnlyAttributesKeys] = useState<string[]>([])
+
 
   const {
     formkiqVersion,
@@ -245,6 +247,16 @@ function DocumentListLine({
     }
   }
 
+  useEffect(() => {
+    if (!file.attributes) return;
+    const attributesKeys = Object.keys(file.attributes);
+    if (attributesKeys.length === 0) return;
+    const keyOnlyAttributes = attributesKeys.filter((key) => file.attributes[key].valueType === 'KEY_ONLY')
+    setKeyOnlyAttributesKeys(keyOnlyAttributes)
+  },[file])
+
+
+
   return (
     <>
       <tr
@@ -346,6 +358,31 @@ function DocumentListLine({
               </Link>
               <div className="grow flex items-center justify-end pt-1.5 pr-4">
                 <div className="flex flex-wrap justify-end w-52">
+                  {keyOnlyAttributesKeys && keyOnlyAttributesKeys.map((attributeKey, i) => {
+                    let tagColor = 'gray';
+                    if (tagColors) {
+                      tagColors.forEach((color) => {
+                        if (color.tagKeys.indexOf(attributeKey) > -1) {
+                          tagColor = color.colorUri;
+                          return;
+                        }
+                      });
+                    }
+                    return(
+                      <div
+                        className="pt-0.5 pr-1 flex" key={"attribute_" + i}>
+                        <div
+                          className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                        >
+                          {attributeKey}
+                        </div>
+                        <div
+                          className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                        ></div>
+                      </div>)
+                    }
+                  )}
+
                   {file.tags &&
                     Object.getOwnPropertyNames(file.tags)
                       .sort() // This will sort the property names alphabetically

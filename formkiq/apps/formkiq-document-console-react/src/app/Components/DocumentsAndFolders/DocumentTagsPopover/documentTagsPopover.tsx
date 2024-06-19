@@ -4,6 +4,7 @@ import { setTagColors } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
+import { DocumentAttribute } from '../../../helpers/types/attributes';
 import { ILine } from '../../../helpers/types/line';
 import { Close, Spinner, Tag } from '../../Icons/icons';
 import AddTag from '../AddTag/addTag';
@@ -37,6 +38,10 @@ export default function DocumentTagsPopover({
   const line: ILine = value;
   const [visible, setVisibility] = useState(false);
   const [allTags, setAllTags] = useState(null);
+  const [isAttributesLoading, setIsAttributesLoading] = useState(true);
+  const [keyOnlyAttributesKeys, setKeyOnlyAttributesKeys] = useState<string[]>(
+    []
+  );
   const [referenceRef, setReferenceRef] = useState(null);
   const [popperRef, setPopperRef] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,66 +54,9 @@ export default function DocumentTagsPopover({
     'path',
   ];
 
-  useEffect(() => {
-    // updateTags()
-  }, [line]);
-
-  const updateTags = () => {
-    if (line) {
-      setAllTags(null);
-      setIsLoading(true);
-      DocumentsService.getDocumentTags(line.documentId as string, siteId).then(
-        (data) => {
-          setAllTags(
-            data?.tags.filter((tag: any) => {
-              return systemTags.indexOf(tag.key) === -1;
-            })
-          );
-          setIsLoading(false);
-        }
-      );
-    }
-  };
-  const onTagDelete = (tagKey: string) => {
-    const deleteFunc = () => {
-      setAllTags(null);
-      DocumentsService.deleteDocumentTag(
-        value?.documentId as string,
-        siteId,
-        tagKey
-      ).then(() => {
-        setTimeout(() => {
-          onDocumentDataChange(value);
-        }, 500);
-      });
-    };
-    dispatch(
-      openDialog({
-        callback: deleteFunc,
-        dialogTitle: 'Are you sure you want to delete this tag?',
-      })
-    );
-  };
   const toggleTagColorEdit = () => {
     setIsTagColorEditMode(!isTagColorEditMode);
   };
-
-  const dispatch = useAppDispatch();
-
-  const wrapperRef = useRef(null);
-  useOutsideAlerter(wrapperRef, setVisibility);
-  const { styles, attributes } = usePopper(referenceRef, popperRef, {
-    placement: 'bottom-start',
-    modifiers: [
-      {
-        name: 'offset',
-        enabled: true,
-        options: {
-          offset: [-100, 0],
-        },
-      },
-    ],
-  });
   const onTagColorChange = (tagKey: string, colorUri: string) => {
     const replacementTagColors = [...tagColors];
     let previousColorUri = '';
@@ -156,13 +104,119 @@ export default function DocumentTagsPopover({
     }
     dispatch(setTagColors(replacementTagColors));
   };
+
+  const updateTags = () => {
+    if (line) {
+      setAllTags(null);
+      setIsLoading(true);
+      DocumentsService.getDocumentTags(line.documentId as string, siteId).then(
+        (data) => {
+          setAllTags(
+            data?.tags.filter((tag: any) => {
+              return systemTags.indexOf(tag.key) === -1;
+            })
+          );
+          setIsLoading(false);
+        }
+      );
+    }
+  };
+  const onTagDelete = (tagKey: string) => {
+    const deleteFunc = () => {
+      setAllTags(null);
+      DocumentsService.deleteDocumentTag(
+        value?.documentId as string,
+        siteId,
+        tagKey
+      ).then(() => {
+        setTimeout(() => {
+          onDocumentDataChange(value);
+        }, 500);
+      });
+    };
+    dispatch(
+      openDialog({
+        callback: deleteFunc,
+        dialogTitle: 'Are you sure you want to delete this tag?',
+      })
+    );
+  };
+
+  const dispatch = useAppDispatch();
+
+  const wrapperRef = useRef(null);
+  useOutsideAlerter(wrapperRef, setVisibility);
+  const { styles, attributes } = usePopper(referenceRef, popperRef, {
+    placement: 'bottom-start',
+    modifiers: [
+      {
+        name: 'offset',
+        enabled: true,
+        options: {
+          offset: [-100, 0],
+        },
+      },
+    ],
+  });
+
   function handleDropdownClick(event: any) {
     updateTags();
+    updateAttributes();
     if (visible) {
       setIsTagColorEditMode(false);
     }
     setVisibility(!visible);
   }
+
+  function updateAttributes() {
+    DocumentsService.getDocumentAttributes(
+      siteId,
+      null,
+      20,
+      line?.documentId as string
+    ).then((response) => {
+      setIsAttributesLoading(false);
+      const attributes = response.attributes;
+      if (!attributes || attributes.length === 0) return;
+      const keyOnlyAttributes: DocumentAttribute[] = [];
+      attributes.forEach((attribute: DocumentAttribute) => {
+        if (
+          attribute.key &&
+          !attribute.stringValue &&
+          !attribute.numberValue &&
+          !attribute.booleanValue &&
+          !attribute.stringValues &&
+          !attribute.numberValues
+        ) {
+          keyOnlyAttributes.push(attribute);
+        }
+      });
+      if (!keyOnlyAttributes || keyOnlyAttributes.length === 0) return;
+      setKeyOnlyAttributesKeys(
+        keyOnlyAttributes.map((attribute) => attribute.key)
+      );
+    });
+  }
+
+  function onDocumentAttributeDelete(key: string) {
+    function deleteAttribute() {
+      DocumentsService.deleteDocumentAttribute(
+        siteId,
+        line?.documentId as string,
+        key
+      ).then(() => {
+        onDocumentDataChange(value);
+      });
+    }
+
+    dispatch(
+      openDialog({
+        callback: deleteAttribute,
+        dialogTitle: 'Are you sure you want to delete this attribute?',
+      })
+    );
+  }
+
   return (
     <div className="relative" ref={wrapperRef}>
       <button
@@ -195,11 +249,57 @@ export default function DocumentTagsPopover({
             )}
           </div>
           <div className="flex flex-wrap">
-            {isLoading && (
+            {(isLoading || isAttributesLoading) && (
               <div className="w-full flex justify-center">
                 <Spinner />
               </div>
             )}
+
+            {keyOnlyAttributesKeys.length > 0 &&
+              keyOnlyAttributesKeys.map((key: any, i: number) => {
+                let tagColor = 'gray';
+                if (tagColors) {
+                  tagColors.forEach((color: any) => {
+                    if (color.tagKeys.indexOf(key) > -1) {
+                      tagColor = color.colorUri;
+                      return;
+                    }
+                  });
+                }
+                return (
+                  <div key={i} className="inline">
+                    <div className="pt-0.5 pr-1 flex items-center">
+                      <div
+                        className={`h-5.5 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}
+                      >
+                        {' '}
+                        {isTagColorEditMode && (
+                          <TagColorPickerPopover
+                            onColorChange={onTagColorChange}
+                            tagKey={key}
+                            tagColors={tagColors}
+                          />
+                        )}
+                        <span className="p-2">{key}</span>
+                        {!isSiteReadOnly && (
+                          <button
+                            className="pl-1 font-semibold hover:text-red-600"
+                            onClick={() => onDocumentAttributeDelete(key)}
+                          >
+                            <div className="w-3.5 text-gray-600">
+                              <Close />
+                            </div>
+                          </button>
+                        )}
+                      </div>
+                      <div
+                        className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+
             {allTags &&
               (allTags as []).map((tag: any, i: number) => {
                 let isKeyOnlyTag = false;
@@ -258,7 +358,6 @@ export default function DocumentTagsPopover({
               <AddTag
                 line={line}
                 onDocumentDataChange={onDocumentDataChange}
-                updateTags={updateTags}
                 siteId={siteId}
                 tagColors={tagColors}
               />

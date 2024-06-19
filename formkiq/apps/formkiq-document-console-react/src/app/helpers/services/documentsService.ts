@@ -286,7 +286,9 @@ export class DocumentsService {
     previous = null,
     next = null,
     limit = 20,
-    allTags = [] as any[]
+    allTags = [] as any[],
+    attribute: string | null = null,
+    allAttributes = [] as any[]
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -313,6 +315,27 @@ export class DocumentsService {
         customIncludeTags.push(allTag.value);
       }
     });
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
+    if(attribute){
+      const searchBody = {
+          query: {
+            attribute:{
+                key:attribute
+              }
+          },
+        responseFields: {
+          tags: customIncludeTags,
+          attributes: attributesKeys
+        },
+      };
+      return this.getFormkiqClient().searchApi.search({
+        searchParameters: searchBody,
+        siteId,
+        previous,
+        next,
+        limit,
+      });
+    }
     const searchBody = {
       query: {
         meta: {
@@ -322,6 +345,7 @@ export class DocumentsService {
       },
       responseFields: {
         tags: customIncludeTags,
+        attributes: attributesKeys
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -338,7 +362,9 @@ export class DocumentsService {
     siteId = '',
     tag: string | null = null,
     previous = null,
-    next = null
+    next = null,
+    attribute: string | null = null,
+    allAttributes = [] as any[]
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -359,15 +385,18 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
     const searchBody = {
       query: {
         tag: {
           key: 'sysSharedWith',
           eq: (user as any).email,
         },
+        attribute: attribute?{key:attribute}:null,
       },
       responseFields: {
         tags: customIncludeTags,
+        attributes: attributesKeys
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -383,7 +412,9 @@ export class DocumentsService {
     siteId = '',
     tag: string | null = null,
     previous = null,
-    next = null
+    next = null,
+    attribute: string | null = null,
+    allAttributes = [] as any[]
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -404,15 +435,18 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
     const searchBody = {
       query: {
         tag: {
           key: 'sysFavoritedBy',
           eq: folderValue,
         },
+        attribute: attribute?{key:attribute}:null,
       },
       responseFields: {
         tags: customIncludeTags,
+        attributes: attributesKeys
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -428,7 +462,9 @@ export class DocumentsService {
     siteId = '',
     tag: string | null = null,
     previous = null,
-    next = null
+    next = null,
+    attribute: string | null = null,
+    allAttributes = [] as any[]
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -444,14 +480,17 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
     const searchBody = {
       query: {
         tag: {
           key: 'sysDeletedBy',
         },
+        attribute: attribute?{key:attribute}:null,
       },
       responseFields: {
         tags: customIncludeTags,
+        attributes: attributesKeys
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -467,7 +506,9 @@ export class DocumentsService {
     siteId = '',
     tag: string | null = null,
     previous = null,
-    next = null
+    next = null,
+    attribute: string | null = null,
+    allAttributes = [] as any[]
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -483,6 +524,26 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
+    if (attribute) {
+        const searchBody = {
+            query: {
+                attribute: {
+                    key: attribute,
+                },
+            },
+            responseFields: {
+                tags: customIncludeTags,
+                attributes: attributesKeys
+            },
+        };
+        return this.getFormkiqClient().searchApi.search({
+            searchParameters: searchBody,
+            siteId,
+            previous,
+            next,
+        });
+    }
     const searchBody = {
       query: {
         meta: {
@@ -492,6 +553,7 @@ export class DocumentsService {
       },
       responseFields: {
         tags: customIncludeTags,
+        attributes: attributesKeys
       },
     };
     return this.getFormkiqClient().searchApi.search({
@@ -590,7 +652,8 @@ export class DocumentsService {
     tag: string | null = null,
     searchText: string,
     page = 1,
-    allTags = [] as any[]
+    allTags = [] as any[],
+    allAttributes = [] as any[],
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -618,6 +681,7 @@ export class DocumentsService {
         },
         responseFields: {
           tags: customIncludeTags,
+          attributes: allAttributes,
         },
       };
       return this.getFormkiqClient().searchApi.search({
@@ -632,6 +696,7 @@ export class DocumentsService {
         },
         responseFields: {
           tags: customIncludeTags,
+          attributes:allAttributes,
         },
       };
       return this.getFormkiqClient().searchApi.searchFulltext({
@@ -647,7 +712,8 @@ export class DocumentsService {
     tag: string | null = null,
     searchText: string,
     folder: string,
-    page: number
+    page: number,
+    allAttributes = [] as any[],
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -663,6 +729,7 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
+
     const searchBody = {
       query: {
         text: searchText + '*',
@@ -673,6 +740,7 @@ export class DocumentsService {
         page: page,
         responseFields: {
           tags: customIncludeTags,
+          attributes: allAttributes,
         },
       },
     };
@@ -939,6 +1007,25 @@ export class DocumentsService {
       addOrUpdateDocumentParameters: documentParams,
       siteId,
     });
+  }
+
+  @formkiqAPIHandler
+  public static async patchDocumentDetails(
+      documentId: string,
+      details: any,
+      siteId = ''
+  ): Promise<any> {
+      if (!siteId || !siteId.length) {
+          siteId = this.determineSiteId();
+      }
+      const documentParams = {
+          ...details,
+      };
+      return this.getFormkiqClient().documentsApi.updateDocument({
+          documentId,
+          addOrUpdateDocumentParameters: documentParams,
+          siteId,
+      });
   }
 
   @formkiqAPIHandler
@@ -1716,4 +1803,183 @@ export class DocumentsService {
       addDecisionParameters,
     });
   }
+
+  @formkiqAPIHandler
+  public static async getAttributes(
+      siteId: string,
+      next = null,
+      limit = 100
+  ): Promise<any> {
+      if (!siteId) {
+          siteId = this.determineSiteId();
+      }
+      return this.getFormkiqClient().documentsApi.getAttributes({
+          siteId,
+          next,
+          limit,
+      });
+  }
+
+  @formkiqAPIHandler
+  public static async addAttribute(
+      siteId: string,
+      addAttributeParameters: any,
+  ): Promise<any> {
+      if (!siteId) {
+          siteId = this.determineSiteId();
+      }
+      return this.getFormkiqClient().documentsApi.addAttribute({
+        siteId,
+        addAttributeParameters,
+      });
+  }
+
+  @formkiqAPIHandler
+    public static async getAttribute(
+        siteId: string,
+        key: string,
+    ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.getAttribute({
+      siteId,
+      key,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteAttribute(
+      siteId: string,
+      key: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.deleteAttribute({
+      siteId,
+      key,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getDocumentAttributes(
+      siteId: string,
+      next = null,
+      limit = 20,
+      documentId: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.getDocumentAttributes({
+      siteId,
+      limit,
+      documentId,
+      next,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async addDocumentAttributes(
+      siteId: string,
+      ws: string,
+      documentId: string,
+      addDocumentAttributesParameters: any,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.addDocumentAttributes({
+      siteId,
+      ws,
+      documentId,
+      addDocumentAttributesParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async setDocumentAttributes(
+      siteId: string,
+      documentId: string,
+      setDocumentAttributesParameters: any,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.setDocumentAttributes({
+      siteId,
+      documentId,
+      setDocumentAttributesParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getDocumentAttribute(
+      siteId: string,
+      documentId: string,
+      attributeKey: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.getDocumentAttribute({
+      siteId,
+      documentId,
+      attributeKey,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async setDocumentAttributeValue(
+      siteId: string,
+      documentId: string,
+      attributeKey: string,
+      setDocumentsAttributeValueParameters: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.setDocumentAttributeValue({
+      siteId,
+      documentId,
+      attributeKey,
+      setDocumentsAttributeValueParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteDocumentAttribute(
+      siteId: string,
+      documentId: string,
+      attributeKey: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.deleteDocumentAttribute({
+      siteId,
+      documentId,
+      attributeKey,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteDocumentAttributeValue(
+      siteId: string,
+      documentId: string,
+      attributeKey: string,
+      attributeValue: string,
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.deleteDocumentAttributeValue({
+      siteId,
+      documentId,
+      attributeKey,
+      attributeValue,
+    });
+  }
+
 }

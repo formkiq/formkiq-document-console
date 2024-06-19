@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { setAllTags } from '../../Store/reducers/data';
+import {setAllAttributes, setAllTags} from '../../Store/reducers/data';
 import {
   addOrCreateTagValue,
   excludeDocumentsWithTagFromAll,
@@ -26,6 +26,7 @@ export const fetchDocuments = createAsyncThunk(
       subfolderUri,
       queueId,
       filterTag,
+      filterAttribute,
       nextToken,
       page,
       documents,
@@ -33,6 +34,7 @@ export const fetchDocuments = createAsyncThunk(
     } = data;
     const user = (thunkAPI.getState() as any)?.authState.user;
     const tagParam = filterTag ? filterTag.split(':')[0] : null;
+    const attributeParam = filterAttribute ? filterAttribute : null;
     const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
     const dateDiff =
       new Date().getTime() - dataCache.tagsLastRefreshed.getTime();
@@ -45,17 +47,27 @@ export const fetchDocuments = createAsyncThunk(
         };
         thunkAPI.dispatch(setAllTags(allTagData));
       });
+      await DocumentsService.getAttributes(siteId).then((response: any) => {
+        const allAttributesData = {
+          allAttributes: response?.attributes,
+          attributesLastRefreshed: new Date(),
+          attributesSiteId: siteId,
+        };
+        thunkAPI.dispatch(setAllAttributes(allAttributesData));
+        });
     }
     if (searchWord) {
       if (searchFolder && searchFolder.length) {
         // TODO: see if now implemented on backend
         // NOTE: not yet implemented on backend
-        DocumentsService.searchDocumentsInFolder(
+        const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
+                DocumentsService.searchDocumentsInFolder(
           siteId,
           tagParam,
           searchWord,
           searchFolder,
-          page
+          page,
+          dataCache.allAttributes,
         ).then((response: any) => {
           if (response) {
             const data = {
@@ -83,7 +95,8 @@ export const fetchDocuments = createAsyncThunk(
           tagParam,
           searchWord,
           page,
-          dataCache.allTags
+          dataCache.allTags,
+          dataCache.allAttributes,
         ).then((response: any) => {
           if (response) {
             const temp: any = response.documents?.filter(
@@ -111,7 +124,6 @@ export const fetchDocuments = createAsyncThunk(
       }
     } else {
       if (queueId && queueId.length) {
-        const dataCache = (thunkAPI.getState() as RootState).dataCacheState;
         DocumentsService.getDocumentsInQueue(
           queueId,
           siteId,
@@ -146,12 +158,15 @@ export const fetchDocuments = createAsyncThunk(
           }
         });
       } else if (subfolderUri) {
+        const dataCache = (thunkAPI.getState() as RootState).dataCacheState;
         if (subfolderUri === 'shared') {
           DocumentsService.getDocumentsSharedWithMe(
             siteId,
             tagParam,
             null,
-            nextToken
+            nextToken,
+            attributeParam,
+            dataCache.allAttributes
           ).then((response: any) => {
             if (response) {
               const data = {
@@ -178,7 +193,9 @@ export const fetchDocuments = createAsyncThunk(
             siteId,
             tagParam,
             null,
-            nextToken
+            nextToken,
+            attributeParam,
+            dataCache.allAttributes
           ).then((response: any) => {
             if (response) {
               const data = {
@@ -205,7 +222,9 @@ export const fetchDocuments = createAsyncThunk(
             siteId,
             tagParam,
             null,
-            nextToken
+            nextToken,
+            attributeParam,
+            dataCache.allAttributes
           ).then((response: any) => {
             if (response) {
               const data = {
@@ -232,7 +251,9 @@ export const fetchDocuments = createAsyncThunk(
             siteId,
             tagParam,
             null,
-            nextToken
+            nextToken,
+            attributeParam,
+            dataCache.allAttributes
           ).then((response: any) => {
             if (response) {
               const data = {
@@ -263,7 +284,9 @@ export const fetchDocuments = createAsyncThunk(
             null,
             nextToken,
             20,
-            dataCache.allTags
+            dataCache.allTags,
+            attributeParam,
+            dataCache.allAttributes,
           ).then((response: any) => {
             if (response) {
               const data = {
@@ -295,7 +318,9 @@ export const fetchDocuments = createAsyncThunk(
           null,
           nextToken,
           20,
-          dataCache.allTags
+          dataCache.allTags,
+          attributeParam,
+          dataCache.allAttributes,
         ).then((response: any) => {
           if (response) {
             const data = {
@@ -306,6 +331,7 @@ export const fetchDocuments = createAsyncThunk(
               tag: filterTag,
               next: response.next,
               isLoadingMore: false,
+              attribute: filterAttribute,
             };
             if (nextToken) {
               data.isLoadingMore = true;
@@ -345,18 +371,28 @@ export const toggleExpandFolder = createAsyncThunk(
         };
         thunkAPI.dispatch(setAllTags(allTagData));
       });
+
+      await DocumentsService.getAttributes(siteId).then(
+        (response: any) => {
+          const allAttributeData = {
+            allAttributes: response?.attributes,
+            attributesLastRefreshed: new Date(),
+            attributesSiteId: siteId,
+          };
+          thunkAPI.dispatch(setAllAttributes(allAttributeData));
+        });
     }
     const folderPath = subfolderUri;
     if (folder.isExpanded) {
-      const newValue = { ...folder, isExpanded: false };
+      const newValue = {...folder, isExpanded: false};
       thunkAPI.dispatch(
-        updateFolderValue({ folderToUpdate: folder, newValue })
+        updateFolderValue({folderToUpdate: folder, newValue})
       );
     } else {
       if (folder.documents?.length > 0 || folder.folders?.length > 0) {
-        const newValue = { ...folder, isExpanded: true };
+        const newValue = {...folder, isExpanded: true};
         thunkAPI.dispatch(
-          updateFolderValue({ folderToUpdate: folder, newValue })
+          updateFolderValue({folderToUpdate: folder, newValue})
         );
       } else {
         await DocumentsService.getDocumentsInFolder(
@@ -366,7 +402,8 @@ export const toggleExpandFolder = createAsyncThunk(
           null,
           null,
           25,
-          dataCache.allTags
+          dataCache.allTags,
+          dataCache.allAttributes
         ).then((response: any) => {
           if (response) {
             let insertedDate = '';
@@ -401,7 +438,7 @@ export const toggleExpandFolder = createAsyncThunk(
               tags: [],
             };
             thunkAPI.dispatch(
-              updateFolderValue({ folderToUpdate: folder, newValue })
+              updateFolderValue({folderToUpdate: folder, newValue})
             );
           }
         });
@@ -421,7 +458,7 @@ export const fetchDeleteFolder = createAsyncThunk(
     } = data;
     DocumentsService.deleteFolder(folder.indexKey, siteId).then((response) => {
       if (response.status && response.status === 200) {
-        thunkAPI.dispatch(removeFolderFromList({ folderToDelete: folder }));
+        thunkAPI.dispatch(removeFolderFromList({folderToDelete: folder}));
       } else {
         if (response.message === 'Folder not empty') {
           thunkAPI.dispatch(
@@ -432,7 +469,7 @@ export const fetchDeleteFolder = createAsyncThunk(
           );
         } else {
           thunkAPI.dispatch(
-            openNotificationDialog({ dialogTitle: response.message })
+            openNotificationDialog({dialogTitle: response.message})
           );
         }
       }
@@ -524,9 +561,10 @@ export const documentsListSlice = createSlice({
           folder,
           tag,
           isLoadingMore = false,
+          attribute,
         } = action.payload;
 
-        let { next, page = 1, isLastSearchPageLoaded = false } = action.payload;
+        let {next, page = 1, isLastSearchPageLoaded = false} = action.payload;
 
         if (page > 1) {
           next = null;

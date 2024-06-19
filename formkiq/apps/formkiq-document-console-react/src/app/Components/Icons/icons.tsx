@@ -845,6 +845,26 @@ export function ChevronRight() {
   );
 }
 
+export function ChevronDown() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 10 10"
+      width="100%"
+      height="100%"
+      className="fill-current"
+    >
+      <path
+        d="M1 2L5 6L9 2"
+        stroke="currentColor"
+        fill="transparent"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function ArrowRight() {
   return (
     <svg
@@ -1523,6 +1543,35 @@ export function CopyToClipboard() {
             d="M29 31H7V7h2V5H6.64A1.66 1.66 0 0 0 5 6.67v24.65A1.66 1.66 0 0 0 6.65 33h22.71A1.66 1.66 0 0 0 31 31.33v-9.27h-2Z"
             className="clr-i-outline clr-i-outline-path-4"/>
       <path fill="none" d="M0 0h36v36H0z"/>
+    </svg>
+  );
+}
+
+export function CheckedRadio() {
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="2" />
+      <circle cx="8" cy="8" r="4" stroke="currentColor" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function UncheckedRadio() {
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="2" />
     </svg>
   );
 }

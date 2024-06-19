@@ -190,7 +190,6 @@ export const configSlice = createSlice({
       };
     },
     setTagColors(state, action: PayloadAction<TagColor[]>) {
-      // console.log(action)
       return {
         ...state,
         tagColors: action.payload,

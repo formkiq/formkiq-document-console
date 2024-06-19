@@ -165,6 +165,33 @@ function updateRequestsFromForm(
     }
   }
 
+  if (apiItem.requiresAttributeKey) {
+    if (getFormInput(formRef, 'attributeKey')?.validity?.valid) {
+      path = path.replace(
+        ' ATTRIBUTE_KEY ',
+        getFormInput(formRef, 'attributeKey')?.value
+      );
+    }
+  }
+
+  if (apiItem.requiresAttributeKey) {
+    if (getFormInput(formRef, 'attributeValue')?.validity?.valid) {
+      path = path.replace(
+        ' ATTRIBUTE_VALUE ',
+        getFormInput(formRef, 'attributeValue')?.value
+      );
+    }
+  }
+
+  if (apiItem.requiresAttributeKey) {
+    if (getFormInput(formRef, 'attributeValue')?.validity?.valid) {
+      path = path.replace(
+        ' ATTRIBUTE_VALUE ',
+        getFormInput(formRef, 'attributeValue')?.value
+      );
+    }
+  }
+
   let httpRequest = apiItem.method + ' ' + path;
   let curlRequest = '';
   const fetchUrl = host + path;
@@ -347,6 +374,13 @@ function updateRequestsFromForm(
       getFormInput(formRef, 'next')?.value.length > 0
     ) {
       params.set('next', getFormInput(formRef, 'next')?.value);
+    }
+
+    if (
+      getFormInput(formRef, 'webSocket')?.value &&
+      getFormInput(formRef, 'webSocket')?.validity?.valid
+    ) {
+      params.set('ws', getFormInput(formRef, 'webSocket')?.checked);
     }
 
     if (getFormInput(formRef, 'postJson')?.validity?.valid) {
@@ -1666,46 +1700,103 @@ function getApiItem(
             )}
 
             {apiItem.requiresRulesetID && (
-                <div className="md:flex md:items-center mx-4 mb-4 relative">
-                  <div className="w-full md:w-1/4">
-                    <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                      Ruleset ID
-                    </label>
-                  </div>
-                  <div className="w-full md:w-3/4">
-                    <input
-                      aria-label="Ruleset ID"
-                      name="rulesetID"
-                      type="text"
-                      required
-                      className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Ruleset ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Ruleset ID"
+                    name="rulesetID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
             placeholder-gray-500 text-gray-900 rounded-t-md
             focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
-                    />
-                  </div>
+                  />
                 </div>
-              )}
+              </div>
+            )}
 
             {apiItem.requiresRuleID && (
-                <div className="md:flex md:items-center mx-4 mb-4 relative">
-                  <div className="w-full md:w-1/4">
-                    <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                      Rule ID
-                    </label>
-                  </div>
-                  <div className="w-full md:w-3/4">
-                    <input
-                      aria-label="Rule ID"
-                      name="ruleID"
-                      type="text"
-                      required
-                      className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Rule ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Rule ID"
+                    name="ruleID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
             placeholder-gray-500 text-gray-900 rounded-t-md
             focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
-                    />
-                  </div>
+                  />
                 </div>
-              )}
+              </div>
+            )}
+            {apiItem.requiresAttributeKey && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    ATTRIBUTE KEY
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="ATTRIBUTE KEY"
+                    name="attributeKey"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresAttributeValue && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    ATTRIBUTE VALUE
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="ATTRIBUTE VALUE"
+                    name="attributeValue"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresWS && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full">
+                  <label className="block text-gray-500 font-bold mb-1 md:mb-0 pr-4">
+                    Enable WebSocket real-time communication with the request
+                  </label>
+                </div>
+                <input
+                  aria-label="WEB SOCKET"
+                  name="webSocket"
+                  type="checkbox"
+                  className="appearance-none rounded-md relative block px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                />
+              </div>
+            )}
           </form>
         </li>
         <li className="relative mt-10 sm:mt-2 md:mt-0">

@@ -3,14 +3,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentReviewModal/DocumentReviewModal';
 import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
 import DocumentWorkflowsModal from '../../Components/DocumentsAndFolders/DocumentWorkflowsModal/documentWorkflowsModal';
 import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
-import EditTagsAndMetadataModal from '../../Components/DocumentsAndFolders/EditTagsAndMetadataModal/editTagsAndMetadataModal';
+import EditAttributesModal from '../../Components/DocumentsAndFolders/EditAttributesModal/editAttributesModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
@@ -18,11 +17,11 @@ import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/rename
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
 import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
 import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
 import {
-  ChevronLeft,
   ChevronRight,
   Close,
   Download,
@@ -43,6 +42,7 @@ import {
 } from '../../Store/reducers/config';
 import {
   DataCacheState,
+  setAllAttributes,
   setAllTags,
   setCurrentDocumentPath,
 } from '../../Store/reducers/data';
@@ -70,6 +70,7 @@ import {
   getFileIcon,
   getUserSites,
 } from '../../helpers/services/toolService';
+import { Attribute } from '../../helpers/types/attributes';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
@@ -77,7 +78,6 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -100,14 +100,14 @@ function Documents() {
     useSoftDelete,
     pendingArchive,
   } = useSelector(ConfigState);
-  const { allTags } = useSelector(DataCacheState);
-
+  const { allTags, allAttributes } = useSelector(DataCacheState);
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
   const filterTag = new URLSearchParams(search).get('filterTag');
+  const filterAttribute = new URLSearchParams(search).get('filterAttribute');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
   const { hash } = useLocation();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
@@ -151,14 +151,10 @@ function Documents() {
   const [infoTagEditMode, setInfoTagEditMode] = useState(false);
   // NOTE: not fully implemented;
   // using the edit metadata modal for now, to be replaced with new system to indicate diff between tag, metadata, and versioned metadata
-  const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
+  // const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
   const [currentDocument, setCurrentDocument]: [IDocument | null, any] =
     useState(null);
   const [currentDocumentTags, setCurrentDocumentTags]: [
-    IDocumentTag[] | null,
-    any
-  ] = useState([]);
-  const [currentDocumentAccessAttributes, setCurrentDocumentAccessAttributes]: [
     IDocumentTag[] | null,
     any
   ] = useState([]);
@@ -173,9 +169,9 @@ function Documents() {
     useState('');
   const [shareModalValue, setShareModalValue] = useState<ILine | null>(null);
   const [isShareModalOpened, setShareModalOpened] = useState(false);
-  const [editTagsAndMetadataModalValue, setEditTagsAndMetadataModalValue] =
+  const [editAttributesModalValue, setEditAttributesModalValue] =
     useState<ILine | null>(null);
-  const [isEditTagsAndMetadataModalOpened, setEditTagsAndMetadataModalOpened] =
+  const [isEditAttributesModalOpened, setEditAttributesModalOpened] =
     useState(false);
   const [documentVersionsModalValue, setDocumentVersionsModalValue] =
     useState<ILine | null>(null);
@@ -231,6 +227,7 @@ function Documents() {
             subfolderUri,
             queueId,
             filterTag,
+            filterAttribute,
             nextToken,
           })
         );
@@ -246,6 +243,7 @@ function Documents() {
               subfolderUri,
               queueId,
               filterTag,
+              filterAttribute,
               page: currentSearchPage + 1,
             })
           );
@@ -267,6 +265,15 @@ function Documents() {
       };
       dispatch(setAllTags(allTagData));
     });
+    DocumentsService.getAttributes(currentSiteId).then((response: any) => {
+      const allAttributeData = {
+        allAttributes: response?.attributes,
+        attributesLastRefreshed: new Date(),
+        attributesSiteId: currentSiteId,
+      };
+      dispatch(setAllAttributes(allAttributeData));
+    });
+
     if (infoDocumentId.length) {
       DocumentsService.getDocumentById(infoDocumentId, currentSiteId).then(
         (response: any) => {
@@ -344,6 +351,26 @@ function Documents() {
     }
   }, [currentActionEvent, actionEvent]);
 
+  function updateAllAttributes() {
+    DocumentsService.getAttributes(currentSiteId).then((response: any) => {
+      const allAttributeData = {
+        allAttributes: response?.attributes,
+        attributesLastRefreshed: new Date(),
+        attributesSiteId: currentSiteId,
+      };
+      dispatch(setAllAttributes(allAttributeData));
+    });
+  }
+  // load all attributes initially
+  useEffect(() => {
+    updateAllAttributes();
+  }, []);
+
+  // update all attributes when switching sites
+  useEffect(() => {
+    updateAllAttributes();
+  }, [currentSiteId]);
+
   const updateTags = () => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentTags(infoDocumentId, currentSiteId).then(
@@ -375,14 +402,6 @@ function Documents() {
           }
         });
       }
-      DocumentsService.getDocumentAccessAttributes(
-        currentSiteId,
-        infoDocumentId
-      ).then((response: any) => {
-        if (response) {
-          setCurrentDocumentAccessAttributes(response.accessAttributes);
-        }
-      });
     }
   };
 
@@ -420,6 +439,7 @@ function Documents() {
         subfolderUri,
         queueId,
         filterTag,
+        filterAttribute,
       })
     );
   }, [
@@ -430,6 +450,7 @@ function Documents() {
     subfolderUri,
     queueId,
     filterTag,
+    filterAttribute,
     formkiqVersion,
   ]);
 
@@ -542,16 +563,16 @@ function Documents() {
   const onFolderUploadClose = () => {
     setFolderUploadModalOpened(false);
   };
-  const onEditTagsAndMetadataModalClick = (event: any, value: ILine | null) => {
-    setEditTagsAndMetadataModalValue(value);
-    setEditTagsAndMetadataModalOpened(true);
+  const onEditAttributesModalClick = (event: any, value: ILine | null) => {
+    setEditAttributesModalValue(value);
+    setEditAttributesModalOpened(true);
   };
-  const onEditTagsAndMetadataModalClose = () => {
-    setEditTagsAndMetadataModalOpened(false);
+  const onEditAttributesModalClose = () => {
+    setEditAttributesModalOpened(false);
     updateTags();
   };
-  const getEditTagsAndMetadataModalValue = () => {
-    return editTagsAndMetadataModalValue;
+  const getEditAttributesModalValue = () => {
+    return editAttributesModalValue;
   };
   const onDocumentVersionsModalClick = (event: any, value: ILine | null) => {
     setDocumentVersionsModalValue(value);
@@ -593,6 +614,7 @@ function Documents() {
         queueId,
         subfolderUri,
         filterTag,
+        filterAttribute,
       })
     );
   };
@@ -648,7 +670,7 @@ function Documents() {
     }
   };
   const onFilterTag = (event: any, tag: string) => {
-    if (filterTag === tag) {
+    if (filterTag === tag || filterAttribute === tag) {
       if (subfolderUri && subfolderUri.length) {
         navigate(
           {
@@ -684,6 +706,52 @@ function Documents() {
           {
             pathname: `${currentDocumentsRootUri}`,
             search: `?filterTag=${tag}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      }
+    }
+  };
+
+  const onFilterAttribute = (event: any, attribute: string) => {
+    if (filterAttribute === attribute || filterTag === attribute) {
+      if (subfolderUri && subfolderUri.length) {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      } else {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      }
+    } else {
+      if (subfolderUri && subfolderUri.length) {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
+            search: `?filterAttribute=${attribute}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      } else {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}`,
+            search: `?filterAttribute=${attribute}`,
           },
           {
             replace: true,
@@ -752,7 +820,6 @@ function Documents() {
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
-                // className="hover:text-primary-600"
                 className="text-primary-500 hover:text-primary-600 text-sm font-bold"
               >
                 {siteDocumentsRootName.replace('Workspace: ', '')}:
@@ -829,6 +896,17 @@ function Documents() {
     let showAllTagsPopover = true;
     const minTagsToShowForFilter = 3;
     tagsToCheck = tagsToCheck.concat(TagsForFilterAndDisplay);
+
+    const keyOnlyAttributes = allAttributes.filter(
+      (attribute: Attribute) => attribute.dataType === 'KEY_ONLY'
+    );
+    const keyOnlyAttributesKeys: { value: string }[] = [];
+    if (keyOnlyAttributes.length > 0) {
+      keyOnlyAttributes.forEach((attribute: Attribute) => {
+        keyOnlyAttributesKeys.push({ value: attribute.key });
+      });
+    }
+
     if (
       filterTag &&
       filterTag.length &&
@@ -836,6 +914,15 @@ function Documents() {
     ) {
       tagsToCheck.push(filterTag);
     }
+
+    if (
+      filterAttribute &&
+      filterAttribute.length &&
+      tagsToCheck.indexOf(filterAttribute) === -1
+    ) {
+      tagsToCheck.push(filterAttribute);
+    }
+
     if (tagsToCheck.length === 0) {
       const tagsToConsider = allTags.filter((tag: any) => {
         return (
@@ -844,6 +931,7 @@ function Documents() {
           tag.value.indexOf('untagged') !== 0
         );
       });
+      tagsToConsider.unshift(...keyOnlyAttributesKeys);
       const numberOfTagsToAdd =
         tagsToConsider.length > minTagsToShowForFilter
           ? minTagsToShowForFilter
@@ -855,6 +943,13 @@ function Documents() {
         tagsToCheck.push(tagsToConsider[i].value);
       }
     }
+
+    const onFilter = (event: any, value: string, index: number) => {
+      if (!keyOnlyAttributesKeys || keyOnlyAttributesKeys.length === 0)
+        onFilterTag(event, value);
+      if (index < keyOnlyAttributesKeys.length) onFilterAttribute(event, value);
+    };
+
     return (
       <div className="flex items-center justify-start">
         <div className="w-1/3 pl-4">
@@ -887,12 +982,13 @@ function Documents() {
                     <li
                       key={i}
                       className={
-                        (filterTag === primaryTag
+                        (filterTag === primaryTag ||
+                        filterAttribute === primaryTag
                           ? 'bg-primary-500 text-white'
                           : `bg-${tagColor}-200 text-black`) +
                         ' text-xs p-1 px-2 mx-1 cursor-pointer'
                       }
-                      onClick={(event) => onFilterTag(event, primaryTag)}
+                      onClick={(event) => onFilter(event, primaryTag, i)}
                     >
                       {primaryTag}
                     </li>
@@ -904,7 +1000,10 @@ function Documents() {
                   siteId={currentSiteId}
                   tagColors={tagColors}
                   onFilterTag={onFilterTag}
+                  onFilterAttribute={onFilterAttribute}
                   filterTag={filterTag}
+                  filterAttribute={filterAttribute}
+                  allAttributes={allAttributes}
                 />
               )}
             </>
@@ -1231,9 +1330,7 @@ function Documents() {
                 onESignaturesModalClick={onESignaturesModalClick}
                 onDocumentDataChange={onDocumentDataChange}
                 isSiteReadOnly={isSiteReadOnly}
-                onEditTagsAndMetadataModalClick={
-                  onEditTagsAndMetadataModalClick
-                }
+                onEditTagsAndMetadataModalClick={onEditAttributesModalClick}
                 filterTag={filterTag}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
@@ -1437,114 +1534,14 @@ function Documents() {
                           </dd>
                         </div>
                         <div className="w-68 flex mr-3 border-b"></div>
-                        <div className="flex flex-col pt-3">
-                          <dt className="mb-1 flex justify-between">
-                            <span className="text-sm font-semibold text-primary-500">
-                              Tags
-                            </span>
-                            {!isSiteReadOnly && (
-                              <div
-                                className="w-3/5 flex font-semibold text-primary-500 cursor-pointer"
-                                onClick={(event) =>
-                                  setInfoTagEditMode(!infoTagEditMode)
-                                }
-                              >
-                                {infoTagEditMode ? (
-                                  <>
-                                    <div className="w-4 pt-0.5">
-                                      <ChevronLeft />
-                                    </div>
-                                    <span>cancel edit</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span>edit tags</span>
-                                    <div className="w-4 pt-0.5">
-                                      <ChevronRight />
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            )}
-                          </dt>
-                          <dd className="text-sm">
-                            {currentDocumentTags &&
-                              (currentDocumentTags as []).map(
-                                (tag: any, i: number) => {
-                                  let isKeyOnlyTag = false;
-                                  if (
-                                    (tag.value !== undefined &&
-                                      tag.value.length === 0) ||
-                                    (tag.values !== undefined &&
-                                      tag.values.length === 0)
-                                  ) {
-                                    isKeyOnlyTag = true;
-                                  }
-                                  let tagColor = 'gray';
-                                  if (tagColors) {
-                                    tagColors.forEach((color: any) => {
-                                      if (color.tagKeys.indexOf(tag.key) > -1) {
-                                        tagColor = color.colorUri;
-                                        return;
-                                      }
-                                    });
-                                  }
-                                  return (
-                                    <div key={i} className="inline">
-                                      {isKeyOnlyTag && (
-                                        <div className="pt-0.5 pr-1 flex items-center">
-                                          <div
-                                            className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}
-                                          >
-                                            {tag.key}
-                                            {infoTagEditMode && (
-                                              <button
-                                                className="pl-2 font-semibold hover:text-red-600"
-                                                onClick={(event) =>
-                                                  onTagDelete(tag.key)
-                                                }
-                                              >
-                                                x
-                                              </button>
-                                            )}
-                                          </div>
-                                          <div
-                                            className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                                          ></div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                }
-                              )}
-                          </dd>
-                        </div>
-                        {infoTagEditMode && (
-                          <div className="flex mt-2">
-                            <AddTag
-                              line={{
-                                lineType: 'document',
-                                folder: subfolderUri,
-                                documentId: (currentDocument as IDocument)
-                                  .documentId,
-                                documentInstance: currentDocument as IDocument,
-                                folderInstance: null,
-                              }}
-                              onDocumentDataChange={onDocumentDataChange}
-                              updateTags={updateTags}
-                              siteId={currentSiteId}
-                              tagColors={tagColors}
-                            />
-                          </div>
-                        )}
-                        <div className="w-68 flex mt-3 mr-3 border-b"></div>
+
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
-                          Metadata
+                          Attributes
                           {!isSiteReadOnly && (
                             <div
                               className="w-3/5 flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
-                                onEditTagsAndMetadataModalClick(event, {
+                                onEditAttributesModalClick(event, {
                                   lineType: 'document',
                                   folder: subfolderUri,
                                   documentId: (currentDocument as IDocument)
@@ -1555,105 +1552,25 @@ function Documents() {
                                 })
                               }
                             >
-                              {infoMetadataEditMode ? (
-                                <>
-                                  <div className="w-4 pt-0.5">
-                                    <ChevronLeft />
-                                  </div>
-                                  <span>cancel edit</span>
-                                </>
-                              ) : (
-                                <>
-                                  <span>add/edit metadata</span>
-                                  <div className="w-4 pt-0.5">
-                                    <ChevronRight />
-                                  </div>
-                                </>
-                              )}
+                              <>
+                                <span>add/edit attributes</span>
+                                <div className="w-4 pt-0.5">
+                                  <ChevronRight />
+                                </div>
+                              </>
                             </div>
                           )}
                         </div>
-                        {currentDocumentTags &&
-                          (currentDocumentTags as []).map(
-                            (tag: any, i: number) => {
-                              let isKeyOnlyTag = false;
-                              if (
-                                (tag.value !== undefined &&
-                                  tag.value.length === 0) ||
-                                (tag.values !== undefined &&
-                                  tag.values.length === 0)
-                              ) {
-                                isKeyOnlyTag = true;
-                              }
-                              return (
-                                <div
-                                  key={i}
-                                  className={
-                                    (isKeyOnlyTag ? 'hidden' : 'inline') +
-                                    ' flex flex-col pt-3'
-                                  }
-                                >
-                                  <dt className="mb-1">{tag.key}</dt>
-                                  <dd className="font-semibold text-sm">
-                                    {tag.value && <span>{tag.value}</span>}
-                                    {tag.values !== undefined &&
-                                      tag.values.map(
-                                        (value: any, j: number) => {
-                                          return (
-                                            <span className="block">
-                                              {value}
-                                            </span>
-                                          );
-                                        }
-                                      )}
-                                  </dd>
-                                </div>
-                              );
-                            }
-                          )}
-                        <div className="w-68 flex mt-3 mr-3 border-b"></div>
-                        {formkiqVersion.type !== 'core' && (
-                          <div className="flex flex-col pt-3">
-                            <dt className="mb-1 flex justify-between">
-                              <span className="text-sm font-semibold text-primary-500">
-                                Access Attributes
-                              </span>
-                            </dt>
-                            <dd className="text-sm">
-                              {currentDocumentAccessAttributes &&
-                                (currentDocumentAccessAttributes as []).map(
-                                  (attribute: any, i: number) => {
-                                    return (
-                                      <div key={i} className="">
-                                        <div className="pt-1 pr-1 flex items-center">
-                                          <div className={`h-5.5 pr-1 `}>
-                                            <span className="block text-xs">
-                                              {attribute.key}
-                                            </span>
-                                            <span className="font-semibold">
-                                              {attribute.stringValue}
-                                            </span>
-                                            <span className="font-semibold">
-                                              {attribute.numberValue}
-                                            </span>
-                                            <span className="font-semibold">
-                                              {attribute.booleanValue}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                )}
-                            </dd>
-                          </div>
-                        )}
                       </dl>
                     )}
                     <div className="mt-4 w-full flex justify-center">
                       <ButtonPrimaryGradient
                         onClick={DownloadDocument}
-                        style={{height: '36px', width: '100%', margin: '0 16px'}}
+                        style={{
+                          height: '36px',
+                          width: '100%',
+                          margin: '0 16px',
+                        }}
                       >
                         <div className="w-full flex justify-center px-4 py-1">
                           <span className="">Download</span>
@@ -1664,8 +1581,12 @@ function Documents() {
                     {formkiqVersion.type !== 'core' && (
                       <div className="mt-2 flex justify-center">
                         <ButtonSecondary
-                          style={{height: '36px', width: '100%', margin: '0 16px'}}
-                          onClick={(event:any) => {
+                          style={{
+                            height: '36px',
+                            width: '100%',
+                            margin: '0 16px',
+                          }}
+                          onClick={(event: any) => {
                             const documentLine: ILine = {
                               lineType: 'document',
                               folder: '',
@@ -1754,8 +1675,8 @@ function Documents() {
                       </dl>
                       <div className="mt-2 flex justify-center">
                         <ButtonPrimaryGradient
-                        style={{height: '36px'}}
-                        onClick={(event: any) => {
+                          style={{ height: '36px' }}
+                          onClick={(event: any) => {
                             const documentLine: ILine = {
                               lineType: 'document',
                               folder: '',
@@ -1773,7 +1694,7 @@ function Documents() {
                             <span>&nbsp;/ Edit&nbsp;</span>
                           )}
                           Versions
-                          </ButtonPrimaryGradient>
+                        </ButtonPrimaryGradient>
                       </div>
                     </span>
                   </div>
@@ -1807,7 +1728,7 @@ function Documents() {
                           )}
                         <ButtonPrimaryGradient
                           onClick={DownloadDocument}
-                          style={{height: '36px',  width: '100%'}}
+                          style={{ height: '36px', width: '100%' }}
                         >
                           <div className="w-full flex justify-center px-4 py-1">
                             <span className="">Download</span>
@@ -1861,7 +1782,7 @@ function Documents() {
                             onDeleteClick={deleteFolder(currentDocument)}
                             onShareClick={onShareClick}
                             onEditTagsAndMetadataModalClick={
-                              onEditTagsAndMetadataModalClick
+                              onEditAttributesModalClick
                             }
                             onRenameModalClick={onRenameModalClick}
                             onMoveModalClick={onMoveModalClick}
@@ -1898,12 +1819,12 @@ function Documents() {
         getValue={getShareModalValue}
         value={shareModalValue}
       />
-      <EditTagsAndMetadataModal
-        isOpened={isEditTagsAndMetadataModalOpened}
-        onClose={onEditTagsAndMetadataModalClose}
+      <EditAttributesModal
+        isOpened={isEditAttributesModalOpened}
+        onClose={onEditAttributesModalClose}
         siteId={currentSiteId}
-        getValue={getEditTagsAndMetadataModalValue}
-        value={editTagsAndMetadataModalValue}
+        getValue={getEditAttributesModalValue}
+        value={editAttributesModalValue}
         onDocumentDataChange={onDocumentDataChange}
       />
       <DocumentVersionsModal
@@ -1952,7 +1873,6 @@ function Documents() {
         value={moveModalValue}
         allTags={allTags}
         onDocumentDataChange={onDocumentDataChange}
-
       />
       <UploadModal
         isOpened={isUploadModalOpened}
