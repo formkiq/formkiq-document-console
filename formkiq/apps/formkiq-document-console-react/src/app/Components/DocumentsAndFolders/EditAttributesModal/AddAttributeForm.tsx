@@ -121,17 +121,18 @@ function AddAttributeForm({
 
   return (
     <>
-      <div className="mt-2 flex justify-center items-center w-full">
+      <div className="mt-2 ml-2 pt-1 pr-2 flex flex-wrap justify-center items-center w-full bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 rounded-md">
+        <div className="flex w-full p-2 pl-4 font-semibold">New Attribute</div>
         <form
           onSubmit={handleSubmit(onAddAttributeSubmit)}
           className="w-full"
           ref={addTagFormRef}
         >
           <div className="flex items-start mx-2 mb-4 relative w-full h-8">
-            <div className="mr-2 h-8">
+            <div className="mr-2 h-8 w-1/2">
               <input
                 type="text"
-                className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                className="h-8 px-4 border border-neutral-300 w-full text-sm rounded-md"
                 {...register('key', { required: true })}
                 placeholder="Key"
               />

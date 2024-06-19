@@ -1,18 +1,18 @@
-import {useEffect, useMemo, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {Trash} from '../../Components/Icons/icons';
+import { useEffect, useMemo, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
+import RadioListbox from '../../Components/Generic/Listboxes/RadioListbox';
+import { Trash } from '../../Components/Icons/icons';
 import RegoEditor from '../../Components/TextEditors/RegoEditor';
-import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../Store/store';
-import {DocumentsService} from '../../helpers/services/documentsService';
-import RadioListbox from "../../Components/Generic/Listboxes/RadioListbox";
-import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
-import {Link} from "react-router-dom";
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../Store/store';
+import { DocumentsService } from '../../helpers/services/documentsService';
 
 export function AccessControl() {
-  const {user} = useAuthenticatedState();
+  const { user } = useAuthenticatedState();
   const [siteIds, setSiteIds] = useState<string[]>([]);
   const sites = useMemo(() => {
     let userSite = null;
@@ -52,25 +52,23 @@ export function AccessControl() {
   const [isDirty, setIsDirty] = useState(false);
 
   function fetchPolicies() {
-    DocumentsService.getOpenPolicyAgentPolicies().then(
-      (res) => {
-        if (res.status === 200) {
-          setPolicies(res.opaPolicies);
-          if (res.opaPolicies.length > 0) {
-            setPolicyText(res.opaPolicies[0].policy);
-          } else {
-            setPolicyText('');
-          }
+    DocumentsService.getOpenPolicyAgentPolicies().then((res) => {
+      if (res.status === 200) {
+        setPolicies(res.opaPolicies);
+        if (res.opaPolicies.length > 0) {
+          setPolicyText(res.opaPolicies[0].policy);
         } else {
-          dispatch(
-            openNotificationDialog({
-              dialogTitle:
-                'Site Configuration did not load correctly. Please try again later.',
-            })
-          );
+          setPolicyText('');
         }
+      } else {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle:
+              'Site Configuration did not load correctly. Please try again later.',
+          })
+        );
       }
-    );
+    });
   }
 
   // Load policies initially.
@@ -107,23 +105,25 @@ export function AccessControl() {
   // Delete current policy
   const onDelete = () => {
     const deletePolicy = () => {
-      DocumentsService.deleteOpenPolicyAgentPolicyItems(currentSiteId).then((res) => {
-        if (res.status === 200) {
-          dispatch(
-            openNotificationDialog({
-              dialogTitle: 'Site Configuration deleted successfully.',
-            })
-          );
-          fetchPolicies();
-        } else {
-          dispatch(
-            openNotificationDialog({
-              dialogTitle:
-                'Site Configuration did not delete correctly. Please check your input and try again.',
-            })
-          );
+      DocumentsService.deleteOpenPolicyAgentPolicyItems(currentSiteId).then(
+        (res) => {
+          if (res.status === 200) {
+            dispatch(
+              openNotificationDialog({
+                dialogTitle: 'Site Configuration deleted successfully.',
+              })
+            );
+            fetchPolicies();
+          } else {
+            dispatch(
+              openNotificationDialog({
+                dialogTitle:
+                  'Site Configuration did not delete correctly. Please check your input and try again.',
+              })
+            );
+          }
         }
-      });
+      );
     };
     dispatch(
       openConfirmationDialog({
@@ -132,7 +132,6 @@ export function AccessControl() {
       })
     );
   };
-
 
   return (
     <>
@@ -144,9 +143,13 @@ export function AccessControl() {
           Access Control: Configure Open Policy Agent
         </h6>
         <Link to={currentSiteId}>
-          <ButtonPrimaryGradient className="h-8">ManagePolicy</ButtonPrimaryGradient>
+          <ButtonPrimaryGradient className="h-8">
+            Manage Policy
+          </ButtonPrimaryGradient>
         </Link>
-        <button className="h-6 w-6 hover:text-primary-500" onClick={onDelete}><Trash/></button>
+        <button className="h-6 w-6 hover:text-primary-500" onClick={onDelete}>
+          <Trash />
+        </button>
       </div>
 
       <div className="flex justify-start items-center px-2 my-2 h-8 gap-2">
@@ -158,7 +161,11 @@ export function AccessControl() {
           setSelectedValue={onSelectSiteId}
         />
       </div>
-      <RegoEditor content={policyText} onChange={onTextChange} readOnly="nocursor"/>
+      <RegoEditor
+        content={policyText}
+        onChange={onTextChange}
+        readOnly="nocursor"
+      />
     </>
   );
 }
