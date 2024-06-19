@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { IDocumentTag } from '../../../helpers/types/documentTag';
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
-import {Pencil, Spinner, Trash} from '../../Icons/icons';
-import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
+import { Pencil, Spinner, Trash } from '../../Icons/icons';
 
 type TagProps = {
   isOpened: boolean;
@@ -50,41 +50,21 @@ function tagListIem(
     if (editingTags[index]?.isOpened) {
       return (
         <div className="flex gap-4 h-6 items-center justify-end">
-          <ButtonPrimaryGradient
-            onClick={onSave}
-          >
-            Save
-          </ButtonPrimaryGradient>
-          <ButtonGhost
-            onClick={closeEdit}
-          >
-            Cancel
-          </ButtonGhost>
-          <button
-            onClick={onRemove}
-            title="Remove"
-            className="h-4"
-          >
-            <Trash/>
+          <ButtonPrimaryGradient onClick={onSave}>Save</ButtonPrimaryGradient>
+          <ButtonGhost onClick={closeEdit}>Cancel</ButtonGhost>
+          <button onClick={onRemove} title="Remove" className="h-4">
+            <Trash />
           </button>
         </div>
       );
     }
     return (
       <div className="flex gap-4 items-center justify-end">
-        <button
-          className="h-4"
-          title="Edit"
-          onClick={toggleEdit}
-        >
-          <Pencil/>
+        <button className="h-4" title="Edit" onClick={toggleEdit}>
+          <Pencil />
         </button>
-        <button
-          onClick={onRemove}
-          title="Remove"
-          className="h-4"
-        >
-          <Trash/>
+        <button onClick={onRemove} title="Remove" className="h-4">
+          <Trash />
         </button>
       </div>
     );
@@ -102,21 +82,19 @@ function tagListIem(
         />
       );
     } else {
-      return tag.value ? tag.value : (editingTags[index]?.inputValue ? editingTags[index].inputValue:"");
+      return tag.value
+        ? tag.value
+        : editingTags[index]?.inputValue
+        ? editingTags[index].inputValue
+        : '';
     }
   };
 
   return (
     <tr key={index} className="border-t border-neutral-300">
-      <td className="p-4">
-        {tag.key}
-      </td>
-      <td className="p-4">
-        {tagValue()}
-      </td>
-      <td className="p-4">
-        {actionButtons()}
-      </td>
+      <td className="p-4">{tag.key}</td>
+      <td className="p-4">{tagValue()}</td>
+      <td className="p-4">{actionButtons()}</td>
     </tr>
   );
 }

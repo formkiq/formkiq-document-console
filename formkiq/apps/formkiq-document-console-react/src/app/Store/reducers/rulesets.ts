@@ -6,6 +6,7 @@ import { openDialog as openNotificationDialog } from './globalNotificationContro
 
 interface RulesetsState {
   rulesets: Ruleset[];
+  ruleset: Ruleset;
   rules: Rule[];
   rule: Rule;
   loadingStatus: keyof typeof RequestStatus;
@@ -17,6 +18,14 @@ interface RulesetsState {
 
 const defaultState: RulesetsState = {
   rulesets: [],
+  ruleset: {
+    rulesetId: '',
+    description: '',
+    priority: 0,
+    version: 0,
+    insertedDate: '',
+    status: 'ACTIVE',
+  },
   rules: [],
   rule: {
     ruleId: '',
@@ -70,6 +79,23 @@ export const fetchRulesets = createAsyncThunk(
   }
 );
 
+export const fetchRuleset = createAsyncThunk(
+  'rulesets/fetchRuleset',
+  async (data: any, thunkAPI) => {
+    const { rulesetId, siteId } = data;
+    await DocumentsService.getRuleset(rulesetId, siteId).then((response) => {
+      if (response) {
+        const data = {
+          rulesetId,
+          siteId,
+          ruleset: response.ruleset,
+        };
+        thunkAPI.dispatch(setRuleset(data));
+      }
+    });
+  }
+);
+
 export const deleteRuleset = createAsyncThunk(
   'rulesets/deleteRuleset',
   async (data: any, thunkAPI) => {
@@ -78,7 +104,7 @@ export const deleteRuleset = createAsyncThunk(
       if (response.status === 200) {
         thunkAPI.dispatch(
           setRulesets({
-            tagSchemas: rulesets.filter(
+            rulesets: rulesets.filter(
               (ruleset: Ruleset) => ruleset.rulesetId !== rulesetId
             ),
           })
@@ -184,6 +210,14 @@ export const rulesetsSlice = createSlice({
       state.rules = [];
     },
 
+    setRuleset: (state, action) => {
+      const { ruleset } = action.payload;
+      if (ruleset) {
+        state.ruleset = ruleset;
+      }
+      state.loadingStatus = RequestStatus.fulfilled;
+    },
+
     setRules: (state, action) => {
       const { rules, isLoadingMore, next, page } = action.payload;
       let { isLastSearchPageLoaded = false } = action.payload;
@@ -211,6 +245,7 @@ export const rulesetsSlice = createSlice({
 
 export const {
   setRulesets,
+  setRuleset,
   setRulesetsLoadingStatusPending,
   setRules,
   setRule,

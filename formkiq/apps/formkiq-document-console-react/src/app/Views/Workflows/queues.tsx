@@ -1,65 +1,59 @@
-import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { ArrowBottom, ArrowRight } from '../../Components/Icons/icons';
+import {useCallback, useEffect, useState} from 'react';
+import {Helmet} from 'react-helmet-async';
+import {useSelector} from 'react-redux';
+import {useLocation, useNavigate} from 'react-router-dom';
 import NewQueueModal from '../../Components/Workflows/NewQueue/newQueue';
 import QueueList from '../../Components/Workflows/QueueList/QueueList';
-import { AuthState } from '../../Store/reducers/auth';
-import { openDialog } from '../../Store/reducers/globalConfirmControls';
-import { useAppDispatch } from '../../Store/store';
-import { DocumentsService } from '../../helpers/services/documentsService';
+import {AuthState} from '../../Store/reducers/auth';
+import {openDialog} from '../../Store/reducers/globalConfirmControls';
+import {useAppDispatch} from '../../Store/store';
+
+import {getCurrentSiteInfo, getUserSites} from "../../helpers/services/toolService";
+import {deleteQueue, fetchQueues, QueuesState, setQueuesLoadingStatusPending} from "../../Store/reducers/queues";
+import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
+import {Plus} from "../../Components/Icons/icons";
+import {RequestStatus} from "../../helpers/types/document";
 
 type QueueItem = {
   siteId: string;
   readonly: boolean;
   queues: [] | null;
 };
+
 export function Queues() {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  let userSite: any = null;
-  let defaultSite: any = null;
-  const workspaceSites: any[] = [];
-  const { user } = useSelector(AuthState);
-  if (user && user.sites) {
-    user.sites.forEach((site: any) => {
-      if (site.siteId === user.email) {
-        userSite = site;
-      } else if (site.siteId === 'default') {
-        defaultSite = site;
-      } else {
-        workspaceSites.push(site);
-      }
-    });
-  }
-  const currentSite = userSite
-    ? userSite
-    : defaultSite
-    ? defaultSite
-    : workspaceSites[0];
-  if (currentSite === null) {
-    alert('No site configured for this user');
-    window.location.href = '/';
-  }
+  const {user} = useSelector(AuthState);
 
-  const [userSiteExpanded, setUserSiteExpanded] = useState(true);
-  const [userSiteQueues, setUserSiteQueues] = useState(null);
-  const [defaultSiteExpanded, setDefaultSiteExpanded] = useState(true);
-  const [defaultSiteQueues, setDefaultSiteQueues] = useState(null);
-  const [workspaceQueues, setWorkspaceQueues] = useState<QueueItem[]>([]);
-  const [workspacesExpanded, setWorkspacesExpanded] = useState(false);
+  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+    getUserSites(user);
+  const pathname = decodeURI(useLocation().pathname);
+  const {
+    siteId,
+    siteDocumentsRootUri,
+    isSiteReadOnly,
+  } = getCurrentSiteInfo(
+    pathname,
+    user,
+    hasUserSite,
+    hasDefaultSite,
+    hasWorkspaces,
+    workspaceSites
+  );
+  const navigate = useNavigate();
+  const {
+    queues,
+    queuesLoadingStatus,
+    nextQueuesToken,
+    currentQueuesSearchPage,
+    isLastQueuesSearchPageLoaded
+  } = useSelector(QueuesState);
+  const [currentSiteId, setCurrentSiteId] = useState(siteId)
+  const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
+    useState(siteDocumentsRootUri);
+
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
-  const toggleUserSiteExpand = () => {
-    setUserSiteExpanded(!userSiteExpanded);
-  };
-  const toggleDefaultSiteExpand = () => {
-    setDefaultSiteExpanded(!defaultSiteExpanded);
-  };
-  const toggleWorkspacesExpand = () => {
-    setWorkspacesExpanded(!workspacesExpanded);
-  };
+
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
     setNewModalOpened(true);
@@ -74,90 +68,53 @@ export function Queues() {
   }, [isNewModalOpened]);
 
   useEffect(() => {
+    const recheckSiteInfo = getCurrentSiteInfo(
+      pathname,
+      user,
+      hasUserSite,
+      hasDefaultSite,
+      hasWorkspaces,
+      workspaceSites
+    );
+    if (recheckSiteInfo.siteRedirectUrl.length) {
+      navigate(
+        {
+          pathname: `${recheckSiteInfo.siteRedirectUrl}`,
+        },
+        {
+          replace: true,
+        }
+      );
+    }
+    setCurrentSiteId(recheckSiteInfo.siteId);
+    setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
+  }, [pathname]);
+
+  useEffect(() => {
     updateQueues();
   }, [user]);
 
-  const setQueues = (queues: [], siteId: string, readonly: boolean) => {
-    if (siteId === user?.email) {
-      // NOTE: does not allow for a readonly user site
-      setUserSiteQueues(queues as any);
-    } else if (siteId === 'default') {
-      // NOTE: does not allow for a readonly default site
-      setDefaultSiteQueues(queues as any);
-    }
-  };
+  useEffect(() => {
+    dispatch(
+      fetchQueues({
+        siteId: currentSiteId,
+      })
+    );
+  }, [
+    currentSiteId,
+  ]);
 
   const updateQueues = async () => {
-    if (userSite) {
-      let readonly = false;
-      if (userSite.permission && userSite.permission === 'READ_ONLY') {
-        readonly = true;
-      }
-      DocumentsService.getQueues(userSite.siteId).then(
-        (queuesResponse: any) => {
-          setQueues(queuesResponse.queues, userSite.siteId, readonly);
-        }
-      );
-    }
-    if (defaultSite) {
-      let readonly = false;
-      if (defaultSite.permission && defaultSite.permission === 'READ_ONLY') {
-        readonly = true;
-      }
-      DocumentsService.getQueues(defaultSite.siteId).then(
-        (queuesResponse: any) => {
-          setQueues(queuesResponse.queues, defaultSite.siteId, readonly);
-        }
-      );
-    }
-    if (workspaceSites.length > 0) {
-      const initialWorkspaceQueuesPromises = workspaceSites.map((item) => {
-        let readonly = false;
-        if (item.permission && item.permission === 'READ_ONLY') {
-          readonly = true;
-        }
-        return DocumentsService.getQueues(item.siteId).then(
-          (queuesResponse: any) => {
-            return {
-              queues: queuesResponse.queues,
-              siteId: item.siteId,
-              readonly,
-            };
-          }
-        );
-      });
-
-      Promise.all(initialWorkspaceQueuesPromises)
-        .then((initialWorkspaceQueues) => {
-          setWorkspaceQueues(initialWorkspaceQueues);
-        })
-        .catch((error) => {
-          // Handle any errors that occurred during the requests
-          console.error('Error fetching queues:', error);
-        });
-    }
+    dispatch(fetchQueues({siteId: currentSiteId}));
   };
 
   const viewQueue = (queueId: string, siteId: string) => {
-    let rootUri = '';
-    if (userSite && siteId === userSite.siteId) {
-      rootUri = '/my-documents';
-    } else if (siteId === defaultSite.siteId) {
-      rootUri = '/documents';
-    } else {
-      rootUri = `/workspaces/${siteId}`;
-    }
-    navigate(`${rootUri}/queues/${queueId}`);
+    navigate(`${currentDocumentsRootUri}/queues/${queueId}`);
   };
 
-  const deleteQueue = (queueId: string, siteId: string) => {
+  const onDeleteQueue = (queueId: string, siteId: string) => {
     const deleteFunc = async () => {
-      setUserSiteQueues(null);
-      await DocumentsService.deleteQueue(queueId, siteId).then(
-        (queuesResponse: any) => {
-          updateQueues();
-        }
-      );
+      dispatch(deleteQueue({queueId, siteId, queues}))
     };
     dispatch(
       openDialog({
@@ -167,125 +124,87 @@ export function Queues() {
     );
   };
 
+  const trackScrolling = useCallback(async () => {
+    const isBottom = (el: HTMLElement) => {
+      if (el) {
+        return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
+      }
+      return false;
+    };
+
+    const scrollpane = document.getElementById('queuesScrollPane');
+
+    if (
+      isBottom(scrollpane as HTMLElement) &&
+      nextQueuesToken &&
+      queuesLoadingStatus === RequestStatus.fulfilled
+    ) {
+      dispatch(setQueuesLoadingStatusPending());
+      if (nextQueuesToken) {
+        await dispatch(
+          fetchQueues({
+            siteId: currentSiteId,
+            nextToken:nextQueuesToken,
+            page: currentQueuesSearchPage + 1,
+          })
+        );
+      }
+    }
+  }, [nextQueuesToken, queuesLoadingStatus, isLastQueuesSearchPageLoaded]);
+
+  const handleScroll = (event: any) => {
+    const el = event.target;
+    // Track scroll when table reaches bottom
+    if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
+      if (el.scrollTop > 0) {
+        trackScrolling();
+      }
+    }
+  };
+
   return (
     <>
       <Helmet>
         <title>Queues</title>
       </Helmet>
-      <div className="p-4 max-w-screen-lg font-semibold mb-4">
-        <p>
-          A queue is place where documents wait for manual actions to be
-          performed.
-        </p>
-        <p className="mt-4">
-          NOTE: a queue cannot be deleted once it has been used by a document.
-        </p>
-      </div>
-      <div className="p-4">
-        {userSite && (
-          <>
-            <div
-              className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleUserSiteExpand}
-            >
-              <div className="flex justify-end mt-3 mr-1">
-                {userSiteExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="pl-1 uppercase text-base">
-                Queues: My Documents
-                <span className="block normal-case">
-                  {' '}
-                  (Site ID: {userSite.siteId})
-                </span>
-              </div>
+
+      <div className="flex" style={{
+        height: `calc(100vh - 3.68rem)`,
+      }}>
+        <div className="grow flex flex-col justify-stretch">
+
+          <div className="p-4 max-w-screen-lg font-semibold mb-4">
+            <p>
+              A queue is place where documents wait for manual actions to be
+              performed.
+            </p>
+            <p className="mt-4">
+              NOTE: a queue cannot be deleted once it has been used by a document.
+            </p>
+          </div>
+          {!isSiteReadOnly && (
+            <div className="mb-4 flex px-4">
+              <ButtonPrimaryGradient
+                data-test-id="create-queue"
+                onClick={(event: any) => onNewClick(event, siteId)}
+                className="flex items-center"
+                style={{height: '36px'}}
+              >
+                <span>Create new</span>
+                <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
+              </ButtonPrimaryGradient>
             </div>
-            {userSiteExpanded && (
-              <QueueList
-                siteId={userSite.siteId}
-                queues={userSiteQueues}
-                isSiteReadOnly={userSite.readonly}
-                onView={viewQueue}
-                onDelete={deleteQueue}
-                onNewClick={onNewClick}
-              ></QueueList>
-            )}
-          </>
-        )}
-        {defaultSite && defaultSite.siteId && (
-          <>
-            <div
-              className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleDefaultSiteExpand}
-            >
-              <div className="flex justify-end mt-3 mr-1">
-                {defaultSiteExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="pl-1 uppercase text-base">
-                {userSite ? (
-                  <span>
-                    Queues: Team Documents
-                    <span className="block normal-case">
-                      (Site ID: default)
-                    </span>
-                  </span>
-                ) : (
-                  <span>
-                    Queues: Documents
-                    <span className="block normal-case">
-                      (Site ID: default)
-                    </span>
-                  </span>
-                )}
-              </div>
-            </div>
-            {defaultSiteExpanded && (
-              <QueueList
-                queues={defaultSiteQueues}
-                onView={viewQueue}
-                onDelete={deleteQueue}
-                siteId={defaultSite.siteId}
-                isSiteReadOnly={defaultSite.readonly}
-                onNewClick={onNewClick}
-              ></QueueList>
-            )}
-          </>
-        )}
-        {workspaceSites.length > 0 && (
-          <>
-            <div
-              className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleWorkspacesExpand}
-            >
-              <div className="flex justify-end mt-3 mr-1">
-                {workspacesExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="pl-1 uppercase text-base">Queues: Workspaces</div>
-            </div>
-            {workspacesExpanded &&
-              workspaceQueues.map((item: QueueItem, i: number) => {
-                return (
-                  <div key={i}>
-                    <div className="mt-4 ml-4 flex flex-wrap w-full">
-                      <div className="pl-1 uppercase text-sm">
-                        Queues:{' '}
-                        <span className="normal-case">{item.siteId}</span>
-                      </div>
-                    </div>
-                    <div className="mt-4 ml-4">
-                      <QueueList
-                        queues={item.queues}
-                        siteId={item.siteId}
-                        isSiteReadOnly={item.readonly}
-                        onView={viewQueue}
-                        onDelete={deleteQueue}
-                        onNewClick={onNewClick}
-                      ></QueueList>
-                    </div>
-                  </div>
-                );
-              })}
-          </>
-        )}
+          )}
+          <div className="relative overflow-hidden h-full">
+            <QueueList
+              siteId={currentSiteId}
+              handleScroll={handleScroll}
+              queues={queues as []}
+              onView={viewQueue}
+              onDelete={onDeleteQueue}
+            ></QueueList>
+          </div>
+        </div>
       </div>
       <NewQueueModal
         isOpened={isNewModalOpened}

@@ -175,12 +175,14 @@ const RoutesMapper = () => {
         element={<WorkflowDesigner />}
       ></Route>
       <Route path="/workflows" element={<Workflows />}></Route>
+      <Route path="/workflows/workspaces/:siteId" element={<Workflows />}></Route>
       <Route path="/workflows/designer" element={<WorkflowDesigner />}></Route>
       <Route
-        path="/workflows/:siteId/designer"
+        path="/workflows/workspaces/:siteId/designer"
         element={<WorkflowDesigner />}
       ></Route>
       <Route path="/queues" element={<Queues />}></Route>
+      <Route path="/queues/workspaces/:siteId" element={<Queues />}></Route>
       <Route path="/integrations/api" element={<ApiExplorer />}></Route>
       <Route path="/integrations/apiKeys" element={<ApiKeys />}></Route>
       <Route path="/integrations/webhooks" element={<Webhooks />}></Route>

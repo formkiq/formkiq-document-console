@@ -54,7 +54,7 @@ function AttributesTab({onDocumentDataChange, siteId, value, getValue}: any) {
             nextToken: documentAttributesNextToken,
             page: documentAttributesCurrentSearchPage + 1,
             documentId: value?.documentId as string,
-            limit: 50
+            limit: 100
           })
         );
       }

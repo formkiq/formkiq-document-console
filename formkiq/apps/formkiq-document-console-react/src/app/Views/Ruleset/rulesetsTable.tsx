@@ -47,25 +47,27 @@ function RulesetsTable({
         <>
           {rulesets.map((ruleset: Ruleset) => {
             return (
-              <tr key={ruleset.rulesetId} className="text-neutral-900 border-neutral-300">
+              <tr key={ruleset.rulesetId} className="text-neutral-900 border-neutral-300 hover:bg-neutral-100 hover:font-medium">
                 <td className="border-b max-w-52 border-neutral-300 p-4 pl-8 truncate">
+                  <div className="flex grow w-full justify-start">
                   <Link
                     to={`${pathname}/${ruleset.rulesetId}`}
-                    className="cursor-pointer"
+                    className="cursor-pointer w-full"
                   >
                     {ruleset.description}
                   </Link>
+                  </div>
                 </td>
-                <td className="border-b p-4 ">
+                <td className="border-b p-4 border-neutral-300">
                   {formatDate(ruleset.insertedDate)}
                 </td>
-                <td className="border-b p-4 ">
+                <td className="border-b p-4 border-neutral-300">
                   {ruleset.priority}
                 </td>
-                <td className="border-b p-4">
+                <td className="border-b p-4 border-neutral-300">
                   {ruleset.version}
                 </td>
-                <td className="border-b p-4">
+                <td className="border-b p-4 border-neutral-300">
                   {ruleset.status}
                 </td>
 

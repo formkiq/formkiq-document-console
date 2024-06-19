@@ -1816,7 +1816,7 @@ export class DocumentsService {
   public static async getAttributes(
       siteId: string,
       next = null,
-      limit = 20
+      limit = 100
   ): Promise<any> {
       if (!siteId) {
           siteId = this.determineSiteId();

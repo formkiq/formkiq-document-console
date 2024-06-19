@@ -330,40 +330,49 @@ function Navbar() {
                         (hasUserSite && hasWorkspaces) ||
                         (hasDefaultSite && hasWorkspaces) ||
                         (hasWorkspaces && workspaceSites.length > 1)) && (
-                        <select
-                          data-test-id="system-subfolder-select"
-                          className="ml-4 text-xs bg-gray-100 px-2 py-1 rounded-md"
-                          value={currentSiteId}
-                          onChange={(event) => {
-                            changeSystemSubfolder(event, subfolderUri);
-                          }}
-                        >
-                          {hasUserSite && (
-                            <option value={user?.email}>My Documents</option>
-                          )}
-                          {hasUserSite && hasDefaultSite && (
-                            <option value="default">Team Documents</option>
-                          )}
-                          {!hasUserSite && hasDefaultSite && (
-                            <option value="default">Documents</option>
-                          )}
-                          {hasWorkspaces && workspaceSites.length > 0 && (
-                            <>
-                              {workspaceSites.map(
-                                (workspaceSite, i: number) => {
-                                  return (
-                                    <option
-                                      key={i}
-                                      value={workspaceSite.siteId}
-                                    >
-                                      {workspaceSite.siteId}
-                                    </option>
-                                  );
-                                }
-                              )}
-                            </>
-                          )}
-                        </select>
+                        <div className="flex">
+                          <span className="text-xs pt-1 pl-4 pr-1 justify-end">
+                            Workspace:
+                          </span>
+                          <select
+                            data-test-id="system-subfolder-select"
+                            className="text-xs bg-gray-100 px-2 py-1 pr-8 rounded-md"
+                            value={currentSiteId}
+                            onChange={(event) => {
+                              changeSystemSubfolder(event, subfolderUri);
+                            }}
+                          >
+                            {hasUserSite && (
+                              <option value={user?.email}>My Documents</option>
+                            )}
+                            {hasUserSite && hasDefaultSite && (
+                              <option value="default">
+                                Team Documents (default)
+                              </option>
+                            )}
+                            {!hasUserSite && hasDefaultSite && (
+                              <option value="default">
+                                Documents (default)
+                              </option>
+                            )}
+                            {hasWorkspaces && workspaceSites.length > 0 && (
+                              <>
+                                {workspaceSites.map(
+                                  (workspaceSite, i: number) => {
+                                    return (
+                                      <option
+                                        key={i}
+                                        value={workspaceSite.siteId}
+                                      >
+                                        {workspaceSite.siteId}
+                                      </option>
+                                    );
+                                  }
+                                )}
+                              </>
+                            )}
+                          </select>
+                        </div>
                       )}
                     </>
                   ) : (
@@ -463,50 +472,59 @@ function Navbar() {
                               <span>Schemas</span>
                             )}
                           </div>
-                          {(pathname.indexOf('/rulesets') > -1||
-                              pathname.indexOf('/schemas') > -1) &&
+                          {(pathname.indexOf('/rulesets') > -1 ||
+                            pathname.indexOf('/schemas') > -1 ||
+                            pathname.indexOf('/workflows') > -1 ||
+                            pathname.indexOf('/queues') > -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
                               (hasDefaultSite && hasWorkspaces) ||
                               (hasWorkspaces && workspaceSites.length > 1)) && (
-                              <select
-                                data-test-id="system-subfolder-select"
-                                className="ml-4 text-xs bg-gray-100 px-2 py-1 rounded-md"
-                                value={currentSiteId}
-                                onChange={(event) => {
-                                  changeSiteId(event);
-                                }}
-                              >
-                                {hasUserSite && (
-                                  <option value={user?.email}>
-                                    My Documents
-                                  </option>
-                                )}
-                                {hasUserSite && hasDefaultSite && (
-                                  <option value="default">
-                                    Team Documents
-                                  </option>
-                                )}
-                                {!hasUserSite && hasDefaultSite && (
-                                  <option value="default">Documents</option>
-                                )}
-                                {hasWorkspaces && workspaceSites.length > 0 && (
-                                  <>
-                                    {workspaceSites.map(
-                                      (workspaceSite, i: number) => {
-                                        return (
-                                          <option
-                                            key={i}
-                                            value={workspaceSite.siteId}
-                                          >
-                                            {workspaceSite.siteId}
-                                          </option>
-                                        );
-                                      }
-                                    )}
-                                  </>
-                                )}
-                              </select>
+                              <div className="flex">
+                                <span className="text-xs pt-1 pl-4 pr-1 justify-end">
+                                  Workspace:
+                                </span>
+                                <select
+                                  data-test-id="system-subfolder-select"
+                                  className="text-xs bg-gray-100 px-2 py-1 pr-8 rounded-md"
+                                  value={currentSiteId}
+                                  onChange={(event) => {
+                                    changeSiteId(event);
+                                  }}
+                                >
+                                  {hasUserSite && (
+                                    <option value={user?.email}>
+                                      My Documents
+                                    </option>
+                                  )}
+                                  {hasUserSite && hasDefaultSite && (
+                                    <option value="default">
+                                      Team Documents (default)
+                                    </option>
+                                  )}
+                                  {!hasUserSite && hasDefaultSite && (
+                                    <option value="default">
+                                      Documents (default)
+                                    </option>
+                                  )}
+                                  {hasWorkspaces && workspaceSites.length > 0 && (
+                                    <>
+                                      {workspaceSites.map(
+                                        (workspaceSite, i: number) => {
+                                          return (
+                                            <option
+                                              key={i}
+                                              value={workspaceSite.siteId}
+                                            >
+                                              {workspaceSite.siteId}
+                                            </option>
+                                          );
+                                        }
+                                      )}
+                                    </>
+                                  )}
+                                </select>
+                              </div>
                             )}
                         </>
                       ) : (
