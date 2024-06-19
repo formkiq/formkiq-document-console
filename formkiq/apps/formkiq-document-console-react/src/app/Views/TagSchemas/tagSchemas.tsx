@@ -47,7 +47,7 @@ function TagSchemas() {
     currentSearchPage,
   } = useSelector(TagSchemasState);
   const dispatch = useAppDispatch();
-  const [isRulesetEditTabVisible, setIsRulesetEditTabVisible] = useState(false);
+  const [isSchemaEditTabVisible, setIsSchemaEditTabVisible] = useState(false);
 
   const [newTagSchemaValue, setNewTagSchemaValue] = useState<{
     tagSchema: TagSchema;
@@ -66,12 +66,12 @@ function TagSchemas() {
     setCurrentSiteId(recheckSiteInfo.siteId);
   }, [pathname]);
 
-  // update rulesets when different siteId selected
+  // update schemas when different siteId selected
   useEffect(() => {
     dispatch(fetchTagSchemas({ siteId: currentSiteId }));
   }, [currentSiteId]);
 
-  // load more rulesets when table reaches bottom
+  // load more schemas when table reaches bottom
   const trackScrolling = useCallback(async () => {
     const isBottom = (el: HTMLElement) => {
       if (el) {
@@ -80,7 +80,7 @@ function TagSchemas() {
       return false;
     };
 
-    const scrollpane = document.getElementById('rulesetsScrollPane');
+    const scrollpane = document.getElementById('schemasScrollPane');
 
     if (
       isBottom(scrollpane as HTMLElement) &&
@@ -110,7 +110,7 @@ function TagSchemas() {
     }
   };
 
-  // Delete ruleset
+  // Delete schema
   const onTagSchemaDelete = (tagSchemaId: string) => {
     dispatch(
       openConfirmationDialog({
@@ -128,7 +128,7 @@ function TagSchemas() {
     );
   };
 
-  // Save new or existing ruleset
+  // Save new or existing schema
   const saveTagSchema = () => {
     if (newTagSchemaValue?.tagSchema?.tagSchemaId) {
       // Check if editing existing ruleset
@@ -155,13 +155,13 @@ function TagSchemas() {
         (res) => {
           if (res.status === 200) {
             dispatch(fetchTagSchemas({ siteId: currentSiteId }));
-            setIsRulesetEditTabVisible(false);
+            setIsSchemaEditTabVisible(false);
             setNewTagSchemaValue(null);
           } else {
             dispatch(
               openNotificationDialog({
                 dialogTitle:
-                  'Error happened while saving ruleset. Please try again later',
+                  'Error happened while saving schema. Please try again later',
               })
             );
           }
@@ -170,8 +170,8 @@ function TagSchemas() {
     }
   };
 
-  // Open tab to create/edit ruleset
-  const showRulesetEditTab = (rulesetId: string) => {
+  // Open tab to create/edit schema
+  const showSchemaEditTab = (rulesetId: string) => {
     const tagSchema = tagSchemas.find(
       (tagSchema) => tagSchema.tagSchemaId === rulesetId
     );
@@ -179,11 +179,11 @@ function TagSchemas() {
       return;
     }
     setNewTagSchemaValue({ tagSchema });
-    setIsRulesetEditTabVisible(true);
+    setIsSchemaEditTabVisible(true);
   };
 
   function onCancelEdit() {
-    setIsRulesetEditTabVisible(false);
+    setIsSchemaEditTabVisible(false);
     setNewTagSchemaValue(null);
   }
   const tempTagSchema = {
@@ -243,13 +243,13 @@ function TagSchemas() {
         </div>
         <div
           className="flex-1 inline-block overflow-y-scroll overflow-x-auto h-full"
-          id="rulesetsScrollPane"
+          id="schemasScrollPane"
           onScroll={handleScroll}
         >
           <TagSchemasTable
             tagSchemas={tagSchemas}
             onTagSchemaDelete={onTagSchemaDelete}
-            showRulesetEditTab={showRulesetEditTab}
+            showSchemaEditTab={showSchemaEditTab}
           />
         </div>
       </div>

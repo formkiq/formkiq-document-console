@@ -17,11 +17,11 @@ import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/rename
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
 import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
 import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
 import {
-  ChevronLeft,
   ChevronRight,
   Close,
   Download,
@@ -70,6 +70,7 @@ import {
   getFileIcon,
   getUserSites,
 } from '../../helpers/services/toolService';
+import { Attribute } from '../../helpers/types/attributes';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
@@ -77,7 +78,6 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import {Attribute} from "../../helpers/types/attributes";
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -266,12 +266,12 @@ function Documents() {
       dispatch(setAllTags(allTagData));
     });
     DocumentsService.getAttributes(currentSiteId).then((response: any) => {
-        const allAttributeData = {
-            allAttributes: response?.attributes,
-            attributesLastRefreshed: new Date(),
-            attributesSiteId: currentSiteId,
-        };
-        dispatch(setAllAttributes(allAttributeData));
+      const allAttributeData = {
+        allAttributes: response?.attributes,
+        attributesLastRefreshed: new Date(),
+        attributesSiteId: currentSiteId,
+      };
+      dispatch(setAllAttributes(allAttributeData));
     });
 
     if (infoDocumentId.length) {
@@ -351,25 +351,24 @@ function Documents() {
     }
   }, [currentActionEvent, actionEvent]);
 
-
-  function updateAllAttributes (){
+  function updateAllAttributes() {
     DocumentsService.getAttributes(currentSiteId).then((response: any) => {
-        const allAttributeData = {
-            allAttributes: response?.attributes,
-            attributesLastRefreshed: new Date(),
-            attributesSiteId: currentSiteId,
-        };
-        dispatch(setAllAttributes(allAttributeData));
+      const allAttributeData = {
+        allAttributes: response?.attributes,
+        attributesLastRefreshed: new Date(),
+        attributesSiteId: currentSiteId,
+      };
+      dispatch(setAllAttributes(allAttributeData));
     });
   }
   // load all attributes initially
   useEffect(() => {
-    updateAllAttributes()
+    updateAllAttributes();
   }, []);
 
   // update all attributes when switching sites
   useEffect(() => {
-    updateAllAttributes()
+    updateAllAttributes();
   }, [currentSiteId]);
 
   const updateTags = () => {
@@ -671,7 +670,7 @@ function Documents() {
     }
   };
   const onFilterTag = (event: any, tag: string) => {
-    if (filterTag === tag || filterAttribute===tag) {
+    if (filterTag === tag || filterAttribute === tag) {
       if (subfolderUri && subfolderUri.length) {
         navigate(
           {
@@ -717,7 +716,7 @@ function Documents() {
   };
 
   const onFilterAttribute = (event: any, attribute: string) => {
-    if (filterAttribute === attribute || filterTag===attribute) {
+    if (filterAttribute === attribute || filterTag === attribute) {
       if (subfolderUri && subfolderUri.length) {
         navigate(
           {
@@ -760,7 +759,7 @@ function Documents() {
         );
       }
     }
-  }
+  };
 
   const foldersPath = (uri: string) => {
     if (uri) {
@@ -898,12 +897,14 @@ function Documents() {
     const minTagsToShowForFilter = 3;
     tagsToCheck = tagsToCheck.concat(TagsForFilterAndDisplay);
 
-    const keyOnlyAttributes = allAttributes.filter((attribute: Attribute) => attribute.dataType === "KEY_ONLY")
-    const keyOnlyAttributesKeys: { value: string }[] = []
+    const keyOnlyAttributes = allAttributes.filter(
+      (attribute: Attribute) => attribute.dataType === 'KEY_ONLY'
+    );
+    const keyOnlyAttributesKeys: { value: string }[] = [];
     if (keyOnlyAttributes.length > 0) {
       keyOnlyAttributes.forEach((attribute: Attribute) => {
-        keyOnlyAttributesKeys.push({value: attribute.key})
-      })
+        keyOnlyAttributesKeys.push({ value: attribute.key });
+      });
     }
 
     if (
@@ -915,11 +916,11 @@ function Documents() {
     }
 
     if (
-        filterAttribute &&
-        filterAttribute.length &&
-        tagsToCheck.indexOf(filterAttribute) === -1
+      filterAttribute &&
+      filterAttribute.length &&
+      tagsToCheck.indexOf(filterAttribute) === -1
     ) {
-        tagsToCheck.push(filterAttribute);
+      tagsToCheck.push(filterAttribute);
     }
 
     if (tagsToCheck.length === 0) {
@@ -944,12 +945,12 @@ function Documents() {
     }
 
     const onFilter = (event: any, value: string, index: number) => {
-      if (!keyOnlyAttributesKeys || keyOnlyAttributesKeys.length === 0) onFilterTag(event, value);
-      if (index< keyOnlyAttributesKeys.length) onFilterAttribute(event, value);
-    }
+      if (!keyOnlyAttributesKeys || keyOnlyAttributesKeys.length === 0)
+        onFilterTag(event, value);
+      if (index < keyOnlyAttributesKeys.length) onFilterAttribute(event, value);
+    };
 
-
-      return (
+    return (
       <div className="flex items-center justify-start">
         <div className="w-1/3 pl-4">
           {useFileFilter && (
@@ -981,7 +982,8 @@ function Documents() {
                     <li
                       key={i}
                       className={
-                        (filterTag === primaryTag || filterAttribute === primaryTag
+                        (filterTag === primaryTag ||
+                        filterAttribute === primaryTag
                           ? 'bg-primary-500 text-white'
                           : `bg-${tagColor}-200 text-black`) +
                         ' text-xs p-1 px-2 mx-1 cursor-pointer'
@@ -1328,9 +1330,7 @@ function Documents() {
                 onESignaturesModalClick={onESignaturesModalClick}
                 onDocumentDataChange={onDocumentDataChange}
                 isSiteReadOnly={isSiteReadOnly}
-                onEditTagsAndMetadataModalClick={
-                  onEditAttributesModalClick
-                }
+                onEditTagsAndMetadataModalClick={onEditAttributesModalClick}
                 filterTag={filterTag}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
@@ -1555,7 +1555,7 @@ function Documents() {
                               <>
                                 <span>add/edit attributes</span>
                                 <div className="w-4 pt-0.5">
-                                  <ChevronRight/>
+                                  <ChevronRight />
                                 </div>
                               </>
                             </div>
@@ -1564,19 +1564,29 @@ function Documents() {
                       </dl>
                     )}
                     <div className="mt-4 w-full flex justify-center">
-                      <button
-                        className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
+                      <ButtonPrimaryGradient
                         onClick={DownloadDocument}
+                        style={{
+                          height: '36px',
+                          width: '100%',
+                          margin: '0 16px',
+                        }}
                       >
-                        <span className="">Download</span>
-                        <span className="w-7 pl-1 -mt-0.5">{Download()}</span>
-                      </button>
+                        <div className="w-full flex justify-center px-4 py-1">
+                          <span className="">Download</span>
+                          <span className="w-7 pl-1">{Download()}</span>
+                        </div>
+                      </ButtonPrimaryGradient>
                     </div>
                     {formkiqVersion.type !== 'core' && (
                       <div className="mt-2 flex justify-center">
-                        <button
-                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
-                          onClick={(event) => {
+                        <ButtonSecondary
+                          style={{
+                            height: '36px',
+                            width: '100%',
+                            margin: '0 16px',
+                          }}
+                          onClick={(event: any) => {
                             const documentLine: ILine = {
                               lineType: 'document',
                               folder: '',
@@ -1594,7 +1604,7 @@ function Documents() {
                             <span>&nbsp;/ Assign&nbsp;</span>
                           )}
                           Workflows
-                        </button>
+                        </ButtonSecondary>
                       </div>
                     )}
                   </div>
@@ -1664,9 +1674,9 @@ function Documents() {
                           )}
                       </dl>
                       <div className="mt-2 flex justify-center">
-                        <button
-                          className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold py-2 px-4 flex cursor-pointer"
-                          onClick={(event) => {
+                        <ButtonPrimaryGradient
+                          style={{ height: '36px' }}
+                          onClick={(event: any) => {
                             const documentLine: ILine = {
                               lineType: 'document',
                               folder: '',
@@ -1684,7 +1694,7 @@ function Documents() {
                             <span>&nbsp;/ Edit&nbsp;</span>
                           )}
                           Versions
-                        </button>
+                        </ButtonPrimaryGradient>
                       </div>
                     </span>
                   </div>
@@ -1716,13 +1726,15 @@ function Documents() {
                               <span className="pl-4 pt-0.5 w-9">{View()}</span>
                             </button>
                           )}
-                        <button
-                          className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md cursor-pointer"
+                        <ButtonPrimaryGradient
                           onClick={DownloadDocument}
+                          style={{ height: '36px', width: '100%' }}
                         >
-                          <span className="">Download</span>
-                          <span className="w-7 pl-1">{Download()}</span>
-                        </button>
+                          <div className="w-full flex justify-center px-4 py-1">
+                            <span className="">Download</span>
+                            <span className="w-7 pl-1">{Download()}</span>
+                          </div>
+                        </ButtonPrimaryGradient>
                         {isCurrentDocumentSoftDeleted ? (
                           <button
                             className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
@@ -1860,6 +1872,7 @@ function Documents() {
         siteId={currentSiteId}
         value={moveModalValue}
         allTags={allTags}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <UploadModal
         isOpened={isUploadModalOpened}

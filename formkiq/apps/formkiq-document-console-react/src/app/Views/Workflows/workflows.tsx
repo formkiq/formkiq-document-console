@@ -1,56 +1,60 @@
-import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useSelector } from 'react-redux';
+import {useCallback, useEffect, useState} from 'react';
+import {Helmet} from 'react-helmet-async';
+import {useSelector} from 'react-redux';
+import {Plus} from '../../Components/Icons/icons';
 import DuplicateDialog from '../../Components/Generic/Dialogs/DuplicateDialog';
-import { ArrowBottom, ArrowRight } from '../../Components/Icons/icons';
 import NewWorkflowModal from '../../Components/Workflows/NewWorkflow/newWorkflow';
 import WorkflowList from '../../Components/Workflows/WorkflowList/WorkflowList';
-import { AuthState } from '../../Store/reducers/auth';
-import { openDialog } from '../../Store/reducers/globalConfirmControls';
-import { useAppDispatch } from '../../Store/store';
-import { DocumentsService } from '../../helpers/services/documentsService';
+import {AuthState} from '../../Store/reducers/auth';
+import {openDialog} from '../../Store/reducers/globalConfirmControls';
+import {useAppDispatch} from '../../Store/store';
+import {DocumentsService} from '../../helpers/services/documentsService';
+import {useLocation, useNavigate} from "react-router-dom";
+import {getCurrentSiteInfo, getUserSites} from "../../helpers/services/toolService";
+import {
+  deleteWorkflow,
+  fetchWorkflows,
+  setWorkflowsLoadingStatusPending,
+  WorkflowsState
+} from "../../Store/reducers/workflows";
+import {RequestStatus} from "../../helpers/types/document";
+import {openDialog as openNotificationDialog} from "../../Store/reducers/globalNotificationControls";
+import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
 
-type WorkflowItem = {
-  siteId: string;
-  readonly: boolean;
-  workflows: [] | null;
-};
 
 export function Workflows() {
   const dispatch = useAppDispatch();
-  let userSite: any = null;
-  let defaultSite: any = null;
-  const workspaceSites: any[] = [];
-  const { user } = useSelector(AuthState);
-  if (user && user.sites) {
-    user.sites.forEach((site: any) => {
-      if (site.siteId === user.email) {
-        userSite = site;
-      } else if (site.siteId === 'default') {
-        defaultSite = site;
-      } else {
-        workspaceSites.push(site);
-      }
-    });
-  }
-  const currentSite = userSite
-    ? userSite
-    : defaultSite
-    ? defaultSite
-    : workspaceSites[0];
-  if (currentSite === null) {
-    alert('No site configured for this user');
-    window.location.href = '/';
-  }
+  const {user} = useSelector(AuthState);
 
-  const [userSiteExpanded, setUserSiteExpanded] = useState(true);
-  const [userSiteWorkflows, setUserSiteWorkflows] = useState(null);
-  const [defaultSiteExpanded, setDefaultSiteExpanded] = useState(true);
-  const [defaultSiteWorkflows, setDefaultSiteWorkflows] = useState(null);
-  const [workspaceWorkflows, setWorkspaceWorkflows] = useState<WorkflowItem[]>(
-    []
+  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+    getUserSites(user);
+  const pathname = decodeURI(useLocation().pathname);
+  const {
+    siteId,
+    siteDocumentsRootUri,
+    isSiteReadOnly,
+  } = getCurrentSiteInfo(
+    pathname,
+    user,
+    hasUserSite,
+    hasDefaultSite,
+    hasWorkspaces,
+    workspaceSites
   );
-  const [workspacesExpanded, setWorkspacesExpanded] = useState(false);
+  const navigate = useNavigate();
+
+  const {
+    workflows,
+    workflowsLoadingStatus,
+    nextToken,
+    currentSearchPage,
+    isLastSearchPageLoaded
+  } = useSelector(WorkflowsState);
+
+  const [currentSiteId, setCurrentSiteId] = useState(siteId)
+  const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
+    useState(siteDocumentsRootUri);
+
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
 
@@ -59,15 +63,30 @@ export function Workflows() {
   const [duplicatedWorkflow, setDuplicatedWorkflow] = useState<any>({});
   const [showTooltipId, setShowTooltipId] = useState('');
 
-  const toggleUserSiteExpand = () => {
-    setUserSiteExpanded(!userSiteExpanded);
-  };
-  const toggleDefaultSiteExpand = () => {
-    setDefaultSiteExpanded(!defaultSiteExpanded);
-  };
-  const toggleWorkspacesExpand = () => {
-    setWorkspacesExpanded(!workspacesExpanded);
-  };
+  useEffect(() => {
+    const recheckSiteInfo = getCurrentSiteInfo(
+      pathname,
+      user,
+      hasUserSite,
+      hasDefaultSite,
+      hasWorkspaces,
+      workspaceSites
+    );
+    if (recheckSiteInfo.siteRedirectUrl.length) {
+      navigate(
+        {
+          pathname: `${recheckSiteInfo.siteRedirectUrl}`,
+        },
+        {
+          replace: true,
+        }
+      );
+    }
+    setCurrentSiteId(recheckSiteInfo.siteId);
+    setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
+  }, [pathname]);
+
+
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
     setNewModalOpened(true);
@@ -83,81 +102,63 @@ export function Workflows() {
 
   useEffect(() => {
     updateWorkflows();
-  }, [user]);
+  }, [user, currentSiteId]);
 
-  const setWorkflows = (workflows: [], siteId: string, readonly: boolean) => {
-    if (siteId === user?.email) {
-      // NOTE: does not allow for a readonly user site
-      setUserSiteWorkflows(workflows as any);
-    } else if (siteId === 'default') {
-      // NOTE: does not allow for a readonly default site
-      setDefaultSiteWorkflows(workflows as any);
-    }
-  };
+  useEffect(() => {
+    dispatch(
+      fetchWorkflows({
+        siteId: currentSiteId,
+      })
+    );
+  }, [
+    currentSiteId,
+  ]);
 
   const updateWorkflows = async () => {
-    if (userSite) {
-      let readonly = false;
-      if (userSite.permission && userSite.permission === 'READ_ONLY') {
-        readonly = true;
-      }
-      DocumentsService.getWorkflows(userSite.siteId).then(
-        (workflowsResponse: any) => {
-          setWorkflows(workflowsResponse.workflows, userSite.siteId, readonly);
-        }
-      );
-    }
-    if (defaultSite) {
-      let readonly = false;
-      if (defaultSite.permission && defaultSite.permission === 'READ_ONLY') {
-        readonly = true;
-      }
-      DocumentsService.getWorkflows(defaultSite.siteId).then(
-        (workflowsResponse: any) => {
-          setWorkflows(
-            workflowsResponse.workflows,
-            defaultSite.siteId,
-            readonly
-          );
-        }
-      );
-    }
-    if (workspaceSites.length > 0) {
-      const initialWorkspaceWorkflowsPromises = workspaceSites.map((item) => {
-        let readonly = false;
-        if (item.permission && item.permission === 'READ_ONLY') {
-          readonly = true;
-        }
-        return DocumentsService.getWorkflows(item.siteId).then(
-          (workflowsResponse: any) => {
-            return {
-              workflows: workflowsResponse.workflows,
-              siteId: item.siteId,
-              readonly,
-            };
-          }
-        );
-      });
+    dispatch(fetchWorkflows({siteId: currentSiteId}));
+  };
 
-      Promise.all(initialWorkspaceWorkflowsPromises)
-        .then((initialWorkspaceWorkflows) => {
-          setWorkspaceWorkflows(initialWorkspaceWorkflows);
-        })
-        .catch((error) => {
-          // Handle any errors that occurred during the requests
-          console.error('Error fetching workflows:', error);
-        });
+  const trackScrolling = useCallback(async () => {
+    const isBottom = (el: HTMLElement) => {
+      if (el) {
+        return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
+      }
+      return false;
+    };
+
+    const scrollpane = document.getElementById('workflowsScrollPane');
+
+    if (
+      isBottom(scrollpane as HTMLElement) &&
+      nextToken &&
+      workflowsLoadingStatus === RequestStatus.fulfilled
+    ) {
+      dispatch(setWorkflowsLoadingStatusPending());
+      if (nextToken) {
+        await dispatch(
+          fetchWorkflows({
+            siteId: currentSiteId,
+            nextToken,
+            page: currentSearchPage + 1,
+          })
+        );
+      }
+    }
+  }, [nextToken, workflowsLoadingStatus, isLastSearchPageLoaded]);
+
+  const handleScroll = (event: any) => {
+    const el = event.target;
+    // Track scroll when table reaches bottom
+    if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
+      if (el.scrollTop > 0) {
+        trackScrolling();
+      }
     }
   };
 
-  const deleteWorkflow = (workflowId: string, siteId: string) => {
+  const onWorkflowDelete = (workflowId: string, siteId: string) => {
     const deleteFunc = async () => {
-      setUserSiteWorkflows(null);
-      await DocumentsService.deleteWorkflow(workflowId, siteId).then(
-        (workflowsResponse: any) => {
-          updateWorkflows();
-        }
-      );
+      dispatch(deleteWorkflow({siteId, workflowId, workflows}));
     };
     dispatch(
       openDialog({
@@ -166,6 +167,32 @@ export function Workflows() {
       })
     );
   };
+
+
+  const createNewWorkflow = () => {
+    const workflow = {
+      name: 'New Workflow',
+      description: 'New Workflow Description',
+      status: 'ACTIVE',
+      steps: [],
+    };
+
+    DocumentsService.addWorkflow(workflow, siteId).then((response) => {
+      if (!response.workflowId) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Something went wrong. Please try again later',
+          })
+        );
+      }
+
+      window.location.href =
+        siteId === 'default'
+          ? `/workflows/designer?workflowId=${response.workflowId}`
+          : `/workspaces/${siteId}/workflows/designer?workflowId=${response.workflowId}`;
+    });
+  };
+
 
   const handleDuplicate = (newName: string) => {
     const newWorkflow = { ...duplicatedWorkflow, name: newName };
@@ -184,6 +211,7 @@ export function Workflows() {
         setIsDuplicateDialogOpen(true);
         setDuplicatedWorkflow(response);
       }
+
     });
   };
 
@@ -199,6 +227,7 @@ export function Workflows() {
     });
   };
 
+
   const handleDownloadClick = (workflowId: string, siteId: string) => {
     DocumentsService.getWorkflow(workflowId, siteId).then((response) => {
       if (response.name) {
@@ -212,141 +241,121 @@ export function Workflows() {
         link.click();
         URL.revokeObjectURL(url);
       }
-    });
+
+    })
+  }
+
+  const isValidString = (text: string) => {
+    try {
+      JSON.parse(text);
+    } catch (e) {
+      return false;
+    }
+    return true;
   };
+
+  const importWorkflow = (event: any) => {
+    console.log('importing')
+    const reader = new FileReader();
+    reader.readAsText(event.target.files[0], "UTF-8");
+    reader.onload = (e) => {
+      if (!isValidString(e.target?.result as string)) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Invalid JSON',
+          })
+        );
+        event.target.value = ''
+        return
+      }
+      const workflow = JSON.parse(e.target?.result as string);
+      DocumentsService.addWorkflow(workflow, siteId).then((response) => {
+        if (!response.workflowId) {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: response.errors[0].error,
+            })
+          );
+          event.target.value = ''
+          return
+        }
+
+        window.location.href =
+          siteId === 'default'
+            ? `/workflows/designer?workflowId=${response.workflowId}`
+            : `/workspaces/${siteId}/workflows/designer?workflowId=${response.workflowId}`;
+        event.target.value = ''
+      });
+    }
+  }
+
 
   return (
     <>
       <Helmet>
         <title>Workflows</title>
       </Helmet>
-      <div className="p-4 max-w-screen-lg font-semibold mb-4">
-        <p>
-          A workflow is a series of steps, which can be document actions or a
-          queue step, where documents await manual action (such as an approval)
-          inside of a document queue.
-        </p>
-        <p className="mt-4">
-          NOTE: a workflow cannot be edited or deleted once it has been
-          triggered by a document.
-        </p>
-      </div>
-      <div className="p-4 mb-20">
-        {userSite && (
-          <>
-            <div
-              className="w-full flex self-start text-neutral-900 hover:text-neutral-600 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleUserSiteExpand}
-            >
-              <div className="flex justify-end mt-3 mr-1">
-                {userSiteExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="pl-1 uppercase text-base">
-                Workflows: My Documents
-                <span className="block normal-case">
-                  {' '}
-                  (Site ID: {userSite.siteId})
-                </span>
-              </div>
+
+
+      <div className="flex" style={{
+        height: `calc(100vh - 3.68rem)`,
+      }}>
+        <div className="grow flex flex-col justify-stretch">
+          <div className="p-4 max-w-screen-lg font-semibold mb-4">
+            <p>
+              A workflow is a series of steps, which can be document actions or a
+              queue step, where documents await manual action (such as an approval)
+              inside of a document queue.
+            </p>
+            <p className="mt-4">
+              NOTE: a workflow cannot be edited or deleted once it has been
+              triggered by a document.
+            </p>
+          </div>
+          {!isSiteReadOnly && (
+            <div className="mb-4 flex px-4 gap-2">
+              <ButtonPrimaryGradient
+                data-test-id="create-workflow"
+                onClick={createNewWorkflow}
+                className="flex items-center"
+                style={{height: '36px'}}
+              >
+                <span>Create new</span>
+                <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
+              </ButtonPrimaryGradient>
+
+              <input type="file" id={"import-workflow" + siteId} accept=".json" className='hidden'
+                     onChange={importWorkflow}/>
+              <label htmlFor={"import-workflow" + siteId}
+                     className="h-9 bg-white text-neutral-900 border border-primary-500 px-4 font-bold whitespace-nowrap hover:text-primary-500 transition duration-100 rounded-md flex items-center justify-center">
+                <span>Import (JSON)</span>
+              </label>
+
+              <button
+                className="flex hidden bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
+                data-test-id="create-workflow"
+                onClick={(event) => onNewClick(event, siteId)}
+              >
+                <span>Create new (OLD)</span>
+                <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
+              </button>
             </div>
-            {userSiteExpanded && (
-              <WorkflowList
-                siteId={userSite.siteId}
-                workflows={userSiteWorkflows}
-                isSiteReadOnly={userSite.readonly}
-                onDelete={deleteWorkflow}
-                onNewClick={onNewClick}
-                handleDuplicateClick={handleDuplicateClick}
-                handleCopyToClipBoard={handleCopyToClipBoard}
-                showTooltipId={showTooltipId}
-                handleDownloadClick={handleDownloadClick}
-              ></WorkflowList>
-            )}
-          </>
-        )}
-        {defaultSite && defaultSite.siteId && (
-          <>
-            <div
-              className="w-full flex self-start text-neutral-900 hover:text-neutral-600 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleDefaultSiteExpand}
-            >
-              <div className="flex justify-end mt-3 mr-1">
-                {defaultSiteExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="pl-1 uppercase text-base">
-                {userSite ? (
-                  <span>
-                    Workflows: Team Documents
-                    <span className="block normal-case">
-                      (Site ID: default)
-                    </span>
-                  </span>
-                ) : (
-                  <span>
-                    Workflows: Documents
-                    <span className="block normal-case">
-                      (Site ID: default)
-                    </span>
-                  </span>
-                )}
-              </div>
-            </div>
-            {defaultSiteExpanded && (
-              <WorkflowList
-                workflows={defaultSiteWorkflows}
-                onDelete={deleteWorkflow}
-                siteId={defaultSite.siteId}
-                isSiteReadOnly={defaultSite.readonly}
-                onNewClick={onNewClick}
-                handleDuplicateClick={handleDuplicateClick}
-                handleCopyToClipBoard={handleCopyToClipBoard}
-                showTooltipId={showTooltipId}
-                handleDownloadClick={handleDownloadClick}
-              ></WorkflowList>
-            )}
-          </>
-        )}
-        {workspaceSites.length > 0 && (
-          <>
-            <div
-              className="w-full flex self-start text-neutral-900 hover:text-neutral-600 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleWorkspacesExpand}
-            >
-              <div className="flex justify-end mt-3 mr-1">
-                {workspacesExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="pl-1 uppercase text-base">
-                Workflows: Workspaces
-              </div>
-            </div>
-            {workspacesExpanded &&
-              workspaceWorkflows.map((item: WorkflowItem, i: number) => {
-                return (
-                  <div key={i}>
-                    <div className="mt-4 ml-4 flex flex-wrap w-full">
-                      <div className="pl-1 uppercase text-sm">
-                        Workflows:{' '}
-                        <span className="normal-case">{item.siteId}</span>
-                      </div>
-                    </div>
-                    <div className="mt-4 ml-4">
-                      <WorkflowList
-                        workflows={item.workflows}
-                        siteId={item.siteId}
-                        isSiteReadOnly={item.readonly}
-                        onDelete={deleteWorkflow}
-                        onNewClick={onNewClick}
-                        handleDuplicateClick={handleDuplicateClick}
-                        handleCopyToClipBoard={handleCopyToClipBoard}
-                        showTooltipId={showTooltipId}
-                        handleDownloadClick={handleDownloadClick}
-                      ></WorkflowList>
-                    </div>
-                  </div>
-                );
-              })}
-          </>
-        )}
+          )}
+          <div className="relative overflow-hidden h-full">
+            <WorkflowList
+              workflows={workflows as []}
+              onDelete={onWorkflowDelete}
+              siteId={currentSiteId}
+              handleScroll={handleScroll}
+              handleDuplicateClick={handleDuplicateClick}
+              handleCopyToClipBoard={handleCopyToClipBoard}
+              showTooltipId={showTooltipId}
+              handleDownloadClick={handleDownloadClick}
+              isSiteReadOnly={isSiteReadOnly}
+            ></WorkflowList>
+          </div>
+        </div>
+
       </div>
       <NewWorkflowModal
         isOpened={isNewModalOpened}

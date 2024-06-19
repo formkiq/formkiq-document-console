@@ -28,7 +28,7 @@ export interface Rule {
     must: [
       {
         attribute: RuleConditionAttribute;
-        fieldName: string;
+        fieldName?: string;
         value: string;
         operation: RuleConditionOperation;
       }
