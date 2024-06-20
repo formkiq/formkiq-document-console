@@ -403,6 +403,7 @@ export const toggleExpandFolder = createAsyncThunk(
           null,
           25,
           dataCache.allTags,
+          null,
           dataCache.allAttributes
         ).then((response: any) => {
           if (response) {
