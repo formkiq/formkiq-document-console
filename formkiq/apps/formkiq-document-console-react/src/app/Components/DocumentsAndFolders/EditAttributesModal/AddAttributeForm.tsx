@@ -55,7 +55,7 @@ function AddAttributeForm({
       if (response.status !== 200) {
         dispatch(
           openNotificationDialog({
-            dialogTitle: 'Failed to add attribute',
+            dialogTitle: response.errors[0].error,
           })
         );
         return;
@@ -91,7 +91,7 @@ function AddAttributeForm({
             if (response.status !== 201) {
               dispatch(
                 openNotificationDialog({
-                  dialogTitle: 'Failed to add attribute',
+                  dialogTitle: response.errors[0].error,
                 })
               );
             } else {
@@ -138,7 +138,7 @@ function AddAttributeForm({
               />
             </div>
 
-            <div className="mr-2 h-8">
+            <div className="mr-2 h-8 w-52">
               <RadioListbox
                 values={attributeTypes}
                 titles={attributeTypes}
