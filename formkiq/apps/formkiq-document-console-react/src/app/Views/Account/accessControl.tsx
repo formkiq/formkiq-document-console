@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import {Link, useSearchParams} from 'react-router-dom';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import RadioListbox from '../../Components/Generic/Listboxes/RadioListbox';
 import { Trash } from '../../Components/Icons/icons';
@@ -51,12 +51,29 @@ export function AccessControl() {
   const [policies, setPolicies] = useState<PolicyType[]>([]);
   const [isDirty, setIsDirty] = useState(false);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedPolicySiteId = searchParams.get('selectedPolicySiteId');
+
   function fetchPolicies() {
     DocumentsService.getOpenPolicyAgentPolicies().then((res) => {
       if (res.status === 200) {
         setPolicies(res.opaPolicies);
-        if (res.opaPolicies.length > 0) {
-          setPolicyText(res.opaPolicies[0].policy);
+        if (res.opaPolicies.length > 0&& !selectedPolicySiteId) {
+          const policy = res.opaPolicies.find((policy: any) => policy.siteId === currentSiteId)?.policy;
+          if (policy) {
+            setPolicyText(policy);
+          } else {
+            setPolicyText('');
+          }
+        } else if(res.opaPolicies.length &&selectedPolicySiteId){
+          const policy = res.opaPolicies.find((policy: any) => policy.siteId === selectedPolicySiteId)?.policy;
+          setCurrentSiteId(selectedPolicySiteId);
+          if (policy) {
+            setPolicyText(policy);
+          } else {
+            setPolicyText('');
+          }
+          setSearchParams({});
         } else {
           setPolicyText('');
         }
@@ -140,7 +157,7 @@ export function AccessControl() {
       </Helmet>
       <div className="flex justify-between items-center gap-2 p-2">
         <h6 className="w-full my-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
-          Access Control: Configure Open Policy Agent
+          Access Control: Open Policy Agent
         </h6>
         <Link to={currentSiteId}>
           <ButtonPrimaryGradient className="h-8">

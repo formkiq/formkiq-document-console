@@ -92,13 +92,22 @@ export function AccessControl() {
         <title>Manage Policy</title>
       </Helmet>
       <div className="flex justify-between p-2">
-        <h6 className="w-full my-2 text-base tracking-normal leading-10 font-bold text-neutral-900 sm:leading-none">
-          Site ID: {siteId}
-        </h6>
+        <div className="flex gap-4 items-center">
+          <h6 className="w-full my-2 text-base tracking-normal leading-10 font-bold text-neutral-900 sm:leading-none">
+            Edit Policy Items
+          </h6>
+          <div className="w-[2px] min-w-[2px] block h-6 bg-neutral-500 "></div>
+          <a className="text-sm font-bold text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
+             href={`/account/accessControl?selectedPolicySiteId=${siteId}`}>
+            Back To Policy View
+          </a>
+        </div>
         <ButtonPrimaryGradient className="h-8" onClick={() => setIsCreatePolicyModalOpen(true)}>+ Add
           New Policy Item</ButtonPrimaryGradient>
       </div>
-
+      <h6 className="my-2 pl-2 text-base tracking-normal leading-10 font-medium text-neutral-900 sm:leading-none">
+        Site ID: {siteId}
+      </h6>
       {allPolicyItems && allPolicyItems.map((policyItem: any, index: number) => (
         <div key={"policyItem_" + index}>
           <div className="flex justify-between items-center px-2 my-2 h-8 gap-2">
