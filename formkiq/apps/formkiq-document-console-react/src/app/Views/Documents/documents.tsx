@@ -1610,19 +1610,19 @@ function Documents() {
                                 {item?.numberValue !== undefined && <span>{item.numberValue}</span>}
                                 {item?.booleanValue !== undefined && <span>{item.booleanValue}</span>}
                                 {item?.stringValues !== undefined &&
-                                  <span className="group relative"> <span>{item.stringValues.length}{item.stringValues.length>1?" values":" value"}
+                                  <span className="group relative"> <span className="italic" >{item.stringValues.length}{item.stringValues.length>1?" values":" value"}
                                  </span>    <span className="group-hover:opacity-100 transition-opacity bg-neutral-100 px-1 text-sm text-neutral-900 font-normal rounded-md absolute left-1/2
     -translate-x-1/2 translate-y-4 opacity-0 m-4 mx-auto">{item.stringValues.map((val:string) => <>{val},<br/></>)}</span>
                                   </span>}
                                 {item?.numberValues !== undefined &&
-                                  <span className="group relative"> <span>{item.numberValues.length}{item.numberValues.length>1?" values":" value"}
+                                  <span className="group relative"> <span className="italic" >{item.numberValues.length}{item.numberValues.length>1?" values":" value"}
                                  </span>    <span className="group-hover:opacity-100 transition-opacity bg-neutral-100 px-1 text-sm text-neutral-900 font-normal rounded-md absolute left-1/2
     -translate-x-1/2 translate-y-4 opacity-0 m-4 mx-auto">{item.numberValues.map((val:number) => <>{val}, <br/></>)}</span>
                                   </span>}
                               {/*Tags*/}
                                 {item?.value !== undefined && <span>{item.value}</span>}
                                 {item?.values !== undefined &&
-                                    <span className="group relative"> <span>{item.values.length}{item.values.length>1?" values":" value"}
+                                    <span className="group relative"> <span className="italic" >{item.values.length}{item.values.length>1?" values":" value"}
                                  </span>    <span className="group-hover:opacity-100 transition-opacity bg-neutral-100 px-1 text-sm text-neutral-900 font-normal rounded-md absolute left-1/2
     -translate-x-1/2 translate-y-2 opacity-0 m-4 mx-auto">{item.values.map((val:any) => <>{val}, <br/></>)}</span>
                                   </span>}
