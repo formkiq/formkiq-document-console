@@ -1369,7 +1369,7 @@ function Documents() {
           </div>
         </div>
         {infoDocumentId.length ? (
-          <div className="h-[calc(100vh-3.68rem)] flex w-72 bg-white border-l border-neutral-300">
+          <div className="h-[calc(100vh-3.68rem)] overflow-y-auto flex w-72 bg-white border-l border-neutral-300">
             <div className="flex-1 inline-block">
               {currentDocument ? (
                 <div className="flex flex-wrap justify-center">
@@ -1460,7 +1460,7 @@ function Documents() {
                   <div
                     className={
                       (infoDocumentView === 'info' ? 'block ' : 'hidden ') +
-                      ' w-64 mr-12 overflow-y-auto h-[calc(100vh-3.68rem)]'
+                      ' w-64 mr-12'
                     }
                   >
                     {currentDocument && (currentDocument as IDocument).path && (
@@ -1554,6 +1554,21 @@ function Documents() {
                             {(currentDocument as IDocument).documentId}&nbsp;
                           </dd>
                         </div>
+                        {(currentDocument as IDocument).deepLinkPath && <div className="flex flex-col pb-3">
+                          <dt className="mb-1">
+                            DeepLinkPath{' '}
+                            <CopyButton
+                              value={(currentDocument as IDocument).deepLinkPath}
+                            />
+                          </dt>
+                          <dd className="font-semibold text-xxs tracking-tight">
+                            <a className="underline h0ver:text-primary-500 break-words" href={(currentDocument as IDocument).deepLinkPath}>
+                              {(currentDocument as IDocument).deepLinkPath}&nbsp;
+                            </a>
+                          </dd>
+                        </div>}
+
+
                         <div className="w-68 flex mr-3 border-b"></div>
 
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
