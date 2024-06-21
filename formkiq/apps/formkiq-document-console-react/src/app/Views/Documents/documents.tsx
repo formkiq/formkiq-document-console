@@ -70,7 +70,6 @@ import {
   getFileIcon,
   getUserSites,
 } from '../../helpers/services/toolService';
-import { Attribute } from '../../helpers/types/attributes';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
@@ -78,6 +77,8 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
+import {Attribute, DocumentAttribute} from '../../helpers/types/attributes';
+import {AttributesState, fetchDocumentAttributes} from "../../Store/reducers/attributes";
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -101,6 +102,7 @@ function Documents() {
     pendingArchive,
   } = useSelector(ConfigState);
   const { allTags, allAttributes } = useSelector(DataCacheState);
+  const {documentAttributes} = useSelector(AttributesState);
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
   const search = useLocation().search;
@@ -196,6 +198,8 @@ function Documents() {
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
   const [documentListOffsetTop, setDocumentListOffsetTop] = useState<number>(0);
+  const [sortedAttributesAndTags, setSortedAttributesAndTags] =
+      useState<any[]>([]);
 
   const trackScrolling = useCallback(async () => {
     const bottomRow = (
@@ -284,11 +288,28 @@ function Documents() {
       );
     }
     dispatch(setCurrentDocumentPath(''));
+    dispatch(fetchDocumentAttributes({
+      siteId: currentSiteId,
+      documentId: infoDocumentId,
+      limit: 100,
+      page: 1,
+      nextToken: null
+    }));
   }
 
   useEffect(() => {
     onDocumentInfoClick();
   }, [infoDocumentId]);
+
+  useEffect(() => {
+    if(documentAttributes.length === 0&&currentDocumentTags){
+      setSortedAttributesAndTags([]);
+      return;
+    }
+    const sortedDocumentAttributesAndTags = [...currentDocumentTags,...documentAttributes]
+    sortedDocumentAttributesAndTags.sort((a, b) => a.key.localeCompare(b.key));
+    setSortedAttributesAndTags(sortedDocumentAttributesAndTags);
+  }, [documentAttributes,currentDocumentTags]);
 
   useEffect(() => {
     if (hash.indexOf('#id=') > -1) {
@@ -1560,6 +1581,39 @@ function Documents() {
                               </>
                             </div>
                           )}
+                        </div>
+                        <div>
+                          {sortedAttributesAndTags.length > 0 && sortedAttributesAndTags.map((item: any, i) => (
+                            <div
+                              key={"attribute_" + i}
+                              className='inline flex flex-col pt-3'
+                            >
+                              <dt className="mb-1">{item.key}</dt>
+                              <dd className="font-semibold text-sm">
+                                {/*Attributes*/}
+                                {item?.stringValue && <span>{item.stringValue}</span>}
+                                {item?.numberValue !== undefined && <span>{item.numberValue}</span>}
+                                {item?.booleanValue !== undefined && <span>{item.booleanValue}</span>}
+                                {item?.stringValues !== undefined &&
+                                  <span className="group relative"> <span>{item.stringValues.length}{item.stringValues.length>1?" values":" value"}
+                                 </span>    <span className="group-hover:opacity-100 transition-opacity bg-neutral-100 px-1 text-sm text-neutral-900 font-normal rounded-md absolute left-1/2
+    -translate-x-1/2 translate-y-4 opacity-0 m-4 mx-auto">{item.stringValues.map((val:string) => <>{val},<br/></>)}</span>
+                                  </span>}
+                                {item?.numberValues !== undefined &&
+                                  <span className="group relative"> <span>{item.numberValues.length}{item.numberValues.length>1?" values":" value"}
+                                 </span>    <span className="group-hover:opacity-100 transition-opacity bg-neutral-100 px-1 text-sm text-neutral-900 font-normal rounded-md absolute left-1/2
+    -translate-x-1/2 translate-y-4 opacity-0 m-4 mx-auto">{item.numberValues.map((val:number) => <>{val}, <br/></>)}</span>
+                                  </span>}
+                              {/*Tags*/}
+                                {item?.value !== undefined && <span>{item.value}</span>}
+                                {item?.values !== undefined &&
+                                    <span className="group relative"> <span>{item.values.length}{item.values.length>1?" values":" value"}
+                                 </span>    <span className="group-hover:opacity-100 transition-opacity bg-neutral-100 px-1 text-sm text-neutral-900 font-normal rounded-md absolute left-1/2
+    -translate-x-1/2 translate-y-2 opacity-0 m-4 mx-auto">{item.values.map((val:any) => <>{val}, <br/></>)}</span>
+                                  </span>}
+                              </dd>
+                            </div>
+                          ))}
                         </div>
                       </dl>
                     )}
