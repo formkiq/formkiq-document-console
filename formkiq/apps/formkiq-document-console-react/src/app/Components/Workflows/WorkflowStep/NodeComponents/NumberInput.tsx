@@ -1,4 +1,4 @@
-import {ChangeEvent} from "react";
+import {ChangeEvent, useEffect} from "react";
 import DisplayValue from "./DisplayValue";
 
 const NumberInput = ({
@@ -14,6 +14,7 @@ const NumberInput = ({
 ) => {
 
   const handleNumberInput = (name: string) => {
+    if(!onChange) return;
     onChange(name)
   };
 
@@ -26,6 +27,13 @@ const NumberInput = ({
       return 0;
     }
   };
+
+  // if default value set, update the step
+  useEffect(() => {
+      if (defaultValue&&isEditing) {
+          handleNumberInput(defaultValue);
+      }
+  }, [defaultValue]);
 
   return (
     <>{isEditing ? <>

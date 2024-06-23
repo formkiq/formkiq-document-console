@@ -26,19 +26,10 @@ const stepInfo = {
   decisions: ['APPROVE'],
 }
 
-function DocumentTagging({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode}: any) {
+function DocumentTagging({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange}: any) {
   const engineSelectorOptions = {
     chatgpt: 'ChatGPT',
   }
-  const onChange = (value: any, key: any) => {
-    setNewStep({
-      ...newStep,
-      parameters: {
-        ...newStep.parameters,
-        [key]: value,
-      },
-    });
-  };
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false
   let connectionsNumber = MAX_CONNECTIONS

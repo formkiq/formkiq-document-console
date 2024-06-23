@@ -81,20 +81,28 @@ export default function DocumentTagsPopover({
           ...replacementTagColors[previousColorIndex].tagKeys,
         ];
         previousColorTagKeys.splice(previousTagKeyIndex, 1);
-        const newColorTagKeys = [
-          ...replacementTagColors[newColorIndex].tagKeys,
-        ];
-        newColorTagKeys.push(tagKey);
-        replacementTagColors[previousColorIndex] = {
-          colorUri: replacementTagColors[previousColorIndex].colorUri,
-          tagKeys: previousColorTagKeys,
-        };
-        replacementTagColors[newColorIndex] = {
-          colorUri: replacementTagColors[newColorIndex].colorUri,
-          tagKeys: newColorTagKeys,
-        };
+        if(colorUri !== 'default'){
+          const newColorTagKeys = [
+            ...replacementTagColors[newColorIndex].tagKeys,
+          ];
+          newColorTagKeys.push(tagKey);
+          replacementTagColors[previousColorIndex] = {
+            colorUri: replacementTagColors[previousColorIndex].colorUri,
+            tagKeys: previousColorTagKeys,
+          };
+          replacementTagColors[newColorIndex] = {
+            colorUri: replacementTagColors[newColorIndex].colorUri,
+            tagKeys: newColorTagKeys,
+          };
+        } else {
+          replacementTagColors[previousColorIndex] = {
+            colorUri: replacementTagColors[previousColorIndex].colorUri,
+            tagKeys: previousColorTagKeys,
+          };
+        }
       }
     } else {
+      if(colorUri === 'default') return
       const newColorTagKeys = [...replacementTagColors[newColorIndex].tagKeys];
       newColorTagKeys.push(tagKey);
       replacementTagColors[newColorIndex] = {

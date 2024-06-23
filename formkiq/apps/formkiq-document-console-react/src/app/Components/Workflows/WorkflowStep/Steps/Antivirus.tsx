@@ -14,17 +14,7 @@ const stepInfo = {
   decisions: ['APPROVE', 'REJECT'],
 }
 
-function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode}: any) {
-
-  const onChange = (value: any, key: any) => {
-    setNewStep({
-      ...newStep,
-      parameters: {
-        ...newStep.parameters,
-        [key]: value,
-      },
-    });
-  };
+function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange}: any) {
 
   const MAX_CONNECTIONS = 2;
   let isHandleConnectable = false

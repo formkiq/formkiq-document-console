@@ -2,6 +2,7 @@ import {parametersDoubleInnerType, Step, WorkflowStepActionType} from "../../../
 import {Listbox} from "@headlessui/react";
 import {ChevronRight} from "../../../Icons/icons";
 import DisplayValue from "./DisplayValue";
+import {useEffect} from "react";
 
 const ParametersSelector = ({
                               options,
@@ -13,6 +14,7 @@ const ParametersSelector = ({
 ) => {
 
   const handleSelectStepParameter = (name: string) => {
+    if(!onChange) return;
     onChange(name)
   };
 
@@ -24,6 +26,14 @@ const ParametersSelector = ({
       return 'Select ...';
     }
   };
+
+  // if only one option, select it by default
+  useEffect(() => {
+    if (Object.keys(options).length === 1 && isEditing) {
+      handleSelectStepParameter(Object.keys(options)[0]);
+    }
+  }, [])
+
   return (
     <>{isEditing ? <>
       <div className="text-sm text-gray-800 mt-4 mb-2">

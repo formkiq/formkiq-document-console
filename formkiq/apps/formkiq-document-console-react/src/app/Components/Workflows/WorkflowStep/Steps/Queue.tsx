@@ -28,16 +28,8 @@ function Queue({
   addCreatorNode,
   siteId,
   data,
+  onChange
 }: any) {
-  const onChange = (value: any, key: any) => {
-    setNewStep({
-      ...newStep,
-      parameters: {
-        ...newStep.parameters,
-        [key]: value,
-      },
-    });
-  };
   const MAX_CONNECTIONS = 2;
   let isHandleConnectable = false;
   let connectionsNumber = MAX_CONNECTIONS;

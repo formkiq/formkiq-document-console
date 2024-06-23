@@ -189,6 +189,17 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
     dispatch(editNode({id: props.id, changes: newNode}));
     setNewStep(null);
   };
+
+  const onChange = (value: any, key: any) => {
+    setNewStep((prev: any) => ({
+      ...prev,
+      parameters: {
+        ...prev.parameters,
+        [key]: value,
+      },
+    }))
+  };
+
   return (
     <>
       <Handle type="target" position={Position.Left} id="a"/>
@@ -201,25 +212,25 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
         {!newStep?.name && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={undefined}/>}
 
         {newStep?.name === 'DOCUMENTTAGGING' && (
-          <DocumentTagging newStep={newStep} setNewStep={setNewStep} isEditing={true}/>
+          <DocumentTagging newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
         {newStep?.name === 'NOTIFICATION' && (
-          <Notification newStep={newStep} setNewStep={setNewStep} isEditing={true}/>
+          <Notification newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
         {newStep?.name === 'WEBHOOK' && (
-          <Webhook newStep={newStep} setNewStep={setNewStep} isEditing={true}/>
+          <Webhook newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
         {newStep?.name === 'OCR' && (
-          <Ocr newStep={newStep} setNewStep={setNewStep} isEditing={true}/>
+          <Ocr newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
         {newStep?.name === 'FULLTEXT' && (
-          <FulltextSearch newStep={newStep} setNewStep={setNewStep} isEditing={true}/>
+          <FulltextSearch newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
         {newStep?.name === 'ANTIVIRUS' && (
-          <Antivirus newStep={newStep} setNewStep={setNewStep} isEditing={true}/>
+          <Antivirus newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
         {newStep?.name === 'QUEUE' && (
-          <Queue newStep={newStep} setNewStep={setNewStep} isEditing={true} site/>
+          <Queue newStep={newStep} setNewStep={setNewStep} isEditing={true} site onChange={onChange}/>
         )}
 
         {!isAddButtonDisabled && newStep !== null && (

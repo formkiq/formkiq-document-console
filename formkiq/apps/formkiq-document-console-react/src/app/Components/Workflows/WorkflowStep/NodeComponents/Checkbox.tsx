@@ -11,6 +11,7 @@ const Checkbox = ({
 ) => {
 
   const handleToggleCheckbox = (value: boolean) => {
+    if(!onChange) return;
     onChange(value)
   };
 
