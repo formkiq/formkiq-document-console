@@ -34,6 +34,10 @@ import {
   View,
 } from '../../Components/Icons/icons';
 import ShareModal from '../../Components/Share/share';
+import {
+  AttributesState,
+  fetchDocumentAttributes,
+} from '../../Store/reducers/attributes';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import {
   ConfigState,
@@ -101,6 +105,7 @@ function Documents() {
     pendingArchive,
   } = useSelector(ConfigState);
   const { allTags, allAttributes } = useSelector(DataCacheState);
+  const { documentAttributes } = useSelector(AttributesState);
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
   const search = useLocation().search;
@@ -196,6 +201,9 @@ function Documents() {
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
   const [documentListOffsetTop, setDocumentListOffsetTop] = useState<number>(0);
+  const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
+    []
+  );
 
   const trackScrolling = useCallback(async () => {
     const bottomRow = (
@@ -284,11 +292,33 @@ function Documents() {
       );
     }
     dispatch(setCurrentDocumentPath(''));
+    dispatch(
+      fetchDocumentAttributes({
+        siteId: currentSiteId,
+        documentId: infoDocumentId,
+        limit: 100,
+        page: 1,
+        nextToken: null,
+      })
+    );
   }
 
   useEffect(() => {
     onDocumentInfoClick();
   }, [infoDocumentId]);
+
+  useEffect(() => {
+    if (documentAttributes.length === 0 && currentDocumentTags) {
+      setSortedAttributesAndTags([]);
+      return;
+    }
+    const sortedDocumentAttributesAndTags = [
+      ...currentDocumentTags,
+      ...documentAttributes,
+    ];
+    sortedDocumentAttributesAndTags.sort((a, b) => a.key.localeCompare(b.key));
+    setSortedAttributesAndTags(sortedDocumentAttributesAndTags);
+  }, [documentAttributes, currentDocumentTags]);
 
   useEffect(() => {
     if (hash.indexOf('#id=') > -1) {
@@ -1348,7 +1378,7 @@ function Documents() {
           </div>
         </div>
         {infoDocumentId.length ? (
-          <div className="h-[calc(100vh-3.68rem)] flex w-72 bg-white border-l border-neutral-300">
+          <div className="h-[calc(100vh-3.68rem)] overflow-y-auto flex w-72 bg-white border-l border-neutral-300">
             <div className="flex-1 inline-block">
               {currentDocument ? (
                 <div className="flex flex-wrap justify-center">
@@ -1439,14 +1469,16 @@ function Documents() {
                   <div
                     className={
                       (infoDocumentView === 'info' ? 'block ' : 'hidden ') +
-                      ' w-64 mr-12 overflow-y-auto h-[calc(100vh-3.68rem)]'
+                      ' w-64 mr-12'
                     }
                   >
                     {currentDocument && (currentDocument as IDocument).path && (
                       <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">Location</dt>
-                          <dd className="font-semibold text-sm text-primary-600 hover:text-primary-400">
+                          <dt className="mb-1 text-smaller font-semibold">
+                            Location
+                          </dt>
+                          <dd className="text-sm text-primary-600 hover:text-primary-400">
                             {(currentDocument as IDocument).path.substring(
                               0,
                               (currentDocument as IDocument).path.lastIndexOf(
@@ -1501,38 +1533,68 @@ function Documents() {
                           </dd>
                         </div>
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">Added by</dt>
-                          <dd className="font-semibold text-sm">
+                          <dt className="mb-1 text-smaller font-semibold">
+                            Added by
+                          </dt>
+                          <dd className="text-sm">
                             {(currentDocument as IDocument).userId}
                           </dd>
                         </div>
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">Date added</dt>
-                          <dd className="font-semibold text-sm">
+                          <dt className="mb-1 text-smaller font-semibold">
+                            Date added
+                          </dt>
+                          <dd className=" text-sm">
                             {formatDate(
                               (currentDocument as IDocument).insertedDate
                             )}
                           </dd>
                         </div>
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">Last modified</dt>
-                          <dd className="font-semibold text-sm">
+                          <dt className="mb-1 text-smaller font-semibold">
+                            Last modified
+                          </dt>
+                          <dd className="text-sm">
                             {formatDate(
                               (currentDocument as IDocument).lastModifiedDate
                             )}
                           </dd>
                         </div>
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">
+                          <dt className="mb-1 text-smaller font-semibold">
                             ID{' '}
                             <CopyButton
                               value={(currentDocument as IDocument).documentId}
                             />
                           </dt>
-                          <dd className="font-semibold text-xxs tracking-tight">
+                          <dd className="text-sm tracking-tight">
                             {(currentDocument as IDocument).documentId}&nbsp;
                           </dd>
                         </div>
+                        {(currentDocument as IDocument).deepLinkPath && (
+                          <div className="flex flex-col pb-3">
+                            <dt className="mb-1 text-smaller font-semibold">
+                              DeepLinkPath{' '}
+                              <CopyButton
+                                value={
+                                  (currentDocument as IDocument).deepLinkPath
+                                }
+                              />
+                            </dt>
+                            <dd className="text-sm tracking-tight">
+                              <a
+                                className="underline h0ver:text-primary-500 break-words"
+                                href={
+                                  (currentDocument as IDocument).deepLinkPath
+                                }
+                              >
+                                {(currentDocument as IDocument).deepLinkPath}
+                                &nbsp;
+                              </a>
+                            </dd>
+                          </div>
+                        )}
+
                         <div className="w-68 flex mr-3 border-b"></div>
 
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
@@ -1553,13 +1615,140 @@ function Documents() {
                               }
                             >
                               <>
-                                <span>add/edit attributes</span>
-                                <div className="w-4 pt-0.5">
+                                <span className="pt-0.5">
+                                  add/edit attributes
+                                </span>
+                                <div className="w-4">
                                   <ChevronRight />
                                 </div>
                               </>
                             </div>
                           )}
+                        </div>
+                        <div className="mt-2 text-smaller font-semibold">
+                          *Key-only*
+                        </div>
+                        <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 flex flex-wrap">
+                          {sortedAttributesAndTags.length > 0 &&
+                            sortedAttributesAndTags.map((item: any, i) => {
+                              let tagColor = 'gray';
+                              if (tagColors) {
+                                tagColors.forEach((color: any) => {
+                                  if (color.tagKeys.indexOf(item.key) > -1) {
+                                    tagColor = color.colorUri;
+                                    return;
+                                  }
+                                });
+                              }
+                              return (
+                                <>
+                                  {!item.stringValue &&
+                                    !item.numberValue &&
+                                    !item.booleanValue &&
+                                    !item.value &&
+                                    !item.values &&
+                                    !item.stringValues &&
+                                    !item.numberValues && (
+                                      <div className="pt-0.5 pr-1 flex">
+                                        <div
+                                          className={`h-5.5 pl-2 text-smaller rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                                        >
+                                          {item.key}
+                                        </div>
+                                        <div
+                                          className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                                        ></div>
+                                      </div>
+                                    )}
+                                </>
+                              );
+                            })}
+                        </div>
+                        <div>
+                          {sortedAttributesAndTags.length > 0 &&
+                            sortedAttributesAndTags.map((item: any, i) => (
+                              <>
+                                {!item.stringValue &&
+                                !item.numberValue &&
+                                !item.booleanValue &&
+                                !item.value &&
+                                !item.values &&
+                                !item.stringValues &&
+                                !item.numberValues ? (
+                                  <></>
+                                ) : (
+                                  <div
+                                    key={'attribute_' + i}
+                                    className="flex flex-col pt-3"
+                                  >
+                                    <dt className="mb-1 text-smaller font-semibold">
+                                      {item.key}
+                                    </dt>
+                                    <dd className="font-semibold text-sm">
+                                      {/*Attributes*/}
+                                      {item?.stringValue && (
+                                        <span>{item.stringValue}</span>
+                                      )}
+                                      {item?.numberValue !== undefined && (
+                                        <span>{item.numberValue}</span>
+                                      )}
+                                      {item?.booleanValue !== undefined && (
+                                        <span>{item.booleanValue}</span>
+                                      )}
+                                      {item?.stringValues !== undefined && (
+                                        <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
+                                          {item.stringValues.map(
+                                            (val: any, index: number) => (
+                                              <>
+                                                {val}
+                                                {index <
+                                                  item.stringValues.length -
+                                                    1 && <hr />}
+                                              </>
+                                            )
+                                          )}
+                                        </div>
+                                      )}
+                                      {item?.numberValues !== undefined && (
+                                        <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
+                                          {item.numberValues.map(
+                                            (val: any, index: number) => (
+                                              <>
+                                                {val}
+                                                {index <
+                                                  item.numberValues.length -
+                                                    1 && <hr />}
+                                              </>
+                                            )
+                                          )}
+                                        </div>
+                                      )}
+                                      {/*Tags*/}
+                                      {item?.value !== undefined && (
+                                        <div className="-mr-2 p-1 text-sm font-normal max-h-24 overflow-auto">
+                                          {item.value}
+                                        </div>
+                                      )}
+                                      {item?.values !== undefined && (
+                                        <div className="-mr-2 rounded-lg border border-neutral-200 p-1 text-smaller font-normal max-h-24 overflow-auto">
+                                          {item.values.map(
+                                            (val: any, index: number) => (
+                                              <>
+                                                {val}
+                                                {index <
+                                                  item.values.length - 1 && (
+                                                  <hr className="my-0.5" />
+                                                )}
+                                              </>
+                                            )
+                                          )}
+                                        </div>
+                                      )}
+                                    </dd>
+                                  </div>
+                                )}
+                              </>
+                            ))}
                         </div>
                       </dl>
                     )}

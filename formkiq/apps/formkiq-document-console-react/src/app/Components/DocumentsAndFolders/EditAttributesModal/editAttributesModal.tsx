@@ -6,6 +6,8 @@ import { Close } from '../../Icons/icons';
 import AttributesTab from './AttributesTab';
 import MetadataTab from './MetadataTab';
 import TagsTab from './TagsTab';
+import {useAppDispatch} from "../../../Store/store";
+import {openDialog as openNotificationDialog} from "../../../Store/reducers/globalNotificationControls";
 
 export default function EditAttributesModal({
   isOpened,
@@ -22,6 +24,7 @@ export default function EditAttributesModal({
   value: ILine | null;
   onDocumentDataChange: any;
 }) {
+  const dispatch = useAppDispatch()
   const [allTags, setAlltags] = useState(null);
   const [selectedTab, setSelectedTab] = useState<
     'attributes' | 'metadata' | 'tags'
@@ -59,7 +62,12 @@ export default function EditAttributesModal({
       tagKey,
       newValue,
       siteId
-    ).then(() => {
+    ).then((res) => {
+      if(res.status!==200){
+        dispatch(openNotificationDialog({
+          dialogTitle: res.errors[0].error
+        }))
+      }
       updateTags();
       setTimeout(() => {
         onDocumentDataChange(value);

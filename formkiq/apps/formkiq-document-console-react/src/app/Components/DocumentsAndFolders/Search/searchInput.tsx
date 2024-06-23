@@ -41,7 +41,7 @@ export default function SearchInput({
   const navigate = useNavigate();
 
   const { formkiqVersion, useAdvancedSearch } = useSelector(ConfigState);
-  const { allTags } = useSelector(DataCacheState);
+  const { allTags, allAttributes } = useSelector(DataCacheState);
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, setExpanded);
 
@@ -55,7 +55,8 @@ export default function SearchInput({
         null,
         value,
         1,
-        allTags
+        allTags,
+        allAttributes
       ).then((response: any) => {
         if (response?.documents) {
           const temp: any = [];

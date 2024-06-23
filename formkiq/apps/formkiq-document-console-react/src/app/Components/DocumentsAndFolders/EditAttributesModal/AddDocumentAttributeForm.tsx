@@ -45,6 +45,11 @@ function AddDocumentAttributeForm({
   const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
 
+  const resetValues = () => {
+      setSelectedAttribute(null)
+      setSelectedAttributeKey("")
+      reset()
+  }
   const onAddAttributeSubmit = async (data: any) => {
     let documentAttributes = {}
     if (data.stringValue) {
@@ -91,17 +96,26 @@ function AddDocumentAttributeForm({
     }
 
     DocumentsService.addDocumentAttributes(siteId, "false", getValue().documentId, documentAttributes).then(
-      () => {
-        setTimeout(() => {
-          onDocumentDataChange(value);
-          dispatch(fetchDocumentAttributes({
-            siteId,
-            documentId: value?.documentId as string,
-          }))
-        }, 500);
+      (res) => {
+        if (res.status === 201) {
+          setTimeout(() => {
+            onDocumentDataChange(value);
+            dispatch(fetchDocumentAttributes({
+              siteId,
+              documentId: value?.documentId as string,
+            }))
+          }, 500);
+          resetValues();
+        } else {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: res.errors[0].error,
+            })
+          );
+        }
       })
 
-    reset();
+
   };
 
   const onAddAttributeFormClose = () => {

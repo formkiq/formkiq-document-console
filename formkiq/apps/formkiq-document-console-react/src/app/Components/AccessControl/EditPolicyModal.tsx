@@ -5,7 +5,7 @@ import { DataCacheState, setAllAttributes } from '../../Store/reducers/data';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
 import { DocumentsService } from '../../helpers/services/documentsService';
-import { Attribute } from '../../helpers/types/attributes';
+import { Attribute, OpaAttributeType } from '../../helpers/types/attributes';
 import AddAttributeForm from '../DocumentsAndFolders/EditAttributesModal/AddAttributeForm';
 import ButtonGhost from '../Generic/Buttons/ButtonGhost';
 import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
@@ -27,32 +27,7 @@ export default function EditPolicyModal({
   policyItems: any[];
   index: number;
 }) {
-  type OpaAttributeType = {
-    key: string;
-    eq: {
-      input: {
-        matchUsername: boolean;
-      };
-      stringValue?: string;
-      numberValue?: number;
-      booleanValue?: boolean;
-    };
-    gt?: {
-      numberValue?: number;
-    };
-    gte?: {
-      numberValue?: number;
-    };
-    lt?: {
-      numberValue?: number;
-    };
-    lte?: {
-      numberValue?: number;
-    };
-    neq?: {
-      stringValue?: string;
-    };
-  };
+
   const numberAttributeCriteria = [
     { key: 'eq', title: 'Equal' },
     { key: 'neq', title: 'Not Equal' },
@@ -70,8 +45,7 @@ export default function EditPolicyModal({
   const policyItemsTypes = ['ALLOW'];
   const [selectedPolicyType, setSelectedPolicyType] = useState<string>('ALLOW');
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [selectedTypeOfRoles, setSelectedTypeOfRoles] =
-    useState<string>('allRoles');
+  const [selectedTypeOfRoles, setSelectedTypeOfRoles] = useState<string>('anyRoles');
   const { allAttributes } = useSelector(DataCacheState);
   const [attributeKeys, setAttributeKeys] = useState<string[]>([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
@@ -95,9 +69,7 @@ export default function EditPolicyModal({
     useState<boolean>(false);
 
   const doneButtonRef = useRef(null);
-  const closeDialog = () => {
-    onClose();
-  };
+
   const dispatch = useAppDispatch();
 
   function onSelectedTypeOfRolesChange(event: any) {
@@ -142,13 +114,18 @@ export default function EditPolicyModal({
       setAttributeCriteria(numberAttributeCriteria);
       setSelectedAttributeCriteria('eq');
       setNewAttributeValue(0);
+      setMatchUsername(false);
     } else if (selectedAttribute.dataType === 'STRING') {
       setAttributeCriteria(stringAttributeCriteria);
       setSelectedAttributeCriteria('eq');
       setNewAttributeValue('');
+      setMatchUsername(false);
     } else if (selectedAttribute.dataType === 'BOOLEAN') {
       setNewAttributeValue(false);
       setSelectedAttributeCriteria('eq');
+      setMatchUsername(false);
+    } else if(selectedAttribute.dataType === 'KEY_ONLY') {
+      setMatchUsername(false);
     }
   }, [selectedAttribute]);
 
@@ -173,17 +150,23 @@ export default function EditPolicyModal({
 
     let attribute: OpaAttributeType = {
       key: selectedAttributeKey,
-      eq: {
-        input: {
-          matchUsername,
-        },
-      },
     };
-    if (selectedAttribute && selectedAttributeCriteria) {
+
+    if (matchUsername) {
+      attribute = {
+        ...attribute,
+        eq: {
+          input: {
+            matchUsername
+          },
+        },
+      };
+    }
+
+    if (selectedAttribute && selectedAttributeCriteria && !matchUsername) {
       attribute = {
         ...attribute,
         [selectedAttributeCriteria]: {
-          ...attribute.eq,
           ...(selectedAttribute.dataType === 'NUMBER' && {
             numberValue: newAttributeValue,
           }),
@@ -201,12 +184,7 @@ export default function EditPolicyModal({
   }
 
   const renderCriteria = (item: OpaAttributeType) => {
-    if (
-      item.eq.stringValue !== undefined ||
-      item.eq.numberValue !== undefined ||
-      item.eq.booleanValue !== undefined
-    )
-      return 'Equal';
+    if (item.eq) return 'Equal';
     if (item.gt) return 'Greater Than';
     if (item.gte) return 'Greater Than or Equal';
     if (item.lt) return 'Less Than';
@@ -266,19 +244,25 @@ export default function EditPolicyModal({
           .map((error: any) => error.error)
           .join(', \n');
         dispatch(
-          openNotificationDialog({ dialogTitle: `Error.\n ${errorsString}` })
+          openNotificationDialog({dialogTitle: `Error.\n ${errorsString}`})
         );
       }
     });
   }
 
   function onMatchUsernameChange() {
-    if (matchUsername) {
-      setSelectedAttributeCriteria(null);
-      setNewAttributeValue('');
+    if (!matchUsername) {
+      setNewAttributeValue("");
+      setSelectedAttributeCriteria("eq");
     }
     setMatchUsername(!matchUsername);
   }
+
+  useEffect(() => {
+    if (matchUsername && selectedAttributeCriteria !== "eq") {
+      setMatchUsername(false);
+    }
+  }, [selectedAttributeCriteria]);
 
   function onRemoveAttribute(index: number) {
     const newAttributes = [...attributes];
@@ -339,7 +323,8 @@ export default function EditPolicyModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-1/2">
+              <Dialog.Panel
+                className="relative transform overflow-hidden text-left transition-all w-full xl-w-1/2 lg:w-2/3 min-w-[850px]">
                 <div className="bg-white p-6 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="w-full flex justify-between items-center">
                     <Dialog.Title className="text-2xl font-bold">
@@ -347,19 +332,21 @@ export default function EditPolicyModal({
                     </Dialog.Title>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
-                      onClick={closeDialog}
+                      onClick={onCancelEdit}
                     >
                       <Close />
                     </div>
                   </div>
                   <div className="h-8 flex gap-2 items-center w-full mt-6">
                     <h6 className="text-md font-bold">Policy Type</h6>
-                    <RadioListbox
-                      values={policyItemsTypes}
-                      titles={policyItemsTypes}
-                      selectedValue={selectedPolicyType}
-                      setSelectedValue={setSelectedPolicyType}
-                    />
+                    <div className="h-8 w-32">
+                      <RadioListbox
+                        values={policyItemsTypes}
+                        titles={policyItemsTypes}
+                        selectedValue={selectedPolicyType}
+                        setSelectedValue={setSelectedPolicyType}
+                      />
+                    </div>
                   </div>
 
                   <h2 className="text-lg font-bold mt-6">Conditions</h2>
@@ -378,31 +365,9 @@ export default function EditPolicyModal({
                       </div>
                       <div className="flex gap-2 items-top w-full">
                         <h6 className="text-sm font-bold whitespace-nowrap">
-                          User must match...
+                          User must match:
                         </h6>
                         <div className="flex flex-col gap-2 w-full ">
-                          <div className="relative">
-                            <input
-                              type="radio"
-                              name="roles"
-                              value="allRoles"
-                              checked={selectedTypeOfRoles === 'allRoles'}
-                              onChange={onSelectedTypeOfRolesChange}
-                              className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"
-                            />
-                            <label className="flex items-center gap-2 w-full">
-                              <div className="w-4">
-                                {selectedTypeOfRoles === 'allRoles' ? (
-                                  <CheckedRadio />
-                                ) : (
-                                  <UncheckedRadio />
-                                )}
-                              </div>
-                              <span className="block truncate text-sm">
-                                All roles
-                              </span>
-                            </label>
-                          </div>
                           <div className="relative">
                             <input
                               type="radio"
@@ -415,13 +380,35 @@ export default function EditPolicyModal({
                             <label className="flex items-center gap-2 w-full">
                               <div className="w-4">
                                 {selectedTypeOfRoles === 'anyRoles' ? (
-                                  <CheckedRadio />
+                                  <CheckedRadio/>
                                 ) : (
                                   <UncheckedRadio />
                                 )}
                               </div>
                               <span className="block truncate text-sm">
                                 Any role
+                              </span>
+                            </label>
+                          </div>
+                          <div className="relative">
+                            <input
+                              type="radio"
+                              name="roles"
+                              value="allRoles"
+                              checked={selectedTypeOfRoles === 'allRoles'}
+                              onChange={onSelectedTypeOfRolesChange}
+                              className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"
+                            />
+                            <label className="flex items-center gap-2 w-full">
+                              <div className="w-4">
+                                {selectedTypeOfRoles === 'allRoles' ? (
+                                  <CheckedRadio/>
+                                ) : (
+                                  <UncheckedRadio/>
+                                )}
+                              </div>
+                              <span className="block truncate text-sm">
+                                All roles
                               </span>
                             </label>
                           </div>
@@ -447,9 +434,9 @@ export default function EditPolicyModal({
                         Attribute Conditions
                       </h6>
 
-                      <div className="w-full flex justify-between mt-2 h-8">
+                      <div className="w-full flex justify-between flex-wrap mt-2 gap-2">
                         <div className="h-8 flex gap-2 items-center">
-                          <div className="relative h-8">
+                          <div className="relative h-8 w-40">
                             <RadioListbox
                               values={attributeKeys}
                               titles={attributeKeys}
@@ -457,13 +444,14 @@ export default function EditPolicyModal({
                               setSelectedValue={setSelectedAttributeKey}
                               placeholderText="Select Attribute"
                             />
-                            {selectedAttribute && (
-                              <h6 className="text-xs absolute top-8 left-0 whitespace-nowrap">
-                                <span className="font-bold">Data type: </span>
-                                {selectedAttribute.dataType}
-                              </h6>
-                            )}
+
                           </div>
+                          {selectedAttribute && (
+                            <div
+                              className="text-xs bg-neutral-100 rounded-md font-bold h-8 p-2 text-center whitespace-nowrap">
+                              {selectedAttribute.dataType}
+                            </div>
+                          )}
 
                           {selectedAttribute &&
                             (selectedAttribute.dataType === 'NUMBER' ||
@@ -491,7 +479,7 @@ export default function EditPolicyModal({
                               <input
                                 type="number"
                                 required
-                                className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                                className="h-8 w-32 px-4 border border-neutral-300 text-sm rounded-md"
                                 placeholder="Value"
                                 value={newAttributeValue as number}
                                 onChange={(e) => {
@@ -500,7 +488,8 @@ export default function EditPolicyModal({
                               />
                             )}
                           {selectedAttribute &&
-                            selectedAttribute.dataType === 'STRING' && (
+                            selectedAttribute.dataType === 'STRING' &&
+                            !matchUsername && (
                               <input
                                 type="text"
                                 required
@@ -529,7 +518,8 @@ export default function EditPolicyModal({
                               </div>
                             )}
                           {selectedAttribute &&
-                            selectedAttribute.dataType === 'KEY_ONLY' && (
+                            selectedAttribute.dataType === 'STRING' &&
+                            (
                               <div className="mt-2 flex items-center gap-2">
                                 <input
                                   type="checkbox"
@@ -549,33 +539,26 @@ export default function EditPolicyModal({
                             )}
                         </div>
                         <div className="h-8 flex gap-2">
-                          <ButtonTertiary
+                          <ButtonPrimaryGradient
                             type="button"
                             onClick={onAddAttribute}
                           >
-                            + Add
-                          </ButtonTertiary>
+                            Add Existing
+                          </ButtonPrimaryGradient>
+                          <ButtonTertiary type="button" onClick={() => {
+                            setIsCreateAttributeFormOpen(true);
+                          }}>Add New</ButtonTertiary>
                         </div>
                       </div>
                       <div className="flex w-full">
-                        {!isCreateAttributeFormOpen && (
-                          <button
-                            onClick={() => {
-                              setIsCreateAttributeFormOpen(true);
-                            }}
-                            className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer mt-4"
-                          >
-                            {' '}
-                            + Create New Attribute
-                          </button>
-                        )}
                         {isCreateAttributeFormOpen && (
-                          <div className="-ml-2 mt-4">
+                          <div className="-ml-2 mt-4 w-full">
                             <AddAttributeForm
                               siteId={siteId}
                               onDocumentDataChange={() => updateAllAttributes()}
                               value={null}
-                              getValue={() => {}}
+                              getValue={() => {
+                              }}
                               onClose={onCreateAttributeFormClose}
                             />
                           </div>
@@ -630,7 +613,7 @@ export default function EditPolicyModal({
                                 }
                               </td>
                               <td className="p-4 text-start ">
-                                {attribute.eq.input.matchUsername
+                                {(attribute.eq && attribute.eq?.input?.matchUsername)
                                   ? 'Yes'
                                   : 'No'}
                               </td>

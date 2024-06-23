@@ -22,3 +22,30 @@ export type DocumentAttribute = {
   numberValues?: number[],
   booleanValue?: boolean,
 };
+
+export type OpaAttributeType = {
+  key: string;
+  eq?: {
+    input: {
+      matchUsername: boolean;
+    };
+    stringValue?: string;
+    numberValue?: number;
+    booleanValue?: boolean;
+  };
+  gt?: {
+    numberValue?: number;
+  };
+  gte?: {
+    numberValue?: number;
+  };
+  lt?: {
+    numberValue?: number;
+  };
+  lte?: {
+    numberValue?: number;
+  };
+  neq?: {
+    stringValue?: string;
+  };
+};
