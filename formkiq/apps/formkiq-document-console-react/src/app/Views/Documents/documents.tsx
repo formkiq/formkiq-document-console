@@ -1684,7 +1684,7 @@ function Documents() {
                                     <dt className="mb-1 text-smaller font-semibold">
                                       {item.key}
                                     </dt>
-                                    <dd className="font-semibold text-sm">
+                                    <dd className="text-sm">
                                       {/*Attributes*/}
                                       {item?.stringValue && (
                                         <span>{item.stringValue}</span>
