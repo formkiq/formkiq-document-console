@@ -82,6 +82,7 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
+import AdvancedAttributesSearchTab from "../../Components/DocumentsAndFolders/Search/advancedAttributesSearchTab";
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -114,6 +115,9 @@ function Documents() {
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
+  const advancedAttributesSearch = new URLSearchParams(search).get(
+      'advancedAttributesSearch'
+  );
   const { hash } = useLocation();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
@@ -1346,6 +1350,11 @@ function Documents() {
                 <div className="pt-2 pr-8">
                   <PendingArchiveTab />
                 </div>
+              )}
+              {advancedAttributesSearch && (
+                  <div className="pt-2 pr-8">
+                      <AdvancedAttributesSearchTab />
+                  </div>
               )}
               <DocumentsTable
                 onDeleteDocument={onDeleteDocument}

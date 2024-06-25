@@ -1,7 +1,7 @@
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import {Link, useNavigate, useSearchParams} from 'react-router-dom';
 import { ConfigState } from '../../../Store/reducers/config';
 import { DataCacheState } from '../../../Store/reducers/data';
 import { DocumentsService } from '../../../helpers/services/documentsService';
@@ -42,6 +42,7 @@ export default function SearchInput({
 
   const { formkiqVersion, useAdvancedSearch } = useSelector(ConfigState);
   const { allTags, allAttributes } = useSelector(DataCacheState);
+  const [searchParams, setSearchParams] = useSearchParams();
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, setExpanded);
 
@@ -184,6 +185,19 @@ export default function SearchInput({
     }
   }
 
+  // toggle advanced search pane
+  const toggleAdvancedSearch = () => {
+    const advancedSearch = searchParams.get('advancedAttributesSearch');
+    if (!advancedSearch) {
+      searchParams.set('advancedAttributesSearch', 'true');
+      setSearchParams(searchParams);
+    }
+    if (advancedSearch === 'true') {
+      searchParams.delete('advancedAttributesSearch');
+      setSearchParams(searchParams);
+    }
+  };
+
   return (
     <div className={'relative w-full'} ref={wrapperRef}>
       <div className="flex items-center">
@@ -206,16 +220,30 @@ export default function SearchInput({
           />
         </div>
         <div className="grow-0 ml-2 -mt-1">
-          {useAdvancedSearch && (
-            <button
-              className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"
-              onClick={(event) => onAdvancedSearchModalClick(event)}
-            >
-              <div className="w-4">
-                <MoreActions />
-              </div>
-            </button>
-          )}
+
+          {/*TODO: check if it is supposed to be used */}
+          {/*{useAdvancedSearch && (*/}
+          {/*  <button*/}
+          {/*    className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"*/}
+          {/*    onClick={(event) => onAdvancedSearchModalClick(event)}*/}
+          {/*  >*/}
+          {/*    <div className="w-4">*/}
+          {/*      <MoreActions />*/}
+          {/*    </div>*/}
+          {/*  </button>*/}
+          {/*)}*/}
+
+          {/*{useAdvancedSearch && (*/}
+          <button
+            className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"
+            onClick={toggleAdvancedSearch}
+          >
+            <div className="w-4">
+              <MoreActions/>
+            </div>
+          </button>
+          {/*)}*/}
+
         </div>
       </div>
       {expanded && (
