@@ -676,12 +676,12 @@ export class DocumentsService {
       }
     });
     if (formkiqVersion.modules.indexOf('opensearch') === -1) {
-
+      const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
       const searchBody:any = {
         query: {},
         responseFields: {
           tags: customIncludeTags,
-          attributes: allAttributes,
+          attributes: attributesKeys,
         },
       };
       if (searchText&&searchText!=='') {
