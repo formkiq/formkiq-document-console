@@ -36,7 +36,7 @@ function RadioCombobox({
 
 
         <Combobox.Options
-          className="absolute top-9 h-48 overflow-y-scroll bg-white shadow-md border border-neutral-100 font-medium z-50">
+          className={"absolute top-9 overflow-y-scroll bg-white shadow-md border border-neutral-100 font-medium z-50 " + (filteredValues.length > 0 && "h-48")}>
           {filteredValues.map((value, index) => (
             <Combobox.Option key={value.key} value={value.key}
                              className="h-12 hover:bg-neutral-200 px-6 flex items-center text-xs">
