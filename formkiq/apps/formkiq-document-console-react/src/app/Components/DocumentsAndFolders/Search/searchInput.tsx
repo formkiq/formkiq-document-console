@@ -234,14 +234,15 @@ export default function SearchInput({
           {/*)}*/}
 
           {/*{useAdvancedSearch && (*/}
-          <button
-            className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"
-            onClick={toggleAdvancedSearch}
-          >
-            <div className="w-4">
-              <MoreActions/>
-            </div>
-          </button>
+          {/*{(formkiqVersion.modules.includes('typesense')|| formkiqVersion.modules.includes('opensearch')) && (*/}          {/*TODO: uncomment*/}
+            <button
+              className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"
+              onClick={toggleAdvancedSearch}
+            >
+              <div className="w-4">
+                <MoreActions/>
+              </div>
+            </button>
           {/*)}*/}
 
         </div>

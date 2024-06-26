@@ -29,8 +29,7 @@ export const fetchDocuments = createAsyncThunk(
       filterAttribute,
       nextToken,
       page,
-      documents,
-      folders,
+      searchAttributes,
     } = data;
     const user = (thunkAPI.getState() as any)?.authState.user;
     const tagParam = filterTag ? filterTag.split(':')[0] : null;
@@ -122,6 +121,41 @@ export const fetchDocuments = createAsyncThunk(
           }
         });
       }
+    } else if(searchAttributes) {
+      const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
+      DocumentsService.searchDocuments(
+        siteId,
+        formkiqVersion,
+        tagParam,
+        searchWord,
+        page,
+        dataCache.allTags,
+        dataCache.allAttributes,
+        searchAttributes
+      ).then((response: any) => {
+        if (response) {
+          const temp: any = response.documents?.filter(
+            (document: IDocument) => {
+              return document.path;
+            }
+          );
+          const data = {
+            siteId,
+            documents: temp,
+            user: user,
+            page,
+            isLoadingMore: false,
+            isLastSearchPageLoaded: false,
+          };
+          if (page > 1) {
+            data.isLoadingMore = true;
+          }
+          if (response.documents?.length === 0) {
+            data.isLastSearchPageLoaded = true;
+          }
+          thunkAPI.dispatch(setDocuments(data));
+        }
+      });
     } else {
       if (queueId && queueId.length) {
         DocumentsService.getDocumentsInQueue(

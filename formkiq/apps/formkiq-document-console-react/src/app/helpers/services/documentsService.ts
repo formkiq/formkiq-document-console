@@ -654,6 +654,7 @@ export class DocumentsService {
     page = 1,
     allTags = [] as any[],
     allAttributes = [] as any[],
+    searchAttributes: any = null
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -678,6 +679,7 @@ export class DocumentsService {
       const searchBody = {
         query: {
           text: searchText + '*',
+          attribute:  searchAttributes,
         },
         responseFields: {
           tags: customIncludeTags,
@@ -693,6 +695,7 @@ export class DocumentsService {
         query: {
           text: searchText + '*',
           page: page,
+          attributes: searchAttributes,
         },
         responseFields: {
           tags: customIncludeTags,

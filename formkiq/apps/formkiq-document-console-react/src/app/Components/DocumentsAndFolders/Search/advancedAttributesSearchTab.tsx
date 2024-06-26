@@ -1,24 +1,19 @@
-import {IDocument} from "../../../helpers/types/document";
-import {Close, Plus, Spinner} from "../../Icons/icons";
-import {Link} from "react-router-dom";
-import {getFileIcon} from "../../../helpers/services/toolService";
-import ButtonPrimary from "../../Generic/Buttons/ButtonPrimary";
-import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
-import RadioCombobox from "../../Generic/Listboxes/RadioCombobox";
+import {Close} from "../../Icons/icons";
 import {useEffect, useState} from "react";
 import {Attribute} from "../../../helpers/types/attributes";
 import {useSelector} from "react-redux";
 import {DataCacheState} from "../../../Store/reducers/data";
-import {useForm} from "react-hook-form";
 import {ConfigState} from "../../../Store/reducers/config";
-import RadioListbox from "../../Generic/Listboxes/RadioListbox";
+import {useAppDispatch} from "../../../Store/store";
+import {openDialog as openNotificationDialog} from "../../../Store/reducers/globalNotificationControls";
+import {fetchDocuments} from "../../../Store/reducers/documentsList";
+import OpenSearchAttributesSelect from "./openSearchAttributesSelect";
 
-
-function AdvancedAttributesSearchTab(props: any) {
-  const fulltextAttributeCriteria = [
-    {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'Equal to Any'},
-  ];
+function AdvancedAttributesSearchTab({siteId, formkiqVersion}: { siteId: string,formkiqVersion:any }) {
+  // const opensearchAttributeCriteria = [
+  //   {key: 'eq', title: 'Equal to'},
+  //   {key: 'eqOr', title: 'Equal to Any'},
+  // ];
 
   const stringAttributeCriteria = [
     {key: 'eq', title: 'Equal to'},
@@ -30,57 +25,142 @@ function AdvancedAttributesSearchTab(props: any) {
   const numberAttributeCriteria = [
     {key: 'range', title: 'Range'},
   ];
+  // const dispatch = useAppDispatch()
+  // const {formkiqVersion} = useSelector(ConfigState);
+  // const {allAttributes} = useSelector(DataCacheState);
+  // const [attributeKeys, setAttributeKeys] = useState<{ key: string, title: string }[]>([])
+  // const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(null)
+  // const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>("")
+  // const [attributeCriteria, setAttributeCriteria] = useState<{ key: string; title: string }[]>(opensearchAttributeCriteria);
+  // const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string | null>(null);
+  // const [attributeValue, setAttributeValue] = useState<string | number | boolean>("");
+  // const [attributeValues, setAttributeValues] = useState<any[]>([]);
+  // const [selectedAttributesQuery, setSelectedAttributesQuery] = useState<any[]>([]);
 
-  const {formkiqVersion} = useSelector(ConfigState);
-  const {
-    register,
-    formState: {errors},
-    handleSubmit,
-    reset,
-  } = useForm();
-  const {allAttributes} = useSelector(DataCacheState);
-  const [attributeKeys, setAttributeKeys] = useState<{ key: string, title: string }[]>([])
-  const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(null)
-  const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>("")
-  const [attributeCriteria, setAttributeCriteria] = useState<{ key: string; title: string }[]>(fulltextAttributeCriteria);
-  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string | null>(null);
+  // useEffect(() => {
+  //   if (!allAttributes || allAttributes.length === 0) return;
+  //   const keys = allAttributes.map((item) => ({key: item.key, title: item.key}))
+  //   setAttributeKeys(keys);
+  // }, [allAttributes]);
 
-  useEffect(() => {
-    if (!allAttributes || allAttributes.length === 0) return;
-    const keys = allAttributes.map((item) => ({key: item.key, title: item.key}))
-    setAttributeKeys(keys);
-  }, [allAttributes]);
+  // useEffect(() => {
+  //   if (!selectedAttributeKey) return;
+  //   const attribute = allAttributes.find(item => item.key === selectedAttributeKey)
+  //   if (!attribute) return;
+  //   setSelectedAttribute(attribute);
+  // }, [selectedAttributeKey]);
 
-  useEffect(() => {
-    if (!selectedAttributeKey) return;
-    const attribute = allAttributes.find(item => item.key === selectedAttributeKey)
-    if (!attribute) return;
-    setSelectedAttribute(attribute);
-  }, [selectedAttributeKey]);
+  // const resetValues = () => {
+  //   setSelectedAttribute(null);
+  //   setSelectedAttributeKey("");
+  //   setSelectedAttributeCriteria(null);
+  //   setAttributeValue("");
+  //   setAttributeValues([]);
+  // };
 
-  const resetValues = () => {
-    setSelectedAttribute(null);
-    setSelectedAttributeKey("");
-    reset()
-  };
+  // const onSearch = (e: any) => {
+  //   e.preventDefault()
+  //   // add conditions to ensure correct attribute json
+  //   if (!selectedAttribute) return;
+  //   if (!selectedAttributeCriteria) return;
+  //   console.log(1)
+  //   // if (formkiqVersion.modules.includes('opensearch')) { // TODO: uncomment
+  //   const searchAttributes = []
+  //   if (selectedAttributesQuery.length > 0) {
+  //     dispatch(fetchDocuments({
+  //       siteId, formkiqVersion, page: 1, searchAttributes: selectedAttributesQuery
+  //     }))
+  //   }
+    // else {
+    //   const searchAttribute = {
+    //     key: selectedAttribute.key,
+    //     [selectedAttributeCriteria]: attributeValues.length > 0 ? attributeValues : attributeValue
+    //   }
+    //   searchAttributes.push(searchAttribute)
+    //   dispatch(fetchDocuments({
+    //     siteId, formkiqVersion, page: 1, searchAttributes
+    //   }))
+    // }
+    // } else {
+    //   // TODO: implement fetch with simple search
+    // }
+    // search
+  //   resetValues()
+  // }
 
-  const onSearch = async (data: any) => {
-    console.log(data)
-    resetValues()
-  }
+  // function onAttributeSelect(key: string) {
+  //   setSelectedAttributeKey(key);
+  //   const attribute = allAttributes.find(item => item.key === key)
+  //   if (!attribute) return;
+  //   setSelectedAttribute(attribute);
+  //   if (!formkiqVersion.modules.includes('opensearch')) { // TODO: Remove "!"
+  //     setSelectedAttributeCriteria('eq');
+  //     setAttributeValue('');
+  //     setAttributeValues([]);
+  //   }
+  //   // else { // TODO: check this again
+  //   //   if (attribute.dataType === 'STRING' || attribute.dataType === 'BOOLEAN') {
+  //   //     setAttributeCriteria(stringAttributeCriteria);
+  //   //     setSelectedAttributeCriteria('eq');
+  //   //     setAttributeValue('');
+  //   //     setAttributeValues([]);
+  //   //   } else if (attribute.dataType === 'NUMBER') {
+  //   //     setAttributeCriteria(numberAttributeCriteria);
+  //   //     setSelectedAttributeCriteria('range');
+  //   //     setAttributeValue(0);
+  //   //     setAttributeValues([]);
+  //   //   }
+  //   // }
+  // }
 
-  useEffect(() => {
-    if (!selectedAttribute) return;
-    if (!formkiqVersion.modules.includes('fulltext')) { // TODO: Remove "!"
-      setAttributeCriteria(fulltextAttributeCriteria);
-    } else {
-      if (selectedAttribute.dataType === 'STRING') {
-        setAttributeCriteria(stringAttributeCriteria);
-      } else if (selectedAttribute.dataType === 'NUMBER') {
-        setAttributeCriteria(numberAttributeCriteria);
-      }
-    }
-  }, [selectedAttribute]);
+  // function addAttributeValueToList() {
+  //   if (!attributeValue) return;
+  //   // check if value already exists in list
+  //   if (attributeValues.includes(attributeValue)) {
+  //     dispatch(openNotificationDialog({
+  //       dialogTitle: 'Value already exists in list',
+  //     }));
+  //     return;
+  //   }
+  //   setAttributeValues([...attributeValues, attributeValue]);
+  //   setAttributeValue("");
+  // }
+  //
+  // function removeAttributeValueFromList(value: any) {
+  //   setAttributeValues(attributeValues.filter(item => item !== value));
+  // }
+  //
+  // function addAttributeToQuery() {
+  //   if (!selectedAttribute || !selectedAttributeCriteria) return;
+  //   // if (formkiqVersion.modules.includes('opensearch')) { // TODO: uncomment
+  //   let valueType = 'stringValue'
+  //   if (selectedAttribute.dataType === 'NUMBER') valueType = 'numberValue'
+  //   if (selectedAttribute.dataType === 'BOOLEAN') valueType = 'booleanValue'
+  //   const searchAttribute: any = {
+  //     key: selectedAttribute.key,
+  //   }
+  //   if (selectedAttributeCriteria === 'eq') {
+  //     searchAttribute['eq'] = {
+  //       [valueType]: attributeValue
+  //     }
+  //   } else if (selectedAttributeCriteria === 'eqOr') {
+  //     if (attributeValues.length === 0) {
+  //       dispatch(openNotificationDialog({
+  //         dialogTitle: 'Please add at least one value',
+  //       }));
+  //       return;
+  //     }
+  //     searchAttribute['eqOr'] = attributeValues.map(item => ({
+  //       [valueType]: item
+  //     }))
+  //   }
+  //   setSelectedAttributesQuery([...selectedAttributesQuery, searchAttribute]);
+  //   // }
+  //   resetValues()
+  //
+  //
+  // }
+
 
   return (
     <div className="w-full h-56 p-4 flex flex-col justify-between relative">
@@ -88,88 +168,21 @@ function AdvancedAttributesSearchTab(props: any) {
         className="absolute flex w-full h-40 justify-center items-center font-bold text-5xl text-gray-100 mb-2 -z-10">
         Advanced Search
       </div>
-      <form
-        onSubmit={handleSubmit(onSearch)}
-        className="w-full h-full"
-      >
-        <div className="h-full border-gray-400 border overflow-y-auto p-2">
-          <div className="h-8 gap-2 flex items-center">
-            <div className="h-8 flex items-center gap-2">
-
-              <RadioCombobox values={attributeKeys}
-                             selectedValue={selectedAttributeKey}
-                             setSelectedValue={setSelectedAttributeKey}
-                             placeholderText="Select Attribute"/>
-              {selectedAttribute && (
-                <div
-                  className="text-xs bg-neutral-100 rounded-md font-bold h-8 p-2 text-center whitespace-nowrap">
-                  {selectedAttribute.dataType}
-                </div>
-              )}
-            </div>
-            {selectedAttribute &&
-              // formkiqVersion.modules.includes('fulltext') && // TODO: uncomment
-              (selectedAttribute.dataType === 'NUMBER' ||
-                selectedAttribute.dataType === 'STRING' ||
-                selectedAttribute.dataType === 'BOOLEAN') && (
-                <div className="h-8">
-                  <RadioListbox
-                    values={attributeCriteria.map(
-                      (item) => item.key
-                    )}
-                    titles={attributeCriteria.map(
-                      (item) => item.title
-                    )}
-                    selectedValue={
-                      selectedAttributeCriteria as string
-                    }
-                    setSelectedValue={
-                      setSelectedAttributeCriteria
-                    }
-                  />
-                </div>
-              )}
-
-
-            {
-              // formkiqVersion.modules.includes('fulltext') &&
-              selectedAttribute && selectedAttribute.dataType === "STRING" &&
-              selectedAttributeCriteria === "eq" &&
-              <input type="text" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
-                     {...register('stringValue', {required: true})}/>
-            }
-            {
-              // formkiqVersion.modules.includes('fulltext') &&
-                  selectedAttribute && selectedAttribute.dataType === "STRING" &&
-                  selectedAttributeCriteria === "eqOr" &&
-              <div className="flex items-center gap-2">
-                <input type="text" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
-                       {...register('stringValue', {required: true})}/>
-                <button type="button" className="text-neutral-400 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1"><Plus/></button>
-              </div>
-              }
-
-            {/*<div className="mr-2 h-8">*/}
-            {/*  {selectedAttribute && selectedAttribute.dataType === "STRING" &&*/}
-            {/*    <input type="text" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'*/}
-            {/*           {...register('stringValue', {required: true})}*/}
-            {/*           placeholder="Value"/>}*/}
-            {/*  {selectedAttribute && selectedAttribute.dataType === "NUMBER" &&*/}
-            {/*    <input type="number" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'*/}
-            {/*           {...register('numberValue', {required: true})}*/}
-            {/*           placeholder="Value"/>}*/}
-            {/*  {selectedAttribute && selectedAttribute.dataType === "BOOLEAN" &&*/}
-            {/*    <input type="checkbox"*/}
-            {/*           className='appearance-none text-primary-600 bg-neutral-100 border-neutral-300 rounded focus:ring-primary-500 focus:ring-2 h-4 w-4 border border-neutral-300 text-sm rounded-md '*/}
-            {/*           {...register('booleanValue')}/>}*/}
-            {/*  {selectedAttribute && selectedAttribute.dataType === "COMPOSITE_STRING" &&*/}
-            {/*    <input type="text" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'*/}
-            {/*           {...register('compositeStringValue', {required: true})}*/}
-            {/*           placeholder="Coma-separated values"/>}*/}
-            {/*</div>*/}
-          </div>
-        </div>
-      </form>
+      <OpenSearchAttributesSelect siteId={siteId}
+                                  formkiqVersion={formkiqVersion}
+                                  // values={attributeKeys}
+                                  // selectedValue={selectedAttributeKey}
+                                  // selectedAttribute={selectedAttribute}
+                                  // selectedAttributeCriteria={selectedAttributeCriteria}
+                                  // setAttributeValue={setAttributeValue}
+                                  // attributeValues={attributeValues}
+                                  // addAttributeValueToList={addAttributeValueToList}
+                                  // addAttributeToQuery={addAttributeToQuery}
+                                  // removeAttributeValueFromList={removeAttributeValueFromList}
+                                  // setSelectedAttributesQuery={setSelectedAttributesQuery}
+                                  // selectedAttributesQuery={selectedAttributesQuery}
+                                  // // resetValues={resetValues}
+      />
     </div>);
 }
 
