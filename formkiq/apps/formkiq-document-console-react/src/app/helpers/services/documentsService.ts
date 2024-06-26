@@ -676,32 +676,40 @@ export class DocumentsService {
       }
     });
     if (formkiqVersion.modules.indexOf('opensearch') === -1) {
-      const searchBody = {
+
+      const searchBody:any = {
+        query: {},
+        responseFields: {
+          tags: customIncludeTags,
+          attributes: allAttributes,
+        },
+      };
+      if (searchText&&searchText!=='') {
+        searchBody.query["text"] = searchText + '*';
+      }
+      if (searchAttributes) {
+        searchBody.query["attribute"] = searchAttributes;
+      }
+      return this.getFormkiqClient().searchApi.search({
+        searchParameters: searchBody,
+        siteId,
+      });
+    } else {
+      const searchBody:any = {
         query: {
-          text: searchText + '*',
-          attribute:  searchAttributes,
+          page: page,
         },
         responseFields: {
           tags: customIncludeTags,
           attributes: allAttributes,
         },
       };
-      return this.getFormkiqClient().searchApi.search({
-        searchParameters: searchBody,
-        siteId,
-      });
-    } else {
-      const searchBody = {
-        query: {
-          text: searchText + '*',
-          page: page,
-          attributes: searchAttributes,
-        },
-        responseFields: {
-          tags: customIncludeTags,
-          attributes:allAttributes,
-        },
-      };
+      if (searchText&&searchText!=='') {
+        searchBody.query["text"] = searchText + '*';
+      }
+      if (searchAttributes) {
+        searchBody.query["attributes"] = searchAttributes;
+      }
       return this.getFormkiqClient().searchApi.searchFulltext({
         documentFulltextSearchBody: searchBody,
         siteId,

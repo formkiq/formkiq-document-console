@@ -7,9 +7,9 @@ import {ConfigState} from "../../../Store/reducers/config";
 import {useAppDispatch} from "../../../Store/store";
 import {openDialog as openNotificationDialog} from "../../../Store/reducers/globalNotificationControls";
 import {fetchDocuments} from "../../../Store/reducers/documentsList";
-import OpenSearchAttributesSelect from "./openSearchAttributesSelect";
+import OpenSearchByAttributes from "./openSearchByAttributes";
 
-function AdvancedAttributesSearchTab({siteId, formkiqVersion}: { siteId: string,formkiqVersion:any }) {
+function AdvancedAttributesSearchTab({siteId, formkiqVersion,subfolderUri}: { siteId: string, formkiqVersion: any,subfolderUri:any }) {
   // const opensearchAttributeCriteria = [
   //   {key: 'eq', title: 'Equal to'},
   //   {key: 'eqOr', title: 'Equal to Any'},
@@ -71,20 +71,20 @@ function AdvancedAttributesSearchTab({siteId, formkiqVersion}: { siteId: string,
   //       siteId, formkiqVersion, page: 1, searchAttributes: selectedAttributesQuery
   //     }))
   //   }
-    // else {
-    //   const searchAttribute = {
-    //     key: selectedAttribute.key,
-    //     [selectedAttributeCriteria]: attributeValues.length > 0 ? attributeValues : attributeValue
-    //   }
-    //   searchAttributes.push(searchAttribute)
-    //   dispatch(fetchDocuments({
-    //     siteId, formkiqVersion, page: 1, searchAttributes
-    //   }))
-    // }
-    // } else {
-    //   // TODO: implement fetch with simple search
-    // }
-    // search
+  // else {
+  //   const searchAttribute = {
+  //     key: selectedAttribute.key,
+  //     [selectedAttributeCriteria]: attributeValues.length > 0 ? attributeValues : attributeValue
+  //   }
+  //   searchAttributes.push(searchAttribute)
+  //   dispatch(fetchDocuments({
+  //     siteId, formkiqVersion, page: 1, searchAttributes
+  //   }))
+  // }
+  // } else {
+  //   // TODO: implement fetch with simple search
+  // }
+  // search
   //   resetValues()
   // }
 
@@ -168,21 +168,12 @@ function AdvancedAttributesSearchTab({siteId, formkiqVersion}: { siteId: string,
         className="absolute flex w-full h-40 justify-center items-center font-bold text-5xl text-gray-100 mb-2 -z-10">
         Advanced Search
       </div>
-      <OpenSearchAttributesSelect siteId={siteId}
-                                  formkiqVersion={formkiqVersion}
-                                  // values={attributeKeys}
-                                  // selectedValue={selectedAttributeKey}
-                                  // selectedAttribute={selectedAttribute}
-                                  // selectedAttributeCriteria={selectedAttributeCriteria}
-                                  // setAttributeValue={setAttributeValue}
-                                  // attributeValues={attributeValues}
-                                  // addAttributeValueToList={addAttributeValueToList}
-                                  // addAttributeToQuery={addAttributeToQuery}
-                                  // removeAttributeValueFromList={removeAttributeValueFromList}
-                                  // setSelectedAttributesQuery={setSelectedAttributesQuery}
-                                  // selectedAttributesQuery={selectedAttributesQuery}
-                                  // // resetValues={resetValues}
-      />
+      {
+        // formkiqVersion.modules.includes('opensearch') && TODO: uncomment
+        <OpenSearchByAttributes siteId={siteId}
+                                formkiqVersion={formkiqVersion}
+                                subfolderUri={subfolderUri}
+        />}
     </div>);
 }
 

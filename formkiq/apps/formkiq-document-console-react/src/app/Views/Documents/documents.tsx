@@ -1353,7 +1353,11 @@ function Documents() {
               )}
               {advancedAttributesSearch && (
                   <div className="pt-2 pr-8">
-                      <AdvancedAttributesSearchTab siteId={currentSiteId} formkiqVersion={formkiqVersion} />
+                      <AdvancedAttributesSearchTab
+                        siteId={currentSiteId}
+                        formkiqVersion={formkiqVersion}
+                        subfolderUri={subfolderUri}
+                      />
                   </div>
               )}
               <DocumentsTable
