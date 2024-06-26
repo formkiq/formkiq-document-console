@@ -54,7 +54,7 @@ function CheckboxListbox({
                   <label className="flex items-center justify-between gap-2 w-full">
                     <span className="block truncate">{value}</span>
                     <div className="w-4">
-                      <input type="checkbox" checked={selected}
+                      <input type="checkbox" checked={selected} readOnly
                                          className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"/>
                     </div>
                   </label>

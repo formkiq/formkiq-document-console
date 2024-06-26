@@ -1,165 +1,23 @@
-import {Close} from "../../Icons/icons";
-import {useEffect, useState} from "react";
-import {Attribute} from "../../../helpers/types/attributes";
-import {useSelector} from "react-redux";
-import {DataCacheState} from "../../../Store/reducers/data";
-import {ConfigState} from "../../../Store/reducers/config";
-import {useAppDispatch} from "../../../Store/store";
-import {openDialog as openNotificationDialog} from "../../../Store/reducers/globalNotificationControls";
-import {fetchDocuments} from "../../../Store/reducers/documentsList";
-import OpenSearchByAttributes from "./openSearchByAttributes";
+import OpensearchSearchByAttributes from "./opensearchSearchByAttributes";
+import TypesenseSearchByAttributes from "./typesenseSearchByAttributes";
+import {useSearchParams} from "react-router-dom";
 
-function AdvancedAttributesSearchTab({siteId, formkiqVersion,subfolderUri}: { siteId: string, formkiqVersion: any,subfolderUri:any }) {
-  // const opensearchAttributeCriteria = [
-  //   {key: 'eq', title: 'Equal to'},
-  //   {key: 'eqOr', title: 'Equal to Any'},
-  // ];
+function AdvancedAttributesSearchTab({
+                                       siteId,
+                                       formkiqVersion,
+                                       subfolderUri,
+                                     }: {
+  siteId: string,
+  formkiqVersion: any,
+  subfolderUri: any,
+}) {
 
-  const stringAttributeCriteria = [
-    {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'Equal to Any'},
-    {key: 'beginsWith', title: 'Begins with'},
-    {key: 'range', title: 'Range'},
-  ];
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const numberAttributeCriteria = [
-    {key: 'range', title: 'Range'},
-  ];
-  // const dispatch = useAppDispatch()
-  // const {formkiqVersion} = useSelector(ConfigState);
-  // const {allAttributes} = useSelector(DataCacheState);
-  // const [attributeKeys, setAttributeKeys] = useState<{ key: string, title: string }[]>([])
-  // const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(null)
-  // const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>("")
-  // const [attributeCriteria, setAttributeCriteria] = useState<{ key: string; title: string }[]>(opensearchAttributeCriteria);
-  // const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string | null>(null);
-  // const [attributeValue, setAttributeValue] = useState<string | number | boolean>("");
-  // const [attributeValues, setAttributeValues] = useState<any[]>([]);
-  // const [selectedAttributesQuery, setSelectedAttributesQuery] = useState<any[]>([]);
-
-  // useEffect(() => {
-  //   if (!allAttributes || allAttributes.length === 0) return;
-  //   const keys = allAttributes.map((item) => ({key: item.key, title: item.key}))
-  //   setAttributeKeys(keys);
-  // }, [allAttributes]);
-
-  // useEffect(() => {
-  //   if (!selectedAttributeKey) return;
-  //   const attribute = allAttributes.find(item => item.key === selectedAttributeKey)
-  //   if (!attribute) return;
-  //   setSelectedAttribute(attribute);
-  // }, [selectedAttributeKey]);
-
-  // const resetValues = () => {
-  //   setSelectedAttribute(null);
-  //   setSelectedAttributeKey("");
-  //   setSelectedAttributeCriteria(null);
-  //   setAttributeValue("");
-  //   setAttributeValues([]);
-  // };
-
-  // const onSearch = (e: any) => {
-  //   e.preventDefault()
-  //   // add conditions to ensure correct attribute json
-  //   if (!selectedAttribute) return;
-  //   if (!selectedAttributeCriteria) return;
-  //   console.log(1)
-  //   // if (formkiqVersion.modules.includes('opensearch')) { // TODO: uncomment
-  //   const searchAttributes = []
-  //   if (selectedAttributesQuery.length > 0) {
-  //     dispatch(fetchDocuments({
-  //       siteId, formkiqVersion, page: 1, searchAttributes: selectedAttributesQuery
-  //     }))
-  //   }
-  // else {
-  //   const searchAttribute = {
-  //     key: selectedAttribute.key,
-  //     [selectedAttributeCriteria]: attributeValues.length > 0 ? attributeValues : attributeValue
-  //   }
-  //   searchAttributes.push(searchAttribute)
-  //   dispatch(fetchDocuments({
-  //     siteId, formkiqVersion, page: 1, searchAttributes
-  //   }))
-  // }
-  // } else {
-  //   // TODO: implement fetch with simple search
-  // }
-  // search
-  //   resetValues()
-  // }
-
-  // function onAttributeSelect(key: string) {
-  //   setSelectedAttributeKey(key);
-  //   const attribute = allAttributes.find(item => item.key === key)
-  //   if (!attribute) return;
-  //   setSelectedAttribute(attribute);
-  //   if (!formkiqVersion.modules.includes('opensearch')) { // TODO: Remove "!"
-  //     setSelectedAttributeCriteria('eq');
-  //     setAttributeValue('');
-  //     setAttributeValues([]);
-  //   }
-  //   // else { // TODO: check this again
-  //   //   if (attribute.dataType === 'STRING' || attribute.dataType === 'BOOLEAN') {
-  //   //     setAttributeCriteria(stringAttributeCriteria);
-  //   //     setSelectedAttributeCriteria('eq');
-  //   //     setAttributeValue('');
-  //   //     setAttributeValues([]);
-  //   //   } else if (attribute.dataType === 'NUMBER') {
-  //   //     setAttributeCriteria(numberAttributeCriteria);
-  //   //     setSelectedAttributeCriteria('range');
-  //   //     setAttributeValue(0);
-  //   //     setAttributeValues([]);
-  //   //   }
-  //   // }
-  // }
-
-  // function addAttributeValueToList() {
-  //   if (!attributeValue) return;
-  //   // check if value already exists in list
-  //   if (attributeValues.includes(attributeValue)) {
-  //     dispatch(openNotificationDialog({
-  //       dialogTitle: 'Value already exists in list',
-  //     }));
-  //     return;
-  //   }
-  //   setAttributeValues([...attributeValues, attributeValue]);
-  //   setAttributeValue("");
-  // }
-  //
-  // function removeAttributeValueFromList(value: any) {
-  //   setAttributeValues(attributeValues.filter(item => item !== value));
-  // }
-  //
-  // function addAttributeToQuery() {
-  //   if (!selectedAttribute || !selectedAttributeCriteria) return;
-  //   // if (formkiqVersion.modules.includes('opensearch')) { // TODO: uncomment
-  //   let valueType = 'stringValue'
-  //   if (selectedAttribute.dataType === 'NUMBER') valueType = 'numberValue'
-  //   if (selectedAttribute.dataType === 'BOOLEAN') valueType = 'booleanValue'
-  //   const searchAttribute: any = {
-  //     key: selectedAttribute.key,
-  //   }
-  //   if (selectedAttributeCriteria === 'eq') {
-  //     searchAttribute['eq'] = {
-  //       [valueType]: attributeValue
-  //     }
-  //   } else if (selectedAttributeCriteria === 'eqOr') {
-  //     if (attributeValues.length === 0) {
-  //       dispatch(openNotificationDialog({
-  //         dialogTitle: 'Please add at least one value',
-  //       }));
-  //       return;
-  //     }
-  //     searchAttribute['eqOr'] = attributeValues.map(item => ({
-  //       [valueType]: item
-  //     }))
-  //   }
-  //   setSelectedAttributesQuery([...selectedAttributesQuery, searchAttribute]);
-  //   // }
-  //   resetValues()
-  //
-  //
-  // }
+  const closeAdvancedSearch = () => {
+    searchParams.delete('advancedAttributesSearch');
+    setSearchParams(searchParams);
+  };
 
 
   return (
@@ -169,11 +27,21 @@ function AdvancedAttributesSearchTab({siteId, formkiqVersion,subfolderUri}: { si
         Advanced Search
       </div>
       {
-        // formkiqVersion.modules.includes('opensearch') && TODO: uncomment
-        <OpenSearchByAttributes siteId={siteId}
-                                formkiqVersion={formkiqVersion}
-                                subfolderUri={subfolderUri}
+        formkiqVersion.modules.includes('opensearch') &&
+        <OpensearchSearchByAttributes siteId={siteId}
+                                      formkiqVersion={formkiqVersion}
+                                      subfolderUri={subfolderUri}
+                                      closeAdvancedSearch={closeAdvancedSearch}
+
         />}
+      {
+        // !formkiqVersion.modules.includes('typesense') && // TODO: uncomment
+        <TypesenseSearchByAttributes siteId={siteId}
+                                     formkiqVersion={formkiqVersion}
+                                     subfolderUri={subfolderUri}
+                                     closeAdvancedSearch={closeAdvancedSearch}
+        />
+      }
     </div>);
 }
 

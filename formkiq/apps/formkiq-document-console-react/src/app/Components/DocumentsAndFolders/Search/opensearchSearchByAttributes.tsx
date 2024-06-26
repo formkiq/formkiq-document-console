@@ -14,7 +14,12 @@ import {openDialog as openNotificationDialog} from "../../../Store/reducers/glob
 import CheckboxListbox from "../../Generic/Listboxes/CheckboxListbox";
 import {useLocation} from "react-router-dom";
 
-export default function OpenSearchByAttributes({siteId, formkiqVersion, subfolderUri}: any) {
+export default function OpenSearchByAttributes({
+                                                 siteId,
+                                                 formkiqVersion,
+                                                 subfolderUri,
+                                                 closeAdvancedSearch
+                                               }: any) {
   const opensearchAttributeCriteria = [
     {key: 'eq', title: 'Equal to'},
     {key: 'eqOr', title: 'Equal to Any'},
@@ -206,6 +211,12 @@ export default function OpenSearchByAttributes({siteId, formkiqVersion, subfolde
     setAttributeValues(values);
   }
 
+  function handleSelectAttributeCriteria(key: string) {
+    setSelectedAttributeCriteria(key);
+    setAttributeValues([]);
+    resetAttributeValue(selectedAttribute as Attribute);
+  }
+
   return <div
     className="w-full h-full"
   >
@@ -233,7 +244,7 @@ export default function OpenSearchByAttributes({siteId, formkiqVersion, subfolde
                 values={opensearchAttributeCriteria.map((item) => item.key)}
                 titles={opensearchAttributeCriteria.map((item) => item.title)}
                 selectedValue={selectedAttributeCriteria as string}
-                setSelectedValue={setSelectedAttributeCriteria}
+                setSelectedValue={handleSelectAttributeCriteria}
               />
             </div>
           )}
@@ -323,7 +334,7 @@ export default function OpenSearchByAttributes({siteId, formkiqVersion, subfolde
           <thead>
           <tr>
             <th className="w-52 px-2">Key</th>
-            <th className="w-96 px-2">Value</th>
+            <th className="w-96 px-2">Values</th>
             <th className="w-8"></th>
           </tr>
           </thead>
@@ -353,9 +364,11 @@ export default function OpenSearchByAttributes({siteId, formkiqVersion, subfolde
         </table>
       )}
 
+
     </div>
     <div className="flex justify-end gap-2 mt-2">
-      <ButtonGhost type="button" onClick={resetValues}>Reset</ButtonGhost>
+      <ButtonGhost type="button" onClick={closeAdvancedSearch}>Cancel</ButtonGhost>
+      {/*<ButtonTertiary type="button" onClick={resetValues}>Reset</ButtonTertiary>*/}
       <ButtonPrimary type="button" onClick={onSearch}>Search</ButtonPrimary>
     </div>
   </div>;
