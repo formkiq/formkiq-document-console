@@ -187,13 +187,13 @@ export default function SearchInput({
 
   // toggle advanced search pane
   const toggleAdvancedSearch = () => {
-    const advancedSearch = searchParams.get('advancedAttributesSearch');
+    const advancedSearch = searchParams.get('advancedSearch');
     if (!advancedSearch) {
-      searchParams.set('advancedAttributesSearch', 'true');
+      searchParams.set('advancedSearch', 'true');
       setSearchParams(searchParams);
     }
     if (advancedSearch === 'true') {
-      searchParams.delete('advancedAttributesSearch');
+      searchParams.delete('advancedSearch');
       setSearchParams(searchParams);
     }
   };
@@ -220,21 +220,6 @@ export default function SearchInput({
           />
         </div>
         <div className="grow-0 ml-2 -mt-1">
-
-          {/*TODO: check if it is supposed to be used */}
-          {/*{useAdvancedSearch && (*/}
-          {/*  <button*/}
-          {/*    className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"*/}
-          {/*    onClick={(event) => onAdvancedSearchModalClick(event)}*/}
-          {/*  >*/}
-          {/*    <div className="w-4">*/}
-          {/*      <MoreActions />*/}
-          {/*    </div>*/}
-          {/*  </button>*/}
-          {/*)}*/}
-
-          {/*{useAdvancedSearch && (*/}
-          {/*{(formkiqVersion.modules.includes('typesense')|| formkiqVersion.modules.includes('opensearch')) && (*/}          {/*TODO: uncomment*/}
             <button
               className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"
               onClick={toggleAdvancedSearch}
@@ -243,8 +228,6 @@ export default function SearchInput({
                 <MoreActions/>
               </div>
             </button>
-          {/*)}*/}
-
         </div>
       </div>
       {expanded && (

@@ -650,17 +650,21 @@ function Navbar() {
                   )}
                 </div>
               </div>
-              {!documentId.length && currentSection === 'DocumentsAndFolders' && (
-                <div className="flex items-center gap-5 w-1/2">
-                  <SearchInput
-                    onChange={updateInputValue}
-                    onKeyDown={handleKeyDown}
-                    siteId={currentSiteId}
-                    documentsRootUri={currentDocumentsRootUri}
-                    value={inputValue}
-                  />
-                </div>
-              )}
+              {!documentId.length &&
+                currentSection === 'DocumentsAndFolders' &&
+                (formkiqVersion.modules.includes('typesense') ||
+                  formkiqVersion.modules.includes('opensearch')) &&
+                (
+                  <div className="flex items-center gap-5 w-1/2">
+                    <SearchInput
+                      onChange={updateInputValue}
+                      onKeyDown={handleKeyDown}
+                      siteId={currentSiteId}
+                      documentsRootUri={currentDocumentsRootUri}
+                      value={inputValue}
+                    />
+                  </div>
+                )}
             </div>
             <div className="w-1/4 flex justify-end mr-16">
               {useNotifications && (

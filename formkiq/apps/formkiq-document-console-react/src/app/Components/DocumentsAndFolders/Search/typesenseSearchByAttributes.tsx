@@ -12,6 +12,7 @@ import {DataCacheState} from "../../../Store/reducers/data";
 import {openDialog as openNotificationDialog} from "../../../Store/reducers/globalNotificationControls";
 import CheckboxListbox from "../../Generic/Listboxes/CheckboxListbox";
 import {useLocation} from "react-router-dom";
+import ButtonSecondary from "../../Generic/Buttons/ButtonSecondary";
 
 export default function TypesenseSearchByAttributes({
                                                       siteId,
@@ -51,6 +52,18 @@ export default function TypesenseSearchByAttributes({
   const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string | null>(null);
   const [attributeValue, setAttributeValue] = useState<string | number | boolean | null>("");
   const [attributeValues, setAttributeValues] = useState<any[]>([]);
+  const [selectedAttributesQuery, setSelectedAttributesQuery] = useState<any[]>([]);
+
+  function stringToNumber(value: string) {
+    try {
+      return Number(value);
+    } catch (e) {
+      dispatch(openNotificationDialog({
+        dialogTitle: 'Invalid number',
+      }));
+      return;
+    }
+  }
 
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
@@ -104,20 +117,21 @@ export default function TypesenseSearchByAttributes({
   };
 
   const onSearch = () => {
-    const selectedAttributeQuery = getAttributeQuery()
-    if (!selectedAttributeQuery) return;
-    dispatch(fetchDocuments({
-      siteId,
-      formkiqVersion,
-      page: 1,
-      searchAttributes: selectedAttributeQuery,
-      searchWord,
-      searchFolder,
-      filterTag,
-      filterAttribute,
-      subfolderUri
-    }))
+    if (selectedAttributesQuery.length > 0) {
+      dispatch(fetchDocuments({
+        siteId,
+        formkiqVersion,
+        page: 1,
+        searchAttributes: selectedAttributesQuery,
+        searchWord,
+        searchFolder,
+        filterTag,
+        filterAttribute,
+        subfolderUri
+      }))
+    }
     resetValues()
+    closeAdvancedSearch()
   }
 
   function validateAttributeValue(dataType: any, value: any) {
@@ -131,14 +145,19 @@ export default function TypesenseSearchByAttributes({
     if (attributeValue === undefined || !selectedAttribute) return;
     if (!validateAttributeValue(selectedAttribute.dataType, attributeValue)) return;
 
+    let newAttributeValue:any = attributeValue;
+    if (selectedAttribute.dataType === 'NUMBER') {
+      if (attributeValue === null) return;
+      newAttributeValue = stringToNumber(attributeValue.toString())
+    }
     // check if value already exists in list
-    if (attributeValues.includes(attributeValue)) {
+    if (attributeValues.includes(newAttributeValue)) {
       dispatch(openNotificationDialog({
         dialogTitle: 'Value already exists in list',
       }));
       return;
     }
-    setAttributeValues([...attributeValues, attributeValue]);
+    setAttributeValues([...attributeValues, newAttributeValue]);
     resetAttributeValue(selectedAttribute);
   }
 
@@ -146,16 +165,24 @@ export default function TypesenseSearchByAttributes({
     setAttributeValues(attributeValues.filter(item => item !== value));
   }
 
-  function getAttributeQuery() {
+  function addAttributeToQuery() {
     if (!selectedAttribute) return;
+
+    // check if value already exists in query
+    if (selectedAttributesQuery.find(item => item.key === selectedAttribute.key)) {
+      dispatch(openNotificationDialog({
+        dialogTitle: "Attribute '" + selectedAttribute.key + "' already in query",
+      }));
+      return;
+    }
     const searchAttribute: any = {
       key: selectedAttribute.key,
     }
 
     // Handle KEY_ONLY data type
     if (selectedAttribute.dataType === "KEY_ONLY") {
+      setSelectedAttributesQuery([...selectedAttributesQuery, searchAttribute]);
       resetValues()
-      return searchAttribute;
     }
     if (attributeValue === undefined) return;
 
@@ -188,9 +215,9 @@ export default function TypesenseSearchByAttributes({
         type: selectedAttribute.dataType
       }
     }
-    return searchAttribute;
+    setSelectedAttributesQuery([...selectedAttributesQuery, searchAttribute]);
+    resetValues()
   }
-
 
   function handleSelectBooleanValues(values: any[]) {
     setAttributeValues(values);
@@ -345,6 +372,7 @@ export default function TypesenseSearchByAttributes({
                            handleSelectValues={handleSelectBooleanValues}/>
         }
 
+        <ButtonSecondary type="button" onClick={addAttributeToQuery} title="Add">Add</ButtonSecondary>
       </div>
 
       <div className="flex flex-row justify-start flex-wrap gap-2 items-end mt-2">
@@ -352,7 +380,7 @@ export default function TypesenseSearchByAttributes({
           <div key={"value_" + i}
                title={val}
                className="cursor-pointer py-1 px-3 text-xs font-bold uppercase rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border border-neutral-500 text-neutral-900 bg-white">
-            <span className="truncate overflow-hidden max-w-64 max-w-[256px]">{val}</span>
+            <span className="truncate overflow-hidden max-w-64 max-w-[256px]">"{val}"</span>
             <button title="Remove Value" type="button"
                     className="w-4 h-4 min-w-4 text-neutral-900"
                     onClick={() => removeAttributeValueFromList(val)}>
@@ -360,8 +388,40 @@ export default function TypesenseSearchByAttributes({
             </button>
           </div>))}
       </div>
-
+      {selectedAttributesQuery.length > 0 && (
+        <table className="border border-neutral-300 table-fixed text-sm text-left mt-2 bg-white">
+          <thead>
+          <tr>
+            <th className="w-52 px-2">Key</th>
+            <th className="w-96 px-2">Values</th>
+            <th className="w-8"></th>
+          </tr>
+          </thead>
+          <tbody>
+          {selectedAttributesQuery.map((item: any, i: number) => (
+            <tr key={i} className="border-t border-neutral-300">
+              <td className="px-2">{item.key}</td>
+              <td className="px-2">
+                {item.eq!==undefined && '"' + item.eq + '"'}
+                {item.eqOr && item.eqOr.map((val: any) => '"' + val + '"').join(", ")}
+                {item.beginsWith && '"' + item.beginsWith + '*"'}
+                {item.range && '"' + item.range.start + '" to "' + item.range.end + '"'}
+              </td>
+              <td>
+                <button type="button" className="p-1 text-neutral-500 h-6 w-6 hover:text-red-500"
+                        onClick={() => {
+                          setSelectedAttributesQuery(selectedAttributesQuery.filter((_: any, j: number) => j !== i));
+                        }} title="Remove">
+                  <Close/>
+                </button>
+              </td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+      )}
     </div>
+
     <div className="flex justify-end gap-2 mt-2">
       <ButtonGhost type="button" onClick={closeAdvancedSearch}>Cancel</ButtonGhost>
       {/*<ButtonTertiary type="button" onClick={resetValues}>Reset</ButtonTertiary>*/}

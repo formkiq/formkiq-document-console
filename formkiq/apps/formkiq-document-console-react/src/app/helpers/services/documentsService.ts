@@ -688,7 +688,7 @@ export class DocumentsService {
         searchBody.query["text"] = searchText + '*';
       }
       if (searchAttributes) {
-        searchBody.query["attribute"] = searchAttributes;
+        searchBody.query["attributes"] = searchAttributes;
       }
       return this.getFormkiqClient().searchApi.search({
         searchParameters: searchBody,

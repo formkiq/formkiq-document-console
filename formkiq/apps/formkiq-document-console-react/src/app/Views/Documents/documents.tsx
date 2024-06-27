@@ -82,7 +82,7 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import AdvancedAttributesSearchTab from "../../Components/DocumentsAndFolders/Search/advancedAttributesSearchTab";
+import AdvancedSearchTab from "../../Components/DocumentsAndFolders/Search/advancedSearchTab";
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -115,8 +115,8 @@ function Documents() {
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
-  const advancedAttributesSearch = new URLSearchParams(search).get(
-      'advancedAttributesSearch'
+  const advancedSearch = new URLSearchParams(search).get(
+      'advancedSearch'
   );
   const { hash } = useLocation();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
@@ -1316,6 +1316,12 @@ function Documents() {
                     Cancel
                   </ButtonTertiary>
                 )}
+              {!formkiqVersion.modules.includes('typesense') &&
+                !formkiqVersion.modules.includes('opensearch') &&
+                (<Link to="?advancedSearch=true"
+                       className="cursor-pointer h-8">
+                  <ButtonGhost type="button">Search Documents...</ButtonGhost>
+                </Link>)}
               <div
                 className={
                   (isTagFilterExpanded
@@ -1332,6 +1338,7 @@ function Documents() {
               >
                 <Tag />
               </div>
+
             </div>
           </div>
           <div
@@ -1351,9 +1358,9 @@ function Documents() {
                   <PendingArchiveTab />
                 </div>
               )}
-              {advancedAttributesSearch && (
+              {advancedSearch && (
                   <div className="pt-2 pr-8">
-                      <AdvancedAttributesSearchTab
+                      <AdvancedSearchTab
                         siteId={currentSiteId}
                         formkiqVersion={formkiqVersion}
                         subfolderUri={subfolderUri}

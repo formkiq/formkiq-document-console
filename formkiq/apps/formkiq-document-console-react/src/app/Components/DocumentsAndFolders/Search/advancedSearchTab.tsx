@@ -1,8 +1,9 @@
 import OpensearchSearchByAttributes from "./opensearchSearchByAttributes";
 import TypesenseSearchByAttributes from "./typesenseSearchByAttributes";
 import {useSearchParams} from "react-router-dom";
+import DocumentsSearch from "./defaultSearchByAttributes";
 
-function AdvancedAttributesSearchTab({
+function AdvancedSearchTab({
                                        siteId,
                                        formkiqVersion,
                                        subfolderUri,
@@ -15,7 +16,7 @@ function AdvancedAttributesSearchTab({
   const [searchParams, setSearchParams] = useSearchParams();
 
   const closeAdvancedSearch = () => {
-    searchParams.delete('advancedAttributesSearch');
+    searchParams.delete('advancedSearch');
     setSearchParams(searchParams);
   };
 
@@ -24,8 +25,17 @@ function AdvancedAttributesSearchTab({
     <div className="w-full h-56 p-4 flex flex-col justify-between relative">
       <div
         className="absolute flex w-full h-40 justify-center items-center font-bold text-5xl text-gray-100 mb-2 -z-10">
-        Advanced Search
+        Search
       </div>
+      {
+        !formkiqVersion.modules.includes('opensearch') &&
+        !formkiqVersion.modules.includes('typesense') &&
+        <DocumentsSearch siteId={siteId}
+                         formkiqVersion={formkiqVersion}
+                         subfolderUri={subfolderUri}
+                         closeAdvancedSearch={closeAdvancedSearch}
+        />
+      }
       {
         formkiqVersion.modules.includes('opensearch') &&
         <OpensearchSearchByAttributes siteId={siteId}
@@ -35,14 +45,15 @@ function AdvancedAttributesSearchTab({
 
         />}
       {
-        // !formkiqVersion.modules.includes('typesense') && // TODO: uncomment
+        formkiqVersion.modules.includes('typesense') &&
         <TypesenseSearchByAttributes siteId={siteId}
                                      formkiqVersion={formkiqVersion}
                                      subfolderUri={subfolderUri}
                                      closeAdvancedSearch={closeAdvancedSearch}
         />
       }
+
     </div>);
 }
 
-export default AdvancedAttributesSearchTab;
+export default AdvancedSearchTab;
