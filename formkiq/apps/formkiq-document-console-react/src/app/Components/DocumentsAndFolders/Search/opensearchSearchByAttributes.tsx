@@ -22,7 +22,7 @@ export default function OpenSearchByAttributes({
                                                }: any) {
   const opensearchAttributeCriteria = [
     {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'Equal to Any'},
+    {key: 'eqOr', title: 'One of'},
   ];
   const dispatch = useAppDispatch()
 
@@ -340,6 +340,7 @@ export default function OpenSearchByAttributes({
           <thead>
           <tr>
             <th className="w-52 px-2">Key</th>
+            <th className="w-32 px-2">Criteria</th>
             <th className="w-96 px-2">Values</th>
             <th className="w-8"></th>
           </tr>
@@ -348,6 +349,10 @@ export default function OpenSearchByAttributes({
           {selectedAttributesQuery.map((item: any, i: number) => (
             <tr key={i} className="border-t border-neutral-300">
               <td className="px-2">{item.key}</td>
+              <td className="px-2">
+                    {item.eq && 'Equal to'}
+                    {item.eqOr && 'One of'}
+              </td>
               <td className="px-2">
                 {item.eq && item.eq.stringValue !== undefined && '"' + item.eq.stringValue + '"'}
                 {item.eqOr && item.eqOr.filter((val: any) => val.stringValue).map((val: any) => '"' + val.stringValue + '"').join(", ")}

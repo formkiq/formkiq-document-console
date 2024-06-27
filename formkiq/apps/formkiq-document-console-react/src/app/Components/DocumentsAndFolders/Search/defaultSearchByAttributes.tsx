@@ -21,18 +21,18 @@ export default function DefaultSearchByAttributes({
                                                     }: any) {
   const stringAttributeCriteria = [
     {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'Equal to Any'},
+    {key: 'eqOr', title: 'One of'},
     {key: 'beginsWith', title: 'Begins with'},
     {key: 'range', title: 'Range'},
   ];
   const numberAttributeCriteria = [
     {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'Equal to Any'},
+    {key: 'eqOr', title: 'One of'},
     {key: 'range', title: 'Range'},
   ];
   const booleanAttributeCriteria = [
     {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'Equal to Any'},
+    {key: 'eqOr', title: 'One of'},
   ];
 
   const dispatch = useAppDispatch()
