@@ -12,6 +12,7 @@ import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/e
 import EditAttributesModal from '../../Components/DocumentsAndFolders/EditAttributesModal/editAttributesModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal';
+import MultiValuedAttributeModal from '../../Components/DocumentsAndFolders/MultivaluedAttributeModal/MultivaluedAttributeModal';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
@@ -21,6 +22,7 @@ import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimar
 import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
 import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
 import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
+import QuantityButton from '../../Components/Generic/Buttons/QuantityButton';
 import {
   ChevronRight,
   Close,
@@ -197,6 +199,8 @@ function Documents() {
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [renameModalValue, setRenameModalValue] = useState<ILine | null>(null);
   const [isRenameModalOpened, setRenameModalOpened] = useState(false);
+  const [isQuantityModalOpened, setQuantityModalOpened] = useState(false);
+  const [quantityModalValue, setQuantityModalValue] =  useState<any[]>([]);
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
@@ -673,6 +677,15 @@ function Documents() {
   const onRenameModalClose = () => {
     setRenameModalOpened(false);
   };
+  const onQuantityClick = (item : any) => {
+    setQuantityModalOpened(true);
+    setQuantityModalValue(item);
+  };
+  const onQuantityModalClose = () => {
+    setQuantityModalOpened(false);
+    setQuantityModalValue([]);
+  };
+
   const onMoveModalClick = (event: any, value: ILine | null) => {
     setMoveModalValue(value);
     setMoveModalOpened(true);
@@ -1683,6 +1696,11 @@ function Documents() {
                                   >
                                     <dt className="mb-1 text-smaller font-semibold">
                                       {item.key}
+                                      {item.values !== undefined && (
+                                        <QuantityButton type="button" onClick={()=>{onQuantityClick(item)}}>
+                                          {item.values.length}
+                                        </QuantityButton>
+                                      )}
                                     </dt>
                                     <dd className="text-sm">
                                       {/*Attributes*/}
@@ -2088,6 +2106,11 @@ function Documents() {
         onClose={onDocumentReviewModalClose}
         siteId={currentSiteId}
         value={documentReviewModalValue}
+      />
+      <MultiValuedAttributeModal
+        item={quantityModalValue}
+        isOpened={isQuantityModalOpened}
+        onClose={onQuantityModalClose}
       />
     </>
   );
