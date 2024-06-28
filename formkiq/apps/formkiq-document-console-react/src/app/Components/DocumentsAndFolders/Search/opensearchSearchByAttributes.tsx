@@ -36,7 +36,6 @@ export default function OpenSearchByAttributes({
   const [attributeKeys, setAttributeKeys] = useState<{ key: string, title: string }[]>([])
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(null)
   const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>("")
-  // const [attributeCriteria, setAttributeCriteria] = useState<{ key: string; title: string }[]>(opensearchAttributeCriteria);
   const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string | null>(null);
   const [attributeValue, setAttributeValue] = useState<string | number | boolean | null>("");
   const [attributeValues, setAttributeValues] = useState<any[]>([]);
@@ -168,6 +167,9 @@ export default function OpenSearchByAttributes({
 
     // Handle KEY_ONLY data type
     if (selectedAttribute.dataType === "KEY_ONLY") {
+      searchAttribute['eq'] = {
+        booleanValue: true
+      }
       setSelectedAttributesQuery([...selectedAttributesQuery, searchAttribute]);
       resetValues()
       return;
