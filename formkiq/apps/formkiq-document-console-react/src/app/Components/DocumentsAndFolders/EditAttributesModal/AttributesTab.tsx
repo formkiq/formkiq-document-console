@@ -93,31 +93,9 @@ function AttributesTab({onDocumentDataChange, siteId, value, getValue}: any) {
     );
   }
 
-  function editAttribute(attributeKey: string, newAttributeValue: any, valuesToDelete: any[]) {
+  function editAttribute(attributeKey: string, newAttributeValue: any, ) {
     if (!attributeKey || !newAttributeValue) return;
     if (!value?.documentId) return;
-
-    if (valuesToDelete.length > 0) {
-      valuesToDelete.forEach((valueToDelete) => {
-        DocumentsService.deleteDocumentAttributeValue(
-          siteId, value?.documentId, attributeKey, valueToDelete).then((res) => {
-            if (res.status !== 200) {
-              dispatch(
-                openNotificationDialog({
-                  dialogTitle: 'Error updating attribute',
-                })
-              );
-              return;
-            }
-            dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}));
-            setTimeout(() => {
-              onDocumentDataChange(value);
-            }, 500);
-          }
-        )
-      })
-      return;
-    }
 
     DocumentsService.setDocumentAttributeValue(siteId, value?.documentId, attributeKey, newAttributeValue).then((res) => {
       if (res.status !== 200) {
