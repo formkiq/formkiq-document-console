@@ -200,7 +200,7 @@ function Documents() {
   const [renameModalValue, setRenameModalValue] = useState<ILine | null>(null);
   const [isRenameModalOpened, setRenameModalOpened] = useState(false);
   const [isQuantityModalOpened, setQuantityModalOpened] = useState(false);
-  const [quantityModalValue, setQuantityModalValue] =  useState<any[]>([]);
+  const [quantityModalValue, setQuantityModalValue] = useState<any[]>([]);
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
@@ -677,7 +677,7 @@ function Documents() {
   const onRenameModalClose = () => {
     setRenameModalOpened(false);
   };
-  const onQuantityClick = (item : any) => {
+  const onQuantityClick = (item: any) => {
     setQuantityModalOpened(true);
     setQuantityModalValue(item);
   };
@@ -1697,7 +1697,12 @@ function Documents() {
                                     <dt className="mb-1 text-smaller font-semibold">
                                       {item.key}
                                       {item.values !== undefined && (
-                                        <QuantityButton type="button" onClick={()=>{onQuantityClick(item)}}>
+                                        <QuantityButton
+                                          type="button"
+                                          onClick={() => {
+                                            onQuantityClick(item);
+                                          }}
+                                        >
                                           {item.values.length}
                                         </QuantityButton>
                                       )}
