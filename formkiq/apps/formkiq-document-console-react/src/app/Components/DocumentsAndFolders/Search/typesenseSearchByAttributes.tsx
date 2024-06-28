@@ -129,9 +129,9 @@ export default function TypesenseSearchByAttributes({
         filterAttribute,
         subfolderUri
       }))
+      resetValues()
+      closeAdvancedSearch()
     }
-    resetValues()
-    closeAdvancedSearch()
   }
 
   function validateAttributeValue(dataType: any, value: any) {

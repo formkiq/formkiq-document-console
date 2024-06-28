@@ -116,9 +116,9 @@ export default function OpenSearchByAttributes({
         filterAttribute,
         subfolderUri
       }))
+      resetValues()
+      closeAdvancedSearch()
     }
-    resetValues()
-    closeAdvancedSearch()
   }
 
   function validateAttributeValue(dataType: any, value: any) {
