@@ -1,5 +1,5 @@
 import {DocumentAttribute} from "../../../helpers/types/attributes";
-import {Close, Pencil, Trash} from "../../Icons/icons";
+import {Close, Pencil, Plus, Trash} from "../../Icons/icons";
 import {useState} from "react";
 import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
@@ -19,12 +19,28 @@ function AttributesList({
   const [editAttributeKey, setEditAttributeKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<any>(null);
   const [valuesToDelete, setValuesToDelete] = useState<any[]>([]);
+  const [newValue, setNewValue] = useState<string | number>('');
 
   function handleEditAttribute(attribute: DocumentAttribute) {
     setEditAttributeKey(attribute.key);
-    const value = attribute?.stringValue || attribute?.stringValues || attribute?.numberValue || attribute?.numberValues || attribute?.booleanValue
-    setEditValue(value);
+    if (attribute?.stringValue) {
+      setEditValue(attribute.stringValue)
+    } else if (attribute?.stringValues) {
+      setEditValue(attribute.stringValues)
+    } else if (attribute.numberValue !== undefined) {
+      setEditValue(attribute.numberValue)
+    } else if (attribute?.numberValues) {
+      setEditValue(attribute.numberValues)
+    } else if (attribute.booleanValue !== undefined) {
+      setEditValue(attribute.booleanValue)
+    }
     setValuesToDelete([])
+  }
+
+  function handleAddValue() {
+    console.log(editValue, 'editValue')
+    setEditValue([...editValue, newValue])
+    setNewValue('')
   }
 
   function deleteValue(event: any, value: string | number) {
@@ -50,13 +66,13 @@ function AttributesList({
     if (attribute?.stringValues) {
       newAttributeValue.attribute.stringValues = editValue
     }
-    if (attribute?.numberValue) {
+    if (attribute?.numberValue !== undefined) {
       newAttributeValue.attribute.numberValue = editValue
     }
     if (attribute?.numberValues) {
       newAttributeValue.attribute.numberValues = editValue
     }
-    if (attribute?.booleanValue) {
+    if (attribute?.booleanValue !== undefined) {
       newAttributeValue.attribute.booleanValue = editValue
     }
 
@@ -97,7 +113,7 @@ function AttributesList({
                              required placeholder="Value" onChange={(e) => setEditValue(e.target.value)}
                              value={editValue}/>}
 
-                    {attribute?.numberValue &&
+                    {attribute?.numberValue !== undefined &&
                       <input type="number" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
                              required placeholder="Value" onChange={(e) => setEditValue(e.target.value)}
                              value={editValue}/>}
@@ -113,6 +129,18 @@ function AttributesList({
                           </button>
                         </div>))}
 
+                      {attribute?.stringValues &&
+                        <div className="flex flex-row justify-start flex-wrap gap-2 items-end">
+                          <input type="text" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
+                                 required placeholder="Value" onChange={(e) => setNewValue(e.target.value)}
+                                 value={newValue}/>
+                          <button title="Add Value" type="button"
+                                  className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
+                                  onClick={handleAddValue}>
+                            <Plus/>
+                          </button>
+                        </div>}
+
                       {attribute?.numberValues &&
                         editValue.map((value: number, index: number) => (
                           <div key={"numberValue" + index}
@@ -124,17 +152,29 @@ function AttributesList({
                             </button>
                           </div>))}
 
-                      {attribute?.booleanValue && <input type="checkbox"
-                                                         className='appearance-none text-primary-600 bg-neutral-100 border-neutral-300 rounded focus:ring-primary-500 focus:ring-2 h-4 w-4 border border-neutral-300 text-sm rounded-md '
-                                                         checked={editValue}
-                                                         onChange={(e) => setEditValue(e.target.checked)}/>}
+                      {attribute?.numberValues &&
+                        <div className="flex flex-row justify-start flex-wrap gap-2 items-end">
+                          <input type="number" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
+                                 required placeholder="Value" onChange={(e) => setNewValue(e.target.value)}
+                                 value={newValue}/>
+                          <button title="Add Value" type="button"
+                                  className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
+                                  onClick={(e) => setEditValue([...editValue, ''])}>
+                            <Plus/>
+                          </button>
+                        </div>}
+
+                      {attribute?.booleanValue !== undefined && <input type="checkbox"
+                                                                       className='appearance-none text-primary-600 bg-neutral-100 border-neutral-300 rounded focus:ring-primary-500 focus:ring-2 h-4 w-4 border border-neutral-300 text-sm rounded-md '
+                                                                       checked={editValue}
+                                                                       onChange={(e) => setEditValue(e.target.checked)}/>}
                     </div>
                   </>)}
 
                   {editAttributeKey !== attribute.key && <>
                     {attribute?.stringValue && attribute.stringValue}
                     {attribute?.stringValues && attribute.stringValues.join(', ')}
-                    {attribute?.numberValue && attribute.numberValue}
+                    {attribute?.numberValue !== undefined && attribute.numberValue}
                     {attribute?.numberValues && attribute.numberValues.join(', ')}
                     {attribute?.booleanValue !== undefined &&
                       (attribute.booleanValue ? 'true' : 'false')}
