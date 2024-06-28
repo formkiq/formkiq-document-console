@@ -144,7 +144,7 @@ function AddAttributeForm({
                 titles={attributeTypes}
                 selectedValue={selectedAttributeDataType}
                 setSelectedValue={setSelectedAttributeDataType}
-                placeholderText="Select Data Type"
+                placeholderText="Data Type"
               />
             </div>
 
