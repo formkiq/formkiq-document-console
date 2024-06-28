@@ -675,8 +675,8 @@ export class DocumentsService {
         customIncludeTags.push(allTag.value);
       }
     });
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
     if (formkiqVersion.modules.indexOf('opensearch') === -1) {
-      const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
       const searchBody:any = {
         query: {},
         responseFields: {
@@ -701,7 +701,7 @@ export class DocumentsService {
         },
         responseFields: {
           tags: customIncludeTags,
-          attributes: allAttributes,
+          attributes: attributesKeys,
         },
       };
       if (searchText&&searchText!=='') {
@@ -740,7 +740,7 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
-
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
     const searchBody = {
       query: {
         text: searchText + '*',
@@ -751,7 +751,7 @@ export class DocumentsService {
         page: page,
         responseFields: {
           tags: customIncludeTags,
-          attributes: allAttributes,
+          attributes: attributesKeys,
         },
       },
     };
