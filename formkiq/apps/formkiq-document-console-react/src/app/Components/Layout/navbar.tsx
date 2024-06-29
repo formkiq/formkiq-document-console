@@ -677,7 +677,11 @@ function Navbar() {
                     />
                   </div>
                 )}
-              {advancedSearch && advancedSearch==='hidden'&&(
+              {advancedSearch
+                && advancedSearch==='hidden'&&
+                (formkiqVersion.modules.includes('typesense') ||
+                  formkiqVersion.modules.includes('opensearch')) &&
+                (
                 <Link to="?advancedSearch=visible" className="text-sm flex gap-2 h-4 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap">
                   Expand Search Tab
                   <ChevronDown/>

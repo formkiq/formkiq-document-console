@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import {Link, useLocation, useSearchParams} from 'react-router-dom';
 import { DataCacheState } from '../../../Store/reducers/data';
 import { fetchDocuments } from '../../../Store/reducers/documentsList';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
@@ -11,13 +11,12 @@ import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
-import { Close, Plus } from '../../Icons/icons';
+import {ChevronDown, Close, Plus} from '../../Icons/icons';
 
 export default function DefaultSearchByAttributes({
   siteId,
   formkiqVersion,
   subfolderUri,
-  closeAdvancedSearch,
 }: any) {
   const stringAttributeCriteria = [
     { key: 'eq', title: 'Equal to' },
@@ -36,7 +35,7 @@ export default function DefaultSearchByAttributes({
   ];
 
   const dispatch = useAppDispatch();
-
+  const [searchParams, setSearchParams] = useSearchParams();
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
@@ -106,15 +105,6 @@ export default function DefaultSearchByAttributes({
     setAttributeValues([]);
   }
 
-  const resetValues = () => {
-    setSelectedAttribute(null);
-    setSelectedAttributeKey('');
-    setSelectedAttributeCriteria(null);
-    setAttributeCriteria([]);
-    setAttributeValue(null);
-    setAttributeValues([]);
-  };
-
   const onSearch = () => {
     const selectedAttributeQuery = getAttributeQuery();
     if (!selectedAttributeQuery) return;
@@ -131,8 +121,6 @@ export default function DefaultSearchByAttributes({
         subfolderUri,
       })
     );
-    resetValues();
-    closeAdvancedSearch();
   };
 
   function validateAttributeValue(dataType: any, value: any) {
@@ -172,7 +160,6 @@ export default function DefaultSearchByAttributes({
 
     // Handle KEY_ONLY data type
     if (selectedAttribute.dataType === 'KEY_ONLY') {
-      resetValues();
       return searchAttribute;
     }
     if (attributeValue === undefined) return;
@@ -232,6 +219,23 @@ export default function DefaultSearchByAttributes({
       newValues[1] = value;
     }
     setAttributeValues(newValues);
+  }
+
+  function onCloseTab() {
+    searchParams.delete('advancedSearch');
+    setSearchParams(searchParams);
+    // re-fetch documents
+    dispatch(
+      fetchDocuments({
+        siteId,
+        formkiqVersion,
+        page: 1,
+        searchFolder,
+        filterTag,
+        filterAttribute,
+        subfolderUri,
+      })
+    );
   }
 
   return (
@@ -442,10 +446,7 @@ export default function DefaultSearchByAttributes({
         </div>
       </div>
       <div className="flex justify-end gap-2 mt-2">
-        <ButtonGhost type="button" onClick={closeAdvancedSearch}>
-          Cancel
-        </ButtonGhost>
-        {/*<ButtonTertiary type="button" onClick={resetValues}>Reset</ButtonTertiary>*/}
+        <ButtonGhost type="button" onClick={onCloseTab}>Cancel</ButtonGhost>
         <ButtonPrimary type="button" onClick={onSearch}>
           Search
         </ButtonPrimary>

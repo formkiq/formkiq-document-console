@@ -35,7 +35,6 @@ function AdvancedSearchTab({
         <DocumentsSearch siteId={siteId}
                          formkiqVersion={formkiqVersion}
                          subfolderUri={subfolderUri}
-                         closeAdvancedSearch={closeAdvancedSearch}
         />
       }
       {

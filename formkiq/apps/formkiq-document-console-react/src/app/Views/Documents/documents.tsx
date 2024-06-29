@@ -1318,10 +1318,23 @@ function Documents() {
                 )}
               {!formkiqVersion.modules.includes('typesense') &&
                 !formkiqVersion.modules.includes('opensearch') &&
+                !advancedSearch &&
                 (<Link to="?advancedSearch=visible"
                        className="cursor-pointer h-8">
                   <ButtonGhost type="button">Search Documents...</ButtonGhost>
                 </Link>)}
+              {
+                (!formkiqVersion.modules.includes('typesense') &&
+                !formkiqVersion.modules.includes('opensearch') &&
+                advancedSearch) &&
+                (advancedSearch === "hidden" ?
+                (<Link to="?advancedSearch=visible"
+                       className="cursor-pointer h-8">
+                  <ButtonGhost type="button">Expand Search Tab</ButtonGhost>
+                </Link>): <Link to="?advancedSearch=hidden"
+                               className="cursor-pointer h-8">
+                    <ButtonGhost type="button">Minimize Search Tab</ButtonGhost>
+                  </Link> )}
               <div
                 className={
                   (isTagFilterExpanded
