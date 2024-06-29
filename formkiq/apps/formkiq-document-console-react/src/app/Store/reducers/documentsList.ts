@@ -55,7 +55,7 @@ export const fetchDocuments = createAsyncThunk(
         thunkAPI.dispatch(setAllAttributes(allAttributesData));
         });
     }
-    if (searchWord) {
+    if (searchWord || searchAttributes) {
       if (searchFolder && searchFolder.length) {
         // TODO: see if now implemented on backend
         // NOTE: not yet implemented on backend
@@ -67,6 +67,7 @@ export const fetchDocuments = createAsyncThunk(
           searchFolder,
           page,
           dataCache.allAttributes,
+          searchAttributes
         ).then((response: any) => {
           if (response) {
             const data = {
@@ -96,6 +97,7 @@ export const fetchDocuments = createAsyncThunk(
           page,
           dataCache.allTags,
           dataCache.allAttributes,
+          searchAttributes,
         ).then((response: any) => {
           if (response) {
             const temp: any = response.documents?.filter(
@@ -121,41 +123,6 @@ export const fetchDocuments = createAsyncThunk(
           }
         });
       }
-    } else if(searchAttributes) {
-      const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
-      DocumentsService.searchDocuments(
-        siteId,
-        formkiqVersion,
-        tagParam,
-        searchWord,
-        page,
-        dataCache.allTags,
-        dataCache.allAttributes,
-        searchAttributes
-      ).then((response: any) => {
-        if (response) {
-          const temp: any = response.documents?.filter(
-            (document: IDocument) => {
-              return document.path;
-            }
-          );
-          const data = {
-            siteId,
-            documents: temp,
-            user: user,
-            page,
-            isLoadingMore: false,
-            isLastSearchPageLoaded: false,
-          };
-          if (page > 1) {
-            data.isLoadingMore = true;
-          }
-          if (response.documents?.length === 0) {
-            data.isLastSearchPageLoaded = true;
-          }
-          thunkAPI.dispatch(setDocuments(data));
-        }
-      });
     } else {
       if (queueId && queueId.length) {
         DocumentsService.getDocumentsInQueue(

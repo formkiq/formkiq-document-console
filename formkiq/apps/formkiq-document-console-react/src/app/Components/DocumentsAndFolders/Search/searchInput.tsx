@@ -1,7 +1,7 @@
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import {Link, useNavigate, useSearchParams} from 'react-router-dom';
+import {Link, useLocation, useNavigate, useSearchParams} from 'react-router-dom';
 import { ConfigState } from '../../../Store/reducers/config';
 import { DataCacheState } from '../../../Store/reducers/data';
 import { DocumentsService } from '../../../helpers/services/documentsService';
@@ -33,6 +33,8 @@ export default function SearchInput({
   documentsRootUri,
   value,
 }: any) {
+  const search = useLocation().search;
+  const advancedSearch = new URLSearchParams(search).get('advancedSearch');
   const [expanded, setExpanded] = useState(false);
   const [documents, setDocuments] = useState(null);
   const [isAdvancedSearchModalOpened, setAdvancedSearchModalOpened] =
@@ -187,13 +189,11 @@ export default function SearchInput({
 
   // toggle advanced search pane
   const toggleAdvancedSearch = () => {
-    const advancedSearch = searchParams.get('advancedSearch');
-    if (!advancedSearch) {
-      searchParams.set('advancedSearch', 'true');
-      setSearchParams(searchParams);
-    }
-    if (advancedSearch === 'true') {
+    if (advancedSearch) {
       searchParams.delete('advancedSearch');
+      setSearchParams(searchParams);
+    } else {
+      searchParams.set('advancedSearch', 'true');
       setSearchParams(searchParams);
     }
   };
@@ -219,7 +219,8 @@ export default function SearchInput({
             className="block w-full appearance-none bg-transparent py-2 pl-4 pr-12 text-base text-neutral-900 placeholder:text-neutral-600 focus:outline-none sm:text-sm sm:leading-6 border-none focus:outline-none focus:ring-0"
           />
         </div>
-        <div className="grow-0 ml-2 -mt-1">
+        {!advancedSearch &&
+          <div className="grow-0 ml-2 -mt-1">
             <button
               className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"
               onClick={toggleAdvancedSearch}
@@ -228,7 +229,7 @@ export default function SearchInput({
                 <MoreActions/>
               </div>
             </button>
-        </div>
+          </div>}
       </div>
       {expanded && (
         <div className="w-full absolute -mt-2 z-30 bg-white border shadow-xl">

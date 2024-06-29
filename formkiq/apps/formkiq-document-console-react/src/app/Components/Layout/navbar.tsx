@@ -61,6 +61,7 @@ const getTopLevelFolderName = (folder: string) => {
 function Navbar() {
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
+  const advancedSearch = new URLSearchParams(search).get('advancedSearch');
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(AuthState);
@@ -151,7 +152,15 @@ function Navbar() {
 
   const redirectToSearchPage = () => {
     if (inputValue) {
-      navigate(`documents?searchWord=${inputValue}`);
+      navigate(
+        {
+          pathname: currentDocumentsRootUri,
+          search: `?searchWord=${inputValue}`,
+        },
+        {
+          replace: true,
+        }
+      );
     }
   };
   const handleKeyDown = (ev: any) => {
@@ -652,6 +661,7 @@ function Navbar() {
               </div>
               {!documentId.length &&
                 currentSection === 'DocumentsAndFolders' &&
+                !advancedSearch &&
                 (formkiqVersion.modules.includes('typesense') ||
                   formkiqVersion.modules.includes('opensearch')) &&
                 (

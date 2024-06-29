@@ -41,7 +41,6 @@ function AdvancedSearchTab({
         <OpensearchSearchByAttributes siteId={siteId}
                                       formkiqVersion={formkiqVersion}
                                       subfolderUri={subfolderUri}
-                                      closeAdvancedSearch={closeAdvancedSearch}
 
         />}
       {

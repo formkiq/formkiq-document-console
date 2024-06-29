@@ -725,6 +725,7 @@ export class DocumentsService {
     folder: string,
     page: number,
     allAttributes = [] as any[],
+    searchAttributes: any = null
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -741,7 +742,7 @@ export class DocumentsService {
       }
     }
     const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
-    const searchBody = {
+    const searchBody:any = {
       query: {
         text: searchText + '*',
         meta: {
@@ -755,6 +756,9 @@ export class DocumentsService {
         },
       },
     };
+    if (searchAttributes) {
+      searchBody.query["attributes"] = searchAttributes;
+    }
     return this.getFormkiqClient().searchApi.searchFulltext({
       documentFulltextSearchBody: searchBody,
       siteId,
