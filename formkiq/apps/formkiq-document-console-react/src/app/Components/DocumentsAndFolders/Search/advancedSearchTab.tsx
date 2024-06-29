@@ -50,7 +50,6 @@ function AdvancedSearchTab({
         <TypesenseSearchByAttributes siteId={siteId}
                                      formkiqVersion={formkiqVersion}
                                      subfolderUri={subfolderUri}
-                                     closeAdvancedSearch={closeAdvancedSearch}
         />
       }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import {useLocation, useSearchParams} from 'react-router-dom';
+import {Link, useLocation, useSearchParams} from 'react-router-dom';
 import { DataCacheState } from '../../../Store/reducers/data';
 import { fetchDocuments } from '../../../Store/reducers/documentsList';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
@@ -12,14 +12,13 @@ import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
-import { Close, Plus } from '../../Icons/icons';
+import {ChevronDown, Close, Plus} from '../../Icons/icons';
 import SearchLine from "./searchLine";
 
 export default function TypesenseSearchByAttributes({
   siteId,
   formkiqVersion,
   subfolderUri,
-  closeAdvancedSearch,
 }: any) {
   const stringAttributeCriteria = [
     { key: 'eq', title: 'Equal to' },
@@ -280,6 +279,18 @@ export default function TypesenseSearchByAttributes({
     searchParams.delete('searchWord');
     searchParams.delete('advancedSearch');
     setSearchParams(searchParams);
+    // re-fetch documents
+    dispatch(
+      fetchDocuments({
+        siteId,
+        formkiqVersion,
+        page: 1,
+        searchFolder,
+        filterTag,
+        filterAttribute,
+        subfolderUri,
+      })
+    );
   }
 
   return (
@@ -554,6 +565,13 @@ export default function TypesenseSearchByAttributes({
       </div>
 
       <div className="flex justify-end gap-2 mt-2">
+        <Link to="?advancedSearch=hidden"
+              className="text-sm flex gap-2 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap">
+          Minimize Search Tab
+          <div className="w-4 h-4 rotate-180">
+            <ChevronDown/>
+          </div>
+        </Link>
         <ButtonGhost type="button" onClick={onCloseTab}>Cancel</ButtonGhost>
         <ButtonPrimary type="button" onClick={onSearch}>
           Search

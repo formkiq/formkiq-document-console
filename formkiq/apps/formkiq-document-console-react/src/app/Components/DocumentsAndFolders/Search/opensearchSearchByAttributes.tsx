@@ -254,6 +254,18 @@ export default function OpenSearchByAttributes({
     searchParams.delete('searchWord');
     searchParams.delete('advancedSearch');
     setSearchParams(searchParams);
+    // re-fetch documents
+    dispatch(
+      fetchDocuments({
+        siteId,
+        formkiqVersion,
+        page: 1,
+        searchFolder,
+        filterTag,
+        filterAttribute,
+        subfolderUri,
+      })
+    );
   }
 
   return (
