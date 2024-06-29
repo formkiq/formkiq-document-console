@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import {useLocation, useSearchParams} from 'react-router-dom';
 import { DataCacheState } from '../../../Store/reducers/data';
 import { fetchDocuments } from '../../../Store/reducers/documentsList';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
@@ -13,6 +13,7 @@ import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
 import { Close, Plus } from '../../Icons/icons';
+import SearchLine from "./searchLine";
 
 export default function TypesenseSearchByAttributes({
   siteId,
@@ -37,7 +38,7 @@ export default function TypesenseSearchByAttributes({
   ];
 
   const dispatch = useAppDispatch();
-
+  const [searchParams, setSearchParams] = useSearchParams();
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
@@ -65,6 +66,7 @@ export default function TypesenseSearchByAttributes({
   const [selectedAttributesQuery, setSelectedAttributesQuery] = useState<any[]>(
     []
   );
+  const [searchInput, setSearchInput] = useState<string>(searchWord ? searchWord : "");
 
   function stringToNumber(value: string) {
     try {
@@ -133,23 +135,23 @@ export default function TypesenseSearchByAttributes({
   };
 
   const onSearch = () => {
+    let searchAttributes: any = null;
     if (selectedAttributesQuery.length > 0) {
-      dispatch(
-        fetchDocuments({
-          siteId,
-          formkiqVersion,
-          page: 1,
-          searchAttributes: selectedAttributesQuery,
-          searchWord,
-          searchFolder,
-          filterTag,
-          filterAttribute,
-          subfolderUri,
-        })
-      );
-      resetValues();
-      closeAdvancedSearch();
+      searchAttributes = selectedAttributesQuery
     }
+    dispatch(
+      fetchDocuments({
+        siteId,
+        formkiqVersion,
+        page: 1,
+        searchAttributes: searchAttributes,
+        searchWord: searchInput,
+        searchFolder,
+        filterTag,
+        filterAttribute,
+        subfolderUri,
+      })
+    );
   };
 
   function validateAttributeValue(dataType: any, value: any) {
@@ -270,9 +272,25 @@ export default function TypesenseSearchByAttributes({
     setAttributeValues(newValues);
   }
 
+  function updateInputValue(value: string) {
+    setSearchInput(value);
+  }
+
+  function onCloseTab() {
+    searchParams.delete('searchWord');
+    searchParams.delete('advancedSearch');
+    setSearchParams(searchParams);
+  }
+
   return (
     <div className="w-full h-full">
       <div className="h-full border-gray-400 border overflow-y-auto p-2">
+        <SearchLine siteId={siteId}
+                    searchWord={searchWord}
+                    onSearch={onSearch}
+                    updateInputValue={updateInputValue}
+                    inputValue={searchInput}
+        />
         <div className="h-8 gap-2 flex items-center">
           <div className="h-8 flex items-center gap-2">
             <RadioCombobox
@@ -536,10 +554,7 @@ export default function TypesenseSearchByAttributes({
       </div>
 
       <div className="flex justify-end gap-2 mt-2">
-        <ButtonGhost type="button" onClick={closeAdvancedSearch}>
-          Cancel
-        </ButtonGhost>
-        {/*<ButtonTertiary type="button" onClick={resetValues}>Reset</ButtonTertiary>*/}
+        <ButtonGhost type="button" onClick={onCloseTab}>Cancel</ButtonGhost>
         <ButtonPrimary type="button" onClick={onSearch}>
           Search
         </ButtonPrimary>
