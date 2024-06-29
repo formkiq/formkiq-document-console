@@ -1,6 +1,6 @@
 import OpensearchSearchByAttributes from "./opensearchSearchByAttributes";
 import TypesenseSearchByAttributes from "./typesenseSearchByAttributes";
-import {useSearchParams} from "react-router-dom";
+import {useLocation, useSearchParams} from "react-router-dom";
 import DocumentsSearch from "./defaultSearchByAttributes";
 
 function AdvancedSearchTab({
@@ -14,6 +14,8 @@ function AdvancedSearchTab({
 }) {
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const search = useLocation().search;
+  const advancedSearch = new URLSearchParams(search).get('advancedSearch');
 
   const closeAdvancedSearch = () => {
     searchParams.delete('advancedSearch');
@@ -22,7 +24,7 @@ function AdvancedSearchTab({
 
 
   return (
-    <div className="w-full h-56 p-4 flex flex-col justify-between relative">
+    <div className={"w-full h-56 p-4 flex flex-col justify-between relative "+(advancedSearch==='hidden' &&'hidden')}>
       <div
         className="absolute flex w-full h-40 justify-center items-center font-bold text-5xl text-gray-100 mb-2 -z-10">
         Search

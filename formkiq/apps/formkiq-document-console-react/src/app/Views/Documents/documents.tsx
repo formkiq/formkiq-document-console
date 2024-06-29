@@ -1318,7 +1318,7 @@ function Documents() {
                 )}
               {!formkiqVersion.modules.includes('typesense') &&
                 !formkiqVersion.modules.includes('opensearch') &&
-                (<Link to="?advancedSearch=true"
+                (<Link to="?advancedSearch=visible"
                        className="cursor-pointer h-8">
                   <ButtonGhost type="button">Search Documents...</ButtonGhost>
                 </Link>)}

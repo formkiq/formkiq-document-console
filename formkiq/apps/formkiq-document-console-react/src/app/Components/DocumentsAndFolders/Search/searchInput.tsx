@@ -193,7 +193,7 @@ export default function SearchInput({
       searchParams.delete('advancedSearch');
       setSearchParams(searchParams);
     } else {
-      searchParams.set('advancedSearch', 'true');
+      searchParams.set('advancedSearch', 'visible');
       setSearchParams(searchParams);
     }
   };

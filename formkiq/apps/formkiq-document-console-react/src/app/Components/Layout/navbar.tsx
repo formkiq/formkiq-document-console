@@ -24,6 +24,7 @@ import {
   Api,
   ApiKey,
   Bell,
+  ChevronDown,
   Documents,
   Examine,
   Queue,
@@ -40,6 +41,7 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
+import ButtonSecondary from "../Generic/Buttons/ButtonSecondary";
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -675,6 +677,12 @@ function Navbar() {
                     />
                   </div>
                 )}
+              {advancedSearch && advancedSearch==='hidden'&&(
+                <Link to="?advancedSearch=visible" className="text-sm flex gap-2 h-4 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap">
+                  Expand Search Tab
+                  <ChevronDown/>
+                </Link>
+              )}
             </div>
             <div className="w-1/4 flex justify-end mr-16">
               {useNotifications && (
