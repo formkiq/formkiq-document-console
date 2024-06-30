@@ -1696,14 +1696,17 @@ function Documents() {
                                   >
                                     <dt className="mb-1 text-smaller font-semibold">
                                       {item.key}
-                                      {item.values !== undefined && (
+                                      {(item.values !== undefined ||
+                                        item?.stringValues !== undefined) && (
                                         <QuantityButton
                                           type="button"
                                           onClick={() => {
                                             onQuantityClick(item);
                                           }}
                                         >
-                                          {item.values.length}
+                                          {item.stringValues === undefined
+                                            ? item.values?.length
+                                            : item.stringValues?.length}
                                         </QuantityButton>
                                       )}
                                     </dt>
