@@ -66,6 +66,49 @@ export const fetchGroups = createAsyncThunk(
   }
 );
 
+export const deleteGroup = createAsyncThunk(
+  'userManagement/deleteGroup',
+  async (data: any, thunkAPI) => {
+    const {groupName} = data;
+    await DocumentsService.deleteGroup(groupName).then(
+      (response) => {
+        if (response.status === 200) {
+          const groups = (thunkAPI.getState() as any)?.userManagementState.groups
+          const filteredGroups = groups.filter((group: Group) => group.name !== groupName);
+          thunkAPI.dispatch(setGroups({groups: filteredGroups}));
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error deleting group',
+            })
+          );
+        }
+      }
+    );
+  }
+);
+
+export const addGroup = createAsyncThunk(
+  'userManagement/addGroup',
+  async (data: any, thunkAPI) => {
+    const {group} = data;
+    await DocumentsService.addGroup({group}).then(
+      (response) => {
+        console.log(response)
+        if (response.status === 200) {
+          thunkAPI.dispatch(fetchGroups({}));
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error creating group',
+            })
+          );
+        }
+      }
+    );
+  }
+);
+
 export const fetchUsers = createAsyncThunk(
   'userManagement/fetchUsers',
   async (data: any, thunkAPI) => {
