@@ -12,6 +12,8 @@ export const WorkflowsAndIntegrationsPrefixes: string[] = [
   '/rulesets',
   '/schemas',
   '/object-examine-tool',
+  '/groups',
+  '/users'
 ];
 
 export const AccountAndSettingsPrefixes: string[] = [
