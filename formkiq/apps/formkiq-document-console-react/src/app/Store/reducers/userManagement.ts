@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {DocumentsService} from '../../helpers/services/documentsService';
-import {RequestStatus, Group} from '../../helpers/types/userManagement';
+import {RequestStatus, Group, User} from '../../helpers/types/userManagement';
 import {RootState} from '../store';
 import {openDialog as openNotificationDialog} from './globalNotificationControls';
 
@@ -11,6 +11,11 @@ interface userManagementState {
   currentGroupsSearchPage: number;
   isLastGroupsSearchPageLoaded: boolean;
   isLoadingMore: boolean;
+  users: User[];
+  usersLoadingStatus: keyof typeof RequestStatus;
+  nextUsersToken: string | null;
+  currentUsersSearchPage: number;
+  isLastUsersSearchPageLoaded: boolean;
 }
 
 const defaultState: userManagementState = {
@@ -20,6 +25,11 @@ const defaultState: userManagementState = {
   currentGroupsSearchPage: 1,
   isLastGroupsSearchPageLoaded: false,
   isLoadingMore: false,
+  users: [],
+  usersLoadingStatus: RequestStatus.fulfilled,
+  nextUsersToken: null,
+  currentUsersSearchPage: 1,
+  isLastUsersSearchPageLoaded: false,
 };
 
 export const fetchGroups = createAsyncThunk(
@@ -56,6 +66,39 @@ export const fetchGroups = createAsyncThunk(
   }
 );
 
+export const fetchUsers = createAsyncThunk(
+  'userManagement/fetchUsers',
+  async (data: any, thunkAPI) => {
+    const {nextToken, limit, page} = data;
+    await DocumentsService.getUsers(nextToken, limit).then(
+      (response) => {
+        if (response.status === 200) {
+          const data = {
+            users: response.users,
+            isLoadingMore: false,
+            isLastSearchPageLoaded: false,
+            next: response.next,
+            page,
+          };
+          if (page > 1) {
+            data.isLoadingMore = true;
+          }
+          if (response.documents?.length === 0) {
+            data.isLastSearchPageLoaded = true;
+          }
+          thunkAPI.dispatch(setUsers(data));
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error fetching users',
+            })
+          );
+        }
+      }
+    );
+  }
+);
+
 export const userManagementSlice = createSlice({
   name: 'userManagement',
   initialState: defaultState,
@@ -80,6 +123,28 @@ export const userManagementSlice = createSlice({
         ...state,
         groupsLoadingStatus: RequestStatus.pending,
       };
+    },
+
+    setUsers: (state, action) => {
+      const {users, isLoadingMore, next,} = action.payload;
+      const isLastSearchPageLoaded = !next;
+      if (users) {
+        if (isLoadingMore) {
+          state.users = state.users.concat(users);
+        } else {
+          state.users = users;
+        }
+        state.nextUsersToken = next;
+        state.isLastUsersSearchPageLoaded = isLastSearchPageLoaded;
+        state.usersLoadingStatus = RequestStatus.fulfilled;
+      }
+    },
+
+    setUsersLoadingStatusPending: (state) => {
+      return {
+        ...state,
+        usersLoadingStatus: RequestStatus.pending,
+      };
     }
   },
 });
@@ -87,6 +152,8 @@ export const userManagementSlice = createSlice({
 export const {
   setGroups,
   setGroupsLoadingStatusPending,
+  setUsers,
+  setUsersLoadingStatusPending,
 } = userManagementSlice.actions;
 
 export const UserManagementState = (state: RootState) => state.userManagementState;

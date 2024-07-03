@@ -1,3 +1,9 @@
+export enum RequestStatus {
+  pending = 'pending',
+  fulfilled = 'fulfilled',
+  rejected = 'rejected',
+}
+
 export interface Group {
   name: string;
   description: string;
@@ -5,8 +11,13 @@ export interface Group {
   lastModifiedDate: string;
 }
 
-export enum RequestStatus {
-  pending = 'pending',
-  fulfilled = 'fulfilled',
-  rejected = 'rejected',
+export interface User {
+  username: string,
+  userStatus: string,
+  insertedDate: string,
+  lastModifiedDate: string,
 }
+
+
+
+
