@@ -100,7 +100,7 @@ function AttributesList({
                     {attribute?.numberValue &&
                       <input type="number" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
                              required placeholder="Value" onChange={(e) => setEditValue(e.target.value)}
-                             value={editValue}/>}
+                             value={editValue} step="any"/>}
 
                     <div className="flex flex-row justify-start flex-wrap gap-2 items-end">
                       {attribute?.stringValues && editValue.map((value: string, index: number) => (
