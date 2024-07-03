@@ -1642,45 +1642,72 @@ function Documents() {
                             </div>
                           )}
                         </div>
-                        <div className="mt-2 text-smaller font-semibold">
-                          *Key-only*
-                        </div>
-                        <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 flex flex-wrap">
-                          {sortedAttributesAndTags.length > 0 &&
-                            sortedAttributesAndTags.map((item: any, i) => {
-                              let tagColor = 'gray';
-                              if (tagColors) {
-                                tagColors.forEach((color: any) => {
-                                  if (color.tagKeys.indexOf(item.key) > -1) {
-                                    tagColor = color.colorUri;
-                                    return;
-                                  }
-                                });
-                              }
-                              return (
-                                <>
-                                  {!item.stringValue &&
-                                    !item.numberValue &&
-                                    !item.booleanValue &&
-                                    !item.value &&
-                                    !item.values &&
-                                    !item.stringValues &&
-                                    !item.numberValues && (
-                                      <div className="pt-0.5 pr-1 flex">
-                                        <div
-                                          className={`h-5.5 pl-2 text-smaller rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
-                                        >
-                                          {item.key}
-                                        </div>
-                                        <div
-                                          className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                                        ></div>
-                                      </div>
-                                    )}
-                                </>
-                              );
-                            })}
-                        </div>
+                        {sortedAttributesAndTags.length === 0 && (
+                          <span className="text-xs">
+                            (no attributes have been added)
+                          </span>
+                        )}
+                        {sortedAttributesAndTags.length > 0 &&
+                          sortedAttributesAndTags.filter((item: any, i) => {
+                            if (
+                              !item.stringValue &&
+                              !item.numberValue &&
+                              !item.booleanValue &&
+                              !item.value &&
+                              !item.values &&
+                              !item.stringValues &&
+                              !item.numberValues
+                            ) {
+                              return true;
+                            }
+                            return false;
+                          }).length && (
+                            <>
+                              <div className="mt-2 text-smaller font-semibold uppercase italic">
+                                Key-Only Attributes
+                              </div>
+                              <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 flex flex-wrap">
+                                {sortedAttributesAndTags.length > 0 &&
+                                  sortedAttributesAndTags.map(
+                                    (item: any, i) => {
+                                      let tagColor = 'gray';
+                                      if (tagColors) {
+                                        tagColors.forEach((color: any) => {
+                                          if (
+                                            color.tagKeys.indexOf(item.key) > -1
+                                          ) {
+                                            tagColor = color.colorUri;
+                                            return;
+                                          }
+                                        });
+                                      }
+                                      return (
+                                        <>
+                                          {!item.stringValue &&
+                                            !item.numberValue &&
+                                            !item.booleanValue &&
+                                            !item.value &&
+                                            !item.values &&
+                                            !item.stringValues &&
+                                            !item.numberValues && (
+                                              <div className="pt-0.5 pr-1 flex">
+                                                <div
+                                                  className={`h-5.5 pl-2 text-smaller rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                                                >
+                                                  {item.key}
+                                                </div>
+                                                <div
+                                                  className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                                                ></div>
+                                              </div>
+                                            )}
+                                        </>
+                                      );
+                                    }
+                                  )}
+                              </div>
+                            </>
+                          )}
                         <div>
                           {sortedAttributesAndTags.length > 0 &&
                             sortedAttributesAndTags.map((item: any, i) => (
