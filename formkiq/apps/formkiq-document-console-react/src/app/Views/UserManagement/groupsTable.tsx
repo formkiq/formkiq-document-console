@@ -1,30 +1,31 @@
-import {ILine} from "../../helpers/types/line";
 import {Link} from 'react-router-dom';
 import moment from "moment";
 import {Group, User} from "../../helpers/types/userManagement";
 import {Info} from "../../Components/Icons/icons";
 import {useEffect, useState} from "react";
 import {DocumentsService} from "../../helpers/services/documentsService";
+import {useAuthenticatedState} from "../../Store/reducers/auth";
+import GroupActionPopover from '../../Components/UserManagement/Popovers/GroupActionPopover';
 
 type GroupsTableProps = {
   groups: Group[],
   selectedGroupNames: string[],
-  onShareClick: (event: any, value: ILine | null) => void;
   onDeleteClick: (groupName: any) => void;
-  onDuplicateClick: (groupName: any) => void;
   setSelectedGroupNames: (groupNames: string[]) => void;
   onGroupInfoClick: (groupName: string) => void;
+  onManageMembersClick: (groupName: string) => void;
 }
 
 function GroupsTable({
                        groups,
                        selectedGroupNames,
-                       onShareClick,
                        onDeleteClick,
-                       onDuplicateClick,
                        setSelectedGroupNames,
-                       onGroupInfoClick
+                       onGroupInfoClick,
+                       onManageMembersClick
                      }: GroupsTableProps) {
+  const {user} = useAuthenticatedState();
+
   function toggleSelectAll() {
     if (selectedGroupNames.length === groups.length) {
       unselectAllGroups()
@@ -61,7 +62,7 @@ function GroupsTable({
     DocumentsService.getGroupUsers(groupName, 20).then((response) => {
       console.log(response.users, groupName);
       if (response.users && response.users.length > 0) {
-        setGroupsUsers({...groupsUsers, [groupName]: response.users});
+        setGroupsUsers((val: any) => ({...val, [groupName]: response.users}));
       }
     });
   }
@@ -73,7 +74,7 @@ function GroupsTable({
   }, [groups]);
 
   useEffect(() => {
-      console.log(groupsUsers);
+    console.log(groupsUsers);
   }, [groupsUsers]);
 
   return (
@@ -124,7 +125,7 @@ function GroupsTable({
           </td>
 
           <td className="border-b border-neutral-300">
-            <Link to={`groups/${item.name}`}>
+            <Link to={item.name}>
               <p className="truncate w-64"
                  style={{fontWeight: selectedGroupNames.includes(item.name) ? '700' : '400'}}>{item.name}</p>
             </Link>
@@ -137,28 +138,35 @@ function GroupsTable({
 
           <td className="border-b border-neutral-300">
             <div className="flex -space-x-2 overflow-hidden">
-              {/*<div*/}
-              {/*  className="h-8 w-8 rounded-full  bg-neutral-500 text-center text-white font-bold flex items-center justify-center">*/}
-              {/*  AP*/}
-              {/*</div>*/}
-              {/*<div*/}
-              {/*  className="h-8 w-8 rounded-full  bg-neutral-400 text-center text-white font-bold flex items-center justify-center">*/}
-              {/*  RW*/}
-              {/*</div>*/}
-              {/*<div*/}
-              {/*  className="h-8 w-8 rounded-full  bg-neutral-800 text-center text-white font-bold flex items-center justify-center">*/}
-              {/*  MF*/}
-              {/*</div>*/}
-              {/*<div*/}
-              {/*  className="h-8 w-8 rounded-full bg-neutral-300 text-center text-white font-bold flex items-center justify-center">*/}
-              {/*  +3*/}
-              {/*</div>*/}
-              {groupsUsers[item.name] && groupsUsers[item.name].length > 0 && groupsUsers[item.name].map((user: User, i: number) => (
-                <div key={"user" + item.name + i}
-                     className="h-8 w-8 rounded-full bg-neutral-300 text-center text-white font-bold flex items-center justify-center">
-                  {user.username[0]}
-                </div>
-              ))}
+
+              {groupsUsers[item.name] && groupsUsers[item.name].length > 0 && (
+                <>
+                  {groupsUsers[item.name][0] &&
+                    <div key={"user" + item.name + 0}
+                         className="h-8 w-8 rounded-full bg-neutral-500 text-center text-white font-bold flex items-center justify-center">
+                      {groupsUsers[item.name][0].username[0]}
+                    </div>
+                  }
+                  {groupsUsers[item.name][1] &&
+                    <div key={"user" + item.name + 1}
+                         className="h-8 w-8 rounded-full bg-neutral-400 text-center text-white font-bold flex items-center justify-center">
+                      {groupsUsers[item.name][1].username[0]}
+                    </div>
+                  }
+                  {groupsUsers[item.name][2] &&
+                    <div key={"user" + item.name + 2}
+                         className="h-8 w-8 rounded-full bg-neutral-800 text-center text-white font-bold flex items-center justify-center">
+                      {groupsUsers[item.name][2].username[0]}
+                    </div>
+                  }
+                  {groupsUsers[item.name].length > 3 && (
+                    <div
+                      className="h-8 w-8 rounded-full bg-neutral-300 text-center text-white font-bold flex items-center justify-center">
+                      + {groupsUsers[item.name].length - 3}
+                    </div>
+                  )}
+                </>
+              )}
 
             </div>
           </td>
@@ -173,18 +181,15 @@ function GroupsTable({
               >
                 <Info/>
               </Link>
-              {/*<CaseActionsPopover*/}
-              {/*  value={{*/}
-              {/*    lineType: 'case',*/}
-              {/*    caseId: item.caseId,*/}
-              {/*  }}*/}
-              {/*  siteId={siteId}*/}
-              {/*  onRenameClick={onRenameClick}*/}
-              {/*  onAddDocumentClick={onAddDocumentClick}*/}
-              {/*  onShareClick={onShareClick}*/}
-              {/*  onDuplicateClick={onDuplicateClick}*/}
-              {/*  onDeleteClick={onDeleteClick}*/}
-              {/*/>*/}
+              {user.isAdmin &&
+                <GroupActionPopover
+                  value={{
+                    lineType: 'case',
+                    groupName: item.name,
+                  }}
+                  onDeleteClick={onDeleteClick}
+                  onManageMembersClick={onManageMembersClick}
+                />}
             </div>
           </td>
         </tr>

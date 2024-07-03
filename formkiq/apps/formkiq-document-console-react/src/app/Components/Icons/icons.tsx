@@ -1646,3 +1646,78 @@ export function Export() {
     </svg>
   );
 }
+
+export function VerticalDots() {
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        cx="2"
+        cy="2"
+        r="2"
+        transform="matrix(-1 0 0 1 14 16)"
+        fill="currentColor"
+      />
+      <circle
+        cx="2"
+        cy="2"
+        r="2"
+        transform="matrix(-1 0 0 1 14 10)"
+        fill="currentColor"
+      />
+      <circle
+        cx="2"
+        cy="2"
+        r="2"
+        transform="matrix(-1 0 0 1 14 4)"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+export function FilePlus() {
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M20.1 22.8002H3.9C3.66131 22.8002 3.43239 22.7054 3.2636 22.5366C3.09482 22.3678 3 22.1389 3 21.9002V2.1002C3 1.8615 3.09482 1.63258 3.2636 1.4638C3.43239 1.29502 3.66131 1.2002 3.9 1.2002H14.7L21 7.5002V21.9002C21 22.1389 20.9052 22.3678 20.7364 22.5366C20.5676 22.7054 20.3387 22.8002 20.1 22.8002Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14.7 1.2002V7.5002H21"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9.30005 14.7002H14.7"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 12V17.4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

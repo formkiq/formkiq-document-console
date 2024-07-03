@@ -7,4 +7,5 @@ export interface ILine {
     documentId: string
     documentInstance: IDocument | null
     folderInstance: IFolder | null
+    groupName?: string
 }

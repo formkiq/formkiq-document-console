@@ -6,7 +6,6 @@ import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalC
 import {useAppDispatch} from '../../Store/store';
 import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
 import ShareModal from '../../Components/Share/share';
-import {ILine} from '../../helpers/types/line';
 import {
   deleteGroup,
   fetchGroups,
@@ -29,33 +28,10 @@ function Groups() {
   const dispatch = useAppDispatch();
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
   const [selectedGroupNames, setSelectedGroupNames] = useState<string[]>([]);
-  const [isShareModalOpened, setShareModalOpened] = useState(false);
-  const [shareModalValue, setShareModalValue] = useState<ILine | null>(null);
-
-
 
   useEffect(() => {
       dispatch(fetchGroups({}));
   }, []);
-
-  // shareModal handles
-  const onShareClick = (event: any, value: ILine | null) => {
-    if (selectedGroupNames.length === 0) {
-      dispatch(
-        openNotificationDialog({
-          dialogTitle: 'Please select at least one group',
-        })
-      );
-    }
-    setShareModalValue(value);
-    setShareModalOpened(true);
-  };
-  const onShareClose = () => {
-    setShareModalOpened(false);
-  };
-  const getShareModalValue = () => {
-    return shareModalValue;
-  };
 
   // load more groups when table reaches bottom
   const trackScrolling = useCallback(async () => {
@@ -138,16 +114,14 @@ function Groups() {
     ));
   };
 
-
-  // const onDocumentDataChange = (event: any, value: ILine | null) => {};
-
-  const onDuplicateGroup = (groupName: string) => {
-   // TODO: copy all group users, prompt to write a name of a new group
-
-  };
-
   const onGroupInfoClick = (groupName:string) => {
     // TODO: open group info pane
+    console.log(groupName)
+  }
+
+  const onManageMembersClick =  (groupName:string) => {
+    // TODO: open manage users modal
+    console.log(groupName)
   }
 
   return (
@@ -165,7 +139,6 @@ function Groups() {
           <div className=" flex flex-col w-full h-full">
             <GroupsMenu
               deleteGroups={onGroupsDelete}
-              onShareClick={onShareClick}
             />
             <div className="w-full py-4 px-6">
               <button type="button"
@@ -188,11 +161,10 @@ function Groups() {
                 <GroupsTable
                   groups={groups}
                   selectedGroupNames={selectedGroupNames}
-                  onShareClick={onShareClick}
                   onDeleteClick={onGroupDelete}
-                  onDuplicateClick={onDuplicateGroup}
                   setSelectedGroupNames={setSelectedGroupNames}
                   onGroupInfoClick={onGroupInfoClick}
+                  onManageMembersClick={onManageMembersClick}
                 />
               </div>
             </div>
@@ -202,12 +174,6 @@ function Groups() {
       <CreateGroupModal
         isOpen={isCreateGroupModalOpen}
         setIsOpen={setIsCreateGroupModalOpen}
-      />
-      <ShareModal
-        isOpened={isShareModalOpened}
-        onClose={onShareClose}
-        getValue={getShareModalValue}
-        value={shareModalValue}
       />
     </>
   );
