@@ -1983,4 +1983,115 @@ export class DocumentsService {
     });
   }
 
+  @formkiqAPIHandler
+  public static async addGroup(
+    groupBody: any,
+  ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.addGroup({
+      groupBody,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteGroup(
+    groupName: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.deleteGroup({
+      groupName,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getGroupUsers(
+      groupName: string,
+      limit = 20,
+      next = null,
+  ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.getGroupUsers({
+      groupName,
+      limit,
+      next,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async addUserToGroup(
+      groupName: string,
+      userBody: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.addUserToGroup({
+      groupName,
+      userBody,
+    });
+  }
+
+  @formkiqAPIHandler
+    public static async deleteUserFromGroup(
+        groupName: string,
+        username: string,
+    ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.deleteUserFromGroup({
+      groupName,
+      username,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getUsers(
+      limit = 20,
+      next = null,
+  ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.getUsers({
+      limit,
+      next,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async addUser(
+      userBody: any,
+  ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.addUser({
+      userBody,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getUser(
+      username: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.getUser({
+      username,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteUser(
+      username: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.deleteUser({
+      username,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getUserGroups(
+      username: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.getUserGroups({
+      username,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async setUserOperation(
+      username: string,
+      userOperation: any,
+  ): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.setUserOperation({
+      username,
+      userOperation,
+    });
+  }
+
 }
