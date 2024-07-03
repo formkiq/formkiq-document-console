@@ -1,7 +1,8 @@
 import {Listbox} from "@headlessui/react";
 import {RequestStatus} from "../../../../helpers/types/queues";
 import {Step} from "../../../../helpers/types/workflows";
-import {fetchGroups, fetchQueues, setQueuesLoadingStatusPending} from "../../../../Store/reducers/queues";
+import {fetchQueues, setQueuesLoadingStatusPending} from "../../../../Store/reducers/queues";
+import {fetchGroups} from "../../../../Store/reducers/userManagement";
 import {RootState, useAppDispatch} from "../../../../Store/store";
 import {useCallback, useEffect, useState} from "react";
 import {useSelector} from 'react-redux';
@@ -29,7 +30,7 @@ const ApprovalGroupsSelector = ({
     currentGroupsSearchPage,
     isLastGroupsSearchPageLoaded,
     isLoadingMore,
-  } = useSelector((state: RootState) => state.queuesState);
+  } = useSelector((state: RootState) => state.userManagementState);
 
   const dispatch = useAppDispatch();
   const [isGroupsSelectorOpen, setIsGroupsSelectorOpen] = useState(false);
@@ -39,7 +40,7 @@ const ApprovalGroupsSelector = ({
   useEffect(() => {
     if (newStep) {
       setIsGroupsSelectorOpen(true);
-      dispatch(fetchGroups({siteId}));
+      dispatch(fetchGroups({}));
     } else {
       setIsGroupsSelectorOpen(false);
     }

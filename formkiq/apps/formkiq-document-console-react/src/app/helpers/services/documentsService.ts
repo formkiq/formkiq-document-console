@@ -1434,17 +1434,10 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async getGroups(
-    siteId: string,
-    previous = null,
     next = null,
     limit = 20
   ): Promise<any> {
-    if (!siteId) {
-      siteId = this.determineSiteId();
-    }
-    return this.getFormkiqClient().workflowsApi.getGroups({
-      siteId,
-      previous,
+    return this.getFormkiqClient().userManagementApi.getGroups({
       next,
       limit,
     });
