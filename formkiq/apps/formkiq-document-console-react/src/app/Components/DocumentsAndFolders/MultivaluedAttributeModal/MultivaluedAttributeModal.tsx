@@ -68,7 +68,7 @@ function MultiValuedAttributeModal(props: any) {
                       </div>
                       <div className="mt-2 max-h-100 overflow-y-scroll">
                         {item?.values !== undefined && (
-                          <div className="rounded-lg border border-gray-400 p-1 text-lg font-normal  overflow-auto">
+                          <div className="rounded-lg border border-gray-400 p-1 text-lg font-normal overflow-auto">
                             {item.values.map((val: any, index: number) => (
                               <>
                                 {val}
