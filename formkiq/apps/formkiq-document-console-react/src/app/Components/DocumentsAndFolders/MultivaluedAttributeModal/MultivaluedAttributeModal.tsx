@@ -72,10 +72,6 @@ function MultiValuedAttributeModal(props: any) {
                             {item.values.map((val: any, index: number) => (
                               <>
                                 {val}
-                                <br />
-                                {val}
-                                <br />
-                                {val}
                                 {index < item.values.length - 1 && (
                                   <hr className="my-2 border border-gray-400" />
                                 )}
@@ -88,10 +84,6 @@ function MultiValuedAttributeModal(props: any) {
                             {item.stringValues.map(
                               (val: any, index: number) => (
                                 <>
-                                  {val}
-                                  <br />
-                                  {val}
-                                  <br />
                                   {val}
                                   {index < item.stringValues.length - 1 && (
                                     <hr className="my-2 border border-gray-400" />
@@ -106,10 +98,6 @@ function MultiValuedAttributeModal(props: any) {
                             {item.numberValues.map(
                               (val: any, index: number) => (
                                 <>
-                                  {val}
-                                  <br />
-                                  {val}
-                                  <br />
                                   {val}
                                   {index < item.numberValues.length - 1 && (
                                     <hr className="my-2 border border-gray-400" />
