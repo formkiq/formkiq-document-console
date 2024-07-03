@@ -199,8 +199,12 @@ function Documents() {
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [renameModalValue, setRenameModalValue] = useState<ILine | null>(null);
   const [isRenameModalOpened, setRenameModalOpened] = useState(false);
-  const [isQuantityModalOpened, setQuantityModalOpened] = useState(false);
-  const [quantityModalValue, setQuantityModalValue] = useState<any[]>([]);
+  const [
+    isMultivaluedAttributeModalOpened,
+    setMultivaluedAttributeModalOpened,
+  ] = useState(false);
+  const [multivaluedAttributeModalValue, setMultivaluedAttributeModalValue] =
+    useState<any[]>([]);
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
@@ -677,13 +681,13 @@ function Documents() {
   const onRenameModalClose = () => {
     setRenameModalOpened(false);
   };
-  const onQuantityClick = (item: any) => {
-    setQuantityModalOpened(true);
-    setQuantityModalValue(item);
+  const onAttributeQuantityClick = (item: any) => {
+    setMultivaluedAttributeModalOpened(true);
+    setMultivaluedAttributeModalValue(item);
   };
-  const onQuantityModalClose = () => {
-    setQuantityModalOpened(false);
-    setQuantityModalValue([]);
+  const onMultiValuedAttributeModalClose = () => {
+    setMultivaluedAttributeModalOpened(false);
+    setMultivaluedAttributeModalValue([]);
   };
 
   const onMoveModalClick = (event: any, value: ILine | null) => {
@@ -1700,10 +1704,30 @@ function Documents() {
                                         <QuantityButton
                                           type="button"
                                           onClick={() => {
-                                            onQuantityClick(item);
+                                            onAttributeQuantityClick(item);
                                           }}
                                         >
                                           {item.values.length}
+                                        </QuantityButton>
+                                      )}
+                                      {item.stringValues !== undefined && (
+                                        <QuantityButton
+                                          type="button"
+                                          onClick={() => {
+                                            onAttributeQuantityClick(item);
+                                          }}
+                                        >
+                                          {item.stringValues.length}
+                                        </QuantityButton>
+                                      )}
+                                      {item.numberValues !== undefined && (
+                                        <QuantityButton
+                                          type="button"
+                                          onClick={() => {
+                                            onAttributeQuantityClick(item);
+                                          }}
+                                        >
+                                          {item.numberValues.length}
                                         </QuantityButton>
                                       )}
                                     </dt>
@@ -2113,9 +2137,9 @@ function Documents() {
         value={documentReviewModalValue}
       />
       <MultiValuedAttributeModal
-        item={quantityModalValue}
-        isOpened={isQuantityModalOpened}
-        onClose={onQuantityModalClose}
+        item={multivaluedAttributeModalValue}
+        isOpened={isMultivaluedAttributeModalOpened}
+        onClose={onMultiValuedAttributeModalClose}
       />
     </>
   );

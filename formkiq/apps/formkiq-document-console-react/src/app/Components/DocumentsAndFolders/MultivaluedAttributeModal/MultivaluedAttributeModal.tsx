@@ -49,7 +49,14 @@ function MultiValuedAttributeModal(props: any) {
                     <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                       <div className="flex w-full items-center">
                         <div className="font-semibold grow text-xl text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 inline-block pr-6">
-                          {item.key} ({item.values.length} values)
+                          {item.key}
+                          {item.values && <> ({item.values.length} values)</>}
+                          {item.stringValues && (
+                            <> ({item.stringValues.length} values)</>
+                          )}
+                          {item.numberValues && (
+                            <> ({item.numberValues.length} values)</>
+                          )}
                           <span className="block"></span>
                         </div>
                         <div
@@ -59,17 +66,57 @@ function MultiValuedAttributeModal(props: any) {
                           <Close />
                         </div>
                       </div>
-                      <div className="max-h-00 overflow-y-scroll">
+                      <div className="mt-2 max-h-100 overflow-y-scroll">
                         {item?.values !== undefined && (
                           <div className="rounded-lg border border-gray-400 p-1 text-lg font-normal  overflow-auto">
                             {item.values.map((val: any, index: number) => (
                               <>
+                                {val}
+                                <br />
+                                {val}
+                                <br />
                                 {val}
                                 {index < item.values.length - 1 && (
                                   <hr className="my-2 border border-gray-400" />
                                 )}
                               </>
                             ))}
+                          </div>
+                        )}
+                        {item?.stringValues !== undefined && (
+                          <div className="rounded-lg border border-gray-400 p-1 text-lg font-normal  overflow-auto">
+                            {item.stringValues.map(
+                              (val: any, index: number) => (
+                                <>
+                                  {val}
+                                  <br />
+                                  {val}
+                                  <br />
+                                  {val}
+                                  {index < item.stringValues.length - 1 && (
+                                    <hr className="my-2 border border-gray-400" />
+                                  )}
+                                </>
+                              )
+                            )}
+                          </div>
+                        )}
+                        {item?.numberValues !== undefined && (
+                          <div className="rounded-lg border border-gray-400 p-1 text-lg font-normal  overflow-auto">
+                            {item.numberValues.map(
+                              (val: any, index: number) => (
+                                <>
+                                  {val}
+                                  <br />
+                                  {val}
+                                  <br />
+                                  {val}
+                                  {index < item.numberValues.length - 1 && (
+                                    <hr className="my-2 border border-gray-400" />
+                                  )}
+                                </>
+                              )
+                            )}
                           </div>
                         )}
                       </div>
