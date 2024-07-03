@@ -245,7 +245,7 @@ function AddDocumentAttributeForm({
                   className="flex items-center h-full gap-2">
                   <input type="number" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
                          {...register('numberValue', {required: true})}
-                         placeholder="Value"/>
+                         placeholder="Value" step="any"/>
                   <button type="button" onClick={addNumberValue} title="Add"
                           className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500">
                     <Plus/>

@@ -470,6 +470,7 @@ export default function CreatePolicyModal({
                                 required
                                 className="h-8 w-32 px-4 border border-neutral-300 text-sm rounded-md"
                                 placeholder="Value"
+                                step="any"
                                 value={newAttributeValue as number}
                                 onChange={(e) => {
                                   setNewAttributeValue(e.target.value);

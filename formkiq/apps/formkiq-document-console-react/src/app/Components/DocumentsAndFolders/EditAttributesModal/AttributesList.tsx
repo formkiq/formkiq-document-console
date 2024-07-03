@@ -112,7 +112,7 @@ function AttributesList({
                     {attribute?.numberValue !== undefined &&
                       <input type="number" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
                              required placeholder="Value" onChange={(e) => setEditValue(e.target.value)}
-                             value={editValue}/>}
+                             value={editValue} step="any"/>}
 
                     <div className="flex flex-row justify-start flex-wrap gap-2 items-end">
                       {attribute?.stringValues && editValue.map((value: string, index: number) => (
@@ -152,7 +152,7 @@ function AttributesList({
                         <div className="flex flex-row items-center justify-start flex-wrap gap-2 items-end">
                           <input type="number" className='h-7 px-4 border border-neutral-300 text-sm rounded-md'
                                  required placeholder="Value" onChange={(e) => setNewValue(e.target.value)}
-                                 value={newValue}/>
+                                 value={newValue} step="any"/>
                           <button title="Add Value" type="button"
                                   className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
                                   onClick={handleAddValue}>
