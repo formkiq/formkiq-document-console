@@ -1,14 +1,13 @@
 import {Link} from 'react-router-dom';
-import moment from "moment";
-import {Group, User} from "../../helpers/types/userManagement";
+import {Group} from "../../helpers/types/userManagement";
 import {Info} from "../../Components/Icons/icons";
 import {useEffect, useState} from "react";
 import {DocumentsService} from "../../helpers/services/documentsService";
-import {useAuthenticatedState} from "../../Store/reducers/auth";
 import GroupActionPopover from '../../Components/UserManagement/Popovers/GroupActionPopover';
 
 type GroupsTableProps = {
   groups: Group[],
+  user: any,
   selectedGroupNames: string[],
   onDeleteClick: (groupName: any) => void;
   setSelectedGroupNames: (groupNames: string[]) => void;
@@ -18,13 +17,13 @@ type GroupsTableProps = {
 
 function GroupsTable({
                        groups,
+                       user,
                        selectedGroupNames,
                        onDeleteClick,
                        setSelectedGroupNames,
                        onGroupInfoClick,
                        onManageMembersClick
                      }: GroupsTableProps) {
-  const {user} = useAuthenticatedState();
 
   function toggleSelectAll() {
     if (selectedGroupNames.length === groups.length) {
@@ -51,16 +50,10 @@ function GroupsTable({
     setSelectedGroupNames([]);
   }
 
-  function formatDate(date: string) {
-    return moment(date).format('MMM DD, YYYY');
-  }
-
-
   const [groupsUsers, setGroupsUsers] = useState<any>({});
 
   async function getGroupUsers(groupName: string) {
     DocumentsService.getGroupUsers(groupName, 20).then((response) => {
-      console.log(response.users, groupName);
       if (response.users && response.users.length > 0) {
         setGroupsUsers((val: any) => ({...val, [groupName]: response.users}));
       }
@@ -72,10 +65,6 @@ function GroupsTable({
       getGroupUsers(group.name);
     });
   }, [groups]);
-
-  useEffect(() => {
-    console.log(groupsUsers);
-  }, [groupsUsers]);
 
   return (
     <table className='table-auto text-neutral-900 text-sm border-b border-neutral-300 w-full '
@@ -138,7 +127,6 @@ function GroupsTable({
 
           <td className="border-b border-neutral-300">
             <div className="flex -space-x-2 overflow-hidden">
-
               {groupsUsers[item.name] && groupsUsers[item.name].length > 0 && (
                 <>
                   {groupsUsers[item.name][0] &&
@@ -167,15 +155,13 @@ function GroupsTable({
                   )}
                 </>
               )}
-
             </div>
           </td>
-
 
           <td className="border-b border-neutral-300">
             <div className="flex items-center justify-end px-6">
               <Link
-                to={`#group=${item.name}`}
+                to={`?groupName=${item.name}`}
                 className="w-5 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
                 onClick={() => onGroupInfoClick(item.name)}
               >

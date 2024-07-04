@@ -1,12 +1,12 @@
 import {Trash} from "../../Icons/icons";
-import {useAuthenticatedState} from "../../../Store/reducers/auth";
 
 type GroupsMenuPropsType = {
   deleteGroups: () => void;
+  user: any,
+
 }
 
-function GroupsMenu({deleteGroups}: GroupsMenuPropsType) {
-  const {user} = useAuthenticatedState();
+function GroupsMenu({deleteGroups,user}: GroupsMenuPropsType) {
 
   return (
     <div
@@ -14,7 +14,6 @@ function GroupsMenu({deleteGroups}: GroupsMenuPropsType) {
       <h2>My Groups</h2>
       {user.isAdmin &&
         <div className="flex gap-6">
-
           <button title="Delete" className="w-5 hover:text-primary-500" onClick={deleteGroups}>
             <Trash/>
             <span className="sr-only">Delete</span>

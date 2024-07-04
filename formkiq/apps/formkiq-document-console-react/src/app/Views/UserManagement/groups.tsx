@@ -5,7 +5,6 @@ import {RequestStatus} from '../../helpers/types/document';
 import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
 import {useAppDispatch} from '../../Store/store';
 import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
-import ShareModal from '../../Components/Share/share';
 import {
   deleteGroup,
   fetchGroups,
@@ -16,6 +15,9 @@ import GroupsMenu from "../../Components/UserManagement/Menus/GroupsMenu";
 import {Plus} from "../../Components/Icons/icons";
 import CreateGroupModal from "../../Components/UserManagement/Modals/CreateGroupModal";
 import GroupsTable from "./groupsTable";
+import {useLocation, useSearchParams} from "react-router-dom";
+import GroupInfoTab from "../../Components/UserManagement/InfoTabs/GroupInfoTab";
+import {useAuthenticatedState} from "../../Store/reducers/auth";
 
 function Groups() {
   const {
@@ -25,12 +27,17 @@ function Groups() {
     isLastGroupsSearchPageLoaded,
     currentGroupsSearchPage,
   } = useSelector(UserManagementState);
+  const {user} = useAuthenticatedState();
+  const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useAppDispatch();
+  const search = useLocation().search;
+  const groupName = new URLSearchParams(search).get('groupName');
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
   const [selectedGroupNames, setSelectedGroupNames] = useState<string[]>([]);
 
+
   useEffect(() => {
-      dispatch(fetchGroups({}));
+    dispatch(fetchGroups({}));
   }, []);
 
   // load more groups when table reaches bottom
@@ -52,13 +59,13 @@ function Groups() {
       if (nextGroupsToken) {
         await dispatch(
           fetchGroups({
-            nextToken:nextGroupsToken,
+            nextToken: nextGroupsToken,
             page: currentGroupsSearchPage + 1,
           })
         );
       }
     }
-  }, [nextGroupsToken, groupsLoadingStatus,     isLastGroupsSearchPageLoaded]);
+  }, [nextGroupsToken, groupsLoadingStatus, isLastGroupsSearchPageLoaded]);
 
   const handleScroll = (event: any) => {
     const el = event.target;
@@ -114,14 +121,23 @@ function Groups() {
     ));
   };
 
-  const onGroupInfoClick = (groupName:string) => {
+  const onGroupInfoClick = (groupName: string) => {
     // TODO: open group info pane
     console.log(groupName)
   }
 
-  const onManageMembersClick =  (groupName:string) => {
+  const onManageMembersClick = (groupName: string) => {
     // TODO: open manage users modal
     console.log(groupName)
+  }
+
+  useEffect(() => {
+    console.log(groupName)
+  }, [groupName]);
+
+  const closeGroupInfoTab = () => {
+    searchParams.delete('groupName');
+    setSearchParams(searchParams);
   }
 
   return (
@@ -139,6 +155,7 @@ function Groups() {
           <div className=" flex flex-col w-full h-full">
             <GroupsMenu
               deleteGroups={onGroupsDelete}
+              user={user}
             />
             <div className="w-full py-4 px-6">
               <button type="button"
@@ -160,6 +177,7 @@ function Groups() {
               >
                 <GroupsTable
                   groups={groups}
+                  user={user}
                   selectedGroupNames={selectedGroupNames}
                   onDeleteClick={onGroupDelete}
                   setSelectedGroupNames={setSelectedGroupNames}
@@ -170,6 +188,13 @@ function Groups() {
             </div>
           </div>
         </div>
+        {groupName && <GroupInfoTab
+          closeGroupInfoTab={closeGroupInfoTab}
+          groupName={groupName}
+          onManageMembersClick={onManageMembersClick}
+          user={user}
+
+        />}
       </div>
       <CreateGroupModal
         isOpen={isCreateGroupModalOpen}
