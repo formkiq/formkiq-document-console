@@ -21,6 +21,9 @@ export type DocumentAttribute = {
   numberValue?: number,
   numberValues?: number[],
   booleanValue?: boolean,
+  insertedDate?: string,
+  valueType?: string,
+  userId?: string,
 };
 
 export type OpaAttributeType = {
