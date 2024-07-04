@@ -121,19 +121,15 @@ function Groups() {
     ));
   };
 
-  const onGroupInfoClick = (groupName: string) => {
-    // TODO: open group info pane
-    console.log(groupName)
-  }
-
   const onManageMembersClick = (groupName: string) => {
     // TODO: open manage users modal
     console.log(groupName)
   }
 
-  useEffect(() => {
+  const onAddMembersClick = (groupName: string) => {
+    // TODO: open add users modal
     console.log(groupName)
-  }, [groupName]);
+  }
 
   const closeGroupInfoTab = () => {
     searchParams.delete('groupName');
@@ -181,8 +177,7 @@ function Groups() {
                   selectedGroupNames={selectedGroupNames}
                   onDeleteClick={onGroupDelete}
                   setSelectedGroupNames={setSelectedGroupNames}
-                  onGroupInfoClick={onGroupInfoClick}
-                  onManageMembersClick={onManageMembersClick}
+                  onAddMembersClick={onAddMembersClick}
                 />
               </div>
             </div>

@@ -11,8 +11,7 @@ type GroupsTableProps = {
   selectedGroupNames: string[],
   onDeleteClick: (groupName: any) => void;
   setSelectedGroupNames: (groupNames: string[]) => void;
-  onGroupInfoClick: (groupName: string) => void;
-  onManageMembersClick: (groupName: string) => void;
+  onAddMembersClick: (groupName: string) => void;
 }
 
 function GroupsTable({
@@ -21,8 +20,7 @@ function GroupsTable({
                        selectedGroupNames,
                        onDeleteClick,
                        setSelectedGroupNames,
-                       onGroupInfoClick,
-                       onManageMembersClick
+                       onAddMembersClick
                      }: GroupsTableProps) {
 
   function toggleSelectAll() {
@@ -163,18 +161,17 @@ function GroupsTable({
               <Link
                 to={`?groupName=${item.name}`}
                 className="w-5 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
-                onClick={() => onGroupInfoClick(item.name)}
               >
                 <Info/>
               </Link>
               {user.isAdmin &&
                 <GroupActionPopover
                   value={{
-                    lineType: 'case',
+                    lineType: 'group',
                     groupName: item.name,
                   }}
                   onDeleteClick={onDeleteClick}
-                  onManageMembersClick={onManageMembersClick}
+                  onAddMembersClick={onAddMembersClick}
                 />}
             </div>
           </td>

@@ -1,35 +1,38 @@
 import {Dialog} from '@headlessui/react'
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useAppDispatch} from "../../../Store/store";
-import {addGroup} from "../../../Store/reducers/userManagement";
+import {fetchUsers, UserManagementState} from "../../../Store/reducers/userManagement";
 import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
+import {useSelector} from "react-redux";
 
 
-type CreateGroupModalPropsType = {
+type ManageGroupMembersModalPropsType = {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }
 
-function CreateGroupModal({isOpen, setIsOpen}: CreateGroupModalPropsType) {
+function ManageGroupMembersModal({isOpen, setIsOpen}: ManageGroupMembersModalPropsType) {
   const groupNameRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
+  const {users, usersLoadingStatus, nextUsersToken} = useSelector(UserManagementState);
+  const [usersToAdd, setUsersToAdd] = useState<string[]>([])
 
-  const [groupValue, setGroupValue] = useState({name: '', description: ''})
+  useEffect(() => {
+    dispatch(fetchUsers({}));
+  }, [isOpen]);
 
 
   const closeModal = () => {
     setIsOpen(false);
-    setGroupValue({name: '', description: ''})
+    setUsersToAdd([])
   }
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // prevent from saving without a Name
-    if (!groupValue.name) {
-      return;
-    }
-    dispatch(addGroup({group: groupValue}))
+
+    // dispatch(addGroup({group: groupValue}))
     closeModal()
   }
 
@@ -47,28 +50,17 @@ function CreateGroupModal({isOpen, setIsOpen}: CreateGroupModalPropsType) {
         <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
           <div className="w-full max-w-xl bg-white p-6">
             <Dialog.Title className="text-2xl font-bold">
-              Create New Group
+              Manage Group Members
             </Dialog.Title>
 
             <form className="flex flex-col gap-4 mt-6" onSubmit={onSubmit}>
-
-              <input type="text" className="h-12 px-4 border border-neutral-300 text-sm rounded-md"
-                     placeholder="Name group"
-                     required value={groupValue.name}
-                     onChange={(e) => setGroupValue({...groupValue, name: e.target.value})}
-                     ref={groupNameRef}
-                     onKeyDown={(e) => preventDialogClose(e)}/>
-              <textarea rows={3} className=" px-4 border border-neutral-300 text-sm rounded-md"
-                        placeholder="Description..."
-                        value={groupValue.description}
-                        onChange={(e) => setGroupValue({...groupValue, description: e.target.value})}/>
 
 
               <div className="flex flex-row justify-end gap-4 text-base font-bold h-10">
                 <ButtonGhost type="button" onClick={closeModal}
                              className=""> CANCEL
                 </ButtonGhost>
-                <ButtonPrimaryGradient type="submit" className="">+ CREATE GROUP</ButtonPrimaryGradient>
+                <ButtonPrimaryGradient type="submit" className="">SAVE</ButtonPrimaryGradient>
               </div>
             </form>
           </div>
@@ -78,4 +70,4 @@ function CreateGroupModal({isOpen, setIsOpen}: CreateGroupModalPropsType) {
 }
 
 
-export default CreateGroupModal;
+export default ManageGroupMembersModal;

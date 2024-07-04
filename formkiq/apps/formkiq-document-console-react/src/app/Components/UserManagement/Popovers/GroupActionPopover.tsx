@@ -25,11 +25,11 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
 }
 
 export default function GroupActionsPopover({
-                                             value,
-                                             onManageMembersClick,
-                                             onDuplicateClick,
-                                             onDeleteClick,
-                                           }: any) {
+                                              value,
+                                              onAddMembersClick,
+                                              onDuplicateClick,
+                                              onDeleteClick,
+                                            }: any) {
   const line: ILine = value;
   const [visible, setVisibility] = useState(false);
   const [referenceRef, setReferenceRef] = useState(null);
@@ -53,18 +53,13 @@ export default function GroupActionsPopover({
     setVisibility(!visible);
   }
 
-  function handleDuplicateClick() {
-    onDuplicateClick(line.groupName);
-    setVisibility(false);
-  }
-
   function handleDeleteClick() {
     onDeleteClick(line.groupName);
     setVisibility(false);
   }
 
-  const handleManageMembersClick = () => {
-    onManageMembersClick(line.groupName)
+  const handleAddMembersClick = () => {
+    onAddMembersClick(line.groupName)
     setVisibility(false);
   }
 
@@ -86,24 +81,7 @@ export default function GroupActionsPopover({
         >
           <ul className="text-neutral-900 font-medium">
 
-            {/*Sharing a group not implemented yet*/}
-            {/*<li*/}
-            {/*  className="py-3 hover:bg-neutral-100 cursor-pointer"*/}
-            {/*  onClick={(event) =>*/}
-            {/*    onShareClick(event, {*/}
-            {/*      lineType: line.lineType,*/}
-            {/*      documentId: line.groupName,*/}
-            {/*    })*/}
-            {/*  }*/}
-            {/*>*/}
-            {/*    <span className='flex items-center'>*/}
-            {/*      <span className="mx-6 w-6 h-6">*/}
-            {/*        <Export/>*/}
-            {/*      </span>*/}
-            {/*      <span>Share</span>*/}
-            {/*    </span>*/}
-            {/*</li>*/}
-            <li className="py-3 hover:bg-neutral-100 cursor-pointer" onClick={handleManageMembersClick}>
+            <li className="py-3 hover:bg-neutral-100 cursor-pointer" onClick={handleAddMembersClick}>
               <span className='flex items-center'>
                 <span className="mx-6 w-6 h-6">
                   <FilePlus/>
