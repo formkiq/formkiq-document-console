@@ -273,23 +273,6 @@ function Documents() {
   }, [isTagFilterExpanded]);
 
   function onDocumentInfoClick() {
-    DocumentsService.getAllTagKeys(currentSiteId).then((response: any) => {
-      const allTagData = {
-        allTags: response?.values,
-        tagsLastRefreshed: new Date(),
-        tagsSiteId: currentSiteId,
-      };
-      dispatch(setAllTags(allTagData));
-    });
-    DocumentsService.getAttributes(currentSiteId).then((response: any) => {
-      const allAttributeData = {
-        allAttributes: response?.attributes,
-        attributesLastRefreshed: new Date(),
-        attributesSiteId: currentSiteId,
-      };
-      dispatch(setAllAttributes(allAttributeData));
-    });
-
     if (infoDocumentId.length) {
       DocumentsService.getDocumentById(infoDocumentId, currentSiteId).then(
         (response: any) => {
