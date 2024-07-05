@@ -37,7 +37,7 @@ export const fetchDocuments = createAsyncThunk(
     const attributeParam = filterAttribute ? filterAttribute : null;
     const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
     const dateDiff =
-      new Date().getTime() - dataCache.tagsLastRefreshed.getTime();
+      new Date().getTime() - new Date(dataCache.tagsLastRefreshed).getTime();
     if (dateDiff / 1000 > 30 || dataCache.tagsSiteId !== siteId) {
       await DocumentsService.getAllTagKeys(siteId).then((response: any) => {
         const allTagData = {
