@@ -63,6 +63,7 @@ const TagSchemas = React.lazy(
 );
 const TagSchema = React.lazy(() => import('../../Views/TagSchemas/tagSchema'));
 const Groups = React.lazy(() => import('../../Views/UserManagement/groups'));
+const Group = React.lazy(() => import('../../Views/UserManagement/group'));
 
 const RoutesMapper = () => {
   return (
@@ -171,6 +172,7 @@ const RoutesMapper = () => {
       <Route path="/schemas/:tagSchemaId" element={<TagSchema />}></Route>
 
       <Route path="/groups" element={<Groups />}></Route>
+      <Route path="/groups/:groupName" element={<Group />}></Route>
 
       <Route
         path="/workspaces/:siteId/workflows/designer"

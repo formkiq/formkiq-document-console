@@ -27,7 +27,6 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
 export default function GroupActionsPopover({
                                               value,
                                               onAddMembersClick,
-                                              onDuplicateClick,
                                               onDeleteClick,
                                             }: any) {
   const line: ILine = value;
@@ -86,7 +85,7 @@ export default function GroupActionsPopover({
                 <span className="mx-6 w-6 h-6">
                   <FilePlus/>
                 </span>
-                <span>Manage Members</span>
+                <span>Add Members</span>
               </span>
             </li>
 

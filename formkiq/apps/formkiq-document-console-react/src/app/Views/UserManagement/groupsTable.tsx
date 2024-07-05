@@ -129,19 +129,19 @@ function GroupsTable({
                 <>
                   {groupsUsers[item.name][0] &&
                     <div key={"user" + item.name + 0}
-                         className="h-8 w-8 rounded-full bg-neutral-500 text-center text-white font-bold flex items-center justify-center">
+                         className="h-8 w-8 rounded-full bg-neutral-500 text-center text-white font-bold flex items-center justify-center uppercase">
                       {groupsUsers[item.name][0].username[0]}
                     </div>
                   }
                   {groupsUsers[item.name][1] &&
                     <div key={"user" + item.name + 1}
-                         className="h-8 w-8 rounded-full bg-neutral-400 text-center text-white font-bold flex items-center justify-center">
+                         className="h-8 w-8 rounded-full bg-neutral-400 text-center text-white font-bold flex items-center justify-center uppercase">
                       {groupsUsers[item.name][1].username[0]}
                     </div>
                   }
                   {groupsUsers[item.name][2] &&
                     <div key={"user" + item.name + 2}
-                         className="h-8 w-8 rounded-full bg-neutral-800 text-center text-white font-bold flex items-center justify-center">
+                         className="h-8 w-8 rounded-full bg-neutral-800 text-center text-white font-bold flex items-center justify-center uppercase">
                       {groupsUsers[item.name][2].username[0]}
                     </div>
                   }

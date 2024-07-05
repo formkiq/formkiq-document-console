@@ -13,6 +13,7 @@ export interface Group {
 
 export interface User {
   username: string,
+  email: string;
   userStatus: string,
   insertedDate: string,
   lastModifiedDate: string,

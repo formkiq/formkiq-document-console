@@ -18,6 +18,7 @@ import GroupsTable from "./groupsTable";
 import {useLocation, useSearchParams} from "react-router-dom";
 import GroupInfoTab from "../../Components/UserManagement/InfoTabs/GroupInfoTab";
 import {useAuthenticatedState} from "../../Store/reducers/auth";
+import AddGroupMembersModal from "../../Components/UserManagement/Modals/AddGroupMembersModal";
 
 function Groups() {
   const {
@@ -33,7 +34,9 @@ function Groups() {
   const search = useLocation().search;
   const groupName = new URLSearchParams(search).get('groupName');
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
+  const [isAddGroupMembersModalOpen, setIsAddGroupMembersModalOpen] = useState(false);
   const [selectedGroupNames, setSelectedGroupNames] = useState<string[]>([]);
+  const [selectedGroupName, setSelectedGroupName] = useState<string>('');
 
 
   useEffect(() => {
@@ -121,19 +124,14 @@ function Groups() {
     ));
   };
 
-  const onManageMembersClick = (groupName: string) => {
-    // TODO: open manage users modal
-    console.log(groupName)
-  }
-
-  const onAddMembersClick = (groupName: string) => {
-    // TODO: open add users modal
-    console.log(groupName)
-  }
-
   const closeGroupInfoTab = () => {
     searchParams.delete('groupName');
     setSearchParams(searchParams);
+  }
+
+  const onAddMembersClick = (groupName: string) => {
+    setSelectedGroupName(groupName);
+    setIsAddGroupMembersModalOpen(true);
   }
 
   return (
@@ -186,14 +184,18 @@ function Groups() {
         {groupName && <GroupInfoTab
           closeGroupInfoTab={closeGroupInfoTab}
           groupName={groupName}
-          onManageMembersClick={onManageMembersClick}
           user={user}
-
+          group={groups.find((group) => group.name === groupName)}
         />}
       </div>
       <CreateGroupModal
         isOpen={isCreateGroupModalOpen}
         setIsOpen={setIsCreateGroupModalOpen}
+      />
+      <AddGroupMembersModal
+        isOpen={isAddGroupMembersModalOpen}
+        setIsOpen={setIsAddGroupMembersModalOpen}
+        groupName={selectedGroupName}
       />
     </>
   );

@@ -11,11 +11,18 @@ interface userManagementState {
   currentGroupsSearchPage: number;
   isLastGroupsSearchPageLoaded: boolean;
   isLoadingMore: boolean;
+
   users: User[];
   usersLoadingStatus: keyof typeof RequestStatus;
   nextUsersToken: string | null;
   currentUsersSearchPage: number;
   isLastUsersSearchPageLoaded: boolean;
+
+  groupUsers: User[];
+  groupUsersLoadingStatus: keyof typeof RequestStatus;
+  nextGroupUsersToken: string | null;
+  currentGroupUsersSearchPage: number;
+  isLastGroupUsersSearchPageLoaded: boolean;
 }
 
 const defaultState: userManagementState = {
@@ -25,11 +32,18 @@ const defaultState: userManagementState = {
   currentGroupsSearchPage: 1,
   isLastGroupsSearchPageLoaded: false,
   isLoadingMore: false,
+
   users: [],
   usersLoadingStatus: RequestStatus.fulfilled,
   nextUsersToken: null,
   currentUsersSearchPage: 1,
   isLastUsersSearchPageLoaded: false,
+
+  groupUsers: [],
+  groupUsersLoadingStatus: RequestStatus.fulfilled,
+  nextGroupUsersToken: null,
+  currentGroupUsersSearchPage: 1,
+  isLastGroupUsersSearchPageLoaded: false,
 };
 
 export const fetchGroups = createAsyncThunk(
@@ -142,6 +156,59 @@ export const fetchUsers = createAsyncThunk(
   }
 );
 
+export const addUserToGroup = createAsyncThunk(
+  'userManagement/addUserToGroup',
+  async (data: any, thunkAPI) => {
+    const {groupName, user} = data;
+    await DocumentsService.addUserToGroup(groupName, user).then(
+      (response) => {
+        if (response.status === 201) {
+          thunkAPI.dispatch(fetchUsers({}));
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error adding user to group',
+            })
+          );
+        }
+      }
+    );
+  }
+);
+
+export const fetchGroupUsers = createAsyncThunk(
+  'userManagement/fetchGroupUsers',
+  async (data: any, thunkAPI) => {
+    const {groupName, nextToken, limit, page} = data;
+    await DocumentsService.getGroupUsers(groupName, limit, nextToken).then(
+      (response) => {
+        if (response.status === 200) {
+          const data = {
+            groupUsers: response.users,
+            isLoadingMore: false,
+            isLastSearchPageLoaded: false,
+            next: response.next,
+            page,
+          };
+          if (page > 1) {
+            data.isLoadingMore = true;
+          }
+          if (response.documents?.length === 0) {
+            data.isLastSearchPageLoaded = true;
+          }
+          thunkAPI.dispatch(setGroupUsers(data));
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error fetching group users',
+            })
+          );
+        }
+      }
+    );
+  }
+);
+
 export const userManagementSlice = createSlice({
   name: 'userManagement',
   initialState: defaultState,
@@ -188,6 +255,28 @@ export const userManagementSlice = createSlice({
         ...state,
         usersLoadingStatus: RequestStatus.pending,
       };
+    },
+
+    setGroupUsers: (state, action) => {
+      const {groupUsers, isLoadingMore, next,} = action.payload;
+      const isLastSearchPageLoaded = !next;
+      if (groupUsers) {
+        if (isLoadingMore) {
+          state.groupUsers = state.groupUsers.concat(groupUsers);
+        } else {
+          state.groupUsers = groupUsers;
+        }
+        state.nextGroupUsersToken = next;
+        state.isLastGroupUsersSearchPageLoaded = isLastSearchPageLoaded;
+        state.groupUsersLoadingStatus = RequestStatus.fulfilled;
+      }
+    },
+
+    setGroupUsersLoadingStatusPending: (state) => {
+      return {
+        ...state,
+        groupUsersLoadingStatus: RequestStatus.pending,
+      };
     }
   },
 });
@@ -197,6 +286,8 @@ export const {
   setGroupsLoadingStatusPending,
   setUsers,
   setUsersLoadingStatusPending,
+  setGroupUsers,
+  setGroupUsersLoadingStatusPending,
 } = userManagementSlice.actions;
 
 export const UserManagementState = (state: RootState) => state.userManagementState;
