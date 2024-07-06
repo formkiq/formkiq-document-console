@@ -1730,3 +1730,37 @@ export function Disable() {
     </svg>
   )
 }
+
+export function Enable() {
+  return (<svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%" height="100%"
+      viewBox="0 0 640 512">
+      <path fill="currentColor"
+            d="M96 128a128 128 0 1 1 256 0a128 128 0 1 1-256 0M0 482.3C0 383.8 79.8 304 178.3 304h91.4c98.5 0 178.3 79.8 178.3 178.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3M625 177L497 305c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L591 143c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/>
+    </svg>
+  )
+}
+
+export function ResetPassword() {
+  return (<svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%" height="100%" viewBox="0 0 24 24">
+      <path fill="currentColor"
+            d="M13.26 3A9.003 9.003 0 0 0 4 12H2.21c-.45 0-.67.54-.35.85l2.79 2.79c.2.2.51.2.71 0l2.8-2.79c.3-.31.08-.85-.37-.85H6c0-3.89 3.2-7.06 7.1-7c3.71.05 6.84 3.18 6.9 6.9c.06 3.91-3.1 7.1-7 7.1c-1.59 0-3.05-.53-4.23-1.43c-.4-.3-.96-.27-1.31.09c-.43.43-.39 1.14.09 1.5A8.971 8.971 0 0 0 13 21c5.06 0 9.14-4.17 9-9.25c-.13-4.7-4.05-8.62-8.74-8.75M15 11v-1c0-1.1-.9-2-2-2s-2 .9-2 2v1c-.55 0-1 .45-1 1v3c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-3c0-.55-.45-1-1-1m-1 0h-2v-1c0-.55.45-1 1-1s1 .45 1 1z"/>
+    </svg>
+  )
+}
+
+export function List() {
+    return (<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 21L23 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="3" cy="21" r="2" stroke="currentColor" strokeWidth="2"/>
+        <path d="M9 12L23 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="3" cy="12" r="2" stroke="currentColor" strokeWidth="2"/>
+        <path d="M9 3L23 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="3" cy="3" r="2" stroke="currentColor" strokeWidth="2"/>
+      </svg>
+
+    )
+}
