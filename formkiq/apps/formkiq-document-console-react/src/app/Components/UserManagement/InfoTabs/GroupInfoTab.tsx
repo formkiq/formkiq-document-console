@@ -1,24 +1,31 @@
 import {ChevronRight, Close} from "../../Icons/icons";
 import {useEffect, useState} from "react";
 import {DocumentsService} from "../../../helpers/services/documentsService";
-import {Link} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
+import {User} from "../../../helpers/types/userManagement";
 
 type GroupInfoTabProps = {
   closeGroupInfoTab: () => void;
   groupName: string;
   user: any;
   group: any;
+  users?: User[];
 }
 
-function GroupInfoTab({closeGroupInfoTab, groupName, user, group}: GroupInfoTabProps) {
+function GroupInfoTab({closeGroupInfoTab, groupName, user, group, users}: GroupInfoTabProps) {
+  const {groupName: name} = useParams()
   const [groupsUsers, setGroupsUsers] = useState<any[]>([]);
   useEffect(() => {
+    if (users) {
+      setGroupsUsers(users);
+      return;
+    }
     DocumentsService.getGroupUsers(groupName, 20).then((response) => {
       if (response.users) {
         setGroupsUsers(response.users);
       }
     });
-  }, [groupName]);
+  }, [groupName,users]);
 
   if (!group) return null;
   return (
@@ -65,7 +72,7 @@ function GroupInfoTab({closeGroupInfoTab, groupName, user, group}: GroupInfoTabP
         )}
 
       </div>
-      {user.isAdmin &&
+      {(user.isAdmin && !name) &&
         <Link to={groupName}
               className="w-3/5 flex gap-1 items-center text-xs font-bold hover:text-primary-500 cursor-pointer mx-4">
           <>

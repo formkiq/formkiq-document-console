@@ -2,8 +2,8 @@ import {useEffect, useRef, useState} from 'react';
 import {usePopper} from 'react-popper';
 import {ILine} from '../../../helpers/types/line';
 import {
-  FilePlus,
-  Trash,
+  Disable,
+  Close,
   VerticalDots,
 } from '../../Icons/icons';
 
@@ -24,9 +24,9 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
   }, [ref]);
 }
 
-export default function GroupActionsPopover({
+export default function GroupUserActionsPopover({
                                               value,
-                                              onAddMembersClick,
+                                              onDisableClick,
                                               onDeleteClick,
                                             }: any) {
   const line: ILine = value;
@@ -53,12 +53,12 @@ export default function GroupActionsPopover({
   }
 
   function handleDeleteClick() {
-    onDeleteClick(line.username);
+    onDeleteClick(line.groupName);
     setVisibility(false);
   }
 
-  const handleAddMembersClick = () => {
-    onAddMembersClick(line.groupName)
+  const handleDisableClick = () => {
+    onDisableClick(line.groupName)
     setVisibility(false);
   }
 
@@ -80,12 +80,12 @@ export default function GroupActionsPopover({
         >
           <ul className="text-neutral-900 font-medium">
 
-            <li className="py-3 hover:bg-neutral-100 cursor-pointer" onClick={handleAddMembersClick}>
+            <li className="py-3 hover:bg-neutral-100 cursor-pointer" onClick={handleDisableClick}>
               <span className='flex items-center'>
                 <span className="mx-6 w-6 h-6">
-                  <FilePlus/>
+                  <Disable/>
                 </span>
-                <span>Add Members</span>
+                <span>Disable</span>
               </span>
             </li>
 
@@ -95,9 +95,9 @@ export default function GroupActionsPopover({
             >
                 <span className='flex items-center'>
                   <span className="mx-6 w-6 h-6">
-                    <Trash/>
+                    <Close/>
                   </span>
-                  <span>Delete</span>
+                  <span>Remove</span>
                 </span>
             </li>
           </ul>

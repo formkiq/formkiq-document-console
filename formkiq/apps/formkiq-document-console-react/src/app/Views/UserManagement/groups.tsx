@@ -92,7 +92,7 @@ function Groups() {
 
     const deleteGroups = () => {
       for (const groupName of selectedGroupNames) {
-        dispatch(deleteGroup({groups, groupName}));
+        dispatch(deleteGroup({groupName}));
       }
     };
 

@@ -101,7 +101,7 @@ function GroupsTable({
       <tbody className='overflow-y-auto max-h-full h-full'>
 
       {groups.length > 0 ? groups.map((item: Group, index: number) => (
-        <tr className="hover:bg-neutral-100 h-[76px] " key={"group" + index}>
+        <tr className="hover:bg-neutral-100  h-[76px] " key={"group" + index}>
           <td className="border-b border-neutral-300">
             <div className="flex items-center justify-center">
               <input id="checkbox-all" type="checkbox" checked={selectedGroupNames.includes(item.name)}
@@ -113,7 +113,7 @@ function GroupsTable({
 
           <td className="border-b border-neutral-300">
             <Link to={item.name}>
-              <p className="truncate w-64"
+              <p className="truncate w-64 hover:text-primary-500"
                  style={{fontWeight: selectedGroupNames.includes(item.name) ? '700' : '400'}}>{item.name}</p>
             </Link>
           </td>

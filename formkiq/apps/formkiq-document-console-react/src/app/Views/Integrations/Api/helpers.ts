@@ -1829,3 +1829,13 @@ export const putUserOperationApiItem = {
     requiresUserOperation: true,
     license: 'Core',
 };
+
+export const getGroupApiItem = {
+    method: 'GET',
+    path: '/groups/ GROUP_NAME ',
+    description: 'Returns a group',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresGroupName: true,
+    license: 'Core',
+};

@@ -2094,4 +2094,13 @@ export class DocumentsService {
     });
   }
 
+  @formkiqAPIHandler
+    public static async getGroup(
+      groupName: string,
+  ): Promise<any> {
+      return this.getFormkiqClient().userManagementApi.getGroup({
+          groupName,
+      });
+  }
+
 }

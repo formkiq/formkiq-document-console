@@ -209,6 +209,46 @@ export const fetchGroupUsers = createAsyncThunk(
   }
 );
 
+export const deleteUserFromGroup = createAsyncThunk(
+  'userManagement/deleteUserFromGroup',
+  async (data: any, thunkAPI) => {
+    const {groupName, username} = data;
+    await DocumentsService.deleteUserFromGroup(groupName, username).then(
+      (response) => {
+        if (response.status === 200) {
+          thunkAPI.dispatch(fetchGroupUsers({groupName}));
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error deleting user from group',
+            })
+          );
+        }
+      }
+    );
+  }
+);
+
+export const disableUser = createAsyncThunk(
+  'userManagement/disableUser',
+  async (data: any, thunkAPI) => {
+    const {username} = data;
+    await DocumentsService.setUserOperation(username, 'DISABLE').then(
+      (response) => {
+        if (response.status === 200) {
+          thunkAPI.dispatch(fetchUsers({}));
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error disabling user',
+            })
+          );
+        }
+      }
+    );
+  }
+);
+
 export const userManagementSlice = createSlice({
   name: 'userManagement',
   initialState: defaultState,

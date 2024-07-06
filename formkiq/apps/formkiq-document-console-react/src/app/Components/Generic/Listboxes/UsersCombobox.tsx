@@ -9,7 +9,7 @@ import {
 } from "../../../Store/reducers/userManagement";
 import {RequestStatus} from "../../../helpers/types/document";
 import {useAppDispatch} from "../../../Store/store";
-import {useCallback, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {User} from "../../../helpers/types/userManagement";
 
 function UsersCombobox({
@@ -27,6 +27,9 @@ function UsersCombobox({
   } = useSelector(UserManagementState);
   const buttonRef = useRef<HTMLButtonElement>(null)
 
+  useEffect(() => {
+    dispatch(fetchUsers({}));
+  }, []);
   const filteredUsers =
     query === ''
       ? users
@@ -84,11 +87,11 @@ function UsersCombobox({
       <Combobox value={selectedValue} onChange={onUserSelect}>
         <Combobox.Input onChange={handleFilter} placeholder='Search email' onClick={() => buttonRef.current?.click()}
                         displayValue={(value: User | null) => value?.email || ''}
-                        className="h-full max-h-8 bg-neutral-100 px-4 w-full text-start font-medium flex flex-row justify-between items-center text-xs  rounded-md relative"
+                        className="h-full bg-neutral-100 px-4 w-full text-start font-medium flex flex-row justify-between items-center text-xs rounded-md relative border border-neutral-300"
         />
 
-        <Combobox.Button className="w-3 text-neutral-500 absolute right-2 top-3" ref={buttonRef}
-                         style={{minWidth: '12px'}}>
+        <Combobox.Button className="w-3 text-neutral-500 absolute right-2" ref={buttonRef}
+                         style={{minWidth: '12px', top: 'calc(50% - 6px)'}}>
           {<ChevronDown/>}
         </Combobox.Button>
 

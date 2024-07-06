@@ -8,4 +8,5 @@ export interface ILine {
     documentInstance: IDocument | null
     folderInstance: IFolder | null
     groupName?: string
+    username?: string
 }

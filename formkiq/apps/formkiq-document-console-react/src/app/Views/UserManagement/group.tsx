@@ -6,44 +6,60 @@ import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalC
 import {useAppDispatch} from '../../Store/store';
 import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
 import {
-  deleteGroup,
-  fetchGroups,
+  addUserToGroup,
+  deleteGroup, deleteUserFromGroup, disableUser,
+  fetchGroups, fetchGroupUsers,
   setGroupsLoadingStatusPending,
   UserManagementState
 } from "../../Store/reducers/userManagement";
-import GroupsMenu from "../../Components/UserManagement/Menus/GroupsMenu";
-import {Plus} from "../../Components/Icons/icons";
-import CreateGroupModal from "../../Components/UserManagement/Modals/CreateGroupModal";
-import GroupsTable from "./groupsTable";
-import {useLocation, useSearchParams} from "react-router-dom";
+
+import {useNavigate, useParams} from "react-router-dom";
 import GroupInfoTab from "../../Components/UserManagement/InfoTabs/GroupInfoTab";
 import {useAuthenticatedState} from "../../Store/reducers/auth";
-import AddGroupMembersModal from "../../Components/UserManagement/Modals/AddGroupMembersModal";
+import {DocumentsService} from "../../helpers/services/documentsService";
+import {Group as GroupType, User} from "../../helpers/types/userManagement";
+import GroupMenu from "../../Components/UserManagement/Menus/GroupMenu";
+import GroupUsersTable from "./groupUsersTable";
 
 function Group() {
   const {
-    groups,
-    nextGroupsToken,
-    groupsLoadingStatus,
-    isLastGroupsSearchPageLoaded,
-    currentGroupsSearchPage,
+    groupUsers,
+    nextGroupUsersToken,
+    groupUsersLoadingStatus,
+    isLastGroupUsersSearchPageLoaded,
+    currentGroupUsersSearchPage,
   } = useSelector(UserManagementState);
   const {user} = useAuthenticatedState();
-  const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useAppDispatch();
-  const search = useLocation().search;
-  const groupName = new URLSearchParams(search).get('groupName');
-  const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
-  const [isAddGroupMembersModalOpen, setIsAddGroupMembersModalOpen] = useState(false);
-  const [selectedGroupNames, setSelectedGroupNames] = useState<string[]>([]);
-  const [selectedGroupName, setSelectedGroupName] = useState<string>('');
+  const navigate = useNavigate();
+  const {groupName} = useParams();
+  const [group, setGroup] = useState<GroupType | null>(null);
+  const [isInfoTabOpen, setIsInfoTabOpen] = useState<boolean>(true);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedGroupUsers, setSelectedGroupUsers] = useState<string[]>([]);
+
+
+  function updateGroup() {
+    if (!groupName) return;
+    DocumentsService.getGroup(groupName).then((response) => {
+      if (response.group) {
+        setGroup(response.group);
+      }
+    });
+  }
+
+  function updateGroupUsers() {
+    if (!groupName) return;
+    dispatch(fetchGroupUsers({groupName, page: 1}));
+  }
 
 
   useEffect(() => {
-    dispatch(fetchGroups({}));
+    updateGroup()
+    updateGroupUsers()
   }, []);
 
-  // load more groups when table reaches bottom
+  // load more users when table reaches bottom
   const trackScrolling = useCallback(async () => {
     const isBottom = (el: HTMLElement) => {
       if (el) {
@@ -52,23 +68,23 @@ function Group() {
       return false;
     };
 
-    const scrollpane = document.getElementById('groupsScrollPane');
+    const scrollpane = document.getElementById('groupUsersScrollPane');
     if (
       isBottom(scrollpane as HTMLElement) &&
-      nextGroupsToken &&
-      groupsLoadingStatus === RequestStatus.fulfilled
+      nextGroupUsersToken &&
+      groupUsersLoadingStatus === RequestStatus.fulfilled
     ) {
       dispatch(setGroupsLoadingStatusPending());
-      if (nextGroupsToken) {
+      if (nextGroupUsersToken) {
         await dispatch(
           fetchGroups({
-            nextToken: nextGroupsToken,
-            page: currentGroupsSearchPage + 1,
+            nextToken: nextGroupUsersToken,
+            page: currentGroupUsersSearchPage + 1,
           })
         );
       }
     }
-  }, [nextGroupsToken, groupsLoadingStatus, isLastGroupsSearchPageLoaded]);
+  }, [nextGroupUsersToken, groupUsersLoadingStatus, isLastGroupUsersSearchPageLoaded]);
 
   const handleScroll = (event: any) => {
     const el = event.target;
@@ -81,36 +97,10 @@ function Group() {
   };
 
   // delete selected groups
-  const onGroupsDelete = () => {
-    if (selectedGroupNames.length === 0) {
-      dispatch(
-        openNotificationDialog({
-          dialogTitle: 'Please select at least one group',
-        })
-      );
-    }
 
-    const deleteGroups = () => {
-      for (const groupName of selectedGroupNames) {
-        dispatch(deleteGroup({groups, groupName}));
-      }
-    };
 
-    if (selectedGroupNames.length > 0) {
-      dispatch(
-        openConfirmationDialog({
-          dialogTitle:
-            'Are you sure you want to delete ' +
-            selectedGroupNames.length +
-            ' selected groups?',
-          callback: deleteGroups,
-        })
-      );
-    }
-  };
-
-  // delete one group
-  const onGroupDelete = (groupName: string) => {
+  // delete group
+  const onGroupDelete = () => {
     dispatch(openConfirmationDialog(
       {
         dialogTitle:
@@ -118,26 +108,64 @@ function Group() {
           groupName +
           '?',
         callback: () => {
-          dispatch(deleteGroup({groups, groupName}));
+          dispatch(deleteGroup({groupName}));
+          navigate('/groups');
         },
       }
     ));
   };
 
-  const closeGroupInfoTab = () => {
-    searchParams.delete('groupName');
-    setSearchParams(searchParams);
+  // remove user from group
+  const onGroupUserDelete = (username: string) => {
+    dispatch(openConfirmationDialog(
+      {
+        dialogTitle:
+          'Are you sure you want to remove the user from the group?',
+        callback: () => {
+          dispatch(deleteUserFromGroup({groupName, username}));
+          setTimeout(updateGroupUsers, 500);
+        },
+      }
+    ));
+  };
+
+  const onGroupUserDisable = (username: string) => {
+    dispatch(openConfirmationDialog(
+      {
+        dialogTitle:
+          'Are you sure you want to disable the user?',
+        callback: () => {
+          dispatch(disableUser({username}));
+          setTimeout(updateGroupUsers, 500);
+        },
+      }
+    ));
+  };
+
+
+  function addGroupMember() {
+    if (!selectedUser) return;
+    if (!group) return;
+    console.log(groupUsers, selectedUser.username, "selectedUser");
+    if (groupUsers.find((user) => user.username === selectedUser.username)) {
+      dispatch(openNotificationDialog(
+        {
+          dialogTitle: 'User already in group',
+        }
+      ));
+      return;
+    }
+    const userData = {user: {username: selectedUser.username}}
+    dispatch(addUserToGroup({groupName: group.name, user: userData}));
+    setTimeout(updateGroupUsers, 500);
   }
 
-  const onAddMembersClick = (groupName: string) => {
-    setSelectedGroupName(groupName);
-    setIsAddGroupMembersModalOpen(true);
-  }
-
+  if (!group) return null;
+  if (!groupName) return null;
   return (
     <>
       <Helmet>
-        <title>Groups</title>
+        <title>Group Users</title>
       </Helmet>
       <div
         className="flex flex-row "
@@ -147,56 +175,44 @@ function Group() {
       >
         <div className="flex-1 inline-block h-full">
           <div className=" flex flex-col w-full h-full">
-            <GroupsMenu
-              deleteGroups={onGroupsDelete}
+            <GroupMenu
+              onGroupDelete={onGroupDelete}
               user={user}
+              group={group as GroupType}
+              isInfoTabOpen={isInfoTabOpen}
+              setInfoTabOpen={() => setIsInfoTabOpen(true)}
+              selectedUser={selectedUser}
+              setSelectedUser={setSelectedUser}
+              addGroupMember={addGroupMember}
             />
-            <div className="w-full py-4 px-6">
-              <button type="button"
-                      className="p-6 border border-neutral-300 rounded-md flex items-center gap-4 justify-center hover:bg-neutral-100 font-bold text-sm"
-                      onClick={() => setIsCreateGroupModalOpen(true)}>
-                <div
-                  className="w-6 h-6 p-1 flex items-center justify-center border border-2 border-neutral-900 rounded-full">
-                  <Plus/>
-                </div>
-                Create New Group
-              </button>
-            </div>
-            <h2 className="px-6 pb-4 text-sm font-bold">Your Groups</h2>
+
+            {/*<h2 className="px-6 pb-4 text-sm font-bold">{g}</h2>*/}
             <div className="relative overflow-hidden h-full">
               <div
                 className="overflow-y-scroll overflow-x-auto h-full w-full"
-                id="groupsScrollPane"
+                id="groupUsersScrollPane"
                 onScroll={handleScroll}
               >
-                <GroupsTable
-                  groups={groups}
+                <GroupUsersTable
                   user={user}
-                  selectedGroupNames={selectedGroupNames}
-                  onDeleteClick={onGroupDelete}
-                  setSelectedGroupNames={setSelectedGroupNames}
-                  onAddMembersClick={onAddMembersClick}
+                  groupUsers={groupUsers}
+                  selectedGroupUsers={selectedGroupUsers}
+                  onDeleteClick={onGroupUserDelete}
+                  onDisableClick={onGroupUserDisable}
+                  setSelectedGroupUsers={setSelectedGroupUsers}
                 />
               </div>
             </div>
           </div>
         </div>
-        {groupName && <GroupInfoTab
-          closeGroupInfoTab={closeGroupInfoTab}
+        {isInfoTabOpen && <GroupInfoTab
+          closeGroupInfoTab={() => setIsInfoTabOpen(false)}
           groupName={groupName}
           user={user}
-          group={groups.find((group) => group.name === groupName)}
+          group={group}
+          users={groupUsers}
         />}
       </div>
-      <CreateGroupModal
-        isOpen={isCreateGroupModalOpen}
-        setIsOpen={setIsCreateGroupModalOpen}
-      />
-      <AddGroupMembersModal
-        isOpen={isAddGroupMembersModalOpen}
-        setIsOpen={setIsAddGroupMembersModalOpen}
-        groupName={selectedGroupName}
-      />
     </>
   );
 }

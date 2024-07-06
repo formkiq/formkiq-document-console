@@ -136,7 +136,9 @@ import {
   postUserApiItem,
   getUserApiItem,
   deleteUserApiItem,
-  getUserGroupsApiItem, putUserOperationApiItem,
+  getUserGroupsApiItem,
+  putUserOperationApiItem,
+  getGroupApiItem
 } from './helpers';
 
 export function ApiExplorer() {
@@ -637,6 +639,7 @@ export function ApiExplorer() {
               <div className="grow">
                 <ApiItem apiItem={getGroupsApiItem} sites={sites} />
                 <ApiItem apiItem={postGroupApiItem} sites={sites} />
+                <ApiItem apiItem={getGroupApiItem} sites={sites} />
                 <ApiItem apiItem={deleteGroupApiItem} sites={sites} />
                 <ApiItem apiItem={getGroupUsersApiItem} sites={sites} />
                 <ApiItem apiItem={postGroupUserApiItem} sites={sites} />
