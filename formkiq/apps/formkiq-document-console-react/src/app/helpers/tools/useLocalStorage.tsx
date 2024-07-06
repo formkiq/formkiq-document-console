@@ -3,7 +3,8 @@ import { IDocument } from "../types/document"
 
 export enum storageKeys {
     auth = 'AUTH',
-    config = 'CONFIG'
+    config = 'CONFIG',
+    dataCache = 'DATACACHE'
 }
 
 // Singleton class
@@ -55,6 +56,21 @@ export class LocalStorage
         }
         data.config = config
         this.saveByKey(data, storageKeys.config)
+    }
+    public getDataCache(): any|null{
+        const data: {dataCache: any} = JSON.parse(localStorage.getItem(storageKeys.dataCache) as string)
+        if (data?.dataCache) {
+          return data.dataCache
+        }
+        return null
+    }
+    public setDataCache(dataCache: any|null){
+      let data: { dataCache: any|null}= JSON.parse(localStorage.getItem(storageKeys.dataCache) as string)
+      if(!data) {
+        data = {dataCache: null}
+      }
+      data.dataCache = dataCache
+      this.saveByKey(data, storageKeys.dataCache)
     }
     public getSection(): Section | null{
         const data: { section: Section } = JSON.parse(localStorage.getItem(storageKeys.auth) as string)

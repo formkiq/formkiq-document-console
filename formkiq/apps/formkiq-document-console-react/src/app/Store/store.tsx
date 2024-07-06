@@ -4,6 +4,7 @@ import thunkMiddleware from 'redux-thunk';
 import FormkiqClient from '../lib/formkiq-client-sdk-es6';
 import authMiddleware from './middleware/auth';
 import configMiddleware from './middleware/config';
+import dataCacheMiddleware from './middleware/dataCache';
 import authState from './reducers/auth';
 import configState from './reducers/config';
 import dataCacheState from './reducers/data';
@@ -40,6 +41,7 @@ export const store = configureStore({
     })
       .prepend(authMiddleware.middleware)
       .prepend(configMiddleware.middleware)
+      .prepend(dataCacheMiddleware.middleware)
       .concat(thunkMiddleware),
   devTools: true,
 });
