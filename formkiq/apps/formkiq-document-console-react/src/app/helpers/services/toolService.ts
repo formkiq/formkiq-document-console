@@ -564,3 +564,17 @@ export function excludeDocumentsWithTagFromAll(
   }
   return res;
 }
+
+export function parseEmailInitials(email: string) {
+  if (!email.length) {
+    return '';
+  }
+  const emailUsername = email.substring(0, email.indexOf('@'));
+  const emailParts = emailUsername.split('.');
+  let initials = '';
+  emailParts.forEach((part: string) => {
+    initials += part[0];
+  });
+  initials = initials.substring(0, 3).toUpperCase();
+  return initials;
+}
