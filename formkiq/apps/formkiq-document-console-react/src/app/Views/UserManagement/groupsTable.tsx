@@ -22,7 +22,7 @@ function GroupsTable({
                        setSelectedGroupNames,
                        onAddMembersClick
                      }: GroupsTableProps) {
-
+  const [groupsUsers, setGroupsUsers] = useState<any>({});
   function toggleSelectAll() {
     if (selectedGroupNames.length === groups.length) {
       unselectAllGroups()
@@ -47,8 +47,6 @@ function GroupsTable({
   function unselectAllGroups() {
     setSelectedGroupNames([]);
   }
-
-  const [groupsUsers, setGroupsUsers] = useState<any>({});
 
   async function getGroupUsers(groupName: string) {
     DocumentsService.getGroupUsers(groupName, 20).then((response) => {

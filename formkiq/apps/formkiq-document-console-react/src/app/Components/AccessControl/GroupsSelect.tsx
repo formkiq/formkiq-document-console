@@ -30,7 +30,6 @@ const GroupsSelect = ({
 
   // load approval groups
   useEffect(() => {
-    console.log('Loading groups...');
     dispatch(fetchGroups({ limit: 50 }));
   }, []);
 

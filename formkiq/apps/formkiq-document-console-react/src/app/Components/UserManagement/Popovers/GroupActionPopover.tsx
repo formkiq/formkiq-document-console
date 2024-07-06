@@ -53,7 +53,7 @@ export default function GroupActionsPopover({
   }
 
   function handleDeleteClick() {
-    onDeleteClick(line.username);
+    onDeleteClick(line.groupName);
     setVisibility(false);
   }
 

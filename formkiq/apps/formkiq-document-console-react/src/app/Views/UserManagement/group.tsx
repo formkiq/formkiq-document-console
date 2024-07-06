@@ -1,25 +1,29 @@
-import {useCallback, useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {RequestStatus} from '../../helpers/types/document';
-import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
-import {useAppDispatch} from '../../Store/store';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
+import { useCallback, useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { RequestStatus } from '../../helpers/types/document';
+import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
+import { useAppDispatch } from '../../Store/store';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import {
   addUserToGroup,
-  deleteGroup, deleteUserFromGroup, disableUser,
-  fetchGroups, fetchGroupUsers,
-  setGroupsLoadingStatusPending,
-  UserManagementState
-} from "../../Store/reducers/userManagement";
+  deleteGroup,
+  deleteUserFromGroup,
+  disableUser,
+  enableUser,
+  fetchGroupUsers,
+  resetUserPassword,
+  setGroupUsersLoadingStatusPending,
+  UserManagementState,
+} from '../../Store/reducers/userManagement';
 
-import {useNavigate, useParams} from "react-router-dom";
-import GroupInfoTab from "../../Components/UserManagement/InfoTabs/GroupInfoTab";
-import {useAuthenticatedState} from "../../Store/reducers/auth";
-import {DocumentsService} from "../../helpers/services/documentsService";
-import {Group as GroupType, User} from "../../helpers/types/userManagement";
-import GroupMenu from "../../Components/UserManagement/Menus/GroupMenu";
-import GroupUsersTable from "./groupUsersTable";
+import { useNavigate, useParams } from 'react-router-dom';
+import GroupInfoTab from '../../Components/UserManagement/InfoTabs/GroupInfoTab';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { Group as GroupType, User } from '../../helpers/types/userManagement';
+import GroupMenu from '../../Components/UserManagement/Menus/GroupMenu';
+import GroupUsersTable from './groupUsersTable';
 
 function Group() {
   const {
@@ -29,15 +33,14 @@ function Group() {
     isLastGroupUsersSearchPageLoaded,
     currentGroupUsersSearchPage,
   } = useSelector(UserManagementState);
-  const {user} = useAuthenticatedState();
+  const { user } = useAuthenticatedState();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const {groupName} = useParams();
+  const { groupName } = useParams();
   const [group, setGroup] = useState<GroupType | null>(null);
   const [isInfoTabOpen, setIsInfoTabOpen] = useState<boolean>(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedGroupUsers, setSelectedGroupUsers] = useState<string[]>([]);
-
 
   function updateGroup() {
     if (!groupName) return;
@@ -50,13 +53,12 @@ function Group() {
 
   function updateGroupUsers() {
     if (!groupName) return;
-    dispatch(fetchGroupUsers({groupName, page: 1}));
+    dispatch(fetchGroupUsers({ groupName, page: 1 }));
   }
 
-
   useEffect(() => {
-    updateGroup()
-    updateGroupUsers()
+    updateGroup();
+    updateGroupUsers();
   }, []);
 
   // load more users when table reaches bottom
@@ -74,17 +76,21 @@ function Group() {
       nextGroupUsersToken &&
       groupUsersLoadingStatus === RequestStatus.fulfilled
     ) {
-      dispatch(setGroupsLoadingStatusPending());
+      dispatch(setGroupUsersLoadingStatusPending());
       if (nextGroupUsersToken) {
         await dispatch(
-          fetchGroups({
+          fetchGroupUsers({
             nextToken: nextGroupUsersToken,
             page: currentGroupUsersSearchPage + 1,
           })
         );
       }
     }
-  }, [nextGroupUsersToken, groupUsersLoadingStatus, isLastGroupUsersSearchPageLoaded]);
+  }, [
+    nextGroupUsersToken,
+    groupUsersLoadingStatus,
+    isLastGroupUsersSearchPageLoaded,
+  ]);
 
   const handleScroll = (event: any) => {
     const el = event.target;
@@ -98,65 +104,137 @@ function Group() {
 
   // delete selected groups
 
-
   // delete group
   const onGroupDelete = () => {
-    dispatch(openConfirmationDialog(
-      {
-        dialogTitle:
-          'Are you sure you want to delete ' +
-          groupName +
-          '?',
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: 'Are you sure you want to delete ' + groupName + '?',
         callback: () => {
-          dispatch(deleteGroup({groupName}));
+          dispatch(deleteGroup({ groupName }));
           navigate('/groups');
         },
-      }
-    ));
+      })
+    );
   };
 
   // remove user from group
   const onGroupUserDelete = (username: string) => {
-    dispatch(openConfirmationDialog(
-      {
-        dialogTitle:
-          'Are you sure you want to remove the user from the group?',
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: 'Are you sure you want to remove the user from the group?',
         callback: () => {
-          dispatch(deleteUserFromGroup({groupName, username}));
+          dispatch(deleteUserFromGroup({ groupName, username }));
           setTimeout(updateGroupUsers, 500);
         },
-      }
-    ));
+      })
+    );
   };
 
   const onGroupUserDisable = (username: string) => {
-    dispatch(openConfirmationDialog(
-      {
-        dialogTitle:
-          'Are you sure you want to disable the user?',
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: 'Are you sure you want to disable the user?',
         callback: () => {
-          dispatch(disableUser({username}));
+          dispatch(disableUser({ username }));
           setTimeout(updateGroupUsers, 500);
         },
-      }
-    ));
+      })
+    );
   };
 
+  const onGroupUserEnable = (username: string) => {
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: 'Are you sure you want to enable the user?',
+        callback: () => {
+          dispatch(enableUser({ username }));
+          setTimeout(updateGroupUsers, 500);
+        },
+      })
+    );
+  };
+
+  const onGroupUserResetPassword = (username: string) => {
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: 'Are you sure you want to reset the user password?',
+        callback: () => {
+          dispatch(resetUserPassword({ username }));
+          setTimeout(updateGroupUsers, 500);
+        },
+      })
+    );
+  };
+
+  const onDeleteSelectedGroupUsers = () => {
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: `Are you sure you want to remove ${selectedGroupUsers.length} selected users from the group?`,
+        callback: () => {
+          for (const username of selectedGroupUsers) {
+            dispatch(deleteUserFromGroup({ groupName, username }));
+          }
+          setTimeout(updateGroupUsers, 500);
+        },
+      })
+    );
+  };
+
+  const onDisableSelectedGroupUsers = () => {
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: `Are you sure you want to disable ${selectedGroupUsers.length} selected users?`,
+        callback: () => {
+          for (const username of selectedGroupUsers) {
+            dispatch(disableUser({ username }));
+          }
+          setTimeout(updateGroupUsers, 500);
+        },
+      })
+    );
+  };
+
+  const onEnableSelectedGroupUsers = () => {
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: `Are you sure you want to enable ${selectedGroupUsers.length} selected users?`,
+        callback: () => {
+          for (const username of selectedGroupUsers) {
+            dispatch(enableUser({ username }));
+          }
+          setTimeout(updateGroupUsers, 500);
+        },
+      })
+    );
+  };
+
+  const onResetPasswordSelectedGroupUsers = () => {
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: `Are you sure you want to reset the password for ${selectedGroupUsers.length} selected users?`,
+        callback: () => {
+          for (const username of selectedGroupUsers) {
+            dispatch(resetUserPassword({ username }));
+          }
+          setTimeout(updateGroupUsers, 500);
+        },
+      })
+    );
+  };
 
   function addGroupMember() {
     if (!selectedUser) return;
     if (!group) return;
-    console.log(groupUsers, selectedUser.username, "selectedUser");
     if (groupUsers.find((user) => user.username === selectedUser.username)) {
-      dispatch(openNotificationDialog(
-        {
+      dispatch(
+        openNotificationDialog({
           dialogTitle: 'User already in group',
-        }
-      ));
+        })
+      );
       return;
     }
-    const userData = {user: {username: selectedUser.username}}
-    dispatch(addUserToGroup({groupName: group.name, user: userData}));
+    const userData = { user: { username: selectedUser.username } };
+    dispatch(addUserToGroup({ groupName: group.name, user: userData }));
     setTimeout(updateGroupUsers, 500);
   }
 
@@ -199,19 +277,29 @@ function Group() {
                   selectedGroupUsers={selectedGroupUsers}
                   onDeleteClick={onGroupUserDelete}
                   onDisableClick={onGroupUserDisable}
+                  onEnableClick={onGroupUserEnable}
+                  onResetPasswordClick={onGroupUserResetPassword}
                   setSelectedGroupUsers={setSelectedGroupUsers}
+                  onDeleteSelectedGroupUsers={onDeleteSelectedGroupUsers}
+                  onDisableSelectedGroupUsers={onDisableSelectedGroupUsers}
+                  onEnableSelectedGroupUsers={onEnableSelectedGroupUsers}
+                  onResetPasswordSelectedGroupUsers={
+                      onResetPasswordSelectedGroupUsers
+                  }
                 />
               </div>
             </div>
           </div>
         </div>
-        {isInfoTabOpen && <GroupInfoTab
-          closeGroupInfoTab={() => setIsInfoTabOpen(false)}
-          groupName={groupName}
-          user={user}
-          group={group}
-          users={groupUsers}
-        />}
+        {isInfoTabOpen && (
+          <GroupInfoTab
+            closeGroupInfoTab={() => setIsInfoTabOpen(false)}
+            groupName={groupName}
+            user={user}
+            group={group}
+            users={groupUsers}
+          />
+        )}
       </div>
     </>
   );

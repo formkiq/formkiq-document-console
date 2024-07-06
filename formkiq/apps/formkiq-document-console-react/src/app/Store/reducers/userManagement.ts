@@ -1,8 +1,8 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {DocumentsService} from '../../helpers/services/documentsService';
-import {RequestStatus, Group, User} from '../../helpers/types/userManagement';
-import {RootState} from '../store';
-import {openDialog as openNotificationDialog} from './globalNotificationControls';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { RequestStatus, Group, User } from '../../helpers/types/userManagement';
+import { RootState } from '../store';
+import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
 interface userManagementState {
   groups: Group[];
@@ -49,137 +49,129 @@ const defaultState: userManagementState = {
 export const fetchGroups = createAsyncThunk(
   'userManagement/fetchGroups',
   async (data: any, thunkAPI) => {
-    const {nextToken, limit, page} = data;
-    await DocumentsService.getGroups(nextToken, limit).then(
-      (response) => {
-        if (response.status === 200) {
-          const data = {
-            groups: response.groups,
-            isLoadingMore: false,
-            isLastSearchPageLoaded: false,
-            next: response.next,
-            page,
-          };
-          if (page > 1) {
-            data.isLoadingMore = true;
-          }
-          if (response.documents?.length === 0) {
-            data.isLastSearchPageLoaded = true;
-          }
-          thunkAPI.dispatch(setGroups(data));
-        } else {
-          console.log(response)
-          thunkAPI.dispatch(
-            openNotificationDialog({
-              dialogTitle: 'Error fetching groups',
-            })
-          );
+    const { nextToken, limit, page } = data;
+    await DocumentsService.getGroups(nextToken, limit).then((response) => {
+      if (response.status === 200) {
+        const data = {
+          groups: response.groups,
+          isLoadingMore: false,
+          isLastSearchPageLoaded: false,
+          next: response.next,
+          page,
+        };
+        if (page > 1) {
+          data.isLoadingMore = true;
         }
+        if (response.documents?.length === 0) {
+          data.isLastSearchPageLoaded = true;
+        }
+        thunkAPI.dispatch(setGroups(data));
+      } else {
+        console.log(response);
+        thunkAPI.dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Error fetching groups',
+          })
+        );
       }
-    );
+    });
   }
 );
 
 export const deleteGroup = createAsyncThunk(
   'userManagement/deleteGroup',
   async (data: any, thunkAPI) => {
-    const {groupName} = data;
-    await DocumentsService.deleteGroup(groupName).then(
-      (response) => {
-        if (response.status === 200) {
-          const groups = (thunkAPI.getState() as any)?.userManagementState.groups
-          const filteredGroups = groups.filter((group: Group) => group.name !== groupName);
-          thunkAPI.dispatch(setGroups({groups: filteredGroups}));
-        } else {
-          thunkAPI.dispatch(
-            openNotificationDialog({
-              dialogTitle: 'Error deleting group',
-            })
-          );
-        }
+    const { groupName } = data;
+    await DocumentsService.deleteGroup(groupName).then((response) => {
+      if (response.status === 200) {
+        const groups = (thunkAPI.getState() as any)?.userManagementState.groups;
+        const filteredGroups = groups.filter(
+          (group: Group) => group.name !== groupName
+        );
+        thunkAPI.dispatch(setGroups({ groups: filteredGroups }));
+      } else {
+        thunkAPI.dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Error deleting group',
+          })
+        );
       }
-    );
+    });
   }
 );
 
 export const addGroup = createAsyncThunk(
   'userManagement/addGroup',
   async (data: any, thunkAPI) => {
-    const {group} = data;
-    await DocumentsService.addGroup({group}).then(
-      (response) => {
-        console.log(response)
-        if (response.status === 200) {
-          thunkAPI.dispatch(fetchGroups({}));
-        } else {
-          thunkAPI.dispatch(
-            openNotificationDialog({
-              dialogTitle: 'Error creating group',
-            })
-          );
-        }
+    const { group } = data;
+    await DocumentsService.addGroup({ group }).then((response) => {
+      console.log(response);
+      if (response.status === 200) {
+        thunkAPI.dispatch(fetchGroups({}));
+      } else {
+        thunkAPI.dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Error creating group',
+          })
+        );
       }
-    );
+    });
   }
 );
 
 export const fetchUsers = createAsyncThunk(
   'userManagement/fetchUsers',
   async (data: any, thunkAPI) => {
-    const {nextToken, limit, page} = data;
-    await DocumentsService.getUsers(nextToken, limit).then(
-      (response) => {
-        if (response.status === 200) {
-          const data = {
-            users: response.users,
-            isLoadingMore: false,
-            isLastSearchPageLoaded: false,
-            next: response.next,
-            page,
-          };
-          if (page > 1) {
-            data.isLoadingMore = true;
-          }
-          if (response.documents?.length === 0) {
-            data.isLastSearchPageLoaded = true;
-          }
-          thunkAPI.dispatch(setUsers(data));
-        } else {
-          thunkAPI.dispatch(
-            openNotificationDialog({
-              dialogTitle: 'Error fetching users',
-            })
-          );
+    const { nextToken, limit, page } = data;
+    await DocumentsService.getUsers(nextToken, limit).then((response) => {
+      if (response.status === 200) {
+        const data = {
+          users: response.users,
+          isLoadingMore: false,
+          isLastSearchPageLoaded: false,
+          next: response.next,
+          page,
+        };
+        if (page > 1) {
+          data.isLoadingMore = true;
         }
+        if (response.documents?.length === 0) {
+          data.isLastSearchPageLoaded = true;
+        }
+        thunkAPI.dispatch(setUsers(data));
+      } else {
+        thunkAPI.dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Error fetching users',
+          })
+        );
       }
-    );
+    });
   }
 );
 
 export const addUserToGroup = createAsyncThunk(
   'userManagement/addUserToGroup',
   async (data: any, thunkAPI) => {
-    const {groupName, user} = data;
-    await DocumentsService.addUserToGroup(groupName, user).then(
-      (response) => {
-        if (response.status === 201) {
-          thunkAPI.dispatch(fetchUsers({}));
-        } else {
-          thunkAPI.dispatch(
-            openNotificationDialog({
-              dialogTitle: 'Error adding user to group',
-            })
-          );
-        }
+    const { groupName, user } = data;
+    await DocumentsService.addUserToGroup(groupName, user).then((response) => {
+      if (response.status === 201) {
+        thunkAPI.dispatch(fetchUsers({}));
+      } else {
+        thunkAPI.dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Error adding user to group',
+          })
+        );
       }
-    );
+    });
   }
 );
 
 export const fetchGroupUsers = createAsyncThunk(
   'userManagement/fetchGroupUsers',
   async (data: any, thunkAPI) => {
-    const {groupName, nextToken, limit, page} = data;
+    const { groupName, nextToken, limit, page } = data;
     await DocumentsService.getGroupUsers(groupName, limit, nextToken).then(
       (response) => {
         if (response.status === 200) {
@@ -212,11 +204,11 @@ export const fetchGroupUsers = createAsyncThunk(
 export const deleteUserFromGroup = createAsyncThunk(
   'userManagement/deleteUserFromGroup',
   async (data: any, thunkAPI) => {
-    const {groupName, username} = data;
+    const { groupName, username } = data;
     await DocumentsService.deleteUserFromGroup(groupName, username).then(
       (response) => {
         if (response.status === 200) {
-          thunkAPI.dispatch(fetchGroupUsers({groupName}));
+          thunkAPI.dispatch(fetchGroupUsers({ groupName }));
         } else {
           thunkAPI.dispatch(
             openNotificationDialog({
@@ -232,7 +224,7 @@ export const deleteUserFromGroup = createAsyncThunk(
 export const disableUser = createAsyncThunk(
   'userManagement/disableUser',
   async (data: any, thunkAPI) => {
-    const {username} = data;
+    const { username } = data;
     await DocumentsService.setUserOperation(username, 'DISABLE').then(
       (response) => {
         if (response.status === 200) {
@@ -249,12 +241,68 @@ export const disableUser = createAsyncThunk(
   }
 );
 
+export const enableUser = createAsyncThunk(
+  'userManagement/enableUser',
+  async (data: any, thunkAPI) => {
+    const { username } = data;
+    await DocumentsService.setUserOperation(username, 'ENABLE').then(
+      (response) => {
+        if (response.status === 200) {
+          thunkAPI.dispatch(fetchUsers({}));
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error enabling user',
+            })
+          );
+        }
+      }
+    );
+  }
+);
+
+export const resetUserPassword = createAsyncThunk(
+  'userManagement/resetUserPassword',
+  async (data: any, thunkAPI) => {
+    const { username } = data;
+    await DocumentsService.setUserOperation(username, 'RESET_PASSWORD').then(
+      (response) => {
+        if (response.status !== 200) {
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error resetting user password',
+            })
+          );
+        }
+      }
+    );
+  }
+);
+
+export const deleteUser = createAsyncThunk(
+  'userManagement/deleteUser',
+  async (data: any, thunkAPI) => {
+    const { username } = data;
+    await DocumentsService.deleteUser(username).then((response) => {
+      if (response.status === 200) {
+        thunkAPI.dispatch(fetchUsers({}));
+      } else {
+        thunkAPI.dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Error deleting user',
+          })
+        );
+      }
+    });
+  }
+);
+
 export const userManagementSlice = createSlice({
   name: 'userManagement',
   initialState: defaultState,
   reducers: {
     setGroups: (state, action) => {
-      const {groups, isLoadingMore, next,} = action.payload;
+      const { groups, isLoadingMore, next } = action.payload;
       const isLastSearchPageLoaded = !next;
       if (groups) {
         if (isLoadingMore) {
@@ -276,7 +324,7 @@ export const userManagementSlice = createSlice({
     },
 
     setUsers: (state, action) => {
-      const {users, isLoadingMore, next,} = action.payload;
+      const { users, isLoadingMore, next } = action.payload;
       const isLastSearchPageLoaded = !next;
       if (users) {
         if (isLoadingMore) {
@@ -298,7 +346,7 @@ export const userManagementSlice = createSlice({
     },
 
     setGroupUsers: (state, action) => {
-      const {groupUsers, isLoadingMore, next,} = action.payload;
+      const { groupUsers, isLoadingMore, next } = action.payload;
       const isLastSearchPageLoaded = !next;
       if (groupUsers) {
         if (isLoadingMore) {
@@ -317,7 +365,7 @@ export const userManagementSlice = createSlice({
         ...state,
         groupUsersLoadingStatus: RequestStatus.pending,
       };
-    }
+    },
   },
 });
 
@@ -330,8 +378,7 @@ export const {
   setGroupUsersLoadingStatusPending,
 } = userManagementSlice.actions;
 
-export const UserManagementState = (state: RootState) => state.userManagementState;
+export const UserManagementState = (state: RootState) =>
+  state.userManagementState;
 
 export default userManagementSlice.reducer;
-
-
