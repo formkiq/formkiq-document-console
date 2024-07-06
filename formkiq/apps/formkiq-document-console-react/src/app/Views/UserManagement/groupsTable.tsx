@@ -225,24 +225,42 @@ function GroupsTable({
                           />
                         </div>
                       )}
-                      {groupsUsers[item.name][4] && (
-                        <div
-                          key={'user' + item.name + 4}
-                          className="h-8 w-8 rounded-full bg-ochre-500 text-center text-white font-bold flex items-center justify-center uppercase"
-                          data-tooltip-id={
-                            `groupUserTooltip-user-` + item.name + 4
-                          }
-                          data-tooltip-content={groupsUsers[item.name][4].email}
-                        >
-                          {parseEmailInitials(groupsUsers[item.name][4].email)}
-                          <Tooltip
-                            id={`groupUserTooltip-user-` + item.name + 4}
-                          />
-                        </div>
-                      )}
+                      {groupsUsers[item.name][4] &&
+                        groupsUsers[item.name].length <= 5 && (
+                          <div
+                            key={'user' + item.name + 4}
+                            className="h-8 w-8 rounded-full bg-ochre-500 text-center text-white font-bold flex items-center justify-center uppercase"
+                            data-tooltip-id={
+                              `groupUserTooltip-user-` + item.name + 4
+                            }
+                            data-tooltip-content={
+                              groupsUsers[item.name][4].email
+                            }
+                          >
+                            {parseEmailInitials(
+                              groupsUsers[item.name][4].email
+                            )}
+                            <Tooltip
+                              id={`groupUserTooltip-user-` + item.name + 4}
+                            />
+                          </div>
+                        )}
                       {groupsUsers[item.name].length > 5 && (
-                        <div className="h-8 w-8 rounded-full bg-buttercup-500 text-center text-white font-bold flex items-center justify-center">
-                          + {groupsUsers[item.name].length - 5}
+                        <div
+                          className="h-8 w-8 rounded-full bg-neutral-500 italic text-center text-white font-bold flex items-center justify-center"
+                          data-tooltip-id={
+                            `groupUserTooltip-user-` + item.name + `-more`
+                          }
+                          data-tooltip-content={
+                            groupsUsers[item.name].length -
+                            4 +
+                            ` additional users`
+                          }
+                        >
+                          + {groupsUsers[item.name].length - 4}
+                          <Tooltip
+                            id={`groupUserTooltip-user-` + item.name + `-more`}
+                          />
                         </div>
                       )}
                     </>

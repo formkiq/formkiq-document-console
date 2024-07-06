@@ -25,9 +25,7 @@ function GroupInfoTab({
   const [groupsUsers, setGroupsUsers] = useState<any[]>([]);
   useEffect(() => {
     if (users) {
-      setGroupsUsers(
-        users.sort((a: any, b: any) => (a.email > b.email ? 1 : -1))
-      );
+      setGroupsUsers(users);
       return;
     }
     DocumentsService.getGroupUsers(groupName, 20).then((response) => {
