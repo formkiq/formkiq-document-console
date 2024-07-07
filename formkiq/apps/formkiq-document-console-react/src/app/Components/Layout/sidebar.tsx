@@ -64,6 +64,7 @@ export function Sidebar() {
     useSoftDelete,
     isSidebarExpanded,
     isWorkspacesExpanded,
+    userAuthenticationType,
   } = useSelector(ConfigState);
 
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
@@ -777,7 +778,7 @@ export function Sidebar() {
             </li>
             {integrationsExpanded && (
               <>
-                {user?.isAdmin && (
+                {user?.isAdmin && userAuthenticationType === 'cognito' && (
                   <>
                     <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
@@ -1159,7 +1160,7 @@ export function Sidebar() {
             <div className="flex w-full">
               <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>
             </div>
-            {user?.isAdmin && (
+            {user?.isAdmin && userAuthenticationType === 'cognito' && (
               <>
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
