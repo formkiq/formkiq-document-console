@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import {
   fetchGroups,
   setGroupsLoadingStatusPending,
-} from '../../Store/reducers/queues';
+} from '../../Store/reducers/userManagement';
 import { RootState, useAppDispatch } from '../../Store/store';
 import { RequestStatus } from '../../helpers/types/queues';
 import { CheckedRadio, ChevronDown, UncheckedRadio } from '../Icons/icons';
@@ -24,13 +24,13 @@ const GroupsSelect = ({
     groupsLoadingStatus,
     currentGroupsSearchPage,
     isLastGroupsSearchPageLoaded,
-  } = useSelector((state: RootState) => state.queuesState);
+  } = useSelector((state: RootState) => state.userManagementState);
 
   const dispatch = useAppDispatch();
 
   // load approval groups
   useEffect(() => {
-    dispatch(fetchGroups({ siteId, limit: 50 }));
+    dispatch(fetchGroups({ limit: 50 }));
   }, []);
 
   const handleSelectGroups = (groups: string[]) => {
@@ -56,7 +56,6 @@ const GroupsSelect = ({
       if (nextGroupsToken) {
         await dispatch(
           fetchGroups({
-            siteId,
             nextToken: nextGroupsToken,
             page: currentGroupsSearchPage + 1,
           })

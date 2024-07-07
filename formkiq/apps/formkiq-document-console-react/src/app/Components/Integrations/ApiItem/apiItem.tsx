@@ -174,7 +174,7 @@ function updateRequestsFromForm(
     }
   }
 
-  if (apiItem.requiresAttributeKey) {
+  if (apiItem.requiresAttributeValue) {
     if (getFormInput(formRef, 'attributeValue')?.validity?.valid) {
       path = path.replace(
         ' ATTRIBUTE_VALUE ',
@@ -183,14 +183,32 @@ function updateRequestsFromForm(
     }
   }
 
-  if (apiItem.requiresAttributeKey) {
-    if (getFormInput(formRef, 'attributeValue')?.validity?.valid) {
+  if (apiItem.requiresGroupName) {
+    if (getFormInput(formRef, 'groupName')?.validity?.valid) {
       path = path.replace(
-        ' ATTRIBUTE_VALUE ',
-        getFormInput(formRef, 'attributeValue')?.value
+        ' GROUP_NAME ',
+        getFormInput(formRef, 'groupName')?.value
       );
     }
   }
+  if (apiItem.requiresUsername) {
+    if (getFormInput(formRef, 'username')?.validity?.valid) {
+      path = path.replace(
+        ' USERNAME ',
+        getFormInput(formRef, 'username')?.value
+      );
+    }
+  }
+  if(apiItem.requiresUserOperation) {
+    if (getFormInput(formRef, 'userOperation')?.validity?.valid) {
+      path = path.replace(
+        ' USER_OPERATION ',
+        getFormInput(formRef, 'userOperation')?.value
+      );
+    }
+  }
+
+
 
   let httpRequest = apiItem.method + ' ' + path;
   let curlRequest = '';
@@ -1780,6 +1798,68 @@ function getApiItem(
                 </div>
               </div>
             )}
+            {apiItem.requiresGroupName && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    GROUP NAME
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="GROUP NAME"
+                    name="groupName"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresUsername && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    USERNAME
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="USERNAME"
+                    name="username"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresUserOperation && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    USER OPERATION
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="USER OPERATION"
+                    name="userOperation"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
             {apiItem.requiresWS && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full">

@@ -125,7 +125,20 @@ import {
   getDocumentAttributeApiItem,
   deleteDocumentAttributeApiItem,
   deleteDocumentAttributeValueApiItem,
-  putDocumentAttributeApiItem, getGroupsApiItem,
+  putDocumentAttributeApiItem,
+  getGroupsApiItem,
+  postGroupApiItem,
+  deleteGroupApiItem,
+  getGroupUsersApiItem,
+  postGroupUserApiItem,
+  deleteGroupUserApiItem,
+  getUsersApiItem,
+  postUserApiItem,
+  getUserApiItem,
+  deleteUserApiItem,
+  getUserGroupsApiItem,
+  putUserOperationApiItem,
+  getGroupApiItem
 } from './helpers';
 
 export function ApiExplorer() {
@@ -625,6 +638,18 @@ export function ApiExplorer() {
               <div className="w-4 border-l"></div>
               <div className="grow">
                 <ApiItem apiItem={getGroupsApiItem} sites={sites} />
+                <ApiItem apiItem={postGroupApiItem} sites={sites} />
+                <ApiItem apiItem={getGroupApiItem} sites={sites} />
+                <ApiItem apiItem={deleteGroupApiItem} sites={sites} />
+                <ApiItem apiItem={getGroupUsersApiItem} sites={sites} />
+                <ApiItem apiItem={postGroupUserApiItem} sites={sites} />
+                <ApiItem apiItem={deleteGroupUserApiItem} sites={sites} />
+                <ApiItem apiItem={getUsersApiItem} sites={sites} />
+                <ApiItem apiItem={postUserApiItem} sites={sites} />
+                <ApiItem apiItem={getUserApiItem} sites={sites} />
+                <ApiItem apiItem={deleteUserApiItem} sites={sites} />
+                <ApiItem apiItem={getUserGroupsApiItem} sites={sites} />
+                <ApiItem apiItem={putUserOperationApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>
