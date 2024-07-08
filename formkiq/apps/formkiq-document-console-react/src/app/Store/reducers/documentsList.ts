@@ -29,8 +29,7 @@ export const fetchDocuments = createAsyncThunk(
       filterAttribute,
       nextToken,
       page,
-      documents,
-      folders,
+      searchAttributes,
     } = data;
     const user = (thunkAPI.getState() as any)?.authState.user;
     const tagParam = filterTag ? filterTag.split(':')[0] : null;
@@ -56,7 +55,7 @@ export const fetchDocuments = createAsyncThunk(
         thunkAPI.dispatch(setAllAttributes(allAttributesData));
         });
     }
-    if (searchWord) {
+    if (searchWord || searchAttributes) {
       if (searchFolder && searchFolder.length) {
         // TODO: see if now implemented on backend
         // NOTE: not yet implemented on backend
@@ -68,6 +67,7 @@ export const fetchDocuments = createAsyncThunk(
           searchFolder,
           page,
           dataCache.allAttributes,
+          searchAttributes
         ).then((response: any) => {
           if (response) {
             const data = {
@@ -97,6 +97,7 @@ export const fetchDocuments = createAsyncThunk(
           page,
           dataCache.allTags,
           dataCache.allAttributes,
+          searchAttributes,
         ).then((response: any) => {
           if (response) {
             const temp: any = response.documents?.filter(

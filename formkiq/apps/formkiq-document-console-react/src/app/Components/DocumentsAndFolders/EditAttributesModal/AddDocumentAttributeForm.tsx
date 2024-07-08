@@ -29,10 +29,13 @@ function AddDocumentAttributeForm({
   const [numberValues, setNumberValues] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!allAttributes || allAttributes.length === 0) return
-    const keys = allAttributes.map((item) => ({key: item.key, title: item.key}))
-    setAttributeKeys(keys)
-  }, [allAttributes])
+    if (!allAttributes || allAttributes.length === 0) return;
+    const keys = allAttributes.map((item) => ({
+      key: item.key,
+      title: item.key,
+    }));
+    setAttributeKeys(keys);
+  }, [allAttributes]);
 
   useEffect(() => {
     if (!selectedAttributeKey) return
@@ -45,7 +48,7 @@ function AddDocumentAttributeForm({
 
   const {
     register,
-    formState: {errors},
+    formState: { errors },
     handleSubmit,
     reset,
     setValue,
@@ -155,28 +158,37 @@ function AddDocumentAttributeForm({
       }
     }
 
-    if (selectedAttribute?.dataType === "BOOLEAN") {
+    if (selectedAttribute?.dataType === 'BOOLEAN') {
       documentAttributes = {
-        attributes: [{
-          key: selectedAttributeKey,
-          booleanValue: data.booleanValue,
-        }]
-      }
+        attributes: [
+          {
+            key: selectedAttributeKey,
+            booleanValue: data.booleanValue,
+          },
+        ],
+      };
     }
     if (selectedAttribute?.dataType === 'KEY_ONLY') {
       documentAttributes = {
-        attributes: [{
-          key: selectedAttributeKey,
-        }]
-      }
+        attributes: [
+          {
+            key: selectedAttributeKey,
+          },
+        ],
+      };
     }
 
-    DocumentsService.addDocumentAttributes(siteId, "false", getValue().documentId, documentAttributes).then(
-      (res) => {
-        if (res.status === 201) {
-          setTimeout(() => {
-            onDocumentDataChange(value);
-            dispatch(fetchDocumentAttributes({
+    DocumentsService.addDocumentAttributes(
+      siteId,
+      'false',
+      getValue().documentId,
+      documentAttributes
+    ).then((res) => {
+      if (res.status === 201) {
+        setTimeout(() => {
+          onDocumentDataChange(value);
+          dispatch(
+            fetchDocumentAttributes({
               siteId,
               documentId: value?.documentId as string,
             }))
@@ -201,8 +213,8 @@ function AddDocumentAttributeForm({
   };
 
   const onAddAttributeFormClose = () => {
-    setIsAddAttributeFormOpen(false)
-  }
+    setIsAddAttributeFormOpen(false);
+  };
 
   return (
     <>
@@ -219,7 +231,7 @@ function AddDocumentAttributeForm({
                 <RadioCombobox values={attributeKeys}
                                selectedValue={selectedAttributeKey}
                                setSelectedValue={setSelectedAttributeKey}
-                               placeholderText="Select Attribute"/>
+                               placeholderText="Attribute"/>
 
               </div>
               {selectedAttribute && (
@@ -265,7 +277,32 @@ function AddDocumentAttributeForm({
             <ButtonPrimaryGradient
               type="submit"
               title="Add"
-              className="h-8 mr-2">Add</ButtonPrimaryGradient>
+              className="h-8 mr-2"
+            >
+              Add
+            </ButtonPrimaryGradient>
+          </div>
+          <div className="flex flex-row justify-start flex-wrap gap-2 items-end ml-2">
+            {stringValues.map((val: string, i: number) => (<div key={"value_" + i}
+                                                                title={val}
+                                                                className="cursor-pointer py-1 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border border-neutral-500 text-neutral-900 bg-white">
+              <span className="truncate overflow-hidden max-w-64 max-w-[256px]">"{val}"</span>
+              <button title="Remove Value" type="button"
+                      className="w-4 h-4 min-w-4 text-neutral-900"
+                      onClick={() => handleRemoveStringValue(i)}>
+                <Close/>
+              </button>
+            </div>))}
+            {numberValues.map((val: number, i: number) => (<div key={"value_" + i}
+                                                                title={val.toString()}
+                                                                className="cursor-pointer py-1 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border border-neutral-500 text-neutral-900 bg-white">
+              <span className="truncate overflow-hidden max-w-64 max-w-[256px]">{val}</span>
+              <button title="Remove Value" type="button"
+                      className="w-4 h-4 min-w-4 text-neutral-900"
+                      onClick={() => handleRemoveNumberValue(i)}>
+                <Close/>
+              </button>
+            </div>))}
           </div>
           <div className="flex flex-row justify-start flex-wrap gap-2 items-end ml-2">
             {stringValues.map((val: string, i: number) => (<div key={"value_" + i}
@@ -292,20 +329,27 @@ function AddDocumentAttributeForm({
         </form>
       </div>
       <div className="flex w-full">
-        {!isAddAttributeFormOpen && <button
-          onClick={() => {
-            setIsAddAttributeFormOpen(true)
-          }}
-          className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer ml-2 mt-2"> + Create New Attribute
-        </button>}
-        {isAddAttributeFormOpen && <AddAttributeForm
-          siteId={siteId}
-          onDocumentDataChange={onDocumentDataChange}
-          value={value}
-          getValue={getValue}
-          onClose={onAddAttributeFormClose}
-          setSelectedAttributeKey={setSelectedAttributeKey}
-        />}
+        {!isAddAttributeFormOpen && (
+          <button
+            onClick={() => {
+              setIsAddAttributeFormOpen(true);
+            }}
+            className="text-neutral-500 font-bold hover:text-primary-500 cursor-pointer ml-2 mt-2"
+          >
+            {' '}
+            + Create New Attribute
+          </button>
+        )}
+        {isAddAttributeFormOpen && (
+          <AddAttributeForm
+            siteId={siteId}
+            onDocumentDataChange={onDocumentDataChange}
+            value={value}
+            getValue={getValue}
+            onClose={onAddAttributeFormClose}
+            setSelectedAttributeKey={setSelectedAttributeKey}
+          />
+        )}
       </div>
     </>
   );

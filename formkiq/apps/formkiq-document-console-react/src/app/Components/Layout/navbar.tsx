@@ -24,6 +24,7 @@ import {
   Api,
   ApiKey,
   Bell,
+  ChevronDown,
   Documents,
   Examine,
   Group,
@@ -42,6 +43,7 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
+import ButtonSecondary from "../Generic/Buttons/ButtonSecondary";
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -63,6 +65,7 @@ const getTopLevelFolderName = (folder: string) => {
 function Navbar() {
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
+  const advancedSearch = new URLSearchParams(search).get('advancedSearch');
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(AuthState);
@@ -153,7 +156,15 @@ function Navbar() {
 
   const redirectToSearchPage = () => {
     if (inputValue) {
-      navigate(`documents?searchWord=${inputValue}`);
+      navigate(
+        {
+          pathname: currentDocumentsRootUri,
+          search: `?searchWord=${inputValue}`,
+        },
+        {
+          replace: true,
+        }
+      );
     }
   };
   const handleKeyDown = (ev: any) => {
@@ -670,16 +681,31 @@ function Navbar() {
                   )}
                 </div>
               </div>
-              {!documentId.length && currentSection === 'DocumentsAndFolders' && (
-                <div className="flex items-center gap-5 w-1/2">
-                  <SearchInput
-                    onChange={updateInputValue}
-                    onKeyDown={handleKeyDown}
-                    siteId={currentSiteId}
-                    documentsRootUri={currentDocumentsRootUri}
-                    value={inputValue}
-                  />
-                </div>
+              {!documentId.length &&
+                currentSection === 'DocumentsAndFolders' &&
+                !advancedSearch &&
+                (formkiqVersion.modules.includes('typesense') ||
+                  formkiqVersion.modules.includes('opensearch')) &&
+                (
+                  <div className="flex items-center gap-5 w-1/2">
+                    <SearchInput
+                      onChange={updateInputValue}
+                      onKeyDown={handleKeyDown}
+                      siteId={currentSiteId}
+                      documentsRootUri={currentDocumentsRootUri}
+                      value={inputValue}
+                    />
+                  </div>
+                )}
+              {advancedSearch
+                && advancedSearch==='hidden'&&
+                (formkiqVersion.modules.includes('typesense') ||
+                  formkiqVersion.modules.includes('opensearch')) &&
+                (
+                <Link to="?advancedSearch=visible" className="text-sm flex gap-2 h-4 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap">
+                  Expand Search Tab
+                  <ChevronDown/>
+                </Link>
               )}
             </div>
             <div className="w-1/4 flex justify-end mr-16">

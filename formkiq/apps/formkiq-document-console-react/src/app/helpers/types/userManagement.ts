@@ -19,7 +19,3 @@ export interface User {
   insertedDate: string,
   lastModifiedDate: string,
 }
-
-
-
-

@@ -657,7 +657,8 @@ export class DocumentsService {
     searchText: string,
     page = 1,
     allTags = [] as any[],
-    allAttributes = [] as any[]
+    allAttributes = [] as any[],
+    searchAttributes: any = null
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -678,31 +679,41 @@ export class DocumentsService {
         customIncludeTags.push(allTag.value);
       }
     });
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
     if (formkiqVersion.modules.indexOf('opensearch') === -1) {
-      const searchBody = {
-        query: {
-          text: searchText + '*',
-        },
+      const searchBody:any = {
+        query: {},
         responseFields: {
           tags: customIncludeTags,
-          attributes: allAttributes,
+          attributes: attributesKeys,
         },
       };
+      if (searchText&&searchText!=='') {
+        searchBody.query["text"] = searchText + '*';
+      }
+      if (searchAttributes) {
+        searchBody.query["attributes"] = searchAttributes;
+      }
       return this.getFormkiqClient().searchApi.search({
         searchParameters: searchBody,
         siteId,
       });
     } else {
-      const searchBody = {
+      const searchBody:any = {
         query: {
-          text: searchText + '*',
           page: page,
         },
         responseFields: {
           tags: customIncludeTags,
-          attributes: allAttributes,
+          attributes:  attributesKeys,
         },
       };
+      if (searchText&&searchText!=='') {
+        searchBody.query["text"] = searchText + '*';
+      }
+      if (searchAttributes) {
+        searchBody.query["attributes"] = searchAttributes;
+      }
       return this.getFormkiqClient().searchApi.searchFulltext({
         documentFulltextSearchBody: searchBody,
         siteId,
@@ -717,7 +728,8 @@ export class DocumentsService {
     searchText: string,
     folder: string,
     page: number,
-    allAttributes = [] as any[]
+    allAttributes = [] as any[],
+    searchAttributes: any = null
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -733,8 +745,8 @@ export class DocumentsService {
         customIncludeTags.push(tag);
       }
     }
-
-    const searchBody = {
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
+    const searchBody:any = {
       query: {
         text: searchText + '*',
         meta: {
@@ -744,10 +756,13 @@ export class DocumentsService {
         page: page,
         responseFields: {
           tags: customIncludeTags,
-          attributes: allAttributes,
+          attributes: attributesKeys,
         },
       },
     };
+    if (searchAttributes) {
+      searchBody.query["attributes"] = searchAttributes;
+    }
     return this.getFormkiqClient().searchApi.searchFulltext({
       documentFulltextSearchBody: searchBody,
       siteId,

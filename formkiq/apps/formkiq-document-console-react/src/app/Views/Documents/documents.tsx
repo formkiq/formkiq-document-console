@@ -84,6 +84,7 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
+import AdvancedSearchTab from "../../Components/DocumentsAndFolders/Search/advancedSearchTab";
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -116,6 +117,9 @@ function Documents() {
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
+  const advancedSearch = new URLSearchParams(search).get(
+      'advancedSearch'
+  );
   const { hash } = useLocation();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
@@ -1312,6 +1316,25 @@ function Documents() {
                     Cancel
                   </ButtonTertiary>
                 )}
+              {!formkiqVersion.modules.includes('typesense') &&
+                !formkiqVersion.modules.includes('opensearch') &&
+                !advancedSearch &&
+                (<Link to="?advancedSearch=visible"
+                       className="cursor-pointer h-8">
+                  <ButtonGhost type="button">Search Documents...</ButtonGhost>
+                </Link>)}
+              {
+                (!formkiqVersion.modules.includes('typesense') &&
+                !formkiqVersion.modules.includes('opensearch') &&
+                advancedSearch) &&
+                (advancedSearch === "hidden" ?
+                (<Link to="?advancedSearch=visible"
+                       className="cursor-pointer h-8">
+                  <ButtonGhost type="button">Expand Search Tab</ButtonGhost>
+                </Link>): <Link to="?advancedSearch=hidden"
+                               className="cursor-pointer h-8">
+                    <ButtonGhost type="button">Minimize Search Tab</ButtonGhost>
+                  </Link> )}
               <div
                 className={
                   (isTagFilterExpanded
@@ -1328,6 +1351,7 @@ function Documents() {
               >
                 <Tag />
               </div>
+
             </div>
           </div>
           <div
@@ -1346,6 +1370,15 @@ function Documents() {
                 <div className="pt-2 pr-8">
                   <PendingArchiveTab />
                 </div>
+              )}
+              {advancedSearch && (
+                  <div className="pt-2 pr-8">
+                      <AdvancedSearchTab
+                        siteId={currentSiteId}
+                        formkiqVersion={formkiqVersion}
+                        subfolderUri={subfolderUri}
+                      />
+                  </div>
               )}
               <DocumentsTable
                 onDeleteDocument={onDeleteDocument}

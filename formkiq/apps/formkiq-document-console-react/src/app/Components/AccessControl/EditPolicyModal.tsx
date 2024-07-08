@@ -27,7 +27,6 @@ export default function EditPolicyModal({
   policyItems: any[];
   index: number;
 }) {
-
   const numberAttributeCriteria = [
     { key: 'eq', title: 'Equal' },
     { key: 'neq', title: 'Not Equal' },
@@ -45,7 +44,8 @@ export default function EditPolicyModal({
   const policyItemsTypes = ['ALLOW'];
   const [selectedPolicyType, setSelectedPolicyType] = useState<string>('ALLOW');
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [selectedTypeOfRoles, setSelectedTypeOfRoles] = useState<string>('anyRoles');
+  const [selectedTypeOfRoles, setSelectedTypeOfRoles] =
+    useState<string>('anyRoles');
   const { allAttributes } = useSelector(DataCacheState);
   const [attributeKeys, setAttributeKeys] = useState<string[]>([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
@@ -124,7 +124,7 @@ export default function EditPolicyModal({
       setNewAttributeValue(false);
       setSelectedAttributeCriteria('eq');
       setMatchUsername(false);
-    } else if(selectedAttribute.dataType === 'KEY_ONLY') {
+    } else if (selectedAttribute.dataType === 'KEY_ONLY') {
       setMatchUsername(false);
     }
   }, [selectedAttribute]);
@@ -157,7 +157,7 @@ export default function EditPolicyModal({
         ...attribute,
         eq: {
           input: {
-            matchUsername
+            matchUsername,
           },
         },
       };
@@ -244,7 +244,7 @@ export default function EditPolicyModal({
           .map((error: any) => error.error)
           .join(', \n');
         dispatch(
-          openNotificationDialog({dialogTitle: `Error.\n ${errorsString}`})
+          openNotificationDialog({ dialogTitle: `Error.\n ${errorsString}` })
         );
       }
     });
@@ -252,14 +252,14 @@ export default function EditPolicyModal({
 
   function onMatchUsernameChange() {
     if (!matchUsername) {
-      setNewAttributeValue("");
-      setSelectedAttributeCriteria("eq");
+      setNewAttributeValue('');
+      setSelectedAttributeCriteria('eq');
     }
     setMatchUsername(!matchUsername);
   }
 
   useEffect(() => {
-    if (matchUsername && selectedAttributeCriteria !== "eq") {
+    if (matchUsername && selectedAttributeCriteria !== 'eq') {
       setMatchUsername(false);
     }
   }, [selectedAttributeCriteria]);
@@ -323,8 +323,7 @@ export default function EditPolicyModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel
-                className="relative transform overflow-hidden text-left transition-all w-full xl-w-1/2 lg:w-2/3 min-w-[850px]">
+              <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full xl-w-1/2 lg:w-2/3 min-w-[850px]">
                 <div className="bg-white p-6 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="w-full flex justify-between items-center">
                     <Dialog.Title className="text-2xl font-bold">
@@ -380,7 +379,7 @@ export default function EditPolicyModal({
                             <label className="flex items-center gap-2 w-full">
                               <div className="w-4">
                                 {selectedTypeOfRoles === 'anyRoles' ? (
-                                  <CheckedRadio/>
+                                  <CheckedRadio />
                                 ) : (
                                   <UncheckedRadio />
                                 )}
@@ -402,9 +401,9 @@ export default function EditPolicyModal({
                             <label className="flex items-center gap-2 w-full">
                               <div className="w-4">
                                 {selectedTypeOfRoles === 'allRoles' ? (
-                                  <CheckedRadio/>
+                                  <CheckedRadio />
                                 ) : (
-                                  <UncheckedRadio/>
+                                  <UncheckedRadio />
                                 )}
                               </div>
                               <span className="block truncate text-sm">
@@ -442,13 +441,11 @@ export default function EditPolicyModal({
                               titles={attributeKeys}
                               selectedValue={selectedAttributeKey}
                               setSelectedValue={setSelectedAttributeKey}
-                              placeholderText="Select Attribute"
+                              placeholderText="Attribute"
                             />
-
                           </div>
                           {selectedAttribute && (
-                            <div
-                              className="text-xs bg-neutral-100 rounded-md font-bold h-8 p-2 text-center whitespace-nowrap">
+                            <div className="text-xs bg-neutral-100 rounded-md font-bold h-8 p-2 text-center whitespace-nowrap">
                               {selectedAttribute.dataType}
                             </div>
                           )}
@@ -519,8 +516,7 @@ export default function EditPolicyModal({
                               </div>
                             )}
                           {selectedAttribute &&
-                            selectedAttribute.dataType === 'STRING' &&
-                            (
+                            selectedAttribute.dataType === 'STRING' && (
                               <div className="mt-2 flex items-center gap-2">
                                 <input
                                   type="checkbox"
@@ -546,9 +542,14 @@ export default function EditPolicyModal({
                           >
                             Add Existing
                           </ButtonPrimaryGradient>
-                          <ButtonTertiary type="button" onClick={() => {
-                            setIsCreateAttributeFormOpen(true);
-                          }}>Add New</ButtonTertiary>
+                          <ButtonTertiary
+                            type="button"
+                            onClick={() => {
+                              setIsCreateAttributeFormOpen(true);
+                            }}
+                          >
+                            Add New
+                          </ButtonTertiary>
                         </div>
                       </div>
                       <div className="flex w-full">
@@ -558,8 +559,7 @@ export default function EditPolicyModal({
                               siteId={siteId}
                               onDocumentDataChange={() => updateAllAttributes()}
                               value={null}
-                              getValue={() => {
-                              }}
+                              getValue={() => {}}
                               onClose={onCreateAttributeFormClose}
                             />
                           </div>
@@ -614,7 +614,8 @@ export default function EditPolicyModal({
                                 }
                               </td>
                               <td className="p-4 text-start ">
-                                {(attribute.eq && attribute.eq?.input?.matchUsername)
+                                {attribute.eq &&
+                                attribute.eq?.input?.matchUsername
                                   ? 'Yes'
                                   : 'No'}
                               </td>
