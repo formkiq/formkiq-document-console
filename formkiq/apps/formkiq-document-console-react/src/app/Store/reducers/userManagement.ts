@@ -297,6 +297,26 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
+export const addUser = createAsyncThunk(
+  'userManagement/addUser',
+  async (data: any, thunkAPI) => {
+    const { email } = data;
+    await DocumentsService.addUser({ user: { username: email } }).then(
+      (response) => {
+        if (response.status === 201) {
+          thunkAPI.dispatch(fetchUsers({}));
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: response.errors[0].errors,
+            })
+          );
+        }
+      }
+    );
+  }
+);
+
 export const userManagementSlice = createSlice({
   name: 'userManagement',
   initialState: defaultState,
