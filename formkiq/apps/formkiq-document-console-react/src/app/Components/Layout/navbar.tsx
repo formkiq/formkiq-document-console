@@ -27,6 +27,8 @@ import {
   ChevronDown,
   Documents,
   Examine,
+  Group,
+  Users,
   Queue,
   Recent,
   Rules,
@@ -394,7 +396,9 @@ function Navbar() {
                       locationPrefix === '/account' ||
                       locationPrefix === '/schemas' ||
                       locationPrefix === '/object-examine-tool' ||
-                      locationPrefix === 'rulesets' ? (
+                      locationPrefix === 'rulesets' ||
+                      locationPrefix === '/groups' ||
+                      locationPrefix === '/users' ? (
                         <>
                           <div className="w-6 mr-1 text-primary-600">
                             {pathname.indexOf('/workflows') > -1 && (
@@ -454,6 +458,16 @@ function Navbar() {
                                 <Admin />
                               </div>
                             )}
+                            {pathname.indexOf('/groups') > -1 && (
+                                  <div className="w-5">
+                                      <Group />
+                                  </div>
+                              )}
+                            {pathname.indexOf('/users') > -1 && (
+                                  <div className="w-5">
+                                      <Users />
+                                  </div>
+                              )}
                           </div>
 
                           <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
@@ -481,6 +495,12 @@ function Navbar() {
                               -1 && <span>Access Control (OPA)</span>}
                             {pathname.indexOf('/schemas') > -1 && (
                               <span>Schemas</span>
+                            )}
+                            {pathname.indexOf('/groups') > -1 && (
+                              <span>Groups</span>
+                            )}
+                            {pathname.indexOf('/users') > -1 && (
+                              <span>Users</span>
                             )}
                           </div>
                           {(pathname.indexOf('/rulesets') > -1 ||

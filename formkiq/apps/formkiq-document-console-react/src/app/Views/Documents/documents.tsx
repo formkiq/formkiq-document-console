@@ -12,6 +12,7 @@ import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/e
 import EditAttributesModal from '../../Components/DocumentsAndFolders/EditAttributesModal/editAttributesModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal';
+import MultiValuedAttributeModal from '../../Components/DocumentsAndFolders/MultivaluedAttributeModal/MultivaluedAttributeModal';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
@@ -21,6 +22,7 @@ import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimar
 import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
 import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
 import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
+import QuantityButton from '../../Components/Generic/Buttons/QuantityButton';
 import {
   ChevronRight,
   Close,
@@ -201,6 +203,12 @@ function Documents() {
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [renameModalValue, setRenameModalValue] = useState<ILine | null>(null);
   const [isRenameModalOpened, setRenameModalOpened] = useState(false);
+  const [
+    isMultivaluedAttributeModalOpened,
+    setMultivaluedAttributeModalOpened,
+  ] = useState(false);
+  const [multivaluedAttributeModalValue, setMultivaluedAttributeModalValue] =
+    useState<any[]>([]);
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
@@ -269,23 +277,6 @@ function Documents() {
   }, [isTagFilterExpanded]);
 
   function onDocumentInfoClick() {
-    DocumentsService.getAllTagKeys(currentSiteId).then((response: any) => {
-      const allTagData = {
-        allTags: response?.values,
-        tagsLastRefreshed: new Date(),
-        tagsSiteId: currentSiteId,
-      };
-      dispatch(setAllTags(allTagData));
-    });
-    DocumentsService.getAttributes(currentSiteId).then((response: any) => {
-      const allAttributeData = {
-        allAttributes: response?.attributes,
-        attributesLastRefreshed: new Date(),
-        attributesSiteId: currentSiteId,
-      };
-      dispatch(setAllAttributes(allAttributeData));
-    });
-
     if (infoDocumentId.length) {
       DocumentsService.getDocumentById(infoDocumentId, currentSiteId).then(
         (response: any) => {
@@ -677,6 +668,15 @@ function Documents() {
   const onRenameModalClose = () => {
     setRenameModalOpened(false);
   };
+  const onAttributeQuantityClick = (item: any) => {
+    setMultivaluedAttributeModalOpened(true);
+    setMultivaluedAttributeModalValue(item);
+  };
+  const onMultiValuedAttributeModalClose = () => {
+    setMultivaluedAttributeModalOpened(false);
+    setMultivaluedAttributeModalValue([]);
+  };
+
   const onMoveModalClick = (event: any, value: ILine | null) => {
     setMoveModalValue(value);
     setMoveModalOpened(true);
@@ -1658,45 +1658,72 @@ function Documents() {
                             </div>
                           )}
                         </div>
-                        <div className="mt-2 text-smaller font-semibold">
-                          *Key-only*
-                        </div>
-                        <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 flex flex-wrap">
-                          {sortedAttributesAndTags.length > 0 &&
-                            sortedAttributesAndTags.map((item: any, i) => {
-                              let tagColor = 'gray';
-                              if (tagColors) {
-                                tagColors.forEach((color: any) => {
-                                  if (color.tagKeys.indexOf(item.key) > -1) {
-                                    tagColor = color.colorUri;
-                                    return;
-                                  }
-                                });
-                              }
-                              return (
-                                <>
-                                  {!item.stringValue &&
-                                    !item.numberValue &&
-                                    !item.booleanValue &&
-                                    !item.value &&
-                                    !item.values &&
-                                    !item.stringValues &&
-                                    !item.numberValues && (
-                                      <div className="pt-0.5 pr-1 flex">
-                                        <div
-                                          className={`h-5.5 pl-2 text-smaller rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
-                                        >
-                                          {item.key}
-                                        </div>
-                                        <div
-                                          className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                                        ></div>
-                                      </div>
-                                    )}
-                                </>
-                              );
-                            })}
-                        </div>
+                        {sortedAttributesAndTags.length === 0 && (
+                          <span className="text-xs">
+                            (no attributes have been added)
+                          </span>
+                        )}
+                        {sortedAttributesAndTags.length > 0 &&
+                          sortedAttributesAndTags.filter((item: any, i) => {
+                            if (
+                              !item.stringValue &&
+                              !item.numberValue &&
+                              !item.booleanValue &&
+                              !item.value &&
+                              !item.values &&
+                              !item.stringValues &&
+                              !item.numberValues
+                            ) {
+                              return true;
+                            }
+                            return false;
+                          }).length && (
+                            <>
+                              <div className="mt-2 text-smaller font-semibold uppercase italic">
+                                Key-Only Attributes
+                              </div>
+                              <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 flex flex-wrap">
+                                {sortedAttributesAndTags.length > 0 &&
+                                  sortedAttributesAndTags.map(
+                                    (item: any, i) => {
+                                      let tagColor = 'gray';
+                                      if (tagColors) {
+                                        tagColors.forEach((color: any) => {
+                                          if (
+                                            color.tagKeys.indexOf(item.key) > -1
+                                          ) {
+                                            tagColor = color.colorUri;
+                                            return;
+                                          }
+                                        });
+                                      }
+                                      return (
+                                        <>
+                                          {!item.stringValue &&
+                                            !item.numberValue &&
+                                            !item.booleanValue &&
+                                            !item.value &&
+                                            !item.values &&
+                                            !item.stringValues &&
+                                            !item.numberValues && (
+                                              <div className="pt-0.5 pr-1 flex">
+                                                <div
+                                                  className={`h-5.5 pl-2 text-smaller rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                                                >
+                                                  {item.key}
+                                                </div>
+                                                <div
+                                                  className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                                                ></div>
+                                              </div>
+                                            )}
+                                        </>
+                                      );
+                                    }
+                                  )}
+                              </div>
+                            </>
+                          )}
                         <div>
                           {sortedAttributesAndTags.length > 0 &&
                             sortedAttributesAndTags.map((item: any, i) => (
@@ -1716,6 +1743,36 @@ function Documents() {
                                   >
                                     <dt className="mb-1 text-smaller font-semibold">
                                       {item.key}
+                                      {item.values !== undefined && (
+                                        <QuantityButton
+                                          type="button"
+                                          onClick={() => {
+                                            onAttributeQuantityClick(item);
+                                          }}
+                                        >
+                                          {item.values.length}
+                                        </QuantityButton>
+                                      )}
+                                      {item.stringValues !== undefined && (
+                                        <QuantityButton
+                                          type="button"
+                                          onClick={() => {
+                                            onAttributeQuantityClick(item);
+                                          }}
+                                        >
+                                          {item.stringValues.length}
+                                        </QuantityButton>
+                                      )}
+                                      {item.numberValues !== undefined && (
+                                        <QuantityButton
+                                          type="button"
+                                          onClick={() => {
+                                            onAttributeQuantityClick(item);
+                                          }}
+                                        >
+                                          {item.numberValues.length}
+                                        </QuantityButton>
+                                      )}
                                     </dt>
                                     <dd className="text-sm">
                                       {/*Attributes*/}
@@ -2121,6 +2178,11 @@ function Documents() {
         onClose={onDocumentReviewModalClose}
         siteId={currentSiteId}
         value={documentReviewModalValue}
+      />
+      <MultiValuedAttributeModal
+        item={multivaluedAttributeModalValue}
+        isOpened={isMultivaluedAttributeModalOpened}
+        onClose={onMultiValuedAttributeModalClose}
       />
     </>
   );

@@ -25,6 +25,9 @@ export interface ApiItem {
   requiresQueueId: boolean;
   requiresAttributeKey: boolean;
   requiresAttributeValue: boolean;
+  requiresGroupName: boolean;
+  requiresUsername: boolean;
+  requiresUserOperation: boolean;
   requiresWS: boolean;
   allowsVersionKey: boolean;
   allowsDate: boolean;
@@ -1703,5 +1706,136 @@ export const getGroupsApiItem = {
     requiresAuthentication: true,
     allowsLimit: true,
     hasPagingTokens: true,
+    license: 'Core',
+};
+
+export const postGroupApiItem = {
+    method: 'POST',
+    path: '/groups',
+    description: 'Add a new group',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"group": {"name": "groupName"}}',
+    license: 'Core',
+};
+
+export const deleteGroupApiItem = {
+    method: 'DELETE',
+    path: '/groups/ GROUP_NAME ',
+    description: 'Deletes a group',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresGroupName: true,
+    license: 'Core',
+};
+
+export const getGroupUsersApiItem = {
+    method: 'GET',
+    path: '/groups/ GROUP_NAME /users',
+    description: 'Returns the list of users in a group',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresGroupName: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
+    license: 'Core',
+};
+
+export const postGroupUserApiItem = {
+    method: 'POST',
+    path: '/groups/ GROUP_NAME /users',
+    description: 'Adds a user to a group',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresGroupName: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"user": {"username": "username"}}',
+    license: 'Core',
+};
+
+export const deleteGroupUserApiItem = {
+    method: 'DELETE',
+    path: '/groups/ GROUP_NAME /users/ USERNAME ',
+    description: 'Remove Username From Group',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresGroupName: true,
+    requiresUsername: true,
+    license: 'Core',
+};
+
+export const getUsersApiItem = {
+    method: 'GET',
+    path: '/users',
+    description: 'Returns the list of users',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
+    license: 'Core',
+};
+
+export const postUserApiItem = {
+    method: 'POST',
+    path: '/users',
+    description: 'Adds a user',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"user": {"username": "username"}}',
+    license: 'Core',
+};
+
+export const getUserApiItem = {
+    method: 'GET',
+    path: '/users/ USERNAME ',
+    description: 'Returns a user',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresUsername: true,
+    license: 'Core',
+};
+
+export const deleteUserApiItem = {
+    method: 'DELETE',
+    path: '/users/ USERNAME ',
+    description: 'Deletes a user',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresUsername: true,
+    license: 'Core',
+};
+
+export const getUserGroupsApiItem = {
+    method: 'GET',
+    path: '/users/ USERNAME /groups',
+    description: 'Returns the list of groups for a user',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresUsername: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
+    license: 'Core',
+};
+
+export const putUserOperationApiItem = {
+    method: 'PUT',
+    path: '/users/ USERNAME / USER_OPERATION ',
+    description: 'Set user operation',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresUsername: true,
+    requiresUserOperation: true,
+    license: 'Core',
+};
+
+export const getGroupApiItem = {
+    method: 'GET',
+    path: '/groups/ GROUP_NAME ',
+    description: 'Returns a group',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresGroupName: true,
     license: 'Core',
 };
