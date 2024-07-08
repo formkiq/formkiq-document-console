@@ -17,6 +17,8 @@ import {
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import UsersMenu from '../../Components/UserManagement/Menus/UsersMenu';
 import UsersTable from './usersTable';
+import {Plus} from "../../Components/Icons/icons";
+import CreateUserModal from "../../Components/UserManagement/Modals/CreateUserModal";
 
 function Users() {
   const {
@@ -29,6 +31,7 @@ function Users() {
   const { user } = useAuthenticatedState();
   const dispatch = useAppDispatch();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
 
   function updateUsers() {
     dispatch(fetchUsers({ page: 1 }));
@@ -231,7 +234,17 @@ function Users() {
               enableUsers={onEnableSelectedUsers}
               resetPasswords={onResetPasswordSelectedUsers}
             />
-
+            <div className="w-full py-4 px-6">
+              <button type="button"
+                      className="p-6 border border-neutral-300 rounded-md flex items-center gap-4 justify-center hover:bg-neutral-100 font-bold text-sm"
+                      onClick={() => setIsCreateUserModalOpen(true)}>
+                <div
+                  className="w-6 h-6 p-1 flex items-center justify-center border border-2 border-neutral-900 rounded-full">
+                  <Plus/>
+                </div>
+                Add New User
+              </button>
+            </div>
             <div className="relative overflow-hidden h-full">
               <div
                 className="overflow-y-scroll overflow-x-auto h-full w-full"
@@ -253,6 +266,10 @@ function Users() {
           </div>
         </div>
       </div>
+      <CreateUserModal
+        isOpen={isCreateUserModalOpen}
+        setIsOpen={setIsCreateUserModalOpen}
+      />
     </>
   );
 }
