@@ -403,6 +403,13 @@ export default function OpenSearchByAttributes({
           >
             Add
           </ButtonSecondary>
+          <ButtonGhost
+            type="button"
+            onClick={resetValues}
+            title="Cancel"
+          >
+            Cancel
+          </ButtonGhost>
         </div>
         <div className="flex flex-row justify-start flex-wrap gap-2 items-end mt-2">
           {attributeValues.map((val: string, i: number) => (

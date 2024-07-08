@@ -1,37 +1,37 @@
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import {Link, useLocation, useSearchParams} from 'react-router-dom';
-import { DataCacheState } from '../../../Store/reducers/data';
-import { fetchDocuments } from '../../../Store/reducers/documentsList';
-import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
-import { useAppDispatch } from '../../../Store/store';
-import { Attribute } from '../../../helpers/types/attributes';
+import React, {useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {useLocation, useSearchParams} from 'react-router-dom';
+import {DataCacheState} from '../../../Store/reducers/data';
+import {fetchDocuments} from '../../../Store/reducers/documentsList';
+import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
+import {useAppDispatch} from '../../../Store/store';
+import {Attribute} from '../../../helpers/types/attributes';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
-import {ChevronDown, Close, Plus} from '../../Icons/icons';
+import {Close, Plus} from '../../Icons/icons';
 
 export default function DefaultSearchByAttributes({
-  siteId,
-  formkiqVersion,
-  subfolderUri,
-}: any) {
+                                                    siteId,
+                                                    formkiqVersion,
+                                                    subfolderUri,
+                                                  }: any) {
   const stringAttributeCriteria = [
-    { key: 'eq', title: 'Equal to' },
-    { key: 'eqOr', title: 'One of' },
-    { key: 'beginsWith', title: 'Begins with' },
-    { key: 'range', title: 'Range' },
+    {key: 'eq', title: 'Equal to'},
+    {key: 'eqOr', title: 'One of'},
+    {key: 'beginsWith', title: 'Begins with'},
+    {key: 'range', title: 'Range'},
   ];
   const numberAttributeCriteria = [
-    { key: 'eq', title: 'Equal to' },
-    { key: 'eqOr', title: 'One of' },
-    { key: 'range', title: 'Range' },
+    {key: 'eq', title: 'Equal to'},
+    {key: 'eqOr', title: 'One of'},
+    {key: 'range', title: 'Range'},
   ];
   const booleanAttributeCriteria = [
-    { key: 'eq', title: 'Equal to' },
-    { key: 'eqOr', title: 'One of' },
+    {key: 'eq', title: 'Equal to'},
+    {key: 'eqOr', title: 'One of'},
   ];
 
   const dispatch = useAppDispatch();
@@ -42,23 +42,15 @@ export default function DefaultSearchByAttributes({
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
 
-  const { allAttributes } = useSelector(DataCacheState);
-  const [attributeKeys, setAttributeKeys] = useState<
-    { key: string; title: string }[]
-  >([]);
+  const {allAttributes} = useSelector(DataCacheState);
+  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
   );
   const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>('');
-  const [attributeCriteria, setAttributeCriteria] = useState<
-    { key: string; title: string }[]
-  >([]);
-  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<
-    string | null
-  >(null);
-  const [attributeValue, setAttributeValue] = useState<
-    string | number | boolean | null
-  >('');
+  const [attributeCriteria, setAttributeCriteria] = useState<{ key: string; title: string }[]>([]);
+  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string | null>(null);
+  const [attributeValue, setAttributeValue] = useState<string | number | boolean | null>('');
   const [attributeValues, setAttributeValues] = useState<any[]>([]);
 
   useEffect(() => {
@@ -238,6 +230,15 @@ export default function DefaultSearchByAttributes({
     );
   }
 
+  const resetSearch = () => {
+    setSelectedAttributeKey('');
+    setSelectedAttribute(null);
+    setSelectedAttributeCriteria(null);
+    setAttributeCriteria([]);
+    setAttributeValue('');
+    setAttributeValues([]);
+  };
+
   return (
     <div className="w-full h-full">
       <div className="h-full border-gray-400 border overflow-y-auto p-2">
@@ -298,7 +299,7 @@ export default function DefaultSearchByAttributes({
                   title="Add"
                   className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
                 >
-                  <Plus />
+                  <Plus/>
                 </button>
               </div>
             )}
@@ -368,7 +369,7 @@ export default function DefaultSearchByAttributes({
                   title="Add"
                   className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
                 >
-                  <Plus />
+                  <Plus/>
                 </button>
               </div>
             )}
@@ -420,6 +421,15 @@ export default function DefaultSearchByAttributes({
                 handleSelectValues={handleSelectBooleanValues}
               />
             )}
+
+          <ButtonGhost
+            type="button"
+            onClick={resetSearch}
+            title="Cancel"
+          >
+            Cancel
+          </ButtonGhost>
+
         </div>
 
         <div className="flex flex-row justify-start flex-wrap gap-2 items-end mt-2">
@@ -439,7 +449,7 @@ export default function DefaultSearchByAttributes({
                   className="w-4 h-4 min-w-4 text-neutral-900"
                   onClick={() => removeAttributeValueFromList(val)}
                 >
-                  <Close />
+                  <Close/>
                 </button>
               </div>
             ))}
