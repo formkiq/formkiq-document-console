@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
-import {DataCacheState} from '../../../Store/reducers/data';
 import {fetchDocuments} from '../../../Store/reducers/documentsList';
 import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
 import {useAppDispatch} from '../../../Store/store';
@@ -14,6 +13,7 @@ import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
 import {ChevronDown, Close, Plus} from '../../Icons/icons';
 import SearchLine from "./searchLine";
+import {AttributesDataState} from "../../../Store/reducers/attributesData";
 
 export default function OpenSearchByAttributes({
                                                  siteId,
@@ -32,7 +32,7 @@ export default function OpenSearchByAttributes({
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
 
-  const {allAttributes} = useSelector(DataCacheState);
+  const {allAttributes} = useSelector(AttributesDataState);
   const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null

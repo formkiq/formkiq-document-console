@@ -1,7 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { DataCacheState, setAllAttributes } from '../../Store/reducers/data';
+import {AttributesDataState, setAllAttributesData} from "../../Store/reducers/attributesData";
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
 import { DocumentsService } from '../../helpers/services/documentsService';
@@ -44,7 +44,7 @@ export default function CreatePolicyModal({
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [selectedTypeOfRoles, setSelectedTypeOfRoles] =
     useState<string>('anyRoles');
-  const { allAttributes } = useSelector(DataCacheState);
+  const { allAttributes } = useSelector(AttributesDataState);
   const [attributeKeys, setAttributeKeys] = useState<string[]>([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
@@ -82,7 +82,7 @@ export default function CreatePolicyModal({
           attributesLastRefreshed: new Date(),
           attributesSiteId: siteId,
         };
-        dispatch(setAllAttributes(allAttributeData));
+        dispatch(setAllAttributesData(allAttributeData));
       }
     });
   };

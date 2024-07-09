@@ -1,7 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { DataCacheState, setAllAttributes } from '../../Store/reducers/data';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
 import { DocumentsService } from '../../helpers/services/documentsService';
@@ -13,6 +12,7 @@ import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 import RadioListbox from '../Generic/Listboxes/RadioListbox';
 import { CheckedRadio, Close, UncheckedRadio } from '../Icons/icons';
 import GroupsSelect from './GroupsSelect';
+import {AttributesDataState, setAllAttributesData} from "../../Store/reducers/attributesData";
 
 export default function EditPolicyModal({
   isOpened,
@@ -46,7 +46,8 @@ export default function EditPolicyModal({
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [selectedTypeOfRoles, setSelectedTypeOfRoles] =
     useState<string>('anyRoles');
-  const { allAttributes } = useSelector(DataCacheState);
+  // const { allAttributes } = useSelector(DataCacheState);
+  const {allAttributes} = useSelector(AttributesDataState);
   const [attributeKeys, setAttributeKeys] = useState<string[]>([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
@@ -84,7 +85,7 @@ export default function EditPolicyModal({
           attributesLastRefreshed: new Date(),
           attributesSiteId: siteId,
         };
-        dispatch(setAllAttributes(allAttributeData));
+        dispatch(setAllAttributesData(allAttributeData));
       }
     });
   };

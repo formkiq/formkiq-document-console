@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import { DataCacheState, setAllAttributes } from '../../../Store/reducers/data';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { TagsForFilterAndDisplay } from '../../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { Attribute } from '../../../helpers/types/attributes';
+import {AttributesDataState,setAllAttributesData, } from "../../../Store/reducers/attributesData";
 
 export default function AddTag({
   line,
@@ -31,7 +31,7 @@ export default function AddTag({
   const [typeaheadVisible, setTypeaheadVisible] = useState(false);
   const [typeaheadTagKeys, setTypeaheadTagKeys] = useState([]);
 
-  const { allTags, allAttributes } = useSelector(DataCacheState);
+  const { allTags, allAttributes } = useSelector(AttributesDataState);
 
   const updateAllAttributes = () => {
     DocumentsService.getAttributes(siteId).then((response) => {
@@ -41,7 +41,7 @@ export default function AddTag({
           attributesLastRefreshed: new Date(),
           attributesSiteId: siteId,
         };
-        dispatch(setAllAttributes(allAttributeData));
+        dispatch(setAllAttributesData(allAttributeData));
       }
     });
   };
