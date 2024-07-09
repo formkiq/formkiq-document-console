@@ -42,42 +42,51 @@ export const fetchDocuments = createAsyncThunk(
     let allAttributes = allAttributesState
     let allTags = allTagsState
     const dateDiff = new Date().getTime() - new Date(attributesLastRefreshed).getTime();
+
+    async function loadTagsAndAttributes() {
+      await DocumentsService.getAllTagKeys(siteId).then((response: any) => {
+        const allTagData = {
+          allTags: response?.values,
+          tagsLastRefreshed: new Date(),
+          tagsSiteId: siteId,
+        };
+        allTags = response?.values;
+        setAllTags(allTagData);
+        thunkAPI.dispatch(setAllTagsData(allTagData));
+      });
+      await DocumentsService.getAttributes(siteId).then((response: any) => {
+        const allAttributesData = {
+          allAttributes: response?.attributes,
+          attributesLastRefreshed: new Date(),
+          attributesSiteId: siteId,
+        };
+        allAttributes = response?.attributes;
+        setAllAttributes(allAttributesData);
+        thunkAPI.dispatch(setAllAttributesData(allAttributesData));
+      });
+    }
+
     // check if data in state is valid
     if (dateDiff / 1000 > 30 || attributesSiteId !== siteId) {
       const allAttributesCache = await getAllAttributes()
       const allTagsCache = await getAllTags()
-
       // check if data in cache is valid
-      const dateDiff = new Date().getTime() - new Date(allAttributesCache.attributesLastRefreshed).getTime();
-      const isCachedDataValid = dateDiff / 1000 < 30 && allAttributesCache.attributesSiteId === siteId;
-      if (isCachedDataValid) {
-        // use data from cache and update state
-        allAttributes = allAttributesCache.allAttributes;
-        allTags = allTagsCache.allTags;
-        thunkAPI.dispatch(setAllAttributesData(allAttributesCache));
-        thunkAPI.dispatch(setAllTagsData(allTagsCache));
+      if (allAttributesCache && allTagsCache) {
+        const dateDiff = new Date().getTime() - new Date(allAttributesCache.attributesLastRefreshed).getTime();
+        const isCachedDataValid = dateDiff / 1000 < 30 && allAttributesCache.attributesSiteId === siteId;
+        if (isCachedDataValid) {
+          // use data from cache and update state
+          allAttributes = allAttributesCache.allAttributes;
+          allTags = allTagsCache.allTags;
+          thunkAPI.dispatch(setAllAttributesData(allAttributesCache));
+          thunkAPI.dispatch(setAllTagsData(allTagsCache));
+        } else {
+          // load the data and save it in cache and in state
+          await loadTagsAndAttributes();
+        }
       } else {
         // load the data and save it in cache and in state
-        await DocumentsService.getAllTagKeys(siteId).then((response: any) => {
-          const allTagData = {
-            allTags: response?.values,
-            tagsLastRefreshed: new Date(),
-            tagsSiteId: siteId,
-          };
-          allTags = response?.values;
-          setAllTags(allTagData);
-          thunkAPI.dispatch(setAllTagsData(allTagData));
-        });
-        await DocumentsService.getAttributes(siteId).then((response: any) => {
-          const allAttributesData = {
-            allAttributes: response?.attributes,
-            attributesLastRefreshed: new Date(),
-            attributesSiteId: siteId,
-          };
-          allAttributes = response?.attributes;
-          setAllAttributes(allAttributesData);
-          thunkAPI.dispatch(setAllAttributesData(allAttributesData));
-        });
+        await loadTagsAndAttributes();
       }
     }
     if (searchWord || searchAttributes) {
@@ -384,46 +393,53 @@ export const toggleExpandFolder = createAsyncThunk(
     const attributesSiteId = (thunkAPI.getState() as any)?.attributesDataState.attributesSiteId;
     let allAttributes = allAttributesState
     let allTags = allTagsState
+
     // check if attributes state is valid
+    async function loadTagsAndAttributes() {
+      await DocumentsService.getAllTagKeys(siteId).then((response: any) => {
+        const allTagData = {
+          allTags: response?.values,
+          tagsLastRefreshed: new Date(),
+          tagsSiteId: siteId,
+        };
+        allTags = response?.values;
+        setAllTags(allTagData);
+        thunkAPI.dispatch(setAllTagsData(allTagData));
+      });
+
+      await DocumentsService.getAttributes(siteId).then(
+        (response: any) => {
+          const allAttributesData = {
+            allAttributes: response?.attributes,
+            attributesLastRefreshed: new Date(),
+            attributesSiteId: siteId,
+          };
+          allAttributes = response?.attributes;
+          setAllAttributes(allAttributesData);
+          thunkAPI.dispatch(setAllAttributesData(allAttributesData));
+        });
+    }
+
     const dateDiff = new Date().getTime() - new Date(attributesLastRefreshed).getTime();
     if (dateDiff / 1000 > 30 || attributesSiteId !== siteId) {
       const allAttributesCache = await getAllAttributes()
       const allTagsCache = await getAllTags()
-
-      // check if data in cache is valid
-      const dateDiff = new Date().getTime() - new Date(allAttributesCache.attributesLastRefreshed).getTime();
-      const isCachedDataValid = dateDiff / 1000 < 30 && allAttributesCache.attributesSiteId === siteId;
-      if (isCachedDataValid) {
-        // use data from cache and update state
-        allAttributes = allAttributesCache.allAttributes;
-        allTags = allTagsCache.allTags;
-        thunkAPI.dispatch(setAllAttributesData(allAttributesCache));
-        thunkAPI.dispatch(setAllTagsData(allTagsCache));
+      if (allAttributesCache && allTagsCache) {
+        // check if data in cache is valid
+        const dateDiff = new Date().getTime() - new Date(allAttributesCache.attributesLastRefreshed).getTime();
+        const isCachedDataValid = dateDiff / 1000 < 30 && allAttributesCache.attributesSiteId === siteId;
+        if (isCachedDataValid) {
+          // use data from cache and update state
+          allAttributes = allAttributesCache.allAttributes;
+          allTags = allTagsCache.allTags;
+          thunkAPI.dispatch(setAllAttributesData(allAttributesCache));
+          thunkAPI.dispatch(setAllTagsData(allTagsCache));
+        } else {
+          // console.log('fetching all tags for refresh - EXPAND')
+          await loadTagsAndAttributes();
+        }
       } else {
-
-        // console.log('fetching all tags for refresh - EXPAND')
-        await DocumentsService.getAllTagKeys(siteId).then((response: any) => {
-          const allTagData = {
-            allTags: response?.values,
-            tagsLastRefreshed: new Date(),
-            tagsSiteId: siteId,
-          };
-          allTags = response?.values;
-          setAllTags(allTagData);
-          thunkAPI.dispatch(setAllTagsData(allTagData));
-        });
-
-        await DocumentsService.getAttributes(siteId).then(
-          (response: any) => {
-            const allAttributesData = {
-              allAttributes: response?.attributes,
-              attributesLastRefreshed: new Date(),
-              attributesSiteId: siteId,
-            };
-            allAttributes = response?.attributes;
-            setAllAttributes(allAttributesData);
-            thunkAPI.dispatch(setAllAttributesData(allAttributesData));
-          });
+        await loadTagsAndAttributes();
       }
     }
     const folderPath = subfolderUri;
