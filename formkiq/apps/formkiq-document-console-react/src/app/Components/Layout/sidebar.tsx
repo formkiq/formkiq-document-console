@@ -39,7 +39,6 @@ import {
   Plus,
   Queue,
   Rules,
-  Schema,
   Settings,
   ShareHand,
   Star,
@@ -958,29 +957,6 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                {formkiqVersion.type !== 'core' && (
-                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                    <NavLink
-                      to="/schemas"
-                      data-test-id="nav-tag-schema"
-                      className={({ isActive }) =>
-                        (isActive
-                          ? 'text-primary-600 bg-neutral-200 '
-                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                        ' w-full text-sm font-bold flex '
-                      }
-                    >
-                      <div
-                        className={'w-full text-sm font-bold flex pl-5 py-2 '}
-                      >
-                        <div className="w-4 flex items-center mr-2">
-                          <Schema />
-                        </div>
-                        <div>Schemas</div>
-                      </div>
-                    </NavLink>
-                  </li>
-                )}
                 <div className="flex w-full">
                   <div className="w-full mt-4 border-b border-neutral-300"></div>
                 </div>
@@ -1339,27 +1315,6 @@ export function Sidebar() {
                 >
                   <div className="w-4 flex items-center mr-2">
                     <Examine />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to="/schemas"
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-primary-600 bg-neutral-200 '
-                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                  ' w-full text-sm font-bold flex '
-                }
-              >
-                <div
-                  className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
-                  }
-                >
-                  <div className="w-4 flex items-center mr-2">
-                    <Schema />
                   </div>
                 </div>
               </NavLink>
