@@ -1,37 +1,37 @@
-import React, {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {useLocation, useSearchParams} from 'react-router-dom';
-import {DataCacheState} from '../../../Store/reducers/data';
-import {fetchDocuments} from '../../../Store/reducers/documentsList';
-import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../../Store/store';
-import {Attribute} from '../../../helpers/types/attributes';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { DataCacheState } from '../../../Store/reducers/data';
+import { fetchDocuments } from '../../../Store/reducers/documentsList';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import { Attribute } from '../../../helpers/types/attributes';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
-import {Close, Plus} from '../../Icons/icons';
+import { Close, Plus } from '../../Icons/icons';
 
 export default function DefaultSearchByAttributes({
-                                                    siteId,
-                                                    formkiqVersion,
-                                                    subfolderUri,
-                                                  }: any) {
+  siteId,
+  formkiqVersion,
+  subfolderUri,
+}: any) {
   const stringAttributeCriteria = [
-    {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'One of'},
-    {key: 'beginsWith', title: 'Begins with'},
-    {key: 'range', title: 'Range'},
+    { key: 'eq', title: 'Equal to' },
+    { key: 'eqOr', title: 'One of' },
+    { key: 'beginsWith', title: 'Begins with' },
+    { key: 'range', title: 'Range' },
   ];
   const numberAttributeCriteria = [
-    {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'One of'},
-    {key: 'range', title: 'Range'},
+    { key: 'eq', title: 'Equal to' },
+    { key: 'eqOr', title: 'One of' },
+    { key: 'range', title: 'Range' },
   ];
   const booleanAttributeCriteria = [
-    {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'One of'},
+    { key: 'eq', title: 'Equal to' },
+    { key: 'eqOr', title: 'One of' },
   ];
 
   const dispatch = useAppDispatch();
@@ -42,15 +42,23 @@ export default function DefaultSearchByAttributes({
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
 
-  const {allAttributes} = useSelector(DataCacheState);
-  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
+  const { allAttributes } = useSelector(DataCacheState);
+  const [attributeKeys, setAttributeKeys] = useState<
+    { key: string; title: string }[]
+  >([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
   );
   const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>('');
-  const [attributeCriteria, setAttributeCriteria] = useState<{ key: string; title: string }[]>([]);
-  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string | null>(null);
-  const [attributeValue, setAttributeValue] = useState<string | number | boolean | null>('');
+  const [attributeCriteria, setAttributeCriteria] = useState<
+    { key: string; title: string }[]
+  >([]);
+  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<
+    string | null
+  >(null);
+  const [attributeValue, setAttributeValue] = useState<
+    string | number | boolean | null
+  >('');
   const [attributeValues, setAttributeValues] = useState<any[]>([]);
 
   useEffect(() => {
@@ -242,195 +250,203 @@ export default function DefaultSearchByAttributes({
   return (
     <div className="w-full h-full">
       <div className="h-full border-gray-400 border overflow-y-auto p-2">
-        <div className="h-8 gap-2 flex items-center">
-          <div className="h-8 flex items-center gap-2">
-            <RadioCombobox
-              values={attributeKeys}
-              selectedValue={selectedAttributeKey}
-              setSelectedValue={onAttributeSelect}
-              placeholderText="Attribute"
-            />
-            {selectedAttribute && (
-              <div className="text-xs bg-neutral-100 rounded-md font-bold h-8 p-2 text-center whitespace-nowrap">
-                {selectedAttribute.dataType}
-              </div>
-            )}
-          </div>
-          {selectedAttribute &&
-            (selectedAttribute.dataType === 'NUMBER' ||
-              selectedAttribute.dataType === 'STRING' ||
-              selectedAttribute.dataType === 'BOOLEAN') && (
-              <div className="h-8">
-                <RadioListbox
-                  values={attributeCriteria.map((item) => item.key)}
-                  titles={attributeCriteria.map((item) => item.title)}
-                  selectedValue={selectedAttributeCriteria as string}
-                  setSelectedValue={handleSelectAttributeCriteria}
-                />
-              </div>
-            )}
-
-          {/*STRING*/}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'STRING' &&
-            selectedAttributeCriteria === 'eq' && (
-              <input
-                type="text"
-                className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                required
-                value={attributeValue as string}
-                onChange={(e: any) => setAttributeValue(e.target.value)}
+        {attributeKeys.length ? (
+          <div className="h-8 gap-2 flex items-center">
+            <div className="h-8 flex items-center gap-2">
+              <RadioCombobox
+                values={attributeKeys}
+                selectedValue={selectedAttributeKey}
+                setSelectedValue={onAttributeSelect}
+                placeholderText="Attribute"
               />
-            )}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'STRING' &&
-            selectedAttributeCriteria === 'eqOr' && (
-              <div className="flex items-center gap-2">
+              {selectedAttribute && (
+                <div className="text-xs bg-neutral-100 rounded-md font-bold h-8 p-2 text-center whitespace-nowrap">
+                  {selectedAttribute.dataType}
+                </div>
+              )}
+            </div>
+            {selectedAttribute &&
+              (selectedAttribute.dataType === 'NUMBER' ||
+                selectedAttribute.dataType === 'STRING' ||
+                selectedAttribute.dataType === 'BOOLEAN') && (
+                <div className="h-8">
+                  <RadioListbox
+                    values={attributeCriteria.map((item) => item.key)}
+                    titles={attributeCriteria.map((item) => item.title)}
+                    selectedValue={selectedAttributeCriteria as string}
+                    setSelectedValue={handleSelectAttributeCriteria}
+                  />
+                </div>
+              )}
+
+            {/*STRING*/}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'STRING' &&
+              selectedAttributeCriteria === 'eq' && (
                 <input
                   type="text"
                   className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                  required={attributeValues.length === 0} // check if added at least one attribute
+                  required
                   value={attributeValue as string}
                   onChange={(e: any) => setAttributeValue(e.target.value)}
                 />
-                <button
-                  type="button"
-                  onClick={addAttributeValueToList}
-                  title="Add"
-                  className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
-                >
-                  <Plus/>
-                </button>
-              </div>
-            )}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'STRING' &&
-            selectedAttributeCriteria === 'beginsWith' && (
-              <input
-                type="text"
-                className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                required
-                value={attributeValue as string}
-                onChange={(e: any) => setAttributeValue(e.target.value)}
-              />
-            )}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'STRING' &&
-            selectedAttributeCriteria === 'range' && (
-              <div className="flex items-center gap-2">
+              )}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'STRING' &&
+              selectedAttributeCriteria === 'eqOr' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                    required={attributeValues.length === 0} // check if added at least one attribute
+                    value={attributeValue as string}
+                    onChange={(e: any) => setAttributeValue(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={addAttributeValueToList}
+                    title="Add"
+                    className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
+                  >
+                    <Plus />
+                  </button>
+                </div>
+              )}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'STRING' &&
+              selectedAttributeCriteria === 'beginsWith' && (
                 <input
                   type="text"
                   className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
                   required
-                  value={attributeValues[0] || ''}
-                  onChange={(e: any) =>
-                    handleRangeInput(e.target.value, 'start')
-                  }
-                />
-                <span className="text-neutral-500">-</span>
-                <input
-                  type="text"
-                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                  required
-                  value={attributeValues[1] || ''}
-                  onChange={(e: any) => handleRangeInput(e.target.value, 'end')}
-                />
-              </div>
-            )}
-
-          {/*NUMBER*/}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'NUMBER' &&
-            selectedAttributeCriteria === 'eq' && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                  required
-                  value={attributeValue as number}
+                  value={attributeValue as string}
                   onChange={(e: any) => setAttributeValue(e.target.value)}
                 />
-              </div>
-            )}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'NUMBER' &&
-            selectedAttributeCriteria === 'eqOr' && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                  required={attributeValues.length === 0} // check if added at least one attribute
-                  value={attributeValue as number}
-                  onChange={(e: any) => setAttributeValue(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={addAttributeValueToList}
-                  title="Add"
-                  className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
-                >
-                  <Plus/>
-                </button>
-              </div>
-            )}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'NUMBER' &&
-            selectedAttributeCriteria === 'range' && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                  required
-                  value={attributeValues[0] || ''}
-                  onChange={(e: any) =>
-                    handleRangeInput(e.target.value, 'start')
-                  }
-                />
-                <span className="text-neutral-500">-</span>
-                <input
-                  type="number"
-                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                  required
-                  value={attributeValues[1] || ''}
-                  onChange={(e: any) => handleRangeInput(e.target.value, 'end')}
-                />
-              </div>
-            )}
+              )}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'STRING' &&
+              selectedAttributeCriteria === 'range' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                    required
+                    value={attributeValues[0] || ''}
+                    onChange={(e: any) =>
+                      handleRangeInput(e.target.value, 'start')
+                    }
+                  />
+                  <span className="text-neutral-500">-</span>
+                  <input
+                    type="text"
+                    className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                    required
+                    value={attributeValues[1] || ''}
+                    onChange={(e: any) =>
+                      handleRangeInput(e.target.value, 'end')
+                    }
+                  />
+                </div>
+              )}
 
-          {/*BOOLEAN*/}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'BOOLEAN' &&
-            selectedAttributeCriteria === 'eq' && (
-              <div className="flex items-center gap-2 h-full">
-                <RadioListbox
+            {/*NUMBER*/}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'NUMBER' &&
+              selectedAttributeCriteria === 'eq' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                    required
+                    value={attributeValue as number}
+                    onChange={(e: any) => setAttributeValue(e.target.value)}
+                  />
+                </div>
+              )}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'NUMBER' &&
+              selectedAttributeCriteria === 'eqOr' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                    required={attributeValues.length === 0} // check if added at least one attribute
+                    value={attributeValue as number}
+                    onChange={(e: any) => setAttributeValue(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={addAttributeValueToList}
+                    title="Add"
+                    className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
+                  >
+                    <Plus />
+                  </button>
+                </div>
+              )}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'NUMBER' &&
+              selectedAttributeCriteria === 'range' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                    required
+                    value={attributeValues[0] || ''}
+                    onChange={(e: any) =>
+                      handleRangeInput(e.target.value, 'start')
+                    }
+                  />
+                  <span className="text-neutral-500">-</span>
+                  <input
+                    type="number"
+                    className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                    required
+                    value={attributeValues[1] || ''}
+                    onChange={(e: any) =>
+                      handleRangeInput(e.target.value, 'end')
+                    }
+                  />
+                </div>
+              )}
+
+            {/*BOOLEAN*/}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'BOOLEAN' &&
+              selectedAttributeCriteria === 'eq' && (
+                <div className="flex items-center gap-2 h-full">
+                  <RadioListbox
+                    values={['true', 'false']}
+                    titles={['True', 'False']}
+                    selectedValue={(attributeValue as string).toString()}
+                    setSelectedValue={(val: string) => {
+                      setAttributeValue(val === 'true');
+                    }}
+                  />
+                </div>
+              )}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'BOOLEAN' &&
+              selectedAttributeCriteria === 'eqOr' && (
+                <CheckboxListbox
                   values={['true', 'false']}
-                  titles={['True', 'False']}
-                  selectedValue={(attributeValue as string).toString()}
-                  setSelectedValue={(val: string) => {
-                    setAttributeValue(val === 'true');
-                  }}
+                  selectedValues={attributeValues}
+                  handleSelectValues={handleSelectBooleanValues}
                 />
-              </div>
-            )}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'BOOLEAN' &&
-            selectedAttributeCriteria === 'eqOr' && (
-              <CheckboxListbox
-                values={['true', 'false']}
-                selectedValues={attributeValues}
-                handleSelectValues={handleSelectBooleanValues}
-              />
-            )}
+              )}
 
-          <ButtonGhost
-            type="button"
-            onClick={resetSearch}
-            title="Cancel"
-          >
-            Cancel
-          </ButtonGhost>
-
-        </div>
+            {selectedAttribute && (
+              <ButtonGhost type="button" onClick={resetSearch} title="Cancel">
+                Cancel
+              </ButtonGhost>
+            )}
+          </div>
+        ) : (
+          <div className="text-sm">
+            (No attributes have been created in this workspace; create an
+            attribute to enable custom metadata for search.)
+          </div>
+        )}
 
         <div className="flex flex-row justify-start flex-wrap gap-2 items-end mt-2">
           {selectedAttributeCriteria !== 'range' &&
@@ -449,14 +465,16 @@ export default function DefaultSearchByAttributes({
                   className="w-4 h-4 min-w-4 text-neutral-900"
                   onClick={() => removeAttributeValueFromList(val)}
                 >
-                  <Close/>
+                  <Close />
                 </button>
               </div>
             ))}
         </div>
       </div>
       <div className="flex justify-end gap-2 mt-2">
-        <ButtonGhost type="button" onClick={onCloseTab}>Cancel</ButtonGhost>
+        <ButtonGhost type="button" onClick={onCloseTab}>
+          Cancel
+        </ButtonGhost>
         <ButtonPrimary type="button" onClick={onSearch}>
           Search
         </ButtonPrimary>

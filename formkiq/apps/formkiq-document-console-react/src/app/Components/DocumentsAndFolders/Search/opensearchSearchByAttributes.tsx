@@ -1,28 +1,28 @@
-import React, {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {DataCacheState} from '../../../Store/reducers/data';
-import {fetchDocuments} from '../../../Store/reducers/documentsList';
-import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../../Store/store';
-import {Attribute} from '../../../helpers/types/attributes';
-import {Link, useLocation, useSearchParams} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { DataCacheState } from '../../../Store/reducers/data';
+import { fetchDocuments } from '../../../Store/reducers/documentsList';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import { Attribute } from '../../../helpers/types/attributes';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
-import {ChevronDown, Close, Plus} from '../../Icons/icons';
-import SearchLine from "./searchLine";
+import { ChevronDown, Close, Plus } from '../../Icons/icons';
+import SearchLine from './searchLine';
 
 export default function OpenSearchByAttributes({
-                                                 siteId,
-                                                 formkiqVersion,
-                                                 subfolderUri,
-                                               }: any) {
+  siteId,
+  formkiqVersion,
+  subfolderUri,
+}: any) {
   const opensearchAttributeCriteria = [
-    {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'One of'},
+    { key: 'eq', title: 'Equal to' },
+    { key: 'eqOr', title: 'One of' },
   ];
   const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,17 +32,27 @@ export default function OpenSearchByAttributes({
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
 
-  const {allAttributes} = useSelector(DataCacheState);
-  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
+  const { allAttributes } = useSelector(DataCacheState);
+  const [attributeKeys, setAttributeKeys] = useState<
+    { key: string; title: string }[]
+  >([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
   );
   const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>('');
-  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string | null>(null);
-  const [attributeValue, setAttributeValue] = useState<string | number | boolean | null>('');
+  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<
+    string | null
+  >(null);
+  const [attributeValue, setAttributeValue] = useState<
+    string | number | boolean | null
+  >('');
   const [attributeValues, setAttributeValues] = useState<any[]>([]);
-  const [selectedAttributesQuery, setSelectedAttributesQuery] = useState<any[]>([]);
-  const [searchInput, setSearchInput] = useState<string>(searchWord ? searchWord : "");
+  const [selectedAttributesQuery, setSelectedAttributesQuery] = useState<any[]>(
+    []
+  );
+  const [searchInput, setSearchInput] = useState<string>(
+    searchWord ? searchWord : ''
+  );
 
   function stringToBoolean(value: string) {
     return value === 'true';
@@ -112,7 +122,7 @@ export default function OpenSearchByAttributes({
   const onSearch = () => {
     let searchAttributes: any = null;
     if (selectedAttributesQuery.length > 0) {
-      searchAttributes = selectedAttributesQuery
+      searchAttributes = selectedAttributesQuery;
     }
     dispatch(
       fetchDocuments({
@@ -128,7 +138,6 @@ export default function OpenSearchByAttributes({
       })
     );
   };
-
 
   function validateAttributeValue(dataType: any, value: any) {
     if (dataType === 'STRING' && typeof value !== 'string') return false;
@@ -271,146 +280,156 @@ export default function OpenSearchByAttributes({
   return (
     <div className="w-full h-full">
       <div className="h-full border-gray-400 border overflow-y-auto p-2">
-        <SearchLine siteId={siteId}
-                    searchWord={searchWord}
-                    onSearch={onSearch}
-                    updateInputValue={updateInputValue}
-                    inputValue={searchInput}
+        <SearchLine
+          siteId={siteId}
+          searchWord={searchWord}
+          onSearch={onSearch}
+          updateInputValue={updateInputValue}
+          inputValue={searchInput}
         />
-        <div className="h-8 gap-2 flex items-center">
-          <div className="h-8 flex items-center gap-2">
-            <RadioCombobox
-              values={attributeKeys}
-              selectedValue={selectedAttributeKey}
-              setSelectedValue={onAttributeSelect}
-              placeholderText="Attribute"
-            />
-            {selectedAttribute && (
-              <div className="text-xs bg-neutral-100 rounded-md font-bold h-8 p-2 text-center whitespace-nowrap">
-                {selectedAttribute.dataType}
-              </div>
-            )}
-          </div>
-          {selectedAttribute &&
-            (selectedAttribute.dataType === 'NUMBER' ||
-              selectedAttribute.dataType === 'STRING' ||
-              selectedAttribute.dataType === 'BOOLEAN') && (
-              <div className="h-8">
-                <RadioListbox
-                  values={opensearchAttributeCriteria.map((item) => item.key)}
-                  titles={opensearchAttributeCriteria.map((item) => item.title)}
-                  selectedValue={selectedAttributeCriteria as string}
-                  setSelectedValue={handleSelectAttributeCriteria}
-                />
-              </div>
-            )}
-
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'STRING' &&
-            selectedAttributeCriteria === 'eq' && (
-              <input
-                type="text"
-                className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                required
-                value={attributeValue as string}
-                onChange={(e: any) => setAttributeValue(e.target.value)}
+        {attributeKeys.length ? (
+          <div className="h-8 gap-2 flex items-center">
+            <div className="h-8 flex items-center gap-2">
+              <RadioCombobox
+                values={attributeKeys}
+                selectedValue={selectedAttributeKey}
+                setSelectedValue={onAttributeSelect}
+                placeholderText="Attribute"
               />
-            )}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'STRING' &&
-            selectedAttributeCriteria === 'eqOr' && (
-              <div className="flex items-center gap-2">
+              {selectedAttribute && (
+                <div className="text-xs bg-neutral-100 rounded-md font-bold h-8 p-2 text-center whitespace-nowrap">
+                  {selectedAttribute.dataType}
+                </div>
+              )}
+            </div>
+            {selectedAttribute &&
+              (selectedAttribute.dataType === 'NUMBER' ||
+                selectedAttribute.dataType === 'STRING' ||
+                selectedAttribute.dataType === 'BOOLEAN') && (
+                <div className="h-8">
+                  <RadioListbox
+                    values={opensearchAttributeCriteria.map((item) => item.key)}
+                    titles={opensearchAttributeCriteria.map(
+                      (item) => item.title
+                    )}
+                    selectedValue={selectedAttributeCriteria as string}
+                    setSelectedValue={handleSelectAttributeCriteria}
+                  />
+                </div>
+              )}
+
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'STRING' &&
+              selectedAttributeCriteria === 'eq' && (
                 <input
                   type="text"
                   className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                  required={attributeValues.length === 0} // check if added at least one attribute
+                  required
                   value={attributeValue as string}
                   onChange={(e: any) => setAttributeValue(e.target.value)}
                 />
-                <button
-                  type="button"
-                  onClick={addAttributeValueToList}
-                  title="Add"
-                  className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
-                >
-                  <Plus/>
-                </button>
-              </div>
-            )}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'NUMBER' &&
-            selectedAttributeCriteria === 'eq' && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                  required
-                  value={attributeValue as number}
-                  onChange={(e: any) => setAttributeValue(e.target.value)}
-                />
-              </div>
-            )}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'NUMBER' &&
-            selectedAttributeCriteria === 'eqOr' && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                  required={attributeValues.length === 0} // check if added at least one attribute
-                  value={attributeValue as number}
-                  onChange={(e: any) => setAttributeValue(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={addAttributeValueToList}
-                  title="Add"
-                  className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
-                >
-                  <Plus/>
-                </button>
-              </div>
-            )}
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'BOOLEAN' &&
-            selectedAttributeCriteria === 'eq' && (
-              <div className="flex items-center gap-2 h-full">
-                <RadioListbox
+              )}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'STRING' &&
+              selectedAttributeCriteria === 'eqOr' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                    required={attributeValues.length === 0} // check if added at least one attribute
+                    value={attributeValue as string}
+                    onChange={(e: any) => setAttributeValue(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={addAttributeValueToList}
+                    title="Add"
+                    className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
+                  >
+                    <Plus />
+                  </button>
+                </div>
+              )}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'NUMBER' &&
+              selectedAttributeCriteria === 'eq' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                    required
+                    value={attributeValue as number}
+                    onChange={(e: any) => setAttributeValue(e.target.value)}
+                  />
+                </div>
+              )}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'NUMBER' &&
+              selectedAttributeCriteria === 'eqOr' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                    required={attributeValues.length === 0} // check if added at least one attribute
+                    value={attributeValue as number}
+                    onChange={(e: any) => setAttributeValue(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={addAttributeValueToList}
+                    title="Add"
+                    className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
+                  >
+                    <Plus />
+                  </button>
+                </div>
+              )}
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'BOOLEAN' &&
+              selectedAttributeCriteria === 'eq' && (
+                <div className="flex items-center gap-2 h-full">
+                  <RadioListbox
+                    values={['true', 'false']}
+                    titles={['True', 'False']}
+                    selectedValue={(attributeValue as string).toString()}
+                    setSelectedValue={(val: string) => {
+                      setAttributeValue(val === 'true');
+                    }}
+                  />
+                </div>
+              )}
+
+            {selectedAttribute &&
+              selectedAttribute.dataType === 'BOOLEAN' &&
+              selectedAttributeCriteria === 'eqOr' && (
+                <CheckboxListbox
                   values={['true', 'false']}
-                  titles={['True', 'False']}
-                  selectedValue={(attributeValue as string).toString()}
-                  setSelectedValue={(val: string) => {
-                    setAttributeValue(val === 'true');
-                  }}
+                  selectedValues={attributeValues}
+                  handleSelectValues={handleSelectBooleanValues}
                 />
-              </div>
-            )}
+              )}
 
-          {selectedAttribute &&
-            selectedAttribute.dataType === 'BOOLEAN' &&
-            selectedAttributeCriteria === 'eqOr' && (
-              <CheckboxListbox
-                values={['true', 'false']}
-                selectedValues={attributeValues}
-                handleSelectValues={handleSelectBooleanValues}
-              />
+            {selectedAttribute && (
+              <>
+                <ButtonSecondary
+                  type="button"
+                  onClick={addAttributeToQuery}
+                  title="Add"
+                >
+                  Add
+                </ButtonSecondary>
+                <ButtonGhost type="button" onClick={resetValues} title="Cancel">
+                  Cancel
+                </ButtonGhost>
+              </>
             )}
-
-          <ButtonSecondary
-            type="button"
-            onClick={addAttributeToQuery}
-            title="Add"
-          >
-            Add
-          </ButtonSecondary>
-          <ButtonGhost
-            type="button"
-            onClick={resetValues}
-            title="Cancel"
-          >
-            Cancel
-          </ButtonGhost>
-        </div>
+          </div>
+        ) : (
+          <div className="text-sm">
+            (No attributes have been created in this workspace; create an
+            attribute to enable custom metadata for search.)
+          </div>
+        )}
         <div className="flex flex-row justify-start flex-wrap gap-2 items-end mt-2">
           {attributeValues.map((val: string, i: number) => (
             <div
@@ -427,7 +446,7 @@ export default function OpenSearchByAttributes({
                 className="w-4 h-4 min-w-4 text-neutral-900"
                 onClick={() => removeAttributeValueFromList(val)}
               >
-                <Close/>
+                <Close />
               </button>
             </div>
           ))}
@@ -436,78 +455,80 @@ export default function OpenSearchByAttributes({
         {selectedAttributesQuery.length > 0 && (
           <table className="border border-neutral-300 table-fixed text-sm text-left mt-2 bg-white">
             <thead>
-            <tr>
-              <th className="w-52 px-2">Key</th>
-              <th className="w-32 px-2">Criteria</th>
-              <th className="w-96 px-2">Values</th>
-              <th className="w-8"></th>
-            </tr>
+              <tr>
+                <th className="w-52 px-2">Key</th>
+                <th className="w-32 px-2">Criteria</th>
+                <th className="w-96 px-2">Values</th>
+                <th className="w-8"></th>
+              </tr>
             </thead>
             <tbody>
-            {selectedAttributesQuery.map((item: any, i: number) => (
-              <tr key={i} className="border-t border-neutral-300">
-                <td className="px-2">{item.key}</td>
-                <td className="px-2">
-                  {item.eq && 'Equal to'}
-                  {item.eqOr && 'One of'}
-                </td>
-                <td className="px-2">
-                  {item.eq &&
-                    item.eq.stringValue !== undefined &&
-                    '"' + item.eq.stringValue + '"'}
-                  {item.eqOr &&
-                    item.eqOr
-                      .filter((val: any) => val.stringValue)
-                      .map((val: any) => '"' + val.stringValue + '"')
-                      .join(', ')}
-                  {item.eq &&
-                    item.eq.numberValue !== undefined &&
-                    '"' + item.eq.numberValue + '"'}
-                  {item.eqOr &&
-                    item.eqOr
-                      .filter((val: any) => val.numberValue)
-                      .map((val: any) => '"' + val.numberValue + '"')
-                      .join(', ')}
-                  {item.eq &&
-                    item.eq.booleanValue !== undefined &&
-                    '"' + item.eq.booleanValue.toString() + '"'}
-                  {item.eqOr &&
-                    item.eqOr
-                      .filter((val: any) => val.booleanValue !== undefined)
-                      .map(
-                        (val: any) => '"' + val.booleanValue.toString() + '"'
-                      )
-                      .join(', ')}
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    className="p-1 text-neutral-500 h-6 w-6 hover:text-red-500"
-                    onClick={() => {
-                      setSelectedAttributesQuery(
-                        selectedAttributesQuery.filter(
-                          (_: any, j: number) => j !== i
+              {selectedAttributesQuery.map((item: any, i: number) => (
+                <tr key={i} className="border-t border-neutral-300">
+                  <td className="px-2">{item.key}</td>
+                  <td className="px-2">
+                    {item.eq && 'Equal to'}
+                    {item.eqOr && 'One of'}
+                  </td>
+                  <td className="px-2">
+                    {item.eq &&
+                      item.eq.stringValue !== undefined &&
+                      '"' + item.eq.stringValue + '"'}
+                    {item.eqOr &&
+                      item.eqOr
+                        .filter((val: any) => val.stringValue)
+                        .map((val: any) => '"' + val.stringValue + '"')
+                        .join(', ')}
+                    {item.eq &&
+                      item.eq.numberValue !== undefined &&
+                      '"' + item.eq.numberValue + '"'}
+                    {item.eqOr &&
+                      item.eqOr
+                        .filter((val: any) => val.numberValue)
+                        .map((val: any) => '"' + val.numberValue + '"')
+                        .join(', ')}
+                    {item.eq &&
+                      item.eq.booleanValue !== undefined &&
+                      '"' + item.eq.booleanValue.toString() + '"'}
+                    {item.eqOr &&
+                      item.eqOr
+                        .filter((val: any) => val.booleanValue !== undefined)
+                        .map(
+                          (val: any) => '"' + val.booleanValue.toString() + '"'
                         )
-                      );
-                    }}
-                    title="Remove"
-                  >
-                    <Close/>
-                  </button>
-                </td>
-              </tr>
-            ))}
+                        .join(', ')}
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="p-1 text-neutral-500 h-6 w-6 hover:text-red-500"
+                      onClick={() => {
+                        setSelectedAttributesQuery(
+                          selectedAttributesQuery.filter(
+                            (_: any, j: number) => j !== i
+                          )
+                        );
+                      }}
+                      title="Remove"
+                    >
+                      <Close />
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         )}
       </div>
 
-      <div className="flex justify-end gap-2 mt-2">
-        <Link to="?advancedSearch=hidden"
-              className="text-sm flex gap-2 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap">
+      <div className="flex justify-end gap-2 mt-1">
+        <Link
+          to="?advancedSearch=hidden"
+          className="text-sm flex gap-2 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap"
+        >
           Minimize Search Tab
-          <div className="w-4 h-4 rotate-180">
-            <ChevronDown/>
+          <div className="w-4 h-4 -mt-1 rotate-180">
+            <ChevronDown />
           </div>
         </Link>
         <ButtonGhost type="button" onClick={onCloseTab}>
