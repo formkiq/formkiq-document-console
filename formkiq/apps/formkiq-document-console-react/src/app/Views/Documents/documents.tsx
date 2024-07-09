@@ -15,6 +15,7 @@ import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal'
 import MultiValuedAttributeModal from '../../Components/DocumentsAndFolders/MultivaluedAttributeModal/MultivaluedAttributeModal';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
+import AdvancedSearchTab from '../../Components/DocumentsAndFolders/Search/advancedSearchTab';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
@@ -40,15 +41,14 @@ import {
   AttributesState,
   fetchDocumentAttributes,
 } from '../../Store/reducers/attributes';
+import { AttributesDataState } from '../../Store/reducers/attributesData';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import {
   ConfigState,
   setCurrentActionEvent,
   setPendingArchive,
 } from '../../Store/reducers/config';
-import {
-  setCurrentDocumentPath,
-} from '../../Store/reducers/data';
+import { setCurrentDocumentPath } from '../../Store/reducers/data';
 import {
   DocumentListState,
   deleteDocument,
@@ -81,8 +81,6 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import AdvancedSearchTab from "../../Components/DocumentsAndFolders/Search/advancedSearchTab";
-import {AttributesDataState} from "../../Store/reducers/attributesData";
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -115,9 +113,7 @@ function Documents() {
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
-  const advancedSearch = new URLSearchParams(search).get(
-      'advancedSearch'
-  );
+  const advancedSearch = new URLSearchParams(search).get('advancedSearch');
   const { hash } = useLocation();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
@@ -310,6 +306,7 @@ function Documents() {
       ...documentAttributes,
     ];
     sortedDocumentAttributesAndTags.sort((a, b) => a.key.localeCompare(b.key));
+    console.log(sortedDocumentAttributesAndTags);
     setSortedAttributesAndTags(sortedDocumentAttributesAndTags);
   }, [documentAttributes, currentDocumentTags]);
 
@@ -1296,23 +1293,32 @@ function Documents() {
                 )}
               {!formkiqVersion.modules.includes('typesense') &&
                 !formkiqVersion.modules.includes('opensearch') &&
-                !advancedSearch &&
-                (<Link to="?advancedSearch=visible"
-                       className="cursor-pointer h-8">
-                  <ButtonGhost type="button">Search Documents...</ButtonGhost>
-                </Link>)}
-              {
-                (!formkiqVersion.modules.includes('typesense') &&
+                !advancedSearch && (
+                  <Link
+                    to="?advancedSearch=visible"
+                    className="cursor-pointer h-8"
+                  >
+                    <ButtonGhost type="button">Search Documents...</ButtonGhost>
+                  </Link>
+                )}
+              {!formkiqVersion.modules.includes('typesense') &&
                 !formkiqVersion.modules.includes('opensearch') &&
-                advancedSearch) &&
-                (advancedSearch === "hidden" ?
-                (<Link to="?advancedSearch=visible"
-                       className="cursor-pointer h-8">
-                  <ButtonGhost type="button">Expand Search Tab</ButtonGhost>
-                </Link>): <Link to="?advancedSearch=hidden"
-                               className="cursor-pointer h-8">
+                advancedSearch &&
+                (advancedSearch === 'hidden' ? (
+                  <Link
+                    to="?advancedSearch=visible"
+                    className="cursor-pointer h-8"
+                  >
+                    <ButtonGhost type="button">Expand Search Tab</ButtonGhost>
+                  </Link>
+                ) : (
+                  <Link
+                    to="?advancedSearch=hidden"
+                    className="cursor-pointer h-8"
+                  >
                     <ButtonGhost type="button">Minimize Search Tab</ButtonGhost>
-                  </Link> )}
+                  </Link>
+                ))}
               <div
                 className={
                   (isTagFilterExpanded
@@ -1329,7 +1335,6 @@ function Documents() {
               >
                 <Tag />
               </div>
-
             </div>
           </div>
           <div
@@ -1350,13 +1355,13 @@ function Documents() {
                 </div>
               )}
               {advancedSearch && (
-                  <div className="pt-2 pr-8">
-                      <AdvancedSearchTab
-                        siteId={currentSiteId}
-                        formkiqVersion={formkiqVersion}
-                        subfolderUri={subfolderUri}
-                      />
-                  </div>
+                <div className="pt-2 pr-8">
+                  <AdvancedSearchTab
+                    siteId={currentSiteId}
+                    formkiqVersion={formkiqVersion}
+                    subfolderUri={subfolderUri}
+                  />
+                </div>
               )}
               <DocumentsTable
                 onDeleteDocument={onDeleteDocument}
@@ -1605,9 +1610,7 @@ function Documents() {
                             </dd>
                           </div>
                         )}
-
                         <div className="w-68 flex mr-3 border-b"></div>
-
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
                           Attributes
                           {!isSiteReadOnly && (
@@ -1642,66 +1645,68 @@ function Documents() {
                           </span>
                         )}
                         {sortedAttributesAndTags.length > 0 &&
-                          sortedAttributesAndTags.filter((item: any, i) => {
-                            if (
-                              !item.stringValue &&
-                              !item.numberValue &&
-                              !item.booleanValue &&
-                              !item.value &&
-                              !item.values &&
-                              !item.stringValues &&
-                              !item.numberValues
-                            ) {
-                              return true;
-                            }
-                            return false;
-                          }).length && (
-                            <>
-                              <div className="mt-2 text-smaller font-semibold uppercase italic">
-                                Key-Only Attributes
-                              </div>
-                              <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 flex flex-wrap">
-                                {sortedAttributesAndTags.length > 0 &&
-                                  sortedAttributesAndTags.map(
-                                    (item: any, i) => {
-                                      let tagColor = 'gray';
-                                      if (tagColors) {
-                                        tagColors.forEach((color: any) => {
-                                          if (
-                                            color.tagKeys.indexOf(item.key) > -1
-                                          ) {
-                                            tagColor = color.colorUri;
-                                            return;
-                                          }
-                                        });
+                        sortedAttributesAndTags.filter((item: any, i) => {
+                          if (
+                            !item.stringValue &&
+                            !item.numberValue &&
+                            !item.booleanValue &&
+                            item.valueType !== 'BOOLEAN' &&
+                            !item.value &&
+                            !item.values &&
+                            !item.stringValues &&
+                            !item.numberValues
+                          ) {
+                            return true;
+                          }
+                          return false;
+                        }).length ? (
+                          <>
+                            <div className="mt-2 text-smaller font-semibold uppercase italic">
+                              Key-Only Attributes
+                            </div>
+                            <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 flex flex-wrap">
+                              {sortedAttributesAndTags.length > 0 &&
+                                sortedAttributesAndTags.map((item: any, i) => {
+                                  let tagColor = 'gray';
+                                  if (tagColors) {
+                                    tagColors.forEach((color: any) => {
+                                      if (
+                                        color.tagKeys.indexOf(item.key) > -1
+                                      ) {
+                                        tagColor = color.colorUri;
+                                        return;
                                       }
-                                      return (
-                                        <>
-                                          {!item.stringValue &&
-                                            !item.numberValue &&
-                                            !item.booleanValue &&
-                                            !item.value &&
-                                            !item.values &&
-                                            !item.stringValues &&
-                                            !item.numberValues && (
-                                              <div className="pt-0.5 pr-1 flex">
-                                                <div
-                                                  className={`h-5.5 pl-2 text-smaller rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
-                                                >
-                                                  {item.key}
-                                                </div>
-                                                <div
-                                                  className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                                                ></div>
-                                              </div>
-                                            )}
-                                        </>
-                                      );
-                                    }
-                                  )}
-                              </div>
-                            </>
-                          )}
+                                    });
+                                  }
+                                  return (
+                                    <>
+                                      {!item.stringValue &&
+                                        !item.numberValue &&
+                                        !item.booleanValue &&
+                                        item.valueType !== 'BOOLEAN' &&
+                                        !item.value &&
+                                        !item.values &&
+                                        !item.stringValues &&
+                                        !item.numberValues && (
+                                          <div className="pt-0.5 pr-1 flex">
+                                            <div
+                                              className={`h-5.5 pl-2 text-smaller rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                                            >
+                                              {item.key}
+                                            </div>
+                                            <div
+                                              className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                                            ></div>
+                                          </div>
+                                        )}
+                                    </>
+                                  );
+                                })}
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                         <div>
                           {sortedAttributesAndTags.length > 0 &&
                             sortedAttributesAndTags.map((item: any, i) => (
@@ -1709,6 +1714,7 @@ function Documents() {
                                 {!item.stringValue &&
                                 !item.numberValue &&
                                 !item.booleanValue &&
+                                item.valueType !== 'BOOLEAN' &&
                                 !item.value &&
                                 !item.values &&
                                 !item.stringValues &&
@@ -1760,8 +1766,16 @@ function Documents() {
                                       {item?.numberValue !== undefined && (
                                         <span>{item.numberValue}</span>
                                       )}
-                                      {item?.booleanValue !== undefined && (
-                                        <span>{item.booleanValue}</span>
+                                      {item?.booleanValue !== undefined ? (
+                                        <>
+                                          {item.booleanValue ? (
+                                            <span>TRUE</span>
+                                          ) : (
+                                            <span>FALSE</span>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <></>
                                       )}
                                       {item?.stringValues !== undefined && (
                                         <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
