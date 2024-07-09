@@ -44,6 +44,9 @@ function AddDocumentAttributeForm({
     setSelectedAttribute(attribute)
     setStringValues([]);
     setNumberValues([]);
+    setValue("stringValue", undefined)
+    setValue("numberValue", undefined)
+    setValue("booleanValue", undefined)
   }, [selectedAttributeKey])
 
   const {
@@ -104,8 +107,9 @@ function AddDocumentAttributeForm({
     reset()
   }
   const onAddAttributeSubmit = async (data: any) => {
+    if(!selectedAttribute) return;
     let documentAttributes = {}
-    if (data.stringValue && stringValues.length === 0) {
+    if (data.stringValue && stringValues.length === 0 && selectedAttribute.dataType === "STRING") {
       documentAttributes = {
         attributes: [{
           key: selectedAttributeKey,
@@ -113,7 +117,7 @@ function AddDocumentAttributeForm({
         }]
       }
     }
-    if (stringValues.length > 0) {
+    if (stringValues.length > 0 && selectedAttribute.dataType === "STRING") {
       if (stringValues.length === 1) {
         documentAttributes = {
           attributes: [{
@@ -131,7 +135,7 @@ function AddDocumentAttributeForm({
       }
     }
 
-    if (data.numberValue!==undefined && numberValues.length === 0) {
+    if (data.numberValue !== undefined && numberValues.length === 0 && selectedAttribute.dataType === "NUMBER") {
       documentAttributes = {
         attributes: [{
           key: selectedAttributeKey,
@@ -140,7 +144,7 @@ function AddDocumentAttributeForm({
       }
     }
 
-    if (numberValues.length > 0) {
+    if (numberValues.length > 0 && selectedAttribute.dataType === "NUMBER") {
       if (numberValues.length === 1) {
         documentAttributes = {
           attributes: [{
@@ -281,28 +285,6 @@ function AddDocumentAttributeForm({
             >
               Add
             </ButtonPrimaryGradient>
-          </div>
-          <div className="flex flex-row justify-start flex-wrap gap-2 items-end ml-2">
-            {stringValues.map((val: string, i: number) => (<div key={"value_" + i}
-                                                                title={val}
-                                                                className="cursor-pointer py-1 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border border-neutral-500 text-neutral-900 bg-white">
-              <span className="truncate overflow-hidden max-w-64 max-w-[256px]">"{val}"</span>
-              <button title="Remove Value" type="button"
-                      className="w-4 h-4 min-w-4 text-neutral-900"
-                      onClick={() => handleRemoveStringValue(i)}>
-                <Close/>
-              </button>
-            </div>))}
-            {numberValues.map((val: number, i: number) => (<div key={"value_" + i}
-                                                                title={val.toString()}
-                                                                className="cursor-pointer py-1 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border border-neutral-500 text-neutral-900 bg-white">
-              <span className="truncate overflow-hidden max-w-64 max-w-[256px]">{val}</span>
-              <button title="Remove Value" type="button"
-                      className="w-4 h-4 min-w-4 text-neutral-900"
-                      onClick={() => handleRemoveNumberValue(i)}>
-                <Close/>
-              </button>
-            </div>))}
           </div>
           <div className="flex flex-row justify-start flex-wrap gap-2 items-end ml-2">
             {stringValues.map((val: string, i: number) => (<div key={"value_" + i}
