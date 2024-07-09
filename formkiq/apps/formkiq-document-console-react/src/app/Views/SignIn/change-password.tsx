@@ -3,16 +3,16 @@ import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import { Spinner } from '../../Components/Icons/icons';
 import { AuthState } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
 import { DataCacheState } from '../../Store/reducers/data';
 import { openDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
 import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
-import { Spinner } from '../../Components/Icons/icons';
 
 export function ChangePassword() {
-  const [isSpinnerDisplayed, setIsSpinnerDisplayed] = useState(false)
+  const [isSpinnerDisplayed, setIsSpinnerDisplayed] = useState(false);
   const {
     register,
     formState: { errors },
@@ -33,7 +33,7 @@ export function ChangePassword() {
   const { documentApi, userPoolId, clientId } = useSelector(ConfigState);
 
   const onSubmit = async (data: any) => {
-    setIsSpinnerDisplayed(true)
+    setIsSpinnerDisplayed(true);
     let newformkiqClient = formkiqClient;
     if (!formkiqClient.apiClient) {
       newformkiqClient = new FormkiqClient(documentApi, userPoolId, clientId);
@@ -49,14 +49,22 @@ export function ChangePassword() {
     await newformkiqClient.documentsApi.apiClient.cognitoClient
       .confirmPassword(email, verificationCode, data.newPassword)
       .then((response: any) => {
-        setIsSpinnerDisplayed(false)
+        setIsSpinnerDisplayed(false);
         if (response.cognitoErrorCode) {
-          dispatch(
-            openDialog({
-              dialogTitle:
-                'An error occurred. Please try again in a few minutes.',
-            })
-          );
+          if (response.message) {
+            dispatch(
+              openDialog({
+                dialogTitle: response.message,
+              })
+            );
+          } else {
+            dispatch(
+              openDialog({
+                dialogTitle:
+                  'An unexpected error has occurred. Please try again in a few minutes.',
+              })
+            );
+          }
         } else {
           dispatch(
             openDialog({ dialogTitle: 'Your password has been changed.' })
@@ -143,7 +151,14 @@ export function ChangePassword() {
                 value="Set New Password"
                 className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-md flex cursor-pointer focus:outline-none"
               />
-              {isSpinnerDisplayed&&<div className="absolute" style={{right: 'calc(50% - 160px)', top:'5px'}}><Spinner/></div>}
+              {isSpinnerDisplayed && (
+                <div
+                  className="absolute"
+                  style={{ right: 'calc(50% - 160px)', top: '5px' }}
+                >
+                  <Spinner />
+                </div>
+              )}
             </div>
             <div className="mt-8 w-full text-center">
               <a className="underline" href="/sign-in">

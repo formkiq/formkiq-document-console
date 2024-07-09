@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
@@ -25,12 +26,11 @@ import { ConfigService } from '../../helpers/services/configService';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { LocalStorage } from '../../helpers/tools/useLocalStorage';
 import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
-import { useState } from 'react';
 
 const storage: LocalStorage = LocalStorage.Instance;
 
 export function SignIn() {
-  const [isSpinnerDisplayed, setIsSpinnerDisplayed] = useState(false)
+  const [isSpinnerDisplayed, setIsSpinnerDisplayed] = useState(false);
   const {
     register,
     formState: { errors },
@@ -199,13 +199,20 @@ export function SignIn() {
                     );
                     break;
                   default:
-                    dispatch(
-                      openDialog({
-                        dialogTitle:
-                          'An unexpected error has occurred. Please try again in a few minutes.',
-                      })
-                    );
-                    console.log(obj.body);
+                    if (obj.body.message) {
+                      dispatch(
+                        openDialog({
+                          dialogTitle: obj.body.message,
+                        })
+                      );
+                    } else {
+                      dispatch(
+                        openDialog({
+                          dialogTitle:
+                            'An unexpected error has occurred. Please try again in a few minutes.',
+                        })
+                      );
+                    }
                     break;
                 }
               } else {
@@ -215,7 +222,6 @@ export function SignIn() {
                       'An unexpected error has occurred. Please try again in a few minutes.',
                   })
                 );
-                console.log(obj.body);
               }
             }
           });
@@ -424,7 +430,14 @@ export function SignIn() {
                   value="Sign In"
                   className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-md flex cursor-pointer focus:outline-none"
                 />
-                {isSpinnerDisplayed&&<div className="absolute" style={{right: 'calc(50% - 110px)', top:'5px'}}><Spinner/></div>}
+                {isSpinnerDisplayed && (
+                  <div
+                    className="absolute"
+                    style={{ right: 'calc(50% - 110px)', top: '5px' }}
+                  >
+                    <Spinner />
+                  </div>
+                )}
               </div>
               <div className="mt-8 w-full text-center">
                 <a
