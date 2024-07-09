@@ -248,9 +248,15 @@ function DocumentListLine({
   }
 
   useEffect(() => {
-    if (!file.attributes) return;
+    if (!file.attributes) {
+      setKeyOnlyAttributesKeys([])
+      return
+    };
     const attributesKeys = Object.keys(file.attributes);
-    if (attributesKeys.length === 0) return;
+    if (attributesKeys.length === 0) {
+      setKeyOnlyAttributesKeys([])
+      return;
+    }
     const keyOnlyAttributes = attributesKeys.filter((key) => file.attributes[key].valueType === 'KEY_ONLY')
     setKeyOnlyAttributesKeys(keyOnlyAttributes)
   },[file])

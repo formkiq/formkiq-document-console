@@ -47,9 +47,6 @@ import {
   setPendingArchive,
 } from '../../Store/reducers/config';
 import {
-  DataCacheState,
-  setAllAttributes,
-  setAllTags,
   setCurrentDocumentPath,
 } from '../../Store/reducers/data';
 import {
@@ -85,6 +82,7 @@ import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
 import AdvancedSearchTab from "../../Components/DocumentsAndFolders/Search/advancedSearchTab";
+import {AttributesDataState} from "../../Store/reducers/attributesData";
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -107,7 +105,7 @@ function Documents() {
     useSoftDelete,
     pendingArchive,
   } = useSelector(ConfigState);
-  const { allTags, allAttributes } = useSelector(DataCacheState);
+  const { allTags, allAttributes } = useSelector(AttributesDataState);
   const { documentAttributes } = useSelector(AttributesState);
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
@@ -375,26 +373,6 @@ function Documents() {
       }
     }
   }, [currentActionEvent, actionEvent]);
-
-  function updateAllAttributes() {
-    DocumentsService.getAttributes(currentSiteId).then((response: any) => {
-      const allAttributeData = {
-        allAttributes: response?.attributes,
-        attributesLastRefreshed: new Date(),
-        attributesSiteId: currentSiteId,
-      };
-      dispatch(setAllAttributes(allAttributeData));
-    });
-  }
-  // load all attributes initially
-  useEffect(() => {
-    updateAllAttributes();
-  }, []);
-
-  // update all attributes when switching sites
-  useEffect(() => {
-    updateAllAttributes();
-  }, [currentSiteId]);
 
   const updateTags = () => {
     if (infoDocumentId.length) {

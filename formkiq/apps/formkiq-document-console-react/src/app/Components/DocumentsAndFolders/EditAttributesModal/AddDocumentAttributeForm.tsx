@@ -7,10 +7,10 @@ import {DocumentsService} from "../../../helpers/services/documentsService";
 import {useForm} from "react-hook-form";
 import {useAppDispatch} from "../../../Store/store";
 import AddAttributeForm from "./AddAttributeForm";
-import {DataCacheState} from "../../../Store/reducers/data";
 import RadioCombobox from "../../Generic/Listboxes/RadioCombobox";
 import {fetchDocumentAttributes} from "../../../Store/reducers/attributes";
 import {Close, Plus} from "../../Icons/icons";
+import {AttributesDataState} from "../../../Store/reducers/attributesData";
 
 function AddDocumentAttributeForm({
                                     onDocumentDataChange,
@@ -18,7 +18,7 @@ function AddDocumentAttributeForm({
                                     value,
                                     getValue,
                                   }: any) {
-  const {allAttributes} = useSelector(DataCacheState);
+  const {allAttributes} = useSelector(AttributesDataState);
   const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
   const [attributeKeys, setAttributeKeys] = useState<{ key: string, title: string }[]>([])

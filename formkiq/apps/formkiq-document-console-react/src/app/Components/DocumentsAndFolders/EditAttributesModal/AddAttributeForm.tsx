@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
-import { setAllAttributes } from '../../../Store/reducers/data';
+import { setAllAttributesData } from '../../../Store/reducers/attributesData';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
@@ -69,7 +69,7 @@ function AddAttributeForm({
             attributesLastRefreshed: new Date(),
             attributesSiteId: siteId,
           };
-          dispatch(setAllAttributes(allAttributeData));
+          dispatch(setAllAttributesData(allAttributeData));
         }
       });
 

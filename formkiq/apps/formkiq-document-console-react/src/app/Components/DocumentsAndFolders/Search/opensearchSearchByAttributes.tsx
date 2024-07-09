@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { DataCacheState } from '../../../Store/reducers/data';
-import { fetchDocuments } from '../../../Store/reducers/documentsList';
-import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
-import { useAppDispatch } from '../../../Store/store';
-import { Attribute } from '../../../helpers/types/attributes';
+import {useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {fetchDocuments} from '../../../Store/reducers/documentsList';
+import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
+import {useAppDispatch} from '../../../Store/store';
+import {Attribute} from '../../../helpers/types/attributes';
+import {Link, useLocation, useSearchParams} from 'react-router-dom';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
-import { ChevronDown, Close, Plus } from '../../Icons/icons';
-import SearchLine from './searchLine';
+import {ChevronDown, Close, Plus} from '../../Icons/icons';
+import SearchLine from "./searchLine";
+import {AttributesDataState} from "../../../Store/reducers/attributesData";
 
 export default function OpenSearchByAttributes({
   siteId,
@@ -32,10 +32,8 @@ export default function OpenSearchByAttributes({
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
 
-  const { allAttributes } = useSelector(DataCacheState);
-  const [attributeKeys, setAttributeKeys] = useState<
-    { key: string; title: string }[]
-  >([]);
+  const {allAttributes} = useSelector(AttributesDataState);
+  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
   );

@@ -3,12 +3,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {Link, useLocation, useNavigate, useSearchParams} from 'react-router-dom';
 import { ConfigState } from '../../../Store/reducers/config';
-import { DataCacheState } from '../../../Store/reducers/data';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { formatDate, getFileIcon } from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
 import { FolderSolid, MoreActions, Search, Spinner } from '../../Icons/icons';
 import AdvancedSearchModal from './advancedSearchModal';
+import {AttributesDataState} from "../../../Store/reducers/attributesData";
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function SearchInput({
   const navigate = useNavigate();
 
   const { formkiqVersion, useAdvancedSearch } = useSelector(ConfigState);
-  const { allTags, allAttributes } = useSelector(DataCacheState);
+  const {allTags, allAttributes} = useSelector(AttributesDataState);
   const [searchParams, setSearchParams] = useSearchParams();
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, setExpanded);
