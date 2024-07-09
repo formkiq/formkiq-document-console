@@ -496,17 +496,15 @@ export default function UploadModal({
                             </label>
                           </div>
                         )}
-                        {formkiqVersion.modules?.indexOf('ocr') > -1 && (
-                          <div className="px-4">
-                            <input id="actionCheckboxOcr" type="checkbox" />
-                            <label
-                              htmlFor="actionCheckboxOcr"
-                              className="pl-2 font-semibold cursor-pointer"
-                            >
-                              Retrieve and Store Content Using OCR
-                            </label>
-                          </div>
-                        )}
+                        <div className="px-4">
+                          <input id="actionCheckboxOcr" type="checkbox" />
+                          <label
+                            htmlFor="actionCheckboxOcr"
+                            className="pl-2 font-semibold cursor-pointer"
+                          >
+                            Retrieve and Store Content Using OCR
+                          </label>
+                        </div>
                         {formkiqVersion.modules?.indexOf('typesense') > -1 &&
                           formkiqVersion.modules?.indexOf('opensearch') ===
                             -1 && (
@@ -537,7 +535,7 @@ export default function UploadModal({
                             </label>
                           </div>
                         )}
-                        {isAiScanEnabled ? (
+                        {isAiScanEnabled && (
                           <div className="px-4">
                             <input
                               id="actionCheckboxDocumentTypeTag"
@@ -553,7 +551,7 @@ export default function UploadModal({
                               </span>
                             </label>
                           </div>
-                        ) : undefined}
+                        )}
                       </div>
                     </div>
                     <div>
