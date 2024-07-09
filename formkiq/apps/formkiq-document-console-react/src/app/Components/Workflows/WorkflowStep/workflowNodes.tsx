@@ -24,6 +24,7 @@ import FulltextSearch from "./Steps/FulltextSearch";
 import Antivirus from "./Steps/Antivirus";
 import Queue from './Steps/Queue';
 import {NodeNameSelector} from "./NodeComponents/NodeNameSelector";
+import Publish from "./Steps/Publish";
 
 
 const getNodeId = () => `node_${uuid()}`;
@@ -139,6 +140,9 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
           <Queue isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
                  siteId={siteId}/>
         )}
+        {data?.label === 'PUBLISH' && (
+          <Publish isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+        )}
       </div>
     </>
   );
@@ -231,6 +235,9 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
         )}
         {newStep?.name === 'QUEUE' && (
           <Queue newStep={newStep} setNewStep={setNewStep} isEditing={true} site onChange={onChange}/>
+        )}
+        {newStep?.name === 'PUBLISH' && (
+            <Publish newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
 
         {!isAddButtonDisabled && newStep !== null && (
