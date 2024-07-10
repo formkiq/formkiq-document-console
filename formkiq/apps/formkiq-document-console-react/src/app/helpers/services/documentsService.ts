@@ -1730,80 +1730,6 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getTagSchemas(
-    siteId: string,
-    next = null,
-    limit = 20
-  ): Promise<any> {
-    if (!siteId) {
-      siteId = this.determineSiteId();
-    }
-    return this.getFormkiqClient().tagSchemasApi.getTagSchemas({
-      siteId,
-      next,
-      limit,
-    });
-  }
-
-  @formkiqAPIHandler
-  public static async getTagSchema(
-    tagSchemaId: string,
-    siteId: string
-  ): Promise<any> {
-    if (!siteId) {
-      siteId = this.determineSiteId();
-    }
-    return this.getFormkiqClient().tagSchemasApi.getTagSchema({
-      tagSchemaId,
-      siteId,
-    });
-  }
-
-  @formkiqAPIHandler
-  public static async addTagSchema(
-    addTagSchemaParameters: any,
-    siteId: string
-  ): Promise<any> {
-    if (!siteId) {
-      siteId = this.determineSiteId();
-    }
-    return this.getFormkiqClient().tagSchemasApi.addTagSchema({
-      addTagSchemaParameters,
-      siteId,
-    });
-  }
-
-  // @formkiqAPIHandler
-  // public static async updateTagSchema(
-  //   tagSchemaId: string,
-  //   addTagSchemaParameters: any,
-  //   siteId: string
-  // ): Promise<any> {
-  //   if (!siteId) {
-  //     siteId = this.determineSiteId();
-  //   }
-  //   return this.getFormkiqClient().tagSchemasApi.patchTagSchema({
-  //     tagSchemaId,
-  //     addTagSchemaParameters,
-  //     siteId,
-  //   });
-  // }
-
-  @formkiqAPIHandler
-  public static async deleteTagSchema(
-    tagSchemaId: string,
-    siteId: string
-  ): Promise<any> {
-    if (!siteId) {
-      siteId = this.determineSiteId();
-    }
-    return this.getFormkiqClient().tagSchemasApi.deleteTagSchema({
-      tagSchemaId,
-      siteId,
-    });
-  }
-
-  @formkiqAPIHandler
   public static async addDecisionToDocumentWorkflow(
     siteId: string,
     documentId: string,
@@ -2114,6 +2040,84 @@ export class DocumentsService {
       return this.getFormkiqClient().userManagementApi.getGroup({
           groupName,
       });
+  }
+
+  @formkiqAPIHandler
+    public static async getSiteSchema(
+      siteId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().schemasApi.getSiteSchema({
+      siteId,
+    });
+  }
+  @formkiqAPIHandler
+    public static async setSiteSchema(
+      siteId: string,
+      schema: any,
+  ): Promise<any> {
+    return this.getFormkiqClient().schemasApi.setSiteSchema({
+      siteId,
+      schema,
+    })
+  }
+
+  @formkiqAPIHandler
+    public static async getSiteClassifications(
+      siteId: string,
+      limit = 20,
+      next = null,
+  ): Promise<any> {
+    return this.getFormkiqClient().schemasApi.getSiteClassifications({
+      siteId,
+      limit,
+      next,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async addSiteClassification(
+    siteId: string,
+    classification: any,
+  ): Promise<any> {
+    return this.getFormkiqClient().schemasApi.addSiteClassification({
+      siteId,
+      classification,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getClassification(
+      siteId: string,
+      classificationId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().schemasApi.getClassification({
+      siteId,
+      classificationId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteClassification(
+      siteId: string,
+      classificationId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().schemasApi.deleteClassification({
+      siteId,
+      classificationId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async setClassification(
+      siteId: string,
+      classificationId: string,
+      classification: any,
+  ): Promise<any> {
+    return this.getFormkiqClient().schemasApi.setClassification({
+      siteId,
+      classificationId,
+      classification,
+    });
   }
 
 }

@@ -207,6 +207,14 @@ function updateRequestsFromForm(
       );
     }
   }
+  if(apiItem.requiresClassificationID) {
+    if (getFormInput(formRef, 'classificationID')?.validity?.valid) {
+      path = path.replace(
+        ' CLASSIFICATION_ID ',
+        getFormInput(formRef, 'classificationID')?.value
+      );
+    }
+  }
 
 
 
@@ -961,17 +969,17 @@ function getApiItem(
               </div>
             )}
 
-            {apiItem.requiresTagSchemaID && (
+            {apiItem.requiresClassificationID && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    Tag Schema ID
+                    Classification ID
                   </label>
                 </div>
                 <div className="w-full md:w-3/4">
                   <input
                     aria-label="Tag Schema ID"
-                    name="tagSchemaID"
+                    name="classificationID"
                     type="text"
                     required
                     className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600

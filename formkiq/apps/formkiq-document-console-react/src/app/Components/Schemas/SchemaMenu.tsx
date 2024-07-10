@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { TagSchema } from '../../helpers/types/tagSchemas';
+import { Schema } from '../../helpers/types/schemas';
 import { Pencil, Trash } from '../Icons/icons';
 
 type CaseMenuPropsType = {
-  tagSchema: TagSchema;
+  tagSchema: Schema;
   updateTagSchema: (value: any) => void;
   deleteTagSchema: () => void;
 };
 
-function CaseMenu({
+function SchemaMenu({
   tagSchema,
   updateTagSchema,
   deleteTagSchema,
@@ -108,13 +108,13 @@ function CaseMenu({
       </div>
 
       <p className="text-neutral-700 text-sm mt-2">
-        Allow Additional Tags:{' '}
+        Allow Additional Attributes:{' '}
         <span className="font-bold text-neutral-900">
-          {tagSchema.tags.allowAdditionalTags ? 'Yes' : 'No'}
+          {tagSchema.attributes.allowAdditionalAttributes ? 'Yes' : 'No'}
         </span>
       </p>
     </>
   );
 }
 
-export default CaseMenu;
+export default SchemaMenu;

@@ -2,16 +2,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import CreateTagSchemaDialog from '../../Components/TagSchemas/createTagSchemaDialog/CreateTagSchemaDialog';
+import CreateSchemaDialog from '../../Components/Schemas/createSchemaDialog/CreateSchemaDialog';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import {
-  TagSchemasState,
-  deleteTagSchema,
-  fetchTagSchemas,
-  setTagSchemasLoadingStatusPending,
-} from '../../Store/reducers/tagSchemas';
+  SchemasState,
+  deleteClassification,
+  fetchClassifications,
+  fetchSiteSchema,
+  setClassificationsLoadingStatusPending,
+} from '../../Store/reducers/schemas';
 import { useAppDispatch } from '../../Store/store';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -19,13 +20,13 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
-import { TagSchema } from '../../helpers/types/tagSchemas';
-import TagSchemasTable from './tagSchemasTable';
+import { Schema } from '../../helpers/types/schemas';
+import ClassificationsTable from './classificationsTable';
 // import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
 // import ButtonPrimary from "../../Components/Generic/Buttons/ButtonPrimary";
 // import ButtonGhost from "../../Components/Generic/Buttons/ButtonGhost";
 
-function TagSchemas() {
+function Schemas() {
   const { user } = useAuthenticatedState();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
@@ -40,17 +41,18 @@ function TagSchemas() {
   );
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const {
-    tagSchemas,
+    siteSchema,
+    classifications,
     nextToken,
     loadingStatus,
     isLastSearchPageLoaded,
     currentSearchPage,
-  } = useSelector(TagSchemasState);
+  } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
   const [isSchemaEditTabVisible, setIsSchemaEditTabVisible] = useState(false);
 
-  const [newTagSchemaValue, setNewTagSchemaValue] = useState<{
-    tagSchema: TagSchema;
+  const [newClassificationValue, setNewClassificationValue] = useState<{
+    classification: Schema;
   } | null>(null);
 
   // update siteId
@@ -68,7 +70,7 @@ function TagSchemas() {
 
   // update schemas when different siteId selected
   useEffect(() => {
-    dispatch(fetchTagSchemas({ siteId: currentSiteId }));
+    dispatch(fetchClassifications({ siteId: currentSiteId, page:1}));
   }, [currentSiteId]);
 
   // load more schemas when table reaches bottom
@@ -80,17 +82,17 @@ function TagSchemas() {
       return false;
     };
 
-    const scrollpane = document.getElementById('schemasScrollPane');
+    const scrollpane = document.getElementById('classificationsScrollPane');
 
     if (
       isBottom(scrollpane as HTMLElement) &&
       nextToken &&
       loadingStatus === RequestStatus.fulfilled
     ) {
-      dispatch(setTagSchemasLoadingStatusPending());
+      dispatch(setClassificationsLoadingStatusPending());
       if (nextToken) {
         await dispatch(
-          fetchTagSchemas({
+          fetchClassifications({
             siteId: currentSiteId,
             nextToken,
             page: currentSearchPage + 1,
@@ -111,16 +113,15 @@ function TagSchemas() {
   };
 
   // Delete schema
-  const onTagSchemaDelete = (tagSchemaId: string) => {
+  const onClassificationDelete = (classificationId: string) => {
     dispatch(
       openConfirmationDialog({
         dialogTitle: 'Are you sure you want to delete this schema?',
         callback: () => {
           dispatch(
-            deleteTagSchema({
-              tagSchemaId,
+            deleteClassification({
+              classificationId,
               siteId: currentSiteId,
-              tagSchemas: tagSchemas,
             })
           );
         },
@@ -129,8 +130,8 @@ function TagSchemas() {
   };
 
   // Save new or existing schema
-  const saveTagSchema = () => {
-    if (newTagSchemaValue?.tagSchema?.tagSchemaId) {
+  const saveClassification = () => {
+    if (newClassificationValue?.classification?.name) {
       // Check if editing existing ruleset
       // DocumentsService.updateTagSchema(
       //   newTagSchemaValue.tagSchema.tagSchemaId,
@@ -151,17 +152,17 @@ function TagSchemas() {
       //   }
       // });
     } else {
-      DocumentsService.addTagSchema(newTagSchemaValue, currentSiteId).then(
+      DocumentsService.addSiteClassification(currentSiteId, newClassificationValue).then(
         (res) => {
           if (res.status === 200) {
-            dispatch(fetchTagSchemas({ siteId: currentSiteId }));
+            dispatch(fetchClassifications({ siteId: currentSiteId, page: 1}));
             setIsSchemaEditTabVisible(false);
-            setNewTagSchemaValue(null);
+            setNewClassificationValue(null);
           } else {
             dispatch(
               openNotificationDialog({
                 dialogTitle:
-                  'Error happened while saving schema. Please try again later',
+                  res.errors[0].error,
               })
             );
           }
@@ -171,20 +172,22 @@ function TagSchemas() {
   };
 
   // Open tab to create/edit schema
-  const showSchemaEditTab = (rulesetId: string) => {
-    const tagSchema = tagSchemas.find(
-      (tagSchema) => tagSchema.tagSchemaId === rulesetId
+  const showSchemaEditTab = (name: string) => {
+    // TODO: update
+    const schema = classifications.find(
+      (classification) => classification.name === name
     );
-    if (!tagSchema) {
+    if (!schema) {
       return;
     }
-    setNewTagSchemaValue({ tagSchema });
+    // TODO: fetch classification
+    // setNewClassificationValue({ classification: schema });
     setIsSchemaEditTabVisible(true);
   };
 
   function onCancelEdit() {
     setIsSchemaEditTabVisible(false);
-    setNewTagSchemaValue(null);
+    setNewClassificationValue(null);
   }
   const tempTagSchema = {
     name: 'string updated',
@@ -243,17 +246,17 @@ function TagSchemas() {
         </div>
         <div
           className="flex-1 inline-block overflow-y-scroll overflow-x-auto h-full"
-          id="schemasScrollPane"
+          id="classificationsScrollPane"
           onScroll={handleScroll}
         >
-          <TagSchemasTable
-            tagSchemas={tagSchemas}
-            onTagSchemaDelete={onTagSchemaDelete}
-            showSchemaEditTab={showSchemaEditTab}
+          <ClassificationsTable
+            classifications={classifications}
+            onClassificationDelete={onClassificationDelete}
+            showClassificationEditTab={showSchemaEditTab}
           />
         </div>
       </div>
-      <CreateTagSchemaDialog
+      <CreateSchemaDialog
         isOpen={isCreateDialogOpen}
         setIsOpen={setIsCreateDialogOpen}
         siteId={currentSiteId}
@@ -262,4 +265,4 @@ function TagSchemas() {
   );
 }
 
-export default TagSchemas;
+export default Schemas;

@@ -16,7 +16,7 @@ type AddTagsTabProps = {
   tags: any,
 }
 
-function AddTagsTab({
+function AddAttributesTab({
                       tagsKey,
                       setTagsKey,
                       preventDialogClose,
@@ -155,4 +155,4 @@ function AddTagsTab({
   );
 }
 
-export default AddTagsTab;
+export default AddAttributesTab;

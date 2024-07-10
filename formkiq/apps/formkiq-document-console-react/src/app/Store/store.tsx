@@ -13,7 +13,7 @@ import globalNotificationControls from './reducers/globalNotificationControls';
 import globalProgressControls from './reducers/globalProgressControls';
 import rulesetsState from './reducers/rulesets';
 import workflowsState from './reducers/workflows';
-import tagSchemasState from './reducers/tagSchemas';
+import schemasState from './reducers/schemas';
 import queuesState from './reducers/queues';
 import attributesState from './reducers/attributes';
 import userManagementState from './reducers/userManagement'
@@ -30,7 +30,7 @@ export const store = configureStore({
     globalProgressControls,
     rulesetsState,
     workflowsState,
-    tagSchemasState,
+    schemasState,
     queuesState,
     attributesState,
     userManagementState,
