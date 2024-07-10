@@ -566,7 +566,7 @@ export function excludeDocumentsWithTagFromAll(
 }
 
 export function parseEmailInitials(email: string) {
-  if (!email.length) {
+  if (!email?.length) {
     return '';
   }
   const emailUsername = email.substring(0, email.indexOf('@'));
