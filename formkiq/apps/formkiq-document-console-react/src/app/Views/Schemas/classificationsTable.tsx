@@ -18,7 +18,6 @@ function ClassificationsTable({
   return (
     <table
       className="w-full border-collapse text-sm table-fixed "
-      // id="classificationsScrollPane"
     >
       <thead
         className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
@@ -27,10 +26,6 @@ function ClassificationsTable({
           className=" w-full max-w-52 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
           Name
         </th>
-        {/*<th*/}
-        {/*  className=" w-full border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">*/}
-        {/*  In Use*/}
-        {/*</th>*/}
         <th
           className=" w-full border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
           Date
@@ -58,13 +53,7 @@ function ClassificationsTable({
                     {classification.name}
                   </Link>
                 </td>
-                {/*<td className="border-b p-4 ">*/}
-                {/*  {classification.inUse ? (*/}
-                {/*    <span className="text-green-500 font-medium">Yes</span>*/}
-                {/*  ) : (*/}
-                {/*    'No'*/}
-                {/*  )}*/}
-                {/*</td>*/}
+
                 <td className="border-b p-4 ">
                   {formatDate(classification.insertedDate)}
                 </td>
@@ -79,7 +68,7 @@ function ClassificationsTable({
                     </NavLink>
                     <button
                       onClick={() => onClassificationDelete(classification.name)}
-                      className="w-3 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
+                      className="w-4 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
                     >
                       <Trash/>
                     </button>
@@ -91,7 +80,7 @@ function ClassificationsTable({
         </>
       ) : (
         <tr>
-          <td colSpan={6} className="text-center p-2">
+          <td colSpan={3} className="text-center p-2">
             No classifications have been added yet
           </td>
         </tr>

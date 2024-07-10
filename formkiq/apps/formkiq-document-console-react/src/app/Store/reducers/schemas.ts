@@ -127,14 +127,12 @@ export const schemasSlice = createSlice({
     },
 
     setClassificationSchema: (state, action) => {
-      const {classificationSchema} = action.payload;
-      state.classificationSchema = classificationSchema;
+      state.classificationSchema = action.payload;
       return state;
     },
 
     setSiteSchema: (state, action) => {
-      const {siteSchema} = action.payload;
-      state.siteSchema = siteSchema;
+      state.siteSchema  = action.payload;
       return state;
     },
 

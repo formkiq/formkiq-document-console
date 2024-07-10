@@ -4,16 +4,16 @@ export interface Schema {
 }
 
 export interface SchemaAttributes {
-  compositeKeys: { attributeKeys: string[] }[];
-  required: {
+  compositeKeys?: { attributeKeys: string[] }[];
+  required?: {
     attributeKey: string;
-    defaultValue: string;
-    defaultValues: string[];
-    allowedValues: string[];
+    defaultValue?: string;
+    defaultValues?: string[];
+    allowedValues?: string[];
   }[];
-  optional: {
+  optional?: {
     attributeKey: string;
-    allowedValues: string[];
+    allowedValues?: string[];
   }[];
   allowAdditionalAttributes: boolean;
 }

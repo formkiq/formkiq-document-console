@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import {useCallback, useEffect, useState} from 'react';
+import {Helmet} from 'react-helmet-async';
+import {useSelector} from 'react-redux';
+import {Link, NavLink, useLocation} from 'react-router-dom';
 import CreateSchemaDialog from '../../Components/Schemas/createSchemaDialog/CreateSchemaDialog';
-import { useAuthenticatedState } from '../../Store/reducers/auth';
-import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
-import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import {useAuthenticatedState} from '../../Store/reducers/auth';
+import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
+import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
 import {
   SchemasState,
   deleteClassification,
@@ -13,25 +13,28 @@ import {
   fetchSiteSchema,
   setClassificationsLoadingStatusPending,
 } from '../../Store/reducers/schemas';
-import { useAppDispatch } from '../../Store/store';
-import { DocumentsService } from '../../helpers/services/documentsService';
+import {useAppDispatch} from '../../Store/store';
+import {DocumentsService} from '../../helpers/services/documentsService';
 import {
+  formatDate,
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import { RequestStatus } from '../../helpers/types/document';
-import { Schema } from '../../helpers/types/schemas';
+import {RequestStatus} from '../../helpers/types/document';
+import {Classification, Schema} from '../../helpers/types/schemas';
 import ClassificationsTable from './classificationsTable';
+import {Edit, Trash} from "../../Components/Icons/icons";
+import {fetchAttributesData} from "../../Store/reducers/attributesData";
 // import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
 // import ButtonPrimary from "../../Components/Generic/Buttons/ButtonPrimary";
 // import ButtonGhost from "../../Components/Generic/Buttons/ButtonGhost";
 
 function Schemas() {
-  const { user } = useAuthenticatedState();
-  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
+  const {user} = useAuthenticatedState();
+  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const { siteId } = getCurrentSiteInfo(
+  const {siteId} = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -70,7 +73,9 @@ function Schemas() {
 
   // update schemas when different siteId selected
   useEffect(() => {
-    dispatch(fetchClassifications({ siteId: currentSiteId, page:1}));
+    dispatch(fetchClassifications({siteId: currentSiteId, page: 1}));
+    dispatch(fetchSiteSchema({siteId: currentSiteId}));
+    dispatch(fetchAttributesData({siteId: currentSiteId, limit: 100}))
   }, [currentSiteId]);
 
   // load more schemas when table reaches bottom
@@ -155,14 +160,14 @@ function Schemas() {
       DocumentsService.addSiteClassification(currentSiteId, newClassificationValue).then(
         (res) => {
           if (res.status === 200) {
-            dispatch(fetchClassifications({ siteId: currentSiteId, page: 1}));
+            dispatch(fetchClassifications({siteId: currentSiteId, page: 1}));
             setIsSchemaEditTabVisible(false);
             setNewClassificationValue(null);
           } else {
             dispatch(
               openNotificationDialog({
                 dialogTitle:
-                  res.errors[0].error,
+                res.errors[0].error,
               })
             );
           }
@@ -189,6 +194,7 @@ function Schemas() {
     setIsSchemaEditTabVisible(false);
     setNewClassificationValue(null);
   }
+
   const tempTagSchema = {
     name: 'string updated',
     tags: {
@@ -233,17 +239,78 @@ function Schemas() {
             onClick={() => setIsCreateDialogOpen(true)}
             className="h-10 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white px-4 rounded-md font-bold"
           >
-            + NEW
+            + New Classification Schema
           </button>
         </div>
-        <div className="text-base p-4 font-semibold">
-          NOTE: Schemas are currently not editable; if a schema is not yet in
-          use, you can delete the new schema and re-create with your changes.
-          Once in use, schemas can not be changed.
-          <span className="block font-normal">
-            (at least, not with the current version of FormKiQ)
-          </span>
-        </div>
+        {/*<div className="text-base p-4 font-semibold">*/}
+        {/*  NOTE: Schemas are currently not editable; if a schema is not yet in*/}
+        {/*  use, you can delete the new schema and re-create with your changes.*/}
+        {/*  Once in use, schemas can not be changed.*/}
+        {/*  <span className="block font-normal">*/}
+        {/*    (at least, not with the current version of FormKiQ)*/}
+        {/*  </span>*/}
+        {/*</div>*/}
+        <div className="w-full h-px bg-gray-300 mt-4"></div>
+
+        <h3 className="text-lg p-4 font-bold">Site Schema</h3>
+
+        <table
+          className="w-full border-collapse text-sm table-fixed "
+        >
+          <thead
+            className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
+          <tr>
+            <th
+              className=" w-full max-w-52 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+              Name
+            </th>
+            <th
+              className=" w-full border-b border-t p-4 pr-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-right">
+              Actions
+            </th>
+          </tr>
+          </thead>
+          <tbody className="bg-white ">
+          {siteSchema ? (
+            <>
+              <tr
+                className="text-neutral-900 border-neutral-300"
+              >
+                <td className="border-b max-w-52 border-neutral-300 p-4 pl-8 truncate">
+                  <Link
+                    to={`${pathname}/${siteSchema.name}`}
+                    className="cursor-pointer"
+                  >
+                    {siteSchema.name}
+                  </Link>
+                </td>
+
+                <td className="border-b border-neutral-300 p-4 pr-8">
+                  <div className="flex items-center justify-end">
+                    <NavLink
+                      to={`/schemas/${siteSchema.name}?editor=true`}
+                      className="w-4 h-auto text-neutral-900  mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
+                    >
+                      <Edit/>
+                    </NavLink>
+                  </div>
+                </td>
+              </tr>
+            </>
+          ) : (
+            <tr>
+              <td colSpan={2} className="text-center p-2">
+                No site schema has been added yet.
+              </td>
+            </tr>
+          )}
+          </tbody>
+        </table>
+
+
+        <div className="w-full h-px bg-gray-300 mt-4"></div>
+        <h3 className="text-lg p-4 font-bold">Classification Schemas</h3>
+
         <div
           className="flex-1 inline-block overflow-y-scroll overflow-x-auto h-full"
           id="classificationsScrollPane"
