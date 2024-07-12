@@ -79,6 +79,8 @@ export const fetchSiteSchema = createAsyncThunk(
     await DocumentsService.getSiteSchema(siteId).then((response) => {
       if (response.status === 200) {
         thunkAPI.dispatch(setSiteSchema({name: response.name, attributes: response.attributes}));
+      } else {
+        thunkAPI.dispatch(setSiteSchema(null));
       }
     });
   }
