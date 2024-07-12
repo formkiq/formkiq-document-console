@@ -1,7 +1,7 @@
 import {Dialog} from '@headlessui/react';
 import {useEffect, useRef, useState} from 'react';
 import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
-import {fetchClassifications, fetchSiteSchema} from '../../../Store/reducers/schemas';
+import {fetchClassifications, fetchClassificationSchema, fetchSiteSchema} from '../../../Store/reducers/schemas';
 import {useAppDispatch} from '../../../Store/store';
 import {DocumentsService} from '../../../helpers/services/documentsService';
 import {Schema} from '../../../helpers/types/schemas';
@@ -10,30 +10,29 @@ import AddAttributesTab from './addAttributesTab';
 import RadioCombobox from "../../Generic/Listboxes/RadioCombobox";
 import {useSelector} from "react-redux";
 import {AttributesDataState, fetchAttributesData} from "../../../Store/reducers/attributesData";
+import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
+import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
 
-type CreateSchemaModalPropsType = {
+type EditSchemaModalPropsType = {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
   siteId: string;
-  schemaType: "site" | "classification"
+  schemaType: "site" | "classification",
+  initialSchemaValue: Schema,
+  classificationId?: string
 };
 
-function CreateSchemaDialog({
-                              isOpen,
-                              setIsOpen,
-                              siteId,
-                              schemaType
-                            }: CreateSchemaModalPropsType) {
+function EditSchemaDialog({
+                            isOpen,
+                            setIsOpen,
+                            siteId,
+                            schemaType,
+                            initialSchemaValue,
+                            classificationId,
+                          }: EditSchemaModalPropsType) {
   const dispatch = useAppDispatch();
   const [selectedTab, setSelectedTab] = useState<'generalInfo' | 'compositeKeys' | 'required' | 'optional'>('generalInfo');
 
-
-  const initialSchemaValue: Schema = {
-    name: '',
-    attributes: {
-      allowAdditionalAttributes: false,
-    },
-  };
   const [schema, setSchema] = useState(initialSchemaValue);
   const {allAttributes} = useSelector(AttributesDataState);
 
@@ -69,6 +68,7 @@ function CreateSchemaDialog({
   useEffect(() => {
     dispatch(fetchAttributesData({siteId, limit: 100}))
   }, [siteId]);
+
 
   const schemaNameRef = useRef<HTMLInputElement>(null);
 
@@ -110,27 +110,34 @@ function CreateSchemaDialog({
     }
 
     if (schemaType === "classification") {
-      DocumentsService.addSiteClassification(siteId, {classification: newSchema}).then((response) => {
-        if (response.classificationId) {
+      if (!classificationId) return;
+      DocumentsService.setClassification(siteId, classificationId, {classification: newSchema}).then((response) => {
+        if (response.status === 200) {
           dispatch(fetchClassifications({siteId, limit: 20, page: 1}));
-          resetValues()
+          dispatch(fetchClassificationSchema({siteId, classificationId}));
           setIsOpen(false);
+          resetValues()
+          console.log('set classification')
         } else {
-          dispatch(
-            openNotificationDialog({dialogTitle: response.errors[0].error})
-          );
+          if (response.errors) {
+            dispatch(
+              openNotificationDialog({dialogTitle: response.errors[0].error})
+            );
+          }
         }
       });
     } else if (schemaType === 'site') {
       DocumentsService.setSiteSchema(siteId, newSchema).then((response) => {
         if (response.status === 200) {
           dispatch(fetchSiteSchema({siteId}));
-          resetValues()
           setIsOpen(false);
+          resetValues()
         } else {
-          dispatch(
-            openNotificationDialog({dialogTitle: response.errors[0].error})
-          );
+          if (response.errors) {
+            dispatch(
+              openNotificationDialog({dialogTitle: response.errors[0].error})
+            );
+          }
         }
       });
     }
@@ -147,12 +154,9 @@ function CreateSchemaDialog({
     setOptionalAllowedValues([]);
     setCompositeKey('');
     setCompositeKeys([]);
-    setSchema(initialSchemaValue);
     setSelectedTab('generalInfo')
   }
-
   const closeModal = () => {
-    console.log(initialSchemaValue)
     resetValues()
     setIsOpen(false);
   };
@@ -173,8 +177,7 @@ function CreateSchemaDialog({
   };
 
   const addCompositeKeyToSchema = () => {
-
-    const newSchema = {...schema};
+    const newSchema: Schema = {name: schema.name, attributes: {...schema.attributes}};
     if (newSchema.attributes.compositeKeys) {
       newSchema.attributes.compositeKeys = [...newSchema.attributes.compositeKeys, {attributeKeys: compositeKeys}];
     } else {
@@ -217,15 +220,14 @@ function CreateSchemaDialog({
     if (requiredKey.length === 0) {
       return;
     }
-
-    const newSchema = {...schema};
+    const newSchema: Schema = {name: schema.name, attributes: {...schema.attributes}};
     const newRequiredAttributes = {
       attributeKey: requiredKey,
       defaultValue: requiredDefaultValues[0] || '',
       defaultValues: requiredDefaultValues,
       allowedValues: requiredAllowedValues
     }
-    if (newSchema.attributes.required) {
+    if (newSchema.attributes.required !== undefined) {
       newSchema.attributes.required = [...newSchema.attributes.required, newRequiredAttributes];
     } else {
       newSchema.attributes.required = [newRequiredAttributes];
@@ -262,7 +264,7 @@ function CreateSchemaDialog({
     if (optionalKey.length === 0) {
       return;
     }
-    const newSchema = {...schema};
+    const newSchema: Schema = {name: schema.name, attributes: {...schema.attributes}};
     if (newSchema.attributes.optional) {
       newSchema.attributes.optional = [...newSchema.attributes.optional, {
         attributeKey: optionalKey,
@@ -304,7 +306,7 @@ function CreateSchemaDialog({
           <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
             <div className="w-full max-w-xl bg-white p-6 rounded-md">
               <Dialog.Title className="text-2xl font-bold mb-4">
-                Create New Schema
+                Edit Schema
               </Dialog.Title>
               <form className="flex flex-col gap-4 mt-6" onSubmit={onSubmit}>
                 <div className="flex flex-row justify-start gap-2 text-sm font-bold">
@@ -532,7 +534,7 @@ function CreateSchemaDialog({
                     setAllowedValues={setRequiredAllowedValues}
                     addAttributesToSchema={addRequiredToSchema}
                     deleteTagsFromSchema={deleteRequiredFromSchema}
-                    attributes={schema.attributes.required}
+                    attributes={schema.attributes.required ? schema.attributes.required : null}
                     allAttributes={allAttributes}
                     attributeType={selectedTab}
                   />
@@ -556,19 +558,19 @@ function CreateSchemaDialog({
                   />
                 )}
                 <div className="flex flex-row justify-end gap-4 text-base font-bold mt-4">
-                  <button
+                  <ButtonGhost
                     type="button"
                     onClick={closeModal}
                     className="h-10 border border-neutral-900 px-4 rounded-md"
                   >
                     CANCEL
-                  </button>
-                  <button
+                  </ButtonGhost>
+                  <ButtonPrimaryGradient
                     type="submit"
                     className="h-10 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white px-4 rounded-md"
                   >
-                    + CREATE
-                  </button>
+                   Save
+                  </ButtonPrimaryGradient>
                 </div>
               </form>
             </div>
@@ -579,4 +581,4 @@ function CreateSchemaDialog({
   );
 }
 
-export default CreateSchemaDialog;
+export default EditSchemaDialog;

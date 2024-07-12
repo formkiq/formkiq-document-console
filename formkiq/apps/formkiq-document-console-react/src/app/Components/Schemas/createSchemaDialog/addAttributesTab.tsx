@@ -16,7 +16,8 @@ type AddTagsTabProps = {
   addAttributesToSchema: () => void,
   deleteTagsFromSchema: (index: number) => void,
   attributes: any,
-  allAttributes: any[]
+  allAttributes: any[],
+  attributeType: "required" | "optional"
 }
 
 function AddAttributesTab({
@@ -34,7 +35,8 @@ function AddAttributesTab({
                             addAttributesToSchema,
                             deleteTagsFromSchema,
                             attributes,
-                            allAttributes
+                            allAttributes,
+                            attributeType,
                           }: AddTagsTabProps) {
 
   const toggleAddToDefault = (event: any, key: string) => {
@@ -55,7 +57,7 @@ function AddAttributesTab({
     if (!setDefaultValues) return;
     setDefaultValues(defaultValues.filter((k: string) => k !== key))
   }
-
+  console.log('allAttributes', allAttributes)
   return (
     <>
       <div className="flex flex-row items-center gap-4 text-base h-10">
@@ -111,21 +113,21 @@ function AddAttributesTab({
         </div>}
 
 
-      {(defaultValues && setDefaultValues) && <div className="flex flex-col gap-2">
-        <p className="text-sm text-neutral-900 font-medium">Default Value: </p>
-        <div className="flex flex-row justify-start flex-wrap gap-2 items-end max-h-[100px] overflow-auto">
+        {(defaultValues && setDefaultValues) && <div className="flex flex-col gap-2">
+          <p className="text-sm text-neutral-900 font-medium">Default Value: </p>
+          <div className="flex flex-row justify-start flex-wrap gap-2 items-end max-h-[100px] overflow-auto">
 
-          {defaultValues.length === 0 ? <p className="text-xs text-neutral-500 font-medium">No default value
-            selected</p> : defaultValues.map((key: string, i) => (<div key={"default_" + i}
-                                                                       className="border border-neutral-500 text-neutral-900 py-1.5 px-3 text-xs font-bold uppercase text-neutral-900 rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2">
-            <span className="text-ellipsis overflow-hidden">{key}</span>
-            <button title="Remove Value" type="button" className="w-4 h-4 min-w-4 text-neutral-900"
-                    onClick={() => setDefaultValues(defaultValues.filter((k: string) => k !== key))}>
-              <Close/>
-            </button>
-          </div>))}
-        </div>
-      </div>}
+            {defaultValues.length === 0 ? <p className="text-xs text-neutral-500 font-medium">No default value
+              selected</p> : defaultValues.map((key: string, i) => (<div key={"default_" + i}
+                                                                         className="border border-neutral-500 text-neutral-900 py-1.5 px-3 text-xs font-bold uppercase text-neutral-900 rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2">
+              <span className="text-ellipsis overflow-hidden">{key}</span>
+              <button title="Remove Value" type="button" className="w-4 h-4 min-w-4 text-neutral-900"
+                      onClick={() => setDefaultValues(defaultValues.filter((k: string) => k !== key))}>
+                <Close/>
+              </button>
+            </div>))}
+          </div>
+        </div>}
       </>}
 
       {tagsKey.length > 0 && <button type='button'
@@ -143,22 +145,22 @@ function AddAttributesTab({
             <tr className="border border-neutral-300 px-4 text-neutral-900">
               <th className="w-4 px-4"> #</th>
               <th> Key</th>
-              {attributes.defaultValues && <th> Default Values</th>}
+              {attributeType === 'required' && <th> Default Values</th>}
               <th> Allowed Values</th>
               <th className="w-4 px-4"></th>
             </tr>
             </thead>
             <tbody>
-            {attributes.map((value: { key: string, defaultValues: string[], allowedValues: string[] }, i: number) => (
+            {attributes.map((value: { attributeKey: string, defaultValues?: string[], allowedValues?: string[] }, i: number) => (
               <tr key={"tag_" + i} className="border border-neutral-300 px-4 h-12 text-neutral-900">
                 <td className="text-sm text-slate-500 px-4"><span
                   className="text-gray-900 font-medium">{i + 1}</span></td>
                 <td
-                  className="text-sm text-ellipsis overflow-hidden">{attributes[i].attributeKey}</td>
-                {attributes.defaultValues && <td
-                  className="text-sm text-ellipsis overflow-hidden">{attributes[i].defaultValues.join(", ")}</td>}
+                  className="text-sm text-ellipsis overflow-hidden">{value.attributeKey}</td>
+                {attributeType === 'required' && <td
+                  className="text-sm text-ellipsis overflow-hidden">{value.defaultValues && value.defaultValues.join(", ")}</td>}
                 <td
-                  className="text-sm  text-ellipsis overflow-hidden">{attributes[i].allowedValues.join(", ")}</td>
+                  className="text-sm  text-ellipsis overflow-hidden">{value.allowedValues && value.allowedValues.join(", ")}</td>
                 <td className="w-[30px]">
                   <button type="button" className="w-4 h-4"
                           onClick={() => deleteTagsFromSchema(i)}

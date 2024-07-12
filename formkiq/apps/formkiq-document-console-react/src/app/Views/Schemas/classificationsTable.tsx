@@ -5,15 +5,15 @@ import {Classification} from '../../helpers/types/schemas';
 
 type TagSchemaTableProps = {
   classifications: Classification[];
-  onClassificationDelete: (name: string) => void;
-  showClassificationEditTab: (name: string) => void;
+  onClassificationDelete: (classificationId: string) => void;
+  showClassificationEditTab: (classificationId: string) => void;
 };
 
 function ClassificationsTable({
-                        classifications,
-                        onClassificationDelete,
-                        showClassificationEditTab,
-                      }: TagSchemaTableProps) {
+                                classifications,
+                                onClassificationDelete,
+                                showClassificationEditTab,
+                              }: TagSchemaTableProps) {
   const pathname = decodeURI(useLocation().pathname);
   return (
     <table
@@ -42,13 +42,13 @@ function ClassificationsTable({
           {classifications.map((classification: Classification) => {
             return (
               <tr
-                key={classification.name}
+                key={classification.classificationId}
                 className="text-neutral-900 border-neutral-300"
               >
                 <td className="border-b max-w-52 border-neutral-300 p-4 pl-8 truncate">
                   <Link
-                    to={`${pathname}/${classification.name}`}
-                    className="cursor-pointer"
+                    to={`${pathname}/${classification.classificationId}`}
+                    className="cursor-pointer hover:text-primary-500"
                   >
                     {classification.name}
                   </Link>
@@ -59,16 +59,27 @@ function ClassificationsTable({
                 </td>
 
                 <td className="border-b border-neutral-300 p-4 pr-8">
-                  <div className="flex items-center justify-end">
+                  <div className="flex items-center justify-end gap-2 mr-3">
                     <NavLink
-                      to={`/schemas/${classification.name}?editor=true`}
-                      className="w-4 h-auto text-neutral-900  mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
+                      title="Open in editor"
+                      to={`/schemas/${classification.classificationId}?editor=true`}
+                      className="h-6"
                     >
-                      <Edit/>
+                      <button title="Open In Editor">
+                        Open In Editor
+                      </button>
                     </NavLink>
+
+                    <button title="Edit"
+                            className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
+                            onClick={() => showClassificationEditTab(classification.classificationId)}>
+                      <Edit/>
+                    </button>
+
                     <button
-                      onClick={() => onClassificationDelete(classification.name)}
-                      className="w-4 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
+                      title="Delete"
+                      onClick={() => onClassificationDelete(classification.classificationId)}
+                      className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
                     >
                       <Trash/>
                     </button>

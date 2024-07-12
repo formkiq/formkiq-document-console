@@ -4,20 +4,17 @@ import {useSelector} from 'react-redux';
 import {
   NavLink,
   useLocation,
-  useNavigate,
-  useParams,
   useSearchParams,
 } from 'react-router-dom';
 import {Mode} from 'vanilla-jsoneditor';
-import {Close, Save, Spinner, Trash} from '../../Components/Icons/icons';
+import {Close, Save, Spinner} from '../../Components/Icons/icons';
 import SchemaMenu from '../../Components/Schemas/SchemaMenu';
 import CompositeKeysTable from '../../Components/Schemas/tables/compositeKeysTable';
 import RequiredAttributesTable from '../../Components/Schemas/tables/requiredAttributesTable';
 import {JSONEditorReact} from '../../Components/TextEditors/JsonEditor';
 import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
 import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
-import {setClassificationSchema, SchemasState, fetchClassificationSchema} from '../../Store/reducers/schemas';
+import {fetchSiteSchema, SchemasState, setSiteSchema} from '../../Store/reducers/schemas';
 import {useAppDispatch} from '../../Store/store';
 import {DocumentsService} from '../../helpers/services/documentsService';
 import {
@@ -28,7 +25,7 @@ import {Schema as SchemaType} from '../../helpers/types/schemas';
 import OptionalAttributesTable from "../../Components/Schemas/tables/optionalAttributesTable";
 import EditSchemaDialog from "../../Components/Schemas/createSchemaDialog/EditSchemaDialog";
 
-function Classification() {
+function SiteSchema() {
   const {user} = useAuthenticatedState();
   const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
     getUserSites(user);
@@ -42,33 +39,33 @@ function Classification() {
     workspaceSites
   );
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const {classificationId} = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const editor = searchParams.get('editor');
-
-  const {classificationSchema} = useSelector(SchemasState);
+  const {siteSchema} = useSelector(SchemasState);
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!classificationId) {
+    if (!siteId) {
       return;
     }
-    dispatch(fetchClassificationSchema({siteId, classificationId}));
+    dispatch(fetchSiteSchema({siteId}));
   }, []);
+  useEffect(() => {
+   console.log("siteSchema",siteSchema)
+  }, [siteSchema]);
 
   // JSON editor
   const [content, setContent] = useState({
     text: undefined,
-    json: classificationSchema,
+    json: siteSchema,
   });
 
   useEffect(() => {
     setContent({
       text: undefined,
-      json: classificationSchema,
+      json: siteSchema,
     });
-  }, [classificationSchema]);
+  }, [siteSchema]);
 
   const isValidString = (text: string) => {
     try {
@@ -88,16 +85,16 @@ function Classification() {
     return true;
   };
 
-  const updateClassification = (classificationSchema: SchemaType) => {
-    if (!classificationId) return;
-    DocumentsService.setClassification(siteId, classificationId, {classification: classificationSchema},).then(res => {
+  const updateSiteSchema = (schema: SchemaType) => {
+    if (!siteId) return;
+    DocumentsService.setSiteSchema(siteId,  schema).then(res => {
       if (res.status === 200) {
         dispatch(
           openNotificationDialog({
             dialogTitle: 'Schema saved successfully',
           })
         );
-        dispatch(setClassificationSchema(classificationSchema))
+        dispatch(setSiteSchema(schema))
       } else if (res.errors && res.errors.length > 0) {
         dispatch(
           openNotificationDialog({
@@ -121,9 +118,9 @@ function Classification() {
 
   const saveSchemaInEditor = () => {
     if (content.json && isValidJSON(content.json)) {
-      updateClassification(content.json);
+      updateSiteSchema(content.json);
     } else if (content.text && isValidString(content.text)) {
-      updateClassification(JSON.parse(content.text));
+      updateSiteSchema(JSON.parse(content.text));
     } else {
       dispatch(
         openNotificationDialog({
@@ -133,32 +130,6 @@ function Classification() {
     }
   };
 
-  const onDeleteClick = () => {
-    if (!classificationId) {
-      return;
-    }
-    const deleteSchema = () => {
-      DocumentsService.deleteClassification(siteId, classificationId).then(
-        (res) => {
-          if (res.status === 200) {
-            navigate('/schemas');
-          } else {
-            dispatch(
-              openNotificationDialog({
-                dialogTitle: 'Schema delete failed. Please try again later.',
-              })
-            );
-          }
-        }
-      );
-    };
-    dispatch(
-      openConfirmationDialog({
-        dialogTitle: 'Are you sure you want to delete this Schema?',
-        callback: deleteSchema,
-      })
-    );
-  };
 
   const handleChange = (value: any) => {
     if (value.json) {
@@ -178,7 +149,7 @@ function Classification() {
         <title>Schema</title>
       </Helmet>
 
-      {classificationSchema ? (
+      {siteSchema ? (
         editor ? (
           <div
             className="flex flex-col "
@@ -214,14 +185,6 @@ function Classification() {
                 >
                   <Save/>
                 </button>
-                <button
-                  className="h-6 text-neutral-900 hover:text-primary-500"
-                  title="Delete Schema"
-                  type="button"
-                  onClick={onDeleteClick}
-                >
-                  <Trash/>
-                </button>
               </div>
             </div>
 
@@ -236,40 +199,38 @@ function Classification() {
         ) : (
           <div className="p-4">
             <SchemaMenu
-              schema={classificationSchema}
-              updateSchema={updateClassification}
-              deleteSchema={onDeleteClick}
+              schema={siteSchema}
+              updateSchema={updateSiteSchema}
               openEditDialog={() => setIsEditDialogOpen(true)}
             />
             <p className="text-neutral-900 text-md font-bold my-4">
               Composite Keys
             </p>
-            <CompositeKeysTable compositeKeys={classificationSchema.attributes.compositeKeys}/>
+            <CompositeKeysTable compositeKeys={siteSchema.attributes.compositeKeys}/>
 
             <p className="text-neutral-900 text-md font-bold my-4">
               Required Attributes
             </p>
-            <RequiredAttributesTable attributes={classificationSchema.attributes.required}/>
+            <RequiredAttributesTable attributes={siteSchema.attributes.required}/>
 
             <p className="text-neutral-900 text-md font-bold my-4">
               Optional Attributes
             </p>
-            <OptionalAttributesTable attributes={classificationSchema.attributes.optional}/>
+            <OptionalAttributesTable attributes={siteSchema.attributes.optional}/>
           </div>
         )
       ) : (
         <Spinner/>
       )}
-      {classificationSchema && <EditSchemaDialog
+      {siteSchema && <EditSchemaDialog
         isOpen={isEditDialogOpen}
         setIsOpen={setIsEditDialogOpen}
         siteId={siteId}
-        schemaType='classification'
-        initialSchemaValue={classificationSchema}
-        classificationId={classificationId}
+        schemaType='site'
+        initialSchemaValue={siteSchema}
       />}
     </>
   );
 }
 
-export default Classification;
+export default SiteSchema;

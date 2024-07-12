@@ -1,5 +1,5 @@
 type CompositeKeysTableProps = {
-  compositeKeys: { key: string[] }[]
+  compositeKeys?: { attributeKeys: string[] }[]
 }
 
 function CompositeKeysTable({compositeKeys}: CompositeKeysTableProps) {
@@ -18,12 +18,12 @@ function CompositeKeysTable({compositeKeys}: CompositeKeysTableProps) {
       </tr>
       </thead>
       <tbody>
-      {compositeKeys.length > 0 ? compositeKeys.map((compositeKey, index) => (
+      {(compositeKeys && compositeKeys.length > 0) ? compositeKeys.map((compositeKey, index) => (
           <tr key={"compositeKey_" + index} className="text-neutral-900 border-neutral-300">
             <td className="w-6 text-center border-b">
               {index + 1}
             </td>
-            <td className="border-b p-4">{compositeKey.key.join(', ')}</td>
+            <td className="border-b p-4">{compositeKey.attributeKeys.join(', ')}</td>
           </tr>
         )) :
         <tr className="text-neutral-900 border-neutral-300">

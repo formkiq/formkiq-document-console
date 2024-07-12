@@ -58,10 +58,11 @@ const ObjectExamineTool = React.lazy(
   () => import('../../Views/Account/objectExamineTool')
 );
 
-const TagSchemas = React.lazy(
+const Schemas = React.lazy(
   () => import('../../Views/Schemas/schemas')
 );
-// const TagSchema = React.lazy(() => import('../../Views/Schemas/classification'));
+const Classification = React.lazy(() => import('../../Views/Schemas/classification'));
+const SiteSchema = React.lazy(() => import('../../Views/Schemas/siteSchema'));
 const Groups = React.lazy(() => import('../../Views/UserManagement/groups'));
 const Group = React.lazy(() => import('../../Views/UserManagement/group'));
 const Users = React.lazy(() => import('../../Views/UserManagement/users'));
@@ -167,10 +168,12 @@ const RoutesMapper = () => {
       <Route path="/rulesets/:id" element={<Ruleset />}></Route>
       <Route path="/rulesets/:id/rule/:ruleId" element={<Rule />}></Route>
 
-      <Route path="/schemas" element={<TagSchemas />}></Route>
-      <Route path="/schemas/workspaces/:siteId" element={<TagSchemas />}></Route>
-      {/*<Route path="/schemas/workspaces/:siteId/:tagSchemaId" element={<TagSchema />}></Route>*/}
-      {/*<Route path="/schemas/:tagSchemaId" element={<TagSchema />}></Route>*/}
+      <Route path="/schemas" element={<Schemas />}></Route>
+      <Route path="/schemas/workspaces/:siteId" element={<Schemas />}></Route>
+      <Route path="/schemas/workspaces/:siteId/:classificationId" element={<Classification />}></Route>
+      <Route path="/schemas/site-schema" element={<SiteSchema />}></Route>
+      <Route path="/schemas/workspaces/:siteId/site-schema" element={<SiteSchema />}></Route>
+      <Route path="/schemas/:classificationId" element={<Classification />}></Route>
 
       <Route path="/groups" element={<Groups />}></Route>
       <Route path="/groups/:groupName" element={<Group />}></Route>

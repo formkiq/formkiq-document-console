@@ -5,29 +5,24 @@ import {Link, NavLink, useLocation} from 'react-router-dom';
 import CreateSchemaDialog from '../../Components/Schemas/createSchemaDialog/CreateSchemaDialog';
 import {useAuthenticatedState} from '../../Store/reducers/auth';
 import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
 import {
   SchemasState,
   deleteClassification,
   fetchClassifications,
   fetchSiteSchema,
-  setClassificationsLoadingStatusPending,
+  setClassificationsLoadingStatusPending, fetchClassificationSchema,
 } from '../../Store/reducers/schemas';
 import {useAppDispatch} from '../../Store/store';
-import {DocumentsService} from '../../helpers/services/documentsService';
 import {
-  formatDate,
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
 import {RequestStatus} from '../../helpers/types/document';
-import {Classification, Schema} from '../../helpers/types/schemas';
+import {Schema} from '../../helpers/types/schemas';
 import ClassificationsTable from './classificationsTable';
-import {Edit, Trash} from "../../Components/Icons/icons";
-import {fetchAttributesData} from "../../Store/reducers/attributesData";
-// import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
-// import ButtonPrimary from "../../Components/Generic/Buttons/ButtonPrimary";
-// import ButtonGhost from "../../Components/Generic/Buttons/ButtonGhost";
+import {Edit} from "../../Components/Icons/icons";
+import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
+import EditSchemaDialog from "../../Components/Schemas/createSchemaDialog/EditSchemaDialog";
 
 function Schemas() {
   const {user} = useAuthenticatedState();
@@ -45,6 +40,7 @@ function Schemas() {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const {
     siteSchema,
+    classificationSchema,
     classifications,
     nextToken,
     loadingStatus,
@@ -54,10 +50,12 @@ function Schemas() {
   const dispatch = useAppDispatch();
   const [isSchemaEditTabVisible, setIsSchemaEditTabVisible] = useState(false);
 
-  const [newClassificationValue, setNewClassificationValue] = useState<{
+  const [newSchemaType, setNewSchemaType] = useState<"site" | "classification">('site');
+  const [editSchemaType, setEditSchemaType] = useState<"site" | "classification">('site');
+  const [newSchemaValue, setNewSchemaValue] = useState<{
     classification: Schema;
   } | null>(null);
-
+  const [editClassificationId, setEditClassificationId] = useState<string | null>(null);
   // update siteId
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -75,7 +73,6 @@ function Schemas() {
   useEffect(() => {
     dispatch(fetchClassifications({siteId: currentSiteId, page: 1}));
     dispatch(fetchSiteSchema({siteId: currentSiteId}));
-    dispatch(fetchAttributesData({siteId: currentSiteId, limit: 100}))
   }, [currentSiteId]);
 
   // load more schemas when table reaches bottom
@@ -134,91 +131,18 @@ function Schemas() {
     );
   };
 
-  // Save new or existing schema
-  const saveClassification = () => {
-    if (newClassificationValue?.classification?.name) {
-      // Check if editing existing ruleset
-      // DocumentsService.updateTagSchema(
-      //   newTagSchemaValue.tagSchema.tagSchemaId,
-      //   newTagSchemaValue,
-      //   currentSiteId
-      // ).then((res) => {
-      //   if (res.status === 200) {
-      //     dispatch(fetchRulesets({ siteId: currentSiteId }));
-      //     setIsRulesetEditTabVisible(false);
-      //     setNewTagSchemaValue(null);
-      //   } else {
-      //     dispatch(
-      //       openNotificationDialog({
-      //         dialogTitle:
-      //           'Error happened while saving ruleset. Please try again later',
-      //       })
-      //     );
-      //   }
-      // });
-    } else {
-      DocumentsService.addSiteClassification(currentSiteId, newClassificationValue).then(
-        (res) => {
-          if (res.status === 200) {
-            dispatch(fetchClassifications({siteId: currentSiteId, page: 1}));
-            setIsSchemaEditTabVisible(false);
-            setNewClassificationValue(null);
-          } else {
-            dispatch(
-              openNotificationDialog({
-                dialogTitle:
-                res.errors[0].error,
-              })
-            );
-          }
-        }
-      );
-    }
-  };
-
   // Open tab to create/edit schema
-  const showSchemaEditTab = (name: string) => {
-    // TODO: update
-    const schema = classifications.find(
-      (classification) => classification.name === name
-    );
-    if (!schema) {
-      return;
-    }
-    // TODO: fetch classification
-    // setNewClassificationValue({ classification: schema });
+  const showClassificationEditTab = (classificationId: string) => {
+    setEditSchemaType('classification');
+    setEditClassificationId(classificationId);
+    dispatch(fetchClassificationSchema({siteId: currentSiteId, classificationId,}));
     setIsSchemaEditTabVisible(true);
   };
 
-  function onCancelEdit() {
-    setIsSchemaEditTabVisible(false);
-    setNewClassificationValue(null);
-  }
-
-  const tempTagSchema = {
-    name: 'string updated',
-    tags: {
-      compositeKeys: [
-        {
-          key: ['string'],
-        },
-      ],
-      required: [
-        {
-          key: 'string',
-          defaultValues: ['string'],
-          allowedValues: ['string'],
-        },
-      ],
-      optional: [
-        {
-          key: 'string',
-          defaultValues: ['string'],
-          allowedValues: ['string'],
-        },
-      ],
-      allowAdditionalTags: true,
-    },
+  const showSiteEditTab = () => {
+    setEditSchemaType('site');
+    setEditClassificationId(null);
+    setIsSchemaEditTabVisible(true);
   };
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -234,23 +158,7 @@ function Schemas() {
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-        <div className="w-full p-2 flex justify-start">
-          <button
-            onClick={() => setIsCreateDialogOpen(true)}
-            className="h-10 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white px-4 rounded-md font-bold"
-          >
-            + New Classification Schema
-          </button>
-        </div>
-        {/*<div className="text-base p-4 font-semibold">*/}
-        {/*  NOTE: Schemas are currently not editable; if a schema is not yet in*/}
-        {/*  use, you can delete the new schema and re-create with your changes.*/}
-        {/*  Once in use, schemas can not be changed.*/}
-        {/*  <span className="block font-normal">*/}
-        {/*    (at least, not with the current version of FormKiQ)*/}
-        {/*  </span>*/}
-        {/*</div>*/}
-        <div className="w-full h-px bg-gray-300 mt-4"></div>
+
 
         <h3 className="text-lg p-4 font-bold">Site Schema</h3>
 
@@ -278,21 +186,30 @@ function Schemas() {
               >
                 <td className="border-b max-w-52 border-neutral-300 p-4 pl-8 truncate">
                   <Link
-                    to={`${pathname}/${siteSchema.name}`}
-                    className="cursor-pointer"
+                    to={`${pathname}/site-schema`}
+                    className="cursor-pointer hover:text-primary-500"
                   >
                     {siteSchema.name}
                   </Link>
                 </td>
 
                 <td className="border-b border-neutral-300 p-4 pr-8">
-                  <div className="flex items-center justify-end">
+                  <div className="flex items-center justify-end gap-2 mr-3">
                     <NavLink
-                      to={`/schemas/${siteSchema.name}?editor=true`}
-                      className="w-4 h-auto text-neutral-900  mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
+                      title="Open in editor"
+                      to={`${pathname}/site-schema?editor=true`}
+                      className="h-6"
                     >
-                      <Edit/>
+                      <button title="Open In Editor">
+                        Open In Editor
+                      </button>
                     </NavLink>
+
+                    <button title="Edit"
+                            className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
+                            onClick={() => showSiteEditTab()}>
+                      <Edit/>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -300,7 +217,14 @@ function Schemas() {
           ) : (
             <tr>
               <td colSpan={2} className="text-center p-2">
-                No site schema has been added yet.
+                No site schema has been added yet.{" "}
+                <button className="underline text-primary-500 hover:text-primary-600"
+                        onClick={() => {
+                          setIsCreateDialogOpen(true)
+                          setNewSchemaType('site')
+                        }}
+                >Add new site schema.
+                </button>
               </td>
             </tr>
           )}
@@ -309,17 +233,35 @@ function Schemas() {
 
 
         <div className="w-full h-px bg-gray-300 mt-4"></div>
-        <h3 className="text-lg p-4 font-bold">Classification Schemas</h3>
-
+        <div className="w-full flex justify-between items-center px-4 mt-2">
+          <h3 className="text-lg font-bold">Classification Schemas</h3>
+          <ButtonPrimaryGradient
+            onClick={() => {
+              setIsCreateDialogOpen(true)
+              setNewSchemaType('classification')
+            }}
+            className="h-10"
+          >
+            + New Classification Schema
+          </ButtonPrimaryGradient>
+        </div>
+        {/*<div className="text-base p-4 font-semibold">*/}
+        {/*  NOTE: Schemas are currently not editable; if a schema is not yet in*/}
+        {/*  use, you can delete the new schema and re-create with your changes.*/}
+        {/*  Once in use, schemas can not be changed.*/}
+        {/*  <span className="block font-normal">*/}
+        {/*    (at least, not with the current version of FormKiQ)*/}
+        {/*  </span>*/}
+        {/*</div>*/}
         <div
-          className="flex-1 inline-block overflow-y-scroll overflow-x-auto h-full"
+          className="flex-1 inline-block overflow-y-scroll overflow-x-auto h-full mt-2"
           id="classificationsScrollPane"
           onScroll={handleScroll}
         >
           <ClassificationsTable
             classifications={classifications}
             onClassificationDelete={onClassificationDelete}
-            showClassificationEditTab={showSchemaEditTab}
+            showClassificationEditTab={showClassificationEditTab}
           />
         </div>
       </div>
@@ -327,7 +269,25 @@ function Schemas() {
         isOpen={isCreateDialogOpen}
         setIsOpen={setIsCreateDialogOpen}
         siteId={currentSiteId}
+        schemaType={newSchemaType}
       />
+      {(editSchemaType === 'classification' && classificationSchema && editClassificationId) &&
+        <EditSchemaDialog
+          isOpen={isSchemaEditTabVisible}
+          setIsOpen={setIsSchemaEditTabVisible}
+          siteId={siteId}
+          schemaType={editSchemaType}
+          initialSchemaValue={classificationSchema}
+          classificationId={editClassificationId}
+        />}
+      {(editSchemaType === 'site' && siteSchema) &&
+        <EditSchemaDialog
+          isOpen={isSchemaEditTabVisible}
+          setIsOpen={setIsSchemaEditTabVisible}
+          siteId={siteId}
+          schemaType={editSchemaType}
+          initialSchemaValue={siteSchema}
+        />}
     </>
   );
 }

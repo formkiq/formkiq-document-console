@@ -22,6 +22,7 @@ export interface Classification {
   name: string;
   userId: string;
   insertedDate: string;
+  classificationId: string;
 }
 
 export enum RequestStatus {
