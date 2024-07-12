@@ -1,5 +1,6 @@
 import {Close, Save} from "../../Icons/icons";
 import RadioCombobox from "../../Generic/Listboxes/RadioCombobox";
+import {useEffect} from "react";
 
 type AddTagsTabProps = {
   attributeKeys: { key: string, title: string }[],
@@ -57,7 +58,23 @@ function AddAttributesTab({
     if (!setDefaultValues) return;
     setDefaultValues(defaultValues.filter((k: string) => k !== key))
   }
-  console.log('allAttributes', allAttributes)
+
+  useEffect(() => {
+    if (allowedValue) return;
+     // if boolean value, set allowedValue to false
+      if (allAttributes.find((a: any) => a.key === tagsKey)?.dataType === "BOOLEAN") {
+        setAllowedValue("false")
+      }
+      // if number value, set allowedValue to 0
+      if (allAttributes.find((a: any) => a.key === tagsKey)?.dataType === "NUMBER") {
+        setAllowedValue("0")
+      }
+      // if string value, set allowedValue to empty string
+      if (allAttributes.find((a: any) => a.key === tagsKey)?.dataType === "STRING") {
+        setAllowedValue("")
+      }
+  }, [tagsKey,allowedValue])
+
   return (
     <>
       <div className="flex flex-row items-center gap-4 text-base h-10">
@@ -76,12 +93,34 @@ function AddAttributesTab({
 
       {(tagsKey && allAttributes.find((a: any) => a.key === tagsKey)?.dataType !== "KEY_ONLY") && <>
         <div className="flex flex-row justify-between items-center gap-4 text-base">
+          {allAttributes.find((a: any) => a.key === tagsKey)?.dataType === "STRING"&&
           <input type="text"
                  className="h-10 px-4 border border-neutral-300 text-sm rounded-md w-full"
                  placeholder="Allowed Value"
                  value={allowedValue}
                  onChange={(e) => setAllowedValue(e.target.value)}
-                 onKeyDown={(e) => preventDialogClose(e)}/>
+                 onKeyDown={(e) => preventDialogClose(e)}/>}
+          {allAttributes.find((a: any) => a.key === tagsKey)?.dataType === "NUMBER"&&
+            <input type="number"
+                   className="h-10 px-4 border border-neutral-300 text-sm rounded-md w-full"
+                   placeholder="Allowed Value"
+                   value={Number(allowedValue)}
+                   step="any"
+                   onChange={(e) => setAllowedValue(e.target.value.toString())}
+                   onKeyDown={(e) => preventDialogClose(e)}/>}
+          {allAttributes.find((a: any) => a.key === tagsKey)?.dataType === "BOOLEAN"&&
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"
+                  checked={allowedValue==="true"}
+                  onChange={(e) => setAllowedValue(e.target.checked ? "true" : "false")}
+                />
+                <label className="text-sm">
+                  {allowedValue==='true' ? 'TRUE' : 'FALSE'}
+                </label>
+              </div>
+          }
 
           <button type="button"
                   className="h-10 rounded-md border border-primary-500 text-neutral-900 hover:text-primary-500 px-4 font-bold whitespace-nowrap"
@@ -114,7 +153,7 @@ function AddAttributesTab({
 
 
         {(defaultValues && setDefaultValues) && <div className="flex flex-col gap-2">
-          <p className="text-sm text-neutral-900 font-medium">Default Value: </p>
+          <p className="text-sm text-neutral-900 font-medium">Default Values: </p>
           <div className="flex flex-row justify-start flex-wrap gap-2 items-end max-h-[100px] overflow-auto">
 
             {defaultValues.length === 0 ? <p className="text-xs text-neutral-500 font-medium">No default value
@@ -151,14 +190,17 @@ function AddAttributesTab({
             </tr>
             </thead>
             <tbody>
-            {attributes.map((value: { attributeKey: string, defaultValues?: string[], allowedValues?: string[] }, i: number) => (
+            {attributes.map((value: { attributeKey: string,defaultValue?: string, defaultValues?: string[], allowedValues?: string[] }, i: number) => (
               <tr key={"tag_" + i} className="border border-neutral-300 px-4 h-12 text-neutral-900">
                 <td className="text-sm text-slate-500 px-4"><span
                   className="text-gray-900 font-medium">{i + 1}</span></td>
                 <td
                   className="text-sm text-ellipsis overflow-hidden">{value.attributeKey}</td>
-                {attributeType === 'required' && <td
-                  className="text-sm text-ellipsis overflow-hidden">{value.defaultValues && value.defaultValues.join(", ")}</td>}
+                {(attributeType === 'required') && <td
+                  className="text-sm text-ellipsis overflow-hidden">
+                  {value.defaultValues && value.defaultValues.join(", ")}
+                  {value.defaultValue}
+                </td>}
                 <td
                   className="text-sm  text-ellipsis overflow-hidden">{value.allowedValues && value.allowedValues.join(", ")}</td>
                 <td className="w-[30px]">
