@@ -88,16 +88,16 @@ function Classification() {
     return true;
   };
 
-  const updateClassification = (classificationSchema: SchemaType) => {
+  const updateClassification = (schema: SchemaType) => {
     if (!classificationId) return;
-    DocumentsService.setClassification(siteId, classificationId, {classification: classificationSchema},).then(res => {
+    DocumentsService.setClassification(siteId, classificationId, {classification: schema},).then(res => {
       if (res.status === 200) {
         dispatch(
           openNotificationDialog({
             dialogTitle: 'Schema saved successfully',
           })
         );
-        dispatch(setClassificationSchema(classificationSchema))
+        dispatch(setClassificationSchema(schema))
       } else if (res.errors && res.errors.length > 0) {
         dispatch(
           openNotificationDialog({

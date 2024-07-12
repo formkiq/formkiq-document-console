@@ -79,8 +79,6 @@ export const fetchSiteSchema = createAsyncThunk(
     await DocumentsService.getSiteSchema(siteId).then((response) => {
       if (response.status === 200) {
         thunkAPI.dispatch(setSiteSchema({name: response.name, attributes: response.attributes}));
-      } else {
-        thunkAPI.dispatch(setSiteSchema(null));
       }
     });
   }
@@ -91,10 +89,9 @@ export const fetchClassificationSchema = createAsyncThunk(
   async (data: any, thunkAPI) => {
     const {siteId, classificationId} = data;
     await DocumentsService.getClassification(siteId, classificationId).then((response) => {
+      console.log(response, 'response')
       if (response.status === 200) {
         thunkAPI.dispatch(setClassificationSchema(response.classification));
-      } else {
-        thunkAPI.dispatch(setClassificationSchema(null));
       }
     });
   }

@@ -75,7 +75,7 @@ function EditSchemaDialog({
   const onSubmit = (e: any) => {
     e.preventDefault();
 
-    const newSchema = {...schema}
+    const newSchema: Schema = {name: schema.name, attributes: schema.attributes}
     // remove empty attributes
     if (newSchema.attributes.compositeKeys && newSchema.attributes.compositeKeys.length === 0) {
       delete newSchema.attributes.compositeKeys;
@@ -89,24 +89,32 @@ function EditSchemaDialog({
     // if defaultValues has single item set defaultValue
     // delete empty default values
     if (newSchema.attributes.required) {
-      newSchema.attributes.required.forEach((item) => {
+      const newRequired = newSchema.attributes.required.map((item) => {
+        const newItem = {...item};
         if (item.defaultValues && item.defaultValues.length === 1) {
-          item.defaultValue = item.defaultValues[0];
-          delete item.defaultValues;
+          newItem.defaultValue = item.defaultValues[0];
+          newItem.defaultValues = undefined;
+          return newItem;
         } else if (item.defaultValue === "") {
-          delete item.defaultValue;
+          newItem.defaultValue = undefined;
+          return newItem;
         } else if (item.defaultValues && item.defaultValues.length === 0) {
-          delete item.defaultValues;
+          newItem.defaultValues = undefined;
+          return newItem;
         }
+        return newItem;
       });
+      newSchema.attributes = {...newSchema.attributes, required: newRequired}
     }
     // delete empty optional attributes
     if (newSchema.attributes.optional) {
-      newSchema.attributes.optional.forEach((item) => {
+      const newOptional: any = newSchema.attributes.optional.map((item) => {
         if (item.allowedValues && item.allowedValues.length === 0) {
-          delete item.allowedValues;
+          item.allowedValues = undefined;
         }
+        return item;
       });
+      newSchema.attributes = {...newSchema.attributes, optional: newOptional}
     }
 
     if (schemaType === "classification") {
@@ -117,7 +125,6 @@ function EditSchemaDialog({
           dispatch(fetchClassificationSchema({siteId, classificationId}));
           setIsOpen(false);
           resetValues()
-          console.log('set classification')
         } else {
           if (response.errors) {
             dispatch(
@@ -172,6 +179,10 @@ function EditSchemaDialog({
     if (compositeKey.length === 0) {
       return;
     }
+    if (compositeKeys.includes(compositeKey)) {
+      dispatch(openNotificationDialog({dialogTitle: 'Key was already added'}));
+      return;
+    }
     setCompositeKeys([...compositeKeys, compositeKey]);
     setCompositeKey('');
   };
@@ -206,12 +217,10 @@ function EditSchemaDialog({
     if (requiredAllowedValue.length === 0) {
       return;
     }
-
     if (requiredAllowedValues.includes(requiredAllowedValue)) {
       dispatch(openNotificationDialog({dialogTitle: 'Value already exists'}));
       return;
     }
-
     setRequiredAllowedValues([...requiredAllowedValues, requiredAllowedValue]);
     setRequiredAllowedValue('');
   };
@@ -255,6 +264,10 @@ function EditSchemaDialog({
 
   const addOptionalAllowedValue = () => {
     if (optionalAllowedValue.length === 0) {
+      return;
+    }
+    if (optionalAllowedValues.includes(optionalAllowedValue)) {
+      dispatch(openNotificationDialog({dialogTitle: 'Value already exists'}));
       return;
     }
     setOptionalAllowedValues([...optionalAllowedValues, optionalAllowedValue]);
@@ -569,7 +582,7 @@ function EditSchemaDialog({
                     type="submit"
                     className="h-10 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white px-4 rounded-md"
                   >
-                   Save
+                    Save
                   </ButtonPrimaryGradient>
                 </div>
               </form>

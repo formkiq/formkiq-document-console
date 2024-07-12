@@ -75,7 +75,7 @@ function CreateSchemaDialog({
   const onSubmit = (e: any) => {
     e.preventDefault();
 
-    const newSchema = {...schema}
+    const newSchema: Schema = {name: schema.name, attributes: schema.attributes}
     // remove empty attributes
     if (newSchema.attributes.compositeKeys && newSchema.attributes.compositeKeys.length === 0) {
       delete newSchema.attributes.compositeKeys;
@@ -168,12 +168,15 @@ function CreateSchemaDialog({
     if (compositeKey.length === 0) {
       return;
     }
+    if (compositeKeys.includes(compositeKey)) {
+      dispatch(openNotificationDialog({dialogTitle: 'Key was already added'}));
+      return;
+    }
     setCompositeKeys([...compositeKeys, compositeKey]);
     setCompositeKey('');
   };
 
   const addCompositeKeyToSchema = () => {
-
     const newSchema = {...schema};
     if (newSchema.attributes.compositeKeys) {
       newSchema.attributes.compositeKeys = [...newSchema.attributes.compositeKeys, {attributeKeys: compositeKeys}];
@@ -203,12 +206,10 @@ function CreateSchemaDialog({
     if (requiredAllowedValue.length === 0) {
       return;
     }
-
     if (requiredAllowedValues.includes(requiredAllowedValue)) {
       dispatch(openNotificationDialog({dialogTitle: 'Value already exists'}));
       return;
     }
-
     setRequiredAllowedValues([...requiredAllowedValues, requiredAllowedValue]);
     setRequiredAllowedValue('');
   };
@@ -253,6 +254,10 @@ function CreateSchemaDialog({
 
   const addOptionalAllowedValue = () => {
     if (optionalAllowedValue.length === 0) {
+      return;
+    }
+    if (optionalAllowedValues.includes(optionalAllowedValue)) {
+      dispatch(openNotificationDialog({dialogTitle: 'Value already exists'}));
       return;
     }
     setOptionalAllowedValues([...optionalAllowedValues, optionalAllowedValue]);
