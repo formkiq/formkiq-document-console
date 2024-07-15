@@ -1,17 +1,17 @@
-import {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {useLocation, useSearchParams} from 'react-router-dom';
-import {fetchDocuments} from '../../../Store/reducers/documentsList';
-import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../../Store/store';
-import {Attribute} from '../../../helpers/types/attributes';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { AttributesDataState } from '../../../Store/reducers/attributesData';
+import { fetchDocuments } from '../../../Store/reducers/documentsList';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import { Attribute } from '../../../helpers/types/attributes';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
-import {Close, Plus} from '../../Icons/icons';
-import {AttributesDataState} from "../../../Store/reducers/attributesData";
+import { Close, Plus } from '../../Icons/icons';
 
 export default function DefaultSearchByAttributes({
   siteId,
@@ -42,8 +42,10 @@ export default function DefaultSearchByAttributes({
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
 
-  const {allAttributes} = useSelector(AttributesDataState);
-  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
+  const { allAttributes } = useSelector(AttributesDataState);
+  const [attributeKeys, setAttributeKeys] = useState<
+    { key: string; title: string }[]
+  >([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
   );
@@ -105,7 +107,14 @@ export default function DefaultSearchByAttributes({
 
   const onSearch = () => {
     const selectedAttributeQuery = getAttributeQuery();
-    if (!selectedAttributeQuery) return;
+    if (!selectedAttributeQuery) {
+      dispatch(
+        openNotificationDialog({
+          dialogTitle: 'Please select at least one attribute to search',
+        })
+      );
+      return;
+    }
     dispatch(
       fetchDocuments({
         siteId,

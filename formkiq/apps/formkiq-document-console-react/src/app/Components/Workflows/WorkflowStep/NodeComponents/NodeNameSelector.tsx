@@ -23,6 +23,7 @@ export const NodeNameSelector = ({
     FULLTEXT: 'Fulltext Search',
     ANTIVIRUS: 'Anti-Malware Scan',
     QUEUE: 'Review / Approval Queue',
+    PUBLISH: 'Publish',
   };
 
   const getNodeId = () => `node_${uuid()}`;

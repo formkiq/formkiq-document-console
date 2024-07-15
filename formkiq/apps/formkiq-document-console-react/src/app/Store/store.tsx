@@ -4,6 +4,8 @@ import thunkMiddleware from 'redux-thunk';
 import FormkiqClient from '../lib/formkiq-client-sdk-es6';
 import authMiddleware from './middleware/auth';
 import configMiddleware from './middleware/config';
+import attributesState from './reducers/attributes';
+import attributesDataState from './reducers/attributesData';
 import authState from './reducers/auth';
 import configState from './reducers/config';
 import dataCacheState from './reducers/data';
@@ -11,13 +13,11 @@ import documentListState from './reducers/documentsList';
 import globalConfirmControls from './reducers/globalConfirmControls';
 import globalNotificationControls from './reducers/globalNotificationControls';
 import globalProgressControls from './reducers/globalProgressControls';
-import rulesetsState from './reducers/rulesets';
-import workflowsState from './reducers/workflows';
-import tagSchemasState from './reducers/tagSchemas';
 import queuesState from './reducers/queues';
-import attributesState from './reducers/attributes';
-import userManagementState from './reducers/userManagement'
-import attributesDataState from './reducers/attributesData';
+import rulesetsState from './reducers/rulesets';
+import tagSchemasState from './reducers/tagSchemas';
+import userManagementState from './reducers/userManagement';
+import workflowsState from './reducers/workflows';
 
 export const store = configureStore({
   reducer: {
@@ -60,15 +60,17 @@ if (!formkiqClient.apiClient && user) {
   );
 }
 if (!formkiqClient.documentsApi?.apiClient?.cognitoClient?.idToken && user) {
-  formkiqClient.rebuildCognitoClient(
-    user?.email,
-    user?.idToken,
-    user?.accessToken,
-    user?.refreshToken,
-    user?.sites,
-    user?.defaultSiteId,
-    user?.currentSiteId
-  );
+  try {
+    formkiqClient.rebuildCognitoClient(
+      user?.email,
+      user?.idToken,
+      user?.accessToken,
+      user?.refreshToken,
+      user?.sites,
+      user?.defaultSiteId,
+      user?.currentSiteId
+    );
+  } catch (e: any) {}
 }
 
 export type RootState = ReturnType<typeof store.getState>;

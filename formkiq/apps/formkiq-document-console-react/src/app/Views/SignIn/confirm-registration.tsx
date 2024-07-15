@@ -64,12 +64,20 @@ export function ConfirmRegistration() {
           );
           navigate('/sign-in');
         } else {
-          dispatch(
-            openDialog({
-              dialogTitle:
-                'An error has occurred. Please try again in a few minutes.',
-            })
-          );
+          if (response.message) {
+            dispatch(
+              openDialog({
+                dialogTitle: response.message,
+              })
+            );
+          } else {
+            dispatch(
+              openDialog({
+                dialogTitle:
+                  'An unexpected error has occurred. Please try again in a few minutes.',
+              })
+            );
+          }
           return;
         }
       });

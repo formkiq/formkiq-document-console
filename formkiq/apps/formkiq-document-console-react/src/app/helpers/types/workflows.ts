@@ -38,7 +38,8 @@ export type WorkflowStepActionType =
   | 'WEBHOOK'
   | 'DOCUMENTTAGGING'
   | 'NOTIFICATION'
-  | 'QUEUE';
+  | 'QUEUE'
+  | 'PUBLISH';
 export type DecisionType = 'APPROVE' | 'REJECT';
 type OcrEngine = 'TESSERACT' | 'TEXTRACT';
 type OcrParseTypes = 'TEXT' | 'FORMS' | 'TABLES';
