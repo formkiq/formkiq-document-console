@@ -7,7 +7,6 @@ import {
   setCognitoSingleSignOnUrl,
   setCustomAuthorizerUrl,
   setDocumentApi,
-  setFormkiqVersion,
   setIsSidebarExpanded,
   setTagColors,
   setUseAuthApiForSignIn,
@@ -51,9 +50,6 @@ const updateConfig = async (action: any) => {
       case 'config/setBrand':
         config.brand = action.payload;
         break;
-      case 'config/setFormkiqVersion':
-        config.formkiqVersion = action.payload;
-        break;
       case 'config/setTagColors':
         config.tagColors = action.payload;
         break;
@@ -78,7 +74,6 @@ configMiddleware.startListening({
     setUseAuthApiForSignIn,
     setCustomAuthorizerUrl,
     setBrand,
-    setFormkiqVersion,
     setTagColors,
     setIsSidebarExpanded
   ),

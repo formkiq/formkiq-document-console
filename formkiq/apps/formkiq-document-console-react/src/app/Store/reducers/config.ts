@@ -1,8 +1,15 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { createSlice } from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import { LocalStorage } from '../../helpers/tools/useLocalStorage';
 import { IDocument } from '../../helpers/types/document';
 import { RootState } from '../store';
+
+export const setFormkiqVersion = createAsyncThunk(
+    'config/setFormkiqVersion',
+    async (data: FormkiqVersion, thunkAPI) => {
+      return data;
+    }
+)
 
 const storage: LocalStorage = LocalStorage.Instance;
 
@@ -183,12 +190,6 @@ export const configSlice = createSlice({
         brand: action.payload,
       };
     },
-    setFormkiqVersion(state, action: PayloadAction<any>) {
-      return {
-        ...state,
-        fkqVersion: action.payload,
-      };
-    },
     setTagColors(state, action: PayloadAction<TagColor[]>) {
       return {
         ...state,
@@ -220,6 +221,12 @@ export const configSlice = createSlice({
       };
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(setFormkiqVersion.fulfilled, (state:any, action) => {
+      state.formkiqVersion = action.payload;
+      storage.setConfig(state);
+    });
+  }
 });
 
 export const {
@@ -232,7 +239,6 @@ export const {
   setUseAuthApiForSignIn,
   setCustomAuthorizerUrl,
   setBrand,
-  setFormkiqVersion,
   setTagColors,
   setIsSidebarExpanded,
   setCurrentActionEvent,
