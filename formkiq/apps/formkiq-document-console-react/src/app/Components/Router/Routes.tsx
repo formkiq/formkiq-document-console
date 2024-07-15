@@ -194,6 +194,7 @@ const RoutesMapper = () => {
       <Route path="/queues/workspaces/:siteId" element={<Queues />}></Route>
       <Route path="/integrations/api" element={<ApiExplorer />}></Route>
       <Route path="/integrations/apiKeys" element={<ApiKeys />}></Route>
+      <Route path="/integrations/apiKeys/workspaces/:siteId" element={<ApiKeys />}></Route>
       <Route path="/integrations/webhooks" element={<Webhooks />}></Route>
       <Route path="/account/settings" element={<AccountSettings />}></Route>
       <Route path="/account/accessControl" element={<AccessControl />}></Route>

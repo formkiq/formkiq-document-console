@@ -225,14 +225,24 @@ function Navbar() {
 
   const changeSiteId = (event: any) => {
     const newSiteId = event.target.options[event.target.selectedIndex].value;
+
+    const pathWithoutSubfolder = location.pathname.split('/')[1];
+    const pathWithSubfolder =
+      location.pathname.split('/')[1]+'/'+location.pathname.split('/')[2]
+    const pathsWithSubfolder:string[] =['integrations/apiKeys']
+
     let newDocumentsRootUri;
+
+    let path = pathWithoutSubfolder
+    if (pathsWithSubfolder.indexOf(pathWithSubfolder) !== -1) {
+      path = pathWithSubfolder
+    }
     if (newSiteId === user?.email) {
-      newDocumentsRootUri = location.pathname.split('/')[1];
+      newDocumentsRootUri = path
     } else if (newSiteId === 'default') {
-      newDocumentsRootUri = location.pathname.split('/')[1];
+      newDocumentsRootUri = path
     } else {
-      newDocumentsRootUri =
-        location.pathname.split('/')[1] + '/workspaces/' + newSiteId;
+      newDocumentsRootUri = path + '/workspaces/' + newSiteId;
     }
     navigate(
       {
@@ -243,6 +253,7 @@ function Navbar() {
       }
     );
   };
+
 
   const DownloadDocument = () => {
     if (documentId.length) {
@@ -506,6 +517,7 @@ function Navbar() {
                           {(pathname.indexOf('/rulesets') > -1 ||
                             pathname.indexOf('/schemas') > -1 ||
                             pathname.indexOf('/workflows') > -1 ||
+                            pathname.indexOf('/integrations/apiKeys') > -1 ||
                             pathname.indexOf('/queues') > -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
