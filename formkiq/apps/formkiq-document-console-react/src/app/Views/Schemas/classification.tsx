@@ -1,6 +1,6 @@
-import {useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
+import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
 import {
   NavLink,
   useLocation,
@@ -8,32 +8,36 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import {Mode} from 'vanilla-jsoneditor';
-import {Close, Save, Spinner, Trash} from '../../Components/Icons/icons';
+import { Mode } from 'vanilla-jsoneditor';
+import { Close, Save, Spinner, Trash } from '../../Components/Icons/icons';
 import SchemaMenu from '../../Components/Schemas/SchemaMenu';
+import EditSchemaDialog from '../../Components/Schemas/createSchemaDialog/EditSchemaDialog';
 import CompositeKeysTable from '../../Components/Schemas/tables/compositeKeysTable';
+import OptionalAttributesTable from '../../Components/Schemas/tables/optionalAttributesTable';
 import RequiredAttributesTable from '../../Components/Schemas/tables/requiredAttributesTable';
-import {JSONEditorReact} from '../../Components/TextEditors/JsonEditor';
-import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
-import {setClassificationSchema, SchemasState, fetchClassificationSchema} from '../../Store/reducers/schemas';
-import {useAppDispatch} from '../../Store/store';
-import {DocumentsService} from '../../helpers/services/documentsService';
+import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import {
+  SchemasState,
+  fetchClassificationSchema,
+  setClassificationSchema,
+} from '../../Store/reducers/schemas';
+import { useAppDispatch } from '../../Store/store';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import {Schema as SchemaType} from '../../helpers/types/schemas';
-import OptionalAttributesTable from "../../Components/Schemas/tables/optionalAttributesTable";
-import EditSchemaDialog from "../../Components/Schemas/createSchemaDialog/EditSchemaDialog";
+import { Schema as SchemaType } from '../../helpers/types/schemas';
 
 function Classification() {
-  const {user} = useAuthenticatedState();
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { user } = useAuthenticatedState();
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId} = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -41,12 +45,12 @@ function Classification() {
     hasWorkspaces,
     workspaceSites
   );
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const {classificationId} = useParams();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { classificationId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const editor = searchParams.get('editor');
 
-  const {classificationSchema} = useSelector(SchemasState);
+  const { classificationSchema } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -54,7 +58,7 @@ function Classification() {
     if (!classificationId) {
       return;
     }
-    dispatch(fetchClassificationSchema({siteId, classificationId}));
+    dispatch(fetchClassificationSchema({ siteId, classificationId }));
   }, []);
 
   // JSON editor
@@ -90,14 +94,16 @@ function Classification() {
 
   const updateClassification = (schema: SchemaType) => {
     if (!classificationId) return;
-    DocumentsService.setClassification(siteId, classificationId, {classification: schema},).then(res => {
+    DocumentsService.setClassification(siteId, classificationId, {
+      classification: schema,
+    }).then((res) => {
       if (res.status === 200) {
         dispatch(
           openNotificationDialog({
             dialogTitle: 'Schema saved successfully',
           })
         );
-        dispatch(setClassificationSchema(schema))
+        dispatch(setClassificationSchema(schema));
       } else if (res.errors && res.errors.length > 0) {
         dispatch(
           openNotificationDialog({
@@ -116,7 +122,7 @@ function Classification() {
           })
         );
       }
-    })
+    });
   };
 
   const saveSchemaInEditor = () => {
@@ -191,11 +197,11 @@ function Classification() {
                 <button
                   onClick={closeEditor}
                   className="h-8 text-neutral-900 bg-neutral-200 hover:bg-neutral-300 rounded-md p-2 flex items-center gap-2 mr-2 whitespace-nowrap font-bold text-sm"
-                  title="Close Editor"
+                  title="Close JSON Editor"
                 >
-                  Close Editor
+                  Close JSON Editor
                   <div className="w-4 h-4">
-                    <Close/>
+                    <Close />
                   </div>
                 </button>
                 <NavLink
@@ -212,7 +218,7 @@ function Classification() {
                   className="h-7 w-7 text-neutral-900 hover:text-primary-500"
                   title="Save"
                 >
-                  <Save/>
+                  <Save />
                 </button>
                 <button
                   className="h-6 text-neutral-900 hover:text-primary-500"
@@ -220,7 +226,7 @@ function Classification() {
                   type="button"
                   onClick={onDeleteClick}
                 >
-                  <Trash/>
+                  <Trash />
                 </button>
               </div>
             </div>
@@ -244,30 +250,38 @@ function Classification() {
             <p className="text-neutral-900 text-md font-bold my-4">
               Composite Keys
             </p>
-            <CompositeKeysTable compositeKeys={classificationSchema.attributes.compositeKeys}/>
+            <CompositeKeysTable
+              compositeKeys={classificationSchema.attributes.compositeKeys}
+            />
 
             <p className="text-neutral-900 text-md font-bold my-4">
               Required Attributes
             </p>
-            <RequiredAttributesTable attributes={classificationSchema.attributes.required}/>
+            <RequiredAttributesTable
+              attributes={classificationSchema.attributes.required}
+            />
 
             <p className="text-neutral-900 text-md font-bold my-4">
               Optional Attributes
             </p>
-            <OptionalAttributesTable attributes={classificationSchema.attributes.optional}/>
+            <OptionalAttributesTable
+              attributes={classificationSchema.attributes.optional}
+            />
           </div>
         )
       ) : (
-        <Spinner/>
+        <Spinner />
       )}
-      {classificationSchema && <EditSchemaDialog
-        isOpen={isEditDialogOpen}
-        setIsOpen={setIsEditDialogOpen}
-        siteId={siteId}
-        schemaType='classification'
-        initialSchemaValue={classificationSchema}
-        classificationId={classificationId}
-      />}
+      {classificationSchema && (
+        <EditSchemaDialog
+          isOpen={isEditDialogOpen}
+          setIsOpen={setIsEditDialogOpen}
+          siteId={siteId}
+          schemaType="classification"
+          initialSchemaValue={classificationSchema}
+          classificationId={classificationId}
+        />
+      )}
     </>
   );
 }

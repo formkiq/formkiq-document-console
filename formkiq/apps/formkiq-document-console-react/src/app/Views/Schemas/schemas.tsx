@@ -1,35 +1,36 @@
-import {useCallback, useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {Link, NavLink, useLocation} from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
+import { Edit, Json } from '../../Components/Icons/icons';
 import CreateSchemaDialog from '../../Components/Schemas/createSchemaDialog/CreateSchemaDialog';
-import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
+import EditSchemaDialog from '../../Components/Schemas/createSchemaDialog/EditSchemaDialog';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
 import {
   SchemasState,
   deleteClassification,
+  fetchClassificationSchema,
   fetchClassifications,
   fetchSiteSchema,
-  setClassificationsLoadingStatusPending, fetchClassificationSchema,
+  setClassificationsLoadingStatusPending,
 } from '../../Store/reducers/schemas';
-import {useAppDispatch} from '../../Store/store';
+import { useAppDispatch } from '../../Store/store';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import {RequestStatus} from '../../helpers/types/document';
-import {Schema} from '../../helpers/types/schemas';
+import { RequestStatus } from '../../helpers/types/document';
+import { Schema } from '../../helpers/types/schemas';
 import ClassificationsTable from './classificationsTable';
-import {Edit} from "../../Components/Icons/icons";
-import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
-import EditSchemaDialog from "../../Components/Schemas/createSchemaDialog/EditSchemaDialog";
 
 function Schemas() {
-  const {user} = useAuthenticatedState();
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { user } = useAuthenticatedState();
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId} = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -50,12 +51,18 @@ function Schemas() {
   const dispatch = useAppDispatch();
   const [isSchemaEditTabVisible, setIsSchemaEditTabVisible] = useState(false);
 
-  const [newSchemaType, setNewSchemaType] = useState<"site" | "classification">('site');
-  const [editSchemaType, setEditSchemaType] = useState<"site" | "classification">('site');
+  const [newSchemaType, setNewSchemaType] = useState<'site' | 'classification'>(
+    'site'
+  );
+  const [editSchemaType, setEditSchemaType] = useState<
+    'site' | 'classification'
+  >('site');
   const [newSchemaValue, setNewSchemaValue] = useState<{
     classification: Schema;
   } | null>(null);
-  const [editClassificationId, setEditClassificationId] = useState<string | null>(null);
+  const [editClassificationId, setEditClassificationId] = useState<
+    string | null
+  >(null);
   // update siteId
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -71,8 +78,8 @@ function Schemas() {
 
   // update schemas when different siteId selected
   useEffect(() => {
-    dispatch(fetchClassifications({siteId: currentSiteId, page: 1}));
-    dispatch(fetchSiteSchema({siteId: currentSiteId}));
+    dispatch(fetchClassifications({ siteId: currentSiteId, page: 1 }));
+    dispatch(fetchSiteSchema({ siteId: currentSiteId }));
   }, [currentSiteId]);
 
   // load more schemas when table reaches bottom
@@ -135,7 +142,9 @@ function Schemas() {
   const showClassificationEditTab = (classificationId: string) => {
     setEditSchemaType('classification');
     setEditClassificationId(classificationId);
-    dispatch(fetchClassificationSchema({siteId: currentSiteId, classificationId,}));
+    dispatch(
+      fetchClassificationSchema({ siteId: currentSiteId, classificationId })
+    );
     setIsSchemaEditTabVisible(true);
   };
 
@@ -158,87 +167,84 @@ function Schemas() {
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-
-
         <h3 className="text-lg p-4 font-bold">Site Schema</h3>
 
-        <table
-          className="w-full border-collapse text-sm table-fixed "
-        >
-          <thead
-            className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
-          <tr>
-            <th
-              className=" w-full max-w-52 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
-              Name
-            </th>
-            <th
-              className=" w-full border-b border-t p-4 pr-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-right">
-              Actions
-            </th>
-          </tr>
+        <table className="w-full border-collapse text-sm table-fixed ">
+          <thead className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
+            <tr>
+              <th className=" w-full max-w-52 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                Name
+              </th>
+              <th className=" w-full border-b border-t p-4 pr-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-right">
+                Actions
+              </th>
+            </tr>
           </thead>
           <tbody className="bg-white ">
-          {siteSchema ? (
-            <>
-              <tr
-                className="text-neutral-900 border-neutral-300"
-              >
-                <td className="border-b max-w-52 border-neutral-300 p-4 pl-8 truncate">
-                  <Link
-                    to={`${pathname}/site-schema`}
-                    className="cursor-pointer hover:text-primary-500"
-                  >
-                    {siteSchema.name}
-                  </Link>
-                </td>
-
-                <td className="border-b border-neutral-300 p-4 pr-8">
-                  <div className="flex items-center justify-end gap-2 mr-3">
-                    <NavLink
-                      title="Open in editor"
-                      to={`${pathname}/site-schema?editor=true`}
-                      className="h-6"
+            {siteSchema ? (
+              <>
+                <tr className="text-neutral-900 border-neutral-300">
+                  <td className="border-b max-w-52 border-neutral-300 p-4 pl-8 truncate">
+                    <Link
+                      to={`${pathname}/site-schema`}
+                      className="cursor-pointer hover:text-primary-500"
                     >
-                      <button title="Open In Editor">
-                        Open In Editor
-                      </button>
-                    </NavLink>
+                      {siteSchema.name}
+                    </Link>
+                  </td>
 
-                    <button title="Edit"
-                            className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
-                            onClick={() => showSiteEditTab()}>
-                      <Edit/>
-                    </button>
-                  </div>
+                  <td className="border-b border-neutral-300 p-4 pr-8">
+                    <div className="flex items-center justify-end gap-2 mr-3">
+                      <NavLink
+                        title="Open in editor"
+                        to={`${pathname}/site-schema?editor=true`}
+                        className="h-6"
+                      >
+                        <button
+                          className="w-6 h-auto"
+                          title="Open in JSON Editor"
+                        >
+                          <Json />
+                        </button>
+                      </NavLink>
+
+                      <button
+                        title="Edit"
+                        className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
+                        onClick={() => showSiteEditTab()}
+                      >
+                        <Edit />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </>
+            ) : (
+              <tr>
+                <td colSpan={2} className="text-center p-2">
+                  No site schema has been added yet.{' '}
+                  <button
+                    className="underline text-primary-500 hover:text-primary-600"
+                    onClick={() => {
+                      setIsCreateDialogOpen(true);
+                      setNewSchemaType('site');
+                    }}
+                  >
+                    Add new site schema.
+                  </button>
                 </td>
               </tr>
-            </>
-          ) : (
-            <tr>
-              <td colSpan={2} className="text-center p-2">
-                No site schema has been added yet.{" "}
-                <button className="underline text-primary-500 hover:text-primary-600"
-                        onClick={() => {
-                          setIsCreateDialogOpen(true)
-                          setNewSchemaType('site')
-                        }}
-                >Add new site schema.
-                </button>
-              </td>
-            </tr>
-          )}
+            )}
           </tbody>
         </table>
-
 
         <div className="w-full h-px bg-gray-300 mt-4"></div>
         <div className="w-full flex justify-between items-center px-4 mt-2">
           <h3 className="text-lg font-bold">Classification Schemas</h3>
           <ButtonPrimaryGradient
             onClick={() => {
-              setIsCreateDialogOpen(true)
-              setNewSchemaType('classification')
+              setIsCreateDialogOpen(true);
+              setNewSchemaType('classification');
             }}
             className="h-10"
           >
@@ -271,23 +277,27 @@ function Schemas() {
         siteId={currentSiteId}
         schemaType={newSchemaType}
       />
-      {(editSchemaType === 'classification' && classificationSchema && editClassificationId) &&
-        <EditSchemaDialog
-          isOpen={isSchemaEditTabVisible}
-          setIsOpen={setIsSchemaEditTabVisible}
-          siteId={siteId}
-          schemaType={editSchemaType}
-          initialSchemaValue={classificationSchema}
-          classificationId={editClassificationId}
-        />}
-      {(editSchemaType === 'site' && siteSchema) &&
+      {editSchemaType === 'classification' &&
+        classificationSchema &&
+        editClassificationId && (
+          <EditSchemaDialog
+            isOpen={isSchemaEditTabVisible}
+            setIsOpen={setIsSchemaEditTabVisible}
+            siteId={siteId}
+            schemaType={editSchemaType}
+            initialSchemaValue={classificationSchema}
+            classificationId={editClassificationId}
+          />
+        )}
+      {editSchemaType === 'site' && siteSchema && (
         <EditSchemaDialog
           isOpen={isSchemaEditTabVisible}
           setIsOpen={setIsSchemaEditTabVisible}
           siteId={siteId}
           schemaType={editSchemaType}
           initialSchemaValue={siteSchema}
-        />}
+        />
+      )}
     </>
   );
 }

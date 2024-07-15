@@ -1,36 +1,36 @@
-import {useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {
-  NavLink,
-  useLocation,
-  useSearchParams,
-} from 'react-router-dom';
-import {Mode} from 'vanilla-jsoneditor';
-import {Close, Save, Spinner} from '../../Components/Icons/icons';
+import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { NavLink, useLocation, useSearchParams } from 'react-router-dom';
+import { Mode } from 'vanilla-jsoneditor';
+import { Close, Save, Spinner } from '../../Components/Icons/icons';
 import SchemaMenu from '../../Components/Schemas/SchemaMenu';
+import EditSchemaDialog from '../../Components/Schemas/createSchemaDialog/EditSchemaDialog';
 import CompositeKeysTable from '../../Components/Schemas/tables/compositeKeysTable';
+import OptionalAttributesTable from '../../Components/Schemas/tables/optionalAttributesTable';
 import RequiredAttributesTable from '../../Components/Schemas/tables/requiredAttributesTable';
-import {JSONEditorReact} from '../../Components/TextEditors/JsonEditor';
-import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
-import {fetchSiteSchema, SchemasState, setSiteSchema} from '../../Store/reducers/schemas';
-import {useAppDispatch} from '../../Store/store';
-import {DocumentsService} from '../../helpers/services/documentsService';
+import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import {
+  SchemasState,
+  fetchSiteSchema,
+  setSiteSchema,
+} from '../../Store/reducers/schemas';
+import { useAppDispatch } from '../../Store/store';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import {Schema as SchemaType} from '../../helpers/types/schemas';
-import OptionalAttributesTable from "../../Components/Schemas/tables/optionalAttributesTable";
-import EditSchemaDialog from "../../Components/Schemas/createSchemaDialog/EditSchemaDialog";
+import { Schema as SchemaType } from '../../helpers/types/schemas';
 
 function SiteSchema() {
-  const {user} = useAuthenticatedState();
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { user } = useAuthenticatedState();
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId} = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -38,20 +38,20 @@ function SiteSchema() {
     hasWorkspaces,
     workspaceSites
   );
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const editor = searchParams.get('editor');
-  const {siteSchema} = useSelector(SchemasState);
+  const { siteSchema } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (!siteId) {
       return;
     }
-    dispatch(fetchSiteSchema({siteId}));
+    dispatch(fetchSiteSchema({ siteId }));
   }, []);
   useEffect(() => {
-   console.log("siteSchema",siteSchema)
+    console.log('siteSchema', siteSchema);
   }, [siteSchema]);
 
   // JSON editor
@@ -87,14 +87,14 @@ function SiteSchema() {
 
   const updateSiteSchema = (schema: SchemaType) => {
     if (!siteId) return;
-    DocumentsService.setSiteSchema(siteId,  schema).then(res => {
+    DocumentsService.setSiteSchema(siteId, schema).then((res) => {
       if (res.status === 200) {
         dispatch(
           openNotificationDialog({
             dialogTitle: 'Schema saved successfully',
           })
         );
-        dispatch(setSiteSchema(schema))
+        dispatch(setSiteSchema(schema));
       } else if (res.errors && res.errors.length > 0) {
         dispatch(
           openNotificationDialog({
@@ -113,7 +113,7 @@ function SiteSchema() {
           })
         );
       }
-    })
+    });
   };
 
   const saveSchemaInEditor = () => {
@@ -129,7 +129,6 @@ function SiteSchema() {
       );
     }
   };
-
 
   const handleChange = (value: any) => {
     if (value.json) {
@@ -162,11 +161,11 @@ function SiteSchema() {
                 <button
                   onClick={closeEditor}
                   className="h-8 text-neutral-900 bg-neutral-200 hover:bg-neutral-300 rounded-md p-2 flex items-center gap-2 mr-2 whitespace-nowrap font-bold text-sm"
-                  title="Close Editor"
+                  title="Close JSON Editor"
                 >
-                  Close Editor
+                  Close JSON Editor
                   <div className="w-4 h-4">
-                    <Close/>
+                    <Close />
                   </div>
                 </button>
                 <NavLink
@@ -183,7 +182,7 @@ function SiteSchema() {
                   className="h-7 w-7 text-neutral-900 hover:text-primary-500"
                   title="Save"
                 >
-                  <Save/>
+                  <Save />
                 </button>
               </div>
             </div>
@@ -206,29 +205,37 @@ function SiteSchema() {
             <p className="text-neutral-900 text-md font-bold my-4">
               Composite Keys
             </p>
-            <CompositeKeysTable compositeKeys={siteSchema.attributes.compositeKeys}/>
+            <CompositeKeysTable
+              compositeKeys={siteSchema.attributes.compositeKeys}
+            />
 
             <p className="text-neutral-900 text-md font-bold my-4">
               Required Attributes
             </p>
-            <RequiredAttributesTable attributes={siteSchema.attributes.required}/>
+            <RequiredAttributesTable
+              attributes={siteSchema.attributes.required}
+            />
 
             <p className="text-neutral-900 text-md font-bold my-4">
               Optional Attributes
             </p>
-            <OptionalAttributesTable attributes={siteSchema.attributes.optional}/>
+            <OptionalAttributesTable
+              attributes={siteSchema.attributes.optional}
+            />
           </div>
         )
       ) : (
-        <Spinner/>
+        <Spinner />
       )}
-      {siteSchema && <EditSchemaDialog
-        isOpen={isEditDialogOpen}
-        setIsOpen={setIsEditDialogOpen}
-        siteId={siteId}
-        schemaType='site'
-        initialSchemaValue={siteSchema}
-      />}
+      {siteSchema && (
+        <EditSchemaDialog
+          isOpen={isEditDialogOpen}
+          setIsOpen={setIsEditDialogOpen}
+          siteId={siteId}
+          schemaType="site"
+          initialSchemaValue={siteSchema}
+        />
+      )}
     </>
   );
 }
