@@ -6,8 +6,7 @@ import {
   setClientId,
   setCognitoSingleSignOnUrl,
   setCustomAuthorizerUrl,
-  setDocumentApi,
-  setFormkiqVersion,
+  setDocumentApi, setFormkiqVersion,
   setIsSidebarExpanded,
   setTagColors,
   setUseAuthApiForSignIn,
@@ -20,45 +19,44 @@ const configMiddleware = createListenerMiddleware();
 
 const updateConfig = async (action: any) => {
   // Run whatever additional side-effect-y logic you want here
-  //console.log(action)
   const config = storage.getConfig();
   if (config) {
     switch (action.type) {
-      case 'config/setDocumentApi':
+      case 'config/setDocumentApi/fulfilled':
         config.documentApi = action.payload;
         break;
-      case 'config/setUserPoolId':
+      case 'config/setUserPoolId/fulfilled':
         config.userPoolId = action.payload;
         break;
-      case 'config/setClientId':
+      case 'config/setClientId/fulfilled':
         config.clientId = action.payload;
         break;
-      case 'config/setCognitoSingleSignOnUrl':
+      case 'config/setCognitoSingleSignOnUrl/fulfilled':
         config.cognitoSingleSignOnUrl = action.payload;
         break;
-      case 'config/setUserAuthenticationType':
+      case 'config/setUserAuthenticationType/fulfilled':
         config.userAuthenticationType = action.payload;
         break;
-      case 'config/setAuthApi':
+      case 'config/setAuthApi/fulfilled':
         config.authApi = action.payload;
         break;
-      case 'config/setUseAuthApiForSignIn':
+      case 'config/setUseAuthApiForSignIn/fulfilled':
         config.useAuthApiForSignIn = action.payload;
         break;
-      case 'config/setCustomAuthorizerUrl':
+      case 'config/setCustomAuthorizerUrl/fulfilled':
         config.customAuthorizerUrl = action.payload;
         break;
-      case 'config/setBrand':
+      case 'config/setBrand/fulfilled':
         config.brand = action.payload;
         break;
-      case 'config/setFormkiqVersion':
-        config.formkiqVersion = action.payload;
-        break;
-      case 'config/setTagColors':
+      case 'config/setTagColors/fulfilled':
         config.tagColors = action.payload;
         break;
-      case 'config/setIsSidebarExpanded':
+      case 'config/setIsSidebarExpanded/fulfilled':
         config.isSidebarExpanded = action.payload;
+        break;
+      case 'config/setFormkiqVersion/fulfilled':
+        config.formkiqVersion = action.payload;
         break;
     }
     storage.setConfig(config);
@@ -69,18 +67,18 @@ const updateConfig = async (action: any) => {
 // They may contain any sync or async logic, similar to thunks.
 configMiddleware.startListening({
   matcher: isAnyOf(
-    setDocumentApi,
-    setUserPoolId,
-    setClientId,
-    setCognitoSingleSignOnUrl,
-    setUserAuthenticationType,
-    setAuthApi,
-    setUseAuthApiForSignIn,
-    setCustomAuthorizerUrl,
-    setBrand,
-    setFormkiqVersion,
-    setTagColors,
-    setIsSidebarExpanded
+    setFormkiqVersion.fulfilled,
+    setUserPoolId.fulfilled,
+    setClientId.fulfilled,
+    setCognitoSingleSignOnUrl.fulfilled,
+    setUserAuthenticationType.fulfilled,
+    setAuthApi.fulfilled,
+    setUseAuthApiForSignIn.fulfilled,
+    setCustomAuthorizerUrl.fulfilled,
+    setBrand.fulfilled,
+    setTagColors.fulfilled,
+    setIsSidebarExpanded.fulfilled,
+    setDocumentApi.fulfilled,
   ),
   effect: updateConfig,
 });
