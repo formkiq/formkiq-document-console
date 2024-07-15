@@ -1,14 +1,98 @@
-import type { PayloadAction } from '@reduxjs/toolkit';
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import { LocalStorage } from '../../helpers/tools/useLocalStorage';
-import { IDocument } from '../../helpers/types/document';
-import { RootState } from '../store';
+import {LocalStorage} from '../../helpers/tools/useLocalStorage';
+import {IDocument} from '../../helpers/types/document';
+import {RootState} from '../store';
 
 export const setFormkiqVersion = createAsyncThunk(
-    'config/setFormkiqVersion',
-    async (data: FormkiqVersion, thunkAPI) => {
-      return data;
-    }
+  'config/setFormkiqVersion',
+  async (data: FormkiqVersion, thunkAPI) => {
+    return data;
+  }
+)
+export const setDocumentApi = createAsyncThunk(
+  'config/setDocumentApi',
+  async (data: string, thunkAPI) => {
+    return data;
+  }
+)
+export const setAuthApi = createAsyncThunk(
+  'config/setAuthApi',
+  async (data: string, thunkAPI) => {
+    return data;
+  }
+)
+export const setUserPoolId = createAsyncThunk(
+  'config/setUserPoolId',
+  async (data: string, thunkAPI) => {
+    return data;
+  }
+)
+export const setClientId = createAsyncThunk(
+  'config/setClientId',
+  async (data: string, thunkAPI) => {
+    return data;
+  }
+)
+export const setCognitoSingleSignOnUrl = createAsyncThunk(
+  'config/setCognitoSingleSignOnUrl',
+  async (data: string, thunkAPI) => {
+    return data;
+  }
+)
+export const setCustomAuthorizerUrl = createAsyncThunk(
+  'config/setCustomAuthorizerUrl',
+  async (data: string, thunkAPI) => {
+    return data;
+  }
+)
+export const setUserAuthenticationType = createAsyncThunk(
+  'config/setUserAuthenticationType',
+  async (data: string, thunkAPI) => {
+    return data;
+  }
+)
+export const setUseAuthApiForSignIn = createAsyncThunk(
+  'config/setUseAuthApiForSignIn',
+  async (data: boolean, thunkAPI) => {
+    return data;
+  }
+)
+
+export const setBrand = createAsyncThunk(
+  'config/setBrand',
+  async (data: string, thunkAPI) => {
+    return data;
+  }
+)
+export const setTagColors = createAsyncThunk(
+  'config/setTagColors',
+  async (data: TagColor[], thunkAPI) => {
+    return data;
+  }
+)
+export const setIsSidebarExpanded = createAsyncThunk(
+  'config/setIsSidebarExpanded',
+  async (data: boolean, thunkAPI) => {
+    return data;
+  }
+)
+export const setCurrentActionEvent = createAsyncThunk(
+  'config/setCurrentActionEvent',
+  async (data: string, thunkAPI) => {
+    return data;
+  }
+)
+export const setIsWorkspacesExpanded = createAsyncThunk(
+  'config/setIsWorkspacesExpanded',
+  async (data: boolean, thunkAPI) => {
+    return data;
+  }
+)
+export const setPendingArchive = createAsyncThunk(
+  'config/setPendingArchive',
+  async (data: IDocument[], thunkAPI) => {
+    return data;
+  }
 )
 
 const storage: LocalStorage = LocalStorage.Instance;
@@ -102,7 +186,7 @@ export const configInitialState = {
   customAuthorizerUrl: '',
   cognitoSingleSignOnUrl: '',
   brand: 'formkiq',
-  formkiqVersion: { type: '', version: '', modules: [] as any[] },
+  formkiqVersion: {type: '', version: '', modules: [] as any[]},
   tagColors,
   isSidebarExpanded: true,
   currentActionEvent: '',
@@ -135,116 +219,55 @@ const getInitialState = (): Config => {
 export const configSlice = createSlice({
   name: 'config',
   initialState: getInitialState(),
-  reducers: {
-    setDocumentApi(state, action: PayloadAction<string>) {
-      return {
-        ...state,
-        documentApi: action.payload,
-      };
-    },
-    setUserPoolId(state, action: PayloadAction<string>) {
-      return {
-        ...state,
-        userPoolId: action.payload,
-      };
-    },
-    setClientId(state, action: PayloadAction<string>) {
-      return {
-        ...state,
-        clientId: action.payload,
-      };
-    },
-    setCognitoSingleSignOnUrl(state, action: PayloadAction<string>) {
-      return {
-        ...state,
-        cognitoSingleSignOnUrl: action.payload,
-      };
-    },
-    setUserAuthenticationType(state, action: PayloadAction<string>) {
-      return {
-        ...state,
-        userAuthenticationType: action.payload,
-      };
-    },
-    setAuthApi(state, action: PayloadAction<string>) {
-      return {
-        ...state,
-        authApi: action.payload,
-      };
-    },
-    setUseAuthApiForSignIn(state, action: PayloadAction<boolean>) {
-      return {
-        ...state,
-        useAuthApiForSignIn: action.payload,
-      };
-    },
-    setCustomAuthorizerUrl(state, action: PayloadAction<string>) {
-      return {
-        ...state,
-        customAuthorizerUrl: action.payload,
-      };
-    },
-    setBrand(state, action: PayloadAction<string>) {
-      return {
-        ...state,
-        brand: action.payload,
-      };
-    },
-    setTagColors(state, action: PayloadAction<TagColor[]>) {
-      return {
-        ...state,
-        tagColors: action.payload,
-      };
-    },
-    setIsSidebarExpanded(state, action: PayloadAction<boolean>) {
-      return {
-        ...state,
-        isSidebarExpanded: action.payload,
-      };
-    },
-    setCurrentActionEvent(state, action: PayloadAction<string>) {
-      return {
-        ...state,
-        currentActionEvent: action.payload,
-      };
-    },
-    setIsWorkspacesExpanded(state, action: PayloadAction<boolean>) {
-      return {
-        ...state,
-        isWorkspacesExpanded: action.payload,
-      };
-    },
-    setPendingArchive(state, action: PayloadAction<IDocument[]>) {
-      return {
-        ...state,
-        pendingArchive: action.payload,
-      };
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(setFormkiqVersion.fulfilled, (state:any, action) => {
+    builder.addCase(setFormkiqVersion.fulfilled, (state: any, action) => {
       state.formkiqVersion = action.payload;
-      storage.setConfig(state);
+    });
+    builder.addCase(setDocumentApi.fulfilled, (state: any, action) => {
+      state.documentApi = action.payload;
+    });
+    builder.addCase(setUserPoolId.fulfilled, (state: any, action) => {
+      state.userPoolId = action.payload;
+    });
+    builder.addCase(setClientId.fulfilled, (state: any, action) => {
+      state.clientId = action.payload;
+    });
+    builder.addCase(setCognitoSingleSignOnUrl.fulfilled, (state: any, action) => {
+      state.cognitoSingleSignOnUrl = action.payload;
+    });
+    builder.addCase(setUserAuthenticationType.fulfilled, (state: any, action) => {
+      state.userAuthenticationType = action.payload;
+    });
+    builder.addCase(setAuthApi.fulfilled, (state: any, action) => {
+      state.authApi = action.payload;
+    });
+    builder.addCase(setUseAuthApiForSignIn.fulfilled, (state: any, action) => {
+      state.useAuthApiForSignIn = action.payload;
+    });
+    builder.addCase(setCustomAuthorizerUrl.fulfilled, (state: any, action) => {
+      state.customAuthorizerUrl = action.payload;
+    });
+    builder.addCase(setBrand.fulfilled, (state: any, action) => {
+      state.brand = action.payload;
+    });
+    builder.addCase(setTagColors.fulfilled, (state: any, action) => {
+      state.tagColors = action.payload;
+    });
+    builder.addCase(setIsSidebarExpanded.fulfilled, (state: any, action) => {
+      state.isSidebarExpanded = action.payload;
+    });
+    builder.addCase(setCurrentActionEvent.fulfilled, (state: any, action) => {
+      state.currentActionEvent = action.payload;
+    });
+    builder.addCase(setIsWorkspacesExpanded.fulfilled, (state: any, action) => {
+      state.isWorkspacesExpanded = action.payload;
+    });
+    builder.addCase(setPendingArchive.fulfilled, (state: any, action) => {
+      state.pendingArchive = action.payload;
     });
   }
 });
-
-export const {
-  setDocumentApi,
-  setUserPoolId,
-  setClientId,
-  setCognitoSingleSignOnUrl,
-  setUserAuthenticationType,
-  setAuthApi,
-  setUseAuthApiForSignIn,
-  setCustomAuthorizerUrl,
-  setBrand,
-  setTagColors,
-  setIsSidebarExpanded,
-  setCurrentActionEvent,
-  setPendingArchive,
-  setIsWorkspacesExpanded,
-} = configSlice.actions;
 
 export const ConfigState = (state: RootState) => state.configState;
 export default configSlice.reducer;
