@@ -15,12 +15,9 @@ import globalNotificationControls from './reducers/globalNotificationControls';
 import globalProgressControls from './reducers/globalProgressControls';
 import queuesState from './reducers/queues';
 import rulesetsState from './reducers/rulesets';
-import workflowsState from './reducers/workflows';
 import schemasState from './reducers/schemas';
-import queuesState from './reducers/queues';
-import attributesState from './reducers/attributes';
-import userManagementState from './reducers/userManagement'
-import attributesDataState from './reducers/attributesData';
+import userManagementState from './reducers/userManagement';
+import workflowsState from './reducers/workflows';
 
 export const store = configureStore({
   reducer: {
