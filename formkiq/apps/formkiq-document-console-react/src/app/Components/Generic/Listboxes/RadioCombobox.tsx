@@ -32,11 +32,11 @@ function RadioCombobox({
       <Combobox value={selectedValue} onChange={setSelectedValue}>
         <Combobox.Input onChange={(event) => setQuery(event.target.value)} onClick={() => buttonRef.current?.click()}
                         placeholder={placeholderText}
-                        className="h-full max-h-8 bg-neutral-100 px-4 w-32 text-start font-medium flex flex-row justify-between items-center text-xs  rounded-md relative"
+                        className="h-full bg-neutral-100 px-4 w-32 text-start font-medium flex flex-row justify-between items-center text-xs  rounded-md relative"
         />
-        <Combobox.Button className="w-3 text-neutral-500 absolute right-2 top-3"
+        <Combobox.Button className="w-3 text-neutral-500 absolute right-2"
                          ref={buttonRef}
-                         style={{minWidth: '12px'}}>{
+                         style={{minWidth: '12px', top: 'calc(50% - 6px)'}}>{
           <ChevronDown/>}</Combobox.Button>
 
         <Transition

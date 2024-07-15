@@ -9,24 +9,30 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 import { Mode } from 'vanilla-jsoneditor';
-import { Close, Spinner, Trash } from '../../Components/Icons/icons';
-import TagSchemaMenu from '../../Components/TagSchemas/TagSchemaMenu';
-import CompositeKeysTable from '../../Components/TagSchemas/tables/compositeKeysTable';
-import TagsTable from '../../Components/TagSchemas/tables/tagsTable';
+import { Close, Save, Spinner, Trash } from '../../Components/Icons/icons';
+import SchemaMenu from '../../Components/Schemas/SchemaMenu';
+import EditSchemaDialog from '../../Components/Schemas/createSchemaDialog/EditSchemaDialog';
+import CompositeKeysTable from '../../Components/Schemas/tables/compositeKeysTable';
+import OptionalAttributesTable from '../../Components/Schemas/tables/optionalAttributesTable';
+import RequiredAttributesTable from '../../Components/Schemas/tables/requiredAttributesTable';
 import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
-import { TagSchemasState, setTagSchema } from '../../Store/reducers/tagSchemas';
+import {
+  SchemasState,
+  fetchClassificationSchema,
+  setClassificationSchema,
+} from '../../Store/reducers/schemas';
 import { useAppDispatch } from '../../Store/store';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import { TagSchema as TagSchemaType } from '../../helpers/types/tagSchemas';
+import { Schema as SchemaType } from '../../helpers/types/schemas';
 
-function TagSchema() {
+function Classification() {
   const { user } = useAuthenticatedState();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
@@ -39,36 +45,34 @@ function TagSchema() {
     hasWorkspaces,
     workspaceSites
   );
-  const [currentSiteId, setCurrentSiteId] = useState(siteId);
-  const { tagSchemaId } = useParams();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { classificationId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const editor = searchParams.get('editor');
 
-  const { tagSchema } = useSelector(TagSchemasState);
+  const { classificationSchema } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!tagSchemaId) {
+    if (!classificationId) {
       return;
     }
-    DocumentsService.getTagSchema(tagSchemaId, currentSiteId).then((res) => {
-      dispatch(setTagSchema(res));
-    });
+    dispatch(fetchClassificationSchema({ siteId, classificationId }));
   }, []);
 
   // JSON editor
   const [content, setContent] = useState({
     text: undefined,
-    json: tagSchema,
+    json: classificationSchema,
   });
 
   useEffect(() => {
     setContent({
       text: undefined,
-      json: tagSchema,
+      json: classificationSchema,
     });
-  }, [tagSchema]);
+  }, [classificationSchema]);
 
   const isValidString = (text: string) => {
     try {
@@ -88,14 +92,18 @@ function TagSchema() {
     return true;
   };
 
-  const updateTagSchema = (tagSchema: TagSchemaType) => {
-    function onResponse(res: any) {
+  const updateClassification = (schema: SchemaType) => {
+    if (!classificationId) return;
+    DocumentsService.setClassification(siteId, classificationId, {
+      classification: schema,
+    }).then((res) => {
       if (res.status === 200) {
         dispatch(
           openNotificationDialog({
-            dialogTitle: 'Rule saved successfully',
+            dialogTitle: 'Schema saved successfully',
           })
         );
+        dispatch(setClassificationSchema(schema));
       } else if (res.errors && res.errors.length > 0) {
         dispatch(
           openNotificationDialog({
@@ -110,45 +118,33 @@ function TagSchema() {
         dispatch(
           openNotificationDialog({
             dialogTitle:
-              'Error happened while saving tag schema. Please try again later',
+              'Error happened while saving schema. Please try again later',
           })
         );
       }
-    }
-
-    if (tagSchemaId) {
-      // TODO: update tag schema when update method is  ready.
-      // DocumentsService.updateTagSchema(tagSchemaId, {tagSchema}, currentSiteId).then(res => {
-      //       onResponse(res)
-      //       if (res.status === 200) {
-      //           dispatch(setTagSchema(res))
-      //       } else {
-      //           dispatch(openNotificationDialog({dialogTitle: res.errors[0].error}))
-      //       }
-      //   })
-    }
+    });
   };
 
   const saveSchemaInEditor = () => {
     if (content.json && isValidJSON(content.json)) {
-      updateTagSchema(content.json);
+      updateClassification(content.json);
     } else if (content.text && isValidString(content.text)) {
-      updateTagSchema(content.text);
+      updateClassification(JSON.parse(content.text));
     } else {
       dispatch(
         openNotificationDialog({
-          dialogTitle: 'Please enter valid tag schema value',
+          dialogTitle: 'Please enter valid schema value',
         })
       );
     }
   };
 
   const onDeleteClick = () => {
-    if (!tagSchemaId) {
+    if (!classificationId) {
       return;
     }
-    const deleteTagSchema = () => {
-      DocumentsService.deleteTagSchema(tagSchemaId, currentSiteId).then(
+    const deleteSchema = () => {
+      DocumentsService.deleteClassification(siteId, classificationId).then(
         (res) => {
           if (res.status === 200) {
             navigate('/schemas');
@@ -162,11 +158,10 @@ function TagSchema() {
         }
       );
     };
-
     dispatch(
       openConfirmationDialog({
         dialogTitle: 'Are you sure you want to delete this Schema?',
-        callback: deleteTagSchema,
+        callback: deleteSchema,
       })
     );
   };
@@ -189,7 +184,7 @@ function TagSchema() {
         <title>Schema</title>
       </Helmet>
 
-      {tagSchema ? (
+      {classificationSchema ? (
         editor ? (
           <div
             className="flex flex-col "
@@ -202,9 +197,9 @@ function TagSchema() {
                 <button
                   onClick={closeEditor}
                   className="h-8 text-neutral-900 bg-neutral-200 hover:bg-neutral-300 rounded-md p-2 flex items-center gap-2 mr-2 whitespace-nowrap font-bold text-sm"
-                  title="Close Editor"
+                  title="Close JSON Editor"
                 >
-                  Close Editor
+                  Close JSON Editor
                   <div className="w-4 h-4">
                     <Close />
                   </div>
@@ -218,15 +213,13 @@ function TagSchema() {
               </div>
 
               <div className="flex gap-2">
-                {/*Uncomment when update method is ready.*/}
-
-                {/*<button*/}
-                {/*  onClick={saveSchemaInEditor}*/}
-                {/*  className="h-7 w-7 text-neutral-900 hover:text-primary-500"*/}
-                {/*  title="Save"*/}
-                {/*>*/}
-                {/*  <Save/>*/}
-                {/*</button>*/}
+                <button
+                  onClick={saveSchemaInEditor}
+                  className="h-7 w-7 text-neutral-900 hover:text-primary-500"
+                  title="Save"
+                >
+                  <Save />
+                </button>
                 <button
                   className="h-6 text-neutral-900 hover:text-primary-500"
                   title="Delete Schema"
@@ -248,32 +241,49 @@ function TagSchema() {
           </div>
         ) : (
           <div className="p-4">
-            <TagSchemaMenu
-              tagSchema={tagSchema}
-              updateTagSchema={updateTagSchema}
-              deleteTagSchema={onDeleteClick}
+            <SchemaMenu
+              schema={classificationSchema}
+              updateSchema={updateClassification}
+              deleteSchema={onDeleteClick}
+              openEditDialog={() => setIsEditDialogOpen(true)}
             />
             <p className="text-neutral-900 text-md font-bold my-4">
               Composite Keys
             </p>
-            <CompositeKeysTable compositeKeys={tagSchema.tags.compositeKeys} />
+            <CompositeKeysTable
+              compositeKeys={classificationSchema.attributes.compositeKeys}
+            />
 
             <p className="text-neutral-900 text-md font-bold my-4">
-              Required Tags
+              Required Attributes
             </p>
-            <TagsTable tags={tagSchema.tags.required} />
+            <RequiredAttributesTable
+              attributes={classificationSchema.attributes.required}
+            />
 
             <p className="text-neutral-900 text-md font-bold my-4">
-              Optional Tags
+              Optional Attributes
             </p>
-            <TagsTable tags={tagSchema.tags.optional} />
+            <OptionalAttributesTable
+              attributes={classificationSchema.attributes.optional}
+            />
           </div>
         )
       ) : (
         <Spinner />
       )}
+      {classificationSchema && (
+        <EditSchemaDialog
+          isOpen={isEditDialogOpen}
+          setIsOpen={setIsEditDialogOpen}
+          siteId={siteId}
+          schemaType="classification"
+          initialSchemaValue={classificationSchema}
+          classificationId={classificationId}
+        />
+      )}
     </>
   );
 }
 
-export default TagSchema;
+export default Classification;

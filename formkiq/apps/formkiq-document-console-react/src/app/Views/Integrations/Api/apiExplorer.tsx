@@ -20,7 +20,6 @@ import {
   deleteRuleApiItem,
   deleteRulesetApiItem,
   deleteShareApiItem,
-  deleteTagSchemaApiItem,
   deleteWebhookApiItem,
   deleteWorkflowApiItem,
   documentFulltextSearch,
@@ -65,8 +64,6 @@ import {
   getRulesetsApiItem,
   getSharesApiItem,
   getSitesApiItem,
-  getTagSchemaApiItem,
-  getTagSchemasApiItem,
   getVersionApiItem,
   getWebhookApiItem,
   getWebhookTagsApiItem,
@@ -99,7 +96,6 @@ import {
   postRulesetsApiItem,
   postSearchIndices,
   postShareFolderApiItem,
-  postTagSchemasApiItem,
   postWebhookTagsApiItem,
   postWebhooksApiItem,
   postWithBodyForNewDocumentUploadApiItem,
@@ -138,7 +134,14 @@ import {
   deleteUserApiItem,
   getUserGroupsApiItem,
   putUserOperationApiItem,
-  getGroupApiItem
+  getGroupApiItem,
+  getSiteSchemaApiItem,
+  putSiteSchemaApiItem,
+  getSiteClassificationsApiItem,
+  postSiteClassificationApiItem,
+  getSiteClassificationApiItem,
+  deleteSiteClassificationApiItem,
+  putSiteClassificationApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -461,14 +464,17 @@ export function ApiExplorer() {
               </div>
             </div>
           </ApiSegment>
-          <ApiSegment title="Tag Schemas">
+          <ApiSegment title="Schemas">
             <div className="ml-2 mb-4 flex flex-cols">
               <div className="w-4 border-l"></div>
               <div className="grow">
-                <ApiItem apiItem={getTagSchemasApiItem} sites={sites} />
-                <ApiItem apiItem={postTagSchemasApiItem} sites={sites} />
-                <ApiItem apiItem={getTagSchemaApiItem} sites={sites} />
-                <ApiItem apiItem={deleteTagSchemaApiItem} sites={sites} />
+                <ApiItem apiItem={getSiteSchemaApiItem} sites={sites} />
+                <ApiItem apiItem={putSiteSchemaApiItem} sites={sites} />
+                <ApiItem apiItem={getSiteClassificationsApiItem} sites={sites} />
+                <ApiItem apiItem={postSiteClassificationApiItem} sites={sites} />
+                <ApiItem apiItem={getSiteClassificationApiItem} sites={sites} />
+                <ApiItem apiItem={deleteSiteClassificationApiItem} sites={sites} />
+                <ApiItem apiItem={putSiteClassificationApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>

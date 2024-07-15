@@ -1,5 +1,7 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../store';
+import {DocumentsService} from "../../helpers/services/documentsService";
+import {setAllAttributes} from "../../helpers/tools/useCacheStorage";
 
 
 export interface attributesData {
@@ -19,6 +21,26 @@ const initialState = {
   allAttributes: [] as any,
   attributesSiteId: 'default',
 } as attributesData;
+
+export const fetchAttributesData = createAsyncThunk(
+  'attributes/fetchAttributes',
+  async (data: any, thunkAPI) => {
+    const {siteId, nextToken, limit = 100} = data;
+    await DocumentsService.getAttributes(siteId, nextToken, limit).then(
+      (response) => {
+        if (response.status === 200) {
+          const allAttributesData = {
+            allAttributes: response?.attributes,
+            attributesLastRefreshed: new Date(),
+            attributesSiteId: siteId,
+          };
+          setAllAttributes(allAttributesData);
+          thunkAPI.dispatch(setAllAttributesData(allAttributesData));
+        }
+      }
+    );
+  }
+);
 
 export const attributesDataSlice = createSlice({
   name: 'attributesData',
@@ -52,7 +74,7 @@ export const attributesDataSlice = createSlice({
   },
 });
 
-export const {setAllTagsData, setAllAttributesData } = attributesDataSlice.actions;
+export const {setAllTagsData, setAllAttributesData} = attributesDataSlice.actions;
 
 export const AttributesDataState = (state: RootState) => state.attributesDataState;
 

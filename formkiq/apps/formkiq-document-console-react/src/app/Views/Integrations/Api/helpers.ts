@@ -29,6 +29,7 @@ export interface ApiItem {
   requiresUsername: boolean;
   requiresUserOperation: boolean;
   requiresWS: boolean;
+  requiresClassificationID:  boolean;
   allowsVersionKey: boolean;
   allowsDate: boolean;
   allowsLimit: boolean;
@@ -743,91 +744,6 @@ export const deleteDocumentFulltextTagValueApiItem = {
   requiresDocumentID: true,
   requiresTagKey: true,
   license: 'Core',
-};
-
-export const getTagSchemasApiItem = {
-  method: 'GET',
-  path: '/tagSchemas',
-  description: 'Returns the list of tag schemas',
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  allowsLimit: true,
-  hasPagingTokens: true,
-  license: 'Pro|Enterprise',
-};
-
-export const postTagSchemasApiItem = {
-  method: 'POST',
-  path: '/tagSchemas',
-  description: 'Creates a new tag schema',
-  username: 'Cognito User',
-  hasNoParams: false,
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresDocumentID: false,
-  requiresWebhookID: false,
-  requiresTagKey: false,
-  requiresIndexKey: false,
-  requiresPostJson: true,
-  defaultPostJsonValue:
-    '{"name":"My TagSchema","tags":{"required":[{"key": "playerId"},{"key": "casinoId"}],"compositeKeys":[{"key":["casinoId","playerId"]}]}}',
-  requiresFileUpload: false,
-  requiresIndexType: false,
-  allowsVersionKey: false,
-  allowsDate: false,
-  allowsLimit: false,
-  hasPagingTokens: false,
-  allowsPath: false,
-  license: 'Pro|Enterprise',
-};
-
-export const getTagSchemaApiItem = {
-  method: 'GET',
-  path: '/tagSchemas/ TAG_SCHEMA_ID ',
-  username: 'Cognito User',
-  description: "Retrieves a tag schema's details, i.e., metadata",
-  hasNoParams: false,
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresDocumentID: false,
-  requiresWebhookID: false,
-  requiresTagSchemaID: true,
-  requiresTagKey: false,
-  requiresIndexKey: false,
-  requiresPostJson: false,
-  requiresFileUpload: false,
-  requiresIndexType: false,
-  allowsVersionKey: false,
-  allowsDate: false,
-  allowsLimit: false,
-  hasPagingTokens: false,
-  allowsPath: false,
-  license: 'Pro|Enterprise',
-};
-
-export const deleteTagSchemaApiItem = {
-  method: 'DELETE',
-  path: '/tagSchemas/ TAG_SCHEMA_ID ',
-  description: 'Deletes a specific tag schema',
-  username: 'Cognito User',
-  hasNoParams: false,
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresDocumentID: false,
-  requiresWebhookID: false,
-  requiresTagSchemaID: true,
-  requiresTagKey: false,
-  requiresIndexKey: false,
-  requiresPostJson: false,
-  requiresFileUpload: false,
-  requiresIndexType: false,
-  allowsVersionKey: false,
-  allowsDate: false,
-  allowsLimit: false,
-  hasPagingTokens: false,
-  allowsPath: false,
-  license: 'Pro|Enterprise',
 };
 
 export const getWebhooksApiItem = {
@@ -1837,5 +1753,86 @@ export const getGroupApiItem = {
     username: 'Cognito User',
     requiresAuthentication: true,
     requiresGroupName: true,
+    license: 'Core',
+};
+
+export const getSiteSchemaApiItem = {
+    method: 'GET',
+    path: '/sites/ SITE_ID /schema/document',
+    description: 'Returns site schema',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    license: 'Core',
+};
+
+export const putSiteSchemaApiItem = {
+    method: 'PUT',
+    path: '/sites/ SITE_ID /schema/document',
+    description: 'Updates site schema',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"name":"My Site Schema","attributes":{"required":[{"attributeKey": "testKey"}]}}',
+    license: 'Core',
+};
+
+export const getSiteClassificationsApiItem = {
+    method: 'GET',
+    path: '/sites/ SITE_ID /classifications',
+    description: 'Returns a list of classifications for a site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
+    license: 'Core',
+};
+
+export const postSiteClassificationApiItem = {
+    method: 'POST',
+    path: '/sites/ SITE_ID /classifications',
+    description: 'Adds a classification to a site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite:true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"classification":{"name":"My Classification","attributes":{"required":[{"attributeKey": "testKey"}]}}}',
+    license: 'Core',
+};
+
+export const getSiteClassificationApiItem = {
+    method: 'GET',
+    path: '/sites/ SITE_ID /classifications/ CLASSIFICATION_ID ',
+    description: 'Returns a classification for a site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresClassificationID: true,
+    license: 'Core',
+};
+
+export const deleteSiteClassificationApiItem = {
+    method: 'DELETE',
+    path: '/sites/ SITE_ID /classifications/ CLASSIFICATION_ID ',
+    description: 'Deletes a classification for a site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresClassificationID: true,
+    license: 'Core',
+};
+
+export const putSiteClassificationApiItem = {
+    method: 'PUT',
+    path: '/sites/ SITE_ID /classifications/ CLASSIFICATION_ID ',
+    description: 'Updates a classification for a site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresClassificationID: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{classification:{"name":"My Classification","attributes":{"required":[{"attributeKey": "testKey"}],"compositeKeys":[{"attributeKey":["testKey"]}]}}}',
     license: 'Core',
 };

@@ -1,44 +1,41 @@
-import { Dialog } from '@headlessui/react';
-import { useRef, useState } from 'react';
-import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
-import { fetchTagSchemas } from '../../../Store/reducers/tagSchemas';
-import { useAppDispatch } from '../../../Store/store';
-import { DocumentsService } from '../../../helpers/services/documentsService';
-import { TagSchemaTags } from '../../../helpers/types/tagSchemas';
-import { Close, Save } from '../../Icons/icons';
-import AddTagsTab from './addTagsTab';
+import {Dialog} from '@headlessui/react';
+import {useEffect, useRef, useState} from 'react';
+import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
+import {fetchClassifications, fetchSiteSchema} from '../../../Store/reducers/schemas';
+import {useAppDispatch} from '../../../Store/store';
+import {DocumentsService} from '../../../helpers/services/documentsService';
+import {Schema} from '../../../helpers/types/schemas';
+import {Close, Save} from '../../Icons/icons';
+import AddAttributesTab from './addAttributesTab';
+import RadioCombobox from "../../Generic/Listboxes/RadioCombobox";
+import {useSelector} from "react-redux";
+import {AttributesDataState, fetchAttributesData} from "../../../Store/reducers/attributesData";
 
-type CreateCaseModalPropsType = {
+type CreateSchemaModalPropsType = {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
   siteId: string;
+  schemaType: "site" | "classification"
 };
 
-function CreateTagSchemaDialog({
-  isOpen,
-  setIsOpen,
-  siteId,
-}: CreateCaseModalPropsType) {
+function CreateSchemaDialog({
+                              isOpen,
+                              setIsOpen,
+                              siteId,
+                              schemaType
+                            }: CreateSchemaModalPropsType) {
   const dispatch = useAppDispatch();
-  const [selectedTab, setSelectedTab] = useState<
-    'generalInfo' | 'compositeKeys' | 'required' | 'optional'
-  >('generalInfo');
+  const [selectedTab, setSelectedTab] = useState<'generalInfo' | 'compositeKeys' | 'required' | 'optional'>('generalInfo');
 
-  type TagSchemaType = {
-    name: string;
-    tags: TagSchemaTags;
-  };
 
-  const initialTagSchemaValue: TagSchemaType = {
+  const initialSchemaValue: Schema = {
     name: '',
-    tags: {
-      compositeKeys: [],
-      required: [],
-      optional: [],
-      allowAdditionalTags: false,
+    attributes: {
+      allowAdditionalAttributes: false,
     },
   };
-  const [tagSchema, setTagSchema] = useState(initialTagSchemaValue);
+  const [schema, setSchema] = useState(initialSchemaValue);
+  const {allAttributes} = useSelector(AttributesDataState);
 
   const [compositeKey, setCompositeKey] = useState<string>('');
   const [compositeKeys, setCompositeKeys] = useState<string[]>([]);
@@ -53,34 +50,111 @@ function CreateTagSchemaDialog({
   );
 
   const [optionalKey, setOptionalKey] = useState<string>('');
-  const [optionalDefaultValues, setOptionalDefaultValues] = useState<string[]>(
-    []
-  );
+
   const [optionalAllowedValue, setOptionalAllowedValue] = useState<string>('');
   const [optionalAllowedValues, setOptionalAllowedValues] = useState<string[]>(
     []
   );
 
-  const caseNameRef = useRef<HTMLInputElement>(null);
+  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
+  useEffect(() => {
+    if (!allAttributes || allAttributes.length === 0) return;
+    const keys = allAttributes.map((item) => ({
+      key: item.key,
+      title: item.key,
+    }));
+    setAttributeKeys(keys);
+  }, [allAttributes]);
+
+  useEffect(() => {
+    dispatch(fetchAttributesData({siteId, limit: 100}))
+  }, [siteId]);
+
+  const schemaNameRef = useRef<HTMLInputElement>(null);
 
   const onSubmit = (e: any) => {
     e.preventDefault();
-    DocumentsService.addTagSchema(tagSchema, siteId).then((response) => {
-      if (response.tagSchemaId) {
-        dispatch(fetchTagSchemas({ siteId, limit: 20, page: 1 }));
-        setIsOpen(false);
-        setTagSchema(initialTagSchemaValue);
-      } else {
-        dispatch(
-          openNotificationDialog({ dialogTitle: response.errors[0].error })
-        );
-      }
-    });
+
+    const newSchema: Schema = {name: schema.name, attributes: schema.attributes}
+    // remove empty attributes
+    if (newSchema.attributes.compositeKeys && newSchema.attributes.compositeKeys.length === 0) {
+      delete newSchema.attributes.compositeKeys;
+    }
+    if (newSchema.attributes.required && newSchema.attributes.required.length === 0) {
+      delete newSchema.attributes.required;
+    }
+    if (newSchema.attributes.optional && newSchema.attributes.optional.length === 0) {
+      delete newSchema.attributes.optional;
+    }
+    // if defaultValues has single item set defaultValue
+    // delete empty default values
+    if (newSchema.attributes.required) {
+      newSchema.attributes.required.forEach((item) => {
+        if (item.defaultValues && item.defaultValues.length === 1) {
+          item.defaultValue = item.defaultValues[0];
+          delete item.defaultValues;
+        } else if (item.defaultValue === "") {
+          delete item.defaultValue;
+        } else if (item.defaultValues && item.defaultValues.length === 0) {
+          delete item.defaultValues;
+        }
+      });
+    }
+    // delete empty optional attributes
+    if (newSchema.attributes.optional) {
+      newSchema.attributes.optional.forEach((item) => {
+        if (item.allowedValues && item.allowedValues.length === 0) {
+          delete item.allowedValues;
+        }
+      });
+    }
+
+    if (schemaType === "classification") {
+      DocumentsService.addSiteClassification(siteId, {classification: newSchema}).then((response) => {
+        if (response.classificationId) {
+          dispatch(fetchClassifications({siteId, limit: 20, page: 1}));
+          resetValues()
+          setIsOpen(false);
+        } else {
+          dispatch(
+            openNotificationDialog({dialogTitle: response.errors[0].error})
+          );
+        }
+      });
+    } else if (schemaType === 'site') {
+      DocumentsService.setSiteSchema(siteId, newSchema).then((response) => {
+        if (response.status === 200) {
+          dispatch(fetchSiteSchema({siteId}));
+          resetValues()
+          setIsOpen(false);
+        } else {
+          dispatch(
+            openNotificationDialog({dialogTitle: response.errors[0].error})
+          );
+        }
+      });
+    }
+
   };
 
+  const resetValues = () => {
+    setRequiredKey('');
+    setRequiredDefaultValues([]);
+    setRequiredAllowedValue('');
+    setRequiredAllowedValues([]);
+    setOptionalKey('');
+    setOptionalAllowedValue('');
+    setOptionalAllowedValues([]);
+    setCompositeKey('');
+    setCompositeKeys([]);
+    setSchema(initialSchemaValue);
+    setSelectedTab('generalInfo')
+  }
+
   const closeModal = () => {
+    console.log(initialSchemaValue)
+    resetValues()
     setIsOpen(false);
-    setTagSchema(initialTagSchemaValue);
   };
 
   const preventDialogClose = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -94,31 +168,36 @@ function CreateTagSchemaDialog({
     if (compositeKey.length === 0) {
       return;
     }
+    if (compositeKeys.includes(compositeKey)) {
+      dispatch(openNotificationDialog({dialogTitle: 'Key was already added'}));
+      return;
+    }
     setCompositeKeys([...compositeKeys, compositeKey]);
     setCompositeKey('');
   };
 
   const addCompositeKeyToSchema = () => {
-    setTagSchema({
-      ...tagSchema,
-      tags: {
-        ...tagSchema.tags,
-        compositeKeys: [
-          ...tagSchema.tags.compositeKeys,
-          { key: compositeKeys },
-        ],
-      },
-    });
+    const newSchema = {...schema};
+    if (newSchema.attributes.compositeKeys) {
+      newSchema.attributes.compositeKeys = [...newSchema.attributes.compositeKeys, {attributeKeys: compositeKeys}];
+    } else {
+      newSchema.attributes.compositeKeys = [{attributeKeys: compositeKeys}];
+    }
+
+    setSchema(newSchema);
     setCompositeKeys([]);
     setCompositeKey('');
   };
 
   const deleteCompositeKeyFromSchema = (index: number) => {
-    const newCompositeKeys = [...tagSchema.tags.compositeKeys];
+    let newCompositeKeys: any[] = [];
+    if (schema.attributes.compositeKeys) {
+      newCompositeKeys = [...schema.attributes.compositeKeys];
+    }
     newCompositeKeys.splice(index, 1);
-    setTagSchema({
-      ...tagSchema,
-      tags: { ...tagSchema.tags, compositeKeys: newCompositeKeys },
+    setSchema({
+      ...schema,
+      attributes: {...schema.attributes, compositeKeys: newCompositeKeys},
     });
   };
 
@@ -127,12 +206,10 @@ function CreateTagSchemaDialog({
     if (requiredAllowedValue.length === 0) {
       return;
     }
-
     if (requiredAllowedValues.includes(requiredAllowedValue)) {
-      dispatch(openNotificationDialog({ dialogTitle: 'Value already exists' }));
+      dispatch(openNotificationDialog({dialogTitle: 'Value already exists'}));
       return;
     }
-
     setRequiredAllowedValues([...requiredAllowedValues, requiredAllowedValue]);
     setRequiredAllowedValue('');
   };
@@ -141,20 +218,20 @@ function CreateTagSchemaDialog({
     if (requiredKey.length === 0) {
       return;
     }
-    setTagSchema({
-      ...tagSchema,
-      tags: {
-        ...tagSchema.tags,
-        required: [
-          ...tagSchema.tags.required,
-          {
-            key: requiredKey,
-            defaultValues: requiredDefaultValues,
-            allowedValues: requiredAllowedValues,
-          },
-        ],
-      },
-    });
+
+    const newSchema = {...schema};
+    const newRequiredAttributes = {
+      attributeKey: requiredKey,
+      defaultValue: requiredDefaultValues[0] || '',
+      defaultValues: requiredDefaultValues,
+      allowedValues: requiredAllowedValues
+    }
+    if (newSchema.attributes.required) {
+      newSchema.attributes.required = [...newSchema.attributes.required, newRequiredAttributes];
+    } else {
+      newSchema.attributes.required = [newRequiredAttributes];
+    }
+    setSchema(newSchema)
     setRequiredKey('');
     setRequiredDefaultValues([]);
     setRequiredAllowedValues([]);
@@ -162,11 +239,14 @@ function CreateTagSchemaDialog({
   };
 
   const deleteRequiredFromSchema = (index: number) => {
-    const newRequired = [...tagSchema.tags.required];
+    let newRequired: any[] = [];
+    if (schema.attributes.required) {
+      newRequired = [...schema.attributes.required];
+    }
     newRequired.splice(index, 1);
-    setTagSchema({
-      ...tagSchema,
-      tags: { ...tagSchema.tags, required: newRequired },
+    setSchema({
+      ...schema,
+      attributes: {...schema.attributes, required: newRequired},
     });
   };
 
@@ -176,6 +256,10 @@ function CreateTagSchemaDialog({
     if (optionalAllowedValue.length === 0) {
       return;
     }
+    if (optionalAllowedValues.includes(optionalAllowedValue)) {
+      dispatch(openNotificationDialog({dialogTitle: 'Value already exists'}));
+      return;
+    }
     setOptionalAllowedValues([...optionalAllowedValues, optionalAllowedValue]);
     setOptionalAllowedValue('');
   };
@@ -183,32 +267,30 @@ function CreateTagSchemaDialog({
     if (optionalKey.length === 0) {
       return;
     }
-    setTagSchema({
-      ...tagSchema,
-      tags: {
-        ...tagSchema.tags,
-        optional: [
-          ...tagSchema.tags.optional,
-          {
-            key: optionalKey,
-            defaultValues: optionalDefaultValues,
-            allowedValues: optionalAllowedValues,
-          },
-        ],
-      },
-    });
+    const newSchema = {...schema};
+    if (newSchema.attributes.optional) {
+      newSchema.attributes.optional = [...newSchema.attributes.optional, {
+        attributeKey: optionalKey,
+        allowedValues: optionalAllowedValues
+      }]
+    } else {
+      newSchema.attributes.optional = [{attributeKey: optionalKey, allowedValues: optionalAllowedValues}]
+    }
+    setSchema(newSchema)
     setOptionalKey('');
-    setOptionalDefaultValues([]);
     setOptionalAllowedValues([]);
     setOptionalAllowedValue('');
   };
 
   const deleteOptionalFromSchema = (index: number) => {
-    const newOptional = [...tagSchema.tags.optional];
+    let newOptional: any[] = []
+    if (schema.attributes.optional) {
+      newOptional = [...schema.attributes.optional];
+    }
     newOptional.splice(index, 1);
-    setTagSchema({
-      ...tagSchema,
-      tags: { ...tagSchema.tags, optional: newOptional },
+    setSchema({
+      ...schema,
+      attributes: {...schema.attributes, optional: newOptional},
     });
   };
 
@@ -220,9 +302,9 @@ function CreateTagSchemaDialog({
           onClose={() => null}
           className="relative z-20 text-neutral-900"
           static
-          initialFocus={caseNameRef}
+          initialFocus={schemaNameRef}
         >
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+          <div className="fixed inset-0 bg-black/30" aria-hidden="true"/>
 
           <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
             <div className="w-full max-w-xl bg-white p-6 rounded-md">
@@ -298,36 +380,36 @@ function CreateTagSchemaDialog({
                       className="h-12 px-4 border border-neutral-300 text-sm rounded-md"
                       placeholder="Add schema name"
                       required
-                      value={tagSchema.name}
+                      value={schema.name}
                       onChange={(e) =>
-                        setTagSchema({ ...tagSchema, name: e.target.value })
+                        setSchema({...schema, name: e.target.value})
                       }
-                      ref={caseNameRef}
+                      ref={schemaNameRef}
                       onKeyDown={(e) => preventDialogClose(e)}
                     />
                     <div className="flex items-center">
                       <input
-                        id="allowAdditionalTags"
+                        id="allowAdditionalAttributes"
                         type="checkbox"
-                        checked={tagSchema.tags.allowAdditionalTags}
+                        checked={schema.attributes.allowAdditionalAttributes}
                         onChange={() =>
-                          setTagSchema({
-                            ...tagSchema,
-                            tags: {
-                              ...tagSchema.tags,
-                              allowAdditionalTags:
-                                !tagSchema.tags.allowAdditionalTags,
+                          setSchema({
+                            ...schema,
+                            attributes: {
+                              ...schema.attributes,
+                              allowAdditionalAttributes:
+                                !schema.attributes.allowAdditionalAttributes,
                             },
                           })
                         }
-                        name="allowAdditionalTags"
+                        name="allowAdditionalAttributes"
                         className="rounded-md w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-neutral-500 focus:ring-2 text-neutral-900"
                       />
                       <label
-                        htmlFor="allowAdditionalTags"
+                        htmlFor="allowAdditionalAttributes"
                         className="ml-2 text-sm font-medium text-neutral-900"
                       >
-                        Allow Additional Tags
+                        Allow Additional Attributes
                       </label>
                     </div>
                   </>
@@ -335,14 +417,12 @@ function CreateTagSchemaDialog({
 
                 {selectedTab === 'compositeKeys' && (
                   <>
-                    <div className="flex flex-row justify-between items-center gap-4 text-base">
-                      <input
-                        type="text"
-                        className="h-10 px-4 border border-neutral-300 text-sm rounded-md w-full"
-                        placeholder="Composite Key"
-                        value={compositeKey}
-                        onChange={(e) => setCompositeKey(e.target.value)}
-                        onKeyDown={(e) => preventDialogClose(e)}
+                    <div className="flex h-10 flex-row justify-between items-center gap-4 text-base">
+                      <RadioCombobox
+                        values={attributeKeys}
+                        selectedValue={compositeKey}
+                        setSelectedValue={setCompositeKey}
+                        placeholderText="Composite Key"
                       />
 
                       <button
@@ -350,7 +430,7 @@ function CreateTagSchemaDialog({
                         className="h-10 rounded-md border border-primary-500 text-neutral-900 hover:text-primary-500 px-4 font-bold whitespace-nowrap"
                         onClick={addCompositeKey}
                       >
-                        + ADD
+                        + Add to Key
                       </button>
                     </div>
 
@@ -358,7 +438,8 @@ function CreateTagSchemaDialog({
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-row justify-start flex-wrap gap-2 ">
                           {compositeKeys.map((key: string) => (
-                            <div className="bg-neutral-300 py-1.5 px-3 text-xs font-bold text-neutral-900 rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2">
+                            <div key={key}
+                                 className="bg-neutral-300 py-1.5 px-3 text-xs font-bold text-neutral-900 rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2">
                               <span className="text-ellipsis overflow-hidden">
                                 {key}
                               </span>
@@ -374,7 +455,7 @@ function CreateTagSchemaDialog({
                                   )
                                 }
                               >
-                                <Close />
+                                <Close/>
                               </button>
                             </div>
                           ))}
@@ -384,16 +465,16 @@ function CreateTagSchemaDialog({
                           className="h-10 rounded-md border border-primary-500 text-neutral-900 hover:text-primary-500 px-4 font-bold whitespace-nowrap flex items-center justify-center w-36"
                           onClick={addCompositeKeyToSchema}
                         >
-                          SAVE KEY{' '}
+                          SAVE KEY
                           <div className="w-5 h-5 ml-2">
-                            <Save />
+                            <Save/>
                           </div>
                         </button>
                       </div>
                     )}
 
-                    {tagSchema.tags.compositeKeys &&
-                      tagSchema.tags.compositeKeys.length > 0 && (
+                    {schema.attributes.compositeKeys &&
+                      schema.attributes.compositeKeys.length > 0 && (
                         <>
                           <h4 className="text-[10px] font-bold">
                             ADDED COMPOSITE KEYS
@@ -401,39 +482,38 @@ function CreateTagSchemaDialog({
                           <div className="overflow-auto max-h-64">
                             <table className="border border-neutral-300 w-full max-w-full table-fixed">
                               <tbody>
-                                {tagSchema.tags.compositeKeys.map(
-                                  (item: { key: string[] }, i: number) => (
-                                    <tr
-                                      key={'compositeKey_' + i}
-                                      className="border border-slate-300 px-4 h-12"
-                                    >
-                                      <td className="text-xs text-slate-500 px-4 w-4">
+                              {schema.attributes.compositeKeys.map(
+                                (item: { attributeKeys: string[] }, i: number) => (
+                                  <tr
+                                    key={'compositeKey_' + i}
+                                    className="border border-slate-300 px-4 h-12"
+                                  >
+                                    <td className="text-xs text-slate-500 px-4 w-4">
                                         <span className="text-gray-900 font-medium">
                                           {i + 1}
                                         </span>
-                                      </td>
-                                      <td className="text-xs text-slate-500 px-4 text-ellipsis overflow-hidden">
-                                        Values:{' '}
-                                        <span className="text-gray-900 font-medium ">
-                                          {tagSchema.tags.compositeKeys[
-                                            i
-                                          ].key.join(', ')}
+                                    </td>
+                                    <td className="text-xs text-slate-500 px-4 text-ellipsis overflow-hidden">
+                                      Values:{' '}
+                                      <span className="text-gray-900 font-medium ">
+                                          {schema.attributes.compositeKeys &&
+                                            schema.attributes.compositeKeys[i].attributeKeys.join(', ')}
                                         </span>
-                                      </td>
-                                      <td className="w-[30px]">
-                                        <button
-                                          type="button"
-                                          className="w-4 h-4 text-gray-900"
-                                          onClick={() =>
-                                            deleteCompositeKeyFromSchema(i)
-                                          }
-                                        >
-                                          <Close />
-                                        </button>
-                                      </td>
-                                    </tr>
-                                  )
-                                )}
+                                    </td>
+                                    <td className="w-[30px]">
+                                      <button
+                                        type="button"
+                                        className="w-4 h-4 text-gray-900"
+                                        onClick={() =>
+                                          deleteCompositeKeyFromSchema(i)
+                                        }
+                                      >
+                                        <Close/>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                )
+                              )}
                               </tbody>
                             </table>
                           </div>
@@ -443,7 +523,8 @@ function CreateTagSchemaDialog({
                 )}
 
                 {selectedTab === 'required' && (
-                  <AddTagsTab
+                  <AddAttributesTab
+                    attributeKeys={attributeKeys}
                     tagsKey={requiredKey}
                     setTagsKey={setRequiredKey}
                     preventDialogClose={preventDialogClose}
@@ -454,26 +535,29 @@ function CreateTagSchemaDialog({
                     addAllowedValue={addRequiredAllowedValue}
                     allowedValues={requiredAllowedValues}
                     setAllowedValues={setRequiredAllowedValues}
-                    addTagsToSchema={addRequiredToSchema}
+                    addAttributesToSchema={addRequiredToSchema}
                     deleteTagsFromSchema={deleteRequiredFromSchema}
-                    tags={tagSchema.tags.required}
+                    attributes={schema.attributes.required}
+                    allAttributes={allAttributes}
+                    attributeType={selectedTab}
                   />
                 )}
                 {selectedTab === 'optional' && (
-                  <AddTagsTab
+                  <AddAttributesTab
+                    attributeKeys={attributeKeys}
                     tagsKey={optionalKey}
                     setTagsKey={setOptionalKey}
                     preventDialogClose={preventDialogClose}
-                    defaultValues={optionalDefaultValues}
-                    setDefaultValues={setOptionalDefaultValues}
                     allowedValue={optionalAllowedValue}
                     setAllowedValue={setOptionalAllowedValue}
                     addAllowedValue={addOptionalAllowedValue}
                     allowedValues={optionalAllowedValues}
                     setAllowedValues={setOptionalAllowedValues}
-                    addTagsToSchema={addOptionalToSchema}
+                    addAttributesToSchema={addOptionalToSchema}
                     deleteTagsFromSchema={deleteOptionalFromSchema}
-                    tags={tagSchema.tags.optional}
+                    attributes={schema.attributes.optional}
+                    allAttributes={allAttributes}
+                    attributeType={selectedTab}
                   />
                 )}
                 <div className="flex flex-row justify-end gap-4 text-base font-bold mt-4">
@@ -482,7 +566,6 @@ function CreateTagSchemaDialog({
                     onClick={closeModal}
                     className="h-10 border border-neutral-900 px-4 rounded-md"
                   >
-                    {' '}
                     CANCEL
                   </button>
                   <button
@@ -501,4 +584,4 @@ function CreateTagSchemaDialog({
   );
 }
 
-export default CreateTagSchemaDialog;
+export default CreateSchemaDialog;
