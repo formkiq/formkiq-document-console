@@ -70,7 +70,9 @@ if (!formkiqClient.documentsApi?.apiClient?.cognitoClient?.idToken && user) {
       user?.defaultSiteId,
       user?.currentSiteId
     );
-  } catch (e: any) {}
+  } catch (e: any) {
+    console.error('An error occurred building the cognito client.');
+  }
 }
 
 export type RootState = ReturnType<typeof store.getState>;
