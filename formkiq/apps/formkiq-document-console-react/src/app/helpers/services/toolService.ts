@@ -305,9 +305,9 @@ export function getCurrentSiteInfo(
           )}`;
         }
       }
-    } else if (pathname.indexOf('/integrations/apiKeys') === 0) {
-      if (pathname.indexOf('/integrations/apiKeys/workspaces') === 0) {
-        currentSiteInfo.siteId = pathname.substring(33).split('/')[0]; // 33 is the length of '/integrations/apiKeys/workspaces'
+    } else if (pathname.indexOf('/admin/api-keys') === 0) {
+      if (pathname.indexOf('/admin/api-keys/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(33).split('/')[0]; // 33 is the length of '/admin/api-keys/workspaces'
         currentSiteInfo.siteDocumentsRootName = `API Keys: ${(
           currentSiteInfo.siteId as any
         ).replaceAll('_', ' ')}`;
@@ -317,7 +317,7 @@ export function getCurrentSiteInfo(
           currentSiteInfo.siteDocumentsRootName = 'API Keys';
         } else if (hasWorkspaces) {
           currentSiteInfo.siteId = workspaceSites[0].siteId;
-          currentSiteInfo.siteRedirectUrl = `/integrations/apiKeys/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/admin/api-keys/workspaces/${workspaceSites[0].siteId}`;
           currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
             '_',
             ' '

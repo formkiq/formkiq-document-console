@@ -8,7 +8,7 @@ import { DataCacheState } from '../../Store/reducers/data';
 import { useAppDispatch } from '../../Store/store';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import {
-  AccountAndSettingsPrefixes,
+  AdminPrefixes,
   DocumentsAndFoldersPrefixes,
   WorkflowsAndIntegrationsPrefixes,
 } from '../../helpers/constants/pagePrefixes';
@@ -28,7 +28,6 @@ import {
   Documents,
   Examine,
   Group,
-  Users,
   Queue,
   Recent,
   Rules,
@@ -38,12 +37,12 @@ import {
   ShareHand,
   Star,
   Trash,
+  Users,
   Webhook,
   Workflow,
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
-import ButtonSecondary from "../Generic/Buttons/ButtonSecondary";
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -127,7 +126,7 @@ function Navbar() {
       return 'DocumentsAndFolders';
     } else if (WorkflowsAndIntegrationsPrefixes.indexOf(locationPrefix) > -1) {
       return 'WorkflowsAndIntegrations';
-    } else if (AccountAndSettingsPrefixes.indexOf(locationPrefix) > -1) {
+    } else if (AdminPrefixes.indexOf(locationPrefix) > -1) {
       return 'AccountAndSettings';
     }
 
@@ -228,19 +227,19 @@ function Navbar() {
 
     const pathWithoutSubfolder = location.pathname.split('/')[1];
     const pathWithSubfolder =
-      location.pathname.split('/')[1]+'/'+location.pathname.split('/')[2]
-    const pathsWithSubfolder:string[] =['integrations/apiKeys']
+      location.pathname.split('/')[1] + '/' + location.pathname.split('/')[2];
+    const pathsWithSubfolder: string[] = ['admin/api-keys'];
 
     let newDocumentsRootUri;
 
-    let path = pathWithoutSubfolder
+    let path = pathWithoutSubfolder;
     if (pathsWithSubfolder.indexOf(pathWithSubfolder) !== -1) {
-      path = pathWithSubfolder
+      path = pathWithSubfolder;
     }
     if (newSiteId === user?.email) {
-      newDocumentsRootUri = path
+      newDocumentsRootUri = path;
     } else if (newSiteId === 'default') {
-      newDocumentsRootUri = path
+      newDocumentsRootUri = path;
     } else {
       newDocumentsRootUri = path + '/workspaces/' + newSiteId;
     }
@@ -253,7 +252,6 @@ function Navbar() {
       }
     );
   };
-
 
   const DownloadDocument = () => {
     if (documentId.length) {
@@ -404,12 +402,13 @@ function Navbar() {
                       {locationPrefix === '/workflows' ||
                       locationPrefix === '/queues' ||
                       locationPrefix === '/integrations' ||
-                      locationPrefix === '/account' ||
                       locationPrefix === '/schemas' ||
                       locationPrefix === '/object-examine-tool' ||
                       locationPrefix === 'rulesets' ||
-                      locationPrefix === '/groups' ||
-                      locationPrefix === '/users' ? (
+                      locationPrefix === '/admin/settings' ||
+                      locationPrefix === '/admin/access-control' ||
+                      locationPrefix === '/admin/groups' ||
+                      locationPrefix === '/admin/users' ? (
                         <>
                           <div className="w-6 mr-1 text-primary-600">
                             {pathname.indexOf('/workflows') > -1 && (
@@ -438,16 +437,9 @@ function Navbar() {
                               </div>
                             )}
 
-                            {pathname.indexOf('/integrations/api') > -1 &&
-                              pathname.indexOf('/integrations/apiKeys') ===
-                                -1 && (
-                                <div className="w-5">
-                                  <Api />
-                                </div>
-                              )}
-                            {pathname.indexOf('/integrations/apiKeys') > -1 && (
+                            {pathname.indexOf('/integrations/api') > -1 && (
                               <div className="w-5">
-                                <ApiKey />
+                                <Api />
                               </div>
                             )}
                             {pathname.indexOf('/integrations/webhooks') >
@@ -456,29 +448,34 @@ function Navbar() {
                                 <Webhook />
                               </div>
                             )}
-                            {pathname.indexOf('/account/settings') > -1 && (
+                            {pathname.indexOf('/rulesets') > -1 && (
+                              <span>Rulesets</span>
+                            )}
+                            {pathname.indexOf('/admin/settings') > -1 && (
                               <div className="w-5">
                                 <Settings />
                               </div>
                             )}
-                            {pathname.indexOf('/rulesets') > -1 && (
-                              <span>Rulesets</span>
+                            {pathname.indexOf('/admin/api-keys') > -1 && (
+                              <div className="w-5">
+                                <ApiKey />
+                              </div>
                             )}
-                            {pathname.indexOf('/accessControl') > -1 && (
+                            {pathname.indexOf('/admin/access-control') > -1 && (
                               <div className="w-5">
                                 <Admin />
                               </div>
                             )}
-                            {pathname.indexOf('/groups') > -1 && (
-                                  <div className="w-5">
-                                      <Group />
-                                  </div>
-                              )}
-                            {pathname.indexOf('/users') > -1 && (
-                                  <div className="w-5">
-                                      <Users />
-                                  </div>
-                              )}
+                            {pathname.indexOf('/admin/groups') > -1 && (
+                              <div className="w-5">
+                                <Group />
+                              </div>
+                            )}
+                            {pathname.indexOf('/admin/users') > -1 && (
+                              <div className="w-5">
+                                <Users />
+                              </div>
+                            )}
                           </div>
 
                           <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
@@ -488,36 +485,36 @@ function Navbar() {
                             {pathname.indexOf('/queues') > -1 && (
                               <span>Queues</span>
                             )}
-                            {pathname.indexOf('/integrations/api') > -1 &&
-                              pathname.indexOf('/integrations/apiKeys') ===
-                                -1 && <span>API Explorer</span>}
-                            {pathname.indexOf('/integrations/apiKeys') > -1 && (
-                              <span>API Keys</span>
+                            {pathname.indexOf('/integrations/api') > -1 && (
+                              <span>API Explorer</span>
                             )}
                             {pathname.indexOf('/object-examine-tool') > -1 && (
                               <span>Examine PDF</span>
                             )}
                             {pathname.indexOf('/integrations/webhooks') >
                               -1 && <span>Inbound Webhooks</span>}
-                            {pathname.indexOf('/account/settings') > -1 && (
+                            {pathname.indexOf('/admin/settings') > -1 && (
                               <span>Settings</span>
                             )}
-                            {pathname.indexOf('/account/accessControl') >
+                            {pathname.indexOf('/admin/api-keys') > -1 && (
+                              <span>API Keys</span>
+                            )}
+                            {pathname.indexOf('/account/access-control') >
                               -1 && <span>Access Control (OPA)</span>}
                             {pathname.indexOf('/schemas') > -1 && (
                               <span>Schemas</span>
                             )}
-                            {pathname.indexOf('/groups') > -1 && (
+                            {pathname.indexOf('/admin/groups') > -1 && (
                               <span>Groups</span>
                             )}
-                            {pathname.indexOf('/users') > -1 && (
+                            {pathname.indexOf('/admin/users') > -1 && (
                               <span>Users</span>
                             )}
                           </div>
                           {(pathname.indexOf('/rulesets') > -1 ||
                             pathname.indexOf('/schemas') > -1 ||
                             pathname.indexOf('/workflows') > -1 ||
-                            pathname.indexOf('/integrations/apiKeys') > -1 ||
+                            pathname.indexOf('/admin/api-keys') > -1 ||
                             pathname.indexOf('/queues') > -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
@@ -697,8 +694,7 @@ function Navbar() {
                 currentSection === 'DocumentsAndFolders' &&
                 !advancedSearch &&
                 (formkiqVersion.modules.includes('typesense') ||
-                  formkiqVersion.modules.includes('opensearch')) &&
-                (
+                  formkiqVersion.modules.includes('opensearch')) && (
                   <div className="flex items-center gap-5 w-1/2">
                     <SearchInput
                       onChange={updateInputValue}
@@ -709,16 +705,18 @@ function Navbar() {
                     />
                   </div>
                 )}
-              {advancedSearch
-                && advancedSearch==='hidden'&&
+              {advancedSearch &&
+                advancedSearch === 'hidden' &&
                 (formkiqVersion.modules.includes('typesense') ||
-                  formkiqVersion.modules.includes('opensearch')) &&
-                (
-                <Link to="?advancedSearch=visible" className="text-sm flex gap-2 h-4 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap">
-                  Expand Search Tab
-                  <ChevronDown/>
-                </Link>
-              )}
+                  formkiqVersion.modules.includes('opensearch')) && (
+                  <Link
+                    to="?advancedSearch=visible"
+                    className="text-sm flex gap-2 h-4 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap"
+                  >
+                    Expand Search Tab
+                    <ChevronDown />
+                  </Link>
+                )}
             </div>
             <div className="w-1/4 flex justify-end mr-16">
               {useNotifications && (
@@ -743,26 +741,6 @@ function Navbar() {
                   </button>
                   {showAccountDropdown && (
                     <ul className="dropdown-menu min-w-max absolute bg-white right-0 text-base z-50 float-right list-none text-left rounded-lg border  border-neutral-300 mt-2.5">
-                      {user.isAdmin && (
-                        <li onClick={ToggleAccountSettings}>
-                          <Link
-                            to="/account/settings"
-                            className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                          >
-                            Settings
-                          </Link>
-                        </li>
-                      )}
-                      {formkiqVersion.type !== 'core' && user.isAdmin && (
-                        <li onClick={ToggleAccountSettings}>
-                          <Link
-                            to="/account/accessControl"
-                            className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                          >
-                            Access Control
-                          </Link>
-                        </li>
-                      )}
                       <li>
                         <Link
                           onClick={signOut}
