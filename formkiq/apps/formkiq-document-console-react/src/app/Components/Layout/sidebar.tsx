@@ -11,7 +11,7 @@ import {
 import { DocumentListState } from '../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../Store/store';
 import {
-  AccountAndSettingsPrefixes,
+  AdminPrefixes,
   DocumentsAndFoldersPrefixes,
   WorkflowsAndIntegrationsPrefixes,
 } from '../../helpers/constants/pagePrefixes';
@@ -26,6 +26,7 @@ import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDr
 import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 import {
+  AccessControl,
   Api,
   ApiKey,
   ArrowBottom,
@@ -38,13 +39,13 @@ import {
   Group,
   Plus,
   Queue,
-  Rules, Schema,
+  Rules,
+  Schema,
   Settings,
   ShareHand,
   Star,
   Trash,
   Upload,
-  UserIcon,
   Users,
   Webhook,
   Workflow,
@@ -59,7 +60,6 @@ export function Sidebar() {
   const { folders } = useSelector(DocumentListState);
   const {
     formkiqVersion,
-    useAccountAndSettings,
     useSoftDelete,
     isSidebarExpanded,
     isWorkspacesExpanded,
@@ -104,13 +104,13 @@ export function Sidebar() {
   const [otherSiteDocumentQueuesExpanded, setOtherSiteDocumentQueuesExpanded] =
     useState(false);
   const [integrationsExpanded, setIntegrationsExpanded] = useState(false);
-  const [settingsExpanded, setSettingsExpanded] = useState(false);
+  const [adminExpanded, setAdminExpanded] = useState(false);
   const [isWorkspacesModalOpened, setWorkspacesModalOpened] = useState(false);
 
-  const locationPrefix = decodeURI(window.location.pathname).substring(
-    0,
-    decodeURI(window.location.pathname).indexOf('/', 1)
-  );
+  const path = decodeURI(window.location.pathname);
+  const firstSlashIndex = path.indexOf('/', 1);
+  const locationPrefix =
+    firstSlashIndex > 0 ? path.substring(0, firstSlashIndex) : path;
 
   const [defaultSiteDocumentQueues, setDefaultSiteDocumentQueues] = useState(
     []
@@ -125,16 +125,10 @@ export function Sidebar() {
     // TODO: determine if we should expand queues by default for "other" sites
     if (DocumentsAndFoldersPrefixes.indexOf(locationPrefix) > -1) {
       setDocumentsExpanded(true);
-      setIntegrationsExpanded(false);
-      setSettingsExpanded(false);
     } else if (WorkflowsAndIntegrationsPrefixes.indexOf(locationPrefix) > -1) {
-      setDocumentsExpanded(false);
       setIntegrationsExpanded(true);
-      setSettingsExpanded(false);
-    } else if (AccountAndSettingsPrefixes.indexOf(locationPrefix) > -1) {
-      setDocumentsExpanded(false);
-      setIntegrationsExpanded(false);
-      setSettingsExpanded(true);
+    } else if (AdminPrefixes.indexOf(locationPrefix) > -1) {
+      setAdminExpanded(true);
     }
   }, [locationPrefix]);
 
@@ -236,8 +230,8 @@ export function Sidebar() {
   const toggleIntegrationsExpand = () => {
     setIntegrationsExpanded(!integrationsExpanded);
   };
-  const toggleSettingsExpand = () => {
-    setSettingsExpanded(!settingsExpanded);
+  const toggleAdminExpand = () => {
+    setAdminExpanded(!adminExpanded);
   };
   const onWorkspacesClick = (event: any) => {
     setWorkspacesModalOpened(true);
@@ -251,12 +245,13 @@ export function Sidebar() {
       '/workflows',
       '/integrations',
       '/queues',
-      '/account',
       '/rulesets',
       '/object-examine-tool',
       '/schemas',
-      '/groups',
-      '/users',
+      '/admin/settings',
+      '/admin/groups',
+      '/admin/users',
+      '/admin/access-control',
     ];
     const isNonDocumentPath = nonDocumentPaths.some(
       (path) => pathname.indexOf(path) > -1
@@ -709,7 +704,7 @@ export function Sidebar() {
                 )}
                 {!isSiteReadOnly && (
                   <>
-                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
                         data-test-id="nav-favorites"
                         to={`${specialFoldersRootUri}/folders/favorites`}
@@ -731,7 +726,7 @@ export function Sidebar() {
                       </NavLink>
                     </li>
                     {useSoftDelete && (
-                      <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                      <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                         <NavLink
                           data-test-id="nav-trash"
                           to={`${specialFoldersRootUri}/folders/deleted`}
@@ -770,63 +765,15 @@ export function Sidebar() {
               <div className="flex justify-end mt-2 mr-1">
                 {integrationsExpanded ? <ArrowBottom /> : <ArrowRight />}
               </div>
-              <div className="uppercase font-bold text-sm mb-2">
+              <div className="uppercase font-bold text-sm">
                 {formkiqVersion.type !== 'core' && <span>Workflows & </span>}
                 Integrations
               </div>
             </li>
             {integrationsExpanded && (
               <>
-                {user?.isAdmin && userAuthenticationType === 'cognito' && (
-                  <>
-                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                      <NavLink
-                        to="/groups"
-                        className={({ isActive }) =>
-                          (isActive
-                            ? 'text-primary-600 bg-neutral-200 '
-                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
-                          ' w-full text-sm font-bold flex '
-                        }
-                      >
-                        <div
-                          className={
-                            'w-full text-sm font-bold flex items-center pl-5  py-2 '
-                          }
-                        >
-                          <div className="w-4 flex items-center mr-2">
-                            <Group />
-                          </div>
-                          <div>Groups</div>
-                        </div>
-                      </NavLink>
-                    </li>
-                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                      <NavLink
-                        to="/users"
-                        className={({ isActive }) =>
-                          (isActive
-                            ? 'text-primary-600 bg-neutral-200 '
-                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
-                          ' w-full text-sm font-bold flex '
-                        }
-                      >
-                        <div
-                          className={
-                            'w-full text-sm font-bold flex items-center pl-5  py-2 '
-                          }
-                        >
-                          <div className="w-4 flex items-center mr-2">
-                            <Users />
-                          </div>
-                          <div>Users</div>
-                        </div>
-                      </NavLink>
-                    </li>
-                  </>
-                )}
                 {formkiqVersion.type !== 'core' && (
-                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
                       to="/workflows"
                       className={({ isActive }) =>
@@ -838,7 +785,7 @@ export function Sidebar() {
                     >
                       <div
                         className={
-                          'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                          'w-full text-sm font-bold flex items-center pl-5 py-2 '
                         }
                       >
                         <div className="w-4 flex items-center mr-2">
@@ -850,7 +797,7 @@ export function Sidebar() {
                   </li>
                 )}
                 {formkiqVersion.type !== 'core' && (
-                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
                       to="/queues"
                       className={({ isActive }) =>
@@ -862,7 +809,7 @@ export function Sidebar() {
                     >
                       <div
                         className={
-                          'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                          'w-full text-sm font-bold flex items-center pl-5 py-2 '
                         }
                       >
                         <div className="w-4 flex items-center mr-2">
@@ -873,7 +820,7 @@ export function Sidebar() {
                     </NavLink>
                   </li>
                 )}
-                <li className="mt-2 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"
                     data-test-id="nav-api-explorer"
@@ -892,31 +839,8 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                {user?.isAdmin && (
-                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                    <NavLink
-                      to="/integrations/apiKeys"
-                      data-test-id="nav-api-keys"
-                      className={({ isActive }) =>
-                        (isActive
-                          ? 'text-primary-600 bg-neutral-200 '
-                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                        ' w-full text-sm font-bold flex '
-                      }
-                    >
-                      <div
-                        className={'w-full text-sm font-bold flex pl-5 py-2'}
-                      >
-                        <div className="w-4 flex items-center mr-2">
-                          <ApiKey />
-                        </div>
-                        <div>API Keys</div>
-                      </div>
-                    </NavLink>
-                  </li>
-                )}
                 {formkiqVersion.type !== 'core' && (
-                  <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
                       to="/rulesets"
                       data-test-id="nav-rulesets"
@@ -938,7 +862,7 @@ export function Sidebar() {
                     </NavLink>
                   </li>
                 )}
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/object-examine-tool"
                     data-test-id="nav-object-examine"
@@ -957,7 +881,7 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/schemas"
                     data-test-id="nav-schemas"
@@ -968,9 +892,7 @@ export function Sidebar() {
                       ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div
-                      className={'w-full text-sm font-bold flex pl-5 py-2 '}
-                    >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-2 '}>
                       <div className="w-4 flex items-center mr-2">
                         <Schema />
                       </div>
@@ -983,24 +905,24 @@ export function Sidebar() {
                 </div>
               </>
             )}
-            {useAccountAndSettings && (
+            {user?.isAdmin && (
               <>
                 <li
-                  className="mt-4 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
-                  onClick={toggleSettingsExpand}
+                  className="mt-2 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-2 pb-2 cursor-pointer"
+                  onClick={toggleAdminExpand}
                 >
                   <div className="flex justify-end mt-2 mr-1">
-                    {settingsExpanded ? <ArrowBottom /> : <ArrowRight />}
+                    {adminExpanded ? <ArrowBottom /> : <ArrowRight />}
                   </div>
-                  <div className="uppercase font-semibold  text-xs">
-                    Account & Settings
+                  <div className="uppercase font-bold text-sm ">
+                    Administration
                   </div>
                 </li>
-                {settingsExpanded && (
+                {adminExpanded && (
                   <>
-                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
+                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
-                        to="/account"
+                        to="/admin/settings"
                         className={({ isActive }) =>
                           (isActive
                             ? 'text-primary-600 bg-neutral-200 '
@@ -1008,25 +930,9 @@ export function Sidebar() {
                           ' w-full text-sm font-bold flex '
                         }
                       >
-                        <div className={'w-full text-sm font-bold flex pl-5 '}>
-                          <div className="w-4 flex items-center mr-2">
-                            <UserIcon />
-                          </div>
-                          <div>Account</div>
-                        </div>
-                      </NavLink>
-                    </li>
-                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                      <NavLink
-                        to="/settings"
-                        className={({ isActive }) =>
-                          (isActive
-                            ? 'text-primary-600 bg-neutral-200 '
-                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                          ' w-full text-sm font-bold flex '
-                        }
-                      >
-                        <div className={'w-full text-sm font-bold flex pl-5 '}>
+                        <div
+                          className={'w-full text-sm font-bold flex pl-5 py-2'}
+                        >
                           <div className="w-4 flex items-center mr-2">
                             <Settings />
                           </div>
@@ -1034,6 +940,100 @@ export function Sidebar() {
                         </div>
                       </NavLink>
                     </li>
+                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                      <NavLink
+                        to="/admin/api-keys"
+                        data-test-id="nav-api-keys"
+                        className={({ isActive }) =>
+                          (isActive
+                            ? 'text-primary-600 bg-neutral-200 '
+                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                          ' w-full text-sm font-bold flex '
+                        }
+                      >
+                        <div
+                          className={'w-full text-sm font-bold flex pl-5 py-2'}
+                        >
+                          <div className="w-4 flex items-center mr-2">
+                            <ApiKey />
+                          </div>
+                          <div>API Keys</div>
+                        </div>
+                      </NavLink>
+                    </li>
+                    {userAuthenticationType === 'cognito' && (
+                      <>
+                        <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                          <NavLink
+                            to="/admin/groups"
+                            className={({ isActive }) =>
+                              (isActive
+                                ? 'text-primary-600 bg-neutral-200 '
+                                : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
+                              ' w-full text-sm font-bold flex '
+                            }
+                          >
+                            <div
+                              className={
+                                'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                              }
+                            >
+                              <div className="w-4 flex items-center mr-2">
+                                <Group />
+                              </div>
+                              <div>Groups</div>
+                            </div>
+                          </NavLink>
+                        </li>
+                        <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                          <NavLink
+                            to="/admin/users"
+                            className={({ isActive }) =>
+                              (isActive
+                                ? 'text-primary-600 bg-neutral-200 '
+                                : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
+                              ' w-full text-sm font-bold flex '
+                            }
+                          >
+                            <div
+                              className={
+                                'w-full text-sm font-bold flex items-center pl-5  py-2 '
+                              }
+                            >
+                              <div className="w-4 flex items-center mr-2">
+                                <Users />
+                              </div>
+                              <div>Users</div>
+                            </div>
+                          </NavLink>
+                        </li>
+                      </>
+                    )}
+                    {formkiqVersion.modules.includes('opa') && (
+                      <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                        <NavLink
+                          to="/admin/access-control"
+                          data-test-id="nav-access-control"
+                          className={({ isActive }) =>
+                            (isActive
+                              ? 'text-primary-600 bg-neutral-200 '
+                              : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                            ' w-full text-sm font-bold flex '
+                          }
+                        >
+                          <div
+                            className={
+                              'w-full text-sm font-bold flex pl-5 py-2'
+                            }
+                          >
+                            <div className="w-4 flex items-center mr-2">
+                              <AccessControl />
+                            </div>
+                            <div>Access Control</div>
+                          </div>
+                        </NavLink>
+                      </li>
+                    )}
                   </>
                 )}
               </>
@@ -1057,7 +1057,7 @@ export function Sidebar() {
                     folder={''}
                     sourceSiteId={currentSiteId}
                     targetSiteId={user?.email || ''}
-                    className={'w-full text-sm font-bold flex pl-5 py-4 '}
+                    className={'w-full text-sm font-bold flex pl-5 py-3 '}
                   >
                     <div className="w-4 flex items-center mr-2">
                       <Documents />
@@ -1103,7 +1103,7 @@ export function Sidebar() {
               </li>
             )}
             {hasWorkspaces && (
-              <div className="w-full text-sm font-bold flex pl-5 py-3 bg-neutral-100 mb-4">
+              <div className="w-full text-sm font-bold flex pl-5 py-3 bg-neutral-100">
                 <div
                   className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
                   onClick={onWorkspacesClick}
@@ -1124,7 +1124,7 @@ export function Sidebar() {
                       ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
+                    <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
                       <div className="w-4 flex items-center mr-2">
                         <Star />
                       </div>
@@ -1143,7 +1143,7 @@ export function Sidebar() {
                       }
                     >
                       <div
-                        className={'w-full text-sm font-bold flex pl-5 py-4 '}
+                        className={'w-full text-sm font-bold flex pl-5 py-3 '}
                       >
                         <div className="w-4 h-4 flex items-center mr-2">
                           <Trash />
@@ -1157,52 +1157,6 @@ export function Sidebar() {
             <div className="flex w-full">
               <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>
             </div>
-            {user?.isAdmin && userAuthenticationType === 'cognito' && (
-              <>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/groups"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div
-                      className={
-                        'w-full text-sm font-bold flex items-center pl-5 py-4 '
-                      }
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <Group />
-                      </div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/users"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div
-                      className={
-                        'w-full text-sm font-bold flex items-center pl-5 py-4 '
-                      }
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <Users />
-                      </div>
-                    </div>
-                  </NavLink>
-                </li>
-              </>
-            )}
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/workflows"
@@ -1215,7 +1169,7 @@ export function Sidebar() {
               >
                 <div
                   className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
+                    'w-full text-sm font-bold flex items-center pl-5 py-3 '
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
@@ -1236,7 +1190,7 @@ export function Sidebar() {
               >
                 <div
                   className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
+                    'w-full text-sm font-bold flex items-center pl-5 py-3 '
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
@@ -1255,32 +1209,13 @@ export function Sidebar() {
                   ' w-full text-sm font-bold flex '
                 }
               >
-                <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
+                <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
                   <div className="w-4 flex items-center mr-2">
                     <Api />
                   </div>
                 </div>
               </NavLink>
             </li>
-            {user?.isAdmin && (
-              <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                <NavLink
-                  to="/integrations/apiKeys"
-                  className={({ isActive }) =>
-                    (isActive
-                      ? 'text-primary-600 bg-neutral-200 '
-                      : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                    ' w-full text-sm font-bold flex '
-                  }
-                >
-                  <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
-                    <div className="w-4 flex items-center mr-2">
-                      <ApiKey />
-                    </div>
-                  </div>
-                </NavLink>
-              </li>
-            )}
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
                 to="/integrations/webhooks"
@@ -1291,7 +1226,7 @@ export function Sidebar() {
                   ' w-full text-sm font-bold flex '
                 }
               >
-                <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
+                <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
                   <div className="w-4 flex items-center mr-2">
                     <Webhook />
                   </div>
@@ -1310,7 +1245,7 @@ export function Sidebar() {
               >
                 <div
                   className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
+                    'w-full text-sm font-bold flex items-center pl-5 py-3 '
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
@@ -1331,7 +1266,7 @@ export function Sidebar() {
               >
                 <div
                   className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
+                    'w-full text-sm font-bold flex items-center pl-5 py-3 '
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
@@ -1352,7 +1287,7 @@ export function Sidebar() {
               >
                 <div
                   className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-4 '
+                    'w-full text-sm font-bold flex items-center pl-5 py-3 '
                   }
                 >
                   <div className="w-4 flex items-center mr-2">
@@ -1361,14 +1296,14 @@ export function Sidebar() {
                 </div>
               </NavLink>
             </li>
-            {useAccountAndSettings && (
+            {user?.isAdmin && (
               <>
                 <div className="flex w-full">
                   <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>
                 </div>
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to="/account"
+                    to="/admin/settings"
                     className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '
@@ -1376,30 +1311,97 @@ export function Sidebar() {
                       ' w-full text-sm font-bold flex '
                     }
                   >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
-                      <div className="w-4 flex items-center mr-2">
-                        <UserIcon />
-                      </div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/settings"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-4 '}>
+                    <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
                       <div className="w-4 flex items-center mr-2">
                         <Settings />
                       </div>
                     </div>
                   </NavLink>
                 </li>
+                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                  <NavLink
+                    to="/admin/api-keys"
+                    className={({ isActive }) =>
+                      (isActive
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                      ' w-full text-sm font-bold flex '
+                    }
+                  >
+                    <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
+                      <div className="w-4 flex items-center mr-2">
+                        <ApiKey />
+                      </div>
+                    </div>
+                  </NavLink>
+                </li>
+                {userAuthenticationType === 'cognito' && (
+                  <>
+                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                      <NavLink
+                        to="/admin/groups"
+                        className={({ isActive }) =>
+                          (isActive
+                            ? 'text-primary-600 bg-neutral-200 '
+                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                          ' w-full text-sm font-bold flex '
+                        }
+                      >
+                        <div
+                          className={
+                            'w-full text-sm font-bold flex items-center pl-5 py-3 '
+                          }
+                        >
+                          <div className="w-4 flex items-center mr-2">
+                            <Group />
+                          </div>
+                        </div>
+                      </NavLink>
+                    </li>
+                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                      <NavLink
+                        to="/admin/users"
+                        className={({ isActive }) =>
+                          (isActive
+                            ? 'text-primary-600 bg-neutral-200 '
+                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                          ' w-full text-sm font-bold flex '
+                        }
+                      >
+                        <div
+                          className={
+                            'w-full text-sm font-bold flex items-center pl-5 py-3 '
+                          }
+                        >
+                          <div className="w-4 flex items-center mr-2">
+                            <Users />
+                          </div>
+                        </div>
+                      </NavLink>
+                    </li>
+                  </>
+                )}
+                {formkiqVersion.modules?.includes('opa') && (
+                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/admin/access-control"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
+                      }
+                    >
+                      <div
+                        className={'w-full text-sm font-bold flex pl-5 py-3 '}
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <AccessControl />
+                        </div>
+                      </div>
+                    </NavLink>
+                  </li>
+                )}
               </>
             )}
           </>
@@ -1415,16 +1417,11 @@ export function Sidebar() {
         ' h-screen relative bg-neutral-100'
       }
     >
-      <div
-        className={
-          (sidebarExpanded ? 'w-64' : 'w-14') +
-          ' border-r border-neutral-300 fixed flex h-full flex-wrap items-start justify-start overflow-y-auto bg-neutral-100'
-        }
-      >
+      <div className="pb-20">
         <div
           className={
             (sidebarExpanded ? 'w-64' : 'w-10') +
-            ' flex fixed z-30 justify-between h-logo bg-neutral-100'
+            ' flex fixed z-30 justify-between h-logo'
           }
         >
           <Link to="/">
@@ -1447,9 +1444,9 @@ export function Sidebar() {
           <div
             className={
               (sidebarExpanded
-                ? 'justify-end -ml-2 mr-2 '
-                : 'justify-end mr-2 ') +
-              ' text-neutral-900 hover:text-primary-500 flex mt-2 cursor-pointer '
+                ? 'justify-end -ml-2 pr-2 '
+                : 'justify-end -mr-4 pr-4 ') +
+              ' text-neutral-900 hover:text-primary-500 flex mt-2 cursor-pointer border-r border-neutral-300 '
             }
             onClick={toggleSidebarExpand}
           >
@@ -1464,9 +1461,16 @@ export function Sidebar() {
             ' flex flex-wrap fixed bg-neutral-100 '
           }
         ></div>
+      </div>
+      <div
+        className={
+          (sidebarExpanded ? 'w-64' : 'w-14') +
+          ' -pt-2 border-r border-neutral-300 fixed flex h-full flex-wrap items-start justify-start overflow-y-auto bg-neutral-100'
+        }
+      >
         {user && (
           <>
-            <nav className="grow mt-20 mb-8 pt-4">
+            <nav className="grow mb-8 pt-4">
               {!isSiteReadOnly && (
                 <div className="flex flex-wrap w-full justify-center mb-4 pl-0.5">
                   <ButtonPrimaryGradient
