@@ -7,12 +7,17 @@ import {
   isTagValueIncludes,
   removeTagOrTagValue,
 } from '../../helpers/services/toolService';
-import { getAllAttributes, getAllTags, setAllAttributes, setAllTags } from "../../helpers/tools/useCacheStorage";
+import {
+  getAllAttributes,
+  getAllTags,
+  setAllAttributes,
+  setAllTags,
+} from '../../helpers/tools/useCacheStorage';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
 import { RootState } from '../store';
 import { DocumentsService } from './../../helpers/services/documentsService';
-import { setAllAttributesData, setAllTagsData } from "./attributesData";
+import { setAllAttributesData, setAllTagsData } from './attributesData';
 import { User } from './auth';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
@@ -35,13 +40,18 @@ export const fetchDocuments = createAsyncThunk(
     const user = (thunkAPI.getState() as any)?.authState.user;
     const tagParam = filterTag ? filterTag.split(':')[0] : null;
     const attributeParam = filterAttribute ? filterAttribute : null;
-    const allAttributesState = (thunkAPI.getState() as any)?.attributesDataState.allAttributes;
-    const allTagsState = (thunkAPI.getState() as any)?.attributesDataState.allTags;
-    const attributesLastRefreshed = (thunkAPI.getState() as any)?.attributesDataState.attributesLastRefreshed;
-    const attributesSiteId = (thunkAPI.getState() as any)?.attributesDataState.attributesSiteId;
-    let allAttributes = allAttributesState
-    let allTags = allTagsState
-    const dateDiff = new Date().getTime() - new Date(attributesLastRefreshed).getTime();
+    const allAttributesState = (thunkAPI.getState() as any)?.attributesDataState
+      .allAttributes;
+    const allTagsState = (thunkAPI.getState() as any)?.attributesDataState
+      .allTags;
+    const attributesLastRefreshed = (thunkAPI.getState() as any)
+      ?.attributesDataState.attributesLastRefreshed;
+    const attributesSiteId = (thunkAPI.getState() as any)?.attributesDataState
+      .attributesSiteId;
+    let allAttributes = allAttributesState;
+    let allTags = allTagsState;
+    const dateDiff =
+      new Date().getTime() - new Date(attributesLastRefreshed).getTime();
 
     async function loadTagsAndAttributes() {
       await DocumentsService.getAllTagKeys(siteId).then((response: any) => {
@@ -68,12 +78,16 @@ export const fetchDocuments = createAsyncThunk(
 
     // check if data in state is valid
     if (dateDiff / 1000 > 30 || attributesSiteId !== siteId) {
-      const allAttributesCache = await getAllAttributes()
-      const allTagsCache = await getAllTags()
+      const allAttributesCache = await getAllAttributes();
+      const allTagsCache = await getAllTags();
       // check if data in cache is valid
       if (allAttributesCache && allTagsCache) {
-        const dateDiff = new Date().getTime() - new Date(allAttributesCache.attributesLastRefreshed).getTime();
-        const isCachedDataValid = dateDiff / 1000 < 30 && allAttributesCache.attributesSiteId === siteId;
+        const dateDiff =
+          new Date().getTime() -
+          new Date(allAttributesCache.attributesLastRefreshed).getTime();
+        const isCachedDataValid =
+          dateDiff / 1000 < 30 &&
+          allAttributesCache.attributesSiteId === siteId;
         if (isCachedDataValid) {
           // use data from cache and update state
           allAttributes = allAttributesCache.allAttributes;
@@ -129,7 +143,7 @@ export const fetchDocuments = createAsyncThunk(
           page,
           allTags,
           allAttributes,
-          searchAttributes,
+          searchAttributes
         ).then((response: any) => {
           if (response) {
             const temp: any = response.documents?.filter(
@@ -387,12 +401,16 @@ export const toggleExpandFolder = createAsyncThunk(
       siteId: string;
       user: User;
     } = data;
-    const allAttributesState = (thunkAPI.getState() as any)?.attributesDataState.allAttributes;
-    const allTagsState = (thunkAPI.getState() as any)?.attributesDataState.allTags;
-    const attributesLastRefreshed = (thunkAPI.getState() as any)?.attributesDataState.attributesLastRefreshed;
-    const attributesSiteId = (thunkAPI.getState() as any)?.attributesDataState.attributesSiteId;
-    let allAttributes = allAttributesState
-    let allTags = allTagsState
+    const allAttributesState = (thunkAPI.getState() as any)?.attributesDataState
+      .allAttributes;
+    const allTagsState = (thunkAPI.getState() as any)?.attributesDataState
+      .allTags;
+    const attributesLastRefreshed = (thunkAPI.getState() as any)
+      ?.attributesDataState.attributesLastRefreshed;
+    const attributesSiteId = (thunkAPI.getState() as any)?.attributesDataState
+      .attributesSiteId;
+    let allAttributes = allAttributesState;
+    let allTags = allTagsState;
 
     // check if attributes state is valid
     async function loadTagsAndAttributes() {
@@ -407,27 +425,31 @@ export const toggleExpandFolder = createAsyncThunk(
         thunkAPI.dispatch(setAllTagsData(allTagData));
       });
 
-      await DocumentsService.getAttributes(siteId).then(
-        (response: any) => {
-          const allAttributesData = {
-            allAttributes: response?.attributes,
-            attributesLastRefreshed: new Date(),
-            attributesSiteId: siteId,
-          };
-          allAttributes = response?.attributes;
-          setAllAttributes(allAttributesData);
-          thunkAPI.dispatch(setAllAttributesData(allAttributesData));
-        });
+      await DocumentsService.getAttributes(siteId).then((response: any) => {
+        const allAttributesData = {
+          allAttributes: response?.attributes,
+          attributesLastRefreshed: new Date(),
+          attributesSiteId: siteId,
+        };
+        allAttributes = response?.attributes;
+        setAllAttributes(allAttributesData);
+        thunkAPI.dispatch(setAllAttributesData(allAttributesData));
+      });
     }
 
-    const dateDiff = new Date().getTime() - new Date(attributesLastRefreshed).getTime();
+    const dateDiff =
+      new Date().getTime() - new Date(attributesLastRefreshed).getTime();
     if (dateDiff / 1000 > 30 || attributesSiteId !== siteId) {
-      const allAttributesCache = await getAllAttributes()
-      const allTagsCache = await getAllTags()
+      const allAttributesCache = await getAllAttributes();
+      const allTagsCache = await getAllTags();
       if (allAttributesCache && allTagsCache) {
         // check if data in cache is valid
-        const dateDiff = new Date().getTime() - new Date(allAttributesCache.attributesLastRefreshed).getTime();
-        const isCachedDataValid = dateDiff / 1000 < 30 && allAttributesCache.attributesSiteId === siteId;
+        const dateDiff =
+          new Date().getTime() -
+          new Date(allAttributesCache.attributesLastRefreshed).getTime();
+        const isCachedDataValid =
+          dateDiff / 1000 < 30 &&
+          allAttributesCache.attributesSiteId === siteId;
         if (isCachedDataValid) {
           // use data from cache and update state
           allAttributes = allAttributesCache.allAttributes;
@@ -444,15 +466,15 @@ export const toggleExpandFolder = createAsyncThunk(
     }
     const folderPath = subfolderUri;
     if (folder.isExpanded) {
-      const newValue = {...folder, isExpanded: false};
+      const newValue = { ...folder, isExpanded: false };
       thunkAPI.dispatch(
-        updateFolderValue({folderToUpdate: folder, newValue})
+        updateFolderValue({ folderToUpdate: folder, newValue })
       );
     } else {
       if (folder.documents?.length > 0 || folder.folders?.length > 0) {
-        const newValue = {...folder, isExpanded: true};
+        const newValue = { ...folder, isExpanded: true };
         thunkAPI.dispatch(
-          updateFolderValue({folderToUpdate: folder, newValue})
+          updateFolderValue({ folderToUpdate: folder, newValue })
         );
       } else {
         await DocumentsService.getDocumentsInFolder(
@@ -499,7 +521,7 @@ export const toggleExpandFolder = createAsyncThunk(
               tags: [],
             };
             thunkAPI.dispatch(
-              updateFolderValue({folderToUpdate: folder, newValue})
+              updateFolderValue({ folderToUpdate: folder, newValue })
             );
           }
         });
@@ -519,7 +541,7 @@ export const fetchDeleteFolder = createAsyncThunk(
     } = data;
     DocumentsService.deleteFolder(folder.indexKey, siteId).then((response) => {
       if (response.status && response.status === 200) {
-        thunkAPI.dispatch(removeFolderFromList({folderToDelete: folder}));
+        thunkAPI.dispatch(removeFolderFromList({ folderToDelete: folder }));
       } else {
         if (response.message === 'Folder not empty') {
           thunkAPI.dispatch(
@@ -530,7 +552,7 @@ export const fetchDeleteFolder = createAsyncThunk(
           );
         } else {
           thunkAPI.dispatch(
-            openNotificationDialog({dialogTitle: response.message})
+            openNotificationDialog({ dialogTitle: response.message })
           );
         }
       }
@@ -625,7 +647,7 @@ export const documentsListSlice = createSlice({
           attribute,
         } = action.payload;
 
-        let {next, page = 1, isLastSearchPageLoaded = false} = action.payload;
+        let { next, page = 1, isLastSearchPageLoaded = false } = action.payload;
 
         if (page > 1) {
           next = null;
@@ -764,7 +786,7 @@ export const documentsListSlice = createSlice({
     },
     updateDocumentsList: (state, action) => {
       if (action.payload && state.documents) {
-        const {documents, isSystemDeletedByKey} = action.payload;
+        const { documents, isSystemDeletedByKey } = action.payload;
         const temp = {
           folders: state.folders,
           documents: documents,
@@ -782,7 +804,7 @@ export const documentsListSlice = createSlice({
       return state as any;
     },
     removeFolderFromList: (state, action) => {
-      const {folderToDelete}: { folderToDelete: IFolder } = action.payload;
+      const { folderToDelete }: { folderToDelete: IFolder } = action.payload;
       if (state.folders) {
         const [folder, index, parentFolder] = findFolderAndParent(
           folderToDelete.documentId,
@@ -798,7 +820,7 @@ export const documentsListSlice = createSlice({
     },
     addDocumentTag: (state, action) => {
       if (state.documents) {
-        const {doc, tagKey, valueToAdd} = action.payload;
+        const { doc, tagKey, valueToAdd } = action.payload;
         const newTags = addOrCreateTagValue(
           tagKey,
           doc?.tags[tagKey],
@@ -807,11 +829,11 @@ export const documentsListSlice = createSlice({
         );
         const [document, index, folder] = findParentForDocument(
           doc.documentId,
-          {...state}
+          { ...state }
         );
         if (document && folder) {
           const newDocuments: any = [...folder.documents] as any[];
-          newDocuments[index] = {...document, tags: newTags};
+          newDocuments[index] = { ...document, tags: newTags };
           folder.documents = newDocuments;
         }
       }
@@ -819,7 +841,7 @@ export const documentsListSlice = createSlice({
     },
     removeDocumentTag: (state, action) => {
       if (state.documents) {
-        const {doc, tagKey, valueToRemove} = action.payload;
+        const { doc, tagKey, valueToRemove } = action.payload;
         const newTags = removeTagOrTagValue(
           tagKey,
           doc.tags[tagKey],
@@ -830,7 +852,7 @@ export const documentsListSlice = createSlice({
           (el: IDocument) => doc.documentId === el.documentId
         );
         const newDocuments: any = [...state.documents] as any[];
-        newDocuments[indexOfFile] = {...doc, tags: newTags};
+        newDocuments[indexOfFile] = { ...doc, tags: newTags };
         state.documents = newDocuments;
       }
       return state;
@@ -1102,8 +1124,8 @@ export const documentsListSlice = createSlice({
                 (a: any, b: any) => (a.path > b.path ? 1 : -1)
               );
             }
-            const newValue = {...foundFolder};
-            updateFolderValue({folderToUpdate: foundFolder, newValue});
+            const newValue = { ...foundFolder };
+            updateFolderValue({ folderToUpdate: foundFolder, newValue });
           } else if (documentAction === 'remove') {
             const index = foundFolder.documents?.indexOf(document);
             if (index > -1) {
@@ -1115,8 +1137,8 @@ export const documentsListSlice = createSlice({
                 }
               });
             }
-            const newValue = {...foundFolder};
-            updateFolderValue({folderToUpdate: foundFolder, newValue});
+            const newValue = { ...foundFolder };
+            updateFolderValue({ folderToUpdate: foundFolder, newValue });
           }
         }
       } else {
@@ -1136,8 +1158,6 @@ export const documentsListSlice = createSlice({
       return {
         ...state,
         nextLoadingStatus: RequestStatus.pending,
-        documents: [],
-        folders: [],
       };
     });
   },
