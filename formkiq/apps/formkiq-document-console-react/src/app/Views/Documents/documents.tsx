@@ -306,7 +306,6 @@ function Documents() {
       ...documentAttributes,
     ];
     sortedDocumentAttributesAndTags.sort((a, b) => a.key.localeCompare(b.key));
-    console.log(sortedDocumentAttributesAndTags);
     setSortedAttributesAndTags(sortedDocumentAttributesAndTags);
   }, [documentAttributes, currentDocumentTags]);
 
