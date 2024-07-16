@@ -1678,7 +1678,9 @@ function Documents() {
                                     });
                                   }
                                   return (
-                                    <>
+                                    <div
+                                      key={`keyonly_attribute_${item.key}_${i}`}
+                                    >
                                       {!item.stringValue &&
                                         !item.numberValue &&
                                         !item.booleanValue &&
@@ -1698,7 +1700,7 @@ function Documents() {
                                             ></div>
                                           </div>
                                         )}
-                                    </>
+                                    </div>
                                   );
                                 })}
                             </div>
@@ -1709,7 +1711,7 @@ function Documents() {
                         <div>
                           {sortedAttributesAndTags.length > 0 &&
                             sortedAttributesAndTags.map((item: any, i) => (
-                              <>
+                              <span key={`attr_${item.key}_${i}`}>
                                 {!item.stringValue &&
                                 !item.numberValue &&
                                 !item.booleanValue &&
@@ -1721,7 +1723,7 @@ function Documents() {
                                   <></>
                                 ) : (
                                   <div
-                                    key={'attribute_' + i}
+                                    key={`attribute_${item.key}_${i}`}
                                     className="flex flex-col pt-3"
                                   >
                                     <dt className="mb-1 text-smaller font-semibold">
@@ -1780,12 +1782,14 @@ function Documents() {
                                         <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
                                           {item.stringValues.map(
                                             (val: any, index: number) => (
-                                              <>
+                                              <span
+                                                key={`attr_string_${item.key}_${index}`}
+                                              >
                                                 {val}
                                                 {index <
                                                   item.stringValues.length -
                                                     1 && <hr />}
-                                              </>
+                                              </span>
                                             )
                                           )}
                                         </div>
@@ -1794,12 +1798,14 @@ function Documents() {
                                         <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
                                           {item.numberValues.map(
                                             (val: any, index: number) => (
-                                              <>
+                                              <span
+                                                key={`attr_number_${item.key}_${index}`}
+                                              >
                                                 {val}
                                                 {index <
                                                   item.numberValues.length -
                                                     1 && <hr />}
-                                              </>
+                                              </span>
                                             )
                                           )}
                                         </div>
@@ -1814,13 +1820,15 @@ function Documents() {
                                         <div className="-mr-2 rounded-lg border border-neutral-200 p-1 text-smaller font-normal max-h-24 overflow-auto">
                                           {item.values.map(
                                             (val: any, index: number) => (
-                                              <>
+                                              <span
+                                                key={`tag_value_${item.key}_${index}`}
+                                              >
                                                 {val}
                                                 {index <
                                                   item.values.length - 1 && (
                                                   <hr className="my-0.5" />
                                                 )}
-                                              </>
+                                              </span>
                                             )
                                           )}
                                         </div>
@@ -1828,7 +1836,7 @@ function Documents() {
                                     </dd>
                                   </div>
                                 )}
-                              </>
+                              </span>
                             ))}
                         </div>
                       </dl>
