@@ -166,7 +166,6 @@ export default function DocumentTagsPopover({
       },
     ],
   });
-
   function handleDropdownClick(event: any) {
     updateTags();
     updateAttributes();

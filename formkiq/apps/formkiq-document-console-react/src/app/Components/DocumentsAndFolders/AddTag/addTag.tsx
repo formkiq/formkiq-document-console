@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
+import { AttributesDataState, setAllAttributesData, } from "../../../Store/reducers/attributesData";
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { TagsForFilterAndDisplay } from '../../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { Attribute } from '../../../helpers/types/attributes';
-import {AttributesDataState,setAllAttributesData, } from "../../../Store/reducers/attributesData";
 
 export default function AddTag({
   line,

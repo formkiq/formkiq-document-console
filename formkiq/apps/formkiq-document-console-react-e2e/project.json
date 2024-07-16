@@ -7,7 +7,13 @@
       "executor": "@mands/nx-playwright:playwright-executor",
       "options": {
         "e2eFolder": "apps/formkiq-document-console-react-e2e",
+        "devServerTarget": "formkiq-document-console-react:serve",
         "packageRunner": "pnpm"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "formkiq-document-console-react:serve:production"
+        }
       }
     },
     "ts-check": {
@@ -15,7 +21,7 @@
       "options": {
         "commands": [
           {
-            "command": "tsc --build --force apps/formkiq-document-console-react-e2e/tsconfig.json"
+            "command": "tsc --build --force --verbose apps/formkiq-document-console-react-e2e/tsconfig.json"
           }
         ]
       }

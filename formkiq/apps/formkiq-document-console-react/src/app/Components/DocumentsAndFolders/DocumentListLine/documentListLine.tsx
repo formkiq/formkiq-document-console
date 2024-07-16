@@ -90,7 +90,6 @@ function DocumentListLine({
   const {user} = useAuthenticatedState();
   const [keyOnlyAttributesKeys, setKeyOnlyAttributesKeys] = useState<string[]>([])
 
-
   const {
     formkiqVersion,
     tagColors,

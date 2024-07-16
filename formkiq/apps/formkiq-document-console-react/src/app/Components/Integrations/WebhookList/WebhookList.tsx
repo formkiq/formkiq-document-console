@@ -1,4 +1,4 @@
-import {Plus, Trash} from '../../Icons/icons';
+import { Plus, Trash } from '../../Icons/icons';
 
 type Props = {
   siteId: string;

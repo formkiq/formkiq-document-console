@@ -7,9 +7,9 @@ import { useAppDispatch } from '../../../Store/store';
 import { InlineViewableContentTypes } from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
-import { Close, Upload } from '../../Icons/icons';
 import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 import ButtonTertiary from "../../Generic/Buttons/ButtonTertiary";
+import { Close, Upload } from '../../Icons/icons';
 
 export default function DocumentVersionsModal({
   isOpened,
