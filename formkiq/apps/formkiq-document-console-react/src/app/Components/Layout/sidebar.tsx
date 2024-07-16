@@ -1417,16 +1417,11 @@ export function Sidebar() {
         ' h-screen relative bg-neutral-100'
       }
     >
-      <div
-        className={
-          (sidebarExpanded ? 'w-64' : 'w-14') +
-          ' border-r border-neutral-300 fixed flex h-full flex-wrap items-start justify-start overflow-y-auto bg-neutral-100'
-        }
-      >
+      <div className="pb-20">
         <div
           className={
             (sidebarExpanded ? 'w-64' : 'w-10') +
-            ' flex fixed z-30 justify-between h-logo bg-neutral-100'
+            ' flex fixed z-30 justify-between h-logo'
           }
         >
           <Link to="/">
@@ -1449,9 +1444,9 @@ export function Sidebar() {
           <div
             className={
               (sidebarExpanded
-                ? 'justify-end -ml-2 mr-2 '
-                : 'justify-end mr-2 ') +
-              ' text-neutral-900 hover:text-primary-500 flex mt-2 cursor-pointer '
+                ? 'justify-end -ml-2 pr-2 '
+                : 'justify-end -mr-4 pr-4 ') +
+              ' text-neutral-900 hover:text-primary-500 flex mt-2 cursor-pointer border-r border-neutral-300 '
             }
             onClick={toggleSidebarExpand}
           >
@@ -1466,9 +1461,16 @@ export function Sidebar() {
             ' flex flex-wrap fixed bg-neutral-100 '
           }
         ></div>
+      </div>
+      <div
+        className={
+          (sidebarExpanded ? 'w-64' : 'w-14') +
+          ' -pt-2 border-r border-neutral-300 fixed flex h-full flex-wrap items-start justify-start overflow-y-auto bg-neutral-100'
+        }
+      >
         {user && (
           <>
-            <nav className="grow mt-20 mb-8 pt-4">
+            <nav className="grow mb-8 pt-4">
               {!isSiteReadOnly && (
                 <div className="flex flex-wrap w-full justify-center mb-4 pl-0.5">
                   <ButtonPrimaryGradient
