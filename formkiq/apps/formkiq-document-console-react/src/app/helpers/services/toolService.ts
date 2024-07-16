@@ -307,7 +307,7 @@ export function getCurrentSiteInfo(
       }
     } else if (pathname.indexOf('/admin/api-keys') === 0) {
       if (pathname.indexOf('/admin/api-keys/workspaces') === 0) {
-        currentSiteInfo.siteId = pathname.substring(33).split('/')[0]; // 33 is the length of '/admin/api-keys/workspaces'
+        currentSiteInfo.siteId = pathname.substring(27).split('/')[0]; // 27 is the length of '/admin/api-keys/workspaces'
         currentSiteInfo.siteDocumentsRootName = `API Keys: ${(
           currentSiteInfo.siteId as any
         ).replaceAll('_', ' ')}`;

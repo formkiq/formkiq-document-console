@@ -404,11 +404,8 @@ function Navbar() {
                       locationPrefix === '/integrations' ||
                       locationPrefix === '/schemas' ||
                       locationPrefix === '/object-examine-tool' ||
-                      locationPrefix === 'rulesets' ||
-                      locationPrefix === '/admin/settings' ||
-                      locationPrefix === '/admin/access-control' ||
-                      locationPrefix === '/admin/groups' ||
-                      locationPrefix === '/admin/users' ? (
+                      locationPrefix === '/rulesets' ||
+                      locationPrefix === '/admin'? (
                         <>
                           <div className="w-6 mr-1 text-primary-600">
                             {pathname.indexOf('/workflows') > -1 && (
@@ -448,9 +445,7 @@ function Navbar() {
                                 <Webhook />
                               </div>
                             )}
-                            {pathname.indexOf('/rulesets') > -1 && (
-                              <span>Rulesets</span>
-                            )}
+
                             {pathname.indexOf('/admin/settings') > -1 && (
                               <div className="w-5">
                                 <Settings />
@@ -499,7 +494,7 @@ function Navbar() {
                             {pathname.indexOf('/admin/api-keys') > -1 && (
                               <span>API Keys</span>
                             )}
-                            {pathname.indexOf('/account/access-control') >
+                            {pathname.indexOf('/admin/access-control') >
                               -1 && <span>Access Control (OPA)</span>}
                             {pathname.indexOf('/schemas') > -1 && (
                               <span>Schemas</span>
@@ -509,6 +504,9 @@ function Navbar() {
                             )}
                             {pathname.indexOf('/admin/users') > -1 && (
                               <span>Users</span>
+                            )}
+                            {pathname.indexOf('/rulesets') > -1 && (
+                              <span>Rulesets</span>
                             )}
                           </div>
                           {(pathname.indexOf('/rulesets') > -1 ||
