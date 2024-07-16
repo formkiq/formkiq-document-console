@@ -1405,7 +1405,7 @@ function Documents() {
                         className="w-12 h-12"
                       />
                     </div>
-                    <div className="grow-0 w-52 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                    <div className="grow-0 w-44 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                       {(currentDocument as IDocument).path}
                       {isCurrentDocumentSoftDeleted && (
                         <small className="block text-red-500 uppercase">
@@ -1413,7 +1413,7 @@ function Documents() {
                         </small>
                       )}
                     </div>
-                    <div className="w-8 grow-0 flex justify-start">
+                    <div className="w-8 grow-0 flex justify-end">
                       <div
                         className="w-4 mt-0.5 h-4 cursor-pointer text-gray-400"
                         onClick={(event) => {
