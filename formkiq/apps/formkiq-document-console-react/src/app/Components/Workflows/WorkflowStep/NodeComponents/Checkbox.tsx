@@ -11,19 +11,21 @@ const Checkbox = ({
 ) => {
 
   const handleToggleCheckbox = (value: boolean) => {
-    if(!onChange) return;
+    if (!onChange) return;
     onChange(value)
   };
 
   const parameterValue = () => {
-    if (selectedValue) {
-      return selectedValue
+    if (typeof selectedValue === "boolean") {
+      return selectedValue;
+    } else if (typeof selectedValue === "string") {
+      return selectedValue.toLowerCase() === "true";
     } else {
       return false;
     }
   };
 
-  const displayedValue = selectedValue ? "Yes" : "No";
+  const displayedValue = parameterValue() ? "Yes" : "No";
   return (
     <>{isEditing ? <>
         <input
