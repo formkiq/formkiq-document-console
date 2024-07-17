@@ -88,7 +88,7 @@ function AddAttributeForm({
             value?.documentId as string,
             documentAttributes
           ).then((response) => {
-            if (response.status !== 201) {
+            if (response.status !== 201 && response.status !== 200) {
               dispatch(
                 openNotificationDialog({
                   dialogTitle: response.errors[0].error,
