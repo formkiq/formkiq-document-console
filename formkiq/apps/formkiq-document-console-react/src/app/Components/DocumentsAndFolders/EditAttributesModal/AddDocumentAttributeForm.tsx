@@ -255,8 +255,8 @@ function AddDocumentAttributeForm({
           ref={addTagFormRef}
         >
           {allAttributes.length > 0 && <div className="flex items-start mx-2 mb-4 relative w-full h-8 gap-2">
-            <div className="flex items-start gap-2">
-              <div className="h-8 flex gap-2">
+            <div className="flex items-start gap-2 w-full">
+              <div className="h-8 flex gap-2 w-full max-w-[300px]">
                 <RadioCombobox
                   values={attributeKeys}
                   selectedValue={selectedAttributeKey}
