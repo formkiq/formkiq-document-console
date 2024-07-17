@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {useSelector} from 'react-redux';
-import {fetchDocumentAttributes} from '../../../Store/reducers/attributes';
+import {AttributesState, fetchDocumentAttributes} from '../../../Store/reducers/attributes';
 import {AttributesDataState} from '../../../Store/reducers/attributesData';
 import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
 import {useAppDispatch} from '../../../Store/store';
@@ -19,6 +19,7 @@ function AddDocumentAttributeForm({
                                     getValue,
                                   }: any) {
   const {allAttributes} = useSelector(AttributesDataState);
+  const {documentAttributes} = useSelector(AttributesState)
   const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
   const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
@@ -33,12 +34,16 @@ function AddDocumentAttributeForm({
 
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
-    const keys = allAttributes.map((item) => ({
+    const unusedAttributes = allAttributes.filter(
+      (attribute) =>
+            !documentAttributes.find((item) => item.key === attribute.key)
+    );
+    const keys = unusedAttributes.map((item) => ({
       key: item.key,
       title: item.key,
     }));
     setAttributeKeys(keys);
-  }, [allAttributes]);
+  }, [allAttributes,  documentAttributes]);
 
   useEffect(() => {
     if (!selectedAttributeKey) return;
