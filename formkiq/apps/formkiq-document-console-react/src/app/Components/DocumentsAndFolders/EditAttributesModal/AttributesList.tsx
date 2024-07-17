@@ -3,6 +3,8 @@ import {Close, Pencil, Plus, Trash} from "../../Icons/icons";
 import {useState} from "react";
 import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
+import {useAppDispatch} from "../../../Store/store";
+import {openDialog as openNotificationDialog} from "../../../Store/reducers/globalNotificationControls";
 
 function AttributesList({
                           attributes,
@@ -15,28 +17,32 @@ function AttributesList({
   deleteDocumentAttribute: (key: string) => void,
   editAttribute: (key: string, newValue: any) => void
 }) {
-
+  const dispatch = useAppDispatch()
   const [editAttributeKey, setEditAttributeKey] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState<any>(null);
-  const [newValue, setNewValue] = useState<string | number>('');
+  const [editValue, setEditValue] = useState<any[]>([]);
+  const [newValue, setNewValue] = useState<string | number | boolean>('');
 
   function handleEditAttribute(attribute: DocumentAttribute) {
     setEditAttributeKey(attribute.key);
     if (attribute?.stringValue) {
-      setEditValue(attribute.stringValue)
+      setEditValue([]);
+      setNewValue(attribute.stringValue);
     } else if (attribute?.stringValues) {
-      setEditValue(attribute.stringValues)
+      setEditValue(attribute.stringValues);
     } else if (attribute.numberValue !== undefined) {
-      setEditValue(attribute.numberValue)
+      setEditValue([]);
+      setNewValue(attribute.numberValue);
     } else if (attribute?.numberValues) {
-      setEditValue(attribute.numberValues)
+      setEditValue(attribute.numberValues);
     } else if (attribute.booleanValue !== undefined) {
-      setEditValue(attribute.booleanValue)
+      setEditValue([]);
+      setNewValue(attribute.booleanValue);
     }
   }
 
   function handleAddValue() {
     if (newValue === '') return;
+    if (editValue.includes(newValue)) return;
     setEditValue([...editValue, newValue]);
     setNewValue('');
   }
@@ -47,7 +53,7 @@ function AttributesList({
 
   function reset() {
     setEditAttributeKey(null)
-    setEditValue(null)
+    setEditValue([])
   }
 
   function saveEditAttribute(attribute: DocumentAttribute) {
@@ -57,19 +63,67 @@ function AttributesList({
       }
     }
     if (attribute?.stringValue) {
-      newAttributeValue.attribute.stringValue = editValue
+      if (newValue === "") {
+        if (editValue.length === 1) {
+          newAttributeValue.attribute.stringValue = editValue[0].toString()
+        } else if (editValue.length > 1) {
+          newAttributeValue.attribute.stringValues = editValue
+        } else {
+          dispatch(openNotificationDialog({
+            dialogTitle: "Error updating attribute. At least one value is required for the attribute."
+          }))
+          return;
+        }
+      } else {
+        newAttributeValue.attribute.stringValue = newValue.toString()
+      }
     }
     if (attribute?.stringValues) {
-      newAttributeValue.attribute.stringValues = editValue
+      if (editValue.length > 1) {
+        newAttributeValue.attribute.stringValues = editValue
+      } else if (editValue.length === 1) {
+        newAttributeValue.attribute.stringValue = editValue[0].toString()
+      } else if (newValue !== "") {
+        newAttributeValue.attribute.stringValue = newValue.toString()
+      } else {
+        dispatch(openNotificationDialog({
+          dialogTitle: "Error updating attribute. At least one value is required for the attribute."
+        }))
+        return;
+      }
     }
     if (attribute?.numberValue !== undefined) {
-      newAttributeValue.attribute.numberValue = editValue
+      if (newValue === "") {
+        if (editValue.length === 1) {
+          newAttributeValue.attribute.numberValue = editValue[0]
+        } else if (editValue.length > 1) {
+          newAttributeValue.attribute.numberValues = editValue
+        } else {
+          dispatch(openNotificationDialog({
+            dialogTitle: "Error updating attribute. At least one value is required for the attribute."
+          }))
+          return;
+        }
+      } else {
+        newAttributeValue.attribute.numberValue = Number(newValue)
+      }
     }
     if (attribute?.numberValues) {
-      newAttributeValue.attribute.numberValues = editValue
+      if (editValue.length > 1) {
+        newAttributeValue.attribute.numberValues = editValue
+      } else if (editValue.length === 1) {
+        newAttributeValue.attribute.numberValue = editValue[0]
+      } else if (newValue !== "") {
+        newAttributeValue.attribute.numberValue = Number(newValue)
+      } else {
+        dispatch(openNotificationDialog({
+          dialogTitle: "Error updating attribute. At least one value is required for the attribute."
+        }))
+        return;
+      }
     }
     if (attribute?.booleanValue !== undefined) {
-      newAttributeValue.attribute.booleanValue = editValue
+      newAttributeValue.attribute.booleanValue = newValue as boolean;
     }
     editAttribute(attribute.key, newAttributeValue);
     reset()
@@ -104,32 +158,23 @@ function AttributesList({
                 <td className="p-4 text-start truncate w-40 ">{attribute.key}</td>
                 <td className="p-4 text-start max-w-2/3">
                   {editAttributeKey === attribute.key && (<>
-                    {attribute?.stringValue &&
-                      <input type="text" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
-                             required placeholder="Value" onChange={(e) => setEditValue(e.target.value)}
-                             value={editValue}/>}
-
-                    {attribute?.numberValue !== undefined &&
-                      <input type="number" className='h-8 px-4 border border-neutral-300 text-sm rounded-md'
-                             required placeholder="Value" onChange={(e) => setEditValue(e.target.value)}
-                             value={editValue} step="any"/>}
-
                     <div className="flex flex-row justify-start flex-wrap gap-2 items-end">
-                      {attribute?.stringValues && editValue.map((value: string, index: number) => (
-                        <div key={"stringValue" + index}
-                             className="cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
-                          <span className="truncate">{value}</span>
-                          <button title="Remove Value" type="button" className="w-4 h-4 min-w-4 text-neutral-900"
-                                  onClick={(e) => deleteValue(e, value)}>
-                            <Close/>
-                          </button>
-                        </div>))}
+                      {(attribute?.stringValue || attribute?.stringValues) &&
+                        editValue.map((value: string, index: number) => (
+                          <div key={"stringValue" + index}
+                               className="cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
+                            <span className="truncate">{value}</span>
+                            <button title="Remove Value" type="button" className="w-4 h-4 min-w-4 text-neutral-900"
+                                    onClick={(e) => deleteValue(e, value)}>
+                              <Close/>
+                            </button>
+                          </div>))}
 
-                      {attribute?.stringValues &&
+                      {(attribute?.stringValues || attribute?.stringValue) &&
                         <div className="flex flex-row items-center justify-start flex-wrap gap-2 items-end">
                           <input type="text" className='h-7 px-4 border border-neutral-300 text-sm rounded-md'
                                  required placeholder="Value" onChange={(e) => setNewValue(e.target.value)}
-                                 value={newValue}/>
+                                 value={newValue as string}/>
                           <button title="Add Value" type="button"
                                   className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
                                   onClick={handleAddValue}>
@@ -137,7 +182,7 @@ function AttributesList({
                           </button>
                         </div>}
 
-                      {attribute?.numberValues &&
+                      {(attribute?.numberValue !== undefined || attribute?.numberValues) &&
                         editValue.map((value: number, index: number) => (
                           <div key={"numberValue" + index}
                                className="cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
@@ -148,11 +193,12 @@ function AttributesList({
                             </button>
                           </div>))}
 
-                      {attribute?.numberValues &&
+                      {(attribute?.numberValue !== undefined || attribute?.numberValues) &&
                         <div className="flex flex-row items-center justify-start flex-wrap gap-2 items-end">
                           <input type="number" className='h-7 px-4 border border-neutral-300 text-sm rounded-md'
                                  required placeholder="Value" onChange={(e) => setNewValue(e.target.value)}
-                                 value={newValue} step="any"/>
+                                 onKeyDown={(e) => ["e", "E", "+"].includes(e.key) && e.preventDefault()}
+                                 value={newValue as number} step="any"/>
                           <button title="Add Value" type="button"
                                   className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
                                   onClick={handleAddValue}>
@@ -162,8 +208,8 @@ function AttributesList({
 
                       {attribute?.booleanValue !== undefined && <input type="checkbox"
                                                                        className='appearance-none text-primary-600 bg-neutral-100 border-neutral-300 rounded focus:ring-primary-500 focus:ring-2 h-4 w-4 border border-neutral-300 text-sm rounded-md '
-                                                                       checked={editValue}
-                                                                       onChange={(e) => setEditValue(e.target.checked)}/>}
+                                                                       checked={newValue as boolean}
+                                                                       onChange={(e) => setNewValue(e.target.checked)}/>}
                     </div>
                   </>)}
 

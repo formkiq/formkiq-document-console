@@ -304,6 +304,7 @@ function AddDocumentAttributeForm({
                       {...register('numberValue', {required: true})}
                       placeholder="Value"
                       step="any"
+                      onKeyDown={(e) => ["e", "E", "+"].includes(e.key) && e.preventDefault()}
                     />
                     <button
                       type="button"
