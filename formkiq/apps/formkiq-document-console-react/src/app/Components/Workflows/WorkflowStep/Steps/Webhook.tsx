@@ -17,7 +17,7 @@ const stepInfo = {
   decisions: ['APPROVE'],
 }
 
-function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange}: any) {
+function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange, readOnly}: any) {
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false
   let connectionsNumber = MAX_CONNECTIONS
@@ -25,6 +25,7 @@ function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNod
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if(readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
 
@@ -47,6 +48,7 @@ function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNod
         id="approve"
         maxConnections={1}
         nodeId={id}
+        readOnly={readOnly}
       ></DefaultSourceHandle>}
       {isHandleConnectable && (
         <div

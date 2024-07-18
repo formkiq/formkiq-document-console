@@ -28,7 +28,8 @@ function Queue({
   addCreatorNode,
   siteId,
   data,
-  onChange
+  onChange,
+  readOnly
 }: any) {
   const MAX_CONNECTIONS = 2;
   let isHandleConnectable = false;
@@ -37,6 +38,7 @@ function Queue({
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if(readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
 
@@ -104,6 +106,7 @@ function Queue({
             maxConnections={1}
             top="33%"
             id="approve"
+            readOnly={readOnly}
           />
           <OneConditionSourceHandle
             type="source"
@@ -112,6 +115,7 @@ function Queue({
             maxConnections={1}
             top="66%"
             id="reject"
+            readOnly={readOnly}
           />
         </>
       )}

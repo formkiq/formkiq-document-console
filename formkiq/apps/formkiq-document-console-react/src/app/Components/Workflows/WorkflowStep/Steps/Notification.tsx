@@ -30,7 +30,7 @@ const stepInfo = {
   decisions: ['APPROVE'],
 }
 
-function Notification({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange}: any) {
+function Notification({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange, readOnly}: any) {
   const notificationTypeSelectorOptions = {
     email: 'Email',
   }
@@ -42,6 +42,7 @@ function Notification({newStep, setNewStep, isEditing, data, edges, id, addCreat
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if(readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
 
@@ -95,6 +96,7 @@ function Notification({newStep, setNewStep, isEditing, data, edges, id, addCreat
         id="approve"
         maxConnections={1}
         nodeId={id}
+        readOnly={readOnly}
       ></DefaultSourceHandle>}
       {isHandleConnectable && (
         <div

@@ -4,7 +4,7 @@ import {useLocation} from 'react-router-dom';
 import {Edge, Handle, NodeProps, Position} from 'reactflow';
 import {v4 as uuid} from 'uuid';
 import {useAuthenticatedState} from '../../../Store/reducers/auth';
-import {addEdge, addNode, editNode, removeNode,} from '../../../Store/reducers/workflows';
+import {addEdge, addNode, editNode, removeNode, WorkflowsState,} from '../../../Store/reducers/workflows';
 import type {RootState} from '../../../Store/store';
 import {useAppDispatch} from '../../../Store/store';
 import {getCurrentSiteInfo, getUserSites,} from '../../../helpers/services/toolService';
@@ -25,12 +25,14 @@ import Antivirus from "./Steps/Antivirus";
 import Queue from './Steps/Queue';
 import {NodeNameSelector} from "./NodeComponents/NodeNameSelector";
 import Publish from "./Steps/Publish";
+import ButtonPrimary from "../../Generic/Buttons/ButtonPrimary";
 
 
 const getNodeId = () => `node_${uuid()}`;
 const getEdgeId = () => `edge_${uuid()}`;
 
 export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
+  const {workflow} = useSelector(WorkflowsState);
   const {user} = useAuthenticatedState();
   const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
     getUserSites(user);
@@ -96,7 +98,7 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
 
   return (
     <>
-      <DefaultTargetHandle type="target" id="a" position={Position.Left}/>
+      <DefaultTargetHandle type="target" id="a" position={Position.Left} readOnly={workflow?.inUse === true}/>
       {props.selected && (
         <div className="absolute top-[-30px] right-0 flex flex-row gap-2 ">
           <div
@@ -119,29 +121,37 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
         } hover:shadow`}
       >
         {data?.label === 'DOCUMENTTAGGING' && (
-          <DocumentTagging isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+          <DocumentTagging isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
+                           readOnly={workflow.inUse}/>
         )}
         {data?.label === 'NOTIFICATION' && (
-          <Notification isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+          <Notification isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
+                        readOnly={workflow.inUse}/>
         )}
         {data?.label === 'WEBHOOK' && (
-          <Webhook isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+          <Webhook isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
+                   readOnly={workflow.inUse}/>
         )}
         {data?.label === 'OCR' && (
-          <Ocr isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+          <Ocr isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
+               readOnly={workflow.inUse}/>
         )}
         {data?.label === 'FULLTEXT' && (
-          <FulltextSearch isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+          <FulltextSearch isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
+                          readOnly={workflow.inUse}/>
         )}
         {data?.label === 'ANTIVIRUS' && (
-          <Antivirus isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+          <Antivirus isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
+                     readOnly={workflow.inUse}/>
         )}
         {data?.label === 'QUEUE' && (
           <Queue isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
+                 readOnly={workflow.inUse}
                  siteId={siteId}/>
         )}
         {data?.label === 'PUBLISH' && (
-          <Publish isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}/>
+          <Publish isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
+                   readOnly={workflow.inUse}/>
         )}
       </div>
     </>
@@ -246,7 +256,7 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
           <Queue newStep={newStep} setNewStep={setNewStep} isEditing={true} site onChange={onChange}/>
         )}
         {newStep?.name === 'PUBLISH' && (
-            <Publish newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
+          <Publish newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
 
         <div className="flex flex-row justify-end w-full gap-2">

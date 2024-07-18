@@ -26,7 +26,7 @@ const stepInfo = {
   decisions: ['APPROVE'],
 }
 
-function DocumentTagging({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange}: any) {
+function DocumentTagging({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange, readOnly}: any) {
   const engineSelectorOptions = {
     chatgpt: 'ChatGPT',
   }
@@ -37,6 +37,7 @@ function DocumentTagging({newStep, setNewStep, isEditing, data, edges, id, addCr
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if(readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
 
@@ -63,6 +64,7 @@ function DocumentTagging({newStep, setNewStep, isEditing, data, edges, id, addCr
         id="approve"
         maxConnections={1}
         nodeId={id}
+        readOnly={readOnly}
       ></DefaultSourceHandle>}
       {isHandleConnectable && (
         <div

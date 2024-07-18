@@ -4,13 +4,13 @@ import { Edge, Handle, HandleProps } from 'reactflow';
 import { RootState } from '../../../Store/store';
 
 export const DefaultSourceHandle = (
-  props: HandleProps & { nodeId: string; maxConnections: number }
+  props: HandleProps & { nodeId: string; maxConnections: number, readOnly:boolean }
 ) => {
   const edges: Edge[] = useSelector(
     (state: RootState) => state.workflowsState.edges
   );
 
-  const { nodeId, maxConnections, ...handleProps } = props;
+  const { nodeId, maxConnections, readOnly, ...handleProps } = props;
   const isHandleConnectable = useMemo(() => {
     const connectedEdges = edges.filter(
       (e) => e.source === nodeId && e.sourceHandle === handleProps.id
@@ -21,7 +21,7 @@ export const DefaultSourceHandle = (
   return (
     <Handle
       {...handleProps}
-      isConnectable={isHandleConnectable}
+      isConnectable={isHandleConnectable && !readOnly}
       style={{
         width: '20px',
         height: '20px',
@@ -33,10 +33,13 @@ export const DefaultSourceHandle = (
   );
 };
 
-export const DefaultTargetHandle = (props: HandleProps) => {
+export const DefaultTargetHandle = (props: HandleProps & { readOnly:boolean }) => {
   return (
     <Handle
       {...props}
+      isConnectable={!props.readOnly}
+      type="target"
+      isConnectableStart={false}
       style={{
         width: '20px',
         height: '20px',
@@ -49,12 +52,12 @@ export const DefaultTargetHandle = (props: HandleProps) => {
 };
 
 export const OneConditionSourceHandle = (
-  props: HandleProps & { nodeId: string; maxConnections: number; top: string }
+  props: HandleProps & { nodeId: string; maxConnections: number; top: string, readOnly:boolean }
 ) => {
   const edges: Edge[] = useSelector(
     (state: RootState) => state.workflowsState.edges
   );
-  const { nodeId, maxConnections, top, ...handleProps } = props;
+  const { nodeId, maxConnections, top, readOnly, ...handleProps } = props;
   const isHandleConnectable = useMemo(() => {
     const connectedEdges = edges.filter(
       (e) => e.source === nodeId && e.sourceHandle === handleProps.id
@@ -65,7 +68,7 @@ export const OneConditionSourceHandle = (
   return (
     <Handle
       {...handleProps}
-      isConnectable={isHandleConnectable}
+      isConnectable={isHandleConnectable && !readOnly}
       style={{
         top: top,
         width: '20px',
