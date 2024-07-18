@@ -69,7 +69,7 @@ function Ocr({
   };
 
   // add textract if module enabled
-  if (formkiqVersion.modules.includes('ocr')) {
+  if (formkiqVersion.modules.includes('textract')) {
     ocrEngineSelectorOptions = {
       ...ocrEngineSelectorOptions,
       TEXTRACT: 'Textract',
