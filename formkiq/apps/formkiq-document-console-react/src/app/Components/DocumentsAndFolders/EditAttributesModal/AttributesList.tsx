@@ -147,7 +147,9 @@ function AttributesList({
                 Value
               </th>
               <th
-                className="w-52"></th>
+                className="w-52 p-4 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-end">
+                Actions
+              </th>
             </tr>
             </thead>
 
