@@ -204,6 +204,15 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
     }))
   };
 
+  const onCancelEditing = () => {
+    //check if it is new node
+    if (props.data.label === '') {
+      dispatch(removeNode(props.id));
+    } else {
+      dispatch(editNode({id: props.id, changes: editedStep}));
+    }
+  };
+
   return (
     <>
       <Handle type="target" position={Position.Left} id="a"/>
@@ -240,11 +249,16 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
             <Publish newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
 
-        {!isAddButtonDisabled && newStep !== null && (
-          <ButtonGhost className="nodrag mt-4" onClick={() => onAdd(newStep)}>
-            Save
+        <div className="flex flex-row justify-end w-full gap-2">
+          {!isAddButtonDisabled && newStep !== null && (
+            <ButtonPrimary className="nodrag mt-4" onClick={() => onAdd(newStep)}>
+              Save
+            </ButtonPrimary>
+          )}
+          <ButtonGhost className="nodrag mt-4" onClick={onCancelEditing}>
+            Cancel
           </ButtonGhost>
-        )}
+        </div>
       </div>
     </>
   );
