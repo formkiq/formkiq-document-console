@@ -4,18 +4,13 @@ export enum RequestStatus {
   rejected = 'rejected',
 }
 
-export interface Group {
-  name: string;
-  description: string;
-  insertedDate: string;
-  lastModifiedDate: string;
-}
+type 	UserActivityType = "VIEW";
 
-export interface User {
-  username: string,
-  email: string;
-  enabled: boolean,
-  userStatus: string,
+export interface UserActivity {
+  activityId: string,
+  type: UserActivityType,
   insertedDate: string,
-  lastModifiedDate: string,
+  userId: string,
+  versionKey: string,
+  timeToLive: string,
 }
