@@ -2120,13 +2120,44 @@ export class DocumentsService {
     });
   }
 
-  public static addDocument(
+  @formkiqAPIHandler
+  public static async addDocument(
     siteId: string,
     addOrUpdateDocumentParameters: any
   ): Promise<any> {
     return this.getFormkiqClient().documentsApi.addDocument({
       siteId,
       addOrUpdateDocumentParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getUserActivities(
+      siteId: string,
+      userId = null,
+      limit = 20,
+      next = null,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getUserActivities({
+      siteId,
+      limit,
+      next,
+      userId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getDocumentUserActivities(
+    siteId: string,
+    limit = 20,
+    next = null,
+    documentId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getDocumentUserActivities({
+      siteId,
+      limit,
+      next,
+      documentId,
     });
   }
 }
