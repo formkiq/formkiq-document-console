@@ -1836,3 +1836,29 @@ export const putSiteClassificationApiItem = {
     defaultPostJsonValue: '{classification:{"name":"My Classification","attributes":{"required":[{"attributeKey": "testKey"}],"compositeKeys":[{"attributeKey":["testKey"]}]}}}',
     license: 'Core',
 };
+
+export const getUserActivitiesApiItem = {
+    method: 'GET',
+    path: '/userActivities',
+    description: "Retrieve a user's activities",
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresUsername: true,
+    requiresSite: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
+    license: 'Core',
+}
+
+export const getDocumentUserActivitiesApiItem = {
+    method: 'GET',
+    path: '/documents/ DOCUMENT_ID /url',
+    description: "Retrieve a user's activities",
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    requiresSite: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
+    license: 'Core',
+};
