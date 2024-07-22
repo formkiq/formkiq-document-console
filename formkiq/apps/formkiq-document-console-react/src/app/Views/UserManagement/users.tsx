@@ -19,6 +19,7 @@ import UsersMenu from '../../Components/UserManagement/Menus/UsersMenu';
 import UsersTable from './usersTable';
 import {Plus} from "../../Components/Icons/icons";
 import CreateUserModal from "../../Components/UserManagement/Modals/CreateUserModal";
+import ManageUserGroupsModal from "../../Components/UserManagement/Modals/ManageUserGroupsModal";
 
 function Users() {
   const {
@@ -32,6 +33,8 @@ function Users() {
   const dispatch = useAppDispatch();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
+  const [isManageGroupsModalOpen, setManageGroupsModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
 
   function updateUsers() {
     dispatch(fetchUsers({ page: 1 }));
@@ -214,6 +217,11 @@ function Users() {
     );
   };
 
+  const onManageGroups = (userId: string) => {
+      setSelectedUserId(userId);
+      setManageGroupsModalOpen(true);
+  };
+
   return (
     <>
       <Helmet>
@@ -259,6 +267,7 @@ function Users() {
                   onDisableClick={onUserDisable}
                   onEnableClick={onUserEnable}
                   onResetPasswordClick={onUserResetPassword}
+                  onManageGroupsClick={onManageGroups}
                   setSelectedUsers={setSelectedUsers}
                 />
               </div>
@@ -269,6 +278,11 @@ function Users() {
       <CreateUserModal
         isOpen={isCreateUserModalOpen}
         setIsOpen={setIsCreateUserModalOpen}
+      />
+      <ManageUserGroupsModal
+        isOpen={isManageGroupsModalOpen}
+        setIsOpen={setManageGroupsModalOpen}
+        userId={selectedUserId}
       />
     </>
   );
