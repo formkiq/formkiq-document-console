@@ -324,7 +324,7 @@ module.exports = {
         '43px': '43px',
       },
       width: {
-        logo: '244px',
+        logo: '230px',
         logoCollapsed: '120px',
       },
       height: {
