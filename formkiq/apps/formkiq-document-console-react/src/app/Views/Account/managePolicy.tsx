@@ -155,7 +155,7 @@ export function AccessControl() {
             </div>
             <RegoEditor
               content={policyItem.policy}
-              readOnly="nocursor"
+              readOnly={true}
               onChange={() => {}}
             />
           </div>

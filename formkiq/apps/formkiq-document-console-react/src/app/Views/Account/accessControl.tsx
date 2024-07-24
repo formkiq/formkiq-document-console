@@ -181,7 +181,7 @@ export function AccessControl() {
       <RegoEditor
         content={policyText}
         onChange={onTextChange}
-        readOnly="nocursor"
+        readOnly={true}
       />
     </>
   );
