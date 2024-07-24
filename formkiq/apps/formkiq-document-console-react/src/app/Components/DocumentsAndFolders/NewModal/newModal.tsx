@@ -45,7 +45,7 @@ export default function NewModal({
   const [itemToCreate, setItemToCreate] = useState('');
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const itemsRequiringNameField = ['folder', 'docx', 'xlsx', 'pptx'];
+  const itemsRequiringNameField = ['folder', 'docx', 'xlsx', 'pptx', 'md'];
 
   useEffect(() => {
     if (isOpened) {
@@ -58,7 +58,7 @@ export default function NewModal({
     params.delete('actionEvent');
     setSearchParams(params);
   };
-  
+
   const closeDialog = () => {
     setItemToCreate('');
     setFormActive(false);
@@ -117,14 +117,18 @@ export default function NewModal({
           if (nameValue.indexOf('.' + itemToCreate) === -1) {
             nameValue += '.' + itemToCreate;
           }
-          navigate(
-            '/documents/new/' +
+          if(itemToCreate === "md") {
+            // TODO: create new .md file, open it
+          } else {
+            navigate(
+              '/documents/new/' +
               itemToCreate +
               '?path=' +
               value.folder +
               '/' +
               nameValue
-          );
+            );
+          }
           closeDialog();
         }
       } else {
@@ -291,6 +295,25 @@ export default function NewModal({
                           </div>
                           <div className="w-full tracking-normal text-sm text-center mb-2">
                             MS PowerPoint Document
+                          </div>
+                        </div>
+                        <div
+                          className={`${
+                            itemToCreate === 'md'
+                              ? 'bg-gray-100 font-semibold border-gray-600'
+                              : 'cursor-pointer hover:bg-gray-100'
+                          } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                          onClick={(event) => onNewDocumentClick(event, 'md')}
+                        >
+                          <div className="w-full h-16 my-3 flex justify-center">
+                            <img
+                              src="/assets/img/svg/icon-default.svg"
+                              className="w-16"
+                              alt="md icon"
+                            />
+                          </div>
+                          <div className="w-full text-sm text-center mb-2">
+                            Markdown Document
                           </div>
                         </div>
                       </>
