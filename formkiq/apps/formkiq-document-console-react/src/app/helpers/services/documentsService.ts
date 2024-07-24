@@ -2120,6 +2120,8 @@ export class DocumentsService {
     });
   }
 
+
+
   @formkiqAPIHandler
   public static async addDocument(
     siteId: string,
@@ -2158,6 +2160,21 @@ export class DocumentsService {
       limit,
       next,
       documentId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getDocumentContent(
+    siteId: string,
+    documentId: string,
+    versionKey: any,
+    inline = false,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getDocumentContent({
+      siteId,
+      documentId,
+      versionKey,
+      inline,
     });
   }
 }

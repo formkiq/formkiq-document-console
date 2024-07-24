@@ -60,3 +60,7 @@ export const ESignatureContentTypes: string[] = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
   'application/vnd.oasis.opendocument.spreadsheet',
 ];
+
+export const InlineViewableContentExtensions: string[] = [
+  'md'
+];
