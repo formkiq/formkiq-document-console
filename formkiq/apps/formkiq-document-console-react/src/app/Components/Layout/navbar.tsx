@@ -28,6 +28,7 @@ import {
   Documents,
   Examine,
   Group,
+  HistoryIcon,
   Queue,
   Recent,
   Rules,
@@ -228,7 +229,7 @@ function Navbar() {
     const pathWithoutSubfolder = location.pathname.split('/')[1];
     const pathWithSubfolder =
       location.pathname.split('/')[1] + '/' + location.pathname.split('/')[2];
-    const pathsWithSubfolder: string[] = ['admin/api-keys'];
+    const pathsWithSubfolder: string[] = ['admin/api-keys','admin/user-activities'];
 
     let newDocumentsRootUri;
 
@@ -456,6 +457,11 @@ function Navbar() {
                                 <ApiKey />
                               </div>
                             )}
+                            {pathname.indexOf('/admin/user-activities') > -1 && (
+                              <div className="w-5">
+                                <HistoryIcon />
+                              </div>
+                            )}
                             {pathname.indexOf('/admin/access-control') > -1 && (
                               <div className="w-5">
                                 <Admin />
@@ -494,6 +500,9 @@ function Navbar() {
                             {pathname.indexOf('/admin/api-keys') > -1 && (
                               <span>API Keys</span>
                             )}
+                            {pathname.indexOf('/admin/user-activities') > -1 && (
+                              <span>User Activities</span>
+                            )}
                             {pathname.indexOf('/admin/access-control') >
                               -1 && <span>Access Control (OPA)</span>}
                             {pathname.indexOf('/schemas') > -1 && (
@@ -513,6 +522,7 @@ function Navbar() {
                             pathname.indexOf('/schemas') > -1 ||
                             pathname.indexOf('/workflows') > -1 ||
                             pathname.indexOf('/admin/api-keys') > -1 ||
+                            pathname.indexOf('/admin/user-activities') > -1 ||
                             pathname.indexOf('/queues') > -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
@@ -749,6 +759,15 @@ function Navbar() {
                           Sign out
                         </Link>
                       </li>
+                      {user.isAdmin && <li>
+                        <Link
+                          to="/admin/user-activities"
+                          data-test-id="user-activities"
+                          className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
+                        >
+                          User Activities
+                        </Link>
+                      </li>}
                     </ul>
                   )}
                 </div>

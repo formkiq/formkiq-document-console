@@ -324,7 +324,29 @@ export function getCurrentSiteInfo(
           )}`;
         }
       }
-    } else {
+    } else if (pathname.indexOf('/admin/user-activities') === 0) {
+      if (pathname.indexOf('/admin/user-activities/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(34).split('/')[0]; // 34 is the length of '/admin/user-activities/workspaces'
+        currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `User Activities: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'User Activities';
+          currentSiteInfo.siteDocumentsRootUri = '/documents';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/admin/user-activities/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    }  else {
       if (hasDefaultSite) {
         currentSiteInfo.siteId = 'default';
         currentSiteInfo.siteDocumentsRootUri = '/documents';

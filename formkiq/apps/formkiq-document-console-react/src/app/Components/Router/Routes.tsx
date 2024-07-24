@@ -67,6 +67,10 @@ const Groups = React.lazy(() => import('../../Views/UserManagement/groups'));
 const Group = React.lazy(() => import('../../Views/UserManagement/group'));
 const Users = React.lazy(() => import('../../Views/UserManagement/users'));
 
+const UserActivities = React.lazy(
+    () => import('../../Views/Account/userActivities')
+);
+
 const RoutesMapper = () => {
   return (
     <Routes>
@@ -220,6 +224,8 @@ const RoutesMapper = () => {
         path="/object-examine-tool"
         element={<ObjectExamineTool />}
       ></Route>
+      <Route path="/admin/user-activities" element={<UserActivities />}></Route>
+      <Route path="/admin/user-activities/workspaces/:siteId" element={<UserActivities />}></Route>
       <Route path="*" element={<Page404 />}></Route>
     </Routes>
   );
