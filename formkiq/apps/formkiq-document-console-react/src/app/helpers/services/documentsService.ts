@@ -2120,4 +2120,13 @@ export class DocumentsService {
     });
   }
 
+  public static addDocument(
+    siteId: string,
+    addOrUpdateDocumentParameters: any
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.addDocument({
+      siteId,
+      addOrUpdateDocumentParameters,
+    });
+  }
 }

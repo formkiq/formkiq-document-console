@@ -31,6 +31,7 @@ function FulltextSearch({
   id,
   addCreatorNode,
   onChange,
+  readOnly
 }: any) {
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false;
@@ -39,6 +40,7 @@ function FulltextSearch({
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if (readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
 
@@ -73,6 +75,7 @@ function FulltextSearch({
           id="approve"
           maxConnections={1}
           nodeId={id}
+          readOnly={readOnly}
         ></DefaultSourceHandle>
       )}
 

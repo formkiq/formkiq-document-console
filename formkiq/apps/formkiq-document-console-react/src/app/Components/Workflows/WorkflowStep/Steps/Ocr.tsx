@@ -55,7 +55,8 @@ function Ocr({
   edges,
   id,
   addCreatorNode,
-  onChange
+  onChange,
+  readOnly
 }: any) {
   const { formkiqVersion } = useSelector(ConfigState);
 
@@ -68,7 +69,7 @@ function Ocr({
   };
 
   // add textract if module enabled
-  if (formkiqVersion.modules.includes('ocr')) {
+  if (formkiqVersion.modules.includes('textract')) {
     ocrEngineSelectorOptions = {
       ...ocrEngineSelectorOptions,
       TEXTRACT: 'Textract',
@@ -87,6 +88,7 @@ function Ocr({
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if(readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
 
@@ -164,6 +166,7 @@ function Ocr({
           id="approve"
           maxConnections={1}
           nodeId={id}
+          readOnly={readOnly}
         ></DefaultSourceHandle>
       )}
       {isHandleConnectable && (

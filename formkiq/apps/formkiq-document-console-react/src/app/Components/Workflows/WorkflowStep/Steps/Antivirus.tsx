@@ -14,7 +14,7 @@ const stepInfo = {
   decisions: ['APPROVE', 'REJECT'],
 }
 
-function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange}: any) {
+function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange, readOnly}: any) {
 
   const MAX_CONNECTIONS = 2;
   let isHandleConnectable = false
@@ -23,6 +23,7 @@ function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, o
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if(readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
   return (
@@ -41,6 +42,7 @@ function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, o
           maxConnections={1}
           top="33%"
           id="approve"
+          readOnly={readOnly}
         />
         <OneConditionSourceHandle
           type="source"
@@ -49,6 +51,7 @@ function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, o
           maxConnections={1}
           top="66%"
           id="reject"
+          readOnly={readOnly}
         />
       </>}
       {isHandleConnectable && (

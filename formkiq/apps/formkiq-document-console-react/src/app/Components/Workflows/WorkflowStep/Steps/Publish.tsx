@@ -14,7 +14,7 @@ const stepInfo = {
   decisions: ['APPROVE'],
 }
 
-function Publish({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange}: any) {
+function Publish({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange, readOnly}: any) {
 
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false
@@ -23,6 +23,7 @@ function Publish({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onC
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if(readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
   return (
@@ -40,6 +41,7 @@ function Publish({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onC
           id="approve"
           maxConnections={1}
           nodeId={id}
+          readOnly={readOnly}
         ></DefaultSourceHandle>
       )}
       {isHandleConnectable && (

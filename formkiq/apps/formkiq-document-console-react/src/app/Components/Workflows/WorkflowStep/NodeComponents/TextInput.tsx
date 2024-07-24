@@ -3,17 +3,17 @@ import {ChangeEvent, useEffect} from "react";
 import DisplayValue from "./DisplayValue";
 
 const TextInput = ({
-                      defaultValue,
-                      description,
-                      editDescription,
-                      onChange,
-                      selectedValue,
-                      isEditing
-                    }: any
+                     defaultValue,
+                     description,
+                     editDescription,
+                     onChange,
+                     selectedValue,
+                     isEditing
+                   }: any
 ) => {
 
   const handleTextInput = (name: string) => {
-    if(!onChange) return;
+    if (!onChange) return;
     onChange(name)
   };
 
@@ -29,7 +29,7 @@ const TextInput = ({
 
   // if default value set, update the step
   useEffect(() => {
-    if (defaultValue && isEditing) {
+    if (defaultValue && isEditing && selectedValue===undefined) {
       handleTextInput(defaultValue);
     }
   }, [defaultValue]);
