@@ -1,11 +1,11 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import {useLocation, useNavigate, useSearchParams} from 'react-router-dom';
 import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
-import { DocumentsService } from '../../../helpers/services/documentsService';
+import {DocumentsService, IFileUploadData} from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import {
   Close,
@@ -42,6 +42,7 @@ export default function NewModal({
   const newFormRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const pathname = decodeURI(useLocation().pathname);
   const [formActive, setFormActive] = useState(true);
   const [itemToCreate, setItemToCreate] = useState('');
   const [searchParams, setSearchParams] = useSearchParams()
@@ -161,8 +162,23 @@ export default function NewModal({
           if (nameValue.indexOf('.' + itemToCreate) === -1) {
             nameValue += '.' + itemToCreate;
           }
-          if(itemToCreate === "md") {
+          if (itemToCreate === "md") {
             // TODO: create new .md file, open it
+            const file = new File([" "], nameValue, {});
+            const uploadData: IFileUploadData[] = [
+              {
+                originalFile: file,
+                uploadedSize: 0,
+              }
+            ]
+            DocumentsService.uploadDocuments(
+              value.folder, siteId, formkiqVersion, uploadData, () => {
+              }
+            ).then((res) => {
+              if (res.length > 0) {
+                navigate(pathname + "/" + res[0].documentId + "/view");
+              }
+            });
           } else {
             navigate(
               '/documents/new/' +

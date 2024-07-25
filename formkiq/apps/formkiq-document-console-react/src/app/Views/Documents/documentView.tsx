@@ -134,7 +134,11 @@ export function DocumentView() {
                 .then((body: any) => {
                   const reader = body.getReader();
                   reader.read().then(({value}: any) => {
-                    setDocumentContent(new TextDecoder().decode(value))
+                    if (value) {
+                      setDocumentContent(new TextDecoder().decode(value))
+                    } else {
+                      setDocumentContent("")
+                    }
                   })
                 })
             });
@@ -234,7 +238,7 @@ export function DocumentView() {
         {/*Text File Editor (currently only for .md files) */}
         {document &&
           InlineViewableContentExtensions.indexOf(documentExtension) > -1 &&
-          documentExtension === 'md' && documentContent && (
+          documentContent!==undefined && (
            <TextFileEditor
              currentDocument={ document}
              documentContent={documentContent}
@@ -253,9 +257,9 @@ export function DocumentView() {
       {document && (
         <div className="flex flex-col lg:flex-row">
           <div className="-mt-3 h-92/100h flex-1 bg-white inline-block">
-            {documentContent || ooConfig ? (
+            {documentContent!==undefined || ooConfig ? (
               <>
-                {documentContent && (
+                {documentContent!==undefined && (
                   <div className="w-full h-full">
                     <DocumentViewer/>
                   </div>
