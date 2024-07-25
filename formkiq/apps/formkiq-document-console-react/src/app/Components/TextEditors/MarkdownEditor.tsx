@@ -24,6 +24,7 @@ function MarkdownEditor({
         theme: 'base16-light',
         lineNumbers: true,
         readOnly: readOnly,
+        lineWrapping: true,
       });
 
       editor.setSize('100%', '150%');

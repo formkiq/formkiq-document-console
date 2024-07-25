@@ -18,8 +18,6 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import {IDocument} from '../../helpers/types/document';
-import MarkdownEditor from '../../Components/TextEditors/MarkdownEditor';
-import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
 import TextFileEditor from '../../Components/DocumentsAndFolders/TextFileEditor/textFileEditor';
 
 export function DocumentView() {
@@ -221,7 +219,7 @@ export function DocumentView() {
           (InlineViewableContentTypes.indexOf(
               (document as IDocument).contentType
             ) > -1 ||
-            (document as IDocument).deepLinkPath.length) && (
+            (document as IDocument).deepLinkPath.length>0) && (
             <>
               {documentContent && (
                 <iframe
@@ -233,11 +231,15 @@ export function DocumentView() {
             </>
           )}
 
-        {/*Markdown Editor*/}
+        {/*Text File Editor (currently only for .md files) */}
         {document &&
           InlineViewableContentExtensions.indexOf(documentExtension) > -1 &&
           documentExtension === 'md' && documentContent && (
-           <TextFileEditor document={ document} documentContent={documentContent} extension={documentExtension} />
+           <TextFileEditor
+             currentDocument={ document}
+             documentContent={documentContent}
+             extension={documentExtension}
+             siteId={currentSiteId}/>
           )}
       </div>
     );
