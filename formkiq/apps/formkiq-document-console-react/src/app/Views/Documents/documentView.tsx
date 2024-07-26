@@ -1,35 +1,37 @@
-import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useSelector } from 'react-redux';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Spinner } from '../../Components/Icons/icons';
-import { useAuthenticatedState } from '../../Store/reducers/auth';
-import { ConfigState } from '../../Store/reducers/config';
-import { setCurrentDocumentPath } from '../../Store/reducers/data';
-import { useAppDispatch } from '../../Store/store';
+import {useEffect, useState} from 'react';
+import {Helmet} from 'react-helmet-async';
+import {useSelector} from 'react-redux';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
+import {Spinner} from '../../Components/Icons/icons';
+import {useAuthenticatedState} from '../../Store/reducers/auth';
+import {ConfigState} from '../../Store/reducers/config';
+import {setCurrentDocumentPath} from '../../Store/reducers/data';
+import {useAppDispatch} from '../../Store/store';
 import {
+  InlineViewableContentExtensions,
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
 } from '../../helpers/constants/contentTypes';
-import { DocumentsService } from '../../helpers/services/documentsService';
+import {DocumentsService} from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import { IDocument } from '../../helpers/types/document';
+import {IDocument} from '../../helpers/types/document';
+import TextFileEditor from '../../Components/DocumentsAndFolders/TextFileEditor/textFileEditor';
 
 export function DocumentView() {
-  const { id } = useParams();
+  const {id} = useParams();
   const versionKey = new URLSearchParams(useLocation().search).get(
     'versionKey'
   );
-  const { user } = useAuthenticatedState();
+  const {user} = useAuthenticatedState();
 
-  const { formkiqVersion } = useSelector(ConfigState);
+  const {formkiqVersion} = useSelector(ConfigState);
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
+  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const {
@@ -74,6 +76,7 @@ export function DocumentView() {
       DocumentsService.getDocumentById(id, currentSiteId).then(
         (response: IDocument) => {
           setDocument(response);
+          setDocumentExtension(response.path.substring(response.path.lastIndexOf('.') + 1).toLowerCase());
           dispatch(setCurrentDocumentPath(response.path));
           if (
             formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
@@ -116,6 +119,29 @@ export function DocumentView() {
             });
           } else if ((response as IDocument).deepLinkPath.length) {
             setDocumentContent((response as IDocument).deepLinkPath);
+          } else if (InlineViewableContentExtensions.indexOf(response.path.substring(response.path.lastIndexOf('.') + 1).toLowerCase()) > -1) {
+            let viewVersionKey = '';
+            if (versionKey && versionKey.length) {
+              viewVersionKey = versionKey;
+            }
+            DocumentsService.getDocumentContent(
+              currentSiteId,
+              id,
+              viewVersionKey,
+              true
+            ).then((res: any) => {
+              fetch(res.contentUrl).then((response) => response.body)
+                .then((body: any) => {
+                  const reader = body.getReader();
+                  reader.read().then(({value}: any) => {
+                    if (value) {
+                      setDocumentContent(new TextDecoder().decode(value))
+                    } else {
+                      setDocumentContent("")
+                    }
+                  })
+                })
+            });
           } else {
             let viewVersionKey = '';
             if (versionKey && versionKey.length) {
@@ -186,6 +212,8 @@ export function DocumentView() {
   const [ooConfig, setOOConfig]: [any | null, any] = useState(null);
   const [documentContent, setDocumentContent]: [string | null, any] =
     useState('');
+  const [documentExtension, setDocumentExtension] = useState<string>('')
+
   const DocumentViewer = () => {
     //return (<></>)
     //return <DocViewer prefetchMethod="GET"  documents={documents} />
@@ -193,9 +221,9 @@ export function DocumentView() {
       <div className="w-full h-full">
         {document &&
           (InlineViewableContentTypes.indexOf(
-            (document as IDocument).contentType
-          ) > -1 ||
-            (document as IDocument).deepLinkPath.length) && (
+              (document as IDocument).contentType
+            ) > -1 ||
+            (document as IDocument).deepLinkPath.length>0) && (
             <>
               {documentContent && (
                 <iframe
@@ -205,6 +233,17 @@ export function DocumentView() {
                 />
               )}
             </>
+          )}
+
+        {/*Text File Editor (currently only for .md files) */}
+        {document &&
+          InlineViewableContentExtensions.indexOf(documentExtension) > -1 &&
+          documentContent!==undefined && (
+           <TextFileEditor
+             currentDocument={ document}
+             documentContent={documentContent}
+             extension={documentExtension}
+             siteId={currentSiteId}/>
           )}
       </div>
     );
@@ -218,11 +257,11 @@ export function DocumentView() {
       {document && (
         <div className="flex flex-col lg:flex-row">
           <div className="-mt-3 h-92/100h flex-1 bg-white inline-block">
-            {documentContent || ooConfig ? (
+            {documentContent!==undefined || ooConfig ? (
               <>
-                {documentContent && (
+                {documentContent!==undefined && (
                   <div className="w-full h-full">
-                    <DocumentViewer />
+                    <DocumentViewer/>
                   </div>
                 )}
                 {ooConfig && (
@@ -235,7 +274,7 @@ export function DocumentView() {
                 )}
               </>
             ) : (
-              <Spinner />
+              <Spinner/>
             )}
           </div>
         </div>

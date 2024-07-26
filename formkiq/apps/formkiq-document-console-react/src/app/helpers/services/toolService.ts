@@ -80,6 +80,9 @@ export function getFileIcon(filename: string) {
       case 'eml':
         fileIcon = '/assets/img/svg/icon-eml.svg';
         break;
+      case 'md':
+        fileIcon = '/assets/img/svg/icon-md.svg';
+        break;
       case 'dwg':
         fileIcon = '/assets/img/svg/icon-dwg.svg';
         break;
@@ -346,7 +349,7 @@ export function getCurrentSiteInfo(
           )}`;
         }
       }
-    }  else {
+    } else {
       if (hasDefaultSite) {
         currentSiteInfo.siteId = 'default';
         currentSiteInfo.siteDocumentsRootUri = '/documents';
