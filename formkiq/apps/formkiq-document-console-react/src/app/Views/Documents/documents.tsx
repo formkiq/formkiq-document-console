@@ -50,8 +50,8 @@ import {
 } from '../../Store/reducers/config';
 import { setCurrentDocumentPath } from '../../Store/reducers/data';
 import {
-  DocumentListState,
   deleteDocument,
+  DocumentListState,
   fetchDeleteFolder,
   fetchDocuments,
   setDocumentLoadingStatusPending,
@@ -59,6 +59,12 @@ import {
   updateDocumentsList,
 } from '../../Store/reducers/documentsList';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
+import { fetchQueues, QueuesState } from '../../Store/reducers/queues';
+import {
+  fetchUsers,
+  UserManagementState,
+} from '../../Store/reducers/userManagement';
+import { fetchWorkflows, WorkflowsState } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
 import {
   InlineViewableContentTypes,
@@ -78,15 +84,12 @@ import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { Queue } from '../../helpers/types/queues';
+import { User } from '../../helpers/types/userManagement';
+import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import {fetchWorkflows, WorkflowsState} from "../../Store/reducers/workflows";
-import {fetchQueues, QueuesState} from "../../Store/reducers/queues";
-import {WorkflowSummary} from "../../helpers/types/workflows";
-import {Queue} from "../../helpers/types/queues";
-import {fetchUsers, UserManagementState} from "../../Store/reducers/userManagement";
-import {User} from "../../helpers/types/userManagement";
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -109,9 +112,9 @@ function Documents() {
     useSoftDelete,
     pendingArchive,
   } = useSelector(ConfigState);
-  const {workflows} = useSelector(WorkflowsState);
-  const {queues} = useSelector(QueuesState);
-  const {users} = useSelector(UserManagementState);
+  const { workflows } = useSelector(WorkflowsState);
+  const { queues } = useSelector(QueuesState);
+  const { users } = useSelector(UserManagementState);
   const { allTags, allAttributes } = useSelector(AttributesDataState);
   const { documentAttributes } = useSelector(AttributesState);
   const subfolderUri = useSubfolderUri();
@@ -173,7 +176,9 @@ function Documents() {
     any
   ] = useState([]);
   const [currentDocumentVersions, setCurrentDocumentVersions] = useState(null);
-  const [currentDocumentActions, setCurrentDocumentActions] = useState<any[]>([]);
+  const [currentDocumentActions, setCurrentDocumentActions] = useState<any[]>(
+    []
+  );
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
   const [isUploadModalOpened, setUploadModalOpened] = useState(false);
@@ -287,7 +292,7 @@ function Documents() {
           setCurrentDocument(response);
           // TODO: set folder to selected document path?
           updateTags();
-          updateDocumentActions()
+          updateDocumentActions();
         }
       );
     }
@@ -307,7 +312,7 @@ function Documents() {
     onDocumentInfoClick();
   }, [infoDocumentId]);
   useEffect(() => {
-    dispatch(fetchUsers({limit: 100, page:1}))
+    dispatch(fetchUsers({ limit: 100, page: 1 }));
   }, []);
 
   useEffect(() => {
@@ -423,41 +428,48 @@ function Documents() {
       DocumentsService.getDocumentActions(infoDocumentId, currentSiteId).then(
         (response: any) => {
           if (response.status === 200) {
-            const actions = [...response.actions]
+            const actions = [...response.actions];
             let isWorkflowsUpToDate = true;
             let isQueuesUpToDate = true;
             const addWorkflowNames = () => {
               actions.forEach((action: any) => {
                 if (action.workflowId) {
-                  const workflowName = workflows.find((workflow: WorkflowSummary) => workflow.workflowId === action.workflowId)?.name
+                  const workflowName = workflows.find(
+                    (workflow: WorkflowSummary) =>
+                      workflow.workflowId === action.workflowId
+                  )?.name;
                   if (!workflowName) {
                     isWorkflowsUpToDate = false;
                   } else {
                     action.workflowName = workflowName;
                   }
                 }
-              })
-            }
+              });
+            };
             const addQueueNames = () => {
               actions.forEach((action: any) => {
                 if (action.queueId) {
-                  const queueName = queues.find((queue: Queue) => queue.queueId === action.queueId)?.name
+                  const queueName = queues.find(
+                    (queue: Queue) => queue.queueId === action.queueId
+                  )?.name;
                   if (!queueName) {
                     isQueuesUpToDate = false;
                   } else {
                     action.queueName = queueName;
                   }
                 }
-              })
-            }
+              });
+            };
             const addUserEmails = () => {
-                actions.forEach((action: any) => {
-                    if (action.userId) {
-                        const userEmail = users.find((user: User) => user.username === action.userId)?.email
-                        action.userEmail = userEmail;
-                    }
-                })
-            }
+              actions.forEach((action: any) => {
+                if (action.userId) {
+                  const userEmail = users.find(
+                    (user: User) => user.username === action.userId
+                  )?.email;
+                  action.userEmail = userEmail;
+                }
+              });
+            };
             addWorkflowNames();
             addQueueNames();
             addUserEmails();
@@ -465,14 +477,28 @@ function Documents() {
             // re-fetch workflows and queues only if new IDs appeared
             if (!isWorkflowsUpToDate || !isQueuesUpToDate) {
               if (!isWorkflowsUpToDate) {
-                dispatch(fetchWorkflows({siteId: currentSiteId, limit: 100, page: 1, nextToken: null}))
+                dispatch(
+                  fetchWorkflows({
+                    siteId: currentSiteId,
+                    limit: 100,
+                    page: 1,
+                    nextToken: null,
+                  })
+                );
               }
               if (!isQueuesUpToDate) {
-                dispatch(fetchQueues({siteId: currentSiteId, limit: 100, page: 1, nextToken: null}))
+                dispatch(
+                  fetchQueues({
+                    siteId: currentSiteId,
+                    limit: 100,
+                    page: 1,
+                    nextToken: null,
+                  })
+                );
               }
               setTimeout(() => {
-                addWorkflowNames()
-                addQueueNames()
+                addWorkflowNames();
+                addQueueNames();
                 setCurrentDocumentActions(actions);
               }, 500);
             } else {
@@ -2100,25 +2126,93 @@ function Documents() {
                     }
                   >
                     <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
-                        {currentDocumentActions.map((action: any, i: number) => (
-                            <div key={i} className="flex flex-col pb-3">
-                                <dt className="font-semibold text-sm">{action.type}</dt>
-                                <dd>
-                                  <p className={`font-bold text-xs ${action.status === 'COMPLETE' ? 'text-green-600' :
-                                    action.status === 'FAILED' ? 'text-red-600' :
-                                      action.status === 'SKIPPED' ? 'text-neutral-600' :
-                                    'text-yellow-600'}`}>{action.status.replace(/_/g, ' ')}</p>
+                      {currentDocumentActions.length === 0 && (
+                        <div className="flex w-full justify-center italic text-smaller">
+                          (no actions exist for this document)
+                        </div>
+                      )}
+                      {currentDocumentActions.map((action: any, i: number) => (
+                        <div key={i} className="flex flex-col pb-3">
+                          <dt className="font-semibold text-sm">
+                            {action.type}
+                          </dt>
+                          <dd>
+                            <p
+                              className={`font-bold text-xs ${
+                                action.status === 'COMPLETE'
+                                  ? 'text-green-600'
+                                  : action.status === 'FAILED'
+                                  ? 'text-red-600'
+                                  : action.status === 'SKIPPED'
+                                  ? 'text-neutral-600'
+                                  : 'text-yellow-600'
+                              }`}
+                            >
+                              {action.status.replace(/_/g, ' ')}
+                            </p>
 
-                                  {action.message && <p className="font-medium text-xs italic">{action.message}</p>}
-                                  {action.userId && <p className="pl-2 text-sm text-neutral-600 font-medium">User: {action.userEmail || action.userId}</p>}
-                                  {action.queueId&&<Link to={`${siteDocumentsRootUri}/queues/${action.queueId}`} className="pl-2 text-sm text-neutral-600 text-neutral-600 font-medium ">Queue: <span className="text-primary-500 hover:text-primary-600">{queues.find((queue: any) => queue.queueId === action.queueId)?.name || action.queueId}</span></Link>}
-                                  {action.workflowId&&<Link to={`${siteDocumentsRootUri.includes('workspaces') ? siteDocumentsRootUri : ''}/workflows/designer?workflowId=${action.workflowId}`} className="pl-2 text-sm text-neutral-600 font-medium inline-block">Workflow: <span className="text-primary-500 hover:text-primary-600">{workflows.find((workflow: any) => workflow.workflowId === action.workflowId)?.name || action.workflowId}</span></Link>}
-                                  {action.insertedDate && <p className="pl-2 text-medsmall text-neutral-600 font-medium">Inserted: {formatDate(action.insertedDate)}</p>}
-                                  {action.startDate && <p className="pl-2 text-medsmall text-neutral-600 font-medium">Start: {formatDate(action.startDate)}</p>}
-                                  {action.completedDate && <p className="pl-2 text-medsmall text-neutral-600 font-medium">End: {formatDate(action.completedDate)}</p>}
-                                </dd>
-                            </div>
-                        ))}
+                            {action.message && (
+                              <p className="font-medium text-xs italic">
+                                {action.message}
+                              </p>
+                            )}
+                            {action.userId && (
+                              <p className="pl-2 text-sm text-neutral-600 font-medium">
+                                User: {action.userEmail || action.userId}
+                              </p>
+                            )}
+                            {action.queueId && (
+                              <Link
+                                to={`${siteDocumentsRootUri}/queues/${action.queueId}`}
+                                className="pl-2 text-sm text-neutral-600 text-neutral-600 font-medium "
+                              >
+                                Queue:{' '}
+                                <span className="text-primary-500 hover:text-primary-600">
+                                  {queues.find(
+                                    (queue: any) =>
+                                      queue.queueId === action.queueId
+                                  )?.name || action.queueId}
+                                </span>
+                              </Link>
+                            )}
+                            {action.workflowId && (
+                              <Link
+                                to={`${
+                                  siteDocumentsRootUri.includes('workspaces')
+                                    ? siteDocumentsRootUri
+                                    : ''
+                                }/workflows/designer?workflowId=${
+                                  action.workflowId
+                                }`}
+                                className="pl-2 text-sm text-neutral-600 font-medium inline-block"
+                              >
+                                Workflow:{' '}
+                                <span className="text-primary-500 hover:text-primary-600">
+                                  {workflows.find(
+                                    (workflow: any) =>
+                                      workflow.workflowId === action.workflowId
+                                  )?.name || action.workflowId}
+                                </span>
+                              </Link>
+                            )}
+                            {action.insertedDate && (
+                              <p className="pl-2 text-medsmall text-neutral-600 font-medium">
+                                Inserted: {formatDate(action.insertedDate)}
+                              </p>
+                            )}
+                            {action.startDate && (
+                              <p className="pl-2 text-medsmall text-neutral-600 font-medium">
+                                Start: {formatDate(action.startDate)}
+                              </p>
+                            )}
+                            {action.completedDate && (
+                              <p className="pl-2 text-medsmall text-neutral-600 font-medium">
+                                End: {formatDate(action.completedDate)}
+                              </p>
+                            )}
+                          </dd>
+                        </div>
+                      ))}
                     </dl>
                   </div>
 
