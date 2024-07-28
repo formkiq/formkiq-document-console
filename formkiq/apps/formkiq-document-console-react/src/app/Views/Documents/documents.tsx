@@ -1267,7 +1267,7 @@ function Documents() {
                       className="cursor-pointer w-16 flex items-center justify-start"
                     >
                       <img
-                        src={getFileIcon(file.path)}
+                        src={getFileIcon(file.path, file.deepLinkPath)}
                         className="w-8 inline-block"
                         alt="icon"
                       />
@@ -1516,7 +1516,10 @@ function Documents() {
                     <div className="w-12">
                       <img
                         alt="File Icon"
-                        src={getFileIcon((currentDocument as IDocument).path)}
+                        src={getFileIcon(
+                          (currentDocument as IDocument).path,
+                          (currentDocument as IDocument).deepLinkPath
+                        )}
                         className="w-12 h-12"
                       />
                     </div>

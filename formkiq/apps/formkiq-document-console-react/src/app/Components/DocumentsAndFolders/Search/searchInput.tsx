@@ -1,14 +1,19 @@
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import {Link, useLocation, useNavigate, useSearchParams} from 'react-router-dom';
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom';
+import { AttributesDataState } from '../../../Store/reducers/attributesData';
 import { ConfigState } from '../../../Store/reducers/config';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { formatDate, getFileIcon } from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
 import { FolderSolid, MoreActions, Search, Spinner } from '../../Icons/icons';
 import AdvancedSearchModal from './advancedSearchModal';
-import {AttributesDataState} from "../../../Store/reducers/attributesData";
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
@@ -43,7 +48,7 @@ export default function SearchInput({
   const navigate = useNavigate();
 
   const { formkiqVersion, useAdvancedSearch } = useSelector(ConfigState);
-  const {allTags, allAttributes} = useSelector(AttributesDataState);
+  const { allTags, allAttributes } = useSelector(AttributesDataState);
   const [searchParams, setSearchParams] = useSearchParams();
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, setExpanded);
@@ -138,7 +143,7 @@ export default function SearchInput({
           <div className={'fex flex-col'}>
             <div className="inline-block w-8 mr-2 align-text-bottom">
               <img
-                src={getFileIcon(file.path)}
+                src={getFileIcon(file.path, file.deepLinkPath)}
                 className="w-8 mr-2 inline-block"
                 alt="icon"
               />
@@ -219,17 +224,18 @@ export default function SearchInput({
             className="block w-full appearance-none bg-transparent py-2 pl-4 pr-12 text-base text-neutral-900 placeholder:text-neutral-600 focus:outline-none sm:text-sm sm:leading-6 border-none focus:outline-none focus:ring-0"
           />
         </div>
-        {!advancedSearch &&
+        {!advancedSearch && (
           <div className="grow-0 ml-2 -mt-1">
             <button
               className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"
               onClick={toggleAdvancedSearch}
             >
               <div className="w-4">
-                <MoreActions/>
+                <MoreActions />
               </div>
             </button>
-          </div>}
+          </div>
+        )}
       </div>
       {expanded && (
         <div className="w-full absolute -mt-2 z-30 bg-white border shadow-xl">
