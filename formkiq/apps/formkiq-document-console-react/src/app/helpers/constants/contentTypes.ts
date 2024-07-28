@@ -13,7 +13,6 @@ export const OnlyOfficeContentTypes: string[] = [
   'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
   'application/vnd.openxmlformats-officedocument.presentationml.template',
   'application/vnd.oasis.opendocument.presentation',
-  'text/csv',
 ];
 
 export const OnlyOfficeNewFileExtensions: string[] = ['docx', 'xlsx', 'pptx'];
@@ -61,6 +60,4 @@ export const ESignatureContentTypes: string[] = [
   'application/vnd.oasis.opendocument.spreadsheet',
 ];
 
-export const InlineViewableContentExtensions: string[] = [
-  'md'
-];
+export const InlineViewableContentExtensions: string[] = ['md'];

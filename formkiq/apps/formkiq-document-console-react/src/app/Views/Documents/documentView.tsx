@@ -1,37 +1,41 @@
-import {useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import {Spinner} from '../../Components/Icons/icons';
-import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {ConfigState} from '../../Store/reducers/config';
-import {setCurrentDocumentPath} from '../../Store/reducers/data';
-import {useAppDispatch} from '../../Store/store';
+import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import TextFileEditor from '../../Components/DocumentsAndFolders/TextFileEditor/textFileEditor';
+import { Spinner } from '../../Components/Icons/icons';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { ConfigState } from '../../Store/reducers/config';
+import { setCurrentDocumentPath } from '../../Store/reducers/data';
+import { useAppDispatch } from '../../Store/store';
 import {
   InlineViewableContentExtensions,
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
 } from '../../helpers/constants/contentTypes';
-import {DocumentsService} from '../../helpers/services/documentsService';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import {IDocument} from '../../helpers/types/document';
-import TextFileEditor from '../../Components/DocumentsAndFolders/TextFileEditor/textFileEditor';
+import { IDocument } from '../../helpers/types/document';
+
+interface CSVRow {
+  [key: string]: string;
+}
 
 export function DocumentView() {
-  const {id} = useParams();
+  const { id } = useParams();
   const versionKey = new URLSearchParams(useLocation().search).get(
     'versionKey'
   );
-  const {user} = useAuthenticatedState();
+  const { user } = useAuthenticatedState();
 
-  const {formkiqVersion} = useSelector(ConfigState);
+  const { formkiqVersion } = useSelector(ConfigState);
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const {
@@ -64,6 +68,45 @@ export function DocumentView() {
     siteDocumentsRootName
   );
 
+  const customParse = (csvText: string): CSVRow[] => {
+    const lines = csvText.split('\n').filter((line) => line.trim() !== '');
+    const headers = parseCSVLine(lines[0]);
+
+    return lines.slice(1).map((line) => {
+      const values = parseCSVLine(line);
+      const row: CSVRow = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index] || '';
+      });
+      return row;
+    });
+  };
+
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
   useEffect(() => {
     if (id) {
       let ooConfig: any;
@@ -76,7 +119,11 @@ export function DocumentView() {
       DocumentsService.getDocumentById(id, currentSiteId).then(
         (response: IDocument) => {
           setDocument(response);
-          setDocumentExtension(response.path.substring(response.path.lastIndexOf('.') + 1).toLowerCase());
+          setDocumentExtension(
+            response.path
+              .substring(response.path.lastIndexOf('.') + 1)
+              .toLowerCase()
+          );
           dispatch(setCurrentDocumentPath(response.path));
           if (
             formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
@@ -119,7 +166,29 @@ export function DocumentView() {
             });
           } else if ((response as IDocument).deepLinkPath.length) {
             setDocumentContent((response as IDocument).deepLinkPath);
-          } else if (InlineViewableContentExtensions.indexOf(response.path.substring(response.path.lastIndexOf('.') + 1).toLowerCase()) > -1) {
+          } else if ((response as IDocument).contentType === 'text/csv') {
+            let viewVersionKey = '';
+            if (versionKey && versionKey.length) {
+              viewVersionKey = versionKey;
+            }
+            DocumentsService.getDocumentContent(
+              currentSiteId,
+              id,
+              viewVersionKey
+            ).then((contentResponse: any) => {
+              try {
+                setDocumentCsvContent(customParse(contentResponse.content));
+              } catch (error: any) {
+                setDocumentCsvContent([]);
+              }
+            });
+          } else if (
+            InlineViewableContentExtensions.indexOf(
+              response.path
+                .substring(response.path.lastIndexOf('.') + 1)
+                .toLowerCase()
+            ) > -1
+          ) {
             let viewVersionKey = '';
             if (versionKey && versionKey.length) {
               viewVersionKey = versionKey;
@@ -130,17 +199,18 @@ export function DocumentView() {
               viewVersionKey,
               true
             ).then((res: any) => {
-              fetch(res.contentUrl).then((response) => response.body)
+              fetch(res.contentUrl)
+                .then((response) => response.body)
                 .then((body: any) => {
                   const reader = body.getReader();
-                  reader.read().then(({value}: any) => {
+                  reader.read().then(({ value }: any) => {
                     if (value) {
-                      setDocumentContent(new TextDecoder().decode(value))
+                      setDocumentContent(new TextDecoder().decode(value));
                     } else {
-                      setDocumentContent("")
+                      setDocumentContent('');
                     }
-                  })
-                })
+                  });
+                });
             });
           } else {
             let viewVersionKey = '';
@@ -212,7 +282,8 @@ export function DocumentView() {
   const [ooConfig, setOOConfig]: [any | null, any] = useState(null);
   const [documentContent, setDocumentContent]: [string | null, any] =
     useState('');
-  const [documentExtension, setDocumentExtension] = useState<string>('')
+  const [documentCsvContent, setDocumentCsvContent] = useState<CSVRow[]>([]);
+  const [documentExtension, setDocumentExtension] = useState<string>('');
 
   const DocumentViewer = () => {
     //return (<></>)
@@ -221,9 +292,9 @@ export function DocumentView() {
       <div className="w-full h-full">
         {document &&
           (InlineViewableContentTypes.indexOf(
-              (document as IDocument).contentType
-            ) > -1 ||
-            (document as IDocument).deepLinkPath.length>0) && (
+            (document as IDocument).contentType
+          ) > -1 ||
+            (document as IDocument).deepLinkPath.length > 0) && (
             <>
               {documentContent && (
                 <iframe
@@ -235,15 +306,66 @@ export function DocumentView() {
             </>
           )}
 
+        {/*CSV Viewer (currently only for text/csv files) */}
+        {document &&
+          (document as IDocument).contentType === 'text/csv' &&
+          documentCsvContent !== undefined && (
+            <>
+              {documentCsvContent.length > 0 && (
+                <div className="mt-5 h-[calc(100vh-120px)] overflow-auto shadow-md sm:rounded-lg">
+                  <div className="inline-block min-w-full align-middle">
+                    <div className="overflow-hidden">
+                      <table className="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-700">
+                        <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
+                          <tr>
+                            {Object.keys(documentCsvContent[0]).map(
+                              (header, index) => (
+                                <th
+                                  key={index}
+                                  scope="col"
+                                  className="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
+                                >
+                                  {header}
+                                </th>
+                              )
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                          {documentCsvContent.map((row, rowIndex) => (
+                            <tr
+                              key={rowIndex}
+                              className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              {Object.values(row).map((cell, cellIndex) => (
+                                <td
+                                  key={cellIndex}
+                                  className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                >
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
         {/*Text File Editor (currently only for .md files) */}
         {document &&
           InlineViewableContentExtensions.indexOf(documentExtension) > -1 &&
-          documentContent!==undefined && (
-           <TextFileEditor
-             currentDocument={ document}
-             documentContent={documentContent}
-             extension={documentExtension}
-             siteId={currentSiteId}/>
+          documentContent !== undefined && (
+            <TextFileEditor
+              currentDocument={document}
+              documentContent={documentContent}
+              extension={documentExtension}
+              siteId={currentSiteId}
+            />
           )}
       </div>
     );
@@ -257,11 +379,11 @@ export function DocumentView() {
       {document && (
         <div className="flex flex-col lg:flex-row">
           <div className="-mt-3 h-92/100h flex-1 bg-white inline-block">
-            {documentContent!==undefined || ooConfig ? (
+            {documentContent !== undefined || ooConfig ? (
               <>
-                {documentContent!==undefined && (
+                {documentContent !== undefined && (
                   <div className="w-full h-full">
-                    <DocumentViewer/>
+                    <DocumentViewer />
                   </div>
                 )}
                 {ooConfig && (
@@ -274,7 +396,7 @@ export function DocumentView() {
                 )}
               </>
             ) : (
-              <Spinner/>
+              <Spinner />
             )}
           </div>
         </div>
