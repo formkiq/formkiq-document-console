@@ -348,14 +348,14 @@ function DocumentListLine({
                 ) : (
                   <span>
                     {file.path.substring(file.path.lastIndexOf('/') + 1)
-                      .length > 60 ? (
+                      .length > 80 ? (
                       <span className="tracking-tighter text-clip overflow-hidden">
                         {file.path.substring(
                           file.path.lastIndexOf('/') + 1,
-                          file.path.lastIndexOf('/') + 60
+                          file.path.lastIndexOf('/') + 80
                         )}
                         {file.path.substring(file.path.lastIndexOf('/') + 1)
-                          .length > 60 && <span>...</span>}
+                          .length > 80 && <span>...</span>}
                       </span>
                     ) : (
                       <span>
