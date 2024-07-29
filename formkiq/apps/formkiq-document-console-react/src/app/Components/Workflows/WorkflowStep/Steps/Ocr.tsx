@@ -89,13 +89,7 @@ function Ocr({
         description="OCR Parsing strategy to use"
         onChange={(value: any) => onChange(value, 'ocrParseTypes')}
         selectedValues={
-          isEditing
-            ? (typeof newStep?.parameters?.ocrParseTypes === 'string'
-              ? [newStep?.parameters?.ocrParseTypes]
-              : newStep?.parameters?.ocrParseTypes || [] )
-            : (typeof data.parameters?.ocrParseTypes === 'string'
-              ? [data.parameters?.ocrParseTypes]
-              : data.parameters?.ocrParseTypes || [] )
+          isEditing ? newStep?.parameters?.ocrParseTypes : data.parameters?.ocrParseTypes
         }
         isEditing={isEditing}
       />

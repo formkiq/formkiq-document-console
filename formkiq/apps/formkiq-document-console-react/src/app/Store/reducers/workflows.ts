@@ -180,10 +180,16 @@ export const updateWorkflowSteps = createAsyncThunk(
             })
           );
         } else {
-          const errors = response.errors
-            .map((error: any) => error.error)
-            .join('\n');
-          thunkAPI.dispatch(openNotificationDialog({ dialogTitle: errors }));
+          if (response?.errors){
+            const errors = response.errors
+              .map((error: any) => error.error)
+              .join('\n');
+            thunkAPI.dispatch(openNotificationDialog({ dialogTitle: errors }));
+          } else {
+            thunkAPI.dispatch(
+              openNotificationDialog({dialogTitle: "Error saving workflow"})
+            );
+          }
         }
         thunkAPI.dispatch(setWorkflow(newWorkflow));
       }

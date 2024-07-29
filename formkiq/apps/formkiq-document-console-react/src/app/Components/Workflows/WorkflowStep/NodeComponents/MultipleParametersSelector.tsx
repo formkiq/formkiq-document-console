@@ -14,13 +14,13 @@ const MultipleParametersSelector = ({
     // handle select parameters
   const handleSelectStepParameter = (names: string[]) => {
     if (!onChange) return;
-    onChange(names)
+    onChange(names.join(", "))
   };
 
 
   const parameterValue = () => {
-    if (selectedValues&&selectedValues.length > 0) {
-      return selectedValues.map((value:string) => options[value]).join(', ');
+    if (selectedValues&&selectedValues!=='') {
+      return selectedValues;
     } else {
       return 'Select ...';
     }
@@ -39,7 +39,7 @@ const MultipleParametersSelector = ({
         {description}:
       </div>
       <Listbox
-        value={selectedValues}
+        value={selectedValues?selectedValues.split(", "):[]}
         onChange={(value: string[]) =>
           handleSelectStepParameter(value)
         }
@@ -97,7 +97,7 @@ const MultipleParametersSelector = ({
         </Listbox.Options>
       </Listbox>
     </> : <DisplayValue description={description}
-                        value={selectedValues.length > 0 ? selectedValues.map((value:string) => options[value]).join(', ') : "-"}/>
+                        value={selectedValues ? selectedValues : "-"}/>
     }
     </>
   );
