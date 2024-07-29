@@ -25,6 +25,7 @@ import Antivirus from "./Steps/Antivirus";
 import Queue from './Steps/Queue';
 import {NodeNameSelector} from "./NodeComponents/NodeNameSelector";
 import Publish from "./Steps/Publish";
+import IntelligentDocumentProcessing from "./Steps/IntelligentDocumentProcessing";
 import ButtonPrimary from "../../Generic/Buttons/ButtonPrimary";
 
 
@@ -153,6 +154,10 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
           <Publish isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
                    readOnly={workflow.inUse}/>
         )}
+        {data?.label === 'IDP' && (
+          <IntelligentDocumentProcessing isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
+                   readOnly={workflow.inUse}/>
+        )}
       </div>
     </>
   );
@@ -232,7 +237,7 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
         } hover:shadow`}
       >
         <div className="mb-2">Step Editor</div>
-        {!newStep?.name && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={undefined}/>}
+        {!newStep?.name && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} />}
 
         {newStep?.name === 'DOCUMENTTAGGING' && (
           <DocumentTagging newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
@@ -257,6 +262,9 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
         )}
         {newStep?.name === 'PUBLISH' && (
           <Publish newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
+        )}
+        {newStep?.name === 'IDP' && (
+          <IntelligentDocumentProcessing newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
 
         <div className="flex flex-row justify-end w-full gap-2">

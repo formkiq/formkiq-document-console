@@ -25,8 +25,8 @@ function DocumentTagging({newStep, setNewStep, isEditing, data, edges, id, addCr
 
   return (
     <>
-      {!isEditing && <NodeTitle icon={<IntelligentClassification/>} title="Intelligent Document Classification"/>}
       {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep}/>}
+      {!isEditing && <NodeTitle icon={<IntelligentClassification/>} title="Intelligent Document Tagging"/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
       <ParametersSelector options={engineSelectorOptions}
                           description='Tagging Engine to use'
