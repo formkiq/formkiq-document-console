@@ -60,7 +60,6 @@ function IntelligentDocumentProcessing({
     });
   }
   useEffect(() => {
-    console.log(siteId)
     fetchMappings();
   }, []);
   return (
