@@ -13,6 +13,12 @@ export function getFileIcon(path: string, deepLinkPath: string) {
       fileIcon = '/assets/img/svg/icon-google-slides.svg';
     } else if (deepLinkPath.indexOf('docs.google.com/forms') > -1) {
       fileIcon = '/assets/img/svg/icon-google-forms.svg';
+    } else if (deepLinkPath.indexOf('https://forms.office.com') > -1) {
+      fileIcon = '/assets/img/svg/icon-microsoft-forms.svg';
+    } else if (deepLinkPath.indexOf('https://1drv.ms/') > -1) {
+      fileIcon = '/assets/img/svg/icon-microsoft-onedrive.svg';
+    } else {
+      fileIcon = '/assets/img/svg/icon-deeplink.svg';
     }
   }
   if (!fileIcon.length) {
@@ -31,6 +37,10 @@ export function getFileIcon(path: string, deepLinkPath: string) {
           break;
         case 'svg':
           fileIcon = '/assets/img/svg/icon-svg.svg';
+          break;
+        case 'tif':
+        case 'tiff':
+          fileIcon = '/assets/img/svg/icon-tiff.svg';
           break;
         case 'webm':
           fileIcon = '/assets/img/svg/icon-webm.svg';
