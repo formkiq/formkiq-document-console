@@ -5,15 +5,6 @@ import {DefaultSourceHandle} from "../../Handles/handles";
 import NodeTitle from "../NodeComponents/NodeTitle";
 import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
 
-const stepInfo = {
-  title: 'Publish',
-  textInputParameters: {},
-  numberInputParameters: {},
-  selectParameters: {},
-  checkboxParameters: {},
-  decisions: ['APPROVE'],
-}
-
 function Publish({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange, readOnly}: any) {
 
   const MAX_CONNECTIONS = 1;
@@ -28,7 +19,7 @@ function Publish({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onC
   }, [connectionsNumber, MAX_CONNECTIONS]);
   return (
     <>
-      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}
+      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep}/>}
       {!isEditing &&
         <NodeTitle icon={<PublishIcon/>} title="Publish"/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}

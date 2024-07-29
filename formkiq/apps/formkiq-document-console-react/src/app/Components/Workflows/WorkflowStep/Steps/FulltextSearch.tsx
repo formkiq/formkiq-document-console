@@ -6,22 +6,6 @@ import { NodeNameSelector } from '../NodeComponents/NodeNameSelector';
 import NodeTitle from '../NodeComponents/NodeTitle';
 import NumberInput from '../NodeComponents/NumberInput';
 
-const stepInfo = {
-  title: 'Fulltext Search',
-  textInputParameters: {},
-  numberInputParameters: {
-    charcterMax: {
-      title: 'Maximum number of characters to add to Fulltext destination',
-      editDescription: '"-1" for no limit',
-      defaultValue: -1,
-      min: -1,
-    },
-  },
-  selectParameters: {},
-  checkboxParameters: {},
-  decisions: ['APPROVE'],
-};
-
 function FulltextSearch({
   newStep,
   setNewStep,
@@ -50,7 +34,6 @@ function FulltextSearch({
         <NodeNameSelector
           newStep={newStep}
           setNewStep={setNewStep}
-          info={stepInfo}
         />
       )}
       {!isEditing && <NodeTitle icon={<Search />} title="Fulltext Search" />}

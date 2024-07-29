@@ -1,4 +1,3 @@
-import {parametersDoubleInnerType, Step, WorkflowStepActionType} from "../../../../helpers/types/workflows";
 import {Listbox} from "@headlessui/react";
 import {ChevronRight} from "../../../Icons/icons";
 import DisplayValue from "./DisplayValue";

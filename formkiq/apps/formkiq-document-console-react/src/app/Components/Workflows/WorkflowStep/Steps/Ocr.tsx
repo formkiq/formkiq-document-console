@@ -10,43 +10,6 @@ import NodeTitle from '../NodeComponents/NodeTitle';
 import NumberInput from '../NodeComponents/NumberInput';
 import ParametersSelector from '../NodeComponents/ParametersSelector';
 
-const stepInfo = {
-  title: 'Optical Character Recognition (OCR)',
-  textInputParameters: {},
-  numberInputParameters: {
-    ocrNumberOfPages: {
-      title: 'Number of Pages to Process (from start)',
-      editDescription: '"-1" for no limit',
-      defaultValue: -1,
-      min: -1,
-    },
-  },
-  selectParameters: {
-    ocrParseTypes: {
-      description: 'OCR Parsing strategy to use',
-      options: {
-        TEXT: 'Text Recognition',
-        FORMS: 'Form Recognition',
-        TABLES: 'Table Recognition',
-      },
-      defaultValue: 'TEXT',
-    },
-    ocrEngine: {
-      description: 'OCR Engine to use',
-      options: {
-        TESSERACT: 'Tesseract',
-        TEXTRACT: 'Textract',
-      },
-    },
-  },
-  checkboxParameters: {
-    addPdfDetectedCharactersAsText: {
-      title: 'PDF Documents convert images to text',
-    },
-  },
-  decisions: ['APPROVE'],
-};
-
 function Ocr({
   newStep,
   setNewStep,
@@ -98,7 +61,6 @@ function Ocr({
         <NodeNameSelector
           newStep={newStep}
           setNewStep={setNewStep}
-          info={stepInfo}
         />
       )}
       {!isEditing && (
