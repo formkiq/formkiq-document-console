@@ -8,17 +8,6 @@ import { NodeNameSelector } from '../NodeComponents/NodeNameSelector';
 import NodeTitle from '../NodeComponents/NodeTitle';
 import QueueSelector from '../NodeComponents/QueueSelector';
 
-const stepInfo = {
-  title: 'Review / Approval Queue',
-  textInputParameters: {},
-  numberInputParameters: {},
-  selectParameters: {},
-  checkboxParameters: {},
-  decisions: ['APPROVE', 'REJECT'],
-  queue: true,
-  approvalGroups: true,
-};
-
 function Queue({
   newStep,
   setNewStep,
@@ -73,7 +62,6 @@ function Queue({
         <NodeNameSelector
           newStep={newStep}
           setNewStep={setNewStep}
-          info={stepInfo}
         />
       )}
       {!isEditing && (

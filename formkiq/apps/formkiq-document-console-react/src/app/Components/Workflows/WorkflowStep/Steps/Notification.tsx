@@ -7,29 +7,6 @@ import ParametersSelector from "../NodeComponents/ParametersSelector";
 import TextInput from "../NodeComponents/TextInput";
 import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
 
-const stepInfo = {
-  title: 'Send Notification (requires "FROM" address in SES)',
-  textInputParameters: {
-    notificationEmail: {title: 'Notification Email'},
-    notificationToCc: {title: 'Notification Carbon Copy'},
-    notificationToBcc: {title: 'Notification Blind Carbon Copy'},
-    notificationSubject: {title: 'Notification Subject'},
-    notificationText: {title: 'Notification Text'},
-    notificationHtml: {title: 'Notification HTML'},
-  },
-  numberInputParameters: {},
-  selectParameters: {
-    notificationType: {
-      description: 'Type of Notification',
-      options: {
-        email: 'Email',
-      },
-    },
-  },
-  checkboxParameters: {},
-  decisions: ['APPROVE'],
-}
-
 function Notification({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange, readOnly}: any) {
   const notificationTypeSelectorOptions = {
     email: 'Email',
@@ -48,7 +25,7 @@ function Notification({newStep, setNewStep, isEditing, data, edges, id, addCreat
 
   return (
     <>
-      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}
+      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep}/>}
       {!isEditing &&
         <NodeTitle icon={<EnvelopeClose />} title='Send Notification (requires "FROM" address in SES)'/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}

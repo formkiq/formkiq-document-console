@@ -11,20 +11,19 @@ import {ConfigState} from "../../../../Store/reducers/config";
 export const NodeNameSelector = ({
                                    newStep,
                                    setNewStep,
-                                   info,
                                  }: {
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
-  info: any;
 }) => {
   const {formkiqVersion} = useSelector(ConfigState);
   const parametersMap: Record<string, string> = {
-    DOCUMENTTAGGING: 'Intelligent Document Classification',
+    DOCUMENTTAGGING: 'Intelligent Document Tagging',
     NOTIFICATION: 'Send Notification (requires "FROM" address in SES)',
     WEBHOOK: 'Webhook',
     OCR: 'Optical Character Recognition (OCR)',
     QUEUE: 'Review / Approval Queue',
     PUBLISH: 'Publish',
+    IDP: 'Intelligent Document Processing',
   };
 
   if (formkiqVersion.modules.indexOf('typesense') > -1 || formkiqVersion.modules.indexOf('opensearch') > -1) {
@@ -53,68 +52,7 @@ export const NodeNameSelector = ({
         type: type,
       };
     }
-    const stepParameters = info;
-    if (!stepParameters) {
       setNewStep(step);
-      return;
-    }
-    for (const selectParameter in stepParameters.selectParameters) {
-      step.parameters = {
-        ...step.parameters,
-        [selectParameter]: Object.keys(
-          stepParameters.selectParameters[selectParameter].options
-        )[0],
-      };
-    }
-
-    for (const textInputParameter in stepParameters.textInputParameters) {
-      if (stepParameters.textInputParameters[textInputParameter].defaultValue) {
-        step.parameters = {
-          ...step.parameters,
-          [textInputParameter]:
-          stepParameters.textInputParameters[textInputParameter].defaultValue,
-        };
-      } else {
-        step.parameters = {
-          ...step.parameters,
-          [textInputParameter]: '',
-        };
-      }
-    }
-    for (const numberInputParameter in stepParameters.numberInputParameters) {
-      if (
-        stepParameters.numberInputParameters[numberInputParameter].defaultValue
-      ) {
-        step.parameters = {
-          ...step.parameters,
-          [numberInputParameter]:
-          stepParameters.numberInputParameters[numberInputParameter]
-            .defaultValue,
-        };
-      } else {
-        step.parameters = {
-          ...step.parameters,
-          [numberInputParameter]: 0,
-        };
-      }
-    }
-
-    for (const checkboxParameter in stepParameters.checkboxParameters) {
-      if (stepParameters.checkboxParameters[checkboxParameter].defaultValue) {
-        step.parameters = {
-          ...step.parameters,
-          [checkboxParameter]:
-          stepParameters.checkboxParameters[checkboxParameter].defaultValue,
-        };
-      } else {
-        step.parameters = {
-          ...step.parameters,
-          [checkboxParameter]: false,
-        };
-      }
-    }
-
-    setNewStep(step);
   };
 
   const stepsNames: { [key: string]: string }[] = Object.keys(

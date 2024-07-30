@@ -1,64 +1,28 @@
-import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { Position } from 'reactflow';
-import { ConfigState } from '../../../../Store/reducers/config';
-import { Documents, Plus } from '../../../Icons/icons';
-import { DefaultSourceHandle } from '../../Handles/handles';
+import {useMemo} from 'react';
+import {useSelector} from 'react-redux';
+import {Position} from 'reactflow';
+import {ConfigState} from '../../../../Store/reducers/config';
+import {Documents, Plus} from '../../../Icons/icons';
+import {DefaultSourceHandle} from '../../Handles/handles';
 import Checkbox from '../NodeComponents/Checkbox';
-import { NodeNameSelector } from '../NodeComponents/NodeNameSelector';
+import {NodeNameSelector} from '../NodeComponents/NodeNameSelector';
 import NodeTitle from '../NodeComponents/NodeTitle';
 import NumberInput from '../NodeComponents/NumberInput';
 import ParametersSelector from '../NodeComponents/ParametersSelector';
-
-const stepInfo = {
-  title: 'Optical Character Recognition (OCR)',
-  textInputParameters: {},
-  numberInputParameters: {
-    ocrNumberOfPages: {
-      title: 'Number of Pages to Process (from start)',
-      editDescription: '"-1" for no limit',
-      defaultValue: -1,
-      min: -1,
-    },
-  },
-  selectParameters: {
-    ocrParseTypes: {
-      description: 'OCR Parsing strategy to use',
-      options: {
-        TEXT: 'Text Recognition',
-        FORMS: 'Form Recognition',
-        TABLES: 'Table Recognition',
-      },
-      defaultValue: 'TEXT',
-    },
-    ocrEngine: {
-      description: 'OCR Engine to use',
-      options: {
-        TESSERACT: 'Tesseract',
-        TEXTRACT: 'Textract',
-      },
-    },
-  },
-  checkboxParameters: {
-    addPdfDetectedCharactersAsText: {
-      title: 'PDF Documents convert images to text',
-    },
-  },
-  decisions: ['APPROVE'],
-};
+import MultipleParametersSelector from "../NodeComponents/MultipleParametersSelector";
 
 function Ocr({
-  newStep,
-  setNewStep,
-  isEditing,
-  data,
-  edges,
-  id,
-  addCreatorNode,
-  onChange,
-  readOnly
-}: any) {
-  const { formkiqVersion } = useSelector(ConfigState);
+               newStep,
+               setNewStep,
+               isEditing,
+               data,
+               edges,
+               id,
+               addCreatorNode,
+               onChange,
+               readOnly
+             }: any) {
+  const {formkiqVersion} = useSelector(ConfigState);
 
   let ocrTypesSelectorOptions: any = {
     TEXT: 'Text Recognition',
@@ -88,7 +52,7 @@ function Ocr({
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
-    if(readOnly) return false;
+    if (readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
 
@@ -98,27 +62,15 @@ function Ocr({
         <NodeNameSelector
           newStep={newStep}
           setNewStep={setNewStep}
-          info={stepInfo}
         />
       )}
       {!isEditing && (
         <NodeTitle
-          icon={<Documents />}
+          icon={<Documents/>}
           title="Optical Character Recognition (OCR)"
         />
       )}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
-      <ParametersSelector
-        options={ocrTypesSelectorOptions}
-        description="OCR Parsing strategy to use"
-        onChange={(value: any) => onChange(value, 'ocrParseTypes')}
-        selectedValue={
-          isEditing
-            ? newStep?.parameters?.ocrParseTypes
-            : data.parameters?.ocrParseTypes
-        }
-        isEditing={isEditing}
-      />
 
       <ParametersSelector
         options={ocrEngineSelectorOptions}
@@ -128,6 +80,16 @@ function Ocr({
           isEditing
             ? newStep?.parameters?.ocrEngine
             : data.parameters?.ocrEngine
+        }
+        isEditing={isEditing}
+      />
+
+      <MultipleParametersSelector
+        options={ocrTypesSelectorOptions}
+        description="OCR Parsing strategy to use"
+        onChange={(value: any) => onChange(value, 'ocrParseTypes')}
+        selectedValues={
+          isEditing ? newStep?.parameters?.ocrParseTypes : data.parameters?.ocrParseTypes
         }
         isEditing={isEditing}
       />
@@ -172,10 +134,10 @@ function Ocr({
       {isHandleConnectable && (
         <div
           className="w-6 mt-6 rounded-full bg-green-400 text-white hover:border-green-700 p-1  cursor-pointer absolute right-[-36px] border-2 border-white hover:text-green-700 nodrag"
-          style={{ top: 'calc(50% - 12px)' }}
+          style={{top: 'calc(50% - 12px)'}}
           onClick={addCreatorNode}
         >
-          <Plus />
+          <Plus/>
         </div>
       )}
     </>

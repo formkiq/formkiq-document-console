@@ -3,24 +3,24 @@ import {ChevronRight} from "../../../Icons/icons";
 import DisplayValue from "./DisplayValue";
 import {useEffect} from "react";
 
-const ParametersSelector = ({
-                              options,
-                              description,
-                              onChange,
-                              selectedValue,
-                              isEditing
-                            }: any
+const MultipleParametersSelector = ({
+                                      options,
+                                      description,
+                                      onChange,
+                                      selectedValues,
+                                      isEditing
+                                    }: any
 ) => {
-
-  const handleSelectStepParameter = (name: string) => {
-    if(!onChange) return;
-    onChange(name)
+    // handle select parameters
+  const handleSelectStepParameter = (names: string[]) => {
+    if (!onChange) return;
+    onChange(names.join(", "))
   };
 
 
   const parameterValue = () => {
-    if (selectedValue && options[selectedValue]) {
-      return options[selectedValue] as string;
+    if (selectedValues&&selectedValues!=='') {
+      return selectedValues;
     } else {
       return 'Select ...';
     }
@@ -29,7 +29,7 @@ const ParametersSelector = ({
   // if only one option, select it by default
   useEffect(() => {
     if (Object.keys(options).length === 1 && isEditing) {
-      handleSelectStepParameter(Object.keys(options)[0]);
+      handleSelectStepParameter([Object.keys(options)[0]]);
     }
   }, [])
 
@@ -39,10 +39,11 @@ const ParametersSelector = ({
         {description}:
       </div>
       <Listbox
-        value=""
-        onChange={(value: string) =>
+        value={selectedValues?selectedValues.split(", "):[]}
+        onChange={(value: string[]) =>
           handleSelectStepParameter(value)
         }
+        multiple
       >
         <Listbox.Button
           className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag nowheel">
@@ -68,17 +69,38 @@ const ParametersSelector = ({
                 }`
               }
             >
-              {
-                options[optionKey]
-              }
+              {({ active, selected }) => (
+                <div className="relative w-full h-full flex items-center">
+                  <input
+                    type="checkbox"
+                    name="status"
+                    value={optionKey}
+                    checked={selected}
+                    readOnly
+                    className="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0"
+                  />
+                  <label className="flex items-center justify-between gap-2 w-full">
+                    <span className="block truncate">{options[optionKey]}</span>
+                    <div className="w-4">
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        readOnly
+                        className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"
+                      />
+                    </div>
+                  </label>
+                </div>
+              )}
             </Listbox.Option>
           ))}
         </Listbox.Options>
       </Listbox>
-    </> : <DisplayValue description={description} value={options[selectedValue] ? options[selectedValue] : "-"}/>
+    </> : <DisplayValue description={description}
+                        value={selectedValues ? selectedValues : "-"}/>
     }
     </>
   );
 };
 
-export default ParametersSelector;
+export default MultipleParametersSelector;

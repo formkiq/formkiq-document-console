@@ -2177,4 +2177,17 @@ export class DocumentsService {
       inline,
     });
   }
+
+  @formkiqAPIHandler
+  public static async getMappings(
+      siteId: string,
+      limit = 20,
+      next = null,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getMappings({
+      siteId,
+      limit,
+      next,
+    });
+  }
 }
