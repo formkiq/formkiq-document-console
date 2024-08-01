@@ -105,7 +105,6 @@ const nodesToWorkflow = (
   }
 
   for (const node of nodes) {
-    console.log(node, 'node');
     if (node.data.label === '') {
       continue;
     }
@@ -145,7 +144,6 @@ const nodesToWorkflow = (
   newWorkflow.steps = Object.keys(stepsMap).map(
     (key) => stepsMap[key] as WorkflowStep
   );
-  console.log(newWorkflow, 'newWorkflow');
   return newWorkflow;
 };
 
@@ -180,14 +178,14 @@ export const updateWorkflowSteps = createAsyncThunk(
             })
           );
         } else {
-          if (response?.errors){
+          if (response?.errors) {
             const errors = response.errors
               .map((error: any) => error.error)
               .join('\n');
             thunkAPI.dispatch(openNotificationDialog({ dialogTitle: errors }));
           } else {
             thunkAPI.dispatch(
-              openNotificationDialog({dialogTitle: "Error saving workflow"})
+              openNotificationDialog({ dialogTitle: 'Error saving workflow' })
             );
           }
         }

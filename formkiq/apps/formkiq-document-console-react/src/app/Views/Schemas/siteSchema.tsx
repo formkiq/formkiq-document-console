@@ -50,9 +50,6 @@ function SiteSchema() {
     }
     dispatch(fetchSiteSchema({ siteId }));
   }, []);
-  useEffect(() => {
-    console.log('siteSchema', siteSchema);
-  }, [siteSchema]);
 
   // JSON editor
   const [content, setContent] = useState({
