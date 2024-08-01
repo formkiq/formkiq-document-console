@@ -1,6 +1,6 @@
 import {DocumentAttribute} from "../../../helpers/types/attributes";
 import {Check, Close, Pencil, Plus, Trash} from "../../Icons/icons";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
 import ButtonGhost from "../../Generic/Buttons/ButtonGhost";
 import {useAppDispatch} from "../../../Store/store";
@@ -22,13 +22,17 @@ function AttributesList({
   const [editValue, setEditValue] = useState<any[]>([]);
   const [newValue, setNewValue] = useState<string | number | boolean>('');
   const [isAddingValue, setIsAddingValue] = useState<boolean>(false);
+  const [editingItems, setEditingItems] = useState<any[]>([]);
 
   function handleEditAttribute(attribute: DocumentAttribute) {
     setEditAttributeKey(attribute.key);
     if (attribute?.stringValue) {
-      setEditValue([]);
-      setNewValue(attribute.stringValue);
-      setIsAddingValue(true);
+      setNewValue("");
+      setEditValue([attribute.stringValue]);
+      setEditingItems([{
+        oldValue: attribute.stringValue,
+        newValue: attribute.stringValue
+      }])
     } else if (attribute?.stringValues) {
       setEditValue(attribute.stringValues);
     } else if (attribute.numberValue !== undefined) {
@@ -43,13 +47,16 @@ function AttributesList({
     }
   }
 
-  function deleteValue(event: any, value: string | number) {
+  function deleteValue(value: string | number) {
     setEditValue(editValue.filter((item: string | number) => item !== value))
   }
 
   function reset() {
     setEditAttributeKey(null)
     setEditValue([])
+    setNewValue('')
+    setIsAddingValue(false)
+    setEditingItems([])
   }
 
   function saveEditAttribute(attribute: DocumentAttribute) {
@@ -58,41 +65,103 @@ function AttributesList({
         key: attribute.key,
       }
     }
-    if (attribute?.stringValue) {
-        if (editValue.length === 1) {
-          newAttributeValue.attribute.stringValue = editValue[0].toString()
-        } else if (editValue.length > 1) {
-          newAttributeValue.attribute.stringValues = editValue
+
+    const onSavingStringAttribute = () => {
+      // Check if newValue exists and is not empty
+      if (newValue && newValue !== "") {
+        // If there are editing items
+        if (editingItems.length > 0) {
+          const updatedValues = editValue.map((item) => {
+            const editingItem = editingItems.find(ei => ei.oldValue === item);
+            return editingItem ? editingItem.newValue : item;
+          });
+          newAttributeValue.attribute.stringValues = [...updatedValues, newValue];
+        } else {
+          // If there are no editing items
+          newAttributeValue.attribute.stringValues = editValue.length > 0 ? [...editValue, newValue] : [newValue];
+        }
+      } else if (editingItems.length > 0) {
+        // If newValue is empty but there are editing items
+        const updatedValues = editValue.map((item) => {
+          const editingItem = editingItems.find(ei => ei.oldValue === item);
+          return editingItem ? editingItem.newValue : item;
+        });
+        newAttributeValue.attribute.stringValues = updatedValues;
+      } else {
+        // If newValue is empty and there are no editing items
+        if (editValue.length > 0) {
+          newAttributeValue.attribute.stringValues = editValue;
         } else {
           dispatch(openNotificationDialog({
             dialogTitle: "Error updating attribute. At least one value is required for the attribute."
-          }))
-          return;
+          }));
+          return false;
         }
+      }
+      return true;
+    };
+
+    // const onSavingStringAttribute = () => { // Function to handle saving string attributes. Returns false if there's no attributes.
+    //   if (newValue && newValue !== "" && editingItems.length > 0) {
+    //     const updatedValues = editValue.map((item) => {
+    //       const editingItem = editingItems.find((editingItem) => editingItem.oldValue === item)
+    //       if (editingItem) {
+    //         return editingItem.newValue
+    //       }
+    //       return item
+    //     })
+    //     newAttributeValue.attribute.stringValues = [...updatedValues, newValue]
+    //   } else if (newValue && newValue !== "" && editingItems.length === 0) {
+    //     if (editValue.length === 1) {
+    //       newAttributeValue.attribute.stringValues = [editValue[0].toString(), newValue]
+    //     } else if (editValue.length > 1) {
+    //       newAttributeValue.attribute.stringValues = [...editValue, newValue]
+    //     } else {
+    //       newAttributeValue.attribute.stringValue = newValue.toString()
+    //     }
+    //   } else if (!newValue && newValue === "" && editingItems.length > 0) {
+    //     const updatedValues = editValue.map((item) => {
+    //       const editingItem = editingItems.find((editingItem) => editingItem.oldValue === item)
+    //       if (editingItem) {
+    //         return editingItem.newValue
+    //       }
+    //       return item
+    //     })
+    //     if (updatedValues.length === 1) {
+    //       newAttributeValue.attribute.stringValue = updatedValues[0].toString()
+    //     } else if (updatedValues.length > 1) {
+    //       newAttributeValue.attribute.stringValues = updatedValues
+    //     }
+    //   } else {
+    //     if (editValue.length === 1) {
+    //       newAttributeValue.attribute.stringValue = editValue[0].toString()
+    //     } else if (editValue.length > 1) {
+    //       newAttributeValue.attribute.stringValues = editValue
+    //     } else {
+    //       dispatch(openNotificationDialog({
+    //         dialogTitle: "Error updating attribute. At least one value is required for the attribute."
+    //       }))
+    //       return false;
+    //     }
+    //   }
+    //   return true;
+    // }
+
+
+    if (attribute?.stringValue || attribute?.stringValues) {
+      if (!onSavingStringAttribute()) return
     }
-    if (attribute?.stringValues) {
-      if (editValue.length > 1) {
-        newAttributeValue.attribute.stringValues = editValue
-      } else if (editValue.length === 1) {
-        newAttributeValue.attribute.stringValue = editValue[0].toString()
+    if (attribute?.numberValue !== undefined) {
+      if (editValue.length === 1) {
+        newAttributeValue.attribute.numberValue = editValue[0]
+      } else if (editValue.length > 1) {
+        newAttributeValue.attribute.numberValues = editValue
       } else {
         dispatch(openNotificationDialog({
           dialogTitle: "Error updating attribute. At least one value is required for the attribute."
         }))
         return;
       }
-    }
-    if (attribute?.numberValue !== undefined) {
-        if (editValue.length === 1) {
-          newAttributeValue.attribute.numberValue = editValue[0]
-        } else if (editValue.length > 1) {
-          newAttributeValue.attribute.numberValues = editValue
-        } else {
-          dispatch(openNotificationDialog({
-            dialogTitle: "Error updating attribute. At least one value is required for the attribute."
-          }))
-          return;
-        }
     }
     if (attribute?.numberValues) {
       if (editValue.length > 1) {
@@ -123,41 +192,88 @@ function AttributesList({
     )
   }
 
-  const ConfirmAddNewValueButton = () => {
+  const ConfirmButton = ({itemType = 'new', updatedItem = null}: {
+    itemType: 'new' | 'edit',
+    updatedItem?: any
+  }) => {
     function handleAddValue() {
       if (newValue === '') return;
-      if (editValue.includes(newValue)){
-          dispatch(openNotificationDialog({
-              dialogTitle: "Error adding new value. Value already exists."
-          }))
-          return;
-      };
+      if (editValue.includes(newValue)) {
+        dispatch(openNotificationDialog({
+          dialogTitle: "Error adding new value. Value already exists."
+        }))
+        return;
+      }
       setEditValue([...editValue, newValue]);
       setNewValue('');
       setIsAddingValue(false);
     }
+
+    function handleUpdateValue() {
+      if (!updatedItem) return;
+      if (editValue.includes(updatedItem.newValue)) {
+        // check if it is not the same item
+        if (updatedItem.newValue !== updatedItem.oldValue) {
+          dispatch(openNotificationDialog({
+            dialogTitle: "Error updating value. Value already exists."
+          }))
+          return;
+        }
+      }
+      // replace the old value with the new value
+      const newEditValue = [...editValue]
+      const index = newEditValue.indexOf(updatedItem.oldValue);
+      newEditValue.splice(index, 1, updatedItem.newValue);
+      setEditValue(newEditValue);
+      setEditingItems(editingItems.filter(item => item.oldValue !== updatedItem.oldValue));
+    }
+
     return (
       <button title="Confirm" type="button"
               className="text-green-500 border-green-500 w-6 h-6 flex items-center justify-center rounded-full p-0.5 border"
-              onClick={handleAddValue}>
+              onClick={itemType === 'new' ? handleAddValue : handleUpdateValue}>
         <Check/>
       </button>
     )
   }
 
-  const CancelAddNewValueButton = () => {
+  const CancelAddNewValueButton = ({itemType = 'new', updatedItem = null}: {
+    itemType: 'new' | 'edit',
+    updatedItem?: any
+  }) => {
     const cancelAddValue = () => {
       setNewValue('')
       setIsAddingValue(false)
     }
+    const cancelEditValue = () => {
+      setEditingItems(editingItems.filter(item => item.oldValue !== updatedItem.oldValue));
+    }
     return (
-      <button title="Cancel" type="button" className="text-red-500 border-red-500 w-6 h-6 flex items-center justify-center rounded-full p-1 border"
-              onClick={cancelAddValue}>
+      <button title="Cancel" type="button"
+              className="text-red-500 border-red-500 w-6 h-6 flex items-center justify-center rounded-full p-1 border"
+              onClick={itemType === 'new' ? cancelAddValue : cancelEditValue}>
         <Close/>
       </button>
     )
   }
 
+  const onValueEdit = (value: string | number) => {
+    const newItem = {
+      oldValue: value,
+      newValue: value
+    }
+    setEditingItems((prev) => [...prev, newItem])
+  }
+
+  const onEditingExistingValue = (newValue: string | number, oldValue: string | number) => {
+    const newEditingItems = [...editingItems].map(item => {
+      if (item.oldValue === oldValue) {
+        return {...item, newValue};
+      }
+      return item;
+    });
+    setEditingItems(newEditingItems);
+  }
   return (
     <div>
       {attributes.length > 0 ? (
@@ -191,15 +307,38 @@ function AttributesList({
                   {editAttributeKey === attribute.key && (<>
                     <div className="flex flex-row justify-start flex-wrap gap-2 items-center">
                       {(attribute?.stringValue || attribute?.stringValues) &&
-                        editValue.map((value: string, index: number) => (
-                          <div key={"stringValue" + index}
-                               className="cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
-                            <span className="truncate">{value}</span>
-                            <button title="Remove Value" type="button" className="w-4 h-4 min-w-4 text-neutral-900"
-                                    onClick={(e) => deleteValue(e, value)}>
-                              <Close/>
-                            </button>
-                          </div>))}
+                        editValue.map((value: string, index: number) => {
+                          const editedItem = editingItems.find((item: { oldValue: string, newValue: string }) => item.oldValue === value)
+                          return (<div key={"stringValue" + index}>
+                            {editedItem ? (
+                              <div
+                                className="flex flex-row items-center justify-start flex-wrap gap-2 rounded-md bg-neutral-100 px-2 py-1.5">
+                                <input type="text" className='h-7 px-4 border-none text-sm rounded-md'
+                                       required placeholder="Value"
+                                       onChange={(e) => onEditingExistingValue(e.target.value, value)}
+                                       value={editedItem.newValue as string}/>
+                                <ConfirmButton itemType="edit" updatedItem={editedItem}/>
+                                <CancelAddNewValueButton itemType="edit" updatedItem={editedItem}/>
+                              </div>
+                            ) : (
+                              <div
+                                className="cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
+                                <span className="truncate">{value}</span>
+                                <button title="Remove Value" type="button"
+                                        className="w-4 h-4 min-w-4 text-neutral-900"
+                                        onClick={() => onValueEdit(value)}>
+                                  <Pencil/>
+                                </button>
+                                <button title="Remove Value" type="button"
+                                        className="w-4 h-4 min-w-4 text-neutral-900"
+                                        onClick={() => deleteValue(value)}>
+                                  <Close/>
+                                </button>
+                              </div>
+                            )}
+                          </div>)
+                        })
+                      }
 
                       {(attribute?.stringValues || attribute?.stringValue) &&
                         <div className="flex flex-row items-center justify-start flex-wrap gap-2">
@@ -208,8 +347,8 @@ function AttributesList({
                               <input type="text" className='h-7 px-4 border border-neutral-300 text-sm rounded-md'
                                      required placeholder="Value" onChange={(e) => setNewValue(e.target.value)}
                                      value={newValue as string}/>
-                              <ConfirmAddNewValueButton/>
-                              <CancelAddNewValueButton/>
+                              <ConfirmButton itemType='new'/>
+                              <CancelAddNewValueButton itemType='new'/>
                             </> : <>
                               <AddNewValueButton/>
                             </>}
@@ -221,7 +360,7 @@ function AttributesList({
                                className="cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
                             <span className="text-ellipsis overflow-hidden">{value}</span>
                             <button title="Remove Value" type="button" className="w-4 h-4 min-w-4 text-neutral-900"
-                                    onClick={(e) => deleteValue(e, value)}>
+                                    onClick={() => deleteValue(value)}>
                               <Close/>
                             </button>
                           </div>))}
@@ -234,8 +373,8 @@ function AttributesList({
                                      required placeholder="Value" onChange={(e) => setNewValue(e.target.value)}
                                      onKeyDown={(e) => ["e", "E", "+"].includes(e.key) && e.preventDefault()}
                                      value={newValue as number} step="any"/>
-                              <ConfirmAddNewValueButton/>
-                              <CancelAddNewValueButton/>
+                              <ConfirmButton itemType='new'/>
+                              <CancelAddNewValueButton itemType='new'/>
                             </> : <>
                               <AddNewValueButton/>
                             </>}
