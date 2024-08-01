@@ -1,4 +1,4 @@
-import EditTagsAndMetadataList from "./editTagsAndMetadataList";
+import EditTagsList from "./editTagsList";
 import {DocumentsService} from "../../../helpers/services/documentsService";
 import {openDialog} from "../../../Store/reducers/globalConfirmControls";
 import {useAppDispatch} from "../../../Store/store";
@@ -33,7 +33,7 @@ function TagsTab({allTags, setAlltags, onTagEdit, value, siteId, onDocumentDataC
     <>
       <div className="flex w-full mt-4">
         <div className="w-full mt-2 mx-2">
-          <EditTagsAndMetadataList
+          <EditTagsList
             tags={allTags}
             onEdit={onTagEdit}
             onDelete={onTagDelete}

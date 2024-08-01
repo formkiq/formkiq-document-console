@@ -8,7 +8,7 @@ test.beforeEach(async ({ LoginPage }) => {
 test('can navigate to the api keys page', async ({ page, ApiKeys }) => {
   await ApiKeys.openPage();
 
-  await page.waitForURL('/integrations/apiKeys');
+  await page.waitForURL('/admin/api-keys');
 });
 
 test('can add and delete a new api key', async ({ page, ApiKeys }) => {

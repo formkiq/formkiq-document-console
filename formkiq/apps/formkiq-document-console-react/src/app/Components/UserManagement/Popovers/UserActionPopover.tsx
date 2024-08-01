@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
-import { usePopper } from 'react-popper';
-import { ILine } from '../../../helpers/types/line';
+import {useEffect, useRef, useState} from 'react';
+import {usePopper} from 'react-popper';
+import {ILine} from '../../../helpers/types/line';
 import {
   Disable,
   VerticalDots,
   Enable,
   ResetPassword,
   Trash,
+  Group,
 } from '../../Icons/icons';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
@@ -27,20 +28,21 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
 }
 
 export default function UserActionsPopover({
-  value,
-  onDisableClick,
-  onEnableClick,
-  onDeleteClick,
-  onResetPasswordClick,
-  user,
-}: any) {
+                                             value,
+                                             onDisableClick,
+                                             onEnableClick,
+                                             onDeleteClick,
+                                             onResetPasswordClick,
+                                             onManageGroupsClick,
+                                             user,
+                                           }: any) {
   const line: ILine = value;
   const [visible, setVisibility] = useState(false);
   const [referenceRef, setReferenceRef] = useState(null);
   const [popperRef, setPopperRef] = useState(null);
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, setVisibility);
-  const { styles, attributes } = usePopper(referenceRef, popperRef, {
+  const {styles, attributes} = usePopper(referenceRef, popperRef, {
     placement: 'bottom-start',
     modifiers: [
       {
@@ -74,6 +76,10 @@ export default function UserActionsPopover({
     onResetPasswordClick(line.username);
     setVisibility(false);
   };
+  const handleManageGroups = () => {
+    onManageGroupsClick(line.username);
+    setVisibility(false);
+  };
 
   return (
     <div className="relative h-6" ref={wrapperRef}>
@@ -82,7 +88,7 @@ export default function UserActionsPopover({
         onClick={handleDropdownClick}
         className="w-6 hover:text-primary-500"
       >
-        <VerticalDots />
+        <VerticalDots/>
       </button>
       {visible && (
         <div
@@ -92,6 +98,14 @@ export default function UserActionsPopover({
           className={`bg-white border-neutral-100 border shadow-xl z-10 w-64 py-4 text-sm`}
         >
           <ul className="text-neutral-900 font-medium">
+            <li className="py-3 hover:bg-neutral-100 cursor-pointer" onClick={handleManageGroups}>
+              <span className='flex items-center'>
+                <span className="mx-6 w-6 h-6">
+                  <Group/>
+                </span>
+                <span>Manage Groups</span>
+              </span>
+            </li>
             {user.enabled ? (
               <li
                 className="py-3 hover:bg-neutral-100 cursor-pointer"
@@ -99,7 +113,7 @@ export default function UserActionsPopover({
               >
                 <span className="flex items-center">
                   <span className="mx-6 w-6 h-6">
-                    <Disable />
+                    <Disable/>
                   </span>
                   <span>Disable</span>
                 </span>
@@ -111,7 +125,7 @@ export default function UserActionsPopover({
               >
                 <span className="flex items-center">
                   <span className="mx-6 w-6 h-6">
-                    <Enable />
+                    <Enable/>
                   </span>
                   <span>Enable</span>
                 </span>
@@ -123,7 +137,7 @@ export default function UserActionsPopover({
             >
               <span className="flex items-center">
                 <span className="mx-6 w-6 h-6">
-                  <ResetPassword />
+                  <ResetPassword/>
                 </span>
                 <span>Reset Password</span>
               </span>
@@ -134,13 +148,13 @@ export default function UserActionsPopover({
             >
               <span className="flex items-center">
                 <span className="mx-6 w-6 h-6">
-                  <Trash />
+                  <Trash/>
                 </span>
                 <span>Delete</span>
               </span>
             </li>
           </ul>
-          <div style={styles['arrow']} />
+          <div style={styles['arrow']}/>
         </div>
       )}
     </div>

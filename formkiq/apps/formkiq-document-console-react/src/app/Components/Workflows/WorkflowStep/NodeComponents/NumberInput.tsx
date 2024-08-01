@@ -1,16 +1,16 @@
-import { ChangeEvent, useEffect } from 'react';
+import {ChangeEvent, useEffect} from 'react';
 import DisplayValue from './DisplayValue';
 
 const NumberInput = ({
-  defaultValue,
-  description,
-  editDescription,
-  onChange,
-  selectedValue,
-  isEditing,
-  min,
-  max,
-}: any) => {
+                       defaultValue,
+                       description,
+                       editDescription,
+                       onChange,
+                       selectedValue,
+                       isEditing,
+                       min,
+                       max,
+                     }: any) => {
   const handleNumberInput = (name: string) => {
     if (!onChange) return;
     onChange(name);
@@ -23,7 +23,7 @@ const NumberInput = ({
   };
 
   const parameterValue = () => {
-    if (selectedValue) {
+    if (selectedValue !== undefined) {
       return selectedValue;
     } else if (defaultValue) {
       return defaultValue;
@@ -34,7 +34,7 @@ const NumberInput = ({
 
   // if default value set, update the step
   useEffect(() => {
-    if (defaultValue && isEditing) {
+    if (defaultValue && isEditing && selectedValue===undefined) {
       handleNumberInput(defaultValue);
     }
   }, [defaultValue]);
@@ -66,7 +66,7 @@ const NumberInput = ({
           />
         </>
       ) : (
-        <DisplayValue description={description} value={selectedValue} />
+        <DisplayValue description={description} value={selectedValue}/>
       )}
     </>
   );

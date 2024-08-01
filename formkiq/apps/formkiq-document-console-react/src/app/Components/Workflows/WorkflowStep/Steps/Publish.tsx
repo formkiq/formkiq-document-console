@@ -5,16 +5,7 @@ import {DefaultSourceHandle} from "../../Handles/handles";
 import NodeTitle from "../NodeComponents/NodeTitle";
 import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
 
-const stepInfo = {
-  title: 'Publish',
-  textInputParameters: {},
-  numberInputParameters: {},
-  selectParameters: {},
-  checkboxParameters: {},
-  decisions: ['APPROVE'],
-}
-
-function Publish({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange}: any) {
+function Publish({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange, readOnly}: any) {
 
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false
@@ -23,11 +14,12 @@ function Publish({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onC
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if(readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
   return (
     <>
-      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}
+      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep}/>}
       {!isEditing &&
         <NodeTitle icon={<PublishIcon/>} title="Publish"/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
@@ -40,6 +32,7 @@ function Publish({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onC
           id="approve"
           maxConnections={1}
           nodeId={id}
+          readOnly={readOnly}
         ></DefaultSourceHandle>
       )}
       {isHandleConnectable && (

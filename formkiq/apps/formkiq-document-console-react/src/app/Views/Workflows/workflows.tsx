@@ -1,39 +1,37 @@
-import {useCallback, useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {Plus} from '../../Components/Icons/icons';
+import { useCallback, useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import DuplicateDialog from '../../Components/Generic/Dialogs/DuplicateDialog';
+import { Plus } from '../../Components/Icons/icons';
 import NewWorkflowModal from '../../Components/Workflows/NewWorkflow/newWorkflow';
 import WorkflowList from '../../Components/Workflows/WorkflowList/WorkflowList';
-import {AuthState} from '../../Store/reducers/auth';
-import {openDialog} from '../../Store/reducers/globalConfirmControls';
-import {useAppDispatch} from '../../Store/store';
-import {DocumentsService} from '../../helpers/services/documentsService';
-import {useLocation, useNavigate} from "react-router-dom";
-import {getCurrentSiteInfo, getUserSites} from "../../helpers/services/toolService";
+import { DocumentsService } from '../../helpers/services/documentsService';
+import {
+  getCurrentSiteInfo,
+  getUserSites,
+} from '../../helpers/services/toolService';
+import { RequestStatus } from '../../helpers/types/document';
+import { AuthState } from '../../Store/reducers/auth';
+import { openDialog } from '../../Store/reducers/globalConfirmControls';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import {
   deleteWorkflow,
   fetchWorkflows,
   setWorkflowsLoadingStatusPending,
-  WorkflowsState
-} from "../../Store/reducers/workflows";
-import {RequestStatus} from "../../helpers/types/document";
-import {openDialog as openNotificationDialog} from "../../Store/reducers/globalNotificationControls";
-import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
-
+  WorkflowsState,
+} from '../../Store/reducers/workflows';
+import { useAppDispatch } from '../../Store/store';
 
 export function Workflows() {
   const dispatch = useAppDispatch();
-  const {user} = useSelector(AuthState);
+  const { user } = useSelector(AuthState);
 
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {
-    siteId,
-    siteDocumentsRootUri,
-    isSiteReadOnly,
-  } = getCurrentSiteInfo(
+  const { siteId, siteDocumentsRootUri, isSiteReadOnly } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -48,10 +46,10 @@ export function Workflows() {
     workflowsLoadingStatus,
     nextToken,
     currentSearchPage,
-    isLastSearchPageLoaded
+    isLastSearchPageLoaded,
   } = useSelector(WorkflowsState);
 
-  const [currentSiteId, setCurrentSiteId] = useState(siteId)
+  const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
 
@@ -86,7 +84,6 @@ export function Workflows() {
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
   }, [pathname]);
 
-
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
     setNewModalOpened(true);
@@ -110,12 +107,10 @@ export function Workflows() {
         siteId: currentSiteId,
       })
     );
-  }, [
-    currentSiteId,
-  ]);
+  }, [currentSiteId]);
 
   const updateWorkflows = async () => {
-    dispatch(fetchWorkflows({siteId: currentSiteId}));
+    dispatch(fetchWorkflows({ siteId: currentSiteId }));
   };
 
   const trackScrolling = useCallback(async () => {
@@ -158,7 +153,7 @@ export function Workflows() {
 
   const onWorkflowDelete = (workflowId: string, siteId: string) => {
     const deleteFunc = async () => {
-      dispatch(deleteWorkflow({siteId, workflowId, workflows}));
+      dispatch(deleteWorkflow({ siteId, workflowId, workflows }));
     };
     dispatch(
       openDialog({
@@ -167,7 +162,6 @@ export function Workflows() {
       })
     );
   };
-
 
   const createNewWorkflow = () => {
     const workflow = {
@@ -193,7 +187,6 @@ export function Workflows() {
     });
   };
 
-
   const handleDuplicate = (newName: string) => {
     const newWorkflow = { ...duplicatedWorkflow, name: newName };
     delete newWorkflow.workflowId;
@@ -211,7 +204,6 @@ export function Workflows() {
         setIsDuplicateDialogOpen(true);
         setDuplicatedWorkflow(response);
       }
-
     });
   };
 
@@ -227,7 +219,6 @@ export function Workflows() {
     });
   };
 
-
   const handleDownloadClick = (workflowId: string, siteId: string) => {
     DocumentsService.getWorkflow(workflowId, siteId).then((response) => {
       if (response.name) {
@@ -241,9 +232,8 @@ export function Workflows() {
         link.click();
         URL.revokeObjectURL(url);
       }
-
-    })
-  }
+    });
+  };
 
   const isValidString = (text: string) => {
     try {
@@ -255,9 +245,8 @@ export function Workflows() {
   };
 
   const importWorkflow = (event: any) => {
-    console.log('importing')
     const reader = new FileReader();
-    reader.readAsText(event.target.files[0], "UTF-8");
+    reader.readAsText(event.target.files[0], 'UTF-8');
     reader.onload = (e) => {
       if (!isValidString(e.target?.result as string)) {
         dispatch(
@@ -265,8 +254,8 @@ export function Workflows() {
             dialogTitle: 'Invalid JSON',
           })
         );
-        event.target.value = ''
-        return
+        event.target.value = '';
+        return;
       }
       const workflow = JSON.parse(e.target?.result as string);
       DocumentsService.addWorkflow(workflow, siteId).then((response) => {
@@ -276,19 +265,18 @@ export function Workflows() {
               dialogTitle: response.errors[0].error,
             })
           );
-          event.target.value = ''
-          return
+          event.target.value = '';
+          return;
         }
 
         window.location.href =
           siteId === 'default'
             ? `/workflows/designer?workflowId=${response.workflowId}`
             : `/workspaces/${siteId}/workflows/designer?workflowId=${response.workflowId}`;
-        event.target.value = ''
+        event.target.value = '';
       });
-    }
-  }
-
+    };
+  };
 
   return (
     <>
@@ -296,16 +284,18 @@ export function Workflows() {
         <title>Workflows</title>
       </Helmet>
 
-
-      <div className="flex" style={{
-        height: `calc(100vh - 3.68rem)`,
-      }}>
+      <div
+        className="flex"
+        style={{
+          height: `calc(100vh - 3.68rem)`,
+        }}
+      >
         <div className="grow flex flex-col justify-stretch">
           <div className="p-4 max-w-screen-lg font-semibold mb-4">
             <p>
-              A workflow is a series of steps, which can be document actions or a
-              queue step, where documents await manual action (such as an approval)
-              inside of a document queue.
+              A workflow is a series of steps, which can be document actions or
+              a queue step, where documents await manual action (such as an
+              approval) inside of a document queue.
             </p>
             <p className="mt-4">
               NOTE: a workflow cannot be edited or deleted once it has been
@@ -318,16 +308,23 @@ export function Workflows() {
                 data-test-id="create-workflow"
                 onClick={createNewWorkflow}
                 className="flex items-center"
-                style={{height: '36px'}}
+                style={{ height: '36px' }}
               >
                 <span>Create new</span>
                 <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
               </ButtonPrimaryGradient>
 
-              <input type="file" id={"import-workflow" + siteId} accept=".json" className='hidden'
-                     onChange={importWorkflow}/>
-              <label htmlFor={"import-workflow" + siteId}
-                     className="h-9 bg-white text-neutral-900 border border-primary-500 px-4 font-bold whitespace-nowrap hover:text-primary-500 transition duration-100 rounded-md flex items-center justify-center">
+              <input
+                type="file"
+                id={'import-workflow' + siteId}
+                accept=".json"
+                className="hidden"
+                onChange={importWorkflow}
+              />
+              <label
+                htmlFor={'import-workflow' + siteId}
+                className="h-9 bg-white text-neutral-900 border border-primary-500 px-4 font-bold whitespace-nowrap hover:text-primary-500 transition duration-100 rounded-md flex items-center justify-center"
+              >
                 <span>Import (JSON)</span>
               </label>
 
@@ -355,7 +352,6 @@ export function Workflows() {
             ></WorkflowList>
           </div>
         </div>
-
       </div>
       <NewWorkflowModal
         isOpened={isNewModalOpened}

@@ -1,29 +1,28 @@
-import { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useSelector } from 'react-redux';
-import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
-import { AttributesDataState } from '../../../Store/reducers/attributesData';
-import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
-import { useAppDispatch } from '../../../Store/store';
-import { DocumentsService } from '../../../helpers/services/documentsService';
-import { Attribute } from '../../../helpers/types/attributes';
+import {useEffect, useRef, useState} from 'react';
+import {useForm} from 'react-hook-form';
+import {useSelector} from 'react-redux';
+import {AttributesState, fetchDocumentAttributes} from '../../../Store/reducers/attributes';
+import {AttributesDataState} from '../../../Store/reducers/attributesData';
+import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
+import {useAppDispatch} from '../../../Store/store';
+import {DocumentsService} from '../../../helpers/services/documentsService';
+import {Attribute} from '../../../helpers/types/attributes';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
-import { Close, Plus } from '../../Icons/icons';
+import {Close, Plus} from '../../Icons/icons';
 import AddAttributeForm from './AddAttributeForm';
 
 function AddDocumentAttributeForm({
-  onDocumentDataChange,
-  siteId,
-  value,
-  getValue,
-}: any) {
-  const { allAttributes } = useSelector(AttributesDataState);
+                                    onDocumentDataChange,
+                                    siteId,
+                                    value,
+                                    getValue,
+                                  }: any) {
+  const {allAttributes} = useSelector(AttributesDataState);
+  const {documentAttributes} = useSelector(AttributesState)
   const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
-  const [attributeKeys, setAttributeKeys] = useState<
-    { key: string; title: string }[]
-  >([]);
+  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
   );
@@ -35,12 +34,16 @@ function AddDocumentAttributeForm({
 
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
-    const keys = allAttributes.map((item) => ({
+    const unusedAttributes = allAttributes.filter(
+      (attribute) =>
+            !documentAttributes.find((item) => item.key === attribute.key)
+    );
+    const keys = unusedAttributes.map((item) => ({
       key: item.key,
       title: item.key,
     }));
     setAttributeKeys(keys);
-  }, [allAttributes]);
+  }, [allAttributes,  documentAttributes]);
 
   useEffect(() => {
     if (!selectedAttributeKey) return;
@@ -58,7 +61,7 @@ function AddDocumentAttributeForm({
 
   const {
     register,
-    formState: { errors },
+    formState: {errors},
     handleSubmit,
     reset,
     setValue,
@@ -256,9 +259,9 @@ function AddDocumentAttributeForm({
           className="w-full"
           ref={addTagFormRef}
         >
-          <div className="flex items-start mx-2 mb-4 relative w-full h-8 gap-2">
-            <div className="flex items-start gap-2">
-              <div className="h-8 flex gap-2">
+          {allAttributes.length > 0 && <div className="flex items-start mx-2 mb-4 relative w-full h-8 gap-2">
+            <div className="flex items-start gap-2 w-full">
+              <div className="h-8 flex gap-2 w-full max-w-[300px]">
                 <RadioCombobox
                   values={attributeKeys}
                   selectedValue={selectedAttributeKey}
@@ -288,7 +291,7 @@ function AddDocumentAttributeForm({
                       title="Add"
                       className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
                     >
-                      <Plus />
+                      <Plus/>
                     </button>
                   </div>
                 )}
@@ -298,9 +301,10 @@ function AddDocumentAttributeForm({
                     <input
                       type="number"
                       className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                      {...register('numberValue', { required: true })}
+                      {...register('numberValue', {required: true})}
                       placeholder="Value"
                       step="any"
+                      onKeyDown={(e) => ["e", "E", "+"].includes(e.key) && e.preventDefault()}
                     />
                     <button
                       type="button"
@@ -308,7 +312,7 @@ function AddDocumentAttributeForm({
                       title="Add"
                       className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
                     >
-                      <Plus />
+                      <Plus/>
                     </button>
                   </div>
                 )}
@@ -325,7 +329,7 @@ function AddDocumentAttributeForm({
                     <input
                       type="text"
                       className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                      {...register('compositeStringValue', { required: true })}
+                      {...register('compositeStringValue', {required: true})}
                       placeholder="Coma-separated values"
                     />
                   )}
@@ -338,7 +342,7 @@ function AddDocumentAttributeForm({
             >
               Add
             </ButtonPrimaryGradient>
-          </div>
+          </div>}
           <div className="flex flex-row justify-start flex-wrap gap-2 items-end ml-2">
             {stringValues.map((val: string, i: number) => (
               <div
@@ -355,7 +359,7 @@ function AddDocumentAttributeForm({
                   className="w-4 h-4 min-w-4 text-neutral-900"
                   onClick={() => handleRemoveStringValue(i)}
                 >
-                  <Close />
+                  <Close/>
                 </button>
               </div>
             ))}
@@ -374,7 +378,7 @@ function AddDocumentAttributeForm({
                   className="w-4 h-4 min-w-4 text-neutral-900"
                   onClick={() => handleRemoveNumberValue(i)}
                 >
-                  <Close />
+                  <Close/>
                 </button>
               </div>
             ))}

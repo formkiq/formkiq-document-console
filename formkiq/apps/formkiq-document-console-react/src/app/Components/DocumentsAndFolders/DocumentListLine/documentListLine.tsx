@@ -80,15 +80,17 @@ function DocumentListLine({
   addToPendingArchive?: (file: IDocument) => void;
   deleteFromPendingArchive?: (file: IDocument) => void;
   archiveStatus?: string;
-  infoDocumentId?:string
+  infoDocumentId?: string;
   onDocumentInfoClick?: () => void;
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
   const dispatch = useAppDispatch();
 
-  const {user} = useAuthenticatedState();
-  const [keyOnlyAttributesKeys, setKeyOnlyAttributesKeys] = useState<string[]>([])
+  const { user } = useAuthenticatedState();
+  const [keyOnlyAttributesKeys, setKeyOnlyAttributesKeys] = useState<string[]>(
+    []
+  );
 
   const {
     formkiqVersion,
@@ -240,7 +242,7 @@ function DocumentListLine({
   }
 
   function onInfoClick() {
-    if (!onDocumentInfoClick) return
+    if (!onDocumentInfoClick) return;
     if (infoDocumentId === file.documentId) {
       onDocumentInfoClick();
     }
@@ -248,24 +250,26 @@ function DocumentListLine({
 
   useEffect(() => {
     if (!file.attributes) {
-      setKeyOnlyAttributesKeys([])
-      return
-    };
-    const attributesKeys = Object.keys(file.attributes);
-    if (attributesKeys.length === 0) {
-      setKeyOnlyAttributesKeys([])
+      setKeyOnlyAttributesKeys([]);
       return;
     }
-    const keyOnlyAttributes = attributesKeys.filter((key) => file.attributes[key].valueType === 'KEY_ONLY')
-    setKeyOnlyAttributesKeys(keyOnlyAttributes)
-  },[file])
-
-
+    const attributesKeys = Object.keys(file.attributes);
+    if (attributesKeys.length === 0) {
+      setKeyOnlyAttributesKeys([]);
+      return;
+    }
+    const keyOnlyAttributes = attributesKeys.filter(
+      (key) => file.attributes[key].valueType === 'KEY_ONLY'
+    );
+    setKeyOnlyAttributesKeys(keyOnlyAttributes);
+  }, [file]);
 
   return (
     <>
       <tr
-        className={`text-sm tracking-normal ${(infoDocumentId===file.documentId)&& "bg-neutral-100"}`}
+        className={`text-sm tracking-normal ${
+          infoDocumentId === file.documentId && 'bg-neutral-100'
+        }`}
         data-test-id={`${file.path}`}
         ref={drag}
         style={{ opacity, visibility: isDragging ? 'hidden' : 'inherit' }}
@@ -328,7 +332,7 @@ function DocumentListLine({
               className="cursor-pointer w-16 flex items-center justify-start"
             >
               <img
-                src={getFileIcon(file.path)}
+                src={getFileIcon(file.path, file.deepLinkPath)}
                 className="w-8 inline-block"
                 alt="icon"
               />
@@ -344,14 +348,14 @@ function DocumentListLine({
                 ) : (
                   <span>
                     {file.path.substring(file.path.lastIndexOf('/') + 1)
-                      .length > 50 ? (
+                      .length > 80 ? (
                       <span className="tracking-tighter text-clip overflow-hidden">
                         {file.path.substring(
                           file.path.lastIndexOf('/') + 1,
-                          file.path.lastIndexOf('/') + 60
+                          file.path.lastIndexOf('/') + 80
                         )}
                         {file.path.substring(file.path.lastIndexOf('/') + 1)
-                          .length > 60 && <span>...</span>}
+                          .length > 80 && <span>...</span>}
                       </span>
                     ) : (
                       <span>
@@ -363,30 +367,33 @@ function DocumentListLine({
               </Link>
               <div className="grow flex items-center justify-end pt-1.5 pr-4">
                 <div className="flex flex-wrap justify-end w-52">
-                  {keyOnlyAttributesKeys && keyOnlyAttributesKeys.map((attributeKey, i) => {
-                    let tagColor = 'gray';
-                    if (tagColors) {
-                      tagColors.forEach((color) => {
-                        if (color.tagKeys.indexOf(attributeKey) > -1) {
-                          tagColor = color.colorUri;
-                          return;
-                        }
-                      });
-                    }
-                    return(
-                      <div
-                        className="pt-0.5 pr-1 flex" key={"attribute_" + i}>
+                  {keyOnlyAttributesKeys &&
+                    keyOnlyAttributesKeys.map((attributeKey, i) => {
+                      let tagColor = 'gray';
+                      if (tagColors) {
+                        tagColors.forEach((color) => {
+                          if (color.tagKeys.indexOf(attributeKey) > -1) {
+                            tagColor = color.colorUri;
+                            return;
+                          }
+                        });
+                      }
+                      return (
                         <div
-                          className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                          className="pt-0.5 pr-1 flex"
+                          key={'attribute_' + i}
                         >
-                          {attributeKey}
+                          <div
+                            className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                          >
+                            {attributeKey}
+                          </div>
+                          <div
+                            className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                          ></div>
                         </div>
-                        <div
-                          className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                        ></div>
-                      </div>)
-                    }
-                  )}
+                      );
+                    })}
 
                   {file.tags &&
                     Object.getOwnPropertyNames(file.tags)

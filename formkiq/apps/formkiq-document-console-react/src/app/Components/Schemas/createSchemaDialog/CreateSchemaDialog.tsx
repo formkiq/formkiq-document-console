@@ -1,32 +1,39 @@
-import {Dialog} from '@headlessui/react';
-import {useEffect, useRef, useState} from 'react';
-import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
-import {fetchClassifications, fetchSiteSchema} from '../../../Store/reducers/schemas';
-import {useAppDispatch} from '../../../Store/store';
-import {DocumentsService} from '../../../helpers/services/documentsService';
-import {Schema} from '../../../helpers/types/schemas';
-import {Close, Save} from '../../Icons/icons';
+import { Dialog } from '@headlessui/react';
+import { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import {
+  AttributesDataState,
+  fetchAttributesData,
+} from '../../../Store/reducers/attributesData';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import {
+  fetchClassifications,
+  fetchSiteSchema,
+} from '../../../Store/reducers/schemas';
+import { useAppDispatch } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { Schema } from '../../../helpers/types/schemas';
+import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
+import { Close, Save } from '../../Icons/icons';
 import AddAttributesTab from './addAttributesTab';
-import RadioCombobox from "../../Generic/Listboxes/RadioCombobox";
-import {useSelector} from "react-redux";
-import {AttributesDataState, fetchAttributesData} from "../../../Store/reducers/attributesData";
 
 type CreateSchemaModalPropsType = {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
   siteId: string;
-  schemaType: "site" | "classification"
+  schemaType: 'site' | 'classification';
 };
 
 function CreateSchemaDialog({
-                              isOpen,
-                              setIsOpen,
-                              siteId,
-                              schemaType
-                            }: CreateSchemaModalPropsType) {
+  isOpen,
+  setIsOpen,
+  siteId,
+  schemaType,
+}: CreateSchemaModalPropsType) {
   const dispatch = useAppDispatch();
-  const [selectedTab, setSelectedTab] = useState<'generalInfo' | 'compositeKeys' | 'required' | 'optional'>('generalInfo');
-
+  const [selectedTab, setSelectedTab] = useState<
+    'generalInfo' | 'compositeKeys' | 'required' | 'optional'
+  >('generalInfo');
 
   const initialSchemaValue: Schema = {
     name: '',
@@ -35,7 +42,7 @@ function CreateSchemaDialog({
     },
   };
   const [schema, setSchema] = useState(initialSchemaValue);
-  const {allAttributes} = useSelector(AttributesDataState);
+  const { allAttributes } = useSelector(AttributesDataState);
 
   const [compositeKey, setCompositeKey] = useState<string>('');
   const [compositeKeys, setCompositeKeys] = useState<string[]>([]);
@@ -56,7 +63,9 @@ function CreateSchemaDialog({
     []
   );
 
-  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
+  const [attributeKeys, setAttributeKeys] = useState<
+    { key: string; title: string }[]
+  >([]);
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
     const keys = allAttributes.map((item) => ({
@@ -67,7 +76,7 @@ function CreateSchemaDialog({
   }, [allAttributes]);
 
   useEffect(() => {
-    dispatch(fetchAttributesData({siteId, limit: 100}))
+    dispatch(fetchAttributesData({ siteId, limit: 100 }));
   }, [siteId]);
 
   const schemaNameRef = useRef<HTMLInputElement>(null);
@@ -75,15 +84,27 @@ function CreateSchemaDialog({
   const onSubmit = (e: any) => {
     e.preventDefault();
 
-    const newSchema: Schema = {name: schema.name, attributes: schema.attributes}
+    const newSchema: Schema = {
+      name: schema.name,
+      attributes: schema.attributes,
+    };
     // remove empty attributes
-    if (newSchema.attributes.compositeKeys && newSchema.attributes.compositeKeys.length === 0) {
+    if (
+      newSchema.attributes.compositeKeys &&
+      newSchema.attributes.compositeKeys.length === 0
+    ) {
       delete newSchema.attributes.compositeKeys;
     }
-    if (newSchema.attributes.required && newSchema.attributes.required.length === 0) {
+    if (
+      newSchema.attributes.required &&
+      newSchema.attributes.required.length === 0
+    ) {
       delete newSchema.attributes.required;
     }
-    if (newSchema.attributes.optional && newSchema.attributes.optional.length === 0) {
+    if (
+      newSchema.attributes.optional &&
+      newSchema.attributes.optional.length === 0
+    ) {
       delete newSchema.attributes.optional;
     }
     // if defaultValues has single item set defaultValue
@@ -93,7 +114,7 @@ function CreateSchemaDialog({
         if (item.defaultValues && item.defaultValues.length === 1) {
           item.defaultValue = item.defaultValues[0];
           delete item.defaultValues;
-        } else if (item.defaultValue === "") {
+        } else if (item.defaultValue === '') {
           delete item.defaultValue;
         } else if (item.defaultValues && item.defaultValues.length === 0) {
           delete item.defaultValues;
@@ -109,32 +130,33 @@ function CreateSchemaDialog({
       });
     }
 
-    if (schemaType === "classification") {
-      DocumentsService.addSiteClassification(siteId, {classification: newSchema}).then((response) => {
+    if (schemaType === 'classification') {
+      DocumentsService.addSiteClassification(siteId, {
+        classification: newSchema,
+      }).then((response) => {
         if (response.classificationId) {
-          dispatch(fetchClassifications({siteId, limit: 20, page: 1}));
-          resetValues()
+          dispatch(fetchClassifications({ siteId, limit: 20, page: 1 }));
+          resetValues();
           setIsOpen(false);
         } else {
           dispatch(
-            openNotificationDialog({dialogTitle: response.errors[0].error})
+            openNotificationDialog({ dialogTitle: response.errors[0].error })
           );
         }
       });
     } else if (schemaType === 'site') {
       DocumentsService.setSiteSchema(siteId, newSchema).then((response) => {
         if (response.status === 200) {
-          dispatch(fetchSiteSchema({siteId}));
-          resetValues()
+          dispatch(fetchSiteSchema({ siteId }));
+          resetValues();
           setIsOpen(false);
         } else {
           dispatch(
-            openNotificationDialog({dialogTitle: response.errors[0].error})
+            openNotificationDialog({ dialogTitle: response.errors[0].error })
           );
         }
       });
     }
-
   };
 
   const resetValues = () => {
@@ -148,12 +170,11 @@ function CreateSchemaDialog({
     setCompositeKey('');
     setCompositeKeys([]);
     setSchema(initialSchemaValue);
-    setSelectedTab('generalInfo')
-  }
+    setSelectedTab('generalInfo');
+  };
 
   const closeModal = () => {
-    console.log(initialSchemaValue)
-    resetValues()
+    resetValues();
     setIsOpen(false);
   };
 
@@ -169,7 +190,9 @@ function CreateSchemaDialog({
       return;
     }
     if (compositeKeys.includes(compositeKey)) {
-      dispatch(openNotificationDialog({dialogTitle: 'Key was already added'}));
+      dispatch(
+        openNotificationDialog({ dialogTitle: 'Key was already added' })
+      );
       return;
     }
     setCompositeKeys([...compositeKeys, compositeKey]);
@@ -177,11 +200,14 @@ function CreateSchemaDialog({
   };
 
   const addCompositeKeyToSchema = () => {
-    const newSchema = {...schema};
+    const newSchema = { ...schema };
     if (newSchema.attributes.compositeKeys) {
-      newSchema.attributes.compositeKeys = [...newSchema.attributes.compositeKeys, {attributeKeys: compositeKeys}];
+      newSchema.attributes.compositeKeys = [
+        ...newSchema.attributes.compositeKeys,
+        { attributeKeys: compositeKeys },
+      ];
     } else {
-      newSchema.attributes.compositeKeys = [{attributeKeys: compositeKeys}];
+      newSchema.attributes.compositeKeys = [{ attributeKeys: compositeKeys }];
     }
 
     setSchema(newSchema);
@@ -197,7 +223,7 @@ function CreateSchemaDialog({
     newCompositeKeys.splice(index, 1);
     setSchema({
       ...schema,
-      attributes: {...schema.attributes, compositeKeys: newCompositeKeys},
+      attributes: { ...schema.attributes, compositeKeys: newCompositeKeys },
     });
   };
 
@@ -207,7 +233,7 @@ function CreateSchemaDialog({
       return;
     }
     if (requiredAllowedValues.includes(requiredAllowedValue)) {
-      dispatch(openNotificationDialog({dialogTitle: 'Value already exists'}));
+      dispatch(openNotificationDialog({ dialogTitle: 'Value already exists' }));
       return;
     }
     setRequiredAllowedValues([...requiredAllowedValues, requiredAllowedValue]);
@@ -219,19 +245,22 @@ function CreateSchemaDialog({
       return;
     }
 
-    const newSchema = {...schema};
+    const newSchema = { ...schema };
     const newRequiredAttributes = {
       attributeKey: requiredKey,
       defaultValue: requiredDefaultValues[0] || '',
       defaultValues: requiredDefaultValues,
-      allowedValues: requiredAllowedValues
-    }
+      allowedValues: requiredAllowedValues,
+    };
     if (newSchema.attributes.required) {
-      newSchema.attributes.required = [...newSchema.attributes.required, newRequiredAttributes];
+      newSchema.attributes.required = [
+        ...newSchema.attributes.required,
+        newRequiredAttributes,
+      ];
     } else {
       newSchema.attributes.required = [newRequiredAttributes];
     }
-    setSchema(newSchema)
+    setSchema(newSchema);
     setRequiredKey('');
     setRequiredDefaultValues([]);
     setRequiredAllowedValues([]);
@@ -246,7 +275,7 @@ function CreateSchemaDialog({
     newRequired.splice(index, 1);
     setSchema({
       ...schema,
-      attributes: {...schema.attributes, required: newRequired},
+      attributes: { ...schema.attributes, required: newRequired },
     });
   };
 
@@ -257,7 +286,7 @@ function CreateSchemaDialog({
       return;
     }
     if (optionalAllowedValues.includes(optionalAllowedValue)) {
-      dispatch(openNotificationDialog({dialogTitle: 'Value already exists'}));
+      dispatch(openNotificationDialog({ dialogTitle: 'Value already exists' }));
       return;
     }
     setOptionalAllowedValues([...optionalAllowedValues, optionalAllowedValue]);
@@ -267,30 +296,35 @@ function CreateSchemaDialog({
     if (optionalKey.length === 0) {
       return;
     }
-    const newSchema = {...schema};
+    const newSchema = { ...schema };
     if (newSchema.attributes.optional) {
-      newSchema.attributes.optional = [...newSchema.attributes.optional, {
-        attributeKey: optionalKey,
-        allowedValues: optionalAllowedValues
-      }]
+      newSchema.attributes.optional = [
+        ...newSchema.attributes.optional,
+        {
+          attributeKey: optionalKey,
+          allowedValues: optionalAllowedValues,
+        },
+      ];
     } else {
-      newSchema.attributes.optional = [{attributeKey: optionalKey, allowedValues: optionalAllowedValues}]
+      newSchema.attributes.optional = [
+        { attributeKey: optionalKey, allowedValues: optionalAllowedValues },
+      ];
     }
-    setSchema(newSchema)
+    setSchema(newSchema);
     setOptionalKey('');
     setOptionalAllowedValues([]);
     setOptionalAllowedValue('');
   };
 
   const deleteOptionalFromSchema = (index: number) => {
-    let newOptional: any[] = []
+    let newOptional: any[] = [];
     if (schema.attributes.optional) {
       newOptional = [...schema.attributes.optional];
     }
     newOptional.splice(index, 1);
     setSchema({
       ...schema,
-      attributes: {...schema.attributes, optional: newOptional},
+      attributes: { ...schema.attributes, optional: newOptional },
     });
   };
 
@@ -304,7 +338,7 @@ function CreateSchemaDialog({
           static
           initialFocus={schemaNameRef}
         >
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true"/>
+          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
 
           <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
             <div className="w-full max-w-xl bg-white p-6 rounded-md">
@@ -382,7 +416,7 @@ function CreateSchemaDialog({
                       required
                       value={schema.name}
                       onChange={(e) =>
-                        setSchema({...schema, name: e.target.value})
+                        setSchema({ ...schema, name: e.target.value })
                       }
                       ref={schemaNameRef}
                       onKeyDown={(e) => preventDialogClose(e)}
@@ -438,8 +472,10 @@ function CreateSchemaDialog({
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-row justify-start flex-wrap gap-2 ">
                           {compositeKeys.map((key: string) => (
-                            <div key={key}
-                                 className="bg-neutral-300 py-1.5 px-3 text-xs font-bold text-neutral-900 rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2">
+                            <div
+                              key={key}
+                              className="bg-neutral-300 py-1.5 px-3 text-xs font-bold text-neutral-900 rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2"
+                            >
                               <span className="text-ellipsis overflow-hidden">
                                 {key}
                               </span>
@@ -455,7 +491,7 @@ function CreateSchemaDialog({
                                   )
                                 }
                               >
-                                <Close/>
+                                <Close />
                               </button>
                             </div>
                           ))}
@@ -467,7 +503,7 @@ function CreateSchemaDialog({
                         >
                           SAVE KEY
                           <div className="w-5 h-5 ml-2">
-                            <Save/>
+                            <Save />
                           </div>
                         </button>
                       </div>
@@ -482,38 +518,43 @@ function CreateSchemaDialog({
                           <div className="overflow-auto max-h-64">
                             <table className="border border-neutral-300 w-full max-w-full table-fixed">
                               <tbody>
-                              {schema.attributes.compositeKeys.map(
-                                (item: { attributeKeys: string[] }, i: number) => (
-                                  <tr
-                                    key={'compositeKey_' + i}
-                                    className="border border-slate-300 px-4 h-12"
-                                  >
-                                    <td className="text-xs text-slate-500 px-4 w-4">
+                                {schema.attributes.compositeKeys.map(
+                                  (
+                                    item: { attributeKeys: string[] },
+                                    i: number
+                                  ) => (
+                                    <tr
+                                      key={'compositeKey_' + i}
+                                      className="border border-slate-300 px-4 h-12"
+                                    >
+                                      <td className="text-xs text-slate-500 px-4 w-4">
                                         <span className="text-gray-900 font-medium">
                                           {i + 1}
                                         </span>
-                                    </td>
-                                    <td className="text-xs text-slate-500 px-4 text-ellipsis overflow-hidden">
-                                      Values:{' '}
-                                      <span className="text-gray-900 font-medium ">
+                                      </td>
+                                      <td className="text-xs text-slate-500 px-4 text-ellipsis overflow-hidden">
+                                        Values:{' '}
+                                        <span className="text-gray-900 font-medium ">
                                           {schema.attributes.compositeKeys &&
-                                            schema.attributes.compositeKeys[i].attributeKeys.join(', ')}
+                                            schema.attributes.compositeKeys[
+                                              i
+                                            ].attributeKeys.join(', ')}
                                         </span>
-                                    </td>
-                                    <td className="w-[30px]">
-                                      <button
-                                        type="button"
-                                        className="w-4 h-4 text-gray-900"
-                                        onClick={() =>
-                                          deleteCompositeKeyFromSchema(i)
-                                        }
-                                      >
-                                        <Close/>
-                                      </button>
-                                    </td>
-                                  </tr>
-                                )
-                              )}
+                                      </td>
+                                      <td className="w-[30px]">
+                                        <button
+                                          type="button"
+                                          className="w-4 h-4 text-gray-900"
+                                          onClick={() =>
+                                            deleteCompositeKeyFromSchema(i)
+                                          }
+                                        >
+                                          <Close />
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  )
+                                )}
                               </tbody>
                             </table>
                           </div>

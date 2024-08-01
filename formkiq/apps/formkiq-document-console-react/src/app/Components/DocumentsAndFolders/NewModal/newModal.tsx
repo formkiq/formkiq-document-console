@@ -1,16 +1,20 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
-import { DocumentsService } from '../../../helpers/services/documentsService';
+import {
+  DocumentsService,
+  IFileUploadData,
+} from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import {
   Close,
   External,
   FolderSolid,
+  LinkIcon,
   Upload,
   Webhook,
   Workflow,
@@ -41,11 +45,20 @@ export default function NewModal({
   const newFormRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const pathname = decodeURI(useLocation().pathname);
   const [formActive, setFormActive] = useState(true);
   const [itemToCreate, setItemToCreate] = useState('');
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const itemsRequiringNameField = ['folder', 'docx', 'xlsx', 'pptx'];
+  const itemsRequiringNameField = [
+    'folder',
+    'docx',
+    'xlsx',
+    'pptx',
+    'md',
+    'deeplink',
+  ];
+  const itemsRequiringDeeplinkPathField = ['deeplink'];
 
   useEffect(() => {
     if (isOpened) {
@@ -58,7 +71,7 @@ export default function NewModal({
     params.delete('actionEvent');
     setSearchParams(params);
   };
-  
+
   const closeDialog = () => {
     setItemToCreate('');
     setFormActive(false);
@@ -84,6 +97,16 @@ export default function NewModal({
       }
     }
   };
+
+  const onNewDeeplinkDocumentClick = (event: any, value: ILine | null) => {
+    if (value) {
+      setItemToCreate('deeplink');
+      setTimeout(() => {
+        setFocus('name');
+      }, 50);
+    }
+  };
+
   const onNewDocumentClick = (event: any, extension: string) => {
     setItemToCreate(extension);
     setTimeout(() => {
@@ -95,6 +118,7 @@ export default function NewModal({
       if (itemToCreate.length) {
         const formData = new FormData(newFormRef.current);
         let nameValue: string | File | null = formData.get('name');
+        const deeplinkPath: string | File | null = formData.get('deeplinkPath');
         if (!nameValue || typeof nameValue === 'object' || !nameValue.length) {
           dispatch(
             openDialog({ dialogTitle: 'You must provide a name for the item' })
@@ -103,8 +127,25 @@ export default function NewModal({
           return;
         }
         // TODO: add file regex check
-        if(nameValue.indexOf('#') !== -1) {
-          nameValue = nameValue.replace(/#/g, '')
+        if (nameValue.indexOf('#') !== -1) {
+          nameValue = nameValue.replace(/#/g, '');
+        }
+
+        // check if adding deeplink document
+        if (itemToCreate === 'deeplink') {
+          if (
+            !deeplinkPath ||
+            typeof deeplinkPath === 'object' ||
+            !deeplinkPath.length
+          ) {
+            dispatch(
+              openDialog({
+                dialogTitle: 'You must provide a deeplink path for the item',
+              })
+            );
+            event.preventDefault();
+            return;
+          }
         }
         // TODO: check if name exists in folder
         if (itemToCreate === 'folder') {
@@ -113,18 +154,61 @@ export default function NewModal({
               closeDialog();
             }
           );
+        } else if (itemToCreate === 'deeplink') {
+          const documentParamaters = {
+            path: value.folder
+              ? `${value.folder}/${nameValue}`
+              : `${nameValue}`,
+            contentType: 'text/html',
+            deepLinkPath: deeplinkPath,
+          };
+          DocumentsService.addDocument(siteId, documentParamaters).then(
+            (res) => {
+              if (res.status === 201) {
+                closeDialog();
+              } else {
+                dispatch(
+                  openDialog({
+                    dialogTitle: 'An error has occurred.',
+                  })
+                );
+              }
+            }
+          );
         } else {
           if (nameValue.indexOf('.' + itemToCreate) === -1) {
             nameValue += '.' + itemToCreate;
           }
-          navigate(
-            '/documents/new/' +
-              itemToCreate +
-              '?path=' +
-              value.folder +
-              '/' +
-              nameValue
-          );
+          if (itemToCreate === 'md') {
+            // TODO: create new .md file, open it
+            const file = new File([' '], nameValue, {});
+            const uploadData: IFileUploadData[] = [
+              {
+                originalFile: file,
+                uploadedSize: 0,
+              },
+            ];
+            DocumentsService.uploadDocuments(
+              value.folder,
+              siteId,
+              formkiqVersion,
+              uploadData,
+              () => {}
+            ).then((res) => {
+              if (res.length > 0) {
+                navigate(pathname + '/' + res[0].documentId + '/view');
+              }
+            });
+          } else {
+            navigate(
+              '/documents/new/' +
+                itemToCreate +
+                '?path=' +
+                value.folder +
+                '/' +
+                nameValue
+            );
+          }
           closeDialog();
         }
       } else {
@@ -234,6 +318,23 @@ export default function NewModal({
                         Upload a New Folder
                       </div>
                     </div>
+                    <div
+                      className={`${
+                        itemToCreate === 'deeplink-document'
+                          ? 'bg-gray-100 font-semibold border-gray-600'
+                          : 'cursor-pointer hover:bg-gray-100'
+                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                      onClick={(event) =>
+                        onNewDeeplinkDocumentClick(event, value)
+                      }
+                    >
+                      <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
+                        <LinkIcon />
+                      </div>
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
+                        Add a Deeplink Document
+                      </div>
+                    </div>
                     {formkiqVersion.modules?.indexOf('onlyoffice') > -1 && (
                       <>
                         <div
@@ -291,6 +392,25 @@ export default function NewModal({
                           </div>
                           <div className="w-full tracking-normal text-sm text-center mb-2">
                             MS PowerPoint Document
+                          </div>
+                        </div>
+                        <div
+                          className={`${
+                            itemToCreate === 'md'
+                              ? 'bg-gray-100 font-semibold border-gray-600'
+                              : 'cursor-pointer hover:bg-gray-100'
+                          } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                          onClick={(event) => onNewDocumentClick(event, 'md')}
+                        >
+                          <div className="w-full h-16 my-3 flex justify-center">
+                            <img
+                              src="/assets/img/svg/icon-md.svg"
+                              className="w-16"
+                              alt="md icon"
+                            />
+                          </div>
+                          <div className="w-full text-sm text-center mb-2">
+                            Markdown Document
                           </div>
                         </div>
                       </>
@@ -380,6 +500,32 @@ export default function NewModal({
                             placeholder="Name"
                             pattern="[^#]*"
                             {...register('name', {
+                              required: true,
+                            })}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
+                        <div
+                          className={
+                            (itemsRequiringDeeplinkPathField.indexOf(
+                              itemToCreate
+                            ) > -1
+                              ? ''
+                              : 'hidden ') + ' w-full mr-12'
+                          }
+                        >
+                          <input
+                            aria-label="DeepLink Path"
+                            type="url"
+                            data-test-id="new-deeplink-path-input"
+                            className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600
+                                                    text-sm invalid:bg-red-200
+                                                    placeholder-gray-500 text-gray-900 rounded-t-md
+                                                    focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
+                            placeholder="DeepLink Path"
+                            pattern="https://.*"
+                            {...register('deeplinkPath', {
                               required: true,
                             })}
                           />

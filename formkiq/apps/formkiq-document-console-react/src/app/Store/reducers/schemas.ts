@@ -1,8 +1,12 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {DocumentsService} from '../../helpers/services/documentsService';
-import {Classification, RequestStatus, Schema} from '../../helpers/types/schemas';
-import {RootState} from '../store';
-import {openDialog as openNotificationDialog} from './globalNotificationControls';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import {
+  Classification,
+  RequestStatus,
+  Schema,
+} from '../../helpers/types/schemas';
+import { RootState } from '../store';
+import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
 interface SchemasState {
   siteSchema: Schema | null;
@@ -29,42 +33,46 @@ const defaultState: SchemasState = {
 export const fetchClassifications = createAsyncThunk(
   'schemas/fetchClassifications',
   async (data: any, thunkAPI) => {
-    const {siteId, nextToken, limit, page} = data;
-    await DocumentsService.getSiteClassifications(siteId, limit, nextToken).then(
-      (response) => {
-        if (response) {
-          const data = {
-            siteId,
-            classifications: response.classifications,
-            isLoadingMore: false,
-            isLastSearchPageLoaded: false,
-            next: response.next,
-            page,
-          };
-          if (page > 1) {
-            data.isLoadingMore = true;
-          }
-          if (response.documents?.length === 0) {
-            data.isLastSearchPageLoaded = true;
-          }
-          thunkAPI.dispatch(setClassifications(data));
+    const { siteId, nextToken, limit, page } = data;
+    await DocumentsService.getSiteClassifications(
+      siteId,
+      limit,
+      nextToken
+    ).then((response) => {
+      if (response) {
+        const data = {
+          siteId,
+          classifications: response.classifications,
+          isLoadingMore: false,
+          isLastSearchPageLoaded: false,
+          next: response.next,
+          page,
+        };
+        if (page > 1) {
+          data.isLoadingMore = true;
         }
+        if (response.documents?.length === 0) {
+          data.isLastSearchPageLoaded = true;
+        }
+        thunkAPI.dispatch(setClassifications(data));
       }
-    );
+    });
   }
 );
 
 export const deleteClassification = createAsyncThunk(
   'schemas/deleteClassification',
   async (data: any, thunkAPI) => {
-    const {siteId, classificationId} = data;
+    const { siteId, classificationId } = data;
     await DocumentsService.deleteClassification(siteId, classificationId).then(
       (response) => {
         if (response.status === 200) {
-          thunkAPI.dispatch(fetchClassifications({siteId, limit: 20, page: 1}));
+          thunkAPI.dispatch(
+            fetchClassifications({ siteId, limit: 20, page: 1 })
+          );
         } else {
           thunkAPI.dispatch(
-            openNotificationDialog({dialogTitle: response.message})
+            openNotificationDialog({ dialogTitle: response.message })
           );
         }
       }
@@ -75,10 +83,15 @@ export const deleteClassification = createAsyncThunk(
 export const fetchSiteSchema = createAsyncThunk(
   'schemas/fetchSiteSchema',
   async (data: any, thunkAPI) => {
-    const {siteId} = data;
+    const { siteId } = data;
     await DocumentsService.getSiteSchema(siteId).then((response) => {
       if (response.status === 200) {
-        thunkAPI.dispatch(setSiteSchema({name: response.name, attributes: response.attributes}));
+        thunkAPI.dispatch(
+          setSiteSchema({
+            name: response.name,
+            attributes: response.attributes,
+          })
+        );
       } else {
         thunkAPI.dispatch(setSiteSchema(null));
       }
@@ -89,13 +102,14 @@ export const fetchSiteSchema = createAsyncThunk(
 export const fetchClassificationSchema = createAsyncThunk(
   'schemas/fetchClassificationSchema',
   async (data: any, thunkAPI) => {
-    const {siteId, classificationId} = data;
-    await DocumentsService.getClassification(siteId, classificationId).then((response) => {
-      console.log(response, 'response')
-      if (response.status === 200) {
-        thunkAPI.dispatch(setClassificationSchema(response.classification));
+    const { siteId, classificationId } = data;
+    await DocumentsService.getClassification(siteId, classificationId).then(
+      (response) => {
+        if (response.status === 200) {
+          thunkAPI.dispatch(setClassificationSchema(response.classification));
+        }
       }
-    });
+    );
   }
 );
 
@@ -104,9 +118,8 @@ export const schemasSlice = createSlice({
   initialState: defaultState,
   reducers: {
     setClassifications: (state, action) => {
-      const {classifications, isLoadingMore, next, page} =
-        action.payload;
-      let {isLastSearchPageLoaded = false} = action.payload;
+      const { classifications, isLoadingMore, next, page } = action.payload;
+      let { isLastSearchPageLoaded = false } = action.payload;
       isLastSearchPageLoaded = !next;
       if (classifications) {
         if (isLoadingMore) {
@@ -135,10 +148,9 @@ export const schemasSlice = createSlice({
     },
 
     setSiteSchema: (state, action) => {
-      state.siteSchema  = action.payload;
+      state.siteSchema = action.payload;
       return state;
     },
-
   },
 });
 

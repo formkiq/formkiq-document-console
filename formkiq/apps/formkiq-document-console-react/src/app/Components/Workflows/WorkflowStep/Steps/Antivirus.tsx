@@ -5,16 +5,7 @@ import {OneConditionSourceHandle} from "../../Handles/handles";
 import NodeTitle from "../NodeComponents/NodeTitle";
 import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
 
-const stepInfo = {
-  title: 'Anti-Malware Scan',
-  textInputParameters: {},
-  numberInputParameters: {},
-  selectParameters: {},
-  checkboxParameters: {},
-  decisions: ['APPROVE', 'REJECT'],
-}
-
-function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange}: any) {
+function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange, readOnly}: any) {
 
   const MAX_CONNECTIONS = 2;
   let isHandleConnectable = false
@@ -23,11 +14,12 @@ function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, o
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if(readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
   return (
     <>
-      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}
+      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep}/>}
       {!isEditing &&
         <NodeTitle icon={<AntivirusIcon/>} title="Anti-Malware Scan"/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
@@ -41,6 +33,7 @@ function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, o
           maxConnections={1}
           top="33%"
           id="approve"
+          readOnly={readOnly}
         />
         <OneConditionSourceHandle
           type="source"
@@ -49,6 +42,7 @@ function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, o
           maxConnections={1}
           top="66%"
           id="reject"
+          readOnly={readOnly}
         />
       </>}
       {isHandleConnectable && (

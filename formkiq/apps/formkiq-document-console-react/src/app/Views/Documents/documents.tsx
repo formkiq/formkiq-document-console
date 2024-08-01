@@ -50,8 +50,8 @@ import {
 } from '../../Store/reducers/config';
 import { setCurrentDocumentPath } from '../../Store/reducers/data';
 import {
-  DocumentListState,
   deleteDocument,
+  DocumentListState,
   fetchDeleteFolder,
   fetchDocuments,
   setDocumentLoadingStatusPending,
@@ -59,6 +59,12 @@ import {
   updateDocumentsList,
 } from '../../Store/reducers/documentsList';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
+import { fetchQueues, QueuesState } from '../../Store/reducers/queues';
+import {
+  fetchUsers,
+  UserManagementState,
+} from '../../Store/reducers/userManagement';
+import { fetchWorkflows, WorkflowsState } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
 import {
   InlineViewableContentTypes,
@@ -78,6 +84,9 @@ import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { Queue } from '../../helpers/types/queues';
+import { User } from '../../helpers/types/userManagement';
+import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
@@ -103,6 +112,9 @@ function Documents() {
     useSoftDelete,
     pendingArchive,
   } = useSelector(ConfigState);
+  const { workflows } = useSelector(WorkflowsState);
+  const { queues } = useSelector(QueuesState);
+  const { users } = useSelector(UserManagementState);
   const { allTags, allAttributes } = useSelector(AttributesDataState);
   const { documentAttributes } = useSelector(AttributesState);
   const subfolderUri = useSubfolderUri();
@@ -164,6 +176,9 @@ function Documents() {
     any
   ] = useState([]);
   const [currentDocumentVersions, setCurrentDocumentVersions] = useState(null);
+  const [currentDocumentActions, setCurrentDocumentActions] = useState<any[]>(
+    []
+  );
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
   const [isUploadModalOpened, setUploadModalOpened] = useState(false);
@@ -277,6 +292,7 @@ function Documents() {
           setCurrentDocument(response);
           // TODO: set folder to selected document path?
           updateTags();
+          updateDocumentActions();
         }
       );
     }
@@ -295,6 +311,9 @@ function Documents() {
   useEffect(() => {
     onDocumentInfoClick();
   }, [infoDocumentId]);
+  useEffect(() => {
+    dispatch(fetchUsers({ limit: 100, page: 1 }));
+  }, []);
 
   useEffect(() => {
     if (documentAttributes.length === 0 && currentDocumentTags) {
@@ -306,7 +325,6 @@ function Documents() {
       ...documentAttributes,
     ];
     sortedDocumentAttributesAndTags.sort((a, b) => a.key.localeCompare(b.key));
-    console.log(sortedDocumentAttributesAndTags);
     setSortedAttributesAndTags(sortedDocumentAttributesAndTags);
   }, [documentAttributes, currentDocumentTags]);
 
@@ -404,6 +422,102 @@ function Documents() {
       }
     }
   };
+
+  const updateDocumentActions = () => {
+    if (infoDocumentId.length) {
+      DocumentsService.getDocumentActions(infoDocumentId, currentSiteId).then(
+        (response: any) => {
+          if (response.status === 200) {
+            const actions = [...response.actions];
+            let isWorkflowsUpToDate = true;
+            let isQueuesUpToDate = true;
+            const addWorkflowNames = () => {
+              actions.forEach((action: any) => {
+                if (action.workflowId) {
+                  const workflowName = workflows.find(
+                    (workflow: WorkflowSummary) =>
+                      workflow.workflowId === action.workflowId
+                  )?.name;
+                  if (!workflowName) {
+                    isWorkflowsUpToDate = false;
+                  } else {
+                    action.workflowName = workflowName;
+                  }
+                }
+              });
+            };
+            const addQueueNames = () => {
+              actions.forEach((action: any) => {
+                if (action.queueId) {
+                  const queueName = queues.find(
+                    (queue: Queue) => queue.queueId === action.queueId
+                  )?.name;
+                  if (!queueName) {
+                    isQueuesUpToDate = false;
+                  } else {
+                    action.queueName = queueName;
+                  }
+                }
+              });
+            };
+            const addUserEmails = () => {
+              actions.forEach((action: any) => {
+                if (action.userId) {
+                  const userEmail = users.find(
+                    (user: User) => user.username === action.userId
+                  )?.email;
+                  action.userEmail = userEmail;
+                }
+              });
+            };
+            addWorkflowNames();
+            addQueueNames();
+            addUserEmails();
+
+            // re-fetch workflows and queues only if new IDs appeared
+            if (!isWorkflowsUpToDate || !isQueuesUpToDate) {
+              if (!isWorkflowsUpToDate) {
+                dispatch(
+                  fetchWorkflows({
+                    siteId: currentSiteId,
+                    limit: 100,
+                    page: 1,
+                    nextToken: null,
+                  })
+                );
+              }
+              if (!isQueuesUpToDate) {
+                dispatch(
+                  fetchQueues({
+                    siteId: currentSiteId,
+                    limit: 100,
+                    page: 1,
+                    nextToken: null,
+                  })
+                );
+              }
+              setTimeout(() => {
+                addWorkflowNames();
+                addQueueNames();
+                setCurrentDocumentActions(actions);
+              }, 500);
+            } else {
+              setCurrentDocumentActions(actions);
+            }
+          }
+        }
+      );
+    }
+  };
+
+  // update document actions every 5 seconds
+  useEffect(() => {
+    if (infoDocumentId && infoDocumentView === 'actions') {
+      const interval = setInterval(updateDocumentActions, 5000);
+      return () => clearInterval(interval);
+    }
+    return () => {};
+  }, [infoDocumentId, infoDocumentView, currentSiteId]);
 
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -1153,7 +1267,7 @@ function Documents() {
                       className="cursor-pointer w-16 flex items-center justify-start"
                     >
                       <img
-                        src={getFileIcon(file.path)}
+                        src={getFileIcon(file.path, file.deepLinkPath)}
                         className="w-8 inline-block"
                         alt="icon"
                       />
@@ -1402,11 +1516,14 @@ function Documents() {
                     <div className="w-12">
                       <img
                         alt="File Icon"
-                        src={getFileIcon((currentDocument as IDocument).path)}
+                        src={getFileIcon(
+                          (currentDocument as IDocument).path,
+                          (currentDocument as IDocument).deepLinkPath
+                        )}
                         className="w-12 h-12"
                       />
                     </div>
-                    <div className="grow-0 w-52 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                    <div className="grow-0 w-44 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                       {(currentDocument as IDocument).path}
                       {isCurrentDocumentSoftDeleted && (
                         <small className="block text-red-500 uppercase">
@@ -1414,7 +1531,7 @@ function Documents() {
                         </small>
                       )}
                     </div>
-                    <div className="w-8 grow-0 flex justify-start">
+                    <div className="w-8 grow-0 flex justify-end">
                       <div
                         className="w-4 mt-0.5 h-4 cursor-pointer text-gray-400"
                         onClick={(event) => {
@@ -1481,6 +1598,33 @@ function Documents() {
                         </div>
                       </div>
                     )}
+
+                    <div
+                      className="w-1/3 text-sm font-semibold cursor-pointer"
+                      onClick={(event) => {
+                        setInfoDocumentView('actions');
+                      }}
+                    >
+                      <div
+                        className={
+                          (infoDocumentView === 'actions'
+                            ? 'text-primary-500 '
+                            : 'text-gray-400 ') + ' text-center'
+                        }
+                      >
+                        Actions
+                      </div>
+                      <div className="flex justify-center">
+                        <hr
+                          className={
+                            (infoDocumentView === 'actions'
+                              ? 'border-primary-500 '
+                              : 'border-transparent ') +
+                            ' w-1/2 rounded-xl border-b border'
+                          }
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div
                     className={
@@ -1679,7 +1823,9 @@ function Documents() {
                                     });
                                   }
                                   return (
-                                    <>
+                                    <div
+                                      key={`keyonly_attribute_${item.key}_${i}`}
+                                    >
                                       {!item.stringValue &&
                                         !item.numberValue &&
                                         !item.booleanValue &&
@@ -1699,7 +1845,7 @@ function Documents() {
                                             ></div>
                                           </div>
                                         )}
-                                    </>
+                                    </div>
                                   );
                                 })}
                             </div>
@@ -1710,7 +1856,7 @@ function Documents() {
                         <div>
                           {sortedAttributesAndTags.length > 0 &&
                             sortedAttributesAndTags.map((item: any, i) => (
-                              <>
+                              <span key={`attr_${item.key}_${i}`}>
                                 {!item.stringValue &&
                                 !item.numberValue &&
                                 !item.booleanValue &&
@@ -1722,7 +1868,7 @@ function Documents() {
                                   <></>
                                 ) : (
                                   <div
-                                    key={'attribute_' + i}
+                                    key={`attribute_${item.key}_${i}`}
                                     className="flex flex-col pt-3"
                                   >
                                     <dt className="mb-1 text-smaller font-semibold">
@@ -1781,12 +1927,14 @@ function Documents() {
                                         <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
                                           {item.stringValues.map(
                                             (val: any, index: number) => (
-                                              <>
+                                              <span
+                                                key={`attr_string_${item.key}_${index}`}
+                                              >
                                                 {val}
                                                 {index <
                                                   item.stringValues.length -
                                                     1 && <hr />}
-                                              </>
+                                              </span>
                                             )
                                           )}
                                         </div>
@@ -1795,12 +1943,14 @@ function Documents() {
                                         <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
                                           {item.numberValues.map(
                                             (val: any, index: number) => (
-                                              <>
+                                              <span
+                                                key={`attr_number_${item.key}_${index}`}
+                                              >
                                                 {val}
                                                 {index <
                                                   item.numberValues.length -
                                                     1 && <hr />}
-                                              </>
+                                              </span>
                                             )
                                           )}
                                         </div>
@@ -1815,13 +1965,15 @@ function Documents() {
                                         <div className="-mr-2 rounded-lg border border-neutral-200 p-1 text-smaller font-normal max-h-24 overflow-auto">
                                           {item.values.map(
                                             (val: any, index: number) => (
-                                              <>
+                                              <span
+                                                key={`tag_value_${item.key}_${index}`}
+                                              >
                                                 {val}
                                                 {index <
                                                   item.values.length - 1 && (
                                                   <hr className="my-0.5" />
                                                 )}
-                                              </>
+                                              </span>
                                             )
                                           )}
                                         </div>
@@ -1829,7 +1981,7 @@ function Documents() {
                                     </dd>
                                   </div>
                                 )}
-                              </>
+                              </span>
                             ))}
                         </div>
                       </dl>
@@ -1969,6 +2121,104 @@ function Documents() {
                       </div>
                     </span>
                   </div>
+
+                  <div
+                    className={
+                      (infoDocumentView === 'actions' ? 'block ' : 'hidden ') +
+                      ' w-64 mr-12'
+                    }
+                  >
+                    <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
+                      {currentDocumentActions.length === 0 && (
+                        <div className="flex w-full justify-center italic text-smaller">
+                          (no actions exist for this document)
+                        </div>
+                      )}
+                      {currentDocumentActions.map((action: any, i: number) => (
+                        <div key={i} className="flex flex-col pb-3">
+                          <dt className="font-semibold text-sm">
+                            {action.type}
+                          </dt>
+                          <dd>
+                            <p
+                              className={`font-bold text-xs ${
+                                action.status === 'COMPLETE'
+                                  ? 'text-green-600'
+                                  : action.status === 'FAILED'
+                                  ? 'text-red-600'
+                                  : action.status === 'SKIPPED'
+                                  ? 'text-neutral-600'
+                                  : 'text-yellow-600'
+                              }`}
+                            >
+                              {action.status.replace(/_/g, ' ')}
+                            </p>
+
+                            {action.message && (
+                              <p className="font-medium text-xs italic">
+                                {action.message}
+                              </p>
+                            )}
+                            {action.userId && (
+                              <p className="pl-2 text-sm text-neutral-600 font-medium">
+                                User: {action.userEmail || action.userId}
+                              </p>
+                            )}
+                            {action.queueId && (
+                              <Link
+                                to={`${siteDocumentsRootUri}/queues/${action.queueId}`}
+                                className="pl-2 text-sm text-neutral-600 text-neutral-600 font-medium "
+                              >
+                                Queue:{' '}
+                                <span className="text-primary-500 hover:text-primary-600">
+                                  {queues.find(
+                                    (queue: any) =>
+                                      queue.queueId === action.queueId
+                                  )?.name || action.queueId}
+                                </span>
+                              </Link>
+                            )}
+                            {action.workflowId && (
+                              <Link
+                                to={`${
+                                  siteDocumentsRootUri.includes('workspaces')
+                                    ? siteDocumentsRootUri
+                                    : ''
+                                }/workflows/designer?workflowId=${
+                                  action.workflowId
+                                }`}
+                                className="pl-2 text-sm text-neutral-600 font-medium inline-block"
+                              >
+                                Workflow:{' '}
+                                <span className="text-primary-500 hover:text-primary-600">
+                                  {workflows.find(
+                                    (workflow: any) =>
+                                      workflow.workflowId === action.workflowId
+                                  )?.name || action.workflowId}
+                                </span>
+                              </Link>
+                            )}
+                            {action.insertedDate && (
+                              <p className="pl-2 text-medsmall text-neutral-600 font-medium">
+                                Inserted: {formatDate(action.insertedDate)}
+                              </p>
+                            )}
+                            {action.startDate && (
+                              <p className="pl-2 text-medsmall text-neutral-600 font-medium">
+                                Start: {formatDate(action.startDate)}
+                              </p>
+                            )}
+                            {action.completedDate && (
+                              <p className="pl-2 text-medsmall text-neutral-600 font-medium">
+                                End: {formatDate(action.completedDate)}
+                              </p>
+                            )}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+
                   <div className="hidden overflow-x-auto relative">
                     <div className="-mr-[4.625rem] p-4 text-[0.8125rem] leading-6 text-slate-900">
                       <div className="flex gap-4 pb-10 border-t border-slate-400/20 justify-center items-center py-6">

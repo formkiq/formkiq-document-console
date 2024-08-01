@@ -51,21 +51,25 @@ const AccessControl = React.lazy(
   () => import('../../Views/Account/accessControl')
 );
 const ManagePolicy = React.lazy(
-    () => import('../../Views/Account/managePolicy')
+  () => import('../../Views/Account/managePolicy')
 );
 
 const ObjectExamineTool = React.lazy(
   () => import('../../Views/Account/objectExamineTool')
 );
 
-const Schemas = React.lazy(
-  () => import('../../Views/Schemas/schemas')
+const Schemas = React.lazy(() => import('../../Views/Schemas/schemas'));
+const Classification = React.lazy(
+  () => import('../../Views/Schemas/classification')
 );
-const Classification = React.lazy(() => import('../../Views/Schemas/classification'));
 const SiteSchema = React.lazy(() => import('../../Views/Schemas/siteSchema'));
 const Groups = React.lazy(() => import('../../Views/UserManagement/groups'));
 const Group = React.lazy(() => import('../../Views/UserManagement/group'));
 const Users = React.lazy(() => import('../../Views/UserManagement/users'));
+
+const UserActivities = React.lazy(
+    () => import('../../Views/Account/userActivities')
+);
 
 const RoutesMapper = () => {
   return (
@@ -170,21 +174,29 @@ const RoutesMapper = () => {
 
       <Route path="/schemas" element={<Schemas />}></Route>
       <Route path="/schemas/workspaces/:siteId" element={<Schemas />}></Route>
-      <Route path="/schemas/workspaces/:siteId/:classificationId" element={<Classification />}></Route>
+      <Route
+        path="/schemas/workspaces/:siteId/:classificationId"
+        element={<Classification />}
+      ></Route>
       <Route path="/schemas/site-schema" element={<SiteSchema />}></Route>
-      <Route path="/schemas/workspaces/:siteId/site-schema" element={<SiteSchema />}></Route>
-      <Route path="/schemas/:classificationId" element={<Classification />}></Route>
-
-      <Route path="/groups" element={<Groups />}></Route>
-      <Route path="/groups/:groupName" element={<Group />}></Route>
-      <Route path="/users" element={<Users />}></Route>
+      <Route
+        path="/schemas/workspaces/:siteId/site-schema"
+        element={<SiteSchema />}
+      ></Route>
+      <Route
+        path="/schemas/:classificationId"
+        element={<Classification />}
+      ></Route>
 
       <Route
         path="/workspaces/:siteId/workflows/designer"
         element={<WorkflowDesigner />}
       ></Route>
       <Route path="/workflows" element={<Workflows />}></Route>
-      <Route path="/workflows/workspaces/:siteId" element={<Workflows />}></Route>
+      <Route
+        path="/workflows/workspaces/:siteId"
+        element={<Workflows />}
+      ></Route>
       <Route path="/workflows/designer" element={<WorkflowDesigner />}></Route>
       <Route
         path="/workflows/workspaces/:siteId/designer"
@@ -193,16 +205,27 @@ const RoutesMapper = () => {
       <Route path="/queues" element={<Queues />}></Route>
       <Route path="/queues/workspaces/:siteId" element={<Queues />}></Route>
       <Route path="/integrations/api" element={<ApiExplorer />}></Route>
-      <Route path="/integrations/apiKeys" element={<ApiKeys />}></Route>
-      <Route path="/integrations/apiKeys/workspaces/:siteId" element={<ApiKeys />}></Route>
+      <Route
+        path="/admin/api-keys/workspaces/:siteId"
+        element={<ApiKeys />}
+      ></Route>
       <Route path="/integrations/webhooks" element={<Webhooks />}></Route>
-      <Route path="/account/settings" element={<AccountSettings />}></Route>
-      <Route path="/account/accessControl" element={<AccessControl />}></Route>
-      <Route path="/account/accessControl/:siteId" element={<ManagePolicy />}></Route>
+      <Route path="/admin/settings" element={<AccountSettings />}></Route>
+      <Route path="/admin/api-keys" element={<ApiKeys />}></Route>
+      <Route path="/admin/groups" element={<Groups />}></Route>
+      <Route path="/admin/groups/:groupName" element={<Group />}></Route>
+      <Route path="/admin/users" element={<Users />}></Route>
+      <Route path="/admin/access-control" element={<AccessControl />}></Route>
+      <Route
+        path="/admin/access-control/:siteId"
+        element={<ManagePolicy />}
+      ></Route>
       <Route
         path="/object-examine-tool"
         element={<ObjectExamineTool />}
       ></Route>
+      <Route path="/admin/user-activities" element={<UserActivities />}></Route>
+      <Route path="/admin/user-activities/workspaces/:siteId" element={<UserActivities />}></Route>
       <Route path="*" element={<Page404 />}></Route>
     </Routes>
   );

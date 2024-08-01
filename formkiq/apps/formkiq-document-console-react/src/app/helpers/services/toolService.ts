@@ -2,93 +2,119 @@ import moment from 'moment';
 import { IDocument } from './../types/document';
 import { IFolder } from './../types/folder';
 
-export function getFileIcon(filename: string) {
+export function getFileIcon(path: string, deepLinkPath: string) {
   let fileIcon = '';
-  if (filename) {
-    const extension = filename.split('.').pop();
-    switch (extension) {
-      case 'png':
-        fileIcon = '/assets/img/svg/icon-png.svg';
-        break;
-      case 'jpg':
-      case 'jpeg':
-        fileIcon = '/assets/img/svg/icon-jpg.svg';
-        break;
-      case 'gif':
-        fileIcon = '/assets/img/svg/icon-gif.svg';
-        break;
-      case 'svg':
-        fileIcon = '/assets/img/svg/icon-svg.svg';
-        break;
-      case 'webm':
-        fileIcon = '/assets/img/svg/icon-webm.svg';
-        break;
-      case 'webp':
-        fileIcon = '/assets/img/svg/icon-webp.svg';
-        break;
-      case 'csv':
-        fileIcon = '/assets/img/svg/icon-csv.svg';
-        break;
-      case 'json':
-        fileIcon = '/assets/img/svg/icon-json.svg';
-        break;
-      case 'doc':
-        fileIcon = '/assets/img/svg/icon-doc.svg';
-        break;
-      case 'docx':
-        fileIcon = '/assets/img/svg/icon-docx.svg';
-        break;
-      case 'pdf':
-        fileIcon = '/assets/img/svg/icon-pdf.svg';
-        break;
-      case 'xls':
-        fileIcon = '/assets/img/svg/icon-xls.svg';
-        break;
-      case 'xlsx':
-        fileIcon = '/assets/img/svg/icon-xlsx.svg';
-        break;
-      case 'ppt':
-        fileIcon = '/assets/img/svg/icon-ppt.svg';
-        break;
-      case 'pptx':
-        fileIcon = '/assets/img/svg/icon-pptx.svg';
-        break;
-      case 'rtf':
-        fileIcon = '/assets/img/svg/icon-rtf.svg';
-        break;
-      case 'txt':
-        fileIcon = '/assets/img/svg/icon-txt.svg';
-        break;
-      case 'html':
-      case 'htm':
-      case 'xhtml':
-      case 'whtml':
-        fileIcon = '/assets/img/svg/icon-html.svg';
-        break;
-      case 'ico':
-        fileIcon = '/assets/img/svg/icon-ico.svg';
-        break;
-      case 'mp3':
-        fileIcon = '/assets/img/svg/icon-mp3.svg';
-        break;
-      case 'ogg':
-        fileIcon = '/assets/img/svg/icon-ogg.svg';
-        break;
-      case 'wav':
-        fileIcon = '/assets/img/svg/icon-wav.svg';
-        break;
-      case 'eml':
-        fileIcon = '/assets/img/svg/icon-eml.svg';
-        break;
-      case 'dwg':
-        fileIcon = '/assets/img/svg/icon-dwg.svg';
-        break;
-      default:
-        fileIcon = '/assets/img/svg/icon-default.svg';
-        break;
+  if (deepLinkPath?.length > 0) {
+    if (deepLinkPath.indexOf('docs.google.com/document') > -1) {
+      fileIcon = '/assets/img/svg/icon-google-docs.svg';
+    } else if (deepLinkPath.indexOf('docs.google.com/spreadsheets') > -1) {
+      fileIcon = '/assets/img/svg/icon-google-sheets.svg';
+    } else if (deepLinkPath.indexOf('docs.google.com/presentation') > -1) {
+      fileIcon = '/assets/img/svg/icon-google-slides.svg';
+    } else if (deepLinkPath.indexOf('docs.google.com/forms') > -1) {
+      fileIcon = '/assets/img/svg/icon-google-forms.svg';
+    } else if (deepLinkPath.indexOf('https://forms.office.com') > -1) {
+      fileIcon = '/assets/img/svg/icon-microsoft-forms.svg';
+    } else if (deepLinkPath.indexOf('https://1drv.ms/') > -1) {
+      fileIcon = '/assets/img/svg/icon-microsoft-onedrive.svg';
+    } else {
+      fileIcon = '/assets/img/svg/icon-deeplink.svg';
     }
-  } else {
-    fileIcon = '/assets/img/svg/icon-default.svg';
+  }
+  if (!fileIcon.length) {
+    if (path) {
+      const extension = path.split('.').pop();
+      switch (extension) {
+        case 'png':
+          fileIcon = '/assets/img/svg/icon-png.svg';
+          break;
+        case 'jpg':
+        case 'jpeg':
+          fileIcon = '/assets/img/svg/icon-jpg.svg';
+          break;
+        case 'gif':
+          fileIcon = '/assets/img/svg/icon-gif.svg';
+          break;
+        case 'svg':
+          fileIcon = '/assets/img/svg/icon-svg.svg';
+          break;
+        case 'tif':
+        case 'tiff':
+          fileIcon = '/assets/img/svg/icon-tiff.svg';
+          break;
+        case 'webm':
+          fileIcon = '/assets/img/svg/icon-webm.svg';
+          break;
+        case 'webp':
+          fileIcon = '/assets/img/svg/icon-webp.svg';
+          break;
+        case 'csv':
+          fileIcon = '/assets/img/svg/icon-csv.svg';
+          break;
+        case 'json':
+          fileIcon = '/assets/img/svg/icon-json.svg';
+          break;
+        case 'doc':
+          fileIcon = '/assets/img/svg/icon-doc.svg';
+          break;
+        case 'docx':
+          fileIcon = '/assets/img/svg/icon-docx.svg';
+          break;
+        case 'pdf':
+          fileIcon = '/assets/img/svg/icon-pdf.svg';
+          break;
+        case 'xls':
+          fileIcon = '/assets/img/svg/icon-xls.svg';
+          break;
+        case 'xlsx':
+          fileIcon = '/assets/img/svg/icon-xlsx.svg';
+          break;
+        case 'ppt':
+          fileIcon = '/assets/img/svg/icon-ppt.svg';
+          break;
+        case 'pptx':
+          fileIcon = '/assets/img/svg/icon-pptx.svg';
+          break;
+        case 'rtf':
+          fileIcon = '/assets/img/svg/icon-rtf.svg';
+          break;
+        case 'txt':
+          fileIcon = '/assets/img/svg/icon-txt.svg';
+          break;
+        case 'html':
+        case 'htm':
+        case 'xhtml':
+        case 'whtml':
+          fileIcon = '/assets/img/svg/icon-html.svg';
+          break;
+        case 'ico':
+          fileIcon = '/assets/img/svg/icon-ico.svg';
+          break;
+        case 'mp3':
+          fileIcon = '/assets/img/svg/icon-mp3.svg';
+          break;
+        case 'ogg':
+          fileIcon = '/assets/img/svg/icon-ogg.svg';
+          break;
+        case 'wav':
+          fileIcon = '/assets/img/svg/icon-wav.svg';
+          break;
+        case 'eml':
+          fileIcon = '/assets/img/svg/icon-eml.svg';
+          break;
+        case 'md':
+          fileIcon = '/assets/img/svg/icon-md.svg';
+          break;
+        case 'dwg':
+          fileIcon = '/assets/img/svg/icon-dwg.svg';
+          break;
+        default:
+          fileIcon = '/assets/img/svg/icon-default.svg';
+          break;
+      }
+    } else {
+      fileIcon = '/assets/img/svg/icon-default.svg';
+    }
   }
   return fileIcon;
 }
@@ -305,9 +331,9 @@ export function getCurrentSiteInfo(
           )}`;
         }
       }
-    } else if (pathname.indexOf('/integrations/apiKeys') === 0) {
-      if (pathname.indexOf('/integrations/apiKeys/workspaces') === 0) {
-        currentSiteInfo.siteId = pathname.substring(33).split('/')[0]; // 33 is the length of '/integrations/apiKeys/workspaces'
+    } else if (pathname.indexOf('/admin/api-keys') === 0) {
+      if (pathname.indexOf('/admin/api-keys/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(27).split('/')[0]; // 27 is the length of '/admin/api-keys/workspaces'
         currentSiteInfo.siteDocumentsRootName = `API Keys: ${(
           currentSiteInfo.siteId as any
         ).replaceAll('_', ' ')}`;
@@ -317,7 +343,29 @@ export function getCurrentSiteInfo(
           currentSiteInfo.siteDocumentsRootName = 'API Keys';
         } else if (hasWorkspaces) {
           currentSiteInfo.siteId = workspaceSites[0].siteId;
-          currentSiteInfo.siteRedirectUrl = `/integrations/apiKeys/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/admin/api-keys/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/admin/user-activities') === 0) {
+      if (pathname.indexOf('/admin/user-activities/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(34).split('/')[0]; // 34 is the length of '/admin/user-activities/workspaces'
+        currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `User Activities: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'User Activities';
+          currentSiteInfo.siteDocumentsRootUri = '/documents';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/admin/user-activities/workspaces/${workspaceSites[0].siteId}`;
           currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
             '_',
             ' '

@@ -113,7 +113,7 @@ export function AccessControl() {
           <div className="w-[2px] min-w-[2px] block h-6 bg-neutral-500 "></div>
           <a
             className="text-sm font-bold text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-            href={`/account/accessControl?selectedPolicySiteId=${siteId}`}
+            href={`/admin/access-control?selectedPolicySiteId=${siteId}`}
           >
             Back To Policy View
           </a>
@@ -155,7 +155,7 @@ export function AccessControl() {
             </div>
             <RegoEditor
               content={policyItem.policy}
-              readOnly="nocursor"
+              readOnly={true}
               onChange={() => {}}
             />
           </div>

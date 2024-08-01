@@ -298,7 +298,7 @@ export function SignIn() {
                           'An unexpected error has occurred. Please try again in a few minutes.',
                       })
                     );
-                    console.log(response);
+                    //console.log(response);
                     break;
                 }
               } else {
@@ -308,7 +308,7 @@ export function SignIn() {
                       'An unexpected error has occurred. Please try again in a few minutes.',
                   })
                 );
-                console.log(response);
+                //console.log(response);
               }
             }
           });

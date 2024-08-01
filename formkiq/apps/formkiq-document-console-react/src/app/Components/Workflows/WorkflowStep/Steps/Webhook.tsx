@@ -6,18 +6,7 @@ import NodeTitle from "../NodeComponents/NodeTitle";
 import TextInput from "../NodeComponents/TextInput";
 import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
 
-const stepInfo = {
-  title: 'Webhook',
-  textInputParameters: {
-    url: {title:'Webhook URL'},
-  },
-  numberInputParameters: {},
-  selectParameters: {},
-  checkboxParameters: {},
-  decisions: ['APPROVE'],
-}
-
-function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange}: any) {
+function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNode, onChange, readOnly}: any) {
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false
   let connectionsNumber = MAX_CONNECTIONS
@@ -25,13 +14,14 @@ function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNod
     connectionsNumber = edges.filter((e: any) => e.source === id).length;
   }
   isHandleConnectable = useMemo(() => {
+    if(readOnly) return false;
     return connectionsNumber < MAX_CONNECTIONS;
   }, [connectionsNumber, MAX_CONNECTIONS]);
 
 
   return (
     <>
-      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep} info={stepInfo}/>}
+      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep}/>}
       {!isEditing && <NodeTitle icon={<Rule />} title="Webhook"/>}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
 
@@ -47,6 +37,7 @@ function Webhook({newStep, setNewStep, isEditing, data, edges, id, addCreatorNod
         id="approve"
         maxConnections={1}
         nodeId={id}
+        readOnly={readOnly}
       ></DefaultSourceHandle>}
       {isHandleConnectable && (
         <div

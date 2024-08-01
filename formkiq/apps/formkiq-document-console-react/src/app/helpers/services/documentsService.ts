@@ -773,20 +773,20 @@ export class DocumentsService {
   public static async updateDocumentTag(
     documentId: string,
     tagKey: string,
-    newValue: string,
+    newValue: string | string[],
     siteId = ''
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
     let body = {};
-    if (newValue.includes(',')) {
+    if ( typeof newValue === 'string'){
       body = {
-        values: newValue.split(','),
+        value: newValue,
       };
     } else {
       body = {
-        value: newValue,
+        values: newValue,
       };
     }
     return this.getFormkiqClient().documentsApi.updateDocumentTag({
@@ -2120,4 +2120,74 @@ export class DocumentsService {
     });
   }
 
+
+
+  @formkiqAPIHandler
+  public static async addDocument(
+    siteId: string,
+    addOrUpdateDocumentParameters: any
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.addDocument({
+      siteId,
+      addOrUpdateDocumentParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getUserActivities(
+      siteId: string,
+      userId = null,
+      limit = 20,
+      next = null,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getUserActivities({
+      siteId,
+      limit,
+      next,
+      userId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getDocumentUserActivities(
+    siteId: string,
+    limit = 20,
+    next = null,
+    documentId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getDocumentUserActivities({
+      siteId,
+      limit,
+      next,
+      documentId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getDocumentContent(
+    siteId: string,
+    documentId: string,
+    versionKey: any,
+    inline = false,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getDocumentContent({
+      siteId,
+      documentId,
+      versionKey,
+      inline,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getMappings(
+      siteId: string,
+      limit = 20,
+      next = null,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getMappings({
+      siteId,
+      limit,
+      next,
+    });
+  }
 }

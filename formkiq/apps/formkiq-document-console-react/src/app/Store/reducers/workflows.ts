@@ -1,22 +1,22 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   Edge,
   MarkerType,
   applyEdgeChanges,
   applyNodeChanges,
 } from 'reactflow';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
-import {DocumentsService} from '../../helpers/services/documentsService';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   DecisionType,
   NodeType,
+  RequestStatus,
   Workflow,
   WorkflowStep,
   WorkflowStepActionType,
-  RequestStatus,
-  WorkflowSummary
+  WorkflowSummary,
 } from '../../helpers/types/workflows';
-import {RootState} from '../store';
+import { RootState } from '../store';
 
 export interface WorkflowsState {
   nodes: NodeType[];
@@ -52,10 +52,9 @@ function workflowToNodes(workflow: Workflow) {
   const edges: Edge[] = [];
 
   for (const step of workflow.steps) {
-
-    let label: WorkflowStepActionType | "" = "";
+    let label: WorkflowStepActionType | '' = '';
     if (step.queue) {
-      label = "QUEUE";
+      label = 'QUEUE';
     }
     if (step.action) {
       label = step.action.type;
@@ -67,7 +66,7 @@ function workflowToNodes(workflow: Workflow) {
         parameters: step.action?.parameters,
         queue: step.queue,
       },
-      position: {x: 0, y: 0},
+      position: { x: 0, y: 0 },
       type: 'defaultNode',
     });
 
@@ -82,12 +81,12 @@ function workflowToNodes(workflow: Workflow) {
         target: decision.nextStepId,
         sourceHandle: decision.type === 'APPROVE' ? 'approve' : 'reject',
         targetHandle: 'a',
-        markerEnd: {type: MarkerType.Arrow},
+        markerEnd: { type: MarkerType.Arrow },
       });
     }
   }
-  console.log(nodes, 'nodes workflowToNodes')
-  return {nodes, edges};
+  // console.log(nodes, 'nodes workflowToNodes')
+  return { nodes, edges };
 }
 
 const nodesToWorkflow = (
@@ -106,7 +105,6 @@ const nodesToWorkflow = (
   }
 
   for (const node of nodes) {
-    console.log(node, 'node')
     if (node.data.label === '') {
       continue;
     }
@@ -146,18 +144,17 @@ const nodesToWorkflow = (
   newWorkflow.steps = Object.keys(stepsMap).map(
     (key) => stepsMap[key] as WorkflowStep
   );
-  console.log(newWorkflow, 'newWorkflow')
   return newWorkflow;
 };
 
 export const fetchWorkflow = createAsyncThunk(
   'workflows/fetchWorkflow',
   async (data: any, thunkAPI) => {
-    const {siteId, workflowId} = data;
+    const { siteId, workflowId } = data;
     await DocumentsService.getWorkflow(workflowId, siteId).then(
       (response: Workflow) => {
         thunkAPI.dispatch(setWorkflow(response));
-        const {nodes, edges} = workflowToNodes(response);
+        const { nodes, edges } = workflowToNodes(response);
         thunkAPI.dispatch(setNodes(nodes));
         thunkAPI.dispatch(setEdges(edges));
       }
@@ -168,21 +165,29 @@ export const fetchWorkflow = createAsyncThunk(
 export const updateWorkflowSteps = createAsyncThunk(
   'workflows/updateWorkflow',
   async (data: any, thunkAPI) => {
-    const {siteId, workflowId} = data;
-    const {workflowsState} = thunkAPI.getState() as RootState;
-    const {nodes, edges, workflow} = workflowsState;
+    const { siteId, workflowId } = data;
+    const { workflowsState } = thunkAPI.getState() as RootState;
+    const { nodes, edges, workflow } = workflowsState;
     const newWorkflow: Workflow = nodesToWorkflow(nodes, edges, workflow);
     await DocumentsService.putWorkflow(workflowId, newWorkflow, siteId).then(
       (response) => {
         if (response.status === 200) {
           thunkAPI.dispatch(
-            openNotificationDialog({dialogTitle: "Workflow was saved successfully"})
+            openNotificationDialog({
+              dialogTitle: 'Workflow was saved successfully',
+            })
           );
         } else {
-          const errors = response.errors.map((error: any) => error.error).join('\n');
-          thunkAPI.dispatch(
-            openNotificationDialog({dialogTitle: errors})
-          );
+          if (response?.errors) {
+            const errors = response.errors
+              .map((error: any) => error.error)
+              .join('\n');
+            thunkAPI.dispatch(openNotificationDialog({ dialogTitle: errors }));
+          } else {
+            thunkAPI.dispatch(
+              openNotificationDialog({ dialogTitle: 'Error saving workflow' })
+            );
+          }
         }
         thunkAPI.dispatch(setWorkflow(newWorkflow));
       }
@@ -193,50 +198,57 @@ export const updateWorkflowSteps = createAsyncThunk(
 export const fetchWorkflows = createAsyncThunk(
   'workflows/fetchWorkflows',
   async (data: any, thunkAPI) => {
-    const {siteId, nextToken, limit, page} = data;
-    await DocumentsService.getWorkflows(siteId, null, null,nextToken, limit).then(
-      (response) => {
-        if (response) {
-          const data = {
-            siteId,
-            workflows: response.workflows,
-            isLoadingMore: false,
-            isLastSearchPageLoaded: false,
-            next: response.next,
-            page,
-          };
-          if (page > 1) {
-            data.isLoadingMore = true;
-          }
-          if (response.documents?.length === 0) {
-            data.isLastSearchPageLoaded = true;
-          }
-          thunkAPI.dispatch(setWorkflows(data));
+    const { siteId, nextToken, limit, page } = data;
+    await DocumentsService.getWorkflows(
+      siteId,
+      null,
+      null,
+      nextToken,
+      limit
+    ).then((response) => {
+      if (response) {
+        const data = {
+          siteId,
+          workflows: response.workflows,
+          isLoadingMore: false,
+          isLastSearchPageLoaded: false,
+          next: response.next,
+          page,
+        };
+        if (page > 1) {
+          data.isLoadingMore = true;
         }
+        if (response.documents?.length === 0) {
+          data.isLastSearchPageLoaded = true;
+        }
+        thunkAPI.dispatch(setWorkflows(data));
       }
-    );
+    });
   }
 );
 
 export const deleteWorkflow = createAsyncThunk(
   'workflows/deleteWorkflow',
   async (data: any, thunkAPI) => {
-    const {siteId, workflowId, workflows} = data;
-    await DocumentsService.deleteWorkflow(workflowId, siteId).then((response) => {
-      if (response.status === 200) {
-        thunkAPI.dispatch(
-          setWorkflows({
-            workflows: workflows.filter(
-              (workflow: WorkflowSummary) => workflow.workflowId !== workflowId
-            ),
-          })
-        );
-      } else {
-        thunkAPI.dispatch(
-          openNotificationDialog({dialogTitle: response.message})
-        );
+    const { siteId, workflowId, workflows } = data;
+    await DocumentsService.deleteWorkflow(workflowId, siteId).then(
+      (response) => {
+        if (response.status === 200) {
+          thunkAPI.dispatch(
+            setWorkflows({
+              workflows: workflows.filter(
+                (workflow: WorkflowSummary) =>
+                  workflow.workflowId !== workflowId
+              ),
+            })
+          );
+        } else {
+          thunkAPI.dispatch(
+            openNotificationDialog({ dialogTitle: response.message })
+          );
+        }
       }
-    });
+    );
   }
 );
 
@@ -310,7 +322,7 @@ export const workflowsSlice = createSlice({
     },
 
     setWorkflows: (state, action) => {
-      const {workflows, isLoadingMore, next} = action.payload;
+      const { workflows, isLoadingMore, next } = action.payload;
       const isLastSearchPageLoaded = !next;
       if (workflows) {
         if (isLoadingMore) {

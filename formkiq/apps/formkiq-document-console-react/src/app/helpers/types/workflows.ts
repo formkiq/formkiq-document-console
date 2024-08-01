@@ -39,7 +39,8 @@ export type WorkflowStepActionType =
   | 'DOCUMENTTAGGING'
   | 'NOTIFICATION'
   | 'QUEUE'
-  | 'PUBLISH';
+  | 'PUBLISH'
+  | 'IDP';
 export type DecisionType = 'APPROVE' | 'REJECT';
 type OcrEngine = 'TESSERACT' | 'TEXTRACT';
 type OcrParseTypes = 'TEXT' | 'FORMS' | 'TABLES';
@@ -61,6 +62,7 @@ export type WorkflowStepActionParameters = {
   notificationText?: string;
   notificationHtml?: string;
   tags?: string;
+  mappingId?: string;
 };
 export type WorkflowStep = {
   stepId: string;

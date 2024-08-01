@@ -25,6 +25,8 @@ function RegoEditor({
         theme: 'base16-light',
         lineNumbers: true,
         readOnly: readOnly,
+        showCursorWhenSelecting: false,
+        cursorBlinkRate: -1
       });
 
       editor.setSize('100%', '150%');

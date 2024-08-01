@@ -160,7 +160,7 @@ export const addUserToGroup = createAsyncThunk(
       } else {
         thunkAPI.dispatch(
           openNotificationDialog({
-            dialogTitle: 'Error adding user to group',
+            dialogTitle: `Error adding user to ${groupName} group`,
           })
         );
       }

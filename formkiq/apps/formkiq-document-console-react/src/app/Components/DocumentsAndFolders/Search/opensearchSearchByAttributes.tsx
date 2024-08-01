@@ -287,7 +287,7 @@ export default function OpenSearchByAttributes({
         />
         {attributeKeys.length ? (
           <div className="h-8 gap-2 flex items-center">
-            <div className="h-8 flex items-center gap-2">
+            <div className="h-8 flex items-center gap-2 w-full max-w-[350px]">
               <RadioCombobox
                 values={attributeKeys}
                 selectedValue={selectedAttributeKey}
