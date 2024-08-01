@@ -203,13 +203,15 @@ export class DocumentsService {
   }
 
   public static deleteDocumentVersion(
+    siteId: string,
     documentId: string,
     versionKey: string
   ): Promise<any> {
-    const apiClient = this.getFormkiqClient().apiClient;
-    const url = `${apiClient.host}/documents/${documentId}/versions/${versionKey}`;
-    const options = apiClient.buildOptions('DELETE');
-    return apiClient.fetchAndRespond(url, options);
+    return this.getFormkiqClient().documentsApi.deleteDocumentVersion({
+      siteId,
+      documentId,
+      versionKey,
+    });
   }
 
   @formkiqAPIHandler
