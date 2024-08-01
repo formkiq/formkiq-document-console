@@ -36,9 +36,12 @@ function AttributesList({
     } else if (attribute?.stringValues) {
       setEditValue(attribute.stringValues);
     } else if (attribute.numberValue !== undefined) {
-      setEditValue([]);
-      setNewValue(attribute.numberValue);
-      setIsAddingValue(true);
+      setNewValue("");
+      setEditValue([attribute.numberValue])
+      setEditingItems([{
+        oldValue: attribute.numberValue,
+        newValue: attribute.numberValue
+      }])
     } else if (attribute?.numberValues) {
       setEditValue(attribute.numberValues);
     } else if (attribute.booleanValue !== undefined) {
@@ -66,114 +69,74 @@ function AttributesList({
       }
     }
 
-    const onSavingStringAttribute = () => {
-      // Check if newValue exists and is not empty
-      if (newValue && newValue !== "") {
-        // If there are editing items
-        if (editingItems.length > 0) {
-          const updatedValues = editValue.map((item) => {
-            const editingItem = editingItems.find(ei => ei.oldValue === item);
-            return editingItem ? editingItem.newValue : item;
-          });
-          newAttributeValue.attribute.stringValues = [...updatedValues, newValue];
+    const onSavingStringAttribute = () => { // Function to handle saving string attributes. Returns false if there's no attributes.
+      const updatedValues: string[] = []
+      editValue.forEach((item) => {
+        const editingItem = editingItems.find((editingItem) => editingItem.oldValue === item)
+        if (editingItem) {
+          if (editingItem.newValue !== undefined && editingItem.newValue !== "") {
+            updatedValues.push(editingItem.newValue)
+          }
         } else {
-          // If there are no editing items
-          newAttributeValue.attribute.stringValues = editValue.length > 0 ? [...editValue, newValue] : [newValue];
+          updatedValues.push(item)
         }
-      } else if (editingItems.length > 0) {
-        // If newValue is empty but there are editing items
-        const updatedValues = editValue.map((item) => {
-          const editingItem = editingItems.find(ei => ei.oldValue === item);
-          return editingItem ? editingItem.newValue : item;
-        });
-        newAttributeValue.attribute.stringValues = updatedValues;
+      })
+
+      if (newValue && newValue !== "" && updatedValues.length > 0) {
+        newAttributeValue.attribute.stringValues = [...updatedValues, newValue.toString()]
+      } else if (newValue && newValue !== "" && updatedValues.length === 0) {
+        newAttributeValue.attribute.stringValue = newValue.toString()
+      } else if ((!newValue || newValue === "") && updatedValues.length > 0) {
+        if (updatedValues.length === 1) {
+          newAttributeValue.attribute.stringValue = updatedValues[0]
+        } else if (updatedValues.length > 1) {
+          newAttributeValue.attribute.stringValues = updatedValues
+        }
       } else {
-        // If newValue is empty and there are no editing items
-        if (editValue.length > 0) {
-          newAttributeValue.attribute.stringValues = editValue;
-        } else {
-          dispatch(openNotificationDialog({
-            dialogTitle: "Error updating attribute. At least one value is required for the attribute."
-          }));
-          return false;
-        }
+        dispatch(openNotificationDialog({
+          dialogTitle: "Error updating attribute. At least one value is required for the attribute."
+        }))
+        return false;
       }
       return true;
-    };
+    }
+    
+    const onSavingNumberAttribute = () => { // Function to handle saving number attributes. Returns false if there's no attributes.
+      const updatedValues: number[] = []
+      editValue.forEach((item) => {
+        const editingItem = editingItems.find((editingItem) => editingItem.oldValue === item)
+        if (editingItem) {
+          if (editingItem.newValue !== undefined && editingItem.newValue !== "") {
+            updatedValues.push(editingItem.newValue)
+          }
+        } else {
+          updatedValues.push(item)
+        }
+      })
 
-    // const onSavingStringAttribute = () => { // Function to handle saving string attributes. Returns false if there's no attributes.
-    //   if (newValue && newValue !== "" && editingItems.length > 0) {
-    //     const updatedValues = editValue.map((item) => {
-    //       const editingItem = editingItems.find((editingItem) => editingItem.oldValue === item)
-    //       if (editingItem) {
-    //         return editingItem.newValue
-    //       }
-    //       return item
-    //     })
-    //     newAttributeValue.attribute.stringValues = [...updatedValues, newValue]
-    //   } else if (newValue && newValue !== "" && editingItems.length === 0) {
-    //     if (editValue.length === 1) {
-    //       newAttributeValue.attribute.stringValues = [editValue[0].toString(), newValue]
-    //     } else if (editValue.length > 1) {
-    //       newAttributeValue.attribute.stringValues = [...editValue, newValue]
-    //     } else {
-    //       newAttributeValue.attribute.stringValue = newValue.toString()
-    //     }
-    //   } else if (!newValue && newValue === "" && editingItems.length > 0) {
-    //     const updatedValues = editValue.map((item) => {
-    //       const editingItem = editingItems.find((editingItem) => editingItem.oldValue === item)
-    //       if (editingItem) {
-    //         return editingItem.newValue
-    //       }
-    //       return item
-    //     })
-    //     if (updatedValues.length === 1) {
-    //       newAttributeValue.attribute.stringValue = updatedValues[0].toString()
-    //     } else if (updatedValues.length > 1) {
-    //       newAttributeValue.attribute.stringValues = updatedValues
-    //     }
-    //   } else {
-    //     if (editValue.length === 1) {
-    //       newAttributeValue.attribute.stringValue = editValue[0].toString()
-    //     } else if (editValue.length > 1) {
-    //       newAttributeValue.attribute.stringValues = editValue
-    //     } else {
-    //       dispatch(openNotificationDialog({
-    //         dialogTitle: "Error updating attribute. At least one value is required for the attribute."
-    //       }))
-    //       return false;
-    //     }
-    //   }
-    //   return true;
-    // }
-
-
+      if (newValue !== undefined && newValue !== "" && updatedValues.length > 0) {
+        newAttributeValue.attribute.numberValues = [...updatedValues, Number(newValue)]
+      } else if (newValue !== undefined && newValue !== "" && updatedValues.length === 0) {
+        newAttributeValue.attribute.numberValue = Number(newValue)
+      } else if ((newValue === undefined || newValue === "") && updatedValues.length > 0) {
+        if (updatedValues.length === 1) {
+          newAttributeValue.attribute.numberValue = updatedValues[0]
+        } else if (updatedValues.length > 1) {
+          newAttributeValue.attribute.numberValues = updatedValues
+        }
+      } else {
+        dispatch(openNotificationDialog({
+          dialogTitle: "Error updating attribute. At least one value is required for the attribute."
+        }))
+        return false;
+      }
+      return true;
+    }
+    if (attribute?.numberValue || attribute?.numberValues) {
+      if (!onSavingNumberAttribute()) return
+    }
     if (attribute?.stringValue || attribute?.stringValues) {
       if (!onSavingStringAttribute()) return
-    }
-    if (attribute?.numberValue !== undefined) {
-      if (editValue.length === 1) {
-        newAttributeValue.attribute.numberValue = editValue[0]
-      } else if (editValue.length > 1) {
-        newAttributeValue.attribute.numberValues = editValue
-      } else {
-        dispatch(openNotificationDialog({
-          dialogTitle: "Error updating attribute. At least one value is required for the attribute."
-        }))
-        return;
-      }
-    }
-    if (attribute?.numberValues) {
-      if (editValue.length > 1) {
-        newAttributeValue.attribute.numberValues = editValue
-      } else if (editValue.length === 1) {
-        newAttributeValue.attribute.numberValue = editValue[0]
-      } else {
-        dispatch(openNotificationDialog({
-          dialogTitle: "Error updating attribute. At least one value is required for the attribute."
-        }))
-        return;
-      }
     }
     if (attribute?.booleanValue !== undefined) {
       newAttributeValue.attribute.booleanValue = newValue as boolean;
@@ -211,6 +174,13 @@ function AttributesList({
 
     function handleUpdateValue() {
       if (!updatedItem) return;
+      // check if newValue is not empty
+      if (updatedItem.newValue === '') {
+        dispatch(openNotificationDialog({
+          dialogTitle: "Error updating value. Value cannot be empty."
+        }))
+        return;
+      }
       if (editValue.includes(updatedItem.newValue)) {
         // check if it is not the same item
         if (updatedItem.newValue !== updatedItem.oldValue) {
@@ -225,6 +195,7 @@ function AttributesList({
       const index = newEditValue.indexOf(updatedItem.oldValue);
       newEditValue.splice(index, 1, updatedItem.newValue);
       setEditValue(newEditValue);
+      // remove item from editingItems
       setEditingItems(editingItems.filter(item => item.oldValue !== updatedItem.oldValue));
     }
 
@@ -355,15 +326,39 @@ function AttributesList({
                         </div>}
 
                       {(attribute?.numberValue !== undefined || attribute?.numberValues) &&
-                        editValue.map((value: number, index: number) => (
-                          <div key={"numberValue" + index}
-                               className="cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
-                            <span className="text-ellipsis overflow-hidden">{value}</span>
-                            <button title="Remove Value" type="button" className="w-4 h-4 min-w-4 text-neutral-900"
-                                    onClick={() => deleteValue(value)}>
-                              <Close/>
-                            </button>
-                          </div>))}
+                        editValue.map((value: number, index: number) => {
+                          const editedItem = editingItems.find((item: { oldValue: number, newValue: number }) => item.oldValue === value)
+                          return (<div key={"numberValue" + index}>
+                            {editedItem ? (
+                              <div
+                                className="flex flex-row items-center justify-start flex-wrap gap-2 rounded-md bg-neutral-100 px-2 py-1.5">
+                                <input type="number" className='h-7 px-4 border-none text-sm rounded-md'
+                                       required placeholder="Value"
+                                       onKeyDown={(e) => ["e", "E", "+"].includes(e.key) && e.preventDefault()}
+                                       onChange={(e) => onEditingExistingValue(e.target.value, value)}
+                                       value={editedItem.newValue as number} step="any"/>
+                                <ConfirmButton itemType="edit" updatedItem={editedItem}/>
+                                <CancelAddNewValueButton itemType="edit" updatedItem={editedItem}/>
+                              </div>
+                            ) : (
+                              <div
+                                className="cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
+                                <span className="truncate">{value}</span>
+                                <button title="Remove Value" type="button"
+                                        className="w-4 h-4 min-w-4 text-neutral-900"
+                                        onClick={() => onValueEdit(value)}>
+                                  <Pencil/>
+                                </button>
+                                <button title="Remove Value" type="button"
+                                        className="w-4 h-4 min-w-4 text-neutral-900"
+                                        onClick={() => deleteValue(value)}>
+                                  <Close/>
+                                </button>
+                              </div>
+                            )}
+                          </div>)
+                        })
+                      }
 
                       {(attribute?.numberValue !== undefined || attribute?.numberValues) &&
                         <div className="flex flex-row items-center justify-start flex-wrap gap-2">
