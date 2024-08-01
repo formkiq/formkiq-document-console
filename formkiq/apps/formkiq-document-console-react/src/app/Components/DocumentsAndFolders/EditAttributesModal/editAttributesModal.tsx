@@ -55,7 +55,7 @@ export default function EditAttributesModal({
     }
   };
 
-  const onTagEdit = (tagKey: string, newValue: string) => {
+  const onTagEdit = (tagKey: string, newValue: string | string[]) => {
     setAlltags(null);
     DocumentsService.updateDocumentTag(
       value?.documentId as string,

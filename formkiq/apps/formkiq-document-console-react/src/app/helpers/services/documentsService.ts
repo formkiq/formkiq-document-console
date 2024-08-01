@@ -773,20 +773,20 @@ export class DocumentsService {
   public static async updateDocumentTag(
     documentId: string,
     tagKey: string,
-    newValue: string,
+    newValue: string | string[],
     siteId = ''
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
     let body = {};
-    if (newValue.includes(',')) {
+    if ( typeof newValue === 'string'){
       body = {
-        values: newValue.split(','),
+        value: newValue,
       };
     } else {
       body = {
-        value: newValue,
+        values: newValue,
       };
     }
     return this.getFormkiqClient().documentsApi.updateDocumentTag({

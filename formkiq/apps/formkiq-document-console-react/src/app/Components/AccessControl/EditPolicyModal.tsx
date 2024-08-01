@@ -13,6 +13,7 @@ import RadioListbox from '../Generic/Listboxes/RadioListbox';
 import { CheckedRadio, Close, UncheckedRadio } from '../Icons/icons';
 import GroupsSelect from './GroupsSelect';
 import {AttributesDataState, setAllAttributesData} from "../../Store/reducers/attributesData";
+import RadioCombobox from "../Generic/Listboxes/RadioCombobox";
 
 export default function EditPolicyModal({
   isOpened,
@@ -48,7 +49,7 @@ export default function EditPolicyModal({
     useState<string>('anyRoles');
   // const { allAttributes } = useSelector(DataCacheState);
   const {allAttributes} = useSelector(AttributesDataState);
-  const [attributeKeys, setAttributeKeys] = useState<string[]>([]);
+  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
   );
@@ -96,7 +97,10 @@ export default function EditPolicyModal({
 
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
-    const keys = allAttributes.map((item) => item.key);
+    const keys = allAttributes.map((item) => ({
+      key: item.key,
+      title: item.key,
+    }));
     setAttributeKeys(keys);
   }, [allAttributes]);
 
@@ -299,7 +303,7 @@ export default function EditPolicyModal({
         as="div"
         className="relative z-20"
         initialFocus={doneButtonRef}
-        onClose={onClose}
+        onClose={() => null}
       >
         <Transition.Child
           as={Fragment}
@@ -435,11 +439,10 @@ export default function EditPolicyModal({
                       </h6>
 
                       <div className="w-full flex justify-between flex-wrap mt-2 gap-2">
-                        <div className="h-8 flex gap-2 items-center">
-                          <div className="relative h-8 w-40">
-                            <RadioListbox
+                        <div className="h-8 flex gap-2 items-center grow">
+                          <div className="relative w-full max-w-[300px]">
+                            <RadioCombobox
                               values={attributeKeys}
-                              titles={attributeKeys}
                               selectedValue={selectedAttributeKey}
                               setSelectedValue={setSelectedAttributeKey}
                               placeholderText="Attribute"
@@ -529,14 +532,14 @@ export default function EditPolicyModal({
                                 <label
                                   htmlFor="matchUsername"
                                   onChange={onMatchUsernameChange}
-                                  className="text-sm cursor-pointer "
+                                  className="text-sm cursor-pointer whitespace-nowrap"
                                 >
                                   Must match Username
                                 </label>
                               </div>
                             )}
                         </div>
-                        <div className="h-8 flex gap-2">
+                        <div className="h-8 flex gap-2 grow justify-end">
                           <ButtonPrimaryGradient
                             type="button"
                             onClick={onAddAttribute}
