@@ -311,8 +311,11 @@ function Documents() {
   useEffect(() => {
     onDocumentInfoClick();
   }, [infoDocumentId]);
+
   useEffect(() => {
-    dispatch(fetchUsers({ limit: 100, page: 1 }));
+    if (user.isAdmin) {
+      dispatch(fetchUsers({ limit: 100, page: 1 }));
+    }
   }, []);
 
   useEffect(() => {
@@ -472,7 +475,9 @@ function Documents() {
             };
             addWorkflowNames();
             addQueueNames();
-            addUserEmails();
+            if (user.isAdmin && users?.length) {
+              addUserEmails();
+            }
 
             // re-fetch workflows and queues only if new IDs appeared
             if (!isWorkflowsUpToDate || !isQueuesUpToDate) {
@@ -2161,7 +2166,22 @@ function Documents() {
                             )}
                             {action.userId && (
                               <p className="pl-2 text-sm text-neutral-600 font-medium">
-                                User: {action.userEmail || action.userId}
+                                User:
+                                {action.userEmail ? (
+                                  <span className="pl-1">
+                                    {action.userEmail}
+                                  </span>
+                                ) : (
+                                  <span className="pl-1">
+                                    {action.userId.length <= 10 ? (
+                                      <>{action.userId}</>
+                                    ) : (
+                                      <span className="text-xs">
+                                        {action.userId}
+                                      </span>
+                                    )}
+                                  </span>
+                                )}
                               </p>
                             )}
                             {action.queueId && (
