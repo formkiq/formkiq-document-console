@@ -124,6 +124,7 @@ export const fetchDocuments = createAsyncThunk(
               page,
               isLoadingMore: false,
               isLastSearchPageLoaded: false,
+              next: response.next,
             };
             if (page > 1) {
               data.isLoadingMore = true;
@@ -158,6 +159,7 @@ export const fetchDocuments = createAsyncThunk(
               page,
               isLoadingMore: false,
               isLastSearchPageLoaded: false,
+              next: response.next,
             };
             if (page > 1) {
               data.isLoadingMore = true;
@@ -343,6 +345,7 @@ export const fetchDocuments = createAsyncThunk(
                 next: response.next,
                 isLoadingMore: false,
                 isLastSearchPageLoaded: false,
+                page,
               };
               if (nextToken) {
                 data.isLoadingMore = true;
@@ -376,6 +379,7 @@ export const fetchDocuments = createAsyncThunk(
               next: response.next,
               isLoadingMore: false,
               attribute: filterAttribute,
+              page,
             };
             if (nextToken) {
               data.isLoadingMore = true;
@@ -645,15 +649,13 @@ export const documentsListSlice = createSlice({
           tag,
           isLoadingMore = false,
           attribute,
+          next,
+          page = 1
         } = action.payload;
 
-        let { next, page = 1, isLastSearchPageLoaded = false } = action.payload;
+        let {  isLastSearchPageLoaded = false } = action.payload;
 
-        if (page > 1) {
-          next = null;
-        }
         if (next) {
-          page = 1;
           isLastSearchPageLoaded = false;
         } else {
           isLastSearchPageLoaded = true;

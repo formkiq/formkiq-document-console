@@ -283,6 +283,26 @@ function Navbar() {
     );
   }, [documentId]);
 
+  const viewFolder = () => {
+
+    navigate(
+      {
+        pathname:
+          siteDocumentsRootUri +
+          '/folders/' +
+          currentDocumentPath.substring(
+            0,
+            currentDocumentPath.lastIndexOf('/')
+          ) +
+          '#id=' +
+          documentId
+      },
+      {
+        replace: true,
+      }
+    );
+
+  };
   return (
     user && (
       <div className="flex w-full h-14.5">
@@ -638,21 +658,12 @@ function Navbar() {
                                 <span className="px-2">|</span>
                                 {currentDocumentPath}
                                 <span className="pl-8">
-                                  <a
-                                    href={
-                                      siteDocumentsRootUri +
-                                      '/folders/' +
-                                      currentDocumentPath.substring(
-                                        0,
-                                        currentDocumentPath.lastIndexOf('/')
-                                      ) +
-                                      '#id=' +
-                                      documentId
-                                    }
+                                  <button type="button"
+                                  onClick={viewFolder}
                                     className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
                                   >
                                     view folder
-                                  </a>
+                                  </button>
                                 </span>
                                 <span className="pl-6">
                                   <span

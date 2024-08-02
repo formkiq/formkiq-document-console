@@ -227,12 +227,7 @@ function Documents() {
   );
 
   const trackScrolling = useCallback(async () => {
-    const bottomRow = (
-      document.getElementById('documentsTable') as HTMLTableElement
-    ).rows[
-      (document.getElementById('documentsTable') as HTMLTableElement).rows
-        .length - 1
-    ].getBoundingClientRect().bottom;
+
     const isBottom = (el: HTMLElement) => {
       if (el) {
         return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
@@ -258,6 +253,7 @@ function Documents() {
             filterTag,
             filterAttribute,
             nextToken,
+            page: currentSearchPage + 1,
           })
         );
       } else {
@@ -280,10 +276,6 @@ function Documents() {
       }
     }
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
-
-  useEffect(() => {
-    setDocumentListOffsetTop(isTagFilterExpanded ? 0 : 45);
-  }, [isTagFilterExpanded]);
 
   function onDocumentInfoClick() {
     if (infoDocumentId.length) {

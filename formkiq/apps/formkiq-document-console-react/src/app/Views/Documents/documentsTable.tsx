@@ -77,18 +77,8 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
   const { documents, folders, loadingStatus } = useSelector(DocumentListState);
 
-  const [scrollPosition, setScrollPosition] = useState(0);
-
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
-
-  // scroll "documentsScrollpane" to the latest position when documents state updates
-  useEffect(() => {
-    const scrollPane = document.getElementById('documentsScrollpane');
-    if (scrollPane) {
-      scrollPane.scrollTo({ top: scrollPosition });
-    }
-  }, [documents, scrollPosition]);
 
   if (
     documents.length === 0 &&
@@ -109,7 +99,6 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     //track scroll when table reaches bottom
     if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
       if (el.scrollTop > 0) {
-        setScrollPosition(el.scrollTop);
         trackScrolling();
       }
     }
