@@ -1986,7 +1986,27 @@ function Documents() {
                         </div>
                       </dl>
                     )}
-                    <div className="mt-4 w-full flex justify-center">
+                    {currentDocument && (InlineViewableContentTypes.indexOf((currentDocument as IDocument).contentType) > -1 ||
+                        (formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
+                          OnlyOfficeContentTypes.indexOf((currentDocument as IDocument).contentType) > -1) ||
+                        (currentDocument as IDocument).deepLinkPath.length > 0) &&
+                      <div className="mt-4 w-full flex justify-center">
+                        <ButtonPrimaryGradient
+                          onClick={viewDocument}
+                          type="button"
+                          style={{
+                            height: '36px',
+                            width: '100%',
+                            margin: '0 16px',
+                          }}
+                        >
+                          <div className="w-full flex justify-center px-4 py-1">
+                            <span className="">View Document</span>
+                            <span className="w-7 pl-1">{View()}</span>
+                          </div>
+                        </ButtonPrimaryGradient>
+                      </div>}
+                    <div className="mt-2 w-full flex justify-center">
                       <ButtonPrimaryGradient
                         onClick={DownloadDocument}
                         style={{
