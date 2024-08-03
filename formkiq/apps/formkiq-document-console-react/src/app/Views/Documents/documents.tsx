@@ -566,7 +566,7 @@ function Documents() {
     if (!scrollToDocumentLine) return;
     if (loadingStatus !== RequestStatus.fulfilled) return;
     const documentIndex = documents.findIndex((doc) => doc.documentId === infoDocumentId);
-    if (documentIndex === -1 && !isLastSearchPageLoaded && documents.length <= 20) {
+    if (documentIndex === -1 && !isLastSearchPageLoaded) {
       const scrollpane = document.getElementById('documentsScrollpane');
       if (!scrollpane) return;
       scrollpane.scrollTo({

@@ -44,6 +44,7 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
+import {setDocuments} from "../../Store/reducers/documentsList";
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -284,7 +285,7 @@ function Navbar() {
   }, [documentId]);
 
   const viewFolder = () => {
-
+    dispatch(setDocuments({ documents: [] }))
     navigate(
       {
         pathname:

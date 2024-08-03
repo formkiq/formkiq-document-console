@@ -273,7 +273,7 @@ function DocumentListLine({
         id={file.documentId}
         data-test-id={`${file.path}`}
         ref={drag}
-        style={{ opacity, visibility: isDragging ? 'hidden' : 'inherit' }}
+        style={{ opacity, visibility: isDragging ? 'hidden' : 'inherit', scrollMarginBottom: '160px' }}
       >
         <td className={`text-neutral-900 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
