@@ -293,7 +293,7 @@ function Navbar() {
           currentDocumentPath.substring(
             0,
             currentDocumentPath.lastIndexOf('/')
-          ) +
+          ) + "?scrollToDocumentLine=true" +
           '#id=' +
           documentId
       },

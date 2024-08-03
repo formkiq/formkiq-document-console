@@ -270,6 +270,7 @@ function DocumentListLine({
         className={`text-sm tracking-normal ${
           infoDocumentId === file.documentId && 'bg-neutral-100'
         }`}
+        id={file.documentId}
         data-test-id={`${file.path}`}
         ref={drag}
         style={{ opacity, visibility: isDragging ? 'hidden' : 'inherit' }}

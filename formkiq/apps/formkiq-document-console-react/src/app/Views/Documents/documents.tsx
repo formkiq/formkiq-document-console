@@ -97,6 +97,7 @@ function Documents() {
   const navigate = useNavigate();
   const { user } = useAuthenticatedState();
   const {
+    documents,
     nextToken,
     loadingStatus,
     currentSearchPage,
@@ -126,6 +127,7 @@ function Documents() {
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
   const advancedSearch = new URLSearchParams(search).get('advancedSearch');
+  const scrollToDocumentLine = new URLSearchParams(search).get('scrollToDocumentLine');
   const { hash } = useLocation();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
@@ -221,7 +223,6 @@ function Documents() {
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
-  const [documentListOffsetTop, setDocumentListOffsetTop] = useState<number>(0);
   const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
     []
   );
@@ -559,6 +560,25 @@ function Documents() {
     filterAttribute,
     formkiqVersion,
   ]);
+
+  // when user opens document folder after viewing document, scroll to list to display document line
+  useEffect(() => {
+    if (!scrollToDocumentLine) return;
+    if (loadingStatus !== RequestStatus.fulfilled) return;
+    const documentIndex = documents.findIndex((doc) => doc.documentId === infoDocumentId);
+    if (documentIndex === -1 && !isLastSearchPageLoaded && documents.length <= 20) {
+      const scrollpane = document.getElementById('documentsScrollpane');
+      if (!scrollpane) return;
+      scrollpane.scrollTo({
+        top: scrollpane.scrollHeight,
+      })
+    } else if (documentIndex !== -1) {
+      const documentLine = document.getElementById(infoDocumentId)
+      if (!documentLine) return;
+      documentLine.scrollIntoView({block: "end",})
+      navigate(pathname + '#id=' + infoDocumentId);
+    }
+  }, [documents]);
 
   const onDeleteDocument = (file: IDocument, searchDocuments: any) => () => {
     const deleteFunc = () => {
