@@ -1,35 +1,27 @@
-import {useAppDispatch} from '../../Store/store';
 import {useEffect, useRef} from "react";
+import {Pencil, Trash} from "../../Components/Icons/icons";
 
 type Props = {
-  siteId: string;
   attributes: any[];
-  onDelete: (workflowId: string, siteId: string) => void;
+  onDelete: (key: string) => void;
+  onEdit: (key: string) => void;
   onAttributeInView: (key: string) => void;
   isAttributesInUse: Record<string, boolean>;
 };
 
 export function AttributesList({
-                                 siteId,
                                  attributes,
                                  onDelete,
+                                 onEdit,
                                  onAttributeInView,
                                  isAttributesInUse,
                                }: Props) {
-  const dispatch = useAppDispatch();
-
-  const onDeleteClick = (attributeKey: string, siteId: string) => () => {
-    onDelete(attributeKey, siteId);
-  };
-
   const tableRef = useRef(null);
-
-
   const handleIntersection = (entries: any[]) => {
     entries.forEach((entry: any) => {
       if (entry.isIntersecting) {
         // check if in view
-        if (!entry.target.id|| entry.target.id === '') return;
+        if (!entry.target.id || entry.target.id === '') return;
         onAttributeInView(entry.target.id);
       }
     });
@@ -58,7 +50,7 @@ export function AttributesList({
       >
         <table
           ref={tableRef}
-          className="box-content table-auto text-sm border-b border-l border-r border-neutral-300 w-full border-spacing-0"
+          className="table-auto text-sm border-b border-l border-r border-neutral-300 w-full border-spacing-0"
           id="workflowsScrollPane"
         >
           <thead className="bg-neutral-100 text-start h-10 sticky top-0 text-transparent whitespace-nowrap">
@@ -95,7 +87,7 @@ export function AttributesList({
                   </td>
                   <td
                     className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
-                    {attribute.dataType}
+                    {attribute.dataType.split('_').join(" ")}
                   </td>
                   <td
                     className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
@@ -103,11 +95,22 @@ export function AttributesList({
                   </td>
                   <td
                     className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
-                    {isAttributesInUse[attribute.key]===true ? 'Yes' : isAttributesInUse[attribute.key]===false ? 'No' : 'Loading...'}
+                    {isAttributesInUse[attribute.key] === true ? 'Yes' : isAttributesInUse[attribute.key] === false ? 'No' : 'Loading...'}
                   </td>
                   <td
                     className="border-b border-neutral-300 nodark:border-slate-700 p-4 pr-8 text-neutral-900 nodark:text-slate-400">
-                    actions
+                    {isAttributesInUse[attribute.key] === false &&
+                      <div className="flex gap-2 items-center">
+                        <button onClick={() => onEdit(attribute.key)}
+                                className="hover:text-primary-500 w-6 h-6">
+                          <Pencil/>
+                        </button>
+
+                        <button onClick={() => onDelete(attribute.key)}
+                                className="hover:text-red-500 w-5 h-5">
+                          <Trash/>
+                        </button>
+                      </div>}
                   </td>
                 </tr>
               );

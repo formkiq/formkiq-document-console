@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {useSelector} from 'react-redux';
 import {useLocation, useNavigate} from 'react-router-dom';
@@ -12,12 +12,15 @@ import {
   AttributesDataState,
   fetchAttributesData,
   setAllAttributesData,
-  setAllTagsData
 } from "../../Store/reducers/attributesData";
 import AttributesList from "./AttributesList";
-import {getAllAttributes, setAllAttributes, setAllTags} from "../../helpers/tools/useCacheStorage";
+import {getAllAttributes} from "../../helpers/tools/useCacheStorage";
 import {DocumentsService} from "../../helpers/services/documentsService";
-import {ConfigState} from "../../Store/reducers/config";
+import {openDialog as openNotificationDialog} from "../../Store/reducers/globalNotificationControls";
+import {openDialog as openConfirmationDialog} from "../../Store/reducers/globalConfirmControls";
+import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
+import CreateNewAttributeModal from "../../Components/Attributes/CreateNewAttributeModal";
+import EditAttributeModal from "../../Components/Attributes/EditAttributeModal";
 
 export function Attributes() {
   const dispatch = useAppDispatch();
@@ -26,7 +29,7 @@ export function Attributes() {
   const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId, siteDocumentsRootUri} = getCurrentSiteInfo(
+  const {siteId} = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -35,13 +38,13 @@ export function Attributes() {
     workspaceSites
   );
   const navigate = useNavigate();
-  const {formkiqVersion} = useSelector(ConfigState);
   const {allAttributes} = useSelector(AttributesDataState);
 
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
-  const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
-    useState(siteDocumentsRootUri);
   const [isAttributesInUse, setIsAttributesInUse] = useState<Record<string, boolean>>({});
+  const [isNewAttributeDialogOpen, setIsNewAttributeDialogOpen] = useState(false);
+  const [isEditAttributeDialogOpen, setIsEditAttributeDialogOpen] = useState(false);
+  const [attributeToEdit, setAttributeToEdit] = useState<any>(null);
 
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -63,14 +66,10 @@ export function Attributes() {
       );
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
-    setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
   }, [pathname]);
 
-  const handleScroll = (e: any) => {
-    const element = e.target;
-    if (element.scrollTop + element.clientHeight >= element.scrollHeight) {
-      // Handle scroll to bottom
-    }
+  const updateAttributes = () => {
+    dispatch(fetchAttributesData({siteId: currentSiteId, limit: 100}));
   };
 
   const getAttributes = async () => {
@@ -87,7 +86,7 @@ export function Attributes() {
         dispatch(setAllAttributesData(allAttributesCache));
       } else {
         // load the data and save it in cache and in state
-        dispatch(fetchAttributesData({siteId: currentSiteId, limit: 100}));
+        updateAttributes()
       }
     }
   }
@@ -96,7 +95,7 @@ export function Attributes() {
   }, []);
 
   useEffect(() => {
-    dispatch(fetchAttributesData({siteId: currentSiteId, limit: 100}));
+    updateAttributes()
     setIsAttributesInUse({});
   }, [currentSiteId]);
 
@@ -104,7 +103,6 @@ export function Attributes() {
     // Use a function to get the current state
     setIsAttributesInUse((currentState) => {
       if (currentState[attributeKey] !== undefined) return currentState;  // No change
-
       DocumentsService.getDocumentsInFolder(
         "",
         currentSiteId,
@@ -124,7 +122,44 @@ export function Attributes() {
     });
   };
 
+  const onDeleteAttribute = (attributeKey: string) => {
+    dispatch(openConfirmationDialog({
+      dialogTitle: 'Are you sure you want to delete this attribute?',
+      callback: () => {
+        DocumentsService.deleteAttribute(
+          currentSiteId,
+          attributeKey,
+        ).then((response: any) => {
+          if (response.status === 200) {
+            updateAttributes()
+          } else {
+            dispatch(openNotificationDialog({
+              dialogTitle: response.errors ? response.errors[0].error : 'Error deleting attribute.',
+            }))
+          }
+        });
+      },
+    }))
+  };
 
+  const onCreateAttribute = () => {
+    setIsNewAttributeDialogOpen(true);
+  };
+
+  const onCreateAttributeFormClose = () => {
+    setIsNewAttributeDialogOpen(false);
+  };
+
+  const onEditAttribute = (attributeKey: string) => {
+    const attribute = allAttributes.find((attribute) => attribute.key === attributeKey);
+    if (!attribute) return;
+    setAttributeToEdit(attribute);
+    setIsEditAttributeDialogOpen(true);
+  };
+  const onEditAttributeModalClose = () => {
+    setIsEditAttributeDialogOpen(false);
+    setAttributeToEdit(null);
+  };
   return (
     <>
       <Helmet>
@@ -138,18 +173,35 @@ export function Attributes() {
         }}
       >
         <div className="grow flex flex-col justify-stretch">
+          <div className="flex justify-between items-center px-4 py-2 border-b border-neutral-300">
+            <div className="text-xl font-bold">Attributes</div>
+            <div className="flex gap-2 p-2">
+              <ButtonPrimaryGradient type="button" className="h-9"
+                                     onClick={onCreateAttribute}>Create Attribute</ButtonPrimaryGradient>
+            </div>
+          </div>
           <div className="relative overflow-hidden h-full">
             <AttributesList
               attributes={allAttributes}
-              siteId={currentSiteId}
-              onDelete={(attributeKey: string) => {
-              }}
+              onDelete={onDeleteAttribute}
               onAttributeInView={onAttributeInView}
               isAttributesInUse={isAttributesInUse}
+              onEdit={onEditAttribute}
             />
           </div>
         </div>
       </div>
+      <CreateNewAttributeModal isOpened={isNewAttributeDialogOpen}
+                               onClose={onCreateAttributeFormClose}
+                               siteId={currentSiteId}
+                               updateAllAttributes={updateAttributes}
+      />
+      <EditAttributeModal attribute={attributeToEdit}
+                          isOpened={isEditAttributeDialogOpen}
+                          onClose={onEditAttributeModalClose}
+                          siteId={currentSiteId}
+                          updateAllAttributes={updateAttributes}
+      />
     </>
   );
 }
