@@ -13,6 +13,7 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { EmptyDocumentsTable } from './EmptyDocumentsTable';
+import {useLocation, useNavigate} from "react-router-dom";
 
 type DocumentTableProps = {
   documentsWrapperRef: Ref<any>;
@@ -75,10 +76,33 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
-  const { documents, folders, loadingStatus } = useSelector(DocumentListState);
+  const { documents, folders, loadingStatus, isLastSearchPageLoaded } = useSelector(DocumentListState);
 
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
+  const navigate = useNavigate();
+  const pathname = decodeURI(useLocation().pathname);
+  const search = useLocation().search;
+  const scrollToDocumentLine = new URLSearchParams(search).get('scrollToDocumentLine');
+
+  // when user opens document folder after viewing document, scroll to list to display document line
+  useEffect(() => {
+    if (!scrollToDocumentLine) return;
+    if (loadingStatus !== RequestStatus.fulfilled) return;
+    const documentIndex = documents.findIndex((doc) => doc.documentId === infoDocumentId);
+    if (documentIndex === -1 && !isLastSearchPageLoaded) {
+      const scrollpane = document.getElementById('documentsScrollpane');
+      if (!scrollpane) return;
+      scrollpane.scrollTo({
+        top: scrollpane.scrollHeight,
+      })
+    } else if (documentIndex !== -1) {
+      const documentLine = document.getElementById(infoDocumentId)
+      if (!documentLine) return;
+      documentLine.scrollIntoView({block: "end",})
+      navigate(pathname + '#id=' + infoDocumentId);
+    }
+  }, [documents]);
 
   if (
     documents.length === 0 &&
