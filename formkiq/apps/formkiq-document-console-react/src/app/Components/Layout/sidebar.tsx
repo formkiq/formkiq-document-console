@@ -30,7 +30,7 @@ import {
   Api,
   ApiKey,
   ArrowBottom,
-  ArrowRight,
+  ArrowRight, Attribute,
   ChevronLeft,
   ChevronRight,
   Documents,
@@ -820,6 +820,28 @@ export function Sidebar() {
                     </NavLink>
                   </li>
                 )}
+                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                  <NavLink
+                    to="/attributes"
+                    className={({ isActive }) =>
+                      (isActive
+                        ? 'text-primary-600 bg-neutral-200 '
+                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500') +
+                      ' w-full text-sm font-bold flex '
+                    }
+                  >
+                    <div
+                      className={
+                        'w-full text-sm font-bold flex items-center pl-5 py-2 '
+                      }
+                    >
+                      <div className="w-4 flex items-center mr-2">
+                        <Attribute />
+                      </div>
+                      <div>Attributes</div>
+                    </div>
+                  </NavLink>
+                </li>
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
                     to="/integrations/api"

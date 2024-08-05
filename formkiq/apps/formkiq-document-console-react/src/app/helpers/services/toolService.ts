@@ -372,6 +372,28 @@ export function getCurrentSiteInfo(
           )}`;
         }
       }
+    } else if (pathname.indexOf('/attributes') === 0) {
+      if (pathname.indexOf('/attributes/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(23).split('/')[0]; // 23 is the length of '/attributes/workspaces'
+        currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Attributes: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Attributes';
+          currentSiteInfo.siteDocumentsRootUri = '/attributes';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/attributes/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
     } else {
       if (hasDefaultSite) {
         currentSiteInfo.siteId = 'default';

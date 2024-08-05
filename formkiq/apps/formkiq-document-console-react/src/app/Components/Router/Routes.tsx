@@ -71,6 +71,10 @@ const UserActivities = React.lazy(
     () => import('../../Views/Account/userActivities')
 );
 
+const Attributes = React.lazy(
+    () => import('../../Views/Attributes/attributes')
+);
+
 const RoutesMapper = () => {
   return (
     <Routes>
@@ -226,6 +230,8 @@ const RoutesMapper = () => {
       ></Route>
       <Route path="/admin/user-activities" element={<UserActivities />}></Route>
       <Route path="/admin/user-activities/workspaces/:siteId" element={<UserActivities />}></Route>
+      <Route path="/attributes" element={<Attributes />}></Route>
+      <Route path="/attributes/workspaces/:siteId" element={<Attributes />}></Route>
       <Route path="*" element={<Page404 />}></Route>
     </Routes>
   );

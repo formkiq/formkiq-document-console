@@ -658,7 +658,8 @@ export class DocumentsService {
     page = 1,
     allTags = [] as any[],
     allAttributes = [] as any[],
-    searchAttributes: any = null
+    searchAttributes: any = null,
+    limit=20
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -697,6 +698,7 @@ export class DocumentsService {
       return this.getFormkiqClient().searchApi.search({
         searchParameters: searchBody,
         siteId,
+        limit
       });
     } else {
       const searchBody:any = {
@@ -717,6 +719,7 @@ export class DocumentsService {
       return this.getFormkiqClient().searchApi.searchFulltext({
         documentFulltextSearchBody: searchBody,
         siteId,
+        limit
       });
     }
   }
