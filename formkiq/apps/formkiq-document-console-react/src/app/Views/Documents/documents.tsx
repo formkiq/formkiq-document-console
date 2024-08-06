@@ -225,7 +225,35 @@ function Documents() {
   const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
     []
   );
+  const [dropUploadDocuments, setDropUploadDocuments] = useState<any>(null);
 
+  const documentsTable = document.getElementById('documentsTable');
+
+  useEffect(() => {
+    function handleDrop(event: any ) {
+      event.stopPropagation();
+      event.preventDefault();
+      setDropUploadDocuments(event.dataTransfer.files)
+    }
+
+    documentsTable?.addEventListener('dragover', function (event) {
+      event.preventDefault();
+    })
+
+    documentsTable?.addEventListener('drop', function (event) {
+      handleDrop(event);
+    })
+
+    return () => {
+      documentsTable?.removeEventListener('dragover', function (event) {
+        event.preventDefault();
+      })
+      documentsTable?.removeEventListener('drop', function (event) {
+        handleDrop(event);
+      })
+    }
+  }, [documentsTable]);
+  
   const trackScrolling = useCallback(async () => {
     const bottomRow = (
       document.getElementById('documentsTable') as HTMLTableElement
@@ -2404,6 +2432,7 @@ function Documents() {
         documentId={uploadModalDocumentId}
         isFolderUpload={false}
         onDocumentDataChange={onDocumentDataChange}
+        dropUploadDocuments={dropUploadDocuments}
       />
       <UploadModal
         isOpened={isFolderUploadModalOpened}
