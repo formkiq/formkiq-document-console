@@ -72,6 +72,7 @@ export default function CreateNewAttributeModal({
                                       onClose={onClose}
                                       setSelectedAttributeKey={() => {
                                       }}
+                                      isAddingDocumentAttribute={false}
                     />
                   </div>
                 </div>

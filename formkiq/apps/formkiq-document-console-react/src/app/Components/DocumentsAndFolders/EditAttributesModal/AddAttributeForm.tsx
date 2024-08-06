@@ -19,6 +19,7 @@ function AddAttributeForm({
   value,
   onClose,
   setSelectedAttributeKey,
+  isAddingDocumentAttribute,
 }: any) {
   const [selectedAttributeDataType, setSelectedAttributeDataType] = useState<
     AttributeDataType | ''
@@ -73,7 +74,7 @@ function AddAttributeForm({
         }
       });
 
-      if (selectedAttributeDataType === 'KEY_ONLY') {
+      if (selectedAttributeDataType === 'KEY_ONLY' && isAddingDocumentAttribute) {
         setTimeout(() => {
           const documentAttributes = {
             attributes: [
