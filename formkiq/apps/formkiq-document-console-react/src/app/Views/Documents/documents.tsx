@@ -234,6 +234,7 @@ function Documents() {
       event.stopPropagation();
       event.preventDefault();
       setDropUploadDocuments(event.dataTransfer.files)
+      onUploadClick(event, "")
     }
 
     documentsTable?.addEventListener('dragover', function (event) {

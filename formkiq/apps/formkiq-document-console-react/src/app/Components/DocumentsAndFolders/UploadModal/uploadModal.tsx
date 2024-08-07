@@ -117,8 +117,9 @@ export default function UploadModal({
   useEffect(() => {
     if (!dropUploadDocuments) return;
     setTimeout(() => {
-      const uploader = document.getElementById('uploader') as HTMLInputElement
-      uploader.files = dropUploadDocuments
+      const uploader = document.getElementById('uploader') as HTMLInputElement;
+      if(!uploader) return;
+      uploader.files = dropUploadDocuments;
       uploader.dispatchEvent(new Event('change'));
     }, 0);
   }, [dropUploadDocuments])
