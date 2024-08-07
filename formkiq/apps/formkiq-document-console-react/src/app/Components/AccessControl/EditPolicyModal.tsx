@@ -564,6 +564,9 @@ export default function EditPolicyModal({
                               onDocumentDataChange={() => updateAllAttributes()}
                               value={null}
                               getValue={() => {}}
+                              setSelectedAttributeKey={() => {
+                              }}
+                              isAddingDocumentAttribute={false}
                               onClose={onCreateAttributeFormClose}
                             />
                           </div>

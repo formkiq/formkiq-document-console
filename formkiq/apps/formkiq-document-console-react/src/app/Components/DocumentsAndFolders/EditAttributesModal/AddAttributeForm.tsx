@@ -19,6 +19,7 @@ function AddAttributeForm({
   value,
   onClose,
   setSelectedAttributeKey,
+  isAddingDocumentAttribute,
 }: any) {
   const [selectedAttributeDataType, setSelectedAttributeDataType] = useState<
     AttributeDataType | ''
@@ -73,7 +74,7 @@ function AddAttributeForm({
         }
       });
 
-      if (selectedAttributeDataType === 'KEY_ONLY') {
+      if (selectedAttributeDataType === 'KEY_ONLY' && isAddingDocumentAttribute) {
         setTimeout(() => {
           const documentAttributes = {
             attributes: [
@@ -121,14 +122,14 @@ function AddAttributeForm({
 
   return (
     <>
-      <div className="mt-2 ml-2 pt-1 pr-2 flex flex-wrap justify-center items-center w-full bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 rounded-md">
+      <div className="mt-2 ml-2 pt-1 flex flex-wrap justify-center items-center w-full bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 rounded-md">
         <div className="flex w-full p-2 pl-4 font-semibold">New Attribute</div>
         <form
           onSubmit={handleSubmit(onAddAttributeSubmit)}
           className="w-full"
           ref={addTagFormRef}
         >
-          <div className="flex items-start mx-2 mb-4 relative w-full h-8">
+          <div className="flex items-start px-2 mb-4 relative w-full h-8">
             <div className="mr-2 h-8 w-1/2">
               <input
                 type="text"
@@ -152,7 +153,7 @@ function AddAttributeForm({
               Create
             </ButtonTertiary>
 
-            <ButtonGhost onClick={onClose}> Cancel </ButtonGhost>
+            <ButtonGhost type="button" onClick={onClose}> Cancel </ButtonGhost>
           </div>
         </form>
       </div>

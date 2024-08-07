@@ -405,6 +405,7 @@ function AddDocumentAttributeForm({
             getValue={getValue}
             onClose={onAddAttributeFormClose}
             setSelectedAttributeKey={setSelectedAttributeKey}
+            isAddingDocumentAttribute={true}
           />
         )}
       </div>

@@ -1941,3 +1941,14 @@ export function HistoryIcon() {
     </svg>
   )
 }
+
+export function Attribute() {
+  return(
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="100%"
+         height="100%"
+         viewBox="0 0 14 14">
+      <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" d="M5.5 1h-5v5h5zm7.75 12.5h-5m0-5h5m-5 2.5h5m.25-5H8L10.75.5zM3 13.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5"/>
+    </svg>
+  )
+}
