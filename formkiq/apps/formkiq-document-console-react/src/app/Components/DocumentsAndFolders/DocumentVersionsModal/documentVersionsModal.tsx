@@ -127,10 +127,13 @@ export default function DocumentVersionsModal({
       const deleteVersion = () => {
         if (value) {
           DocumentsService.deleteDocumentVersion(
+            siteId,
             value.documentId,
-            versionKey
+            encodeURIComponent(versionKey)
           ).catch((err) => {
             console.error('Failed to delete document version: ', err);
+          }).then(() => {
+              updateVersions();
           });
         }
       };
