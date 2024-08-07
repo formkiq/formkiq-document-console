@@ -1,4 +1,4 @@
-import {useMemo} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {Position} from 'reactflow';
 import {ConfigState} from '../../../../Store/reducers/config';
@@ -24,26 +24,45 @@ function Ocr({
              }: any) {
   const {formkiqVersion} = useSelector(ConfigState);
 
-  let ocrTypesSelectorOptions: any = {
-    TEXT: 'Text Recognition',
-  };
-
-  let ocrEngineSelectorOptions: any = {
+  const [ocrEngineSelectorOptions, setOcrEngineSelectorOptions] = useState<any>({
     TESSERACT: 'Tesseract',
+  });
+  const [ocrTypesSelectorOptions, setOcrTypesSelectorOptions] = useState<any>({
+    TEXT: 'Text Recognition',
+  });
+
+  const updateOcrEngineSelectorOptions = () => {
+    if (!formkiqVersion.modules.includes('textract')) return;
+    setOcrEngineSelectorOptions({
+      TESSERACT: 'Tesseract',
+      TEXTRACT: 'Textract',
+    });
+    if (isEditing && newStep?.parameters?.ocrEngine === 'TEXTRACT') {
+      onOcrEngineChange('TEXTRACT');
+    }
   };
 
-  // add textract if module enabled
-  if (formkiqVersion.modules.includes('textract')) {
-    ocrEngineSelectorOptions = {
-      ...ocrEngineSelectorOptions,
-      TEXTRACT: 'Textract',
-    };
-    ocrTypesSelectorOptions = {
-      ...ocrTypesSelectorOptions,
-      FORMS: 'Form Recognition',
-      TABLES: 'Table Recognition',
-    };
-  }
+
+  useEffect(() => {
+    updateOcrEngineSelectorOptions();
+  }, []);
+
+  const onOcrEngineChange = (value: any) => {
+    onChange(value, 'ocrEngine');
+    if (value === 'TEXTRACT') {
+      setOcrTypesSelectorOptions({
+        TEXT: 'Text Recognition',
+        FORMS: 'Form Recognition',
+        TABLES: 'Table Recognition',
+      });
+    } else {
+      onChange("TEXT", 'ocrParseTypes')
+      setOcrTypesSelectorOptions(
+        {
+          TEXT: 'Text Recognition',
+        });
+    }
+  };
 
   const MAX_CONNECTIONS = 1;
   let isHandleConnectable = false;
@@ -75,7 +94,7 @@ function Ocr({
       <ParametersSelector
         options={ocrEngineSelectorOptions}
         description="OCR Engine to use"
-        onChange={(value: any) => onChange(value, 'ocrEngine')}
+        onChange={onOcrEngineChange}
         selectedValue={
           isEditing
             ? newStep?.parameters?.ocrEngine
