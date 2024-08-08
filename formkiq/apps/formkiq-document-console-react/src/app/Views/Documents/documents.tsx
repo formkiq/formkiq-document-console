@@ -227,34 +227,33 @@ function Documents() {
   );
   const [dropUploadDocuments, setDropUploadDocuments] = useState<any>(null);
 
-  const documentsTable = document.getElementById('documentsTable');
+  const documentsPageWrapper = document.getElementById('documentsPageWrapper');
 
   useEffect(() => {
-    function handleDrop(event: any ) {
+    function handleDrop(event: any) {
       event.stopPropagation();
       event.preventDefault();
-      setDropUploadDocuments(event.dataTransfer.files)
-      onUploadClick(event, "")
+      setDropUploadDocuments(event.dataTransfer.files);
+      onUploadClick(event, '');
     }
-
-    documentsTable?.addEventListener('dragover', function (event) {
+    documentsPageWrapper?.addEventListener('dragover', function (event) {
       event.preventDefault();
-    })
+    });
 
-    documentsTable?.addEventListener('drop', function (event) {
+    documentsPageWrapper?.addEventListener('drop', function (event) {
       handleDrop(event);
-    })
+    });
 
     return () => {
-      documentsTable?.removeEventListener('dragover', function (event) {
+      documentsPageWrapper?.removeEventListener('dragover', function (event) {
         event.preventDefault();
-      })
-      documentsTable?.removeEventListener('drop', function (event) {
+      });
+      documentsPageWrapper?.removeEventListener('drop', function (event) {
         handleDrop(event);
-      })
-    }
-  }, [documentsTable]);
-  
+      });
+    };
+  }, [documentsPageWrapper]);
+
   const trackScrolling = useCallback(async () => {
     const bottomRow = (
       document.getElementById('documentsTable') as HTMLTableElement
@@ -1488,7 +1487,10 @@ function Documents() {
               }`,
             }}
           >
-            <div className="flex-1 inline-block h-full">
+            <div
+              className="flex-1 inline-block h-full"
+              id="documentsPageWrapper"
+            >
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
