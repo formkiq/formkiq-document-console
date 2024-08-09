@@ -120,6 +120,7 @@ function Documents() {
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
   const search = useLocation().search;
+  const searchParams = new URLSearchParams(search);
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
   const filterTag = new URLSearchParams(search).get('filterTag');
@@ -880,6 +881,38 @@ function Documents() {
     }
   };
 
+  const expandAdvancedSearch = () => {
+    searchParams.set('advancedSearch', 'visible');
+    navigate(
+      {
+        pathname:
+          pathname +
+          '?' +
+          searchParams.toString() +
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}`:""),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const minimizeAdvancedSearch = () => {
+    searchParams.set('advancedSearch','hidden');
+    navigate(
+      {
+        pathname:
+          pathname +
+          '?' +
+          searchParams.toString() +
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}`:""),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
   const foldersPath = (uri: string) => {
     if (uri) {
       const folderLevels = uri.split('/');
@@ -1404,30 +1437,33 @@ function Documents() {
               {!formkiqVersion.modules.includes('typesense') &&
                 !formkiqVersion.modules.includes('opensearch') &&
                 !advancedSearch && (
-                  <Link
-                    to="?advancedSearch=visible"
+                  <button
+                    type="button"
+                    onClick={expandAdvancedSearch}
                     className="cursor-pointer h-8"
                   >
                     <ButtonGhost type="button">Search Documents...</ButtonGhost>
-                  </Link>
+                  </button>
                 )}
               {!formkiqVersion.modules.includes('typesense') &&
                 !formkiqVersion.modules.includes('opensearch') &&
                 advancedSearch &&
                 (advancedSearch === 'hidden' ? (
-                  <Link
-                    to="?advancedSearch=visible"
+                  <button
+                    type="button"
+                    onClick={expandAdvancedSearch}
                     className="cursor-pointer h-8"
                   >
                     <ButtonGhost type="button">Expand Search Tab</ButtonGhost>
-                  </Link>
+                  </button>
                 ) : (
-                  <Link
-                    to="?advancedSearch=hidden"
+                  <button
+                    type="button"
+                    onClick={minimizeAdvancedSearch}
                     className="cursor-pointer h-8"
                   >
                     <ButtonGhost type="button">Minimize Search Tab</ButtonGhost>
-                  </Link>
+                  </button>
                 ))}
               <div
                 className={
@@ -1470,6 +1506,7 @@ function Documents() {
                     siteId={currentSiteId}
                     formkiqVersion={formkiqVersion}
                     subfolderUri={subfolderUri}
+                    infoDocumentId={infoDocumentId}
                   />
                 </div>
               )}

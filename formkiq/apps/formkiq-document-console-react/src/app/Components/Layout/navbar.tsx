@@ -45,7 +45,7 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
-import {setDocuments} from "../../Store/reducers/documentsList";
+import { setDocuments } from '../../Store/reducers/documentsList';
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -68,6 +68,7 @@ function Navbar() {
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const advancedSearch = new URLSearchParams(search).get('advancedSearch');
+  const searchParams = new URLSearchParams(search);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(AuthState);
@@ -78,6 +79,7 @@ function Navbar() {
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
+  const { hash } = useLocation();
   const { siteId, siteDocumentsRootUri, siteDocumentsRootName } =
     getCurrentSiteInfo(
       pathname,
@@ -91,6 +93,7 @@ function Navbar() {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
+  const [infoDocumentId, setInfoDocumentId] = useState('');
 
   const subfolderUri = useSubfolderUri();
 
@@ -231,7 +234,10 @@ function Navbar() {
     const pathWithoutSubfolder = location.pathname.split('/')[1];
     const pathWithSubfolder =
       location.pathname.split('/')[1] + '/' + location.pathname.split('/')[2];
-    const pathsWithSubfolder: string[] = ['admin/api-keys','admin/user-activities'];
+    const pathsWithSubfolder: string[] = [
+      'admin/api-keys',
+      'admin/user-activities',
+    ];
 
     let newDocumentsRootUri;
 
@@ -286,7 +292,7 @@ function Navbar() {
   }, [documentId]);
 
   const viewFolder = () => {
-    dispatch(setDocuments({ documents: [] }))
+    dispatch(setDocuments({ documents: [] }));
     navigate(
       {
         pathname:
@@ -295,16 +301,43 @@ function Navbar() {
           currentDocumentPath.substring(
             0,
             currentDocumentPath.lastIndexOf('/')
-          ) + "?scrollToDocumentLine=true" +
+          ) +
+          '?scrollToDocumentLine=true' +
           '#id=' +
-          documentId
+          documentId,
       },
       {
         replace: true,
       }
     );
-
   };
+
+  useEffect(() => {
+    if (hash.indexOf('#id=') > -1) {
+      setInfoDocumentId(hash.substring(4));
+    } else if (hash.indexOf('#history_id') > -1) {
+      setInfoDocumentId(hash.substring(12));
+    } else {
+      setInfoDocumentId('');
+    }
+  }, [hash]);
+
+  const expandAdvancedSearch = () => {
+    searchParams.set('advancedSearch', 'visible');
+    navigate(
+      {
+        pathname:
+          pathname +
+          '?' +
+          searchParams.toString() +
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}`:""),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
   return (
     user && (
       <div className="flex w-full h-14.5">
@@ -429,7 +462,7 @@ function Navbar() {
                       locationPrefix === '/object-examine-tool' ||
                       locationPrefix === '/rulesets' ||
                       locationPrefix === '/admin' ||
-                      locationPrefix === '/attributes'? (
+                      locationPrefix === '/attributes' ? (
                         <>
                           <div className="w-6 mr-1 text-primary-600">
                             {pathname.indexOf('/workflows') > -1 && (
@@ -480,7 +513,8 @@ function Navbar() {
                                 <ApiKey />
                               </div>
                             )}
-                            {pathname.indexOf('/admin/user-activities') > -1 && (
+                            {pathname.indexOf('/admin/user-activities') >
+                              -1 && (
                               <div className="w-5">
                                 <HistoryIcon />
                               </div>
@@ -528,11 +562,11 @@ function Navbar() {
                             {pathname.indexOf('/admin/api-keys') > -1 && (
                               <span>API Keys</span>
                             )}
-                            {pathname.indexOf('/admin/user-activities') > -1 && (
-                              <span>User Activities</span>
+                            {pathname.indexOf('/admin/user-activities') >
+                              -1 && <span>User Activities</span>}
+                            {pathname.indexOf('/admin/access-control') > -1 && (
+                              <span>Access Control (OPA)</span>
                             )}
-                            {pathname.indexOf('/admin/access-control') >
-                              -1 && <span>Access Control (OPA)</span>}
                             {pathname.indexOf('/schemas') > -1 && (
                               <span>Schemas</span>
                             )}
@@ -546,7 +580,7 @@ function Navbar() {
                               <span>Rulesets</span>
                             )}
                             {pathname.indexOf('/attributes') > -1 && (
-                            <span>Attributes</span>
+                              <span>Attributes</span>
                             )}
                           </div>
                           {(pathname.indexOf('/rulesets') > -1 ||
@@ -670,8 +704,9 @@ function Navbar() {
                                 <span className="px-2">|</span>
                                 {currentDocumentPath}
                                 <span className="pl-8">
-                                  <button type="button"
-                                  onClick={viewFolder}
+                                  <button
+                                    type="button"
+                                    onClick={viewFolder}
                                     className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
                                   >
                                     view folder
@@ -733,6 +768,7 @@ function Navbar() {
                       siteId={currentSiteId}
                       documentsRootUri={currentDocumentsRootUri}
                       value={inputValue}
+                      expandAdvancedSearch={expandAdvancedSearch}
                     />
                   </div>
                 )}
@@ -740,13 +776,13 @@ function Navbar() {
                 advancedSearch === 'hidden' &&
                 (formkiqVersion.modules.includes('typesense') ||
                   formkiqVersion.modules.includes('opensearch')) && (
-                  <Link
-                    to="?advancedSearch=visible"
+                  <button
+                    onClick={expandAdvancedSearch}
                     className="text-sm flex gap-2 h-4 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap"
                   >
                     Expand Search Tab
                     <ChevronDown />
-                  </Link>
+                  </button>
                 )}
             </div>
             <div className="w-1/4 flex justify-end mr-16">
@@ -782,15 +818,17 @@ function Navbar() {
                           Sign out
                         </Link>
                       </li>
-                      {user.isAdmin && <li>
-                        <Link
-                          to="/admin/user-activities"
-                          data-test-id="user-activities"
-                          className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                        >
-                          User Activities
-                        </Link>
-                      </li>}
+                      {user.isAdmin && (
+                        <li>
+                          <Link
+                            to="/admin/user-activities"
+                            data-test-id="user-activities"
+                            className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
+                          >
+                            User Activities
+                          </Link>
+                        </li>
+                      )}
                     </ul>
                   )}
                 </div>

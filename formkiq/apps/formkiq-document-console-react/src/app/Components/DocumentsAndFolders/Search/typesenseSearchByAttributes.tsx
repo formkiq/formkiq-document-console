@@ -1,39 +1,41 @@
-import {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {Link, useLocation, useSearchParams} from 'react-router-dom';
-import {fetchDocuments} from '../../../Store/reducers/documentsList';
-import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../../Store/store';
-import {Attribute} from '../../../helpers/types/attributes';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { fetchDocuments } from '../../../Store/reducers/documentsList';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import { Attribute } from '../../../helpers/types/attributes';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
-import {ChevronDown, Close, Plus} from '../../Icons/icons';
-import SearchLine from "./searchLine";
-import {AttributesDataState} from "../../../Store/reducers/attributesData";
+import { ChevronDown, Close, Plus } from '../../Icons/icons';
+import SearchLine from './searchLine';
+import { AttributesDataState } from '../../../Store/reducers/attributesData';
 
 export default function TypesenseSearchByAttributes({
-                                                      siteId,
-                                                      formkiqVersion,
-                                                      subfolderUri,
-                                                    }: any) {
+  siteId,
+  formkiqVersion,
+  subfolderUri,
+  minimizeAdvancedSearch,
+  closeAdvancedSearch,
+}: any) {
   const stringAttributeCriteria = [
-    {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'One of'},
-    {key: 'beginsWith', title: 'Begins with'},
-    {key: 'range', title: 'Range'},
+    { key: 'eq', title: 'Equal to' },
+    { key: 'eqOr', title: 'One of' },
+    { key: 'beginsWith', title: 'Begins with' },
+    { key: 'range', title: 'Range' },
   ];
   const numberAttributeCriteria = [
-    {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'One of'},
-    {key: 'range', title: 'Range'},
+    { key: 'eq', title: 'Equal to' },
+    { key: 'eqOr', title: 'One of' },
+    { key: 'range', title: 'Range' },
   ];
   const booleanAttributeCriteria = [
-    {key: 'eq', title: 'Equal to'},
-    {key: 'eqOr', title: 'One of'},
+    { key: 'eq', title: 'Equal to' },
+    { key: 'eqOr', title: 'One of' },
   ];
 
   const dispatch = useAppDispatch();
@@ -44,15 +46,23 @@ export default function TypesenseSearchByAttributes({
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
 
-  const {allAttributes} = useSelector(AttributesDataState);
-  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
+  const { allAttributes } = useSelector(AttributesDataState);
+  const [attributeKeys, setAttributeKeys] = useState<
+    { key: string; title: string }[]
+  >([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
   );
   const [selectedAttributeKey, setSelectedAttributeKey] = useState<string>('');
-  const [attributeCriteria, setAttributeCriteria] = useState<{ key: string; title: string }[]>([]);
-  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<string | null>(null);
-  const [attributeValue, setAttributeValue] = useState<string | number | boolean | null>('');
+  const [attributeCriteria, setAttributeCriteria] = useState<
+    { key: string; title: string }[]
+  >([]);
+  const [selectedAttributeCriteria, setSelectedAttributeCriteria] = useState<
+    string | null
+  >(null);
+  const [attributeValue, setAttributeValue] = useState<
+    string | number | boolean | null
+  >('');
   const [attributeValues, setAttributeValues] = useState<any[]>([]);
   const [selectedAttributesQuery, setSelectedAttributesQuery] = useState<any[]>(
     []
@@ -270,9 +280,7 @@ export default function TypesenseSearchByAttributes({
   }
 
   function onCloseTab() {
-    searchParams.delete('searchWord');
-    searchParams.delete('advancedSearch');
-    setSearchParams(searchParams);
+    closeAdvancedSearch();
     // re-fetch documents
     dispatch(
       fetchDocuments({
@@ -355,7 +363,7 @@ export default function TypesenseSearchByAttributes({
                     title="Add"
                     className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
                   >
-                    <Plus/>
+                    <Plus />
                   </button>
                 </div>
               )}
@@ -427,7 +435,7 @@ export default function TypesenseSearchByAttributes({
                     title="Add"
                     className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
                   >
-                    <Plus/>
+                    <Plus />
                   </button>
                 </div>
               )}
@@ -520,7 +528,7 @@ export default function TypesenseSearchByAttributes({
                   className="w-4 h-4 min-w-4 text-neutral-900"
                   onClick={() => removeAttributeValueFromList(val)}
                 >
-                  <Close/>
+                  <Close />
                 </button>
               </div>
             ))}
@@ -528,64 +536,65 @@ export default function TypesenseSearchByAttributes({
         {selectedAttributesQuery.length > 0 && (
           <table className="border border-neutral-300 table-fixed text-sm text-left mt-2 bg-white">
             <thead>
-            <tr>
-              <th className="w-52 px-2">Key</th>
-              <th className="w-32 px-2">Criteria</th>
-              <th className="w-96 px-2">Values</th>
-              <th className="w-8"></th>
-            </tr>
+              <tr>
+                <th className="w-52 px-2">Key</th>
+                <th className="w-32 px-2">Criteria</th>
+                <th className="w-96 px-2">Values</th>
+                <th className="w-8"></th>
+              </tr>
             </thead>
             <tbody>
-            {selectedAttributesQuery.map((item: any, i: number) => (
-              <tr key={i} className="border-t border-neutral-300">
-                <td className="px-2">{item.key}</td>
-                <td className="px-2">
-                  {item.eq !== undefined && 'Equal to'}
-                  {item.eqOr !== undefined && 'One of'}
-                  {item.beginsWith !== undefined && 'Begins with'}
-                  {item.range !== undefined && 'In range'}
-                </td>
-                <td className="px-2">
-                  {item.eq !== undefined && '"' + item.eq + '"'}
-                  {item.eqOr &&
-                    item.eqOr.map((val: any) => '"' + val + '"').join(', ')}
-                  {item.beginsWith && '"' + item.beginsWith + '*"'}
-                  {item.range &&
-                    '"' + item.range.start + '" to "' + item.range.end + '"'}
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    className="p-1 text-neutral-500 h-6 w-6 hover:text-red-500"
-                    onClick={() => {
-                      setSelectedAttributesQuery(
-                        selectedAttributesQuery.filter(
-                          (_: any, j: number) => j !== i
-                        )
-                      );
-                    }}
-                    title="Remove"
-                  >
-                    <Close/>
-                  </button>
-                </td>
-              </tr>
-            ))}
+              {selectedAttributesQuery.map((item: any, i: number) => (
+                <tr key={i} className="border-t border-neutral-300">
+                  <td className="px-2">{item.key}</td>
+                  <td className="px-2">
+                    {item.eq !== undefined && 'Equal to'}
+                    {item.eqOr !== undefined && 'One of'}
+                    {item.beginsWith !== undefined && 'Begins with'}
+                    {item.range !== undefined && 'In range'}
+                  </td>
+                  <td className="px-2">
+                    {item.eq !== undefined && '"' + item.eq + '"'}
+                    {item.eqOr &&
+                      item.eqOr.map((val: any) => '"' + val + '"').join(', ')}
+                    {item.beginsWith && '"' + item.beginsWith + '*"'}
+                    {item.range &&
+                      '"' + item.range.start + '" to "' + item.range.end + '"'}
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="p-1 text-neutral-500 h-6 w-6 hover:text-red-500"
+                      onClick={() => {
+                        setSelectedAttributesQuery(
+                          selectedAttributesQuery.filter(
+                            (_: any, j: number) => j !== i
+                          )
+                        );
+                      }}
+                      title="Remove"
+                    >
+                      <Close />
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         )}
       </div>
 
       <div className="flex justify-end gap-2 mt-1">
-        <Link
-          to="?advancedSearch=hidden"
+        <button
+          type="button"
+          onClick={minimizeAdvancedSearch}
           className="text-sm flex gap-2 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap"
         >
           Minimize Search Tab
           <div className="w-4 h-4 -mt-1 rotate-180">
-            <ChevronDown/>
+            <ChevronDown />
           </div>
-        </Link>
+        </button>
         <ButtonGhost type="button" onClick={onCloseTab}>
           Cancel
         </ButtonGhost>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
 import {
@@ -86,7 +86,8 @@ function DocumentListLine({
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
   const dispatch = useAppDispatch();
-
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const { user } = useAuthenticatedState();
   const [keyOnlyAttributesKeys, setKeyOnlyAttributesKeys] = useState<string[]>(
     []
@@ -273,7 +274,11 @@ function DocumentListLine({
         id={file.documentId}
         data-test-id={`${file.path}`}
         ref={drag}
-        style={{ opacity, visibility: isDragging ? 'hidden' : 'inherit', scrollMarginBottom: '160px' }}
+        style={{
+          opacity,
+          visibility: isDragging ? 'hidden' : 'inherit',
+          scrollMarginBottom: '160px',
+        }}
       >
         <td className={`text-neutral-900 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
@@ -459,7 +464,9 @@ function DocumentListLine({
               </div>
             </div>
             <Link
-              to={`#id=${file.documentId}`}
+              to={`${location.pathname}?${searchParams.toString()}#id=${
+                file.documentId
+              }`}
               className="w-5 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
               onClick={onInfoClick}
             >
