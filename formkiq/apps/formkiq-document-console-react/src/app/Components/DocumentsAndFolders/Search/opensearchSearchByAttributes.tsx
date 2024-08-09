@@ -277,7 +277,7 @@ export default function OpenSearchByAttributes({
 
   return (
     <div className="w-full h-full">
-      <div className="h-full border-gray-400 border overflow-y-auto p-2">
+      <div className="h-full border-gray-400 border p-2">
         <SearchLine
           siteId={siteId}
           searchWord={searchWord}
@@ -287,7 +287,7 @@ export default function OpenSearchByAttributes({
         />
         {attributeKeys.length ? (
           <div className="h-8 gap-2 flex items-center">
-            <div className="h-8 flex items-center gap-2 w-full max-w-[350px]">
+            <div className="h-full flex items-center gap-2 w-full max-w-[350px]">
               <RadioCombobox
                 values={attributeKeys}
                 selectedValue={selectedAttributeKey}
@@ -451,13 +451,15 @@ export default function OpenSearchByAttributes({
         </div>
 
         {selectedAttributesQuery.length > 0 && (
-          <table className="border border-neutral-300 table-fixed text-sm text-left mt-2 bg-white">
-            <thead>
+          <div className="max-h-[35vh] overflow-y-auto w-fit">
+          <table
+            className=" border-separate border-spacing-0 border-x border-b border-neutral-300 table-fixed text-sm text-left mt-2 bg-white">
+            <thead className="sticky top-0 bg-white z-10">
               <tr>
-                <th className="w-52 px-2">Key</th>
-                <th className="w-32 px-2">Criteria</th>
-                <th className="w-96 px-2">Values</th>
-                <th className="w-8"></th>
+                <th className="w-52 px-2 border-b border-t border-neutral-300">Key</th>
+                <th className="w-32 px-2 border-b border-t border-neutral-300">Criteria</th>
+                <th className="w-96 px-2 border-b border-t border-t border-neutral-300">Values</th>
+                <th className="w-8 border-b border-t border-neutral-300"></th>
               </tr>
             </thead>
             <tbody>
@@ -516,6 +518,7 @@ export default function OpenSearchByAttributes({
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
