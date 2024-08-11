@@ -312,6 +312,14 @@ function Documents() {
           // TODO: set folder to selected document path?
           updateTags();
           updateDocumentActions();
+
+          // close history tab if deeplink file
+          if (
+            infoDocumentView === 'history' &&
+            response.deepLinkPath.length > 0
+          ) {
+            setInfoDocumentView('info');
+          }
         }
       );
     }
@@ -1597,34 +1605,36 @@ function Documents() {
                         />
                       </div>
                     </div>
-                    {formkiqVersion.type !== 'core' && (
-                      <div
-                        className="w-1/3 text-sm font-semibold cursor-pointer"
-                        onClick={(event) => {
-                          setInfoDocumentView('history');
-                        }}
-                      >
+                    {formkiqVersion.type !== 'core' &&
+                      (currentDocument as IDocument).deepLinkPath.length ===
+                        0 && (
                         <div
-                          className={
-                            (infoDocumentView === 'history'
-                              ? 'text-primary-500 '
-                              : 'text-gray-400 ') + ' text-center'
-                          }
+                          className="w-1/3 text-sm font-semibold cursor-pointer"
+                          onClick={(event) => {
+                            setInfoDocumentView('history');
+                          }}
                         >
-                          History
-                        </div>
-                        <div className="flex justify-center">
-                          <hr
+                          <div
                             className={
                               (infoDocumentView === 'history'
-                                ? 'border-primary-500 '
-                                : 'border-transparent ') +
-                              ' w-1/2 rounded-xl border-b border'
+                                ? 'text-primary-500 '
+                                : 'text-gray-400 ') + ' text-center'
                             }
-                          />
+                          >
+                            History
+                          </div>
+                          <div className="flex justify-center">
+                            <hr
+                              className={
+                                (infoDocumentView === 'history'
+                                  ? 'border-primary-500 '
+                                  : 'border-transparent ') +
+                                ' w-1/2 rounded-xl border-b border'
+                              }
+                            />
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     <div
                       className="w-1/3 text-sm font-semibold cursor-pointer"
@@ -2013,14 +2023,38 @@ function Documents() {
                         </div>
                       </dl>
                     )}
-                    {currentDocument && (InlineViewableContentTypes.indexOf((currentDocument as IDocument).contentType) > -1 ||
+                    {currentDocument &&
+                      (InlineViewableContentTypes.indexOf(
+                        (currentDocument as IDocument).contentType
+                      ) > -1 ||
                         (formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
-                          OnlyOfficeContentTypes.indexOf((currentDocument as IDocument).contentType) > -1) ||
-                        (currentDocument as IDocument).deepLinkPath.length > 0) &&
-                      <div className="mt-4 w-full flex justify-center">
+                          OnlyOfficeContentTypes.indexOf(
+                            (currentDocument as IDocument).contentType
+                          ) > -1) ||
+                        (currentDocument as IDocument).deepLinkPath.length >
+                          0) && (
+                        <div className="mt-4 w-full flex justify-center">
+                          <ButtonPrimaryGradient
+                            onClick={viewDocument}
+                            type="button"
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                          >
+                            <div className="w-full flex justify-center px-4 py-1">
+                              <span className="">View Document</span>
+                              <span className="w-7 pl-1">{View()}</span>
+                            </div>
+                          </ButtonPrimaryGradient>
+                        </div>
+                      )}
+                    {(currentDocument as IDocument).deepLinkPath.length ===
+                      0 && (
+                      <div className="mt-2 w-full flex justify-center">
                         <ButtonPrimaryGradient
-                          onClick={viewDocument}
-                          type="button"
+                          onClick={DownloadDocument}
                           style={{
                             height: '36px',
                             width: '100%',
@@ -2028,55 +2062,46 @@ function Documents() {
                           }}
                         >
                           <div className="w-full flex justify-center px-4 py-1">
-                            <span className="">View Document</span>
-                            <span className="w-7 pl-1">{View()}</span>
+                            <span className="">Download</span>
+                            <span className="w-7 pl-1">{Download()}</span>
                           </div>
                         </ButtonPrimaryGradient>
-                      </div>}
-                    <div className="mt-2 w-full flex justify-center">
-                      <ButtonPrimaryGradient
-                        onClick={DownloadDocument}
-                        style={{
-                          height: '36px',
-                          width: '100%',
-                          margin: '0 16px',
-                        }}
-                      >
-                        <div className="w-full flex justify-center px-4 py-1">
-                          <span className="">Download</span>
-                          <span className="w-7 pl-1">{Download()}</span>
-                        </div>
-                      </ButtonPrimaryGradient>
-                    </div>
-                    {formkiqVersion.type !== 'core' && (
-                      <div className="mt-2 flex justify-center">
-                        <ButtonSecondary
-                          style={{
-                            height: '36px',
-                            width: '100%',
-                            margin: '0 16px',
-                          }}
-                          onClick={(event: any) => {
-                            const documentLine: ILine = {
-                              lineType: 'document',
-                              folder: '',
-                              documentId: infoDocumentId,
-                              documentInstance: currentDocument,
-                              folderInstance: null,
-                            };
-                            onDocumentWorkflowsModalClick(event, documentLine);
-                          }}
-                        >
-                          View
-                          {isSiteReadOnly ? (
-                            <span>&nbsp;</span>
-                          ) : (
-                            <span>&nbsp;/ Assign&nbsp;</span>
-                          )}
-                          Workflows
-                        </ButtonSecondary>
                       </div>
                     )}
+                    {formkiqVersion.type !== 'core' &&
+                      (currentDocument as IDocument).deepLinkPath.length ===
+                        0 && (
+                        <div className="mt-2 flex justify-center">
+                          <ButtonSecondary
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                            onClick={(event: any) => {
+                              const documentLine: ILine = {
+                                lineType: 'document',
+                                folder: '',
+                                documentId: infoDocumentId,
+                                documentInstance: currentDocument,
+                                folderInstance: null,
+                              };
+                              onDocumentWorkflowsModalClick(
+                                event,
+                                documentLine
+                              );
+                            }}
+                          >
+                            View
+                            {isSiteReadOnly ? (
+                              <span>&nbsp;</span>
+                            ) : (
+                              <span>&nbsp;/ Assign&nbsp;</span>
+                            )}
+                            Workflows
+                          </ButtonSecondary>
+                        </div>
+                      )}
                   </div>
                   <div
                     className={

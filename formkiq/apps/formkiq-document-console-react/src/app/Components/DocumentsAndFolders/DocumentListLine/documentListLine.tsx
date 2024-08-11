@@ -567,6 +567,9 @@ function DocumentListLine({
                     useIndividualSharing={useIndividualSharing}
                     useCollections={useCollections}
                     useSoftDelete={useSoftDelete}
+                    isDeeplinkPath={
+                      file?.deepLinkPath && file.deepLinkPath.length > 0
+                    }
                   />
                 </div>
               </>

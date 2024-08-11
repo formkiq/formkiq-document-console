@@ -58,6 +58,7 @@ export default function DocumentActionsPopover({
   useIndividualSharing,
   useCollections,
   useSoftDelete,
+  isDeeplinkPath,
 }: any) {
   const line: ILine = value;
   const [visible, setVisibility] = useState(false);
@@ -152,7 +153,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {line.lineType === 'document' && !onInfoPage && (
+            {line.lineType === 'document' && !onInfoPage && !isDeeplinkPath && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={DownloadDocument}
@@ -215,56 +216,60 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {formkiqVersion.type !== 'core' && line.lineType === 'document' && (
-              <li
-                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
-                onClick={(event) =>
-                  onDocumentVersionsModalClick(event, {
-                    lineType: line.lineType,
-                    documentId: line.documentId,
-                    folder: line.folder,
-                  })
-                }
-              >
-                <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-3.5 text-neutral-900">
-                    {History()}
+            {formkiqVersion.type !== 'core' &&
+              line.lineType === 'document' &&
+              !isDeeplinkPath && (
+                <li
+                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(event) =>
+                    onDocumentVersionsModalClick(event, {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      folder: line.folder,
+                    })
+                  }
+                >
+                  <span className={'flex items-baseline'}>
+                    <span className="mr-2 w-3.5 text-neutral-900">
+                      {History()}
+                    </span>
+                    <span>Versions</span>
+                    <span
+                      className="ml-auto"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {ArrowRight()}
+                    </span>
                   </span>
-                  <span>Versions</span>
-                  <span
-                    className="ml-auto"
-                    style={{ width: '15px', height: '13px' }}
-                  >
-                    {ArrowRight()}
+                </li>
+              )}
+            {formkiqVersion.type !== 'core' &&
+              line.lineType === 'document' &&
+              !isDeeplinkPath && (
+                <li
+                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(event) =>
+                    onDocumentWorkflowsModalClick(event, {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      folder: line.folder,
+                    })
+                  }
+                >
+                  <span className={'flex items-baseline'}>
+                    <span className="mr-2 w-3.5 text-neutral-900">
+                      {Workflow()}
+                    </span>
+                    <span>Workflows</span>
+                    <span
+                      className="ml-auto"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {ArrowRight()}
+                    </span>
                   </span>
-                </span>
-              </li>
-            )}
-            {formkiqVersion.type !== 'core' && line.lineType === 'document' && (
-              <li
-                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
-                onClick={(event) =>
-                  onDocumentWorkflowsModalClick(event, {
-                    lineType: line.lineType,
-                    documentId: line.documentId,
-                    folder: line.folder,
-                  })
-                }
-              >
-                <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-3.5 text-neutral-900">
-                    {Workflow()}
-                  </span>
-                  <span>Workflows</span>
-                  <span
-                    className="ml-auto"
-                    style={{ width: '15px', height: '13px' }}
-                  >
-                    {ArrowRight()}
-                  </span>
-                </span>
-              </li>
-            )}
+                </li>
+              )}
 
             {line.lineType === 'document' && pathname.indexOf('/queues') > -1 && (
               <li
