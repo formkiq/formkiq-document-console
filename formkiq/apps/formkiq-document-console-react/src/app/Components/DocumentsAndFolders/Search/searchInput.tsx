@@ -37,6 +37,7 @@ export default function SearchInput({
   siteId,
   documentsRootUri,
   value,
+  expandAdvancedSearch,
 }: any) {
   const search = useLocation().search;
   const advancedSearch = new URLSearchParams(search).get('advancedSearch');
@@ -192,17 +193,6 @@ export default function SearchInput({
     }
   }
 
-  // toggle advanced search pane
-  const toggleAdvancedSearch = () => {
-    if (advancedSearch) {
-      searchParams.delete('advancedSearch');
-      setSearchParams(searchParams);
-    } else {
-      searchParams.set('advancedSearch', 'visible');
-      setSearchParams(searchParams);
-    }
-  };
-
   return (
     <div className={'relative w-full'} ref={wrapperRef}>
       <div className="flex items-center">
@@ -228,7 +218,7 @@ export default function SearchInput({
           <div className="grow-0 ml-2 -mt-1">
             <button
               className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"
-              onClick={toggleAdvancedSearch}
+              onClick={expandAdvancedSearch}
             >
               <div className="w-4">
                 <MoreActions />

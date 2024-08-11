@@ -17,6 +17,7 @@ export default function DefaultSearchByAttributes({
   siteId,
   formkiqVersion,
   subfolderUri,
+  closeAdvancedSearch,
 }: any) {
   const stringAttributeCriteria = [
     { key: 'eq', title: 'Equal to' },
@@ -229,8 +230,7 @@ export default function DefaultSearchByAttributes({
   }
 
   function onCloseTab() {
-    searchParams.delete('advancedSearch');
-    setSearchParams(searchParams);
+    closeAdvancedSearch();
     // re-fetch documents
     dispatch(
       fetchDocuments({
