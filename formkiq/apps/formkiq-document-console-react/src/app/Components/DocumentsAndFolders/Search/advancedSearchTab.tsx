@@ -57,11 +57,11 @@ function AdvancedSearchTab({
   return (
     <div
       className={
-        'w-full h-84 p-3 flex flex-col justify-between relative ' +
+        'w-full p-3 flex flex-col justify-between relative ' +
         (advancedSearch === 'hidden' && 'hidden')
       }
     >
-      <div className="absolute flex w-full h-72 justify-center items-center font-bold text-5xl text-gray-100 mb-2 -z-10">
+      <div className="absolute flex w-full h-full justify-center items-center font-bold text-5xl text-gray-100 mb-2 -z-10">
         Search
       </div>
       {!formkiqVersion.modules.includes('opensearch') &&

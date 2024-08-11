@@ -85,8 +85,10 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   const search = useLocation().search;
   const scrollToDocumentLine = new URLSearchParams(search).get('scrollToDocumentLine');
 
-  // when user opens document folder after viewing document, scroll to list to display document line
   useEffect(() => {
+    // load more items if bottom of a table is visible
+    trackScrolling()
+    // when user opens document folder after viewing document, scroll to list to display document line
     if (!scrollToDocumentLine) return;
     if (loadingStatus !== RequestStatus.fulfilled) return;
     const documentIndex = documents.findIndex((doc) => doc.documentId === infoDocumentId);

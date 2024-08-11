@@ -45,7 +45,7 @@ export default function SearchInput({
   const [documents, setDocuments] = useState(null);
   const [isAdvancedSearchModalOpened, setAdvancedSearchModalOpened] =
     useState(false);
-  const [isSearchAvailable, setIsSearchAvailable] = useState<boolean>(false);
+  const [isSearchAvailable, setIsSearchAvailable] = useState<boolean>(true);
   const navigate = useNavigate();
 
   const { formkiqVersion, useAdvancedSearch } = useSelector(ConfigState);
