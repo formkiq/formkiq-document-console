@@ -224,6 +224,34 @@ function Documents() {
   const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
     []
   );
+  const [dropUploadDocuments, setDropUploadDocuments] = useState<any>(null);
+
+  const documentsPageWrapper = document.getElementById('documentsPageWrapper');
+
+  useEffect(() => {
+    function handleDrop(event: any) {
+      event.stopPropagation();
+      event.preventDefault();
+      setDropUploadDocuments(event.dataTransfer.files);
+      onUploadClick(event, '');
+    }
+    documentsPageWrapper?.addEventListener('dragover', function (event) {
+      event.preventDefault();
+    });
+
+    documentsPageWrapper?.addEventListener('drop', function (event) {
+      handleDrop(event);
+    });
+
+    return () => {
+      documentsPageWrapper?.removeEventListener('dragover', function (event) {
+        event.preventDefault();
+      });
+      documentsPageWrapper?.removeEventListener('drop', function (event) {
+        handleDrop(event);
+      });
+    };
+  }, [documentsPageWrapper]);
 
   const trackScrolling = useCallback(async () => {
 
@@ -1455,7 +1483,10 @@ function Documents() {
               }`,
             }}
           >
-            <div className="flex-1 inline-block h-full">
+            <div
+              className="flex-1 inline-block h-full"
+              id="documentsPageWrapper"
+            >
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
@@ -2435,6 +2466,7 @@ function Documents() {
         documentId={uploadModalDocumentId}
         isFolderUpload={false}
         onDocumentDataChange={onDocumentDataChange}
+        dropUploadDocuments={dropUploadDocuments}
       />
       <UploadModal
         isOpened={isFolderUploadModalOpened}

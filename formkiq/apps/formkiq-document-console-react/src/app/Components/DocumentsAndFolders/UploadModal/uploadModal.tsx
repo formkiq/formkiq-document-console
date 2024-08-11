@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import {
-  BeforeUploadEventArgs,
+  BeforeUploadEventArgs, FileInfo,
   SelectedEventArgs,
   UploaderComponent,
   UploadingEventArgs,
@@ -80,6 +80,7 @@ export default function UploadModal({
   documentId,
   isFolderUpload,
   onDocumentDataChange,
+  dropUploadDocuments,
 }: {
   isOpened: boolean;
   onClose: any;
@@ -89,6 +90,7 @@ export default function UploadModal({
   documentId: string;
   isFolderUpload: boolean;
   onDocumentDataChange: any;
+  dropUploadDocuments?: any;
 }) {
   const dispatch = useAppDispatch();
   const cancelButtonRef = useRef(null);
@@ -113,6 +115,16 @@ export default function UploadModal({
   }
 
   useEffect(() => {
+    if (!dropUploadDocuments) return;
+    setTimeout(() => {
+      const uploader = document.getElementById('uploader') as HTMLInputElement;
+      if(!uploader) return;
+      uploader.files = dropUploadDocuments;
+      uploader.dispatchEvent(new Event('change'));
+    }, 0);
+  }, [dropUploadDocuments])
+
+    useEffect(() => {
     const siteId = DocumentsService.determineSiteId();
     DocumentsService.getConfiguration(siteId).then((response) => {
       if (response.chatGptApiKey) {
