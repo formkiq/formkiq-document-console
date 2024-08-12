@@ -231,6 +231,7 @@ function Documents() {
 
   useEffect(() => {
     function handleDrop(event: any) {
+      if (event.dataTransfer.files.length === 0) return;
       event.stopPropagation();
       event.preventDefault();
       setDropUploadDocuments(event.dataTransfer.files);
