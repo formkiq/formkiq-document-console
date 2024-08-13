@@ -233,13 +233,13 @@ function Documents() {
   const [isDropZoneVisible, setIsDropZoneVisible] = useState(false);
 
   function handleDragEnter(event: any) {
+    if (!event.dataTransfer?.types.includes('Files')) return;
     event.preventDefault();
     event.stopPropagation();
-    if (event.dataTransfer?.types.includes('Files')) {
-      setIsDropZoneVisible(true)
-    }
+    setIsDropZoneVisible(true)
   }
   function handleDrop(event: any) {
+    if (!event.dataTransfer?.types.includes('Files')) return;
     event.preventDefault();
     if (event.dataTransfer.files.length === 0) return;
     setIsDropZoneVisible(false);
@@ -253,6 +253,7 @@ function Documents() {
   }
   useEffect(() => {
     const handleDragOver = (event: any) => {
+      if (!event.dataTransfer?.types.includes('Files')) return;
       event.preventDefault();
     };
     documentsPageWrapper?.addEventListener('dragover', function (event) {

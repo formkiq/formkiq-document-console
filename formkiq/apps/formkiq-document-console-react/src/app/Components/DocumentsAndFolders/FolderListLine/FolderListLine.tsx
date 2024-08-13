@@ -87,7 +87,8 @@ function FolderListLine({
 
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1);
   const trElem = React.forwardRef((props: any, ref) => (
-    <tr {...props} ref={ref} className="folder-drop-wrapper" data-folder-path={folderPath} >
+    <tr {...props} ref={ref} data-folder-path={folderPath}
+    >
       {props.childs}
     </tr>
   ));
@@ -228,7 +229,7 @@ function FolderListLine({
       >
         <tbody>
           <FolderDropWrapper
-            className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-normal"
+            className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-normal folder-drop-wrapper"
             wrapper={trElem}
             folder={folderPath}
             sourceSiteId={currentSiteId}
