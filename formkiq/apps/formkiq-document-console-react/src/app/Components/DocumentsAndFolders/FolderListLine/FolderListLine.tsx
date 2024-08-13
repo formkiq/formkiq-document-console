@@ -87,7 +87,7 @@ function FolderListLine({
 
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1);
   const trElem = React.forwardRef((props: any, ref) => (
-    <tr {...props} ref={ref}>
+    <tr {...props} ref={ref} className="folder-drop-wrapper" data-folder-path={folderPath} >
       {props.childs}
     </tr>
   ));

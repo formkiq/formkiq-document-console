@@ -90,6 +90,7 @@ import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
+import { Dialog } from '@headlessui/react';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -226,19 +227,36 @@ function Documents() {
     []
   );
   const [dropUploadDocuments, setDropUploadDocuments] = useState<any>(null);
-
+  const [dropFolderPath, setDropFolderPath] = useState<any>(null);
   const documentsPageWrapper = document.getElementById('documentsPageWrapper');
+  const closeDropZoneRef = useRef(null);
+  const [isDropZoneVisible, setIsDropZoneVisible] = useState(false);
 
-  useEffect(() => {
-    function handleDrop(event: any) {
-      if (event.dataTransfer.files.length === 0) return;
-      event.stopPropagation();
-      event.preventDefault();
-      setDropUploadDocuments(event.dataTransfer.files);
-      onUploadClick(event, '');
+  function handleDragEnter(event: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.dataTransfer?.types.includes('Files')) {
+      setIsDropZoneVisible(true)
     }
-    documentsPageWrapper?.addEventListener('dragover', function (event) {
+  }
+  function handleDrop(event: any) {
+    event.preventDefault();
+    if (event.dataTransfer.files.length === 0) return;
+    setIsDropZoneVisible(false);
+    const folder = event.target.closest('.folder-drop-wrapper');
+    if (folder) {
+      const folderPath = folder.getAttribute('data-folder-path');
+      setDropFolderPath(folderPath);
+    }
+    setDropUploadDocuments(event.dataTransfer.files);
+    onUploadClick(event, '');
+  }
+  useEffect(() => {
+    const handleDragOver = (event: any) => {
       event.preventDefault();
+    };
+    documentsPageWrapper?.addEventListener('dragover', function (event) {
+      handleDragOver(event);
     });
 
     documentsPageWrapper?.addEventListener('drop', function (event) {
@@ -247,13 +265,18 @@ function Documents() {
 
     return () => {
       documentsPageWrapper?.removeEventListener('dragover', function (event) {
-        event.preventDefault();
+        handleDragOver(event);
       });
       documentsPageWrapper?.removeEventListener('drop', function (event) {
         handleDrop(event);
       });
     };
   }, [documentsPageWrapper]);
+
+  function resetDropUploadDocuments() {
+    setDropUploadDocuments(null);
+    setDropFolderPath(null);
+  }
 
   const trackScrolling = useCallback(async () => {
 
@@ -1527,11 +1550,10 @@ function Documents() {
                 isTagFilterExpanded ? '- 6rem' : '- 3.68rem'
               }`,
             }}
+            id="documentsPageWrapper"
+            onDragEnter={handleDragEnter}
           >
-            <div
-              className="flex-1 inline-block h-full"
-              id="documentsPageWrapper"
-            >
+            <div className="flex-1 inline-block h-full">
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
@@ -1577,6 +1599,33 @@ function Documents() {
                 infoDocumentId={infoDocumentId}
                 onDocumentInfoClick={onDocumentInfoClick}
               />
+              <Dialog
+                open={isDropZoneVisible}
+                onClose={() => setIsDropZoneVisible(false)}
+                initialFocus={closeDropZoneRef}
+                className="h-[calc(100vh-60px)] w-96 absolute right-0 top-[60px] z-10 bg-neutral-100 flex text-gray-400 border border-dashed border-4"
+              >
+                <Dialog.Panel>
+                  <button
+                    ref={closeDropZoneRef}
+                    className="absolute right-2 top-2 cursor-pointer h-6 w-6 text-gray-400 hover:text-gray-600 focus:outline-none "
+                    onClick={() => setIsDropZoneVisible(false)}
+                  >
+                    <Close />
+                  </button>
+                  <div
+                    className="h-full w-full flex justify-center items-center p-6"
+                    onDrop={handleDrop}
+                  >
+                    <h1 className="text-2xl font-bold text-center">
+                      Drop files here to upload to current folder <br />
+                      <span className="text-sm font-normal ">
+                        (or drop files onto specific folders)
+                      </span>
+                    </h1>
+                  </div>
+                </Dialog.Panel>
+              </Dialog>
             </div>
           </div>
         </div>
@@ -2525,11 +2574,12 @@ function Documents() {
         onClose={onUploadClose}
         siteId={currentSiteId}
         formkiqVersion={formkiqVersion}
-        folder={subfolderUri}
+        folder={dropFolderPath ? dropFolderPath : subfolderUri}
         documentId={uploadModalDocumentId}
         isFolderUpload={false}
         onDocumentDataChange={onDocumentDataChange}
         dropUploadDocuments={dropUploadDocuments}
+        resetDropUploadDocuments={resetDropUploadDocuments}
       />
       <UploadModal
         isOpened={isFolderUploadModalOpened}
