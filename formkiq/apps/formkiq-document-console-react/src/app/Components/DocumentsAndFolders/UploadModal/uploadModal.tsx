@@ -81,6 +81,7 @@ export default function UploadModal({
   isFolderUpload,
   onDocumentDataChange,
   dropUploadDocuments,
+  resetDropUploadDocuments,
 }: {
   isOpened: boolean;
   onClose: any;
@@ -91,6 +92,7 @@ export default function UploadModal({
   isFolderUpload: boolean;
   onDocumentDataChange: any;
   dropUploadDocuments?: any;
+  resetDropUploadDocuments?: any;
 }) {
   const dispatch = useAppDispatch();
   const cancelButtonRef = useRef(null);
@@ -168,6 +170,7 @@ export default function UploadModal({
   };
 
   const closeDialog = () => {
+    if(resetDropUploadDocuments) resetDropUploadDocuments();
     setUploaded([]);
     onClose();
   };
