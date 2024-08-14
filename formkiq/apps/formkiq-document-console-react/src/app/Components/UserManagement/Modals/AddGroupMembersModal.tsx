@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 import {
   addUserToGroup,
+  fetchGroups,
   fetchUsers,
 } from '../../../Store/reducers/userManagement';
 import { useAppDispatch } from '../../../Store/store';
@@ -45,7 +46,7 @@ function AddGroupMembersModal({
       const userData = { user: { username: user.username } };
       dispatch(addUserToGroup({ groupName, user: userData }));
     }
-    fetchUsers({});
+    dispatch(fetchGroups({}));
     closeModal();
   };
 
