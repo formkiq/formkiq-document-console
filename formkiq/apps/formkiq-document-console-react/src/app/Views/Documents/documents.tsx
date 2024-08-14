@@ -255,7 +255,6 @@ function Documents() {
   }, [documentsPageWrapper]);
 
   const trackScrolling = useCallback(async () => {
-
     const isBottom = (el: HTMLElement) => {
       if (el) {
         return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
@@ -317,6 +316,7 @@ function Documents() {
           // close history tab if deeplink file
           if (
             infoDocumentView === 'history' &&
+            response.deepLinkPath &&
             response.deepLinkPath.length > 0
           ) {
             setInfoDocumentView('info');
@@ -925,7 +925,7 @@ function Documents() {
           pathname +
           '?' +
           searchParams.toString() +
-          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}`:""),
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}` : ''),
       },
       {
         replace: true,
@@ -934,14 +934,14 @@ function Documents() {
   };
 
   const minimizeAdvancedSearch = () => {
-    searchParams.set('advancedSearch','hidden');
+    searchParams.set('advancedSearch', 'hidden');
     navigate(
       {
         pathname:
           pathname +
           '?' +
           searchParams.toString() +
-          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}`:""),
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}` : ''),
       },
       {
         replace: true,
@@ -1643,6 +1643,7 @@ function Documents() {
                       </div>
                     </div>
                     {formkiqVersion.type !== 'core' &&
+                      (currentDocument as IDocument).deepLinkPath &&
                       (currentDocument as IDocument).deepLinkPath.length ===
                         0 && (
                         <div
@@ -2068,8 +2069,9 @@ function Documents() {
                           OnlyOfficeContentTypes.indexOf(
                             (currentDocument as IDocument).contentType
                           ) > -1) ||
-                        (currentDocument as IDocument).deepLinkPath.length >
-                          0) && (
+                        ((currentDocument as IDocument).deepLinkPath &&
+                          (currentDocument as IDocument).deepLinkPath.length >
+                            0)) && (
                         <div className="mt-4 w-full flex justify-center">
                           <ButtonPrimaryGradient
                             onClick={viewDocument}
@@ -2087,25 +2089,27 @@ function Documents() {
                           </ButtonPrimaryGradient>
                         </div>
                       )}
-                    {(currentDocument as IDocument).deepLinkPath.length ===
-                      0 && (
-                      <div className="mt-2 w-full flex justify-center">
-                        <ButtonPrimaryGradient
-                          onClick={DownloadDocument}
-                          style={{
-                            height: '36px',
-                            width: '100%',
-                            margin: '0 16px',
-                          }}
-                        >
-                          <div className="w-full flex justify-center px-4 py-1">
-                            <span className="">Download</span>
-                            <span className="w-7 pl-1">{Download()}</span>
-                          </div>
-                        </ButtonPrimaryGradient>
-                      </div>
-                    )}
+                    {(currentDocument as IDocument).deepLinkPath &&
+                      (currentDocument as IDocument).deepLinkPath.length ===
+                        0 && (
+                        <div className="mt-2 w-full flex justify-center">
+                          <ButtonPrimaryGradient
+                            onClick={DownloadDocument}
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                          >
+                            <div className="w-full flex justify-center px-4 py-1">
+                              <span className="">Download</span>
+                              <span className="w-7 pl-1">{Download()}</span>
+                            </div>
+                          </ButtonPrimaryGradient>
+                        </div>
+                      )}
                     {formkiqVersion.type !== 'core' &&
+                      (currentDocument as IDocument).deepLinkPath &&
                       (currentDocument as IDocument).deepLinkPath.length ===
                         0 && (
                         <div className="mt-2 flex justify-center">
