@@ -164,7 +164,10 @@ export function DocumentView() {
             ).then((urlResponse: any) => {
               setDocumentContent(urlResponse.url);
             });
-          } else if ((response as IDocument).deepLinkPath.length) {
+          } else if (
+            (response as IDocument).deepLinkPath &&
+            (response as IDocument).deepLinkPath.length
+          ) {
             setDocumentContent((response as IDocument).deepLinkPath);
           } else if ((response as IDocument).contentType === 'text/csv') {
             let viewVersionKey = '';
@@ -294,7 +297,8 @@ export function DocumentView() {
           (InlineViewableContentTypes.indexOf(
             (document as IDocument).contentType
           ) > -1 ||
-            (document as IDocument).deepLinkPath.length > 0) && (
+            ((document as IDocument).deepLinkPath &&
+              (document as IDocument).deepLinkPath.length > 0)) && (
             <>
               {documentContent && (
                 <iframe
