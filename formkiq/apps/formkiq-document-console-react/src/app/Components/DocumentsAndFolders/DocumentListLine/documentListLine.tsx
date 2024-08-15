@@ -115,36 +115,10 @@ function DocumentListLine({
 
   const onPermanentDeleteClick = () => {
     const deleteFunc = () => {
-      DocumentsService.deleteDocument(file.documentId, siteId).then(() => {
+      DocumentsService.deleteDocument(file.documentId, siteId, "false").then(() => {
         setTimeout(() => {
           onDocumentDataChange();
         }, 1000);
-        /*
-        if (useSoftDelete) {
-          navigate(
-            {
-              pathname: `${documentsRootUri}/folders/deleted`,
-              search: '?refresh=' + Math.random(),
-            },
-            {
-              replace: true,
-            }
-          );
-        } else {
-          // TODO: add delete processing modal with spinner ?
-          setTimeout(() => {
-            navigate(
-              {
-                pathname: `${documentsRootUri}/folders/${folder}`,
-                search: '?refresh=' + Math.random(),
-              },
-              {
-                replace: true,
-              }
-            );
-          }, 1500)
-        }
-        */
       });
     };
     dispatch(
@@ -331,8 +305,19 @@ function DocumentListLine({
                 }
               ></div>
             ) : (
-              <div className="w-1"></div>
+              <div className="w-5"></div>
             )}
+            {folder === 'deleted' ? (
+                <span
+                  className="w-16 flex items-center justify-start"
+                >
+                  <img
+                    src={getFileIcon(file.path, file.deepLinkPath)}
+                    className="w-8 inline-block"
+                    alt="icon"
+                  />
+                </span>
+              ):
             <Link
               to={`${documentsRootUri}/${file.documentId}/view`}
               className="cursor-pointer w-16 flex items-center justify-start"
@@ -342,16 +327,32 @@ function DocumentListLine({
                 className="w-8 inline-block"
                 alt="icon"
               />
-            </Link>
+            </Link>}
             <div className="grow flex">
-              <Link
-                to={`${documentsRootUri}/${file.documentId}/view`}
-                className="cursor-pointer pt-1.5 flex items-center"
-                title={file.path.substring(file.path.lastIndexOf('/') + 1)}
-              >
-                {folder === 'deleted' ? (
-                  <span>{file.path}</span>
-                ) : (
+              {folder === 'deleted' ? (
+                  <span className="pt-1.5 flex items-center">
+                    {file.path.substring(file.path.lastIndexOf('/') + 1)
+                      .length > 80 ? (
+                      <span className="tracking-tighter text-clip overflow-hidden">
+                        {file.path.substring(
+                          file.path.lastIndexOf('/') + 1,
+                          file.path.lastIndexOf('/') + 80
+                        )}
+                        {file.path.substring(file.path.lastIndexOf('/') + 1)
+                          .length > 80 && <span>...</span>}
+                      </span>
+                    ) : (
+                      <span>
+                        {file.path.substring(file.path.lastIndexOf('/') + 1)}
+                      </span>
+                    )}
+                </span>
+              ) : (
+                <Link
+                  to={`${documentsRootUri}/${file.documentId}/view`}
+                  className="cursor-pointer pt-1.5 flex items-center"
+                  title={file.path.substring(file.path.lastIndexOf('/') + 1)}
+                >
                   <span>
                     {file.path.substring(file.path.lastIndexOf('/') + 1)
                       .length > 80 ? (
@@ -369,11 +370,12 @@ function DocumentListLine({
                       </span>
                     )}
                   </span>
-                )}
-              </Link>
+                </Link>
+              )}
               <div className="grow flex items-center justify-end pt-1.5 pr-4">
                 <div className="flex flex-wrap justify-end w-52">
-                  {keyOnlyAttributesKeys &&
+                  {folder !== 'deleted' &&
+                    keyOnlyAttributesKeys &&
                     keyOnlyAttributesKeys.map((attributeKey, i) => {
                       let tagColor = 'gray';
                       if (tagColors) {
@@ -402,6 +404,7 @@ function DocumentListLine({
                     })}
 
                   {file.tags &&
+                    folder !== 'deleted' &&
                     Object.getOwnPropertyNames(file.tags)
                       .sort() // This will sort the property names alphabetically
                       .map((propertyName, i) => {
@@ -446,32 +449,36 @@ function DocumentListLine({
                         );
                       })}
                 </div>
-                <div className="flex">
-                  <div className="w-4 h-4 text-neutral-900 ml-2 -mt-1 cursor-pointer hover:text-primary-500">
-                    <DocumentTagsPopover
-                      value={{
-                        lineType: 'document',
-                        folder: folder,
-                        documentId: file.documentId,
-                      }}
-                      onDocumentDataChange={onDocumentDataChange}
-                      siteId={siteId}
-                      isSiteReadOnly={isSiteReadOnly}
-                      tagColors={tagColors}
-                    />
+                {folder !== 'deleted' && (
+                  <div className="flex">
+                    <div className="w-4 h-4 text-neutral-900 ml-2 -mt-1 cursor-pointer hover:text-primary-500">
+                      <DocumentTagsPopover
+                        value={{
+                          lineType: 'document',
+                          folder: folder,
+                          documentId: file.documentId,
+                        }}
+                        onDocumentDataChange={onDocumentDataChange}
+                        siteId={siteId}
+                        isSiteReadOnly={isSiteReadOnly}
+                        tagColors={tagColors}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
-            <Link
-              to={`${location.pathname}?${searchParams.toString()}#id=${
-                file.documentId
-              }`}
-              className="w-5 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
-              onClick={onInfoClick}
-            >
-              <Info />
-            </Link>
+            {folder !== 'deleted' && (
+              <Link
+                to={`${location.pathname}?${searchParams.toString()}#id=${
+                  file.documentId
+                }`}
+                className="w-5 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
+                onClick={onInfoClick}
+              >
+                <Info />
+              </Link>
+            )}
             {folder !== 'deleted' && !isSiteReadOnly && (
               <div
                 onClick={toggleFavorite}
