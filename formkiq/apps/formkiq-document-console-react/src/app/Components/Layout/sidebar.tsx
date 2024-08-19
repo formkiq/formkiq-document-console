@@ -143,11 +143,7 @@ export function Sidebar() {
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    if (recheckSiteInfo.siteDocumentsRootUri.indexOf('workspaces') > 0) {
-      if (!hasUserSite && !hasDefaultSite && hasWorkspaces) {
-        setSpecialFoldersRootUri('/documents');
-      }
-    }
+    setSpecialFoldersRootUri(recheckSiteInfo.siteDocumentsRootUri);
   }, [pathname]);
 
   useEffect(() => {
