@@ -38,6 +38,12 @@ function CreateGroupModal({isOpen, setIsOpen}: CreateGroupModalPropsType) {
       e.preventDefault();
     }
   }
+  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const pattern = /^[a-zA-Z0-9_-]+$/;
+    if (pattern.test(e.target.value)) {
+      setGroupValue({...groupValue, name: e.target.value});
+    }
+  }
 
   return (<>{isOpen &&
       <Dialog open={isOpen} onClose={() => null} className="relative z-50 text-neutral-900" static
@@ -55,8 +61,9 @@ function CreateGroupModal({isOpen, setIsOpen}: CreateGroupModalPropsType) {
               <input type="text" className="h-12 px-4 border border-neutral-300 text-sm rounded-md"
                      placeholder="Name group"
                      required value={groupValue.name}
-                     onChange={(e) => setGroupValue({...groupValue, name: e.target.value})}
                      ref={groupNameRef}
+                     pattern="^[a-zA-Z0-9_-]+$"
+                     onChange={handleNameChange}
                      onKeyDown={(e) => preventDialogClose(e)}/>
               <textarea rows={3} className=" px-4 border border-neutral-300 text-sm rounded-md"
                         placeholder="Description..."
