@@ -402,7 +402,7 @@ export default function UploadModal({
     return (
       <tr key={i}>
         <td
-          className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400"
+          className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400 break-words"
           data-test-id={`uploaded-files-${i}`}
         >
           {file.path}
