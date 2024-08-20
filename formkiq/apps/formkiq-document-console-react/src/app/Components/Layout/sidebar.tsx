@@ -771,7 +771,12 @@ export function Sidebar() {
                 {formkiqVersion.type !== 'core' && (
                   <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
-                      to="/workflows"
+                      to={
+                        '/workflows' +
+                        (pathname.indexOf('workspaces') > 0
+                          ? '/workspaces/' + currentSiteId
+                          : '')
+                      }
                       className={({ isActive }) =>
                         (isActive
                           ? 'text-primary-600 bg-neutral-200 '
@@ -795,7 +800,12 @@ export function Sidebar() {
                 {formkiqVersion.type !== 'core' && (
                   <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
-                      to="/queues"
+                      to={
+                        '/queues' +
+                        (pathname.indexOf('workspaces') > 0
+                          ? '/workspaces/' + currentSiteId
+                          : '')
+                      }
                       className={({ isActive }) =>
                         (isActive
                           ? 'text-primary-600 bg-neutral-200 '
@@ -818,7 +828,12 @@ export function Sidebar() {
                 )}
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to="/attributes"
+                    to={
+                      '/attributes' +
+                      (pathname.indexOf('workspaces') > 0
+                        ? '/workspaces/' + currentSiteId
+                        : '')
+                    }
                     className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '
@@ -860,7 +875,12 @@ export function Sidebar() {
                 {formkiqVersion.type !== 'core' && (
                   <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
-                      to="/rulesets"
+                      to={
+                        '/rulesets' +
+                        (pathname.indexOf('workspaces') > 0
+                          ? '/workspaces/' + currentSiteId
+                          : '')
+                      }
                       data-test-id="nav-rulesets"
                       className={({ isActive }) =>
                         (isActive
@@ -901,7 +921,12 @@ export function Sidebar() {
                 </li>
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to="/schemas"
+                    to={
+                      '/schemas' +
+                      (pathname.indexOf('workspaces') > 0
+                        ? '/workspaces/' + currentSiteId
+                        : '')
+                    }
                     data-test-id="nav-schemas"
                     className={({ isActive }) =>
                       (isActive
@@ -960,7 +985,12 @@ export function Sidebar() {
                     </li>
                     <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
-                        to="/admin/api-keys"
+                        to={
+                          '/admin/api-keys' +
+                          (pathname.indexOf('workspaces') > 0
+                            ? '/workspaces/' + currentSiteId
+                            : '')
+                        }
                         data-test-id="nav-api-keys"
                         className={({ isActive }) =>
                           (isActive
@@ -1177,7 +1207,12 @@ export function Sidebar() {
             </div>
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
-                to="/workflows"
+                to={
+                  '/workflows' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
                 className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
@@ -1198,7 +1233,12 @@ export function Sidebar() {
             </li>
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
-                to="/queues"
+                to={
+                  '/queues' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
                 className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
@@ -1253,7 +1293,12 @@ export function Sidebar() {
             </li>
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
-                to="/rulesets"
+                to={
+                  '/rulesets' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
                 className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
@@ -1295,7 +1340,12 @@ export function Sidebar() {
             </li>
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
-                to="/schemas"
+                to={
+                  '/schemas' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
                 className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
@@ -1338,7 +1388,12 @@ export function Sidebar() {
                 </li>
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to="/admin/api-keys"
+                    to={
+                      '/admin/api-keys' +
+                      (pathname.indexOf('workspaces') > 0
+                        ? '/workspaces/' + currentSiteId
+                        : '')
+                    }
                     className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '
