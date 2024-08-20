@@ -29,7 +29,8 @@ import {
   Close,
   Download,
   Edit,
-  FolderOutline,
+  FolderOutline, 
+  Retry,
   Spinner,
   Tag,
   Trash,
@@ -567,6 +568,28 @@ function Documents() {
       );
     }
   };
+
+  function retryFailedActions() {
+    DocumentsService.retryDocumentActions(currentSiteId, infoDocumentId).then(
+      (response: any) => {
+        if (response.status === 200) {
+          updateDocumentActions();
+        } else if (response.status === 400) {
+          dispatch(
+            openDialog({
+              dialogTitle: response.errors[0].error,
+            })
+          );
+        } else {
+          dispatch(
+            openDialog({
+              dialogTitle: 'Something went wrong. Please try again later.',
+            })
+          );
+        }
+      }
+    );
+  }
 
   // update document actions every 5 seconds
   useEffect(() => {
@@ -2297,6 +2320,21 @@ function Documents() {
                         <div className="flex w-full justify-center italic text-smaller">
                           (no actions exist for this document)
                         </div>
+                      )}
+                      {currentDocumentActions.find(
+                        (action: any) => action.status === 'FAILED'
+                      ) && (
+                        <ButtonPrimaryGradient
+                          className="text-sm h-9 w-full mb-2"
+                          onClick={retryFailedActions}
+                        >
+                          <div className="flex gap-2 items-center justify-center">
+                            <span>Retry Failed Actions</span>
+                            <div className="w-5">
+                              <Retry />
+                            </div>
+                          </div>
+                        </ButtonPrimaryGradient>
                       )}
                       {currentDocumentActions.map((action: any, i: number) => (
                         <div key={i} className="flex flex-col pb-3">
