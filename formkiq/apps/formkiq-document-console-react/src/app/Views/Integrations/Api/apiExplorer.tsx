@@ -144,6 +144,7 @@ import {
   putSiteClassificationApiItem,
   getUserActivitiesApiItem,
   getDocumentUserActivitiesApiItem,
+  postRetryDocumentActionsApiItem
 } from './helpers';
 
 export function ApiExplorer() {
@@ -228,6 +229,10 @@ export function ApiExplorer() {
                       />
                       <ApiItem
                         apiItem={postDocumentActionsApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={postRetryDocumentActionsApiItem}
                         sites={sites}
                       />
                     </div>
