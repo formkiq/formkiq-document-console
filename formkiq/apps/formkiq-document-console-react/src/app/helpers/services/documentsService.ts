@@ -1034,6 +1034,20 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async retryDocumentActions(
+    siteId = '',
+    documentId: string
+  ): Promise<any> {
+    if (!siteId || !siteId.length) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.retryDocumentActions({
+      siteId,
+      documentId,
+    });
+  }
+
+  @formkiqAPIHandler
   public static async patchDocumentDetails(
     documentId: string,
     details: any,
