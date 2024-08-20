@@ -29,7 +29,7 @@ import {
   Close,
   Download,
   Edit,
-  FolderOutline, 
+  FolderOutline,
   Retry,
   Spinner,
   Tag,
@@ -2346,7 +2346,8 @@ function Documents() {
                               className={`font-bold text-xs ${
                                 action.status === 'COMPLETE'
                                   ? 'text-green-600'
-                                  : action.status === 'FAILED'
+                                  : action.status === 'FAILED' ||
+                                    action.status === 'FAILED_RETRY'
                                   ? 'text-red-600'
                                   : action.status === 'SKIPPED'
                                   ? 'text-neutral-600'
