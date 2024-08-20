@@ -1259,6 +1259,28 @@ export function Sidebar() {
             </li>
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
+                to={
+                  '/attributes' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
+                className={({ isActive }) =>
+                  (isActive
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
+                }
+              >
+                <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
+                  <div className="w-4 flex items-center mr-2">
+                    <Attribute />
+                  </div>
+                </div>
+              </NavLink>
+            </li>
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+              <NavLink
                 to="/integrations/api"
                 className={({ isActive }) =>
                   (isActive
