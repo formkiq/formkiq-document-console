@@ -9,9 +9,9 @@ import { ConfigState } from '../../Store/reducers/config';
 import { setCurrentDocumentPath } from '../../Store/reducers/data';
 import { useAppDispatch } from '../../Store/store';
 import {
-  InlineViewableContentExtensions,
   InlineViewableContentTypes,
-  OnlyOfficeContentTypes,
+  OnlyOfficeContentTypes, TextFileEditorEditableContentTypes,
+  TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -67,6 +67,8 @@ export function DocumentView() {
   const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
     siteDocumentsRootName
   );
+  const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
+    useState<boolean>(true);
 
   const customParse = (csvText: string): CSVRow[] => {
     const lines = csvText.split('\n').filter((line) => line.trim() !== '');
@@ -119,11 +121,6 @@ export function DocumentView() {
       DocumentsService.getDocumentById(id, currentSiteId).then(
         (response: IDocument) => {
           setDocument(response);
-          setDocumentExtension(
-            response.path
-              .substring(response.path.lastIndexOf('.') + 1)
-              .toLowerCase()
-          );
           dispatch(setCurrentDocumentPath(response.path));
           if (
             formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
@@ -186,10 +183,8 @@ export function DocumentView() {
               }
             });
           } else if (
-            InlineViewableContentExtensions.indexOf(
-              response.path
-                .substring(response.path.lastIndexOf('.') + 1)
-                .toLowerCase()
+            TextFileEditorViewableContentTypes.indexOf(
+              (response as IDocument).contentType
             ) > -1
           ) {
             let viewVersionKey = '';
@@ -202,18 +197,9 @@ export function DocumentView() {
               viewVersionKey,
               true
             ).then((res: any) => {
-              fetch(res.contentUrl)
-                .then((response) => response.body)
-                .then((body: any) => {
-                  const reader = body.getReader();
-                  reader.read().then(({ value }: any) => {
-                    if (value) {
-                      setDocumentContent(new TextDecoder().decode(value));
-                    } else {
-                      setDocumentContent('');
-                    }
-                  });
-                });
+              if(res.content){
+                setDocumentContent(res.content);
+              }
             });
           } else {
             let viewVersionKey = '';
@@ -277,8 +263,7 @@ export function DocumentView() {
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
-    // TODO: determine if readonly check required here
-    //setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly)
+    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
   const [document, setDocument]: [IDocument | null, any] = useState(null);
@@ -286,7 +271,6 @@ export function DocumentView() {
   const [documentContent, setDocumentContent]: [string | null, any] =
     useState('');
   const [documentCsvContent, setDocumentCsvContent] = useState<CSVRow[]>([]);
-  const [documentExtension, setDocumentExtension] = useState<string>('');
 
   const DocumentViewer = () => {
     //return (<></>)
@@ -360,15 +344,23 @@ export function DocumentView() {
             </>
           )}
 
-        {/*Text File Editor (currently only for .md files) */}
+        {/*Text File Editor (currently only for 'text/markdown' files) */}
         {document &&
-          InlineViewableContentExtensions.indexOf(documentExtension) > -1 &&
+          TextFileEditorViewableContentTypes.indexOf(
+            (document as IDocument).contentType
+          ) > -1 &&
           documentContent !== undefined && (
             <TextFileEditor
               currentDocument={document}
               documentContent={documentContent}
-              extension={documentExtension}
+              contentType={(document as IDocument).contentType}
               siteId={currentSiteId}
+              readOnly={
+                isCurrentSiteReadonly ||
+                TextFileEditorEditableContentTypes.indexOf(
+                  (document as IDocument).contentType
+                ) === -1
+              }
             />
           )}
       </div>
