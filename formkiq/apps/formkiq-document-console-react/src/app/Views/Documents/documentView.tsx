@@ -9,6 +9,7 @@ import { ConfigState } from '../../Store/reducers/config';
 import { setCurrentDocumentPath } from '../../Store/reducers/data';
 import { useAppDispatch } from '../../Store/store';
 import {
+  InlineEditableContentTypes,
   InlineViewableContentTypes,
   OnlyOfficeContentTypes, TextFileEditorEditableContentTypes,
   TextFileEditorViewableContentTypes,
@@ -70,6 +71,22 @@ export function DocumentView() {
   const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
     useState<boolean>(true);
 
+  const [mode, setMode] = useState(getModeFromPath());
+  const isDocumentContentTypeEditable = (contentType: string) => {
+    return (
+      TextFileEditorEditableContentTypes.indexOf(contentType) > -1 ||
+      InlineEditableContentTypes.indexOf(contentType) > -1
+    );
+  };
+  function getModeFromPath() {
+    const mode = pathname.split('/').pop();
+    if (mode === 'view' || mode === 'edit') {
+      return mode;
+    } else {
+      return 'view';
+    }
+  }
+
   const customParse = (csvText: string): CSVRow[] => {
     const lines = csvText.split('\n').filter((line) => line.trim() !== '');
     const headers = parseCSVLine(lines[0]);
@@ -122,6 +139,14 @@ export function DocumentView() {
         (response: IDocument) => {
           setDocument(response);
           dispatch(setCurrentDocumentPath(response.path));
+          // redirect if file is not editable type
+          if (
+            !isDocumentContentTypeEditable(response.contentType) &&
+            mode === 'edit'
+          ) {
+            navigate(pathname.replace(/\/edit$/, '/view'));
+          }
+
           if (
             formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
             OnlyOfficeContentTypes.indexOf(
@@ -264,6 +289,7 @@ export function DocumentView() {
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
     setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
+    setMode(getModeFromPath())
   }, [pathname]);
 
   const [document, setDocument]: [IDocument | null, any] = useState(null);
@@ -359,7 +385,8 @@ export function DocumentView() {
                 isCurrentSiteReadonly ||
                 TextFileEditorEditableContentTypes.indexOf(
                   (document as IDocument).contentType
-                ) === -1
+                ) === -1 ||
+                mode === 'view'
               }
             />
           )}
