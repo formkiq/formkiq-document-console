@@ -139,9 +139,10 @@ export function DocumentView() {
         (response: IDocument) => {
           setDocument(response);
           dispatch(setCurrentDocumentPath(response.path));
-          // redirect if file is not editable type
+          // redirect if file is not editable type or user doesn't have editing rights
           if (
-            !isDocumentContentTypeEditable(response.contentType) &&
+            (!isDocumentContentTypeEditable(response.contentType) ||
+              isCurrentSiteReadonly) &&
             mode === 'edit'
           ) {
             navigate(pathname.replace(/\/edit$/, '/view'));
