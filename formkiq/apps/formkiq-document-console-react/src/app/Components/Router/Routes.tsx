@@ -75,6 +75,10 @@ const Attributes = React.lazy(
     () => import('../../Views/Attributes/attributes')
 );
 
+const Mappings = React.lazy(
+    () => import('../../Views/Mappings/mappings')
+);
+
 const RoutesMapper = () => {
   return (
     <Routes>
@@ -208,6 +212,7 @@ const RoutesMapper = () => {
       ></Route>
       <Route path="/queues" element={<Queues />}></Route>
       <Route path="/queues/workspaces/:siteId" element={<Queues />}></Route>
+      <Route path="/mappings" element={<Mappings />}></Route>
       <Route path="/integrations/api" element={<ApiExplorer />}></Route>
       <Route
         path="/admin/api-keys/workspaces/:siteId"

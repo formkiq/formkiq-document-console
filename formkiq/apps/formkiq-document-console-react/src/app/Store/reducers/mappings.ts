@@ -80,11 +80,10 @@ export const deleteMapping = createAsyncThunk(
     await DocumentsService.deleteMapping(siteId, mappingId).then((response) => {
       if (response.status === 200) {
         const mappingsState = (thunkAPI.getState() as any)?.mappingsState;
-        setMappings(
-          mappingsState.mappings.filter(
-            (mapping: Mapping) => mapping.mappingId !== mappingId
-          )
+        const filteredMappings = mappingsState.mappings.filter(
+          (mapping: Mapping) => mapping.mappingId !== mappingId
         );
+        thunkAPI.dispatch(setMappings({ mappings: filteredMappings }));
       } else {
         let dialogTitle = 'Error deleting mapping';
         if (response.errors) {
@@ -129,8 +128,12 @@ export const mappingsSlice = createSlice({
         } else {
           state.mappings = mappings;
         }
-        state.nextMappingsToken = next;
-        state.isLastMappingsSearchPageLoaded = isLastSearchPageLoaded;
+        if (next) {
+          state.nextMappingsToken = next;
+        }
+        if (isLastSearchPageLoaded !== undefined) {
+          state.isLastMappingsSearchPageLoaded = isLastSearchPageLoaded;
+        }
         state.mappingsLoadingStatus = RequestStatus.fulfilled;
       }
     },
