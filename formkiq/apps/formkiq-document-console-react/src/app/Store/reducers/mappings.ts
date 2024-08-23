@@ -1,8 +1,8 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {DocumentsService} from '../../helpers/services/documentsService';
-import {RootState} from '../store';
-import {openDialog as openNotificationDialog} from './globalNotificationControls';
-import {Mapping, RequestStatus} from "../../helpers/types/mappings";
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { RootState } from '../store';
+import { openDialog as openNotificationDialog } from './globalNotificationControls';
+import { Mapping, RequestStatus } from '../../helpers/types/mappings';
 
 interface MappingsState {
   mappings: Mapping[];
@@ -25,31 +25,94 @@ const defaultState: MappingsState = {
 export const fetchMappings = createAsyncThunk(
   'mappings/fetchMappings',
   async (data: any, thunkAPI) => {
-    const {nextToken, limit, page, siteId} = data;
-    await DocumentsService.getMappings(siteId, limit, nextToken).then((response) => {
-      if (response.status === 200) {
-        const data = {
-          mappings: response.mappings,
-          isLoadingMore: false,
-          isLastSearchPageLoaded: false,
-          next: response.next,
-          page,
-        };
-        if (page > 1) {
-          data.isLoadingMore = true;
+    const { nextToken, limit, page, siteId } = data;
+    await DocumentsService.getMappings(siteId, limit, nextToken).then(
+      (response) => {
+        if (response.status === 200) {
+          const data = {
+            mappings: response.mappings,
+            isLoadingMore: false,
+            isLastSearchPageLoaded: false,
+            next: response.next,
+            page,
+          };
+          if (page > 1) {
+            data.isLoadingMore = true;
+          }
+          if (response.mappings?.length === 0) {
+            data.isLastSearchPageLoaded = true;
+          }
+          thunkAPI.dispatch(setMappings(data));
+        } else {
+          let dialogTitle = 'Error fetching mappings';
+          if (response.errors) {
+            dialogTitle = response.errors[0].error;
+          }
+          thunkAPI.dispatch(openNotificationDialog({ dialogTitle }));
         }
-        if (response.mappings?.length === 0) {
-          data.isLastSearchPageLoaded = true;
-        }
-        thunkAPI.dispatch(setMappings(data));
+      }
+    );
+  }
+);
+
+export const addMapping = createAsyncThunk(
+  'mappings/addMapping',
+  async (data: any, thunkAPI) => {
+    const { siteId, mapping } = data;
+    await DocumentsService.addMapping(siteId, mapping).then((response) => {
+      if (response.status === 201) {
+        thunkAPI.dispatch(fetchMappings({ siteId, limit: 20, page: 1 }));
       } else {
-        thunkAPI.dispatch(
-          openNotificationDialog({
-            dialogTitle: 'Error fetching mappings',
-          })
-        );
+        let dialogTitle = 'Error adding mapping';
+        if (response.errors) {
+          dialogTitle = response.errors[0].error;
+        }
+        thunkAPI.dispatch(openNotificationDialog({ dialogTitle }));
       }
     });
+  }
+);
+
+export const deleteMapping = createAsyncThunk(
+  'mappings/deleteMapping',
+  async (data: any, thunkAPI) => {
+    const { siteId, mappingId } = data;
+    await DocumentsService.deleteMapping(siteId, mappingId).then((response) => {
+      if (response.status === 200) {
+        const mappingsState = (thunkAPI.getState() as any)?.mappingsState;
+        setMappings(
+          mappingsState.mappings.filter(
+            (mapping: Mapping) => mapping.mappingId !== mappingId
+          )
+        );
+      } else {
+        let dialogTitle = 'Error deleting mapping';
+        if (response.errors) {
+          dialogTitle = response.errors[0].error;
+        }
+        thunkAPI.dispatch(openNotificationDialog({ dialogTitle }));
+      }
+    });
+  }
+);
+
+export const updateMapping = createAsyncThunk(
+  'mappings/updateMapping',
+  async (data: any, thunkAPI) => {
+    const { siteId, mappingId, mapping } = data;
+    await DocumentsService.setMapping(siteId, mappingId, mapping).then(
+      (response) => {
+        if (response.status === 200) {
+          thunkAPI.dispatch(fetchMappings({ siteId, limit: 20, page: 1 }));
+        } else {
+          let dialogTitle = 'Error updating mapping';
+          if (response.errors) {
+            dialogTitle = response.errors[0].error;
+          }
+          thunkAPI.dispatch(openNotificationDialog({ dialogTitle }));
+        }
+      }
+    );
   }
 );
 
@@ -58,7 +121,7 @@ export const mappingsSlice = createSlice({
   initialState: defaultState,
   reducers: {
     setMappings: (state, action) => {
-      const {mappings, isLoadingMore, next} = action.payload;
+      const { mappings, isLoadingMore, next } = action.payload;
       const isLastSearchPageLoaded = !next;
       if (mappings) {
         if (isLoadingMore) {
@@ -81,12 +144,9 @@ export const mappingsSlice = createSlice({
   },
 });
 
-export const {
-  setMappings,
-  setMappingsLoadingStatusPending,
-} = mappingsSlice.actions;
+export const { setMappings, setMappingsLoadingStatusPending } =
+  mappingsSlice.actions;
 
-export const MappingsState = (state: RootState) =>
-  state.mappingsState;
+export const MappingsState = (state: RootState) => state.mappingsState;
 
 export default mappingsSlice.reducer;
