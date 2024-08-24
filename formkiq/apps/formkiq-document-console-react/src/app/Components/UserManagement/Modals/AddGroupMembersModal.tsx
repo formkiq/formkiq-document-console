@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 import {
   addUserToGroup,
-  fetchGroups,
   fetchUsers,
 } from '../../../Store/reducers/userManagement';
 import { useAppDispatch } from '../../../Store/store';
@@ -18,12 +17,14 @@ type AddGroupMembersModalPropsType = {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
   groupName: any;
+  getGroupUsers: (groupName: string) => Promise<void>;
 };
 
 function AddGroupMembersModal({
   isOpen,
   setIsOpen,
   groupName,
+  getGroupUsers,
 }: AddGroupMembersModalPropsType) {
   const usernameRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
@@ -46,7 +47,8 @@ function AddGroupMembersModal({
       const userData = { user: { username: user.username } };
       dispatch(addUserToGroup({ groupName, user: userData }));
     }
-    dispatch(fetchGroups({}));
+    //dispatch(fetchGroups({}));
+    getGroupUsers(groupName);
     closeModal();
   };
 

@@ -1,4 +1,3 @@
-//import { useEffect } from 'react';
 import { Tooltip } from 'react-tooltip';
 import { parseEmailInitials } from '../../helpers/services/toolService';
 import { Group } from '../../helpers/types/userManagement';
@@ -6,7 +5,6 @@ import { Group } from '../../helpers/types/userManagement';
 type GroupMembersProps = {
   group: Group;
   groupUsers: any[];
-  //getGroupUsers: (groupName: string) => void;
 };
 
 function GroupMembers({ group, groupUsers }: GroupMembersProps) {

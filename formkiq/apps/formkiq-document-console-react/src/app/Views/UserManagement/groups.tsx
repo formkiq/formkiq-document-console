@@ -215,6 +215,7 @@ function Groups() {
         isOpen={isAddGroupMembersModalOpen}
         setIsOpen={setIsAddGroupMembersModalOpen}
         groupName={selectedGroupName}
+        getGroupUsers={getGroupUsers}
       />
     </>
   );
