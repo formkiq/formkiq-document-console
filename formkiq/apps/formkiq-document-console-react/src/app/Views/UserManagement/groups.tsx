@@ -1,24 +1,25 @@
-import {useCallback, useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {RequestStatus} from '../../helpers/types/document';
-import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
-import {useAppDispatch} from '../../Store/store';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
+import { useCallback, useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { Plus } from '../../Components/Icons/icons';
+import GroupInfoTab from '../../Components/UserManagement/InfoTabs/GroupInfoTab';
+import GroupsMenu from '../../Components/UserManagement/Menus/GroupsMenu';
+import AddGroupMembersModal from '../../Components/UserManagement/Modals/AddGroupMembersModal';
+import CreateGroupModal from '../../Components/UserManagement/Modals/CreateGroupModal';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { RequestStatus } from '../../helpers/types/document';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import {
   deleteGroup,
   fetchGroups,
   setGroupsLoadingStatusPending,
-  UserManagementState
-} from "../../Store/reducers/userManagement";
-import GroupsMenu from "../../Components/UserManagement/Menus/GroupsMenu";
-import {Plus} from "../../Components/Icons/icons";
-import CreateGroupModal from "../../Components/UserManagement/Modals/CreateGroupModal";
-import GroupsTable from "./groupsTable";
-import {useLocation, useSearchParams} from "react-router-dom";
-import GroupInfoTab from "../../Components/UserManagement/InfoTabs/GroupInfoTab";
-import {useAuthenticatedState} from "../../Store/reducers/auth";
-import AddGroupMembersModal from "../../Components/UserManagement/Modals/AddGroupMembersModal";
+  UserManagementState,
+} from '../../Store/reducers/userManagement';
+import { useAppDispatch } from '../../Store/store';
+import GroupsTable from './groupsTable';
 
 function Groups() {
   const {
@@ -28,16 +29,36 @@ function Groups() {
     isLastGroupsSearchPageLoaded,
     currentGroupsSearchPage,
   } = useSelector(UserManagementState);
-  const {user} = useAuthenticatedState();
+  const { user } = useAuthenticatedState();
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useAppDispatch();
   const search = useLocation().search;
   const groupName = new URLSearchParams(search).get('groupName');
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
-  const [isAddGroupMembersModalOpen, setIsAddGroupMembersModalOpen] = useState(false);
+  const [isAddGroupMembersModalOpen, setIsAddGroupMembersModalOpen] =
+    useState(false);
   const [selectedGroupNames, setSelectedGroupNames] = useState<string[]>([]);
   const [selectedGroupName, setSelectedGroupName] = useState<string>('');
+  const [groupsUsers, setGroupsUsers] = useState<any>({});
 
+  async function getGroupUsers(groupName: string) {
+    DocumentsService.getGroupUsers(groupName, 20).then((response) => {
+      if (response.users && response.users.length > 0) {
+        setGroupsUsers((val: any) => ({
+          ...val,
+          [groupName]: response.users.sort((a: any, b: any) =>
+            a.email > b.email ? 1 : -1
+          ),
+        }));
+      }
+    });
+  }
+
+  useEffect(() => {
+    groups.forEach((group) => {
+      getGroupUsers(group.name);
+    });
+  }, [groups]);
 
   useEffect(() => {
     dispatch(fetchGroups({}));
@@ -92,7 +113,7 @@ function Groups() {
 
     const deleteGroups = () => {
       for (const groupName of selectedGroupNames) {
-        dispatch(deleteGroup({groupName}));
+        dispatch(deleteGroup({ groupName }));
       }
     };
 
@@ -111,28 +132,25 @@ function Groups() {
 
   // delete one group
   const onGroupDelete = (groupName: string) => {
-    dispatch(openConfirmationDialog(
-      {
-        dialogTitle:
-          'Are you sure you want to delete ' +
-          groupName +
-          '?',
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: 'Are you sure you want to delete ' + groupName + '?',
         callback: () => {
-          dispatch(deleteGroup({groups, groupName}));
+          dispatch(deleteGroup({ groups, groupName }));
         },
-      }
-    ));
+      })
+    );
   };
 
   const closeGroupInfoTab = () => {
     searchParams.delete('groupName');
     setSearchParams(searchParams);
-  }
+  };
 
   const onAddMembersClick = (groupName: string) => {
     setSelectedGroupName(groupName);
     setIsAddGroupMembersModalOpen(true);
-  }
+  };
 
   return (
     <>
@@ -147,17 +165,15 @@ function Groups() {
       >
         <div className="flex-1 inline-block h-full">
           <div className=" flex flex-col w-full h-full">
-            <GroupsMenu
-              deleteGroups={onGroupsDelete}
-              user={user}
-            />
+            <GroupsMenu deleteGroups={onGroupsDelete} user={user} />
             <div className="w-full py-4 px-6">
-              <button type="button"
-                      className="p-6 border border-neutral-300 rounded-md flex items-center gap-4 justify-center hover:bg-neutral-100 font-bold text-sm"
-                      onClick={() => setIsCreateGroupModalOpen(true)}>
-                <div
-                  className="w-6 h-6 p-1 flex items-center justify-center border border-2 border-neutral-900 rounded-full">
-                  <Plus/>
+              <button
+                type="button"
+                className="p-6 border border-neutral-300 rounded-md flex items-center gap-4 justify-center hover:bg-neutral-100 font-bold text-sm"
+                onClick={() => setIsCreateGroupModalOpen(true)}
+              >
+                <div className="w-6 h-6 p-1 flex items-center justify-center border border-2 border-neutral-900 rounded-full">
+                  <Plus />
                 </div>
                 Create New Group
               </button>
@@ -172,6 +188,7 @@ function Groups() {
                 <GroupsTable
                   groups={groups}
                   user={user}
+                  groupsUsers={groupsUsers}
                   selectedGroupNames={selectedGroupNames}
                   onDeleteClick={onGroupDelete}
                   setSelectedGroupNames={setSelectedGroupNames}
@@ -181,12 +198,14 @@ function Groups() {
             </div>
           </div>
         </div>
-        {groupName && <GroupInfoTab
-          closeGroupInfoTab={closeGroupInfoTab}
-          groupName={groupName}
-          user={user}
-          group={groups.find((group) => group.name === groupName)}
-        />}
+        {groupName && (
+          <GroupInfoTab
+            closeGroupInfoTab={closeGroupInfoTab}
+            groupName={groupName}
+            user={user}
+            group={groups.find((group) => group.name === groupName)}
+          />
+        )}
       </div>
       <CreateGroupModal
         isOpen={isCreateGroupModalOpen}
