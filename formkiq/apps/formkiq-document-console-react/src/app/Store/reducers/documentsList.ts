@@ -21,9 +21,12 @@ import { setAllAttributesData, setAllTagsData } from './attributesData';
 import { User } from './auth';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
+
+let callCounter = 0;
 export const fetchDocuments = createAsyncThunk(
   'documentsList/fetchDocuments',
   async (data: any, thunkAPI) => {
+    const currentCallId = ++callCounter;
     const {
       siteId,
       formkiqVersion,
@@ -117,6 +120,7 @@ export const fetchDocuments = createAsyncThunk(
           searchAttributes
         ).then((response: any) => {
           if (response) {
+            if (currentCallId !== callCounter) return; // After the async operation completes,this check ensures that only the result from the most recent call is used to update the state.
             const data = {
               siteId,
               documents: response.documents,
@@ -147,6 +151,7 @@ export const fetchDocuments = createAsyncThunk(
           searchAttributes
         ).then((response: any) => {
           if (response) {
+            if (currentCallId !== callCounter) return;
             const temp: any = response.documents?.filter(
               (document: IDocument) => {
                 return document.path;
@@ -182,6 +187,7 @@ export const fetchDocuments = createAsyncThunk(
         ).then((response: any) => {
           // putting workflow under document object, for top-level object consistency with other search results
           if (response) {
+            if (currentCallId !== callCounter) return;
             const mappedDocuments: any = [];
             response.documents.map((val: any) => {
               if (val.workflow) {
@@ -217,6 +223,7 @@ export const fetchDocuments = createAsyncThunk(
             allAttributes
           ).then((response: any) => {
             if (response) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -246,6 +253,7 @@ export const fetchDocuments = createAsyncThunk(
             allAttributes
           ).then((response: any) => {
             if (response) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -268,13 +276,12 @@ export const fetchDocuments = createAsyncThunk(
         } else if (subfolderUri === 'deleted') {
           DocumentsService.getDeletedDocuments(
             siteId,
-            tagParam,
             null,
             nextToken,
-            attributeParam,
-            allAttributes
+            "true"
           ).then((response: any) => {
             if (response) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -304,6 +311,7 @@ export const fetchDocuments = createAsyncThunk(
             allAttributes
           ).then((response: any) => {
             if (response) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -336,6 +344,7 @@ export const fetchDocuments = createAsyncThunk(
             allAttributes
           ).then((response: any) => {
             if (response) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -370,6 +379,7 @@ export const fetchDocuments = createAsyncThunk(
           allAttributes
         ).then((response: any) => {
           if (response) {
+            if (currentCallId !== callCounter) return;
             const data = {
               siteId,
               documents: response.documents,
@@ -511,7 +521,6 @@ export const toggleExpandFolder = createAsyncThunk(
               });
             const childDocs = response.documents
               .filter((val: any) => val.folder !== true)
-              .filter((val: IDocument) => !(val.tags as any)['sysDeletedBy']);
             const newValue: IFolder = {
               ...folder,
               siteId: siteId,
@@ -570,55 +579,57 @@ export const deleteDocument = createAsyncThunk(
       siteId,
       user,
       document,
-      documents,
-      isDocumentInfoPage,
     }: {
       siteId: string;
       user: User;
       document: IDocument;
-      documents: any;
-      isDocumentInfoPage: boolean;
     } = data;
-    DocumentsService.addTag(document.documentId, siteId, {
-      key: 'sysDeletedBy',
-      value: user.email,
-    }).then(() => {
-      if (documents) {
-        thunkAPI.dispatch(
-          addDocumentTag({
-            doc: document,
-            tagKey: 'sysDeletedBy',
-            valueToAdd: user.email,
-          })
-        );
+    DocumentsService.deleteDocument(document.documentId, siteId, 'true').then(
+      (res) => {
+        if (res.status !== 200) {
+          const errors = res?.errors;
+          thunkAPI.dispatch(
+            openNotificationDialog({
+              dialogTitle: errors
+                ? errors[0].error
+                : 'Error deleting document.',
+            })
+          );
+          return;
+        }
+        const infoDocumentId = window.location.hash.match(/id=(.*)/);
+        if (
+          infoDocumentId &&
+          infoDocumentId.length > 0 &&
+          document.documentId === infoDocumentId[1]
+        ) {
+          // close info tab if viewing deleted document
+          window.location.hash = '';
+        }
+        // remove file from document list
+        const state = thunkAPI.getState() as any;
+        const { documents, folders } = state?.documentListState || {};
         const newDocs = documents.filter((doc: any) => {
           return doc.documentId !== document.documentId;
+        });
+        const newFolders = [...folders].map((folder: any) => {
+          return {
+            ...folder,
+            documents: folder.documents ? folder.documents.filter(
+              (doc: any) => doc.documentId !== document.documentId
+            ):[],
+          };
         });
         thunkAPI.dispatch(
           updateDocumentsList({
             documents: newDocs,
+            folders: newFolders,
             user: user,
             isSystemDeletedByKey: false,
           })
         );
-      } else {
-        if (!isDocumentInfoPage) {
-          if (document.path.indexOf('/') > -1) {
-            const folderPath = document.path.substring(
-              0,
-              document.path.lastIndexOf('/')
-            );
-            thunkAPI.dispatch(
-              retrieveAndRefreshFolder({
-                folderPath: folderPath,
-                document: document,
-                documentAction: 'remove',
-              })
-            );
-          }
-        }
       }
-    });
+    );
   }
 );
 const defaultState = {
@@ -698,37 +709,19 @@ export const documentsListSlice = createSlice({
               if (tag.indexOf(':') === -1) {
                 type ObjectKey = keyof typeof doc.tags;
                 const tagProperty = tag as ObjectKey;
-                if (doc.tags[tagProperty] !== undefined) {
-                  return (
-                    !(doc.tags as any)['sysDeletedBy'] ||
-                    (doc.tags as any)['sysDeletedBy'] !== undefined
-                  );
-                } else {
-                  return false;
-                }
+                return doc.tags[tagProperty] !== undefined;
               } else {
                 type ObjectKey = keyof typeof doc.tags;
                 const tagProperty = tag.split(':')[0] as ObjectKey;
                 const tagValues = tag.split(':')[1].split('|');
                 if (doc.tags[tagProperty] !== undefined) {
-                  if (
-                    !(doc.tags as any)['sysDeletedBy'] ||
-                    (doc.tags as any)['sysDeletedBy'] !== undefined
-                  ) {
-                    return isTagValueIncludes(doc.tags[tagProperty], tagValues);
-                  } else {
-                    return false;
-                  }
+                  return isTagValueIncludes(doc.tags[tagProperty], tagValues);
                 } else {
                   return false;
                 }
               }
             } else {
-              if (doc.tags) {
-                return !(doc.tags as any)['sysDeletedBy'];
-              } else {
-                return true;
-              }
+              return true;
             }
           });
           if (isLoadingMore && state.documents) {
@@ -788,20 +781,13 @@ export const documentsListSlice = createSlice({
     },
     updateDocumentsList: (state, action) => {
       if (action.payload && state.documents) {
-        const { documents, isSystemDeletedByKey } = action.payload;
+        const { documents, folders } = action.payload;
         const temp = {
-          folders: state.folders,
+          folders: folders ? folders : state.folders,
           documents: documents,
-          isSystemDeletedByKey: isSystemDeletedByKey,
         };
-        const res = excludeDocumentsWithTagFromAll(
-          temp as any,
-          'sysDeletedBy',
-          '',
-          isSystemDeletedByKey
-        );
-        state.folders = res.folders as any;
-        state.documents = res.documents as any;
+        state.folders = temp.folders as any;
+        state.documents = temp.documents as any;
       }
       return state as any;
     },

@@ -416,7 +416,7 @@ export default function UploadModal({
     return (
       <tr key={i}>
         <td
-          className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400"
+          className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400 break-words"
           data-test-id={`uploaded-files-${i}`}
         >
           {file.path}
@@ -633,24 +633,25 @@ export default function UploadModal({
                     <div className="flex justify-between mr-8"></div>
                     <div>{uploadProcessTable(uploadProcessDocs)}</div>
                     {uploadedDocs.length > 0 && (
-                      <div className="relative rounded-xl overflow-auto max-h-64 overflow-y-scroll">
+                      <div className="relative rounded-xl">
                         <div className="shadow-sm overflow-hidden my-8">
                           <div className="font-bold text-lg inline-block pr-6 pb-6">
                             Uploaded files:
                           </div>
-                          <table className="border-collapse table-fixed w-full text-sm">
-                            <thead>
+                          <div className=" max-h-56 overflow-y-auto">
+                          <table className="border-separate border-spacing-0 table-fixed w-full text-sm border-none">
+                            <thead className="sticky top-0 bg-white" >
                               <tr>
                                 <th
-                                  className="border-b nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left"
+                                  className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left"
                                   data-test-id="uploaded-filename"
                                 >
                                   Filename
                                 </th>
-                                <th className="border-b nodark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                <th className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
                                   Uploaded by
                                 </th>
-                                <th className="border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                <th className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
                                   Date added
                                 </th>
                                 <th className="hidden border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
@@ -664,6 +665,7 @@ export default function UploadModal({
                               })}
                             </tbody>
                           </table>
+                          </div>
                         </div>
                       </div>
                     )}

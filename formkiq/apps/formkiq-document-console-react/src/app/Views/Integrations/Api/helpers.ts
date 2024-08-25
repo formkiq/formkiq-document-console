@@ -1862,3 +1862,25 @@ export const getDocumentUserActivitiesApiItem = {
     hasPagingTokens: true,
     license: 'Core',
 };
+
+export const postRetryDocumentActionsApiItem = {
+    method: 'POST',
+    path: '/documents/ DOCUMENT_ID /actions/retry',
+    description: 'Retries document actions',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    requiresSite: true,
+    license: 'Core',
+};
+ 
+export const restoreDocumentApiItem = {
+    method: 'PUT',
+    path: '/documents/ DOCUMENT_ID /restore',
+    description: 'Restore a document',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    requiresSite: true,
+    license: 'Core',
+};
