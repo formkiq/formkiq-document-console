@@ -143,7 +143,7 @@ import {
   deleteSiteClassificationApiItem,
   putSiteClassificationApiItem,
   getUserActivitiesApiItem,
-  getDocumentUserActivitiesApiItem,
+  getDocumentUserActivitiesApiItem, restoreDocumentApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -192,6 +192,7 @@ export function ApiExplorer() {
                 <ApiItem apiItem={deleteDocumentApiItem} sites={sites} />
                 <ApiItem apiItem={getDocumentContentApiItem} sites={sites} />
                 <ApiItem apiItem={getDocumentUrlApiItem} sites={sites} />
+                <ApiItem apiItem={restoreDocumentApiItem} sites={sites} />
                 <ApiSegment title="Public Document Endpoints">
                   <div className="ml-2 flex flex-cols">
                     <div className="w-4 border-l"></div>

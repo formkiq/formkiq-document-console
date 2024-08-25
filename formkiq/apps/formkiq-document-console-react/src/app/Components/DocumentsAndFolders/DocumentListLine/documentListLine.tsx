@@ -115,37 +115,13 @@ function DocumentListLine({
 
   const onPermanentDeleteClick = () => {
     const deleteFunc = () => {
-      DocumentsService.deleteDocument(file.documentId, siteId).then(() => {
-        setTimeout(() => {
-          onDocumentDataChange();
-        }, 1000);
-        /*
-        if (useSoftDelete) {
-          navigate(
-            {
-              pathname: `${documentsRootUri}/folders/deleted`,
-              search: '?refresh=' + Math.random(),
-            },
-            {
-              replace: true,
-            }
-          );
-        } else {
-          // TODO: add delete processing modal with spinner ?
+      DocumentsService.deleteDocument(file.documentId, siteId, 'false').then(
+        () => {
           setTimeout(() => {
-            navigate(
-              {
-                pathname: `${documentsRootUri}/folders/${folder}`,
-                search: '?refresh=' + Math.random(),
-              },
-              {
-                replace: true,
-              }
-            );
-          }, 1500)
+            onDocumentDataChange();
+          }, 1000);
         }
-        */
-      });
+      );
     };
     dispatch(
       openDialog({
@@ -331,27 +307,46 @@ function DocumentListLine({
                 }
               ></div>
             ) : (
-              <div className="w-1"></div>
+              <div className="w-5"></div>
             )}
-            <Link
-              to={`${documentsRootUri}/${file.documentId}/view`}
-              className="cursor-pointer w-16 flex items-center justify-start"
-            >
-              <img
-                src={getFileIcon(file.path, file.deepLinkPath)}
-                className="w-8 inline-block"
-                alt="icon"
-              />
-            </Link>
-            <div className="grow flex">
+            {folder === 'deleted' ? (
+              <span className="w-16 flex items-center justify-start">
+                <img
+                  src={getFileIcon(file.path, file.deepLinkPath)}
+                  className="w-8 inline-block"
+                  alt="icon"
+                />
+              </span>
+            ) : (
               <Link
                 to={`${documentsRootUri}/${file.documentId}/view`}
-                className="cursor-pointer pt-1.5 flex items-center"
-                title={file.path.substring(file.path.lastIndexOf('/') + 1)}
+                className="cursor-pointer w-16 flex items-center justify-start"
               >
-                {folder === 'deleted' ? (
-                  <span>{file.path}</span>
-                ) : (
+                <img
+                  src={getFileIcon(file.path, file.deepLinkPath)}
+                  className="w-8 inline-block"
+                  alt="icon"
+                />
+              </Link>
+            )}
+            <div className="grow flex">
+              {folder === 'deleted' ? (
+                <span className="pt-1.5 flex items-center">
+                  {file.path.length > 120 ? (
+                    <span className="tracking-tighter text-clip overflow-hidden">
+                      {file.path.substring(0, 120)}
+                      {file.path.length > 120 && <span>...</span>}
+                    </span>
+                  ) : (
+                    <span>{file.path}</span>
+                  )}
+                </span>
+              ) : (
+                <Link
+                  to={`${documentsRootUri}/${file.documentId}/view`}
+                  className="cursor-pointer pt-1.5 flex items-center"
+                  title={file.path.substring(file.path.lastIndexOf('/') + 1)}
+                >
                   <span>
                     {file.path.substring(file.path.lastIndexOf('/') + 1)
                       .length > 80 ? (
@@ -369,109 +364,113 @@ function DocumentListLine({
                       </span>
                     )}
                   </span>
-                )}
-              </Link>
-              <div className="grow flex items-center justify-end pt-1.5 pr-4">
-                <div className="flex flex-wrap justify-end w-52">
-                  {keyOnlyAttributesKeys &&
-                    keyOnlyAttributesKeys.map((attributeKey, i) => {
-                      let tagColor = 'gray';
-                      if (tagColors) {
-                        tagColors.forEach((color) => {
-                          if (color.tagKeys.indexOf(attributeKey) > -1) {
-                            tagColor = color.colorUri;
-                            return;
-                          }
-                        });
-                      }
-                      return (
-                        <div
-                          className="pt-0.5 pr-1 flex"
-                          key={'attribute_' + i}
-                        >
-                          <div
-                            className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
-                          >
-                            {attributeKey}
-                          </div>
-                          <div
-                            className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                          ></div>
-                        </div>
-                      );
-                    })}
-
-                  {file.tags &&
-                    Object.getOwnPropertyNames(file.tags)
-                      .sort() // This will sort the property names alphabetically
-                      .map((propertyName, i) => {
-                        let showTag = false;
-                        const tagsToIgnore = [
-                          'sysFavoritedBy',
-                          'sysSharedWith',
-                          'sysDeletedBy',
-                          'untagged',
-                          'path',
-                        ];
+                </Link>
+              )}
+              {folder !== 'deleted' && (
+                <div className="grow flex items-center justify-end pt-1.5 pr-4">
+                  <div className="flex flex-wrap justify-end w-52">
+                    {keyOnlyAttributesKeys &&
+                      keyOnlyAttributesKeys.map((attributeKey, i) => {
                         let tagColor = 'gray';
                         if (tagColors) {
                           tagColors.forEach((color) => {
-                            if (color.tagKeys.indexOf(propertyName) > -1) {
+                            if (color.tagKeys.indexOf(attributeKey) > -1) {
                               tagColor = color.colorUri;
                               return;
                             }
                           });
                         }
-                        if (
-                          tagsToIgnore.indexOf(propertyName) === -1 &&
-                          !file.tags[propertyName].length
-                        ) {
-                          showTag = true;
-                        }
                         return (
-                          <div key={i}>
-                            {showTag && (
-                              <div className="pt-0.5 pr-1 flex">
-                                <div
-                                  className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
-                                >
-                                  {propertyName}
-                                </div>
-                                <div
-                                  className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                                ></div>
-                              </div>
-                            )}
+                          <div
+                            className="pt-0.5 pr-1 flex"
+                            key={'attribute_' + i}
+                          >
+                            <div
+                              className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                            >
+                              {attributeKey}
+                            </div>
+                            <div
+                              className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                            ></div>
                           </div>
                         );
                       })}
-                </div>
-                <div className="flex">
-                  <div className="w-4 h-4 text-neutral-900 ml-2 -mt-1 cursor-pointer hover:text-primary-500">
-                    <DocumentTagsPopover
-                      value={{
-                        lineType: 'document',
-                        folder: folder,
-                        documentId: file.documentId,
-                      }}
-                      onDocumentDataChange={onDocumentDataChange}
-                      siteId={siteId}
-                      isSiteReadOnly={isSiteReadOnly}
-                      tagColors={tagColors}
-                    />
+
+                    {file.tags &&
+                      Object.getOwnPropertyNames(file.tags)
+                        .sort() // This will sort the property names alphabetically
+                        .map((propertyName, i) => {
+                          let showTag = false;
+                          const tagsToIgnore = [
+                            'sysFavoritedBy',
+                            'sysSharedWith',
+                            'sysDeletedBy',
+                            'untagged',
+                            'path',
+                          ];
+                          let tagColor = 'gray';
+                          if (tagColors) {
+                            tagColors.forEach((color) => {
+                              if (color.tagKeys.indexOf(propertyName) > -1) {
+                                tagColor = color.colorUri;
+                                return;
+                              }
+                            });
+                          }
+                          if (
+                            tagsToIgnore.indexOf(propertyName) === -1 &&
+                            !file.tags[propertyName].length
+                          ) {
+                            showTag = true;
+                          }
+                          return (
+                            <div key={i}>
+                              {showTag && (
+                                <div className="pt-0.5 pr-1 flex">
+                                  <div
+                                    className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                                  >
+                                    {propertyName}
+                                  </div>
+                                  <div
+                                    className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                                  ></div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                  </div>
+                  <div className="flex">
+                    <div className="w-4 h-4 text-neutral-900 ml-2 -mt-1 cursor-pointer hover:text-primary-500">
+                      <DocumentTagsPopover
+                        value={{
+                          lineType: 'document',
+                          folder: folder,
+                          documentId: file.documentId,
+                        }}
+                        onDocumentDataChange={onDocumentDataChange}
+                        siteId={siteId}
+                        isSiteReadOnly={isSiteReadOnly}
+                        tagColors={tagColors}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
-            <Link
-              to={`${location.pathname}?${searchParams.toString()}#id=${
-                file.documentId
-              }`}
-              className="w-5 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
-              onClick={onInfoClick}
-            >
-              <Info />
-            </Link>
+            {folder !== 'deleted' && (
+              <Link
+                to={`${location.pathname}?${searchParams.toString()}#id=${
+                  file.documentId
+                }`}
+                className="w-5 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
+                onClick={onInfoClick}
+              >
+                <Info />
+              </Link>
+            )}
             {folder !== 'deleted' && !isSiteReadOnly && (
               <div
                 onClick={toggleFavorite}
