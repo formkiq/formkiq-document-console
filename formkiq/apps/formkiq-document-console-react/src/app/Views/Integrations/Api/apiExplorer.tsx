@@ -143,7 +143,9 @@ import {
   deleteSiteClassificationApiItem,
   putSiteClassificationApiItem,
   getUserActivitiesApiItem,
-  getDocumentUserActivitiesApiItem, restoreDocumentApiItem,
+  getDocumentUserActivitiesApiItem,
+  postRetryDocumentActionsApiItem,
+  getDocumentUserActivitiesApiItem, restoreDocumentApiItem
 } from './helpers';
 
 export function ApiExplorer() {
@@ -229,6 +231,10 @@ export function ApiExplorer() {
                       />
                       <ApiItem
                         apiItem={postDocumentActionsApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={postRetryDocumentActionsApiItem}
                         sites={sites}
                       />
                     </div>
