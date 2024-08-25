@@ -40,16 +40,22 @@ function AddGroupMembersModal({
     setUsersToAdd([]);
   };
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (usersToAdd.length === 0) return;
-    for (const user of usersToAdd) {
-      const userData = { user: { username: user.username } };
-      dispatch(addUserToGroup({ groupName, user: userData }));
+
+    try {
+      const addUserPromises = usersToAdd.map((user) => {
+        const userData = { user: { username: user.username } };
+        return dispatch(addUserToGroup({ groupName, user: userData }));
+      });
+
+      await Promise.all(addUserPromises);
+      getGroupUsers(groupName);
+      closeModal();
+    } catch (error) {
+      console.error('Error adding users to group:', error);
     }
-    //dispatch(fetchGroups({}));
-    getGroupUsers(groupName);
-    closeModal();
   };
 
   function addUser() {
