@@ -1873,3 +1873,14 @@ export const postRetryDocumentActionsApiItem = {
     requiresSite: true,
     license: 'Core',
 };
+ 
+export const restoreDocumentApiItem = {
+    method: 'PUT',
+    path: '/documents/ DOCUMENT_ID /restore',
+    description: 'Restore a document',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresDocumentID: true,
+    requiresSite: true,
+    license: 'Core',
+};

@@ -102,13 +102,14 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static deleteDocument(id: string, siteId = ''): Promise<any> {
+  public static deleteDocument(id: string, siteId = '', softDelete: null|string = null): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
     return this.getFormkiqClient().documentsApi.deleteDocument({
       documentId: id,
       siteId,
+      softDelete,
     });
   }
 
@@ -466,44 +467,19 @@ export class DocumentsService {
   @formkiqAPIHandler
   public static async getDeletedDocuments(
     siteId = '',
-    tag: string | null = null,
     previous = null,
     next = null,
-    attribute: string | null = null,
-    allAttributes = [] as any[]
+    deleted: string | null = null
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
-    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
-      if (customIncludeTags.indexOf(primaryTag) === -1) {
-        customIncludeTags.push(primaryTag);
-      }
-    });
-    if (tag) {
-      if (customIncludeTags.indexOf(tag) === -1) {
-        customIncludeTags.push(tag);
-      }
-    }
-    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
-    const searchBody = {
-      query: {
-        tag: {
-          key: 'sysDeletedBy',
-        },
-        attribute: attribute ? { key: attribute } : null,
-      },
-      responseFields: {
-        tags: customIncludeTags,
-        attributes: attributesKeys,
-      },
-    };
-    return this.getFormkiqClient().searchApi.search({
-      searchParameters: searchBody,
+
+    return this.getFormkiqClient().documentsApi.getDocuments({
       siteId,
       previous,
       next,
+      deleted,
     });
   }
 
@@ -2207,6 +2183,17 @@ export class DocumentsService {
       siteId,
       limit,
       next,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async restoreDocument(
+      siteId: string,
+      documentId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.restoreDocument({
+      siteId,
+      documentId,
     });
   }
 }

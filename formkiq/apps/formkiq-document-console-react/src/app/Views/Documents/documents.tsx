@@ -651,18 +651,12 @@ function Documents() {
 
   const onDeleteDocument = (file: IDocument, searchDocuments: any) => () => {
     const deleteFunc = () => {
-      let isDocumentInfoPage = false;
-      if (infoDocumentId.length) {
-        isDocumentInfoPage = true;
-        setIsCurrentDocumentSoftDeleted(true);
-      }
       dispatch(
         deleteDocument({
           siteId: currentSiteId,
           user,
           document: file,
           documents: searchDocuments,
-          isDocumentInfoPage: isDocumentInfoPage,
         })
       );
     };
@@ -686,10 +680,9 @@ function Documents() {
   };
   const restoreDocument =
     (file: IDocument, siteId: string, searchDocuments: any) => () => {
-      DocumentsService.deleteDocumentTag(
-        file.documentId,
+      DocumentsService.restoreDocument(
         siteId,
-        'sysDeletedBy'
+        file.documentId,
       ).then(() => {
         let newDocs = null;
         if (searchDocuments) {
@@ -697,16 +690,12 @@ function Documents() {
             return doc.documentId !== file.documentId;
           });
         }
-        setIsCurrentDocumentSoftDeleted(false);
-        if (!infoDocumentId.length) {
-          dispatch(
-            updateDocumentsList({
-              documents: newDocs,
-              user: user,
-              isSystemDeletedByKey: true,
-            })
-          );
-        }
+        dispatch(
+          updateDocumentsList({
+            documents: newDocs,
+            user: user,
+          })
+        );
       });
     };
   const onTagDelete = (tagKey: string) => {
