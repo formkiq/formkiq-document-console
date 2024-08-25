@@ -1,3 +1,4 @@
+import { Dialog } from '@headlessui/react';
 import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -91,7 +92,6 @@ import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import { Dialog } from '@headlessui/react';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -237,7 +237,7 @@ function Documents() {
     if (!event.dataTransfer?.types.includes('Files')) return;
     event.preventDefault();
     event.stopPropagation();
-    setIsDropZoneVisible(true)
+    setIsDropZoneVisible(true);
   }
   function handleDrop(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
@@ -2322,7 +2322,10 @@ function Documents() {
                         </div>
                       )}
                       {currentDocumentActions.find(
-                        (action: any) => action.status === 'FAILED'
+                        (action: any) =>
+                          action.status === 'FAILED' ||
+                          action.status === 'PENDING' ||
+                          action.status === 'FAILED_RETRY'
                       ) && (
                         <ButtonPrimaryGradient
                           className="text-sm h-9 w-full mb-2"
