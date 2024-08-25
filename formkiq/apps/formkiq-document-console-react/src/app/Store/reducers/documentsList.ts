@@ -21,9 +21,12 @@ import { setAllAttributesData, setAllTagsData } from './attributesData';
 import { User } from './auth';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
+
+let callCounter = 0;
 export const fetchDocuments = createAsyncThunk(
   'documentsList/fetchDocuments',
   async (data: any, thunkAPI) => {
+    const currentCallId = ++callCounter;
     const {
       siteId,
       formkiqVersion,
@@ -117,6 +120,7 @@ export const fetchDocuments = createAsyncThunk(
           searchAttributes
         ).then((response: any) => {
           if (response) {
+            if (currentCallId !== callCounter) return; // After the async operation completes,this check ensures that only the result from the most recent call is used to update the state.
             const data = {
               siteId,
               documents: response.documents,
@@ -147,6 +151,7 @@ export const fetchDocuments = createAsyncThunk(
           searchAttributes
         ).then((response: any) => {
           if (response) {
+            if (currentCallId !== callCounter) return;
             const temp: any = response.documents?.filter(
               (document: IDocument) => {
                 return document.path;
@@ -182,6 +187,7 @@ export const fetchDocuments = createAsyncThunk(
         ).then((response: any) => {
           // putting workflow under document object, for top-level object consistency with other search results
           if (response) {
+            if (currentCallId !== callCounter) return;
             const mappedDocuments: any = [];
             response.documents.map((val: any) => {
               if (val.workflow) {
@@ -217,6 +223,7 @@ export const fetchDocuments = createAsyncThunk(
             allAttributes
           ).then((response: any) => {
             if (response) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -246,6 +253,7 @@ export const fetchDocuments = createAsyncThunk(
             allAttributes
           ).then((response: any) => {
             if (response) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -273,6 +281,7 @@ export const fetchDocuments = createAsyncThunk(
             "true"
           ).then((response: any) => {
             if (response) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -302,6 +311,7 @@ export const fetchDocuments = createAsyncThunk(
             allAttributes
           ).then((response: any) => {
             if (response) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -334,6 +344,7 @@ export const fetchDocuments = createAsyncThunk(
             allAttributes
           ).then((response: any) => {
             if (response) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -368,6 +379,7 @@ export const fetchDocuments = createAsyncThunk(
           allAttributes
         ).then((response: any) => {
           if (response) {
+            if (currentCallId !== callCounter) return;
             const data = {
               siteId,
               documents: response.documents,
