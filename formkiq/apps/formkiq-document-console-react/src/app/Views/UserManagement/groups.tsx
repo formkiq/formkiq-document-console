@@ -204,6 +204,7 @@ function Groups() {
             groupName={groupName}
             user={user}
             group={groups.find((group) => group.name === groupName)}
+            groupsUsers={groupsUsers[groupName]}
           />
         )}
       </div>

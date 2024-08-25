@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { DocumentsService } from '../../../helpers/services/documentsService';
 import { User } from '../../../helpers/types/userManagement';
 import GroupMembers from '../../../Views/UserManagement/groupMembers';
 import { ChevronRight, Close } from '../../Icons/icons';
@@ -11,6 +9,7 @@ type GroupInfoTabProps = {
   user: any;
   group: any;
   users?: User[];
+  groupsUsers: User[];
 };
 
 function GroupInfoTab({
@@ -19,22 +18,9 @@ function GroupInfoTab({
   user,
   group,
   users,
+  groupsUsers,
 }: GroupInfoTabProps) {
   const { groupName: name } = useParams();
-  const [groupsUsers, setGroupsUsers] = useState<any[]>([]);
-  useEffect(() => {
-    if (users) {
-      setGroupsUsers(users);
-      return;
-    }
-    DocumentsService.getGroupUsers(groupName, 20).then((response) => {
-      if (response.users) {
-        setGroupsUsers(
-          response.users.sort((a: any, b: any) => (a.email > b.email ? 1 : -1))
-        );
-      }
-    });
-  }, [groupName, users]);
 
   if (!group) return null;
   return (
