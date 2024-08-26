@@ -52,16 +52,6 @@ function Mappings() {
   const dispatch = useAppDispatch();
   const [isMappingEditTabVisible, setIsMappingEditTabVisible] = useState(false);
   const [isMappingAddTabVisible, setIsMappingAddTabVisible] = useState(false);
-  const initialMappingValue = {
-    mapping: {
-      name: '',
-      description: '',
-      attributes: [],
-    },
-  };
-  // const [newMappingValue, setNewMappingValue] = useState<{ mapping: Mapping }>(
-  //   initialMappingValue as { mapping: Mapping }
-  // );
 
   // update siteId
   useEffect(() => {
@@ -138,24 +128,15 @@ function Mappings() {
     );
   };
 
-  const saveNewMapping = (mapping: Mapping) => {
-    dispatch(addMapping({ mapping, siteId: currentSiteId }));
-  };
 
-  // // Open tab to create/edit mapping
+  // Open tab to create/edit mapping
   const showMappingEditTab = (mappingId: string) => {
     const mapping = mappings.find((mapping) => mapping.mappingId === mappingId);
     if (!mapping) {
       return;
     }
-    // setNewMappingValue({ mapping });
     setIsMappingEditTabVisible(true);
   };
-  //
-  // function onCancelEdit() {
-  //   setIsMappingEditTabVisible(false);
-  //   setNewMappingValue(initialMappingValue as { mapping: Mapping });
-  // }
 
 
   return (

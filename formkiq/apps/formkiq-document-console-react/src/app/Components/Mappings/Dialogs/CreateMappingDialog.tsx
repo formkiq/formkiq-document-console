@@ -13,7 +13,7 @@ import {
 } from '../../../Store/reducers/attributesData';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
-import AddAttributesTab from './AddAttributesTab';
+import AttributesTab from './AttributesTab';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { addMapping } from '../../../Store/reducers/mappings';
 
@@ -112,8 +112,7 @@ function CreateMappingDialog({
   };
 
   const closeModal = () => {
-    setMapping(initialMappingValue);
-    setAttribute(initialAttributeValue);
+    resetMapping();
     setSelectedTab('generalInfo');
     setIsOpen(false);
   };
@@ -154,30 +153,30 @@ function CreateMappingDialog({
     }
   };
 
-  const addAttributesToMapping = () => {
-    if (attribute.attributeKey.length === 0) return;
+  const isCurrentAttributeValid = () => {
+    const errorsMessages = [];
+    if (attribute.attributeKey.length === 0) {
+      errorsMessages.push('Please select an attribute key.');
+    }
     if (attribute.sourceType.length === 0) {
-      dispatch(
-        openNotificationDialog({ dialogTitle: 'Please select a source type' })
-      );
-      return;
+      errorsMessages.push('Please select a source type.');
     }
     if (attribute.labelMatchingType.length === 0) {
-      dispatch(
-        openNotificationDialog({
-          dialogTitle: 'Please select a label matching type',
-        })
-      );
-      return;
+      errorsMessages.push('Please select a label matching type.');
     }
     if (attribute.labelTexts.length === 0 && attribute.labelText.length === 0) {
-      dispatch(
-        openNotificationDialog({ dialogTitle: 'Please add a label text' })
-      );
-      return;
+      errorsMessages.push('Please add a label text.');
     }
+    if (errorsMessages.length > 0) {
+      dispatch(
+        openNotificationDialog({ dialogTitle: errorsMessages.join('\n') })
+      );
+      return false;
+    }
+    return true;
+  };
 
-    const newMapping = { ...mapping };
+  const createNewAttribute = () => {
     const newAttribute: MappingAttribute = {
       attributeKey: attribute.attributeKey,
       sourceType: attribute.sourceType as MappingAttributeSourceType,
@@ -186,31 +185,49 @@ function CreateMappingDialog({
       metadataField: attribute.metadataField as MappingAttributeMetadataField,
       validationRegex: attribute.validationRegex,
     };
-    if (attribute.defaultValues.length > 0) {
+    if (attribute.defaultValues?.length) {
       newAttribute.defaultValues = attribute.defaultValues;
     } else if (attribute.defaultValue.length > 0) {
       newAttribute.defaultValue = attribute.defaultValue;
     }
-    if (attribute.labelTexts.length > 0) {
+    if (attribute.labelTexts?.length) {
       newAttribute.labelTexts = attribute.labelTexts;
     } else if (attribute.labelText.length > 0) {
       newAttribute.labelTexts = [attribute.labelText];
     }
+    return newAttribute;
+  };
 
+  const addAttributesToMapping = () => {
+    if (!isCurrentAttributeValid()) return;
+    const newMapping = { ...mapping };
+    const newAttribute = createNewAttribute();
     newMapping.attributes.push(newAttribute);
     setMapping(newMapping);
+    resetAttribute();
+  };
+
+  const updateAttributeInMapping = (index: number) => {
+    if (!isCurrentAttributeValid()) return 'failed';
+    const newMapping = { ...mapping };
+    newMapping.attributes[index] = createNewAttribute();
+    setMapping(newMapping);
+    resetAttribute();
+    return 'success';
+  };
+
+  const resetAttribute = () => {
     setAttribute(initialAttributeValue);
+  };
+
+  const resetMapping = () => {
+    resetAttribute();
+    setMapping(initialMappingValue);
   };
 
   const deleteAttributeFromMapping = (index: number) => {
     const newMapping = { ...mapping };
     newMapping.attributes.splice(index, 1);
-    setMapping(newMapping);
-  };
-
-  const deleteLabelTextFromMapping = (index: number) => {
-    const newMapping = { ...mapping };
-    newMapping.attributes[index].labelTexts?.splice(index, 1);
     setMapping(newMapping);
   };
 
@@ -285,11 +302,13 @@ function CreateMappingDialog({
             )}
 
             {selectedTab === 'attributes' && (
-              <AddAttributesTab
+              <AttributesTab
                 attributeKeys={attributeKeys}
                 preventDialogClose={preventDialogClose}
                 addDefaultValue={addDefaultValue}
                 addAttributesToMapping={addAttributesToMapping}
+                updateAttributeInMapping={updateAttributeInMapping}
+                resetAttribute={resetAttribute}
                 deleteAttributeFromMapping={deleteAttributeFromMapping}
                 attributes={mapping.attributes}
                 allAttributes={allAttributes}
