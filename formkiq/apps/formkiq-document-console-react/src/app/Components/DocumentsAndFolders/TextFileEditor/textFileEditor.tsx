@@ -103,7 +103,7 @@ function TextFileEditor({
               <MarkdownEditor
                 content={documentContent}
                 onChange={onTextChange}
-                readOnly={false}
+                readOnly={readOnly}
               />
             </div>
           )}

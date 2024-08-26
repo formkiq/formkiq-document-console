@@ -11,7 +11,8 @@ import { useAppDispatch } from '../../Store/store';
 import {
   InlineEditableContentTypes,
   InlineViewableContentTypes,
-  OnlyOfficeContentTypes, TextFileEditorEditableContentTypes,
+  OnlyOfficeContentTypes,
+  TextFileEditorEditableContentTypes,
   TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../helpers/services/documentsService';
@@ -139,10 +140,9 @@ export function DocumentView() {
         (response: IDocument) => {
           setDocument(response);
           dispatch(setCurrentDocumentPath(response.path));
-          // redirect if file is not editable type or user doesn't have editing rights
+          // redirect if file is not editable type
           if (
-            (!isDocumentContentTypeEditable(response.contentType) ||
-              isCurrentSiteReadonly) &&
+            !isDocumentContentTypeEditable(response.contentType) &&
             mode === 'edit'
           ) {
             navigate(pathname.replace(/\/edit$/, '/view'));
@@ -223,7 +223,7 @@ export function DocumentView() {
               viewVersionKey,
               true
             ).then((res: any) => {
-              if(res.content){
+              if (res.content) {
                 setDocumentContent(res.content);
               }
             });
@@ -290,7 +290,11 @@ export function DocumentView() {
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
     setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
-    setMode(getModeFromPath())
+    setMode(getModeFromPath());
+    // redirect if user doesn't have editing rights
+    if (recheckSiteInfo.isSiteReadOnly && getModeFromPath() === 'edit') {
+      navigate(pathname.replace(/\/edit$/, '/view'));
+    }
   }, [pathname]);
 
   const [document, setDocument]: [IDocument | null, any] = useState(null);
