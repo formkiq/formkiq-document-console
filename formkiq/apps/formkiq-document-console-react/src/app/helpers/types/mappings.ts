@@ -6,7 +6,7 @@ export enum RequestStatus {
 
 export type MappingAttributeSourceType = 'CONTENT' | 'CONTENT_KEY_VALUE' | 'METADATA';
 export type MappingAttributeLabelMatchingType =
-  | ' FUZZY'
+  | 'FUZZY'
   | 'EXACT'
   | 'BEGINS_WITH'
   | 'CONTAINS';

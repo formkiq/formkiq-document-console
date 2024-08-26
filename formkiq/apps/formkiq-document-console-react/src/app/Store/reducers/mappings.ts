@@ -65,9 +65,11 @@ export const addMapping = createAsyncThunk(
       } else {
         let dialogTitle = 'Error adding mapping';
         if (response.errors) {
-          dialogTitle = response.errors[0].error;
+          dialogTitle = response.errors
+            .map((item:any) => `${item.key}: ${item.error}`)
+            .join('\n');
         }
-        thunkAPI.dispatch(openNotificationDialog({ dialogTitle }));
+        throw new Error(dialogTitle);
       }
     });
   }

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   MappingAttribute,
   MappingAttributeLabelMatchingType,
+  MappingAttributeMetadataField,
   MappingAttributeSourceType,
 } from '../../../helpers/types/mappings';
 import { useSelector } from 'react-redux';
@@ -14,6 +15,7 @@ import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import AddAttributesTab from './AddAttributesTab';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { addMapping } from '../../../Store/reducers/mappings';
 
 type CreateMappingDialogPropsType = {
   isOpen: boolean;
@@ -35,18 +37,22 @@ function CreateMappingDialog({
     attributeKey: string;
     defaultValue: string;
     defaultValues: string[];
-    sourceType: MappingAttributeSourceType;
+    sourceType: MappingAttributeSourceType | string;
     labelText: string;
     labelTexts: string[];
-    labelMatchingType: MappingAttributeLabelMatchingType;
+    labelMatchingType: MappingAttributeLabelMatchingType | string;
+    metadataField: MappingAttributeMetadataField | string;
+    validationRegex: string;
   } = {
     attributeKey: '',
     defaultValue: '',
     defaultValues: [],
-    sourceType: 'CONTENT',
+    sourceType: '',
     labelText: '',
     labelTexts: [],
-    labelMatchingType: 'EXACT',
+    labelMatchingType: '',
+    metadataField: '',
+    validationRegex: '',
   };
 
   const [selectedTab, setSelectedTab] = useState<'generalInfo' | 'attributes'>(
@@ -88,14 +94,26 @@ function CreateMappingDialog({
     updateAllAttributes();
   }, []);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(mapping);
-    closeModal();
+    if (mapping.name.length === 0) {
+      dispatch(
+        openNotificationDialog({ dialogTitle: 'Please enter the name.' })
+      );
+      setSelectedTab('generalInfo');
+      return;
+    }
+    try {
+      await dispatch(addMapping({ mapping: { mapping }, siteId })).unwrap();
+      closeModal();
+    } catch (error: any) {
+      dispatch(openNotificationDialog({ dialogTitle: error.message }));
+    }
   };
 
   const closeModal = () => {
     setMapping(initialMappingValue);
+    setAttribute(initialAttributeValue);
     setSelectedTab('generalInfo');
     setIsOpen(false);
   };
@@ -124,10 +142,10 @@ function CreateMappingDialog({
       return;
     }
     setAttribute({
-          ...attribute,
-          labelTexts: [...attribute.labelTexts, attribute.labelText],
-          labelText: '',
-      });
+      ...attribute,
+      labelTexts: [...attribute.labelTexts, attribute.labelText],
+      labelText: '',
+    });
   };
 
   const preventDialogClose = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -138,11 +156,35 @@ function CreateMappingDialog({
 
   const addAttributesToMapping = () => {
     if (attribute.attributeKey.length === 0) return;
+    if (attribute.sourceType.length === 0) {
+      dispatch(
+        openNotificationDialog({ dialogTitle: 'Please select a source type' })
+      );
+      return;
+    }
+    if (attribute.labelMatchingType.length === 0) {
+      dispatch(
+        openNotificationDialog({
+          dialogTitle: 'Please select a label matching type',
+        })
+      );
+      return;
+    }
+    if (attribute.labelTexts.length === 0 && attribute.labelText.length === 0) {
+      dispatch(
+        openNotificationDialog({ dialogTitle: 'Please add a label text' })
+      );
+      return;
+    }
+
     const newMapping = { ...mapping };
     const newAttribute: MappingAttribute = {
       attributeKey: attribute.attributeKey,
-      sourceType: attribute.sourceType,
-      labelMatchingType:  attribute.labelMatchingType,
+      sourceType: attribute.sourceType as MappingAttributeSourceType,
+      labelMatchingType:
+        attribute.labelMatchingType as MappingAttributeLabelMatchingType,
+      metadataField: attribute.metadataField as MappingAttributeMetadataField,
+      validationRegex: attribute.validationRegex,
     };
     if (attribute.defaultValues.length > 0) {
       newAttribute.defaultValues = attribute.defaultValues;
@@ -154,8 +196,6 @@ function CreateMappingDialog({
     } else if (attribute.labelText.length > 0) {
       newAttribute.labelTexts = [attribute.labelText];
     }
-
-    // TODO: add check for required values
 
     newMapping.attributes.push(newAttribute);
     setMapping(newMapping);
@@ -184,7 +224,7 @@ function CreateMappingDialog({
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
 
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-        <div className="w-full max-w-xl bg-white p-6 rounded-md">
+        <div className="w-full max-w-5xl bg-white p-6 rounded-md">
           <Dialog.Title className="text-2xl font-bold mb-4">
             Create New Mapping
           </Dialog.Title>
@@ -247,27 +287,13 @@ function CreateMappingDialog({
             {selectedTab === 'attributes' && (
               <AddAttributesTab
                 attributeKeys={attributeKeys}
-                // attributeKey={selectedAttributeKey}
-                // setAttributeKey={setSelectedAttributeKey}
                 preventDialogClose={preventDialogClose}
-                // defaultValue={defaultValue}
-                // setDefaultValue={setDefaultValue}
                 addDefaultValue={addDefaultValue}
-                // defaultValues={defaultValues}
-                // setDefaultValues={setDefaultValues}
                 addAttributesToMapping={addAttributesToMapping}
                 deleteAttributeFromMapping={deleteAttributeFromMapping}
                 attributes={mapping.attributes}
                 allAttributes={allAttributes}
-                // sourceType={sourceType}
-                // setSourceType={setSourceType}
-                // labelText={labelText}
-                // setLabelText={setLabelText}
-                // labelTexts={labelTexts}
                 addLabelText={addLabelText}
-                // deleteLabelTextFromMapping={deleteLabelTextFromMapping}
-                // labelMatchingType={labelMatchingType}
-                // setLabelMatchingType={setLabelMatchingType}
                 attribute={attribute}
                 setAttribute={setAttribute}
               />
