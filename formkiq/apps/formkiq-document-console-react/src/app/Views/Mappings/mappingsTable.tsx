@@ -41,7 +41,7 @@ function MappingsTable({
                   key={mapping.mappingId}
                   className="text-neutral-900 border-neutral-300"
                 >
-                  <td className="border-b max-w-52 border-neutral-300 p-4 pl-8 truncate">
+                  <td className="border-b max-w-52 border-neutral-300 p-4 pl-8 truncate font-semibold">
                     <Link
                       title={mapping.name}
                       to={`${pathname}/${mapping.mappingId}`}
@@ -51,11 +51,30 @@ function MappingsTable({
                     </Link>
                   </td>
 
-                  <td className="border-b p-4 ">{mapping.description}</td>
+                  <td className="border-b p-4">
+                    <p style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                       title={mapping.description}
+                    >
+                      {mapping.description}
+                      </p>
+                  </td>
                   <td className="border-b p-4 ">
+                    <div className="flex flex-wrap gap-2">
                     {mapping.attributes
-                      .map((attr) => attr.attributeKey)
-                      .join(', ')}
+                      .map((attr) => (
+                        <div key={attr.attributeKey}
+                             className="inline-block bg-neutral-100 rounded-full px-2 py-1 text-xs font-semibold"
+                        >
+                          {attr.attributeKey}
+                        </div>
+                      ))}
+                    </div>
                   </td>
 
                   <td className="border-b border-neutral-300 p-4 pr-8">
