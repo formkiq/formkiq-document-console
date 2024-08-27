@@ -1952,3 +1952,16 @@ export function Attribute() {
     </svg>
   )
 }
+
+export function Mapping() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%"
+         height="100%" viewBox="0 0 48 48">
+      <g fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="4">
+        <path
+          d="M8 28a4 4 0 1 0 0-8a4 4 0 0 0 0 8ZM42 8a2 2 0 1 0 0-4a2 2 0 0 0 0 4Zm0 18a2 2 0 1 0 0-4a2 2 0 0 0 0 4Zm0 18a2 2 0 1 0 0-4a2 2 0 0 0 0 4Z"/>
+        <path strokeLinecap="round" d="M32 6H20v36h12M12 24h20"/>
+      </g>
+    </svg>
+  )
+}
