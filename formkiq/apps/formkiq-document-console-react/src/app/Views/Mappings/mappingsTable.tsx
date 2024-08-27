@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 type MappingTableProps = {
   mappings: Mapping[];
   onMappingDelete: (mappingId: string) => void;
-  showMappingEditTab: (mappingId: string) => void;
+  showMappingEditTab: (mapping: Mapping) => void;
 };
 
 function MappingsTable({
@@ -76,14 +76,14 @@ function MappingsTable({
                       <button
                         title="Edit"
                         className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
-                        // onClick={() => showMappingEditTab(mapping.mappingId)}
+                        onClick={() => showMappingEditTab(mapping)}
                       >
                         <Edit />
                       </button>
 
                       <button
                         title="Delete"
-                        onClick={() => onMappingDelete(mapping.mappingId)}
+                        onClick={() => onMappingDelete(mapping.mappingId as string)}
                         className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
                       >
                         <Trash />

@@ -9,9 +9,12 @@ import {
 } from '../../../helpers/types/mappings';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
+import {useSelector} from "react-redux";
+import {AttributesDataState, fetchAttributesData} from "../../../Store/reducers/attributesData";
+import {useAppDispatch} from "../../../Store/store";
 
 type AddAttributesTabProps = {
-  attributeKeys: { key: string; title: string }[];
+  siteId: string;
   attribute: {
     attributeKey: string;
     defaultValue: string;
@@ -24,32 +27,48 @@ type AddAttributesTabProps = {
     validationRegex: string;
   };
   setAttribute: (attribute: any) => void;
-  preventDialogClose: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   addDefaultValue: () => void;
   addAttributesToMapping: () => void;
   updateAttributeInMapping: (index: number) => 'failed' | 'success';
   resetAttribute: () => void;
   deleteAttributeFromMapping: (index: number) => void;
   attributes: any[];
-  allAttributes: any[];
   addLabelText: () => void;
 };
 
 function AttributesTab({
-  attributeKeys,
+  siteId,
   attribute,
   setAttribute,
-  preventDialogClose,
   addDefaultValue,
   addAttributesToMapping,
   updateAttributeInMapping,
   resetAttribute,
   deleteAttributeFromMapping,
   attributes,
-  allAttributes,
   addLabelText,
 }: AddAttributesTabProps) {
   const [editingAttributeIndex, setEditingAttributeIndex] = useState(-1);
+  const { allAttributes } = useSelector(AttributesDataState);
+  const [attributeKeys, setAttributeKeys] = useState<
+    { key: string; title: string }[]
+    >([]);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (!allAttributes || allAttributes.length === 0) return;
+    const keys = allAttributes.map((item) => ({
+      key: item.key,
+      title: item.key,
+    }));
+    setAttributeKeys(keys);
+  }, [allAttributes]);
+
+  useEffect(() => {
+    if (!allAttributes || allAttributes.length === 0) {
+      dispatch(fetchAttributesData({ siteId }));
+    }
+  }, []);
   const deleteDefaultValue = (event: React.MouseEvent, value: string) => {
     event.stopPropagation();
     setAttribute((prev: any) => ({
@@ -111,6 +130,11 @@ function AttributesTab({
     }
   };
 
+  const preventDialogClose = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
   return (
     <>
       <div className="flex gap-4 w-full items-end">

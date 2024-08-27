@@ -24,7 +24,7 @@ export interface MappingAttribute {
 }
 
 export interface Mapping {
-  mappingId: string;
+  mappingId?: string;
   name: string;
   description: string;
   attributes: MappingAttribute[];

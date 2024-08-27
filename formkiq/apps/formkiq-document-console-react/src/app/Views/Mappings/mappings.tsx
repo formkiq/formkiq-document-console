@@ -4,28 +4,24 @@ import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
-import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import {
   MappingsState,
   deleteMapping,
   fetchMappings,
   setMappingsLoadingStatusPending,
-  addMapping,
 } from '../../Store/reducers/mappings';
 import { useAppDispatch } from '../../Store/store';
-import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
 import { Mapping } from '../../helpers/types/mappings';
-// import MappingsTable from './mappingsTable';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
-import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
-import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
-import CreateMappingDialog from "../../Components/Mappings/Dialogs/CreateMappingDialog";
-import MappingsTable from "./mappingsTable";
+
+import CreateMappingDialog from '../../Components/Mappings/Dialogs/CreateMappingDialog';
+import MappingsTable from './mappingsTable';
+import EditMappingDialog from '../../Components/Mappings/Dialogs/EditMappingDialog';
 
 function Mappings() {
   const { user } = useAuthenticatedState();
@@ -51,6 +47,7 @@ function Mappings() {
 
   const dispatch = useAppDispatch();
   const [isMappingEditTabVisible, setIsMappingEditTabVisible] = useState(false);
+  const [editingMapping, setEditingMapping] = useState<Mapping|null>(null);
   const [isMappingAddTabVisible, setIsMappingAddTabVisible] = useState(false);
 
   // update siteId
@@ -128,16 +125,11 @@ function Mappings() {
     );
   };
 
-
   // Open tab to create/edit mapping
-  const showMappingEditTab = (mappingId: string) => {
-    const mapping = mappings.find((mapping) => mapping.mappingId === mappingId);
-    if (!mapping) {
-      return;
-    }
-    setIsMappingEditTabVisible(true);
+  const showMappingEditTab = (mapping: Mapping) => {
+    setEditingMapping(mapping);
+    setTimeout(() => setIsMappingEditTabVisible(true),10);
   };
-
 
   return (
     <>
@@ -174,7 +166,13 @@ function Mappings() {
         isOpen={isMappingAddTabVisible}
         setIsOpen={setIsMappingAddTabVisible}
         siteId={siteId}
-        />
+      />
+      <EditMappingDialog
+        isOpen={isMappingEditTabVisible}
+        setIsOpen={setIsMappingEditTabVisible}
+        mapping={editingMapping as Mapping}
+        siteId={siteId}
+      />
     </>
   );
 }

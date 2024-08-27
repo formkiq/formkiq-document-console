@@ -66,7 +66,7 @@ export const addMapping = createAsyncThunk(
         let dialogTitle = 'Error adding mapping';
         if (response.errors) {
           dialogTitle = response.errors
-            .map((item:any) => `${item.key}: ${item.error}`)
+            .map((item: any) => `${item.key}: ${item.error}`)
             .join('\n');
         }
         throw new Error(dialogTitle);
@@ -101,16 +101,20 @@ export const updateMapping = createAsyncThunk(
   'mappings/updateMapping',
   async (data: any, thunkAPI) => {
     const { siteId, mappingId, mapping } = data;
+    console.log("data", data);
     await DocumentsService.setMapping(siteId, mappingId, mapping).then(
       (response) => {
+        console.log(response);
         if (response.status === 200) {
           thunkAPI.dispatch(fetchMappings({ siteId, limit: 20, page: 1 }));
         } else {
           let dialogTitle = 'Error updating mapping';
           if (response.errors) {
-            dialogTitle = response.errors[0].error;
+            dialogTitle = response.errors
+              .map((item: any) => `${item.key}: ${item.error}`)
+              .join('\n');
           }
-          thunkAPI.dispatch(openNotificationDialog({ dialogTitle }));
+          throw new Error(dialogTitle);
         }
       }
     );
