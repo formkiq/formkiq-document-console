@@ -680,10 +680,7 @@ function Documents() {
   };
   const restoreDocument =
     (file: IDocument, siteId: string, searchDocuments: any) => () => {
-      DocumentsService.restoreDocument(
-        siteId,
-        file.documentId,
-      ).then(() => {
+      DocumentsService.restoreDocument(siteId, file.documentId).then(() => {
         let newDocs = null;
         if (searchDocuments) {
           newDocs = searchDocuments.filter((doc: any) => {
@@ -2616,6 +2613,11 @@ function Documents() {
         onDocumentDataChange={onDocumentDataChange}
         dropUploadDocuments={dropUploadDocuments}
         resetDropUploadDocuments={resetDropUploadDocuments}
+        folderPath={
+          dropFolderPath
+            ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
+            : pathname
+        }
       />
       <UploadModal
         isOpened={isFolderUploadModalOpened}
@@ -2626,6 +2628,11 @@ function Documents() {
         documentId={folderUploadModalDocumentId}
         isFolderUpload={true}
         onDocumentDataChange={onDocumentDataChange}
+        folderPath={
+          dropFolderPath
+            ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
+            : pathname
+        }
       />
       <DocumentReviewModal
         isOpened={isDocumentReviewModalOpened}
