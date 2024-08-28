@@ -57,12 +57,10 @@ export const fetchMappings = createAsyncThunk(
 
 export const addMapping = createAsyncThunk(
   'mappings/addMapping',
-  async (data: any, thunkAPI) => {
+  async (data: any) => {
     const { siteId, mapping } = data;
     await DocumentsService.addMapping(siteId, mapping).then((response) => {
-      if (response.status === 201) {
-        thunkAPI.dispatch(fetchMappings({ siteId, limit: 20, page: 1 }));
-      } else {
+      if (response.status !== 201) {
         let dialogTitle = 'Error adding mapping';
         if (response.errors) {
           dialogTitle = response.errors
@@ -99,15 +97,12 @@ export const deleteMapping = createAsyncThunk(
 
 export const updateMapping = createAsyncThunk(
   'mappings/updateMapping',
-  async (data: any, thunkAPI) => {
+  async (data: any) => {
     const { siteId, mappingId, mapping } = data;
-    console.log("data", data);
     await DocumentsService.setMapping(siteId, mappingId, mapping).then(
       (response) => {
         console.log(response);
-        if (response.status === 200) {
-          thunkAPI.dispatch(fetchMappings({ siteId, limit: 20, page: 1 }));
-        } else {
+        if (response.status !== 200) {
           let dialogTitle = 'Error updating mapping';
           if (response.errors) {
             dialogTitle = response.errors
