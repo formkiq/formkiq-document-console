@@ -1,3 +1,4 @@
+import { Dialog } from '@headlessui/react';
 import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -30,6 +31,7 @@ import {
   Download,
   Edit,
   FolderOutline,
+  Retry,
   Spinner,
   Tag,
   Trash,
@@ -90,7 +92,6 @@ import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import { Dialog } from '@headlessui/react';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -236,7 +237,7 @@ function Documents() {
     if (!event.dataTransfer?.types.includes('Files')) return;
     event.preventDefault();
     event.stopPropagation();
-    setIsDropZoneVisible(true)
+    setIsDropZoneVisible(true);
   }
   function handleDrop(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
@@ -568,6 +569,28 @@ function Documents() {
     }
   };
 
+  function retryFailedActions() {
+    DocumentsService.retryDocumentActions(currentSiteId, infoDocumentId).then(
+      (response: any) => {
+        if (response.status === 200) {
+          updateDocumentActions();
+        } else if (response.status === 400) {
+          dispatch(
+            openDialog({
+              dialogTitle: response.errors[0].error,
+            })
+          );
+        } else {
+          dispatch(
+            openDialog({
+              dialogTitle: 'Something went wrong. Please try again later.',
+            })
+          );
+        }
+      }
+    );
+  }
+
   // update document actions every 5 seconds
   useEffect(() => {
     if (infoDocumentId && infoDocumentView === 'actions') {
@@ -628,18 +651,12 @@ function Documents() {
 
   const onDeleteDocument = (file: IDocument, searchDocuments: any) => () => {
     const deleteFunc = () => {
-      let isDocumentInfoPage = false;
-      if (infoDocumentId.length) {
-        isDocumentInfoPage = true;
-        setIsCurrentDocumentSoftDeleted(true);
-      }
       dispatch(
         deleteDocument({
           siteId: currentSiteId,
           user,
           document: file,
           documents: searchDocuments,
-          isDocumentInfoPage: isDocumentInfoPage,
         })
       );
     };
@@ -663,10 +680,9 @@ function Documents() {
   };
   const restoreDocument =
     (file: IDocument, siteId: string, searchDocuments: any) => () => {
-      DocumentsService.deleteDocumentTag(
-        file.documentId,
+      DocumentsService.restoreDocument(
         siteId,
-        'sysDeletedBy'
+        file.documentId,
       ).then(() => {
         let newDocs = null;
         if (searchDocuments) {
@@ -674,16 +690,12 @@ function Documents() {
             return doc.documentId !== file.documentId;
           });
         }
-        setIsCurrentDocumentSoftDeleted(false);
-        if (!infoDocumentId.length) {
-          dispatch(
-            updateDocumentsList({
-              documents: newDocs,
-              user: user,
-              isSystemDeletedByKey: true,
-            })
-          );
-        }
+        dispatch(
+          updateDocumentsList({
+            documents: newDocs,
+            user: user,
+          })
+        );
       });
     };
   const onTagDelete = (tagKey: string) => {
@@ -2298,6 +2310,24 @@ function Documents() {
                           (no actions exist for this document)
                         </div>
                       )}
+                      {currentDocumentActions.find(
+                        (action: any) =>
+                          action.status === 'FAILED' ||
+                          action.status === 'PENDING' ||
+                          action.status === 'FAILED_RETRY'
+                      ) && (
+                        <ButtonPrimaryGradient
+                          className="text-sm h-9 w-full mb-2"
+                          onClick={retryFailedActions}
+                        >
+                          <div className="flex gap-2 items-center justify-center">
+                            <span>Retry Failed Actions</span>
+                            <div className="w-5">
+                              <Retry />
+                            </div>
+                          </div>
+                        </ButtonPrimaryGradient>
+                      )}
                       {currentDocumentActions.map((action: any, i: number) => (
                         <div key={i} className="flex flex-col pb-3">
                           <dt className="font-semibold text-sm">
@@ -2308,7 +2338,8 @@ function Documents() {
                               className={`font-bold text-xs ${
                                 action.status === 'COMPLETE'
                                   ? 'text-green-600'
-                                  : action.status === 'FAILED'
+                                  : action.status === 'FAILED' ||
+                                    action.status === 'FAILED_RETRY'
                                   ? 'text-red-600'
                                   : action.status === 'SKIPPED'
                                   ? 'text-neutral-600'

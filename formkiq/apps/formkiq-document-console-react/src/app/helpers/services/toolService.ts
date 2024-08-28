@@ -638,7 +638,6 @@ export function excludeDocumentsWithTagFromAll(
   parentObj: { folders: null | IFolder[]; documents: IDocument[] },
   tagKey: string,
   tagValue: string,
-  isSystemDeletedByKey = false
 ) {
   const res = { ...parentObj };
   const updateDocumentsList = (documents: IDocument[]): IDocument[] => {
@@ -647,14 +646,6 @@ export function excludeDocumentsWithTagFromAll(
       if (tagValue.length) {
         return (docs as any[]).filter((doc: any) => {
           return !isTagValueIncludes(doc.tags[tagKey], tagValue);
-        });
-      } else {
-        return (docs as any[]).filter((doc: any) => {
-          if (isSystemDeletedByKey) {
-            return (doc.tags as any)['sysDeletedBy'];
-          } else {
-            return !(doc.tags as any)['sysDeletedBy'];
-          }
         });
       }
     }

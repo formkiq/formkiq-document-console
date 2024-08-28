@@ -143,10 +143,10 @@ export function Sidebar() {
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    if (recheckSiteInfo.siteDocumentsRootUri.indexOf('workspaces') > 0) {
-      if (!hasUserSite && !hasDefaultSite && hasWorkspaces) {
-        setSpecialFoldersRootUri('/documents');
-      }
+    if (pathname.indexOf('/workspaces') > -1) {
+      setSpecialFoldersRootUri('/workspaces/' + recheckSiteInfo.siteId);
+    } else {
+      setSpecialFoldersRootUri('/documents');
     }
   }, [pathname]);
 
@@ -776,7 +776,12 @@ export function Sidebar() {
                 {formkiqVersion.type !== 'core' && (
                   <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
-                      to="/workflows"
+                      to={
+                        '/workflows' +
+                        (pathname.indexOf('workspaces') > 0
+                          ? '/workspaces/' + currentSiteId
+                          : '')
+                      }
                       className={({ isActive }) =>
                         (isActive
                           ? 'text-primary-600 bg-neutral-200 '
@@ -800,7 +805,12 @@ export function Sidebar() {
                 {formkiqVersion.type !== 'core' && (
                   <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
-                      to="/queues"
+                      to={
+                        '/queues' +
+                        (pathname.indexOf('workspaces') > 0
+                          ? '/workspaces/' + currentSiteId
+                          : '')
+                      }
                       className={({ isActive }) =>
                         (isActive
                           ? 'text-primary-600 bg-neutral-200 '
@@ -823,7 +833,12 @@ export function Sidebar() {
                 )}
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to="/attributes"
+                    to={
+                      '/attributes' +
+                      (pathname.indexOf('workspaces') > 0
+                        ? '/workspaces/' + currentSiteId
+                        : '')
+                    }
                     className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '
@@ -865,7 +880,12 @@ export function Sidebar() {
                 {formkiqVersion.type !== 'core' && (
                   <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                     <NavLink
-                      to="/rulesets"
+                      to={
+                        '/rulesets' +
+                        (pathname.indexOf('workspaces') > 0
+                          ? '/workspaces/' + currentSiteId
+                          : '')
+                      }
                       data-test-id="nav-rulesets"
                       className={({ isActive }) =>
                         (isActive
@@ -906,7 +926,12 @@ export function Sidebar() {
                 </li>
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to="/schemas"
+                    to={
+                      '/schemas' +
+                      (pathname.indexOf('workspaces') > 0
+                        ? '/workspaces/' + currentSiteId
+                        : '')
+                    }
                     data-test-id="nav-schemas"
                     className={({ isActive }) =>
                       (isActive
@@ -988,7 +1013,12 @@ export function Sidebar() {
                     </li>
                     <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                       <NavLink
-                        to="/admin/api-keys"
+                        to={
+                          '/admin/api-keys' +
+                          (pathname.indexOf('workspaces') > 0
+                            ? '/workspaces/' + currentSiteId
+                            : '')
+                        }
                         data-test-id="nav-api-keys"
                         className={({ isActive }) =>
                           (isActive
@@ -1205,7 +1235,12 @@ export function Sidebar() {
             </div>
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
-                to="/workflows"
+                to={
+                  '/workflows' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
                 className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
@@ -1226,7 +1261,12 @@ export function Sidebar() {
             </li>
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
-                to="/queues"
+                to={
+                  '/queues' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
                 className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
@@ -1241,6 +1281,28 @@ export function Sidebar() {
                 >
                   <div className="w-4 flex items-center mr-2">
                     <Queue />
+                  </div>
+                </div>
+              </NavLink>
+            </li>
+            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+              <NavLink
+                to={
+                  '/attributes' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
+                className={({ isActive }) =>
+                  (isActive
+                    ? 'text-primary-600 bg-neutral-200 '
+                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                  ' w-full text-sm font-bold flex '
+                }
+              >
+                <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
+                  <div className="w-4 flex items-center mr-2">
+                    <Attribute />
                   </div>
                 </div>
               </NavLink>
@@ -1281,7 +1343,12 @@ export function Sidebar() {
             </li>
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
-                to="/rulesets"
+                to={
+                  '/rulesets' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
                 className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
@@ -1323,7 +1390,12 @@ export function Sidebar() {
             </li>
             <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
               <NavLink
-                to="/schemas"
+                to={
+                  '/schemas' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
                 className={({ isActive }) =>
                   (isActive
                     ? 'text-primary-600 bg-neutral-200 '
@@ -1389,7 +1461,12 @@ export function Sidebar() {
                 </li>
                 <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
                   <NavLink
-                    to="/admin/api-keys"
+                    to={
+                      '/admin/api-keys' +
+                      (pathname.indexOf('workspaces') > 0
+                        ? '/workspaces/' + currentSiteId
+                        : '')
+                    }
                     className={({ isActive }) =>
                       (isActive
                         ? 'text-primary-600 bg-neutral-200 '

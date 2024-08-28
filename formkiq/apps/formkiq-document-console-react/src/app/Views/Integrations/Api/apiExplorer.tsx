@@ -5,9 +5,12 @@ import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ApiSegment } from './api-segment';
 import {
   deleteApiKeyApiItem,
+  deleteAttributeApiItem,
   deleteConfigurationOpaPolicyApiItem,
   deleteDocumentAccessAttributesApiItem,
   deleteDocumentApiItem,
+  deleteDocumentAttributeApiItem,
+  deleteDocumentAttributeValueApiItem,
   deleteDocumentFulltextApiItem,
   deleteDocumentFulltextTagApiItem,
   deleteDocumentFulltextTagValueApiItem,
@@ -16,10 +19,14 @@ import {
   deleteDocumentVersionApiItem,
   deleteFolderApiItem,
   deleteFolderDeprecatedApiItem,
+  deleteGroupApiItem,
+  deleteGroupUserApiItem,
   deleteQueueApiItem,
   deleteRuleApiItem,
   deleteRulesetApiItem,
   deleteShareApiItem,
+  deleteSiteClassificationApiItem,
+  deleteUserApiItem,
   deleteWebhookApiItem,
   deleteWorkflowApiItem,
   documentFulltextSearch,
@@ -29,6 +36,8 @@ import {
   documentsTagsPatchApiItem,
   fulltextQueryApiItem,
   getApiKeysApiItem,
+  getAttributeApiItem,
+  getAttributesApiItem,
   getCaseApiItem,
   getCaseDocumentsApiItem,
   getCaseNigoDocumentsApiItem,
@@ -38,9 +47,13 @@ import {
   getCasesApiItem,
   getConfigurationApiItem,
   getConfigurationOpaPoliciesApiItem,
+  getConfigurationOpaPolicyApiItem,
+  getConfigurationOpaPolicyItemsApiItem,
   getDocumentAccessAttributesApiItem,
   getDocumentActionsApiItem,
   getDocumentApiItem,
+  getDocumentAttributeApiItem,
+  getDocumentAttributesApiItem,
   getDocumentContentApiItem,
   getDocumentFulltextApiItem,
   getDocumentOcrApiItem,
@@ -48,6 +61,7 @@ import {
   getDocumentSyncsApiItem,
   getDocumentTagsApiItem,
   getDocumentUrlApiItem,
+  getDocumentUserActivitiesApiItem,
   getDocumentVersionsApiItem,
   getDocumentsApiItem,
   getDocumentsInQueueApiItem,
@@ -55,6 +69,9 @@ import {
   getExaminePdfDetailsApiItem,
   getExaminePdfUploadUrlApiItem,
   getFoldersApiItem,
+  getGroupApiItem,
+  getGroupUsersApiItem,
+  getGroupsApiItem,
   getNewDocumentUploadApiItem,
   getQueueApiItem,
   getQueuesApiItem,
@@ -63,7 +80,14 @@ import {
   getRulesetApiItem,
   getRulesetsApiItem,
   getSharesApiItem,
+  getSiteClassificationApiItem,
+  getSiteClassificationsApiItem,
+  getSiteSchemaApiItem,
   getSitesApiItem,
+  getUserActivitiesApiItem,
+  getUserApiItem,
+  getUserGroupsApiItem,
+  getUsersApiItem,
   getVersionApiItem,
   getWebhookApiItem,
   getWebhookTagsApiItem,
@@ -79,9 +103,11 @@ import {
   patchRulesetApiItem,
   patchWebhookApiItem,
   postApiKeysApiItem,
+  postAttributeApiItem,
   postConfigurationApiItem,
   postDocumentAccessAttributesApiItem,
   postDocumentActionsApiItem,
+  postDocumentAttributesApiItem,
   postDocumentCompressApiItem,
   postDocumentOcrApiItem,
   postDocumentWorkflowApiItem,
@@ -89,13 +115,18 @@ import {
   postDocumentsApiItem,
   postDocumentsPublicApiItem,
   postFoldersApiItem,
+  postGroupApiItem,
+  postGroupUserApiItem,
   postPrivateWebhooksApiItem,
   postPublicWebhooksApiItem,
   postQueuesApiItem,
+  postRetryDocumentActionsApiItem,
   postRuleApiItem,
   postRulesetsApiItem,
   postSearchIndices,
   postShareFolderApiItem,
+  postSiteClassificationApiItem,
+  postUserApiItem,
   postWebhookTagsApiItem,
   postWebhooksApiItem,
   postWithBodyForNewDocumentUploadApiItem,
@@ -103,47 +134,18 @@ import {
   putConfigurationOpaPolicyApiItem,
   putDocumentAccessAttributesApiItem,
   putDocumentAntivirusApiItem,
+  putDocumentAttributeApiItem,
+  putDocumentAttributesApiItem,
   putDocumentFulltextApiItem,
   putDocumentOcrApiItem,
   putDocumentTagApiItem,
   putDocumentVersionApiItem,
-  putWorkflowsApiItem,
-  searchDocumentQueryApiItem,
-  getConfigurationOpaPolicyApiItem,
-  getConfigurationOpaPolicyItemsApiItem,
-  getAttributesApiItem,
-  postAttributeApiItem,
-  getAttributeApiItem,
-  deleteAttributeApiItem,
-  getDocumentAttributesApiItem,
-  postDocumentAttributesApiItem,
-  putDocumentAttributesApiItem,
-  getDocumentAttributeApiItem,
-  deleteDocumentAttributeApiItem,
-  deleteDocumentAttributeValueApiItem,
-  putDocumentAttributeApiItem,
-  getGroupsApiItem,
-  postGroupApiItem,
-  deleteGroupApiItem,
-  getGroupUsersApiItem,
-  postGroupUserApiItem,
-  deleteGroupUserApiItem,
-  getUsersApiItem,
-  postUserApiItem,
-  getUserApiItem,
-  deleteUserApiItem,
-  getUserGroupsApiItem,
-  putUserOperationApiItem,
-  getGroupApiItem,
-  getSiteSchemaApiItem,
-  putSiteSchemaApiItem,
-  getSiteClassificationsApiItem,
-  postSiteClassificationApiItem,
-  getSiteClassificationApiItem,
-  deleteSiteClassificationApiItem,
   putSiteClassificationApiItem,
-  getUserActivitiesApiItem,
-  getDocumentUserActivitiesApiItem,
+  putSiteSchemaApiItem,
+  putUserOperationApiItem,
+  putWorkflowsApiItem,
+  restoreDocumentApiItem,
+  searchDocumentQueryApiItem,
   getMappingsApiItem,
   postMappingApiItem,
   deleteMappingApiItem,
@@ -197,6 +199,7 @@ export function ApiExplorer() {
                 <ApiItem apiItem={deleteDocumentApiItem} sites={sites} />
                 <ApiItem apiItem={getDocumentContentApiItem} sites={sites} />
                 <ApiItem apiItem={getDocumentUrlApiItem} sites={sites} />
+                <ApiItem apiItem={restoreDocumentApiItem} sites={sites} />
                 <ApiSegment title="Public Document Endpoints">
                   <div className="ml-2 flex flex-cols">
                     <div className="w-4 border-l"></div>
@@ -233,6 +236,10 @@ export function ApiExplorer() {
                       />
                       <ApiItem
                         apiItem={postDocumentActionsApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={postRetryDocumentActionsApiItem}
                         sites={sites}
                       />
                     </div>
@@ -437,18 +444,39 @@ export function ApiExplorer() {
                   </div>
                 </ApiSegment>
                 <ApiSegment title="Document Attributes">
-                    <div className="ml-2 flex flex-cols">
-                        <div className="w-4 border-l"></div>
-                        <div className="grow">
-                            <ApiItem apiItem={getDocumentAttributesApiItem} sites={sites} />
-                            <ApiItem apiItem={postDocumentAttributesApiItem} sites={sites} />
-                            <ApiItem apiItem={putDocumentAttributesApiItem} sites={sites} />
-                            <ApiItem apiItem={getDocumentAttributeApiItem} sites={sites} />
-                            <ApiItem apiItem={putDocumentAttributeApiItem} sites={sites} />
-                            <ApiItem apiItem={deleteDocumentAttributeApiItem} sites={sites} />
-                            <ApiItem apiItem={deleteDocumentAttributeValueApiItem} sites={sites} />
-                        </div>
+                  <div className="ml-2 flex flex-cols">
+                    <div className="w-4 border-l"></div>
+                    <div className="grow">
+                      <ApiItem
+                        apiItem={getDocumentAttributesApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={postDocumentAttributesApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={putDocumentAttributesApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={getDocumentAttributeApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={putDocumentAttributeApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={deleteDocumentAttributeApiItem}
+                        sites={sites}
+                      />
+                      <ApiItem
+                        apiItem={deleteDocumentAttributeValueApiItem}
+                        sites={sites}
+                      />
                     </div>
+                  </div>
                 </ApiSegment>
               </div>
             </div>
@@ -477,10 +505,19 @@ export function ApiExplorer() {
               <div className="grow">
                 <ApiItem apiItem={getSiteSchemaApiItem} sites={sites} />
                 <ApiItem apiItem={putSiteSchemaApiItem} sites={sites} />
-                <ApiItem apiItem={getSiteClassificationsApiItem} sites={sites} />
-                <ApiItem apiItem={postSiteClassificationApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={getSiteClassificationsApiItem}
+                  sites={sites}
+                />
+                <ApiItem
+                  apiItem={postSiteClassificationApiItem}
+                  sites={sites}
+                />
                 <ApiItem apiItem={getSiteClassificationApiItem} sites={sites} />
-                <ApiItem apiItem={deleteSiteClassificationApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={deleteSiteClassificationApiItem}
+                  sites={sites}
+                />
                 <ApiItem apiItem={putSiteClassificationApiItem} sites={sites} />
               </div>
             </div>
@@ -648,15 +685,15 @@ export function ApiExplorer() {
             </div>
           </ApiSegment>
           <ApiSegment title="Attributes">
-              <div className="ml-2 flex flex-cols">
-                  <div className="w-4 border-l"></div>
-                  <div className="grow">
-                      <ApiItem apiItem={getAttributesApiItem} sites={sites} />
-                      <ApiItem apiItem={postAttributeApiItem} sites={sites} />
-                      <ApiItem apiItem={getAttributeApiItem} sites={sites} />
-                      <ApiItem apiItem={deleteAttributeApiItem} sites={sites} />
-                  </div>
+            <div className="ml-2 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={getAttributesApiItem} sites={sites} />
+                <ApiItem apiItem={postAttributeApiItem} sites={sites} />
+                <ApiItem apiItem={getAttributeApiItem} sites={sites} />
+                <ApiItem apiItem={deleteAttributeApiItem} sites={sites} />
               </div>
+            </div>
           </ApiSegment>
           <ApiSegment title="User Management">
             <div className="ml-2 flex flex-cols">
@@ -683,7 +720,10 @@ export function ApiExplorer() {
               <div className="w-4 border-l"></div>
               <div className="grow">
                 <ApiItem apiItem={getUserActivitiesApiItem} sites={sites} />
-                <ApiItem apiItem={getDocumentUserActivitiesApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={getDocumentUserActivitiesApiItem}
+                  sites={sites}
+                />
               </div>
             </div>
           </ApiSegment>
