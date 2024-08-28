@@ -28,7 +28,7 @@ function MappingMenu({
   return (
     <>
       <div className="flex justify-between items-center h-14 min-h-[56px] px-6 border-b border-neutral-300 ">
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center max-w-[50vw]">
           {isEditing ? (
             <>
               <input
@@ -40,7 +40,7 @@ function MappingMenu({
             </>
           ) : (
             <>
-              <h2 className="text-lg font-bold">{mapping.name}</h2>
+              <h2 className="text-lg font-bold truncate" title={mapping.name}>{mapping.name}</h2>
             </>
           )}
         </div>
