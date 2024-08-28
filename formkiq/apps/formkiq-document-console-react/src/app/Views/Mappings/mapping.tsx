@@ -19,6 +19,7 @@ import { openDialog as openNotificationDialog } from '../../Store/reducers/globa
 import MappingAttributesTable from '../../Components/Mappings/MappingAttributesTable';
 import EditMappingAttributeDialog from '../../Components/Mappings/Dialogs/MappingAttributeDialog/EditMappingAttributeDialog';
 import CreateMappingAttributeDialog from '../../Components/Mappings/Dialogs/MappingAttributeDialog/CreateMappingAttributeDialog';
+import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
 
 function Mapping() {
   const { user } = useAuthenticatedState();
@@ -173,6 +174,15 @@ function Mapping() {
             onMappingDelete={onMappingDelete}
             saveChanges={saveChanges}
           />
+          <div className="px-6 flex h-9 mb-2 items-center justify-between">
+            <h1 className="text-lg font-bold text-gray-900">
+               Mapping Attributes
+            </h1>
+            <ButtonPrimaryGradient
+              onClick={() => setIsCreateAttributeDialogOpen(true)}>
+                + Add Attribute
+            </ButtonPrimaryGradient>
+          </div>
           <MappingAttributesTable
             attributes={mapping.attributes}
             onDelete={onDeleteAttribute}
