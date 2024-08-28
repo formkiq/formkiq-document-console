@@ -1,14 +1,18 @@
 import {
   MappingAttribute,
-  MappingAttributeLabelMatchingType, MappingAttributeMetadataField,
-  MappingAttributeSourceType
-} from "../../helpers/types/mappings";
+  MappingAttributeLabelMatchingType,
+  MappingAttributeMetadataField,
+  MappingAttributeSourceType,
+} from '../../../helpers/types/mappings';
 
 export const isAttributeValid = (attribute: any) => {
   if (attribute.attributeKey.length === 0) return false;
   if (attribute.sourceType.length === 0) return false;
   if (attribute.labelMatchingType.length === 0) return false;
-  if (attribute.labelTexts.length === 0 && attribute.labelText.length === 0)
+  if (
+    attribute.labelTexts.length === 0 &&
+    ( !attribute.labelText||attribute.labelText.length === 0 )
+  )
     return false;
   return true;
 };
@@ -25,7 +29,10 @@ export const getAttributeErrorMessages = (attribute: any) => {
   if (attribute.labelMatchingType.length === 0) {
     errorMessages.push('Please select a label matching type.');
   }
-  if (attribute.labelTexts.length === 0 && attribute.labelText.length === 0) {
+  if (
+    attribute.labelTexts.length === 0 &&
+    ( !attribute.labelText||attribute.labelText.length === 0 )
+  ) {
     errorMessages.push('Please add a label text.');
   }
   return errorMessages;
@@ -39,6 +46,7 @@ export const createNewAttribute = (attribute: any) => {
       attribute.labelMatchingType as MappingAttributeLabelMatchingType,
     metadataField: attribute.metadataField as MappingAttributeMetadataField,
     validationRegex: attribute.validationRegex,
+    labelTexts: [],
   };
   if (attribute.defaultValues?.length) {
     newAttribute.defaultValues = attribute.defaultValues;

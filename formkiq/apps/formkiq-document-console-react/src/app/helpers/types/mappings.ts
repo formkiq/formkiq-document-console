@@ -14,11 +14,11 @@ export type MappingAttributeMetadataField = 'USERNAME' | 'PATH' | 'CONTENT_TYPE'
 
 export interface MappingAttribute {
   attributeKey: string;
-  sourceType?: MappingAttributeSourceType;
+  sourceType: MappingAttributeSourceType;
   defaultValue?: string;
   defaultValues?: string[];
-  labelTexts?: string[];
-  labelMatchingType?: MappingAttributeLabelMatchingType;
+  labelTexts: string[];
+  labelMatchingType: MappingAttributeLabelMatchingType;
   metadataField?: MappingAttributeMetadataField;
   validationRegex?: string;
 }

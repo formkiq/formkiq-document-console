@@ -1,5 +1,5 @@
-import { Mapping } from '../../../helpers/types/mappings';
-import { preventDialogClose } from '../../../Views/Mappings/helpers';
+import { Mapping } from '../../../../helpers/types/mappings';
+import { preventDialogClose } from '../helpers';
 
 function GeneralInfoTab({
   mapping,

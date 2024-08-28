@@ -1,5 +1,5 @@
 import MappingDialog from './MappingDialog';
-import { MappingAttribute } from '../../../helpers/types/mappings';
+import { MappingAttribute } from '../../../../helpers/types/mappings';
 
 type CreateMappingDialogPropsType = {
   isOpen: boolean;

@@ -1,20 +1,19 @@
-import { Close, Pencil} from '../../Icons/icons';
-import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import { useEffect, useState } from 'react';
+import { Close } from '../../Icons/icons';
+import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
+import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
+import { useSelector } from "react-redux";
+import { AttributesDataState, fetchAttributesData } from "../../../Store/reducers/attributesData";
+import { useAppDispatch } from "../../../Store/store";
+import { preventDialogClose } from "./helpers";
 import {
   MappingAttributeLabelMatchingType,
   MappingAttributeMetadataField,
   MappingAttributeSourceType,
 } from '../../../helpers/types/mappings';
-import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
-import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
-import {useSelector} from "react-redux";
-import {AttributesDataState, fetchAttributesData} from "../../../Store/reducers/attributesData";
-import {useAppDispatch} from "../../../Store/store";
-import {preventDialogClose} from "../../../Views/Mappings/helpers";
 
-type AddAttributesTabProps = {
+type AttributeFormProps = {
   siteId: string;
   attribute: {
     attributeKey: string;
@@ -29,32 +28,25 @@ type AddAttributesTabProps = {
   };
   setAttribute: (attribute: any) => void;
   addDefaultValue: () => void;
-  addAttributesToMapping: () => void;
-  updateAttributeInMapping: (index: number) => 'failed' | 'success';
-  resetAttribute: () => void;
-  deleteAttributeFromMapping: (index: number) => void;
-  attributes: any[];
   addLabelText: () => void;
 };
 
-function AttributesTab({
+function AttributeForm({
   siteId,
   attribute,
   setAttribute,
   addDefaultValue,
-  addAttributesToMapping,
-  updateAttributeInMapping,
-  resetAttribute,
-  deleteAttributeFromMapping,
-  attributes,
   addLabelText,
-}: AddAttributesTabProps) {
-  const [editingAttributeIndex, setEditingAttributeIndex] = useState(-1);
+}: AttributeFormProps) {
   const { allAttributes } = useSelector(AttributesDataState);
-  const [attributeKeys, setAttributeKeys] = useState<
-    { key: string; title: string }[]
-    >([]);
+  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (!allAttributes || allAttributes.length === 0) {
+      dispatch(fetchAttributesData({ siteId }));
+    }
+  }, [siteId]);
 
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
@@ -64,26 +56,6 @@ function AttributesTab({
     }));
     setAttributeKeys(keys);
   }, [allAttributes]);
-
-  useEffect(() => {
-    if (!allAttributes || allAttributes.length === 0) {
-      dispatch(fetchAttributesData({ siteId }));
-    }
-  }, []);
-  const deleteDefaultValue = (event: React.MouseEvent, value: string) => {
-    event.stopPropagation();
-    setAttribute((prev: any) => ({
-      ...prev,
-      defaultValues: prev.defaultValues.filter((v: string) => v !== value),
-    }));
-  };
-
-  const deleteLabelText = (index: number) => {
-    setAttribute((prev: any) => ({
-      ...prev,
-      labelTexts: prev.labelTexts.filter((_: string, i: number) => i !== index),
-    }));
-  };
 
   useEffect(() => {
     if (attribute.defaultValue) return;
@@ -105,12 +77,13 @@ function AttributesTab({
         break;
     }
     setAttribute((prev: any) => ({ ...prev, defaultValue }));
-  }, [attribute.attributeKey, attribute.defaultValue, allAttributes]);
+  }, [attribute.attributeKey, attribute.defaultValue, allAttributes, setAttribute]);
 
   const selectedAttribute = allAttributes.find(
     (a) => a.key === attribute.attributeKey
   );
   const dataType = selectedAttribute?.dataType;
+
   const onAttributeKeyChange = (attributeKey: string) => {
     setAttribute((prev: any) => ({
       ...prev,
@@ -120,19 +93,24 @@ function AttributesTab({
     }));
   };
 
-  const editAttribute = (index: number) => {
-    setEditingAttributeIndex(index);
-    setAttribute(attributes[index]);
+  const deleteDefaultValue = (event: React.MouseEvent, value: string) => {
+    event.stopPropagation();
+    setAttribute((prev: any) => ({
+      ...prev,
+      defaultValues: prev.defaultValues.filter((v: string) => v !== value),
+    }));
   };
-  const onSaveEditedAttribute = () => {
-    const res = updateAttributeInMapping(editingAttributeIndex);
-    if (res === 'success') {
-      setEditingAttributeIndex(-1);
-    }
+
+  const deleteLabelText = (index: number) => {
+    setAttribute((prev: any) => ({
+      ...prev,
+      labelTexts: prev.labelTexts.filter((_: string, i: number) => i !== index),
+    }));
   };
 
   return (
     <>
+      {/* Attribute selection and default value input */}
       <div className="flex gap-4 w-full items-end">
         <div className="flex flex-col w-1/2">
           <label className="text-xs font-bold">ATTRIBUTE</label>
@@ -220,6 +198,7 @@ function AttributesTab({
         )}
       </div>
 
+      {/* Default values display */}
       {attribute?.defaultValues && attribute.defaultValues.length > 0 && (
         <div className="flex flex-col gap-2">
           <div>
@@ -248,6 +227,7 @@ function AttributesTab({
         </div>
       )}
 
+      {/* Source type and metadata field selection */}
       <div className="flex w-full gap-4">
         <div className="w-1/2 h-[60px] flex flex-col">
           <label className="text-xs font-bold">SOURCE TYPE</label>
@@ -286,6 +266,7 @@ function AttributesTab({
         </div>
       </div>
 
+      {/* Label matching type and label text input */}
       <div className="flex w-full gap-4 items-end">
         <div className="w-1/2">
           <label className="text-xs font-bold">LABEL MATCHING TYPE</label>
@@ -329,6 +310,7 @@ function AttributesTab({
         </div>
       </div>
 
+      {/* Label texts display */}
       {attribute.labelTexts.length > 0 && (
         <div className="flex flex-col gap-2">
           <div>
@@ -355,6 +337,7 @@ function AttributesTab({
         </div>
       )}
 
+      {/* Validation regex input */}
       <div className="">
         <label className="text-xs font-bold">VALIDATION REGEX</label>
         <input
@@ -371,144 +354,8 @@ function AttributesTab({
           onKeyDown={preventDialogClose}
         />
       </div>
-
-      {attribute.attributeKey &&
-        (editingAttributeIndex === -1 ? (
-          <ButtonPrimary
-            type="button"
-            className="h-10 self-end"
-            onClick={addAttributesToMapping}
-          >
-            Add Attribute
-          </ButtonPrimary>
-        ) : (
-          <div className="flex gap-2">
-            <ButtonTertiary
-              type="button"
-              className="h-10 self-end"
-              onClick={() => {
-                setEditingAttributeIndex(-1);
-                resetAttribute();
-              }}
-            >
-              Cancel Editing
-            </ButtonTertiary>
-            <ButtonPrimary
-              type="button"
-              className="h-10 self-end"
-              onClick={onSaveEditedAttribute}
-            >
-              Update Attribute
-            </ButtonPrimary>
-          </div>
-        ))}
-
-      {attributes && attributes.length > 0 && (
-        <>
-          <h4 className="text-sm font-bold">ADDED ATTRIBUTES:</h4>
-          <div className="overflow-y-auto max-h-44">
-            <table className="border-b border-x border-separate border-spacing-0 border-neutral-300 w-full max-w-full table-fixed text-left text-xs">
-              <thead className="sticky top-0 bg-neutral-100 border border-neutral-300 ">
-                <tr className="border border-neutral-300 px-4 text-neutral-900">
-                  <th className="w-4 px-4 border-b border-t border-neutral-300">
-                    #
-                  </th>
-                  <th className="border-b border-t border-neutral-300">Key</th>
-                  <th className="border-b border-t border-neutral-300">
-                    Default Values
-                  </th>
-                  <th className="border-b border-t border-neutral-300">
-                    Source Type
-                  </th>
-                  <th className="border-b border-t border-neutral-300">
-                    Label Matching Type
-                  </th>
-                  <th className="border-b border-t border-neutral-300">
-                    Label Texts
-                  </th>
-                  <th className="border-b border-t border-neutral-300">
-                    Metadata Field
-                  </th>
-                  <th className="border-b border-t border-neutral-300">
-                    Validation Regex
-                  </th>
-                  <th
-                    className="px-4 border-b border-t border-neutral-300"
-                    style={{
-                      width: editingAttributeIndex === -1 ? '56px' : 'auto',
-                    }}
-                  ></th>
-                </tr>
-              </thead>
-              <tbody>
-                {attributes.map((value, i) => (
-                  <tr
-                    key={`tag_${i}`}
-                    className="border border-neutral-300 px-4 h-12 text-neutral-900"
-                  >
-                    <td className="text-neutral-500 px-4 border-t border-neutral-300">
-                      <span className="text-neutral-900 font-medium">
-                        {i + 1}
-                      </span>
-                    </td>
-                    <td className="text-ellipsis overflow-hidden border-t border-neutral-300">
-                      <span title={value.attributeKey}>
-                        {value.attributeKey}
-                      </span>
-                    </td>
-                    <td className="text-ellipsis overflow-hidden border-t border-neutral-300">
-                      {value.defaultValues
-                        ? value.defaultValues.join(', ')
-                        : value.defaultValue}
-                    </td>
-                    <td className="text-ellipsis overflow-hidden border-t border-neutral-300">
-                      {value.sourceType}
-                    </td>
-                    <td className="text-ellipsis overflow-hidden border-t border-neutral-300">
-                      {value.labelMatchingType}
-                    </td>
-                    <td className="text-ellipsis overflow-hidden border-t border-neutral-300">
-                      {value.labelTexts && value.labelTexts.join(', ')}
-                    </td>
-                    <td className="text-ellipsis overflow-hidden border-t border-neutral-300">
-                      {value.metadataField}
-                    </td>
-                    <td className="text-ellipsis overflow-hidden border-t border-neutral-300">
-                      {value.validationRegex}
-                    </td>
-                    <td className="border-t border-neutral-300 text-center">
-                      {editingAttributeIndex === i ? (
-                        <div className="p-1 bg-primary-100 text-primary-900 rounded-md text-xs font-bold whitespace-nowrap">
-                          <p>EDITING NOW</p>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            className="w-4 h-4 min-w-4 text-neutral-900 hover:text-primary-500"
-                            onClick={() => editAttribute(i)}
-                          >
-                            <Pencil />
-                          </button>
-                          <button
-                            type="button"
-                            className="w-4 h-4 min-w-4 text-neutral-900 hover:text-primary-500"
-                            onClick={() => deleteAttributeFromMapping(i)}
-                          >
-                            <Close />
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
     </>
   );
 }
 
-export default AttributesTab;
+export default AttributeForm;

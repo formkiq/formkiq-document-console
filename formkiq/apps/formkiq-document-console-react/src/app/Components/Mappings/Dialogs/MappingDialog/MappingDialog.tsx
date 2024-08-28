@@ -5,14 +5,14 @@ import {
   MappingAttributeLabelMatchingType,
   MappingAttributeMetadataField,
   MappingAttributeSourceType,
-} from '../../../helpers/types/mappings';
+} from '../../../../helpers/types/mappings';
 
-import { useAppDispatch } from '../../../Store/store';
+import { useAppDispatch } from '../../../../Store/store';
 import AttributesTab from './AttributesTab';
-import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
-import {addMapping, fetchMappings, updateMapping} from '../../../Store/reducers/mappings';
+import { openDialog as openNotificationDialog } from '../../../../Store/reducers/globalNotificationControls';
+import {addMapping, fetchMappings, updateMapping} from '../../../../Store/reducers/mappings';
 import GeneralInfoTab from './GeneralInfoTab';
-import {createNewAttribute, getAttributeErrorMessages, isAttributeValid} from '../../../Views/Mappings/helpers';
+import {createNewAttribute, getAttributeErrorMessages, isAttributeValid} from '../helpers';
 
 type MappingDialogPropsType = {
   isOpen: boolean;

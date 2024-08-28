@@ -1,5 +1,5 @@
 import MappingDialog from './MappingDialog';
-import { Mapping} from '../../../helpers/types/mappings';
+import { Mapping} from '../../../../helpers/types/mappings';
 
 type EditMappingDialogPropsType = {
   isOpen: boolean;

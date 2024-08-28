@@ -77,21 +77,8 @@ function MappingsTable({
                     </div>
                   </td>
 
-                  <td className="border-b border-neutral-300 p-4 pr-8">
+                  <td className="border-b p-4 pr-8">
                     <div className="flex items-center justify-end gap-2 mr-3">
-                      {/*<NavLink*/}
-                      {/*  title="Open in editor"*/}
-                      {/*  to={`/schemas/${mapping.mappingId}?editor=true`}*/}
-                      {/*  className="h-6"*/}
-                      {/*>*/}
-                      {/*  <button*/}
-                      {/*    className="w-6 h-auto"*/}
-                      {/*    title="Open in JSON Editor"*/}
-                      {/*  >*/}
-                      {/*    <Json />*/}
-                      {/*  </button>*/}
-                      {/*</NavLink>*/}
-
                       <button
                         title="Edit"
                         className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"

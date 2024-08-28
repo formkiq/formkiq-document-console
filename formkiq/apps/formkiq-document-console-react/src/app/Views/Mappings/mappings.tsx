@@ -19,9 +19,9 @@ import { RequestStatus } from '../../helpers/types/document';
 import { Mapping } from '../../helpers/types/mappings';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 
-import CreateMappingDialog from '../../Components/Mappings/Dialogs/CreateMappingDialog';
+import CreateMappingDialog from '../../Components/Mappings/Dialogs/MappingDialog/CreateMappingDialog';
 import MappingsTable from './mappingsTable';
-import EditMappingDialog from '../../Components/Mappings/Dialogs/EditMappingDialog';
+import EditMappingDialog from '../../Components/Mappings/Dialogs/MappingDialog/EditMappingDialog';
 
 function Mappings() {
   const { user } = useAuthenticatedState();

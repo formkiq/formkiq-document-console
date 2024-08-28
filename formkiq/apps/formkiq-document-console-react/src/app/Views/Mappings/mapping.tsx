@@ -9,14 +9,16 @@ import {
 } from '../../helpers/services/toolService';
 import MappingMenu from '../../Components/Mappings/MappingMenu';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
-import {
-  addMapping,
-  deleteMapping,
-  updateMapping,
-} from '../../Store/reducers/mappings';
+import { deleteMapping, updateMapping } from '../../Store/reducers/mappings';
 import { DocumentsService } from '../../helpers/services/documentsService';
-import { Mapping as MappingType } from '../../helpers/types/mappings';
+import {
+  Mapping as MappingType,
+  MappingAttribute,
+} from '../../helpers/types/mappings';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import MappingAttributesTable from '../../Components/Mappings/MappingAttributesTable';
+import EditMappingAttributeDialog from '../../Components/Mappings/Dialogs/MappingAttributeDialog/EditMappingAttributeDialog';
+import CreateMappingAttributeDialog from '../../Components/Mappings/Dialogs/MappingAttributeDialog/CreateMappingAttributeDialog';
 
 function Mapping() {
   const { user } = useAuthenticatedState();
@@ -34,6 +36,12 @@ function Mapping() {
   );
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [mapping, setMapping] = useState<MappingType | null>(null);
+  const [editingAttribute, setEditingAttribute] =
+    useState<MappingAttribute | null>(null);
+  const [isEditAttributeDialogOpen, setIsEditAttributeDialogOpen] =
+    useState(false);
+  const [isCreateAttributeDialogOpen, setIsCreateAttributeDialogOpen] =
+    useState(false);
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -96,10 +104,61 @@ function Mapping() {
           mappingId: mapping.mappingId,
         })
       ).unwrap();
-      getMapping()
+      getMapping();
     } catch (error: any) {
       dispatch(openNotificationDialog({ dialogTitle: error.message }));
     }
+  }
+
+  function onDeleteAttribute(key: string) {
+    function deleteAttribute(key: string) {
+      if (!mapping) return;
+      const filteredAttributes = mapping.attributes.filter(
+        (attr) => attr.attributeKey !== key
+      );
+      const newMapping: MappingType = {
+        ...mapping,
+        attributes: filteredAttributes,
+      };
+      saveChanges(newMapping);
+    }
+
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle:
+          'Are you sure you want to delete ' +
+          key +
+          ' attribute from the mapping?',
+        callback: () => {
+          deleteAttribute(key);
+        },
+      })
+    );
+  }
+
+  function onEditAttribute(attribute: MappingAttribute) {
+    setEditingAttribute(attribute);
+    setIsEditAttributeDialogOpen(true);
+  }
+
+  function saveUpdatedAttribute(attribute: MappingAttribute) {
+    if (!mapping||!editingAttribute) return;
+    const editedAttributeIndex = mapping.attributes.findIndex(
+        (attr) => attr.attributeKey === editingAttribute.attributeKey
+    );
+    const newAttributes = [...mapping.attributes];
+    newAttributes[editedAttributeIndex] = attribute;
+    const newMapping = { ...mapping, attributes: newAttributes };
+    saveChanges(newMapping);
+    setIsEditAttributeDialogOpen(false);
+  }
+
+  function saveNewAttribute(attribute: MappingAttribute) {
+    if (!mapping) return;
+    const newAttributes = mapping.attributes.concat(attribute);
+    const newMapping = { ...mapping, attributes: newAttributes };
+    saveChanges(newMapping);
+    setIsCreateAttributeDialogOpen(false);
   }
 
   return (
@@ -114,8 +173,31 @@ function Mapping() {
             onMappingDelete={onMappingDelete}
             saveChanges={saveChanges}
           />
+          <MappingAttributesTable
+            attributes={mapping.attributes}
+            onDelete={onDeleteAttribute}
+            onEdit={(attribute) => {
+              onEditAttribute(attribute);
+            }}
+          />
         </>
       )}
+      {editingAttribute && (
+        <EditMappingAttributeDialog
+          isOpen={isEditAttributeDialogOpen}
+          setIsOpen={setIsEditAttributeDialogOpen}
+          siteId={currentSiteId}
+          attribute={editingAttribute}
+          onSave={saveUpdatedAttribute}
+        />
+      )}
+
+      <CreateMappingAttributeDialog
+        isOpen={isCreateAttributeDialogOpen}
+        setIsOpen={setIsCreateAttributeDialogOpen}
+        siteId={currentSiteId}
+        onSave={saveNewAttribute}
+      />
     </>
   );
 }
