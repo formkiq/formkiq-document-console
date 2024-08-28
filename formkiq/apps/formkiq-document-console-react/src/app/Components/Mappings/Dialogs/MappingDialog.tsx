@@ -2,7 +2,6 @@ import { Dialog } from '@headlessui/react';
 import {useEffect, useRef, useState} from 'react';
 import {
   Mapping,
-  MappingAttribute,
   MappingAttributeLabelMatchingType,
   MappingAttributeMetadataField,
   MappingAttributeSourceType,
@@ -11,8 +10,9 @@ import {
 import { useAppDispatch } from '../../../Store/store';
 import AttributesTab from './AttributesTab';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
-import { addMapping, updateMapping } from '../../../Store/reducers/mappings';
+import {addMapping, fetchMappings, updateMapping} from '../../../Store/reducers/mappings';
 import GeneralInfoTab from './GeneralInfoTab';
+import {createNewAttribute, getAttributeErrorMessages, isAttributeValid} from '../../../Views/Mappings/helpers';
 
 type MappingDialogPropsType = {
   isOpen: boolean;
@@ -84,59 +84,13 @@ function MappingDialog({
           })
         ).unwrap();
       }
+      dispatch(fetchMappings({ siteId,  page: 1, limit: 20, nextToken: null}))
       closeModal();
     } catch (error: any) {
       dispatch(openNotificationDialog({ dialogTitle: error.message }));
     }
   };
-  const isAttributeValid = (attribute: any) => {
-    if (attribute.attributeKey.length === 0) return false;
-    if (attribute.sourceType.length === 0) return false;
-    if (attribute.labelMatchingType.length === 0) return false;
-    if (attribute.labelTexts.length === 0 && attribute.labelText.length === 0)
-      return false;
-    return true;
-  };
 
-  // Function to get error messages
-  const getAttributeErrorMessages = (attribute: any) => {
-    const errorMessages = [];
-    if (attribute.attributeKey.length === 0) {
-      errorMessages.push('Please select an attribute key.');
-    }
-    if (attribute.sourceType.length === 0) {
-      errorMessages.push('Please select a source type.');
-    }
-    if (attribute.labelMatchingType.length === 0) {
-      errorMessages.push('Please select a label matching type.');
-    }
-    if (attribute.labelTexts.length === 0 && attribute.labelText.length === 0) {
-      errorMessages.push('Please add a label text.');
-    }
-    return errorMessages;
-  };
-
-  const createNewAttribute = (attribute: any) => {
-    const newAttribute: MappingAttribute = {
-      attributeKey: attribute.attributeKey,
-      sourceType: attribute.sourceType as MappingAttributeSourceType,
-      labelMatchingType:
-        attribute.labelMatchingType as MappingAttributeLabelMatchingType,
-      metadataField: attribute.metadataField as MappingAttributeMetadataField,
-      validationRegex: attribute.validationRegex,
-    };
-    if (attribute.defaultValues?.length) {
-      newAttribute.defaultValues = attribute.defaultValues;
-    } else if (attribute.defaultValue.length > 0) {
-      newAttribute.defaultValue = attribute.defaultValue;
-    }
-    if (attribute.labelTexts?.length) {
-      newAttribute.labelTexts = attribute.labelTexts;
-    } else if (attribute.labelText.length > 0) {
-      newAttribute.labelTexts = [attribute.labelText];
-    }
-    return newAttribute;
-  };
 
   const closeModal = () => {
     resetMapping();

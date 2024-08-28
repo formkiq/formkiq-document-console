@@ -118,7 +118,7 @@ function Mappings() {
         dialogTitle: 'Are you sure you want to delete this mapping?',
         callback: () => {
           dispatch(
-            deleteMapping({ mappingId, siteId: currentSiteId, mappings })
+            deleteMapping({ mappingId, siteId: currentSiteId })
           );
         },
       })

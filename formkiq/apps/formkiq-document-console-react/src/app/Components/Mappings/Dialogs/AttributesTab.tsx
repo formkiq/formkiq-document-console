@@ -12,6 +12,7 @@ import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
 import {useSelector} from "react-redux";
 import {AttributesDataState, fetchAttributesData} from "../../../Store/reducers/attributesData";
 import {useAppDispatch} from "../../../Store/store";
+import {preventDialogClose} from "../../../Views/Mappings/helpers";
 
 type AddAttributesTabProps = {
   siteId: string;
@@ -130,11 +131,6 @@ function AttributesTab({
     }
   };
 
-  const preventDialogClose = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-    }
-  };
   return (
     <>
       <div className="flex gap-4 w-full items-end">
@@ -372,6 +368,7 @@ function AttributesTab({
               validationRegex: e.target.value,
             }))
           }
+          onKeyDown={preventDialogClose}
         />
       </div>
 
