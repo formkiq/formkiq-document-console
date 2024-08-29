@@ -46,6 +46,7 @@ import {
 } from '../Icons/icons';
 import Notifications from './notifications';
 import { setDocuments } from '../../Store/reducers/documentsList';
+import {InlineEditableContentTypes, TextFileEditorEditableContentTypes} from "../../helpers/constants/contentTypes";
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -74,13 +75,13 @@ function Navbar() {
   const { user } = useSelector(AuthState);
   const { formkiqVersion, useNotifications, isSidebarExpanded } =
     useSelector(ConfigState);
-  const { currentDocumentPath } = useSelector(DataCacheState);
+  const { currentDocumentPath, currentDocument } = useSelector(DataCacheState);
 
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const { hash } = useLocation();
-  const { siteId, siteDocumentsRootUri, siteDocumentsRootName } =
+  const { siteId, siteDocumentsRootUri, siteDocumentsRootName, isSiteReadOnly } =
     getCurrentSiteInfo(
       pathname,
       user,
@@ -305,6 +306,18 @@ function Navbar() {
           '?scrollToDocumentLine=true' +
           '#id=' +
           documentId,
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const editDocument = () => {
+    navigate(
+      {
+        pathname:
+          pathname.replace(/\/view$/, '/edit')
       },
       {
         replace: true,
@@ -739,6 +752,24 @@ function Navbar() {
                                     </a>
                                   </span>
                                 )}
+                                {!isSiteReadOnly &&
+                                  currentDocument &&
+                                  (InlineEditableContentTypes.indexOf(
+                                    currentDocument.contentType
+                                  ) > -1 ||
+                                    TextFileEditorEditableContentTypes.indexOf(
+                                      currentDocument.contentType
+                                    ) > -1) &&
+                                  pathname.indexOf('/view') > -1 && (
+                                    <span className="pl-6">
+                                      <span
+                                        className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
+                                        onClick={editDocument}
+                                      >
+                                        edit
+                                      </span>
+                                    </span>
+                                  )}
                               </span>
                             ) : (
                               <span></span>

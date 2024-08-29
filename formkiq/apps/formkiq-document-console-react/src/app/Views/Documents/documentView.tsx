@@ -6,7 +6,7 @@ import TextFileEditor from '../../Components/DocumentsAndFolders/TextFileEditor/
 import { Spinner } from '../../Components/Icons/icons';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
-import { setCurrentDocumentPath } from '../../Store/reducers/data';
+import {setCurrentDocument, setCurrentDocumentPath} from '../../Store/reducers/data';
 import { useAppDispatch } from '../../Store/store';
 import {
   InlineEditableContentTypes,
@@ -140,6 +140,7 @@ export function DocumentView() {
         (response: IDocument) => {
           setDocument(response);
           dispatch(setCurrentDocumentPath(response.path));
+          dispatch(setCurrentDocument(response));
           // redirect if file is not editable type
           if (
             !isDocumentContentTypeEditable(response.contentType) &&
