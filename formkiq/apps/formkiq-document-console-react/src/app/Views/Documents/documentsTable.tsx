@@ -129,7 +129,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   const handleScroll = (event: any) => {
     const el = event.target;
     //track scroll when table reaches bottom
-    if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
+    if (el.offsetHeight + el.scrollTop + 600 > el.scrollHeight) {
       if (el.scrollTop > 0) {
         trackScrolling();
       }

@@ -283,7 +283,7 @@ function Documents() {
   const trackScrolling = useCallback(async () => {
     const isBottom = (el: HTMLElement) => {
       if (el) {
-        return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
+        return el.offsetHeight + el.scrollTop + 600 > el.scrollHeight;
       }
       return false;
     };
