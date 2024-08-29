@@ -180,25 +180,26 @@ export default function NewModal({
             nameValue += '.' + itemToCreate;
           }
           if (itemToCreate === 'md') {
-            // TODO: create new .md file, open it
-            const file = new File([' '], nameValue, {});
-            const uploadData: IFileUploadData[] = [
-              {
-                originalFile: file,
-                uploadedSize: 0,
-              },
-            ];
-            DocumentsService.uploadDocuments(
-              value.folder,
-              siteId,
-              formkiqVersion,
-              uploadData,
-              () => {}
-            ).then((res) => {
-              if (res.length > 0) {
-                navigate(pathname + '/' + res[0].documentId + '/view');
+            const documentParamaters = {
+              path: value.folder
+                ? `${value.folder}/${nameValue}`
+                : `${nameValue}`,
+              contentType: 'text/markdown',
+              content: ' ',
+            };
+            DocumentsService.addDocument(siteId, documentParamaters).then(
+              (res) => {
+                if (res.status === 201) {
+                  navigate(pathname + '/' + res.documentId + '/edit');
+                } else {
+                  dispatch(
+                    openDialog({
+                      dialogTitle: 'An error has occurred.',
+                    })
+                  );
+                }
               }
-            });
+            );
           } else {
             navigate(
               '/documents/new/' +
