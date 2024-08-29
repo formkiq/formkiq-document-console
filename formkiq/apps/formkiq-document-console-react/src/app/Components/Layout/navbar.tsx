@@ -316,8 +316,19 @@ function Navbar() {
   const editDocument = () => {
     navigate(
       {
+        pathname: pathname.replace(/\/view$/, '/edit'),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const viewDocument = () => {
+    navigate(
+      {
         pathname:
-          pathname.replace(/\/view$/, '/edit')
+          pathname.replace(/\/edit$/, '/view')
       },
       {
         replace: true,
@@ -759,16 +770,29 @@ function Navbar() {
                                   ) > -1 ||
                                     TextFileEditorEditableContentTypes.indexOf(
                                       currentDocument.contentType
-                                    ) > -1) &&
-                                  pathname.indexOf('/view') > -1 && (
-                                    <span className="pl-6">
-                                      <span
-                                        className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                        onClick={editDocument}
-                                      >
-                                        edit
-                                      </span>
-                                    </span>
+                                    ) > -1) && (
+                                    <>
+                                      {pathname.indexOf('/view') > -1 && (
+                                        <span className="pl-6">
+                                          <span
+                                            className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
+                                            onClick={editDocument}
+                                          >
+                                            edit document
+                                          </span>
+                                        </span>
+                                      )}
+                                      {pathname.indexOf('/edit') > -1 && (
+                                        <span className="pl-6">
+                                          <span
+                                            className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
+                                            onClick={viewDocument}
+                                          >
+                                            view document
+                                          </span>
+                                        </span>
+                                      )}
+                                    </>
                                   )}
                               </span>
                             ) : (
