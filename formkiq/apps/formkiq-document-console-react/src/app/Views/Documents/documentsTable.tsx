@@ -88,6 +88,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   useEffect(() => {
     // load more items if bottom of a table is visible
     trackScrolling()
+    if (!documents || documents.length === 0) return; // prevent execution if documents are not loaded yet
     // when user opens document folder after viewing document, scroll to list to display document line
     if (!scrollToDocumentLine) return;
     if (loadingStatus !== RequestStatus.fulfilled) return;
