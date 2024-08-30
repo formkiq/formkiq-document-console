@@ -198,7 +198,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                     </div>
                   )}
                   {subfolderUri !== 'deleted' &&
-                    (selectedDocuments.length > 0 ? (
+                    (selectedDocuments.length > 0 && !isArchiveTabExpanded ? (
                       <button
                         onClick={() => onDeleteSelectedDocuments(useSoftDelete)}
                         className="w-8 h-8 p-[6px] relative text-neutral-700 hover:text-neutral-900 group ml-4"
@@ -214,7 +214,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                     ))}
 
                   {subfolderUri === 'deleted' &&
-                    (selectedDocuments.length > 0 ? (
+                    (selectedDocuments.length > 0 && !isArchiveTabExpanded ? (
                       <>
                         <button
                           onClick={onRestoreSelectedDocuments}
