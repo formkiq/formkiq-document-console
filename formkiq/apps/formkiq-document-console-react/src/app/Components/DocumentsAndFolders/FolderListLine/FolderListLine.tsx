@@ -20,12 +20,8 @@ interface IProps {
   currentSiteId: string;
   isSiteReadOnly: boolean;
   onDeleteClick: (folder: IFolder) => () => void;
-  onRestoreDocument: (
-    file: IDocument,
-    siteId: string,
-    searchDocuments: any
-  ) => () => void;
-  onDeleteDocument: (documentId: string, softDelete: boolean ) => void;
+  onRestoreDocument: (documentId: string) => void;
+  onDeleteDocument: (documentId: string, softDelete: boolean) => void;
   currentDocumentsRootUri: string;
   onShareClick: (event: any, value: ILine | null) => void;
   onEditTagsAndMetadataModalClick: any;
@@ -171,7 +167,7 @@ function FolderListLine({
                   onShareClick={onShareClick}
                   searchDocuments={folderInstance.documents}
                   onDeleteClick={onDeleteDocument}
-                  onRestoreClick={onRestoreDocument(file, currentSiteId, null)}
+                  onRestoreClick={onRestoreDocument}
                   onEditTagsAndMetadataModalClick={
                     onEditTagsAndMetadataModalClick
                   }

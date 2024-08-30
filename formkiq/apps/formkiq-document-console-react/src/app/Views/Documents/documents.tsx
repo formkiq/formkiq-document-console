@@ -99,6 +99,7 @@ function Documents() {
   const navigate = useNavigate();
   const { user } = useAuthenticatedState();
   const {
+    documents,
     nextToken,
     loadingStatus,
     currentSearchPage,
@@ -651,8 +652,8 @@ function Documents() {
     formkiqVersion,
   ]);
 
-  const deleteFunc = (id: string, softDelete: boolean) => {
-    dispatch(
+  const deleteFunc = async (id: string, softDelete: boolean) => {
+    const res:any = await dispatch(
       deleteDocument({
         siteId: currentSiteId,
         user,
@@ -660,16 +661,25 @@ function Documents() {
         softDelete,
       })
     );
+    if (res.error) {
+      dispatch(
+        openDialog({
+          dialogTitle: res.error.message,
+        })
+      );
+      return;
+    }
+    setSelectedDocuments((docs) => docs.filter((doc: any) => doc !== id));
   };
 
   const onDeleteDocument = (id: string, softDelete: boolean) => {
+    const dialogTitle = softDelete
+      ? 'Are you sure you want to delete this document?'
+      : 'Are you sure you want to delete this document permanently?';
     dispatch(
       openDialog({
         callback: () => deleteFunc(id, softDelete),
-        dialogTitle:
-          'Are you sure you want to delete this document' + softDelete
-            ? ''
-            : ' permanently' + '?',
+        dialogTitle,
       })
     );
   };
@@ -707,26 +717,40 @@ function Documents() {
       })
     );
   };
-  const restoreDocument =
-    (file: IDocument, siteId: string, searchDocuments: any) => () => {
-      DocumentsService.restoreDocument(
-        siteId,
-        file.documentId,
-      ).then(() => {
-        let newDocs = null;
-        if (searchDocuments) {
-          newDocs = searchDocuments.filter((doc: any) => {
-            return doc.documentId !== file.documentId;
-          });
-        }
+  const restoreDocument = (documentId: string) => {
+    DocumentsService.restoreDocument(currentSiteId, documentId).then((res) => {
+      if (res.status !== 200) {
         dispatch(
-          updateDocumentsList({
-            documents: newDocs,
-            user: user,
+          openDialog({
+            dialogTitle: 'Error restoring document. Please try again later.',
           })
         );
-      });
-    };
+        return;
+      }
+      let newDocs = null;
+      if (documents) {
+        newDocs = documents.filter((doc: any) => {
+          return doc.documentId !== documentId;
+        });
+      }
+      dispatch(
+        updateDocumentsList({
+          documents: newDocs,
+          user: user,
+        })
+      );
+      setSelectedDocuments((docs) =>
+        docs.filter((doc: any) => doc !== documentId)
+      );
+    });
+  };
+
+  const onRestoreSelectedDocuments = async () => {
+    await selectedDocuments.forEach((id: string) => {
+      restoreDocument(id);
+    });
+  };
+
   const onTagDelete = (tagKey: string) => {
     if (infoDocumentId.length) {
       const deleteFunc = () => {
@@ -1643,6 +1667,7 @@ function Documents() {
                 selectedDocuments={selectedDocuments}
                 setSelectedDocuments={setSelectedDocuments}
                 onDeleteSelectedDocuments={onDeleteSelectedDocuments}
+                onRestoreSelectedDocuments={onRestoreSelectedDocuments}
               />
               <Dialog
                 open={isDropZoneVisible}
@@ -2501,11 +2526,11 @@ function Documents() {
                         {isCurrentDocumentSoftDeleted ? (
                           <button
                             className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                            onClick={restoreDocument(
-                              currentDocument,
-                              currentSiteId,
-                              null
-                            )}
+                            onClick={() =>
+                              restoreDocument(
+                                (currentDocument as IDocument).documentId
+                              )
+                            }
                           >
                             <span className="">Restore</span>
                             <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">

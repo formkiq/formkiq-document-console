@@ -19,11 +19,7 @@ type DocumentTableProps = {
   documentsWrapperRef: Ref<any>;
   documentsScrollpaneRef: Ref<any>;
   onDeleteDocument: (documentId: string, softDelete: boolean) => void;
-  onRestoreDocument: (
-    file: IDocument,
-    siteId: string,
-    searchDocuments: any
-  ) => () => void;
+  onRestoreDocument: (documentId: string) => void;
   currentSiteId: string;
   currentDocumentsRootUri: string;
   isSiteReadOnly: boolean;
@@ -48,6 +44,7 @@ type DocumentTableProps = {
   selectedDocuments: string[];
   setSelectedDocuments: (selectedDocuments: string[]) => void;
   onDeleteSelectedDocuments: (softDelete: boolean) => void;
+  onRestoreSelectedDocuments: () => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -79,6 +76,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     selectedDocuments,
     setSelectedDocuments,
     onDeleteSelectedDocuments,
+    onRestoreSelectedDocuments,
   } = props;
 
   const { formkiqVersion, useIndividualSharing, useSoftDelete } =
@@ -202,9 +200,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                   {subfolderUri !== 'deleted' &&
                     (selectedDocuments.length > 0 ? (
                       <button
-                        onClick={() =>
-                          onDeleteSelectedDocuments(useSoftDelete)
-                        }
+                        onClick={() => onDeleteSelectedDocuments(useSoftDelete)}
                         className="w-8 h-8 p-[6px] relative text-neutral-700 hover:text-neutral-900 group ml-4"
                         title="Delete Selected"
                       >
@@ -221,9 +217,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                     (selectedDocuments.length > 0 ? (
                       <>
                         <button
-                          // onClick={() =>
-                          //   onDeleteSelectedDocuments(useSoftDelete)
-                          // }
+                          onClick={onRestoreSelectedDocuments}
                           className="w-8 h-8 p-1 relative text-neutral-700 hover:text-neutral-900 group ml-4"
                           title="Restore Selected"
                         >
@@ -233,9 +227,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                           <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
                         </button>
                         <button
-                          onClick={() =>
-                            onDeleteSelectedDocuments(false)
-                          }
+                          onClick={() => onDeleteSelectedDocuments(false)}
                           className="w-8 h-8 p-[6px] relative text-red-500 hover:text-red-700 group"
                           title="Delete Permanently"
                         >
@@ -304,11 +296,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onShareClick={onShareClick}
                 searchDocuments={documents}
                 onDeleteClick={onDeleteDocument}
-                onRestoreClick={onRestoreDocument(
-                  file,
-                  currentSiteId,
-                  documents
-                )}
+                onRestoreClick={() => onRestoreDocument(file.documentId)}
                 onEditTagsAndMetadataModalClick={
                   onEditTagsAndMetadataModalClick
                 }

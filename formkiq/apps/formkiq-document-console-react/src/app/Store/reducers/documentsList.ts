@@ -586,18 +586,13 @@ export const deleteDocument = createAsyncThunk(
       documentId: string;
       softDelete: boolean;
     } = data;
-    DocumentsService.deleteDocument(documentId, siteId, softDelete.toString()).then(
+    await DocumentsService.deleteDocument(documentId, siteId, softDelete.toString()).then(
       (res) => {
         if (res.status !== 200) {
           const errors = res?.errors;
-          thunkAPI.dispatch(
-            openNotificationDialog({
-              dialogTitle: errors
-                ? errors[0].error
-                : 'Error deleting document.',
-            })
-          );
-          return;
+          throw new Error(errors
+            ? errors[0].error
+            : 'Error deleting document.');
         }
         const infoDocumentId = window.location.hash.match(/id=(.*)/);
         if (
