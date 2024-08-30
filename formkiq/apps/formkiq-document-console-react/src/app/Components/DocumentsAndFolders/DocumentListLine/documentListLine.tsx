@@ -219,7 +219,7 @@ function DocumentListLine({
   }
   let lineSubfolderLevel = 0;
   if (file.path.indexOf('/') > -1) {
-    lineSubfolderLevel = file.path.split('/').length - 1;
+    lineSubfolderLevel = file.path.replace(/^\//, '').split('/').length - 1;
   }
 
   function onInfoClick() {
