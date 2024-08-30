@@ -541,7 +541,7 @@ function DocumentListLine({
                 </ButtonSecondary>
                 <ButtonSecondary
                   type="button"
-                  onClick={()=>onDeleteClick(file.documentId, true)}
+                  onClick={()=>onDeleteClick(file.documentId, false)}
                   className="mr-2 hover:bg-red-50"
                   style={{
                     borderColor: '#ef4444',
