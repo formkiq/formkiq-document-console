@@ -141,22 +141,50 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   };
 
   // checkboxes functions
+  function countVisibleDocuments(folders: IFolder[]): number {
+    return folders.reduce((count, folder) => {
+      if (folder.isExpanded) {
+        return count + folder.documents.length + countVisibleDocuments(folder.folders);
+      }
+      return count;
+    }, 0);
+  }
+  function getTotalVisibleDocuments(): number {
+    return documents.length + countVisibleDocuments(folders);
+  }
+  const totalVisibleDocuments = getTotalVisibleDocuments();
+
   function toggleSelectAll() {
-    if (selectedDocuments.length === documents.length) {
+    if (selectedDocuments.length === totalVisibleDocuments) {
       unselectAllDocuments();
     } else {
       selectAllDocuments();
     }
   }
-
   function selectAllDocuments() {
-    setSelectedDocuments(documents.map((item) => item.documentId));
+    const documentsIds = documents.map((item) => item.documentId);
+    const expandedFoldersDocumentsIds = getExpandedFoldersDocumentsIds(folders);
+    setSelectedDocuments([...documentsIds, ...expandedFoldersDocumentsIds]);
+  }
+
+  function getExpandedFoldersDocumentsIds(folders: IFolder[]): string[] {
+    return folders.reduce((acc: string[], folder: IFolder) => {
+      if (folder.isExpanded) {
+        // Add document IDs from the current folder
+        const folderDocumentIds = folder.documents.map((doc) => doc.documentId);
+
+        // Recursively get document IDs from subfolders
+        const subFolderDocumentIds = getExpandedFoldersDocumentsIds(folder.folders);
+
+        return [...acc, ...folderDocumentIds, ...subFolderDocumentIds];
+      }
+      return acc;
+    }, []);
   }
 
   function unselectAllDocuments() {
     setSelectedDocuments([]);
   }
-
 
   return (
     <div
@@ -187,7 +215,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                         type="checkbox"
                         checked={
                           selectedDocuments.length > 0 &&
-                          selectedDocuments.length === documents.length
+                          selectedDocuments.length === totalVisibleDocuments
                         }
                         onChange={toggleSelectAll}
                         className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900 mr-2 cursor-pointer"
