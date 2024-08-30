@@ -56,6 +56,8 @@ function DocumentListLine({
   archiveStatus,
   infoDocumentId,
   onDocumentInfoClick,
+  selectedDocuments,
+  setSelectedDocuments
 }: {
   file: any;
   folder: any;
@@ -82,6 +84,8 @@ function DocumentListLine({
   archiveStatus?: string;
   infoDocumentId?: string;
   onDocumentInfoClick?: () => void;
+  selectedDocuments?: string[];
+  setSelectedDocuments?: (documents: string[]) => void;
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
@@ -241,6 +245,20 @@ function DocumentListLine({
     setKeyOnlyAttributesKeys(keyOnlyAttributes);
   }, [file]);
 
+  // checkboxes functions
+  function addToSelectedDocuments(documentId: string) {
+    if (!selectedDocuments || !setSelectedDocuments) return;
+    setSelectedDocuments([...selectedDocuments, documentId]);
+  }
+
+  function removeFromSelectedDocuments(documentId: string) {
+    if (!selectedDocuments || !setSelectedDocuments) return;
+
+    setSelectedDocuments(
+      selectedDocuments.filter((id) => id !== documentId)
+    );
+  }
+
   return (
     <>
       <tr
@@ -256,6 +274,26 @@ function DocumentListLine({
           scrollMarginBottom: '160px',
         }}
       >
+        {selectedDocuments && (
+          <td className="">
+            <div className="flex items-center justify-center">
+              <input
+                id="checkbox-all"
+                type="checkbox"
+                checked={selectedDocuments.includes(file.documentId)}
+                onChange={() =>
+                  selectedDocuments.includes(file.documentId)
+                    ? removeFromSelectedDocuments(file.documentId)
+                    : addToSelectedDocuments(file.documentId)
+                }
+                className="rounded-none w-4 h-4 bg-transparent  border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"
+              />
+              <label htmlFor="checkbox-all" className="sr-only">
+                Select Document
+              </label>
+            </div>
+          </td>
+        )}
         <td className={`text-neutral-900 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
             {isArchiveTabExpanded &&
@@ -331,7 +369,16 @@ function DocumentListLine({
             )}
             <div className="grow flex">
               {folder === 'deleted' ? (
-                <span className="pt-1.5 flex items-center">
+                <span
+                  className="pt-1.5 flex items-center"
+                  style={{
+                    fontWeight:
+                      selectedDocuments &&
+                      selectedDocuments.includes(file.documentId)
+                        ? '700'
+                        : '400',
+                  }}
+                >
                   {file.path.length > 120 ? (
                     <span className="tracking-tighter text-clip overflow-hidden">
                       {file.path.substring(0, 120)}
@@ -346,6 +393,13 @@ function DocumentListLine({
                   to={`${documentsRootUri}/${file.documentId}/view`}
                   className="cursor-pointer pt-1.5 flex items-center"
                   title={file.path.substring(file.path.lastIndexOf('/') + 1)}
+                  style={{
+                    fontWeight:
+                      selectedDocuments &&
+                      selectedDocuments.includes(file.documentId)
+                        ? '700'
+                        : '400',
+                  }}
                 >
                   <span>
                     {file.path.substring(file.path.lastIndexOf('/') + 1)

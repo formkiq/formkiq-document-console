@@ -1,4 +1,4 @@
-import { Ref, useEffect, useState } from 'react';
+import { Ref, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
@@ -45,6 +45,8 @@ type DocumentTableProps = {
   trackScrolling: () => void;
   infoDocumentId:  string;
   onDocumentInfoClick: () => void;
+  selectedDocuments:  string[];
+  setSelectedDocuments:  (selectedDocuments:  string[]) => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -73,6 +75,8 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     trackScrolling,
     infoDocumentId,
     onDocumentInfoClick,
+    selectedDocuments,
+    setSelectedDocuments,
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
@@ -130,6 +134,23 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     }
   };
 
+  // checkboxes functions
+  function toggleSelectAll() {
+    if (selectedDocuments.length === documents.length) {
+      unselectAllDocuments();
+    } else {
+      selectAllDocuments();
+    }
+  }
+
+  function selectAllDocuments() {
+    setSelectedDocuments(documents.map((item) => item.documentId));
+  }
+
+  function unselectAllDocuments() {
+    setSelectedDocuments([]);
+  }
+
   return (
     <div
       className="relative mt-5 overflow-hidden h-full"
@@ -147,6 +168,20 @@ export const DocumentsTable = (props: DocumentTableProps) => {
         >
           <thead className="sticky top-0 bg-neutral-100 z-10">
             <tr>
+              <th scope="col" className="px-6 w-6 border-b border-t border-neutral-300 ">
+                <div className="flex items-center">
+                  <input
+                    id="checkbox-all"
+                    type="checkbox"
+                    checked={selectedDocuments.length === documents.length}
+                    onChange={toggleSelectAll}
+                    className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"
+                  />
+                  <label htmlFor="checkbox-all" className="sr-only">
+                    checkbox
+                  </label>
+                </div>
+              </th>
               <th
                 scope="col"
                 className="px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
@@ -229,6 +264,8 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 deleteFromPendingArchive={deleteFromPendingArchive}
                 infoDocumentId={infoDocumentId}
                 onDocumentInfoClick={onDocumentInfoClick}
+                selectedDocuments={selectedDocuments}
+                setSelectedDocuments={setSelectedDocuments}
               />
             ))}
           </tbody>

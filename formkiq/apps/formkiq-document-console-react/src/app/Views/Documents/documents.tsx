@@ -232,6 +232,7 @@ function Documents() {
   const documentsPageWrapper = document.getElementById('documentsPageWrapper');
   const closeDropZoneRef = useRef(null);
   const [isDropZoneVisible, setIsDropZoneVisible] = useState(false);
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
 
   function handleDragEnter(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
@@ -1611,6 +1612,8 @@ function Documents() {
                 archiveStatus={archiveStatus}
                 infoDocumentId={infoDocumentId}
                 onDocumentInfoClick={onDocumentInfoClick}
+                selectedDocuments={selectedDocuments}
+                setSelectedDocuments={setSelectedDocuments}
               />
               <Dialog
                 open={isDropZoneVisible}
