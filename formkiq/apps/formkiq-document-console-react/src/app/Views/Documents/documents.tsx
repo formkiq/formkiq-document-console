@@ -622,6 +622,7 @@ function Documents() {
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
+    setSelectedDocuments([])
   }, [pathname]);
 
   useEffect(() => {
@@ -650,24 +651,51 @@ function Documents() {
     formkiqVersion,
   ]);
 
-  const onDeleteDocument = (file: IDocument, searchDocuments: any) => () => {
-    const deleteFunc = () => {
-      dispatch(
-        deleteDocument({
-          siteId: currentSiteId,
-          user,
-          document: file,
-          documents: searchDocuments,
-        })
-      );
-    };
+  const deleteFunc = (id: string, softDelete: boolean) => {
     dispatch(
-      openDialog({
-        callback: deleteFunc,
-        dialogTitle: 'Are you sure you want to delete this document?',
+      deleteDocument({
+        siteId: currentSiteId,
+        user,
+        documentId: id,
+        softDelete,
       })
     );
   };
+
+  const onDeleteDocument = (id: string, softDelete: boolean) => {
+    dispatch(
+      openDialog({
+        callback: () => deleteFunc(id, softDelete),
+        dialogTitle:
+          'Are you sure you want to delete this document' + softDelete
+            ? ''
+            : ' permanently' + '?',
+      })
+    );
+  };
+
+  const onDeleteSelectedDocuments = (softDelete: boolean) => {
+    function deleteMultipleDocuments(
+      documentIds: string[],
+      softDelete: boolean
+    ) {
+      documentIds.forEach((id: string) => {
+        deleteFunc(id, softDelete);
+      });
+    }
+
+    dispatch(
+      openDialog({
+        callback: () => deleteMultipleDocuments(selectedDocuments, softDelete),
+        dialogTitle: `Are you sure you want to delete ${
+          selectedDocuments.length
+        } selected document${selectedDocuments.length === 1 ? '' : 's'}${
+          softDelete ? '' : ' permanently'
+        }?`,
+      })
+    );
+  };
+
   const deleteFolder = (folder: IFolder | IDocument) => () => {
     const deleteFunc = () => {
       dispatch(fetchDeleteFolder({ folder, siteId }));
@@ -1614,6 +1642,7 @@ function Documents() {
                 onDocumentInfoClick={onDocumentInfoClick}
                 selectedDocuments={selectedDocuments}
                 setSelectedDocuments={setSelectedDocuments}
+                onDeleteSelectedDocuments={onDeleteSelectedDocuments}
               />
               <Dialog
                 open={isDropZoneVisible}
@@ -2488,10 +2517,12 @@ function Documents() {
                             {useSoftDelete && (
                               <button
                                 className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                                onClick={onDeleteDocument(
-                                  currentDocument,
-                                  null
-                                )}
+                                onClick={() =>
+                                  onDeleteDocument(
+                                    (currentDocument as IDocument).documentId,
+                                    useSoftDelete
+                                  )
+                                }
                               >
                                 <span className="">Delete</span>
                                 <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">

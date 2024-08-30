@@ -578,13 +578,15 @@ export const deleteDocument = createAsyncThunk(
     const {
       siteId,
       user,
-      document,
+      documentId,
+      softDelete
     }: {
       siteId: string;
       user: User;
-      document: IDocument;
+      documentId: string;
+      softDelete: boolean;
     } = data;
-    DocumentsService.deleteDocument(document.documentId, siteId, 'true').then(
+    DocumentsService.deleteDocument(documentId, siteId, softDelete.toString()).then(
       (res) => {
         if (res.status !== 200) {
           const errors = res?.errors;
@@ -601,7 +603,7 @@ export const deleteDocument = createAsyncThunk(
         if (
           infoDocumentId &&
           infoDocumentId.length > 0 &&
-          document.documentId === infoDocumentId[1]
+          documentId === infoDocumentId[1]
         ) {
           // close info tab if viewing deleted document
           window.location.hash = '';
@@ -610,13 +612,13 @@ export const deleteDocument = createAsyncThunk(
         const state = thunkAPI.getState() as any;
         const { documents, folders } = state?.documentListState || {};
         const newDocs = documents.filter((doc: any) => {
-          return doc.documentId !== document.documentId;
+          return doc.documentId !== documentId;
         });
         const newFolders = [...folders].map((folder: any) => {
           return {
             ...folder,
             documents: folder.documents ? folder.documents.filter(
-              (doc: any) => doc.documentId !== document.documentId
+              (doc: any) => doc.documentId !== documentId
             ):[],
           };
         });

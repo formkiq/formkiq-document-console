@@ -4,7 +4,7 @@ import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLaye
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import FolderListLine from '../../Components/DocumentsAndFolders/FolderListLine/FolderListLine';
-import { Spinner } from '../../Components/Icons/icons';
+import { RestoreFile, Spinner, Trash } from '../../Components/Icons/icons';
 import { ConfigState } from '../../Store/reducers/config';
 import { DocumentListState } from '../../Store/reducers/documentsList';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
@@ -13,12 +13,12 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { EmptyDocumentsTable } from './EmptyDocumentsTable';
-import {useLocation, useNavigate} from "react-router-dom";
+import { useLocation, useNavigate } from 'react-router-dom';
 
 type DocumentTableProps = {
   documentsWrapperRef: Ref<any>;
   documentsScrollpaneRef: Ref<any>;
-  onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void;
+  onDeleteDocument: (documentId: string, softDelete: boolean) => void;
   onRestoreDocument: (
     file: IDocument,
     siteId: string,
@@ -43,10 +43,11 @@ type DocumentTableProps = {
   deleteFromPendingArchive: (file: IDocument) => void;
   archiveStatus: string;
   trackScrolling: () => void;
-  infoDocumentId:  string;
+  infoDocumentId: string;
   onDocumentInfoClick: () => void;
-  selectedDocuments:  string[];
-  setSelectedDocuments:  (selectedDocuments:  string[]) => void;
+  selectedDocuments: string[];
+  setSelectedDocuments: (selectedDocuments: string[]) => void;
+  onDeleteSelectedDocuments: (softDelete: boolean) => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -77,35 +78,42 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onDocumentInfoClick,
     selectedDocuments,
     setSelectedDocuments,
+    onDeleteSelectedDocuments,
   } = props;
 
-  const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
-  const { documents, folders, loadingStatus, isLastSearchPageLoaded } = useSelector(DocumentListState);
+  const { formkiqVersion, useIndividualSharing, useSoftDelete } =
+    useSelector(ConfigState);
+  const { documents, folders, loadingStatus, isLastSearchPageLoaded } =
+    useSelector(DocumentListState);
 
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
   const navigate = useNavigate();
   const pathname = decodeURI(useLocation().pathname);
   const search = useLocation().search;
-  const scrollToDocumentLine = new URLSearchParams(search).get('scrollToDocumentLine');
+  const scrollToDocumentLine = new URLSearchParams(search).get(
+    'scrollToDocumentLine'
+  );
 
   useEffect(() => {
     // load more items if bottom of a table is visible
-    trackScrolling()
+    trackScrolling();
     // when user opens document folder after viewing document, scroll to list to display document line
     if (!scrollToDocumentLine) return;
     if (loadingStatus !== RequestStatus.fulfilled) return;
-    const documentIndex = documents.findIndex((doc) => doc.documentId === infoDocumentId);
+    const documentIndex = documents.findIndex(
+      (doc) => doc.documentId === infoDocumentId
+    );
     if (documentIndex === -1 && !isLastSearchPageLoaded) {
       const scrollpane = document.getElementById('documentsScrollpane');
       if (!scrollpane) return;
       scrollpane.scrollTo({
         top: scrollpane.scrollHeight,
-      })
+      });
     } else if (documentIndex !== -1) {
-      const documentLine = document.getElementById(infoDocumentId)
+      const documentLine = document.getElementById(infoDocumentId);
       if (!documentLine) return;
-      documentLine.scrollIntoView({block: "end",})
+      documentLine.scrollIntoView({ block: 'end' });
       navigate(pathname + '#id=' + infoDocumentId);
     }
   }, [documents]);
@@ -151,6 +159,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     setSelectedDocuments([]);
   }
 
+
   return (
     <div
       className="relative mt-5 overflow-hidden h-full"
@@ -170,7 +179,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
             <tr>
               <th
                 scope="col"
-                className="px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
+                className="px-4 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
               >
                 <div className="flex items-center">
                   {!isArchiveTabExpanded && (
@@ -178,7 +187,10 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                       <input
                         id="checkbox-all"
                         type="checkbox"
-                        checked={selectedDocuments.length === documents.length}
+                        checked={
+                          selectedDocuments.length > 0 &&
+                          selectedDocuments.length === documents.length
+                        }
                         onChange={toggleSelectAll}
                         className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900 mr-2 cursor-pointer"
                       />
@@ -187,7 +199,55 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                       </label>
                     </div>
                   )}
-                  Name
+                  {subfolderUri !== 'deleted' &&
+                    (selectedDocuments.length > 0 ? (
+                      <button
+                        onClick={() =>
+                          onDeleteSelectedDocuments(useSoftDelete)
+                        }
+                        className="w-8 h-8 p-[6px] relative text-neutral-700 hover:text-neutral-900 group ml-4"
+                        title="Delete Selected"
+                      >
+                        <div className="relative z-10">
+                          <Trash />
+                        </div>
+                        <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                      </button>
+                    ) : (
+                      'Name'
+                    ))}
+
+                  {subfolderUri === 'deleted' &&
+                    (selectedDocuments.length > 0 ? (
+                      <>
+                        <button
+                          // onClick={() =>
+                          //   onDeleteSelectedDocuments(useSoftDelete)
+                          // }
+                          className="w-8 h-8 p-1 relative text-neutral-700 hover:text-neutral-900 group ml-4"
+                          title="Restore Selected"
+                        >
+                          <div className="relative z-10">
+                            <RestoreFile />
+                          </div>
+                          <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
+                        <button
+                          onClick={() =>
+                            onDeleteSelectedDocuments(false)
+                          }
+                          className="w-8 h-8 p-[6px] relative text-red-500 hover:text-red-700 group"
+                          title="Delete Permanently"
+                        >
+                          <div className="relative z-10">
+                            <Trash />
+                          </div>
+                          <div className="absolute inset-0 bg-red-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
+                      </>
+                    ) : (
+                      'Name'
+                    ))}
                 </div>
               </th>
               <th
@@ -243,7 +303,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 documentsRootUri={currentDocumentsRootUri}
                 onShareClick={onShareClick}
                 searchDocuments={documents}
-                onDeleteClick={onDeleteDocument(file, documents)}
+                onDeleteClick={onDeleteDocument}
                 onRestoreClick={onRestoreDocument(
                   file,
                   currentSiteId,

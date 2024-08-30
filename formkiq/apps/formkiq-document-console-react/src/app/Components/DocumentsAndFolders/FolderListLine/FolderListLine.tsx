@@ -25,7 +25,7 @@ interface IProps {
     siteId: string,
     searchDocuments: any
   ) => () => void;
-  onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void;
+  onDeleteDocument: (documentId: string, softDelete: boolean ) => void;
   currentDocumentsRootUri: string;
   onShareClick: (event: any, value: ILine | null) => void;
   onEditTagsAndMetadataModalClick: any;
@@ -170,7 +170,7 @@ function FolderListLine({
                   documentsRootUri={currentDocumentsRootUri}
                   onShareClick={onShareClick}
                   searchDocuments={folderInstance.documents}
-                  onDeleteClick={onDeleteDocument(file, null)}
+                  onDeleteClick={onDeleteDocument}
                   onRestoreClick={onRestoreDocument(file, currentSiteId, null)}
                   onEditTagsAndMetadataModalClick={
                     onEditTagsAndMetadataModalClick

@@ -106,34 +106,8 @@ function DocumentListLine({
     pendingArchive,
   } = useSelector(ConfigState);
 
-  const deleteDocument = () => {
-    if (useSoftDelete) {
-      onDeleteClick();
-    } else {
-      onPermanentDeleteClick();
-    }
-  };
   const restoreDocument = () => {
     onRestoreClick();
-  };
-
-  const onPermanentDeleteClick = () => {
-    const deleteFunc = () => {
-      DocumentsService.deleteDocument(file.documentId, siteId, 'false').then(
-        () => {
-          setTimeout(() => {
-            onDocumentDataChange();
-          }, 1000);
-        }
-      );
-    };
-    dispatch(
-      openDialog({
-        callback: deleteFunc,
-        dialogTitle:
-          'Are you sure you want to delete this document permanently?',
-      })
-    );
   };
 
   const [{ opacity, isDragging }, drag, preview] = useDrag(
@@ -567,7 +541,7 @@ function DocumentListLine({
                 </ButtonSecondary>
                 <ButtonSecondary
                   type="button"
-                  onClick={onPermanentDeleteClick}
+                  onClick={()=>onDeleteClick(file.documentId, true)}
                   className="mr-2 hover:bg-red-50"
                   style={{
                     borderColor: '#ef4444',
@@ -598,9 +572,7 @@ function DocumentListLine({
                     <div
                       className="w-3 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
                       data-test-id="delete-action"
-                      onClick={
-                        useSoftDelete ? onDeleteClick : onPermanentDeleteClick
-                      }
+                      onClick={()=>onDeleteClick(file.documentId, useSoftDelete)}
                     >
                       <Trash />
                     </div>
@@ -617,7 +589,7 @@ function DocumentListLine({
                     siteId={siteId}
                     isSiteReadOnly={isSiteReadOnly}
                     formkiqVersion={formkiqVersion}
-                    onDeleteClick={deleteDocument}
+                    onDeleteClick={()=>onDeleteClick(file.documentId, useSoftDelete)}
                     onShareClick={onShareClick}
                     onEditTagsAndMetadataModalClick={
                       onEditTagsAndMetadataModalClick
