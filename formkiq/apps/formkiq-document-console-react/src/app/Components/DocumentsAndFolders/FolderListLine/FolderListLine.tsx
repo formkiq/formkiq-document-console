@@ -41,6 +41,8 @@ interface IProps {
   addToPendingArchive?: (file: IDocument) => void;
   deleteFromPendingArchive?: (file: IDocument) => void;
   archiveStatus?: string;
+  selectedDocuments: string[];
+  setSelectedDocuments: (documents: string[]) => void;
 }
 
 function FolderListLine({
@@ -66,10 +68,10 @@ function FolderListLine({
   addToPendingArchive,
   deleteFromPendingArchive,
   archiveStatus,
+  selectedDocuments,
+  setSelectedDocuments,
 }: IProps) {
-  const {
-    loadingStatus,
-  } = useSelector(DocumentListState);
+  const { loadingStatus } = useSelector(DocumentListState);
 
   let folderPath = folderInstance.path;
   if (folderInstance.path.indexOf('/') === -1) {
@@ -87,8 +89,7 @@ function FolderListLine({
 
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1);
   const trElem = React.forwardRef((props: any, ref) => (
-    <tr {...props} ref={ref} data-folder-path={folderPath}
-    >
+    <tr {...props} ref={ref} data-folder-path={folderPath}>
       {props.childs}
     </tr>
   ));
@@ -151,6 +152,8 @@ function FolderListLine({
                       archiveStatus={archiveStatus}
                       addToPendingArchive={addToPendingArchive}
                       deleteFromPendingArchive={deleteFromPendingArchive}
+                      selectedDocuments={selectedDocuments}
+                      setSelectedDocuments={setSelectedDocuments}
                     />
                   );
                 })}
@@ -185,6 +188,8 @@ function FolderListLine({
                   archiveStatus={archiveStatus}
                   addToPendingArchive={addToPendingArchive}
                   deleteFromPendingArchive={deleteFromPendingArchive}
+                  selectedDocuments={selectedDocuments}
+                  setSelectedDocuments={setSelectedDocuments}
                 />
               );
             })}
@@ -258,7 +263,11 @@ function FolderListLine({
                 </div>
                 <div className="flex grow w-full justify-start">
                   <Link
-                    to={loadingStatus===RequestStatus.pending? "#":`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={
+                      loadingStatus === RequestStatus.pending
+                        ? '#'
+                        : `${currentDocumentsRootUri}/folders/${folderPath}`
+                    }
                     className="w-16 pl-1 pt-1.5 cursor-pointer"
                   >
                     <svg
@@ -275,7 +284,11 @@ function FolderListLine({
                     </svg>
                   </Link>
                   <Link
-                    to={loadingStatus===RequestStatus.pending? "#":`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={
+                      loadingStatus === RequestStatus.pending
+                        ? '#'
+                        : `${currentDocumentsRootUri}/folders/${folderPath}`
+                    }
                     className="cursor-pointer grow p-1"
                   >
                     {folderName}

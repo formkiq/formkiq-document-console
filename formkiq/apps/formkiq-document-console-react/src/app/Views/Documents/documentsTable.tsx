@@ -168,25 +168,27 @@ export const DocumentsTable = (props: DocumentTableProps) => {
         >
           <thead className="sticky top-0 bg-neutral-100 z-10">
             <tr>
-              <th scope="col" className="px-6 w-6 border-b border-t border-neutral-300 ">
-                <div className="flex items-center">
-                  <input
-                    id="checkbox-all"
-                    type="checkbox"
-                    checked={selectedDocuments.length === documents.length}
-                    onChange={toggleSelectAll}
-                    className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"
-                  />
-                  <label htmlFor="checkbox-all" className="sr-only">
-                    checkbox
-                  </label>
-                </div>
-              </th>
               <th
                 scope="col"
                 className="px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
               >
-                Name
+                <div className="flex items-center">
+                  {!isArchiveTabExpanded && (
+                    <div className="inline-flex items-end">
+                      <input
+                        id="checkbox-all"
+                        type="checkbox"
+                        checked={selectedDocuments.length === documents.length}
+                        onChange={toggleSelectAll}
+                        className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900 mr-2 cursor-pointer"
+                      />
+                      <label htmlFor="checkbox-all" className="sr-only">
+                        checkbox
+                      </label>
+                    </div>
+                  )}
+                  Name
+                </div>
               </th>
               <th
                 scope="col"
@@ -270,7 +272,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
             ))}
           </tbody>
         </table>
-        {(loadingStatus === RequestStatus.pending && documents.length > 0)&& (
+        {loadingStatus === RequestStatus.pending && documents.length > 0 && (
           <div className="absolute bottom-0 w-full flex justify-center">
             <Spinner />
           </div>
@@ -316,6 +318,8 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     addToPendingArchive,
     deleteFromPendingArchive,
     archiveStatus,
+    selectedDocuments,
+    setSelectedDocuments,
   } = props;
 
   return (
@@ -347,6 +351,8 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               archiveStatus={archiveStatus}
               addToPendingArchive={addToPendingArchive}
               deleteFromPendingArchive={deleteFromPendingArchive}
+              selectedDocuments={selectedDocuments}
+              setSelectedDocuments={setSelectedDocuments}
             />
           );
         })}

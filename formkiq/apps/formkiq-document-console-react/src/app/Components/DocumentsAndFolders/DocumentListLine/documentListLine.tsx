@@ -84,8 +84,8 @@ function DocumentListLine({
   archiveStatus?: string;
   infoDocumentId?: string;
   onDocumentInfoClick?: () => void;
-  selectedDocuments?: string[];
-  setSelectedDocuments?: (documents: string[]) => void;
+  selectedDocuments: string[];
+  setSelectedDocuments: (documents: string[]) => void;
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
@@ -247,13 +247,10 @@ function DocumentListLine({
 
   // checkboxes functions
   function addToSelectedDocuments(documentId: string) {
-    if (!selectedDocuments || !setSelectedDocuments) return;
     setSelectedDocuments([...selectedDocuments, documentId]);
   }
 
   function removeFromSelectedDocuments(documentId: string) {
-    if (!selectedDocuments || !setSelectedDocuments) return;
-
     setSelectedDocuments(
       selectedDocuments.filter((id) => id !== documentId)
     );
@@ -274,28 +271,38 @@ function DocumentListLine({
           scrollMarginBottom: '160px',
         }}
       >
-        {selectedDocuments && (
-          <td className="">
-            <div className="flex items-center justify-center">
-              <input
-                id="checkbox-all"
-                type="checkbox"
-                checked={selectedDocuments.includes(file.documentId)}
-                onChange={() =>
-                  selectedDocuments.includes(file.documentId)
-                    ? removeFromSelectedDocuments(file.documentId)
-                    : addToSelectedDocuments(file.documentId)
-                }
-                className="rounded-none w-4 h-4 bg-transparent  border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900"
-              />
-              <label htmlFor="checkbox-all" className="sr-only">
-                Select Document
-              </label>
-            </div>
-          </td>
-        )}
         <td className={`text-neutral-900 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
+            {!isArchiveTabExpanded && (
+              <div className="flex items-center justify-center">
+                {folder !== 'deleted' &&
+                folder !== 'shared' &&
+                folder !== 'recent' &&
+                folder !== 'favorites' ? (
+                  <div
+                    className={
+                      lineSubfolderLevel === pageSubfolderLevel ? 'w-5 ' : 'w-1'
+                    }
+                  ></div>
+                ) : (
+                  <div className="w-5"></div>
+                )}
+                <input
+                  id="checkbox-all"
+                  type="checkbox"
+                  checked={selectedDocuments.includes(file.documentId)}
+                  onChange={() =>
+                    selectedDocuments.includes(file.documentId)
+                      ? removeFromSelectedDocuments(file.documentId)
+                      : addToSelectedDocuments(file.documentId)
+                  }
+                  className="rounded-none w-4 h-4 bg-transparent  border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900 cursor-pointer"
+                />
+                <label htmlFor="checkbox-all" className="sr-only">
+                  Select Document
+                </label>
+              </div>
+            )}
             {isArchiveTabExpanded &&
               (archiveStatus === 'INITIAL' || archiveStatus === 'COMPLETE') &&
               (pendingArchive.indexOf(file) === -1 ? (
