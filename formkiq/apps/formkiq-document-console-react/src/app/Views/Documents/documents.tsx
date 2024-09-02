@@ -167,6 +167,7 @@ function Documents() {
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
   const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
   const [infoDocumentId, setInfoDocumentId] = useState('');
+  const [infoDocumentAction, setInfoDocumentAction] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
   const [infoTagEditMode, setInfoTagEditMode] = useState(false);
   // NOTE: not fully implemented;
@@ -387,10 +388,24 @@ function Documents() {
 
   useEffect(() => {
     if (hash.indexOf('#id=') > -1) {
-      setInfoDocumentId(hash.substring(4));
-    } else if (hash.indexOf('#history_id') > -1) {
-      setInfoDocumentId(hash.substring(12));
-      setInfoDocumentView('history');
+      const hashParams = new URLSearchParams(hash);
+      const id = hashParams.get('id');
+      const action = hashParams.get('action');
+      if (id) {
+        setInfoDocumentId(id);
+      } else {
+        setInfoDocumentId('');
+      }
+      if (action) {
+        setInfoDocumentAction(action);
+      } else {
+        setInfoDocumentAction('');
+      }
+      if (action && action === 'history') {
+        setInfoDocumentView('history');
+      } else {
+        setInfoDocumentView('info');
+      }
     } else {
       setInfoDocumentId('');
     }
@@ -680,10 +695,7 @@ function Documents() {
   };
   const restoreDocument =
     (file: IDocument, siteId: string, searchDocuments: any) => () => {
-      DocumentsService.restoreDocument(
-        siteId,
-        file.documentId,
-      ).then(() => {
+      DocumentsService.restoreDocument(siteId, file.documentId).then(() => {
         let newDocs = null;
         if (searchDocuments) {
           newDocs = searchDocuments.filter((doc: any) => {

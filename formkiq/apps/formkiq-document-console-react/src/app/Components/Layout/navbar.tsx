@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthState, logout } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
 import { DataCacheState } from '../../Store/reducers/data';
+import { setDocuments } from '../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../Store/store';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import {
@@ -19,6 +20,7 @@ import {
 } from '../../helpers/services/toolService';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import SearchInput from '../DocumentsAndFolders/Search/searchInput';
+import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 import {
   Admin,
   Api,
@@ -45,7 +47,6 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
-import { setDocuments } from '../../Store/reducers/documentsList';
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -291,7 +292,7 @@ function Navbar() {
     );
   }, [documentId]);
 
-  const viewFolder = () => {
+  const viewFolder = (event: any, action: string = '') => {
     dispatch(setDocuments({ documents: [] }));
     navigate(
       {
@@ -304,7 +305,9 @@ function Navbar() {
           ) +
           '?scrollToDocumentLine=true' +
           '#id=' +
-          documentId,
+          documentId +
+          '&action=' +
+          action,
       },
       {
         replace: true,
@@ -330,7 +333,7 @@ function Navbar() {
           pathname +
           '?' +
           searchParams.toString() +
-          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}`:""),
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}` : ''),
       },
       {
         replace: true,
@@ -703,41 +706,60 @@ function Navbar() {
                               <span>
                                 <span className="px-2">|</span>
                                 {currentDocumentPath}
-                                <span className="pl-8">
-                                  <button
-                                    type="button"
-                                    onClick={viewFolder}
-                                    className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                  >
-                                    view folder
-                                  </button>
-                                </span>
-                                <span className="pl-6">
-                                  <span
-                                    className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                    onClick={DownloadDocument}
-                                  >
-                                    download
-                                  </span>
-                                </span>
+                                <span className="px-2"></span>
+                                <ButtonTertiary
+                                  className={
+                                    'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                  }
+                                  onClick={(e: any) => viewFolder(e, '')}
+                                >
+                                  View in Folder
+                                </ButtonTertiary>
+                                <ButtonTertiary
+                                  className={
+                                    'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                  }
+                                  onClick={DownloadDocument}
+                                >
+                                  Download
+                                </ButtonTertiary>
+                                <ButtonTertiary
+                                  className={
+                                    'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                  }
+                                  onClick={(e: any) =>
+                                    viewFolder(e, 'attributes')
+                                  }
+                                >
+                                  View / Edit Attributes
+                                </ButtonTertiary>
+                                <ButtonTertiary
+                                  className={
+                                    'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                  }
+                                  onClick={(e: any) => viewFolder(e, 'review')}
+                                >
+                                  Submit for Review
+                                </ButtonTertiary>
+                                <ButtonTertiary
+                                  className={
+                                    'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                  }
+                                  onClick={(e: any) => viewFolder(e, 'history')}
+                                >
+                                  View Versions
+                                </ButtonTertiary>
                                 {hasDocumentVersions && (
-                                  <span className="pl-6">
-                                    <a
-                                      href={
-                                        siteDocumentsRootUri +
-                                        '/folders/' +
-                                        currentDocumentPath.substring(
-                                          0,
-                                          currentDocumentPath.lastIndexOf('/')
-                                        ) +
-                                        '#history_id=' +
-                                        documentId
-                                      }
-                                      className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                    >
-                                      view versions
-                                    </a>
-                                  </span>
+                                  <ButtonTertiary
+                                    className={
+                                      'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                    }
+                                    onClick={(e: any) =>
+                                      viewFolder(e, 'history')
+                                    }
+                                  >
+                                    View Versions
+                                  </ButtonTertiary>
                                 )}
                               </span>
                             ) : (
