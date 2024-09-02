@@ -1,5 +1,6 @@
-import { Ref, useEffect, useState } from 'react';
+import { Ref, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
@@ -13,7 +14,6 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { EmptyDocumentsTable } from './EmptyDocumentsTable';
-import {useLocation, useNavigate} from "react-router-dom";
 
 type DocumentTableProps = {
   documentsWrapperRef: Ref<any>;
@@ -32,6 +32,7 @@ type DocumentTableProps = {
   onShareClick: (event: any, value: ILine | null) => void;
   onRenameModalClick: (event: any, value: ILine | null) => void;
   onMoveModalClick: (event: any, value: ILine | null) => void;
+  onSubmitForReviewModalClick: (event: any, value: ILine | null) => void;
   onDocumentVersionsModalClick: (event: any, value: ILine | null) => void;
   onDocumentWorkflowsModalClick: (event: any, value: ILine | null) => void;
   onDocumentReviewModalClick: (event: any, value: ILine | null) => void;
@@ -43,7 +44,7 @@ type DocumentTableProps = {
   deleteFromPendingArchive: (file: IDocument) => void;
   archiveStatus: string;
   trackScrolling: () => void;
-  infoDocumentId:  string;
+  infoDocumentId: string;
   onDocumentInfoClick: () => void;
 };
 
@@ -66,6 +67,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
+    onSubmitForReviewModalClick,
     isArchiveTabExpanded,
     addToPendingArchive,
     deleteFromPendingArchive,
@@ -76,32 +78,37 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   } = props;
 
   const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
-  const { documents, folders, loadingStatus, isLastSearchPageLoaded } = useSelector(DocumentListState);
+  const { documents, folders, loadingStatus, isLastSearchPageLoaded } =
+    useSelector(DocumentListState);
 
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
   const navigate = useNavigate();
   const pathname = decodeURI(useLocation().pathname);
   const search = useLocation().search;
-  const scrollToDocumentLine = new URLSearchParams(search).get('scrollToDocumentLine');
+  const scrollToDocumentLine = new URLSearchParams(search).get(
+    'scrollToDocumentLine'
+  );
 
   useEffect(() => {
     // load more items if bottom of a table is visible
-    trackScrolling()
+    trackScrolling();
     // when user opens document folder after viewing document, scroll to list to display document line
     if (!scrollToDocumentLine) return;
     if (loadingStatus !== RequestStatus.fulfilled) return;
-    const documentIndex = documents.findIndex((doc) => doc.documentId === infoDocumentId);
+    const documentIndex = documents.findIndex(
+      (doc) => doc.documentId === infoDocumentId
+    );
     if (documentIndex === -1 && !isLastSearchPageLoaded) {
       const scrollpane = document.getElementById('documentsScrollpane');
       if (!scrollpane) return;
       scrollpane.scrollTo({
         top: scrollpane.scrollHeight,
-      })
+      });
     } else if (documentIndex !== -1) {
-      const documentLine = document.getElementById(infoDocumentId)
+      const documentLine = document.getElementById(infoDocumentId);
       if (!documentLine) return;
-      documentLine.scrollIntoView({block: "end",})
+      documentLine.scrollIntoView({ block: 'end' });
       navigate(pathname + '#id=' + infoDocumentId);
     }
   }, [documents]);
@@ -217,6 +224,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 }
                 onRenameModalClick={onRenameModalClick}
                 onMoveModalClick={onMoveModalClick}
+                onSubmitForReviewModalClick={onSubmitForReviewModalClick}
                 onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                 onDocumentReviewModalClick={onDocumentReviewModalClick}
@@ -233,7 +241,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
             ))}
           </tbody>
         </table>
-        {(loadingStatus === RequestStatus.pending && documents.length > 0)&& (
+        {loadingStatus === RequestStatus.pending && documents.length > 0 && (
           <div className="absolute bottom-0 w-full flex justify-center">
             <Spinner />
           </div>
@@ -274,6 +282,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     onMoveModalClick,
+    onSubmitForReviewModalClick,
     deleteFolder,
     isArchiveTabExpanded,
     addToPendingArchive,
@@ -298,6 +307,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
               onRenameModalClick={onRenameModalClick}
               onMoveModalClick={onMoveModalClick}
+              onSubmitForReviewModalClick={onSubmitForReviewModalClick}
               onDocumentVersionsModalClick={onDocumentVersionsModalClick}
               onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
               onDocumentReviewModalClick={onDocumentReviewModalClick}

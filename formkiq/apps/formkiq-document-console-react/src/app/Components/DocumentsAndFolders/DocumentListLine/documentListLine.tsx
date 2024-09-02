@@ -44,6 +44,7 @@ function DocumentListLine({
   onEditTagsAndMetadataModalClick,
   onRenameModalClick,
   onMoveModalClick,
+  onSubmitForReviewModalClick,
   onDocumentVersionsModalClick,
   onDocumentWorkflowsModalClick,
   onDocumentReviewModalClick,
@@ -69,6 +70,7 @@ function DocumentListLine({
   onEditTagsAndMetadataModalClick: any;
   onRenameModalClick: any;
   onMoveModalClick: any;
+  onSubmitForReviewModalClick: any;
   onDocumentVersionsModalClick: any;
   onDocumentWorkflowsModalClick: any;
   onDocumentReviewModalClick: any;
@@ -563,6 +565,7 @@ function DocumentListLine({
                     }
                     onRenameModalClick={onRenameModalClick}
                     onMoveModalClick={onMoveModalClick}
+                    onSubmitForReviewModalClick={onSubmitForReviewModalClick}
                     onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                     onDocumentWorkflowsModalClick={
                       onDocumentWorkflowsModalClick

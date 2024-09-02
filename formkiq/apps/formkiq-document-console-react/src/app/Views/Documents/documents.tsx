@@ -17,6 +17,7 @@ import MultiValuedAttributeModal from '../../Components/DocumentsAndFolders/Mult
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
 import AdvancedSearchTab from '../../Components/DocumentsAndFolders/Search/advancedSearchTab';
+import SubmitForReviewModal from '../../Components/DocumentsAndFolders/SubmitForReviewModal/submitForReviewModal';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
@@ -167,8 +168,8 @@ function Documents() {
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
   const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
   const [infoDocumentId, setInfoDocumentId] = useState('');
-  const [infoDocumentAction, setInfoDocumentAction] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
+  const [infoDocumentAction, setInfoDocumentAction] = useState('');
   const [infoTagEditMode, setInfoTagEditMode] = useState(false);
   // NOTE: not fully implemented;
   // using the edit metadata modal for now, to be replaced with new system to indicate diff between tag, metadata, and versioned metadata
@@ -224,6 +225,10 @@ function Documents() {
     useState<any[]>([]);
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
+  const [submitForReviewModalValue, setSubmitForReviewModalValue] =
+    useState<ILine | null>(null);
+  const [isSubmitForReviewModalOpened, setSubmitForReviewModalOpened] =
+    useState(false);
   const dispatch = useAppDispatch();
   const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
     []
@@ -339,14 +344,36 @@ function Documents() {
           // TODO: set folder to selected document path?
           updateTags();
           updateDocumentActions();
-
           // close history tab if deeplink file
           if (
             infoDocumentView === 'history' &&
-            response.deepLinkPath &&
-            response.deepLinkPath.length > 0
+            response.deepLinkPath?.length > 0
           ) {
             setInfoDocumentView('info');
+          }
+          // CHECK FOR MODAL ACTION
+          if (infoDocumentAction.length) {
+            switch (infoDocumentAction) {
+              case 'attributes':
+                onEditAttributesModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                break;
+              case 'review':
+                onSubmitForReviewModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                break;
+            }
+            setInfoDocumentAction('');
           }
         }
       );
@@ -388,23 +415,21 @@ function Documents() {
 
   useEffect(() => {
     if (hash.indexOf('#id=') > -1) {
-      const hashParams = new URLSearchParams(hash);
+      const hashParams = new URLSearchParams(hash.substring(1));
       const id = hashParams.get('id');
       const action = hashParams.get('action');
       if (id) {
         setInfoDocumentId(id);
       } else {
-        setInfoDocumentId('');
+        setInfoDocumentId(''); // Handle case where id might be null
       }
       if (action) {
         setInfoDocumentAction(action);
+        if (action === 'history') {
+          setInfoDocumentView('history');
+        }
       } else {
         setInfoDocumentAction('');
-      }
-      if (action && action === 'history') {
-        setInfoDocumentView('history');
-      } else {
-        setInfoDocumentView('info');
       }
     } else {
       setInfoDocumentId('');
@@ -854,6 +879,13 @@ function Documents() {
   };
   const onMoveModalClose = () => {
     setMoveModalOpened(false);
+  };
+  const onSubmitForReviewModalClick = (event: any, value: ILine | null) => {
+    setSubmitForReviewModalValue(value);
+    setSubmitForReviewModalOpened(true);
+  };
+  const onSubmitForReviewModalClose = () => {
+    setSubmitForReviewModalOpened(false);
   };
   const DownloadDocument = () => {
     if (infoDocumentId.length) {
@@ -1602,6 +1634,7 @@ function Documents() {
                 onRestoreDocument={restoreDocument}
                 onRenameModalClick={onRenameModalClick}
                 onMoveModalClick={onMoveModalClick}
+                onSubmitForReviewModalClick={onSubmitForReviewModalClick}
                 onShareClick={onShareClick}
                 documentsScrollpaneRef={documentsScrollpaneRef}
                 documentsWrapperRef={documentsWrapperRef}
@@ -1718,8 +1751,7 @@ function Documents() {
                       </div>
                     </div>
                     {formkiqVersion.type !== 'core' &&
-                      (currentDocument as IDocument).deepLinkPath &&
-                      (currentDocument as IDocument).deepLinkPath.length ===
+                      (currentDocument as IDocument).deepLinkPath?.length ===
                         0 && (
                         <div
                           className="w-1/3 text-sm font-semibold cursor-pointer"
@@ -2529,6 +2561,9 @@ function Documents() {
                             }
                             onRenameModalClick={onRenameModalClick}
                             onMoveModalClick={onMoveModalClick}
+                            onSubmitForReviewModalClick={
+                              onSubmitForReviewModalClick
+                            }
                             onDocumentVersionsModalClick={
                               onDocumentVersionsModalClick
                             }
@@ -2615,6 +2650,13 @@ function Documents() {
         siteId={currentSiteId}
         value={moveModalValue}
         allTags={allTags}
+        onDocumentDataChange={onDocumentDataChange}
+      />
+      <SubmitForReviewModal
+        isOpened={isSubmitForReviewModalOpened}
+        onClose={onSubmitForReviewModalClose}
+        siteId={currentSiteId}
+        value={submitForReviewModalValue}
         onDocumentDataChange={onDocumentDataChange}
       />
       <UploadModal

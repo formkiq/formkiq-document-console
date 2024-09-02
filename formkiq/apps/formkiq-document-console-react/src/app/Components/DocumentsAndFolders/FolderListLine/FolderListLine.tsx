@@ -3,7 +3,10 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
-import { DocumentListState, toggleExpandFolder } from '../../../Store/reducers/documentsList';
+import {
+  DocumentListState,
+  toggleExpandFolder,
+} from '../../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../../Store/store';
 import { formatDate } from '../../../helpers/services/toolService';
 import { IDocument, RequestStatus } from '../../../helpers/types/document';
@@ -31,6 +34,7 @@ interface IProps {
   onEditTagsAndMetadataModalClick: any;
   onRenameModalClick: any;
   onMoveModalClick: any;
+  onSubmitForReviewModalClick: any;
   onDocumentVersionsModalClick: any;
   onDocumentWorkflowsModalClick: any;
   onDocumentReviewModalClick: any;
@@ -54,6 +58,7 @@ function FolderListLine({
   onEditTagsAndMetadataModalClick,
   onRenameModalClick,
   onMoveModalClick,
+  onSubmitForReviewModalClick,
   onDocumentVersionsModalClick,
   onDocumentWorkflowsModalClick,
   onDocumentReviewModalClick,
@@ -67,9 +72,7 @@ function FolderListLine({
   deleteFromPendingArchive,
   archiveStatus,
 }: IProps) {
-  const {
-    loadingStatus,
-  } = useSelector(DocumentListState);
+  const { loadingStatus } = useSelector(DocumentListState);
 
   let folderPath = folderInstance.path;
   if (folderInstance.path.indexOf('/') === -1) {
@@ -87,8 +90,7 @@ function FolderListLine({
 
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1);
   const trElem = React.forwardRef((props: any, ref) => (
-    <tr {...props} ref={ref} data-folder-path={folderPath}
-    >
+    <tr {...props} ref={ref} data-folder-path={folderPath}>
       {props.childs}
     </tr>
   ));
@@ -135,6 +137,7 @@ function FolderListLine({
                       }
                       onRenameModalClick={onRenameModalClick}
                       onMoveModalClick={onMoveModalClick}
+                      onSubmitForReviewModalClick={onSubmitForReviewModalClick}
                       onDocumentVersionsModalClick={
                         onDocumentVersionsModalClick
                       }
@@ -174,6 +177,7 @@ function FolderListLine({
                   }
                   onRenameModalClick={onRenameModalClick}
                   onMoveModalClick={onMoveModalClick}
+                  onSubmitForReviewModalClick={onSubmitForReviewModalClick}
                   onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                   onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
                   onDocumentReviewModalClick={onDocumentReviewModalClick}
@@ -258,7 +262,11 @@ function FolderListLine({
                 </div>
                 <div className="flex grow w-full justify-start">
                   <Link
-                    to={loadingStatus===RequestStatus.pending? "#":`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={
+                      loadingStatus === RequestStatus.pending
+                        ? '#'
+                        : `${currentDocumentsRootUri}/folders/${folderPath}`
+                    }
                     className="w-16 pl-1 pt-1.5 cursor-pointer"
                   >
                     <svg
@@ -275,7 +283,11 @@ function FolderListLine({
                     </svg>
                   </Link>
                   <Link
-                    to={loadingStatus===RequestStatus.pending? "#":`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={
+                      loadingStatus === RequestStatus.pending
+                        ? '#'
+                        : `${currentDocumentsRootUri}/folders/${folderPath}`
+                    }
                     className="cursor-pointer grow p-1"
                   >
                     {folderName}
@@ -334,6 +346,9 @@ function FolderListLine({
                         }
                         onRenameModalClick={onRenameModalClick}
                         onMoveModalClick={onMoveModalClick}
+                        onSubmitForReviewModalClick={
+                          onSubmitForReviewModalClick
+                        }
                         onDocumentVersionsModalClick={
                           onDocumentVersionsModalClick
                         }

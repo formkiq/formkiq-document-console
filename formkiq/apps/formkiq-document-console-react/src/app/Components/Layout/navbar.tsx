@@ -741,14 +741,6 @@ function Navbar() {
                                 >
                                   Submit for Review
                                 </ButtonTertiary>
-                                <ButtonTertiary
-                                  className={
-                                    'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
-                                  }
-                                  onClick={(e: any) => viewFolder(e, 'history')}
-                                >
-                                  View Versions
-                                </ButtonTertiary>
                                 {hasDocumentVersions && (
                                   <ButtonTertiary
                                     className={
