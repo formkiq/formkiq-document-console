@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Tooltip } from 'react-tooltip';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentReviewModal/DocumentReviewModal';
@@ -363,8 +364,17 @@ function Documents() {
                   folderInstance: null,
                 });
                 break;
-              case 'review':
+              case 'submitForReview':
                 onSubmitForReviewModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                break;
+              case 'reviewDocument':
+                onDocumentReviewModalClick(null, {
                   lineType: 'document',
                   folder: subfolderUri,
                   documentId: (response as IDocument).documentId,
@@ -1518,6 +1528,16 @@ function Documents() {
     }
   };
 
+  const [publicationLinkCopyTooltipText, setPublicationLinkCopyTooltipText] =
+    useState('Copy Link');
+  const CopyPublicationLink = (documentId: string) => {
+    window.navigator.clipboard.writeText(`/publications/${documentId}`);
+    setPublicationLinkCopyTooltipText('Copied!');
+    setTimeout(() => {
+      setPublicationLinkCopyTooltipText('Copy Link');
+    }, 2000);
+  };
+
   return (
     <>
       <Helmet>
@@ -2088,8 +2108,55 @@ function Documents() {
                                     </dt>
                                     <dd className="text-sm">
                                       {/*Attributes*/}
-                                      {item?.stringValue && (
-                                        <span>{item.stringValue}</span>
+                                      {item?.key === 'Publication' ||
+                                      item?.key === 'Relationships' ? (
+                                        <>
+                                          {item?.stringValue && (
+                                            <div>
+                                              <span className="text-xs pr-2">
+                                                {item.stringValue}
+                                                <span className="mx-1"></span>
+                                                <CopyButton
+                                                  value={item.stringValue}
+                                                />
+                                              </span>
+                                              {item?.key === 'Publication' && (
+                                                <span className="block mt-1 text-xs">
+                                                  <Tooltip
+                                                    id={
+                                                      'publication-link-copy-tooltip'
+                                                    }
+                                                  />
+                                                  <ButtonTertiary
+                                                    className="px-2 py-0.5"
+                                                    data-tooltip-id={
+                                                      'publication-link-copy-tooltip'
+                                                    }
+                                                    data-tooltip-content={
+                                                      publicationLinkCopyTooltipText
+                                                    }
+                                                    onClick={() => {
+                                                      CopyPublicationLink(
+                                                        (
+                                                          currentDocument as IDocument
+                                                        ).documentId
+                                                      );
+                                                    }}
+                                                    type="button"
+                                                  >
+                                                    Copy Publication Link
+                                                  </ButtonTertiary>
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <>
+                                          {item?.stringValue && (
+                                            <span>{item.stringValue}</span>
+                                          )}
+                                        </>
                                       )}
                                       {item?.numberValue !== undefined && (
                                         <span>{item.numberValue}</span>
@@ -2109,14 +2176,31 @@ function Documents() {
                                         <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
                                           {item.stringValues.map(
                                             (val: any, index: number) => (
-                                              <span
-                                                key={`attr_string_${item.key}_${index}`}
-                                              >
-                                                {val}
-                                                {index <
-                                                  item.stringValues.length -
-                                                    1 && <hr />}
-                                              </span>
+                                              <>
+                                                {item?.key ===
+                                                'Relationships' ? (
+                                                  <span
+                                                    className="text-xs"
+                                                    key={`attr_string_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    <span className="mx-1"></span>
+                                                    <CopyButton value={val} />
+                                                    {index <
+                                                      item.stringValues.length -
+                                                        1 && <hr />}
+                                                  </span>
+                                                ) : (
+                                                  <span
+                                                    key={`attr_string_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    {index <
+                                                      item.stringValues.length -
+                                                        1 && <hr />}
+                                                  </span>
+                                                )}
+                                              </>
                                             )
                                           )}
                                         </div>

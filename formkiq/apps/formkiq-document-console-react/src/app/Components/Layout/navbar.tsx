@@ -20,6 +20,7 @@ import {
 } from '../../helpers/services/toolService';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import SearchInput from '../DocumentsAndFolders/Search/searchInput';
+import ButtonPrimary from '../Generic/Buttons/ButtonPrimary';
 import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 import {
   Admin,
@@ -279,6 +280,7 @@ function Navbar() {
   };
 
   const [hasDocumentVersions, setHasDocumentVersions] = useState(false);
+  const [hasInProgressWorkflow, setHasInProgressWorkflow] = useState(false);
 
   useEffect(() => {
     DocumentsService.getDocumentVersions(documentId, currentSiteId).then(
@@ -287,6 +289,28 @@ function Navbar() {
           setHasDocumentVersions(true);
         } else {
           setHasDocumentVersions(false);
+        }
+      }
+    );
+    DocumentsService.getWorkflowsInDocument(currentSiteId, documentId).then(
+      (response: any) => {
+        if (response.workflows?.length) {
+          const inProgressWorkflows = response.workflows.filter(
+            (workflow: any) => {
+              if (workflow.status === 'IN_PROGRESS') {
+                return true;
+              } else {
+                return false;
+              }
+            }
+          );
+          if (inProgressWorkflows.length > 0) {
+            setHasInProgressWorkflow(true);
+          } else {
+            setHasInProgressWorkflow(false);
+          }
+        } else {
+          setHasInProgressWorkflow(false);
         }
       }
     );
@@ -707,51 +731,78 @@ function Navbar() {
                                 <span className="px-2">|</span>
                                 {currentDocumentPath}
                                 <span className="px-2"></span>
-                                <ButtonTertiary
-                                  className={
-                                    'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
-                                  }
-                                  onClick={(e: any) => viewFolder(e, '')}
-                                >
-                                  View in Folder
-                                </ButtonTertiary>
-                                <ButtonTertiary
-                                  className={
-                                    'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
-                                  }
-                                  onClick={DownloadDocument}
-                                >
-                                  Download
-                                </ButtonTertiary>
-                                <ButtonTertiary
-                                  className={
-                                    'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
-                                  }
-                                  onClick={(e: any) =>
-                                    viewFolder(e, 'attributes')
-                                  }
-                                >
-                                  View / Edit Attributes
-                                </ButtonTertiary>
-                                <ButtonTertiary
-                                  className={
-                                    'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
-                                  }
-                                  onClick={(e: any) => viewFolder(e, 'review')}
-                                >
-                                  Submit for Review
-                                </ButtonTertiary>
-                                {hasDocumentVersions && (
-                                  <ButtonTertiary
-                                    className={
-                                      'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
-                                    }
-                                    onClick={(e: any) =>
-                                      viewFolder(e, 'history')
-                                    }
-                                  >
-                                    View Versions
-                                  </ButtonTertiary>
+                                {hasInProgressWorkflow ? (
+                                  <>
+                                    <ButtonPrimary
+                                      className={
+                                        'text-small font-bold mx-2 px-4 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) =>
+                                        viewFolder(e, 'reviewDocument')
+                                      }
+                                    >
+                                      Submit Document Review
+                                    </ButtonPrimary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) => viewFolder(e, '')}
+                                    >
+                                      View in Folder
+                                    </ButtonTertiary>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) => viewFolder(e, '')}
+                                    >
+                                      View in Folder
+                                    </ButtonTertiary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={DownloadDocument}
+                                    >
+                                      Download
+                                    </ButtonTertiary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) =>
+                                        viewFolder(e, 'attributes')
+                                      }
+                                    >
+                                      View / Edit Attributes
+                                    </ButtonTertiary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) =>
+                                        viewFolder(e, 'submitForReview')
+                                      }
+                                    >
+                                      Submit for Review
+                                    </ButtonTertiary>
+                                    {hasDocumentVersions && (
+                                      <ButtonTertiary
+                                        className={
+                                          'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                        }
+                                        onClick={(e: any) =>
+                                          viewFolder(e, 'history')
+                                        }
+                                      >
+                                        View Versions
+                                      </ButtonTertiary>
+                                    )}
+                                  </>
                                 )}
                               </span>
                             ) : (
