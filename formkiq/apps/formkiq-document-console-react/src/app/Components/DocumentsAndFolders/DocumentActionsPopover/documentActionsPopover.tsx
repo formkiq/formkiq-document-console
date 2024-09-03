@@ -117,13 +117,13 @@ export default function DocumentActionsPopover({
           onClick={handleDropdownClick}
           className="w-20 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
         >
-          <span className="w-5 pt-1">{MoreActions()}</span>
+          <span className="w-5 pt-1 ">{MoreActions()}</span>
         </button>
       ) : (
         <button
           ref={setReferenceRef as any}
           onClick={handleDropdownClick}
-          className="w-5 hover:text-primary-500"
+          className="w-5 hover:text-primary-500 rotate-90 text-inherit "
         >
           <MoreActions />
         </button>

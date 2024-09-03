@@ -785,7 +785,7 @@ function Navbar() {
                                 {documentId &&
                                   currentDocumentPath?.length &&
                                   currentDocument && (
-                                    <span className="w-5 pt-0.5 h-auto text-neutral-900 cursor-pointer">
+                                    <span className="w-5 pt-0.5 text-neutral-900 cursor-pointer inline-flex pl-6 text-gray-500 ">
                                       <DocumentActionsPopover
                                         value={{
                                           lineType: 'document',
