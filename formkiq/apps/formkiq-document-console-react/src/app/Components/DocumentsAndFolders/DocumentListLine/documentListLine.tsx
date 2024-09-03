@@ -31,6 +31,7 @@ import {
 } from '../../Icons/icons';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
+import {useDocumentActions} from "../DocumentActionsPopover/DocumentActionsContext";
 
 function DocumentListLine({
   file,
@@ -38,16 +39,16 @@ function DocumentListLine({
   siteId,
   isSiteReadOnly,
   documentsRootUri,
-  onShareClick,
-  onDeleteClick,
+  // onShareClick,
+  // onDeleteClick,
   onRestoreClick,
-  onEditTagsAndMetadataModalClick,
-  onRenameModalClick,
-  onMoveModalClick,
-  onDocumentVersionsModalClick,
-  onDocumentWorkflowsModalClick,
-  onDocumentReviewModalClick,
-  onESignaturesModalClick,
+  // onEditTagsAndMetadataModalClick,
+  // onRenameModalClick,
+  // onMoveModalClick,
+  // onDocumentVersionsModalClick,
+  // onDocumentWorkflowsModalClick,
+  // onDocumentReviewModalClick,
+  // onESignaturesModalClick,
   onDocumentDataChange,
   leftOffset = 0,
   isArchiveTabExpanded,
@@ -64,17 +65,17 @@ function DocumentListLine({
   siteId: string;
   isSiteReadOnly: boolean;
   documentsRootUri: string;
-  onShareClick: any;
+  // onShareClick: any;
   searchDocuments: any;
-  onDeleteClick: any;
+  // onDeleteClick: any;
   onRestoreClick: any;
-  onEditTagsAndMetadataModalClick: any;
-  onRenameModalClick: any;
-  onMoveModalClick: any;
-  onDocumentVersionsModalClick: any;
-  onDocumentWorkflowsModalClick: any;
-  onDocumentReviewModalClick: any;
-  onESignaturesModalClick: any;
+  // onEditTagsAndMetadataModalClick: any;
+  // onRenameModalClick: any;
+  // onMoveModalClick: any;
+  // onDocumentVersionsModalClick: any;
+  // onDocumentWorkflowsModalClick: any;
+  // onDocumentReviewModalClick: any;
+  // onESignaturesModalClick: any;
   onDocumentDataChange: any;
   filterTag: string | null;
   leftOffset?: number;
@@ -105,6 +106,12 @@ function DocumentListLine({
     useIndividualSharing,
     pendingArchive,
   } = useSelector(ConfigState);
+
+  const {
+    onShareClick,
+    onDeleteClick,
+  } = useDocumentActions();
+
 
   const restoreDocument = () => {
     onRestoreClick();
@@ -541,7 +548,7 @@ function DocumentListLine({
                 </ButtonSecondary>
                 <ButtonSecondary
                   type="button"
-                  onClick={()=>onDeleteClick(file.documentId, false)}
+                  onClick={()=>onDeleteClick(file.documentId, false, siteId, setSelectedDocuments)}
                   className="mr-2 hover:bg-red-50"
                   style={{
                     borderColor: '#ef4444',
@@ -572,7 +579,7 @@ function DocumentListLine({
                     <div
                       className="w-3 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
                       data-test-id="delete-action"
-                      onClick={()=>onDeleteClick(file.documentId, useSoftDelete)}
+                      onClick={()=>onDeleteClick(file.documentId, useSoftDelete, siteId, setSelectedDocuments)}
                     >
                       <Trash />
                     </div>
@@ -589,26 +596,27 @@ function DocumentListLine({
                     siteId={siteId}
                     isSiteReadOnly={isSiteReadOnly}
                     formkiqVersion={formkiqVersion}
-                    onDeleteClick={()=>onDeleteClick(file.documentId, useSoftDelete)}
-                    onShareClick={onShareClick}
-                    onEditTagsAndMetadataModalClick={
-                      onEditTagsAndMetadataModalClick
-                    }
-                    onRenameModalClick={onRenameModalClick}
-                    onMoveModalClick={onMoveModalClick}
-                    onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                    onDocumentWorkflowsModalClick={
-                      onDocumentWorkflowsModalClick
-                    }
-                    onDocumentReviewModalClick={onDocumentReviewModalClick}
-                    onESignaturesModalClick={onESignaturesModalClick}
-                    user={user}
+                    // onDeleteClick={()=>onDeleteClick(file.documentId, useSoftDelete)}
+                    // onShareClick={onShareClick}
+                    // onEditTagsAndMetadataModalClick={
+                    //   onEditTagsAndMetadataModalClick
+                    // }
+                    // onRenameModalClick={onRenameModalClick}
+                    // onMoveModalClick={onMoveModalClick}
+                    // onDocumentVersionsModalClick={onDocumentVersionsModalClick}
+                    // onDocumentWorkflowsModalClick={
+                    //   onDocumentWorkflowsModalClick
+                    // }
+                    // onDocumentReviewModalClick={onDocumentReviewModalClick}
+                    // onESignaturesModalClick={onESignaturesModalClick}
+                    // user={user}
                     useIndividualSharing={useIndividualSharing}
                     useCollections={useCollections}
                     useSoftDelete={useSoftDelete}
                     isDeeplinkPath={
                       file?.deepLinkPath && file.deepLinkPath.length > 0
                     }
+                    setSelectedDocuments={setSelectedDocuments}
                   />
                 </div>
               </>

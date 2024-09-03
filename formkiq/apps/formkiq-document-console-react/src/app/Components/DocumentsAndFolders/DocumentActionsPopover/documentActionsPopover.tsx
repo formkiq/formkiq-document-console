@@ -20,6 +20,7 @@ import {
   Trash,
   Workflow,
 } from '../../Icons/icons';
+import { useDocumentActions } from './DocumentActionsContext';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
@@ -28,6 +29,7 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
         setExpanded(false);
       }
     }
+
     // Bind the event listener
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -38,28 +40,37 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
 }
 
 export default function DocumentActionsPopover({
-  onChange,
-  onKeyDown,
   value,
   siteId,
   isSiteReadOnly,
   formkiqVersion,
-  onShareClick,
-  onDeleteClick,
-  onEditTagsAndMetadataModalClick,
-  onRenameModalClick,
-  onMoveModalClick,
-  onDocumentVersionsModalClick,
-  onDocumentWorkflowsModalClick,
-  onDocumentReviewModalClick,
-  onESignaturesModalClick,
+  // onShareClick,
+  // onDeleteClick,
+  // onEditTagsAndMetadataModalClick: onEditAttributesModalClick,
+  // onRenameModalClick,
+  // onMoveModalClick,
+  // onDocumentVersionsModalClick,
+  // onDocumentWorkflowsModalClick,
+  // onDocumentReviewModalClick,
+  // onESignaturesModalClick,
   onInfoPage,
-  user,
   useIndividualSharing,
   useCollections,
   useSoftDelete,
   isDeeplinkPath,
+  setSelectedDocuments,
 }: any) {
+  const {
+    onShareClick,
+    onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
+    onESignaturesModalClick,
+    onDocumentReviewModalClick,
+    onDeleteClick,
+    onEditAttributesModalClick,
+    onRenameModalClick,
+    onMoveModalClick,
+  } = useDocumentActions();
   const line: ILine = value;
   const [visible, setVisibility] = useState(false);
   const [referenceRef, setReferenceRef] = useState(null);
@@ -82,11 +93,13 @@ export default function DocumentActionsPopover({
 
   const clickDelete = () => {
     setVisibility(false);
-    onDeleteClick();
+    onDeleteClick(line.documentId, useSoftDelete, siteId, setSelectedDocuments);
   };
+
   function handleDropdownClick(event: any) {
     setVisibility(!visible);
   }
+
   const DownloadDocument = () => {
     DocumentsService.getDocumentUrl(line.documentId, siteId, '', false).then(
       (urlResponse: any) => {
@@ -360,7 +373,7 @@ export default function DocumentActionsPopover({
                 <li
                   className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(event) =>
-                    onEditTagsAndMetadataModalClick(event, {
+                    onEditAttributesModalClick(event, {
                       lineType: line.lineType,
                       documentId: line.documentId,
                       folder: line.folder,
