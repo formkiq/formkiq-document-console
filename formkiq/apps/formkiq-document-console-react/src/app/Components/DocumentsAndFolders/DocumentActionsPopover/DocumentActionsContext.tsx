@@ -8,6 +8,7 @@ import { useAppDispatch } from '../../../Store/store';
 import { deleteDocument } from '../../../Store/reducers/documentsList';
 import { useSelector } from 'react-redux';
 import { AuthState } from '../../../Store/reducers/auth';
+import {useNavigate} from "react-router-dom";
 
 interface DocumentActionsContextType {
   shareModalValue: ILine | null;
@@ -133,6 +134,8 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
 
   const dispatch = useAppDispatch();
   const { user } = useSelector(AuthState);
+  const navigate = useNavigate();
+  const pathname =  window.location.pathname;
 
   const onShareClick = (event: any, value: ILine | null) => {
     setShareModalValue(value);
@@ -292,6 +295,9 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     }
     if (setSelectedDocuments) {
       setSelectedDocuments((docs) => docs.filter((doc: any) => doc !== id));
+    } else {
+      const folderLocation = pathname.split('/').slice(0, -1).join('/');
+      navigate(folderLocation)
     }
   };
 

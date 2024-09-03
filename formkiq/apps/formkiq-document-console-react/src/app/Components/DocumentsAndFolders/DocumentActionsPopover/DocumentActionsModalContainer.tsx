@@ -10,20 +10,19 @@ import DocumentReviewModal from '../DocumentReviewModal/DocumentReviewModal';
 import MultiValuedAttributeModal from '../MultivaluedAttributeModal/MultivaluedAttributeModal';
 import {IDocumentTag} from "../../../helpers/types/documentTag";
 import {ILine} from "../../../helpers/types/line";
+import {useSelector} from "react-redux";
+import {AttributesDataState} from "../../../Store/reducers/attributesData";
 
-const ModalContainer = ({
+const DocumentActionsModalContainer = ({
   currentSiteId,
   isSiteReadOnly,
   currentDocumentsRootUri,
   onDocumentDataChange,
-  allTags,
 }: {
-
     currentSiteId: string;
     isSiteReadOnly: boolean;
     currentDocumentsRootUri: string;
     onDocumentDataChange: (event: any, value: ILine | null) => void;
-    allTags: IDocumentTag[];
 }) => {
   const {
     shareModalOpened,
@@ -63,6 +62,7 @@ const ModalContainer = ({
     getShareModalValue,
     getEditAttributesModalValue,
   } = useDocumentActions();
+  const { allTags } = useSelector(AttributesDataState);
 
   return (
     <>
@@ -134,4 +134,4 @@ const ModalContainer = ({
   );
 };
 
-export default ModalContainer;
+export default DocumentActionsModalContainer;

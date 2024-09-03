@@ -92,7 +92,7 @@ import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import ModalContainer from "../../Components/DocumentsAndFolders/DocumentActionsPopover/ModalContainer";
+import DocumentActionsModalContainer from "../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer";
 import {useDocumentActions} from "../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext";
 
 function Documents() {
@@ -2711,12 +2711,11 @@ function Documents() {
       {/*  isOpened={isMultivaluedAttributeModalOpened}*/}
       {/*  onClose={onMultiValuedAttributeModalClose}*/}
       {/*/>*/}
-      <ModalContainer
+      <DocumentActionsModalContainer
         currentSiteId={currentSiteId}
         isSiteReadOnly={isSiteReadOnly}
         currentDocumentsRootUri={currentDocumentsRootUri}
         onDocumentDataChange={onDocumentDataChange}
-        allTags={allTags}
       />
     </>
   );

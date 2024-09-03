@@ -4,7 +4,10 @@ import { matchPath } from 'react-router';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthState, logout } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
-import { DataCacheState } from '../../Store/reducers/data';
+import {
+  DataCacheState,
+  setCurrentDocumentPath,
+} from '../../Store/reducers/data';
 import { useAppDispatch } from '../../Store/store';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import {
@@ -45,7 +48,15 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
-import { setDocuments } from '../../Store/reducers/documentsList';
+import {
+  DocumentListState,
+  setCurrentDocument,
+  setDocuments,
+} from '../../Store/reducers/documentsList';
+import DocumentActionsPopover from '../DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
+import { IDocument } from '../../helpers/types/document';
+import DocumentActionsModalContainer from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer';
+import { ILine } from '../../helpers/types/line';
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -72,24 +83,34 @@ function Navbar() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(AuthState);
-  const { formkiqVersion, useNotifications, isSidebarExpanded } =
-    useSelector(ConfigState);
+  const {
+    formkiqVersion,
+    useIndividualSharing,
+    useCollections,
+    useSoftDelete,
+    useNotifications,
+    isSidebarExpanded,
+  } = useSelector(ConfigState);
   const { currentDocumentPath } = useSelector(DataCacheState);
 
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const { hash } = useLocation();
-  const { siteId, siteDocumentsRootUri, siteDocumentsRootName } =
-    getCurrentSiteInfo(
-      pathname,
-      user,
-      hasUserSite,
-      hasDefaultSite,
-      hasWorkspaces,
-      workspaceSites
-    );
-
+  const {
+    siteId,
+    siteDocumentsRootUri,
+    siteDocumentsRootName,
+    isSiteReadOnly,
+  } = getCurrentSiteInfo(
+    pathname,
+    user,
+    hasUserSite,
+    hasDefaultSite,
+    hasWorkspaces,
+    workspaceSites
+  );
+  const { currentDocument } = useSelector(DocumentListState);
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
@@ -330,12 +351,34 @@ function Navbar() {
           pathname +
           '?' +
           searchParams.toString() +
-          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}`:""),
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}` : ''),
       },
       {
         replace: true,
       }
     );
+  };
+
+  const onDocumentDataChange = (event: any, value: ILine | null) => {
+    if (!currentDocument) return;
+    DocumentsService.getDocumentById(
+      (currentDocument as IDocument).documentId,
+      currentSiteId
+    ).then((response: IDocument) => {
+      if (response) {
+        dispatch(setCurrentDocument(response));
+        dispatch(setCurrentDocumentPath(response.path));
+      } else {
+        navigate(
+          {
+            pathname: siteDocumentsRootUri,
+          },
+          {
+            replace: true,
+          }
+        );
+      }
+    });
   };
 
   return (
@@ -739,6 +782,43 @@ function Navbar() {
                                     </a>
                                   </span>
                                 )}
+                                {documentId &&
+                                  currentDocumentPath?.length &&
+                                  currentDocument && (
+                                    <span className="w-5 pt-0.5 h-auto text-neutral-900 cursor-pointer">
+                                      <DocumentActionsPopover
+                                        value={{
+                                          lineType: 'document',
+                                          folder: currentDocument
+                                            ? (
+                                                currentDocument as IDocument
+                                              ).path
+                                                .split('/')
+                                                .slice(0, -1)
+                                                .join('/')
+                                            : '',
+                                          documentId: (
+                                            currentDocument as IDocument
+                                          ).documentId,
+                                          documentInstance: currentDocument,
+                                        }}
+                                        siteId={siteId}
+                                        isSiteReadOnly={isSiteReadOnly}
+                                        formkiqVersion={formkiqVersion}
+                                        useIndividualSharing={
+                                          useIndividualSharing
+                                        }
+                                        useCollections={useCollections}
+                                        useSoftDelete={useSoftDelete}
+                                        isDeeplinkPath={
+                                          (currentDocument as IDocument)
+                                            ?.deepLinkPath &&
+                                          (currentDocument as IDocument)
+                                            .deepLinkPath.length > 0
+                                        }
+                                      />
+                                    </span>
+                                  )}
                               </span>
                             ) : (
                               <span></span>
@@ -843,6 +923,12 @@ function Navbar() {
             </div>
           </div>
         </div>
+        <DocumentActionsModalContainer
+          currentSiteId={currentSiteId}
+          isSiteReadOnly={isSiteReadOnly}
+          currentDocumentsRootUri={currentDocumentsRootUri}
+          onDocumentDataChange={onDocumentDataChange}
+        />
       </div>
     )
   );

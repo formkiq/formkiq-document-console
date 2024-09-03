@@ -636,6 +636,7 @@ const defaultState = {
   nextToken: null,
   currentSearchPage: 1,
   isLastSearchPageLoaded: false,
+  currentDocument: null
 };
 
 export const documentsListSlice = createSlice({
@@ -1131,6 +1132,9 @@ export const documentsListSlice = createSlice({
         window.location.reload();
       }
     },
+    setCurrentDocument: (state, action) => {
+        state.currentDocument = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchDocuments.rejected, (state) => {
@@ -1157,6 +1161,7 @@ export const {
   updateFolderValue,
   retrieveAndRefreshFolder,
   removeFolderFromList,
+  setCurrentDocument
 } = documentsListSlice.actions;
 
 export const DocumentListState = (state: RootState) => state.documentListState;
