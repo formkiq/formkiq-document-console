@@ -3,17 +3,20 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
-import { DocumentListState, toggleExpandFolder } from '../../../Store/reducers/documentsList';
+import {
+  DocumentListState,
+  toggleExpandFolder,
+} from '../../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../../Store/store';
 import { formatDate } from '../../../helpers/services/toolService';
 import { IDocument, RequestStatus } from '../../../helpers/types/document';
 import { IFolder } from '../../../helpers/types/folder';
 import { ILine } from '../../../helpers/types/line';
 import { ArrowBottom, ArrowRight, Share, Star, Trash } from '../../Icons/icons';
+import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentListLine from '../DocumentListLine/documentListLine';
 import FolderDropWrapper from '../FolderDropWrapper/folderDropWrapper';
-import {useDocumentActions} from "../DocumentActionsPopover/DocumentActionsContext";
 
 interface IProps {
   subfolder: string;
@@ -83,7 +86,7 @@ function FolderListLine({
     useCollections,
     useSoftDelete,
   } = useSelector(ConfigState);
-  const {onShareClick} = useDocumentActions();
+  const { onShareClick } = useDocumentActions();
 
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1);
   const trElem = React.forwardRef((props: any, ref) => (

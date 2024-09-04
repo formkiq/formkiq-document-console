@@ -1,5 +1,6 @@
 import { Ref, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
@@ -13,7 +14,6 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { EmptyDocumentsTable } from './EmptyDocumentsTable';
-import { useLocation, useNavigate } from 'react-router-dom';
 
 type DocumentTableProps = {
   documentsWrapperRef: Ref<any>;
@@ -66,6 +66,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     // onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     // onMoveModalClick,
+    onSubmitForReviewModalClick,
     isArchiveTabExpanded,
     addToPendingArchive,
     deleteFromPendingArchive,
@@ -144,7 +145,11 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   function countVisibleDocuments(folders: IFolder[]): number {
     return folders.reduce((count, folder) => {
       if (folder.isExpanded) {
-        return count + folder.documents.length + countVisibleDocuments(folder.folders);
+        return (
+          count +
+          folder.documents.length +
+          countVisibleDocuments(folder.folders)
+        );
       }
       return count;
     }, 0);
@@ -174,7 +179,9 @@ export const DocumentsTable = (props: DocumentTableProps) => {
         const folderDocumentIds = folder.documents.map((doc) => doc.documentId);
 
         // Recursively get document IDs from subfolders
-        const subFolderDocumentIds = getExpandedFoldersDocumentsIds(folder.folders);
+        const subFolderDocumentIds = getExpandedFoldersDocumentsIds(
+          folder.folders
+        );
 
         return [...acc, ...folderDocumentIds, ...subFolderDocumentIds];
       }

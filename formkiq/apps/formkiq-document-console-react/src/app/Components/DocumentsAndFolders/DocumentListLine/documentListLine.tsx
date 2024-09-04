@@ -9,7 +9,6 @@ import {
   addDocumentTag,
   removeDocumentTag,
 } from '../../../Store/reducers/documentsList';
-import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import {
@@ -29,9 +28,9 @@ import {
   StarFilled,
   Trash,
 } from '../../Icons/icons';
+import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
-import {useDocumentActions} from "../DocumentActionsPopover/DocumentActionsContext";
 
 function DocumentListLine({
   file,
@@ -58,7 +57,7 @@ function DocumentListLine({
   infoDocumentId,
   onDocumentInfoClick,
   selectedDocuments,
-  setSelectedDocuments
+  setSelectedDocuments,
 }: {
   file: any;
   folder: any;
@@ -107,11 +106,7 @@ function DocumentListLine({
     pendingArchive,
   } = useSelector(ConfigState);
 
-  const {
-    onShareClick,
-    onDeleteClick,
-  } = useDocumentActions();
-
+  const { onShareClick, onDeleteClick } = useDocumentActions();
 
   const restoreDocument = () => {
     onRestoreClick();
@@ -232,9 +227,7 @@ function DocumentListLine({
   }
 
   function removeFromSelectedDocuments(documentId: string) {
-    setSelectedDocuments(
-      selectedDocuments.filter((id) => id !== documentId)
-    );
+    setSelectedDocuments(selectedDocuments.filter((id) => id !== documentId));
   }
 
   return (
@@ -548,7 +541,14 @@ function DocumentListLine({
                 </ButtonSecondary>
                 <ButtonSecondary
                   type="button"
-                  onClick={()=>onDeleteClick(file.documentId, false, siteId, setSelectedDocuments)}
+                  onClick={() =>
+                    onDeleteClick(
+                      file.documentId,
+                      false,
+                      siteId,
+                      setSelectedDocuments
+                    )
+                  }
                   className="mr-2 hover:bg-red-50"
                   style={{
                     borderColor: '#ef4444',
@@ -579,7 +579,14 @@ function DocumentListLine({
                     <div
                       className="w-3 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
                       data-test-id="delete-action"
-                      onClick={()=>onDeleteClick(file.documentId, useSoftDelete, siteId, setSelectedDocuments)}
+                      onClick={() =>
+                        onDeleteClick(
+                          file.documentId,
+                          useSoftDelete,
+                          siteId,
+                          setSelectedDocuments
+                        )
+                      }
                     >
                       <Trash />
                     </div>

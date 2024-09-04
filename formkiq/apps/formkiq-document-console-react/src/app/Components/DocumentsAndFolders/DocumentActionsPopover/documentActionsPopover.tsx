@@ -284,6 +284,34 @@ export default function DocumentActionsPopover({
                 </li>
               )}
 
+            {line.lineType === 'document' &&
+              pathname.indexOf('/queues') === -1 && (
+                <li
+                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(event) =>
+                    onSubmitForReviewModalClick(event, {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      folder: line.folder,
+                      documentInstance: line.documentInstance,
+                    })
+                  }
+                >
+                  <span className={'flex items-baseline'}>
+                    <span className="mr-2 w-3.5 text-neutral-900">
+                      <Checkmark />
+                    </span>
+                    <span>Submit for Review</span>
+                    <span
+                      className="ml-auto"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {ArrowRight()}
+                    </span>
+                  </span>
+                </li>
+              )}
+
             {line.lineType === 'document' && pathname.indexOf('/queues') > -1 && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"

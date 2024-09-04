@@ -4,19 +4,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Tooltip } from 'react-tooltip';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
+import { useDocumentActions } from '../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
+import DocumentActionsModalContainer from '../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
-import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentReviewModal/DocumentReviewModal';
-import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
-import DocumentWorkflowsModal from '../../Components/DocumentsAndFolders/DocumentWorkflowsModal/documentWorkflowsModal';
-import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
-import EditAttributesModal from '../../Components/DocumentsAndFolders/EditAttributesModal/editAttributesModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
-import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal';
-import MultiValuedAttributeModal from '../../Components/DocumentsAndFolders/MultivaluedAttributeModal/MultivaluedAttributeModal';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
-import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
 import AdvancedSearchTab from '../../Components/DocumentsAndFolders/Search/advancedSearchTab';
+import SubmitForReviewModal from '../../Components/DocumentsAndFolders/SubmitForReviewModal/submitForReviewModal';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
@@ -38,7 +34,6 @@ import {
   Undo,
   View,
 } from '../../Components/Icons/icons';
-import ShareModal from '../../Components/Share/share';
 import {
   AttributesState,
   fetchDocumentAttributes,
@@ -92,8 +87,6 @@ import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import DocumentActionsModalContainer from "../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer";
-import {useDocumentActions} from "../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext";
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -183,6 +176,7 @@ function Documents() {
   const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
+  const [infoDocumentAction, setInfoDocumentAction] = useState('');
   const [infoTagEditMode, setInfoTagEditMode] = useState(false);
   // NOTE: not fully implemented;
   // using the edit metadata modal for now, to be replaced with new system to indicate diff between tag, metadata, and versioned metadata
@@ -238,6 +232,10 @@ function Documents() {
     useState<any[]>([]);
   const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
   const [isMoveModalOpened, setMoveModalOpened] = useState(false);
+  const [submitForReviewModalValue, setSubmitForReviewModalValue] =
+    useState<ILine | null>(null);
+  const [isSubmitForReviewModalOpened, setSubmitForReviewModalOpened] =
+    useState(false);
   const dispatch = useAppDispatch();
   const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
     []
@@ -354,14 +352,45 @@ function Documents() {
           // TODO: set folder to selected document path?
           updateTags();
           updateDocumentActions();
-
           // close history tab if deeplink file
           if (
             infoDocumentView === 'history' &&
-            response.deepLinkPath &&
-            response.deepLinkPath.length > 0
+            response.deepLinkPath?.length > 0
           ) {
             setInfoDocumentView('info');
+          }
+          // CHECK FOR MODAL ACTION
+          if (infoDocumentAction.length) {
+            switch (infoDocumentAction) {
+              case 'attributes':
+                onEditAttributesModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                break;
+              case 'submitForReview':
+                onSubmitForReviewModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                break;
+              case 'reviewDocument':
+                onDocumentReviewModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                break;
+            }
+            setInfoDocumentAction('');
           }
         }
       );
@@ -403,10 +432,22 @@ function Documents() {
 
   useEffect(() => {
     if (hash.indexOf('#id=') > -1) {
-      setInfoDocumentId(hash.substring(4));
-    } else if (hash.indexOf('#history_id') > -1) {
-      setInfoDocumentId(hash.substring(12));
-      setInfoDocumentView('history');
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const id = hashParams.get('id');
+      const action = hashParams.get('action');
+      if (id) {
+        setInfoDocumentId(id);
+      } else {
+        setInfoDocumentId(''); // Handle case where id might be null
+      }
+      if (action) {
+        setInfoDocumentAction(action);
+        if (action === 'history') {
+          setInfoDocumentView('history');
+        }
+      } else {
+        setInfoDocumentAction('');
+      }
     } else {
       setInfoDocumentId('');
     }
@@ -637,7 +678,7 @@ function Documents() {
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    setSelectedDocuments([])
+    setSelectedDocuments([]);
   }, [pathname]);
 
   useEffect(() => {
@@ -667,7 +708,7 @@ function Documents() {
   ]);
 
   const deleteFunc = async (id: string, softDelete: boolean) => {
-    const res:any = await dispatch(
+    const res: any = await dispatch(
       deleteDocument({
         siteId: currentSiteId,
         user,
@@ -910,6 +951,13 @@ function Documents() {
   // const onMoveModalClose = () => {
   //   setMoveModalOpened(false);
   // };
+  const onSubmitForReviewModalClick = (event: any, value: ILine | null) => {
+    setSubmitForReviewModalValue(value);
+    setSubmitForReviewModalOpened(true);
+  };
+  const onSubmitForReviewModalClose = () => {
+    setSubmitForReviewModalOpened(false);
+  };
   const DownloadDocument = () => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentUrl(
@@ -1541,6 +1589,16 @@ function Documents() {
     }
   };
 
+  const [publicationLinkCopyTooltipText, setPublicationLinkCopyTooltipText] =
+    useState('Copy Link');
+  const CopyPublicationLink = (documentId: string) => {
+    window.navigator.clipboard.writeText(`/publications/${documentId}`);
+    setPublicationLinkCopyTooltipText('Copied!');
+    setTimeout(() => {
+      setPublicationLinkCopyTooltipText('Copy Link');
+    }, 2000);
+  };
+
   return (
     <>
       <Helmet>
@@ -1777,8 +1835,7 @@ function Documents() {
                       </div>
                     </div>
                     {formkiqVersion.type !== 'core' &&
-                      (currentDocument as IDocument).deepLinkPath &&
-                      (currentDocument as IDocument).deepLinkPath.length ===
+                      (currentDocument as IDocument).deepLinkPath?.length ===
                         0 && (
                         <div
                           className="w-1/3 text-sm font-semibold cursor-pointer"
@@ -2115,8 +2172,55 @@ function Documents() {
                                     </dt>
                                     <dd className="text-sm">
                                       {/*Attributes*/}
-                                      {item?.stringValue && (
-                                        <span>{item.stringValue}</span>
+                                      {item?.key === 'Publication' ||
+                                      item?.key === 'Relationships' ? (
+                                        <>
+                                          {item?.stringValue && (
+                                            <div>
+                                              <span className="text-xs pr-2">
+                                                {item.stringValue}
+                                                <span className="mx-1"></span>
+                                                <CopyButton
+                                                  value={item.stringValue}
+                                                />
+                                              </span>
+                                              {item?.key === 'Publication' && (
+                                                <span className="block mt-1 text-xs">
+                                                  <Tooltip
+                                                    id={
+                                                      'publication-link-copy-tooltip'
+                                                    }
+                                                  />
+                                                  <ButtonTertiary
+                                                    className="px-2 py-0.5"
+                                                    data-tooltip-id={
+                                                      'publication-link-copy-tooltip'
+                                                    }
+                                                    data-tooltip-content={
+                                                      publicationLinkCopyTooltipText
+                                                    }
+                                                    onClick={() => {
+                                                      CopyPublicationLink(
+                                                        (
+                                                          currentDocument as IDocument
+                                                        ).documentId
+                                                      );
+                                                    }}
+                                                    type="button"
+                                                  >
+                                                    Copy Publication Link
+                                                  </ButtonTertiary>
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <>
+                                          {item?.stringValue && (
+                                            <span>{item.stringValue}</span>
+                                          )}
+                                        </>
                                       )}
                                       {item?.numberValue !== undefined && (
                                         <span>{item.numberValue}</span>
@@ -2136,14 +2240,31 @@ function Documents() {
                                         <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
                                           {item.stringValues.map(
                                             (val: any, index: number) => (
-                                              <span
-                                                key={`attr_string_${item.key}_${index}`}
-                                              >
-                                                {val}
-                                                {index <
-                                                  item.stringValues.length -
-                                                    1 && <hr />}
-                                              </span>
+                                              <>
+                                                {item?.key ===
+                                                'Relationships' ? (
+                                                  <span
+                                                    className="text-xs"
+                                                    key={`attr_string_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    <span className="mx-1"></span>
+                                                    <CopyButton value={val} />
+                                                    {index <
+                                                      item.stringValues.length -
+                                                        1 && <hr />}
+                                                  </span>
+                                                ) : (
+                                                  <span
+                                                    key={`attr_string_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    {index <
+                                                      item.stringValues.length -
+                                                        1 && <hr />}
+                                                  </span>
+                                                )}
+                                              </>
                                             )
                                           )}
                                         </div>
@@ -2655,6 +2776,7 @@ function Documents() {
       {/*  siteId={currentSiteId}*/}
       {/*  value={eSignaturesModalValue}*/}
       {/*/>*/}
+
       <NewModal
         isOpened={isNewModalOpened}
         onClose={onNewClose}
@@ -2678,6 +2800,15 @@ function Documents() {
       {/*  allTags={allTags}*/}
       {/*  onDocumentDataChange={onDocumentDataChange}*/}
       {/*/>*/}
+
+      <SubmitForReviewModal
+        isOpened={isSubmitForReviewModalOpened}
+        onClose={onSubmitForReviewModalClose}
+        siteId={currentSiteId}
+        value={submitForReviewModalValue}
+        onDocumentDataChange={onDocumentDataChange}
+      />
+
       <UploadModal
         isOpened={isUploadModalOpened}
         onClose={onUploadClose}

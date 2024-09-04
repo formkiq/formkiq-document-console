@@ -8,6 +8,11 @@ import {
   DataCacheState,
   setCurrentDocumentPath,
 } from '../../Store/reducers/data';
+import {
+  DocumentListState,
+  setCurrentDocument,
+  setDocuments,
+} from '../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../Store/store';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import {
@@ -20,8 +25,14 @@ import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
+import { IDocument } from '../../helpers/types/document';
+import { ILine } from '../../helpers/types/line';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
+import DocumentActionsModalContainer from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer';
+import DocumentActionsPopover from '../DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import SearchInput from '../DocumentsAndFolders/Search/searchInput';
+import ButtonPrimary from '../Generic/Buttons/ButtonPrimary';
+import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 import {
   Admin,
   Api,
@@ -48,15 +59,6 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
-import {
-  DocumentListState,
-  setCurrentDocument,
-  setDocuments,
-} from '../../Store/reducers/documentsList';
-import DocumentActionsPopover from '../DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
-import { IDocument } from '../../helpers/types/document';
-import DocumentActionsModalContainer from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer';
-import { ILine } from '../../helpers/types/line';
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -299,6 +301,7 @@ function Navbar() {
   };
 
   const [hasDocumentVersions, setHasDocumentVersions] = useState(false);
+  const [hasInProgressWorkflow, setHasInProgressWorkflow] = useState(false);
 
   useEffect(() => {
     DocumentsService.getDocumentVersions(documentId, currentSiteId).then(
@@ -310,9 +313,31 @@ function Navbar() {
         }
       }
     );
+    DocumentsService.getWorkflowsInDocument(currentSiteId, documentId).then(
+      (response: any) => {
+        if (response.workflows?.length) {
+          const inProgressWorkflows = response.workflows.filter(
+            (workflow: any) => {
+              if (workflow.status === 'IN_PROGRESS') {
+                return true;
+              } else {
+                return false;
+              }
+            }
+          );
+          if (inProgressWorkflows.length > 0) {
+            setHasInProgressWorkflow(true);
+          } else {
+            setHasInProgressWorkflow(false);
+          }
+        } else {
+          setHasInProgressWorkflow(false);
+        }
+      }
+    );
   }, [documentId]);
 
-  const viewFolder = () => {
+  const viewFolder = (event: any, action: string = '') => {
     dispatch(setDocuments({ documents: [] }));
     navigate(
       {
@@ -325,7 +350,9 @@ function Navbar() {
           ) +
           '?scrollToDocumentLine=true' +
           '#id=' +
-          documentId,
+          documentId +
+          '&action=' +
+          action,
       },
       {
         replace: true,
@@ -746,41 +773,79 @@ function Navbar() {
                               <span>
                                 <span className="px-2">|</span>
                                 {currentDocumentPath}
-                                <span className="pl-8">
-                                  <button
-                                    type="button"
-                                    onClick={viewFolder}
-                                    className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                  >
-                                    view folder
-                                  </button>
-                                </span>
-                                <span className="pl-6">
-                                  <span
-                                    className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                    onClick={DownloadDocument}
-                                  >
-                                    download
-                                  </span>
-                                </span>
-                                {hasDocumentVersions && (
-                                  <span className="pl-6">
-                                    <a
-                                      href={
-                                        siteDocumentsRootUri +
-                                        '/folders/' +
-                                        currentDocumentPath.substring(
-                                          0,
-                                          currentDocumentPath.lastIndexOf('/')
-                                        ) +
-                                        '#history_id=' +
-                                        documentId
+                                <span className="px-2"></span>
+                                {hasInProgressWorkflow ? (
+                                  <>
+                                    <ButtonPrimary
+                                      className={
+                                        'text-small font-bold mx-2 px-4 cursor-pointer whitespace-nowrap'
                                       }
-                                      className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
+                                      onClick={(e: any) =>
+                                        viewFolder(e, 'reviewDocument')
+                                      }
                                     >
-                                      view versions
-                                    </a>
-                                  </span>
+                                      Submit Document Review
+                                    </ButtonPrimary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) => viewFolder(e, '')}
+                                    >
+                                      View in Folder
+                                    </ButtonTertiary>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) => viewFolder(e, '')}
+                                    >
+                                      View in Folder
+                                    </ButtonTertiary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={DownloadDocument}
+                                    >
+                                      Download
+                                    </ButtonTertiary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) =>
+                                        viewFolder(e, 'attributes')
+                                      }
+                                    >
+                                      View / Edit Attributes
+                                    </ButtonTertiary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) =>
+                                        viewFolder(e, 'submitForReview')
+                                      }
+                                    >
+                                      Submit for Review
+                                    </ButtonTertiary>
+                                    {hasDocumentVersions && (
+                                      <ButtonTertiary
+                                        className={
+                                          'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                        }
+                                        onClick={(e: any) =>
+                                          viewFolder(e, 'history')
+                                        }
+                                      >
+                                        View Versions
+                                      </ButtonTertiary>
+                                    )}
+                                  </>
                                 )}
                                 {documentId &&
                                   currentDocumentPath?.length &&
