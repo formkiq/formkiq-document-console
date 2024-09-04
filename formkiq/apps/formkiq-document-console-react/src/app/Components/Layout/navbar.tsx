@@ -339,7 +339,7 @@ function Navbar() {
     );
   }, [documentId]);
 
-  const viewFolder = (event: any, action: string = '') => {
+  const viewFolder = (event: any, action = '') => {
     dispatch(setDocuments({ documents: [] }));
     navigate(
       {
