@@ -86,7 +86,7 @@ export default function SubmitForReviewModal({
 
   const searchDocument = useCallback(
     (data: FormData, documentId: string) => {
-      let intervalId: NodeJS.Timeout;
+      const intervalId: NodeJS.Timeout = setInterval(searchAndProcess, 500);
       let attempts = 0;
       const maxAttempts = 30;
 
@@ -97,7 +97,7 @@ export default function SubmitForReviewModal({
         },
       ];
 
-      const searchAndProcess = () => {
+      function searchAndProcess() {
         DocumentsService.searchDocuments(
           siteId,
           formkiqVersion,
@@ -158,7 +158,7 @@ export default function SubmitForReviewModal({
           });
       };
 
-      intervalId = setInterval(searchAndProcess, 500);
+      // intervalId = setInterval(searchAndProcess, 500);
 
       // Clear interval after component unmounts or dialog closes
       return () => clearInterval(intervalId);
