@@ -1,6 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useCallback, useEffect, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ConfigState } from '../../../Store/reducers/config';
 import { useAppDispatch } from '../../../Store/store';
@@ -8,6 +7,16 @@ import { DocumentsService } from '../../../helpers/services/documentsService';
 import { IDocument } from '../../../helpers/types/document';
 import { ILine } from '../../../helpers/types/line';
 import { Close, Spinner } from '../../Icons/icons';
+import {
+  fetchWorkflows,
+  WorkflowsState,
+} from '../../../Store/reducers/workflows';
+import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
+import {
+  RequestStatus,
+  WorkflowSummary,
+} from '../../../helpers/types/workflows';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 
 interface Option {
   value: string;
@@ -22,30 +31,6 @@ interface SubmitForReviewModalProps {
   onDocumentDataChange: any;
 }
 
-interface FormData {
-  option: string;
-  customOptions: string[];
-}
-
-const options: Option[] = [
-  {
-    value: 'test',
-    label: 'Test',
-  },
-  {
-    value: 'custom',
-    label: 'Custom',
-  },
-];
-
-const standardOptions: Option[] = [
-  { value: 'test', label: 'Submit to Yourself (TEST)' },
-];
-
-const customOptions: Option[] = [
-  { value: 'test', label: 'Submit to Yourself (TEST)' },
-];
-
 export default function SubmitForReviewModal({
   isOpened,
   onClose,
@@ -53,20 +38,18 @@ export default function SubmitForReviewModal({
   value,
   onDocumentDataChange,
 }: SubmitForReviewModalProps): JSX.Element {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    reset,
-    formState: { errors },
-  } = useForm<FormData>();
   const dispatch = useAppDispatch();
   const [formActive, setFormActive] = useState<boolean>(true);
   const [isSpinnerDisplayed, setIsSpinnerDisplayed] = useState(false);
+  const [workflowsValues, setWorkflowsValues] = useState<
+    { key: string; title: string }[]
+  >([]);
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
+  const [isWorkflowHasQueue, setIsWorkflowHasQueue] = useState<boolean>(false);
 
   const { formkiqVersion } = useSelector(ConfigState);
-
-  const selectedOption = watch('option');
+  const { workflows, workflowsLoadingStatus } = useSelector(WorkflowsState);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isOpened) {
@@ -74,19 +57,61 @@ export default function SubmitForReviewModal({
     }
   }, [isOpened]);
 
+  const updateWorkflows = () => {
+    dispatch(fetchWorkflows({ siteId, limit: 100 }));
+  };
+  useEffect(() => {
+    if (isOpened) {
+      updateWorkflows();
+    }
+  }, [isOpened]);
+
+  useEffect(() => {
+    if (!workflows) return;
+    setWorkflowsValues(
+      workflows.map((workflow: WorkflowSummary) => ({
+        key: workflow?.workflowId ?? '',
+        title: workflow?.name ?? '',
+      }))
+    );
+  }, [workflows]);
+
+  function resetValues() {
+    setSelectedWorkflowId('');
+    setIsWorkflowHasQueue(false);
+  }
+
   const closeDialog = useCallback((): void => {
     setFormActive(false);
-    reset();
     setIsSpinnerDisplayed(false);
+    resetValues();
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
     setTimeout(() => {
       onDocumentDataChange();
     }, 1500);
     onClose();
-  }, [reset, onDocumentDataChange, onClose]);
+  }, [onDocumentDataChange, onClose]);
+
+  useEffect(() => {
+    // Clear interval when component unmounts
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
 
   const searchDocument = useCallback(
-    (data: FormData, documentId: string) => {
-      const intervalId: NodeJS.Timeout = setInterval(searchAndProcess, 500);
+    (documentId: string) => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      intervalRef.current = setInterval(searchAndProcess, 500);
       let attempts = 0;
       const maxAttempts = 30;
 
@@ -109,8 +134,11 @@ export default function SubmitForReviewModal({
           searchAttributes
         )
           .then((response) => {
-            if (response.documents.length > 0) {
-              clearInterval(intervalId);
+            if (response.documents?.length > 0) {
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+              }
               setIsSpinnerDisplayed(false);
 
               const newName: string =
@@ -121,70 +149,117 @@ export default function SubmitForReviewModal({
                 newName
               );
 
-              let workflowId = '';
-              switch (data.option) {
-                case 'test':
-                  console.log('test');
-                  workflowId = '';
-                  break;
-                case 'custom':
-                  console.log('custom');
-                  workflowId = '';
-                  break;
-              }
-
               DocumentsService.addWorkflowToDocument(
                 siteId,
                 response.documents[0].documentId,
-                workflowId
+                selectedWorkflowId
               );
 
               closeDialog();
             } else {
               attempts++;
               if (attempts >= maxAttempts) {
-                clearInterval(intervalId);
+                if (intervalRef.current) {
+                  clearInterval(intervalRef.current);
+                  intervalRef.current = null;
+                }
                 console.log('Document search timed out');
                 setIsSpinnerDisplayed(false);
                 // Handle timeout (e.g., show an error message to the user)
+                dispatch(
+                  openNotificationDialog({
+                    dialogTitle: 'Something went wrong. Please try again later',
+                  })
+                );
               }
             }
           })
           .catch((error) => {
             console.error('Error searching documents:', error);
-            clearInterval(intervalId);
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
             setIsSpinnerDisplayed(false);
             // Handle error (e.g., show an error message to the user)
+            dispatch(
+              openNotificationDialog({
+                dialogTitle: 'Error searching documents:' + error.message,
+              })
+            );
           });
-      };
-
-      // intervalId = setInterval(searchAndProcess, 500);
+      }
 
       // Clear interval after component unmounts or dialog closes
-      return () => clearInterval(intervalId);
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      };
     },
     [siteId, formkiqVersion, value, closeDialog]
   );
 
-  const onSubmit: SubmitHandler<FormData> = (data: FormData): void => {
+  const onSubmit = (e: any) => {
+    e.preventDefault();
+    if (!isWorkflowHasQueue) return;
     if (formActive && value) {
-      setIsSpinnerDisplayed(true);
-      if (data.customOptions && data.customOptions.length > 0) {
+      if ((value?.documentInstance as IDocument).deepLinkPath?.length > 0) {
+        setIsSpinnerDisplayed(true);
         const actions = [
           {
             type: 'PDFEXPORT',
           },
         ];
-        DocumentsService.postDocumentActions(value.documentId, actions, siteId);
-        searchDocument(data, value.documentId);
+        DocumentsService.postDocumentActions(
+          value.documentId,
+          actions,
+          siteId
+        ).then((response) => {
+          if (response.status === 200) {
+            searchDocument(value.documentId);
+          } else {
+            setIsSpinnerDisplayed(false);
+              // Handle error (e.g., show an error message to the user)
+            dispatch(
+              openNotificationDialog({
+                dialogTitle: 'Something went wrong. Please try again later',
+              })
+            );
+          }
+        });
+      } else {
+        DocumentsService.addWorkflowToDocument(
+          siteId,
+          value.documentId,
+          selectedWorkflowId
+        ).then((response) => {
+          if (response.status === 201) {
+            closeDialog();
+          }
+        });
       }
-      console.log(data);
     }
   };
 
+  function onSelectWorkflowId(workflowId: string) {
+    setSelectedWorkflowId(workflowId);
+    DocumentsService.getWorkflow(workflowId, siteId).then((workflow) => {
+      const queueStep: any = workflow.steps?.find(
+        (step: any) => step.queue?.queueId
+      );
+      if (queueStep) {
+        setIsWorkflowHasQueue(true);
+      } else {
+        setIsWorkflowHasQueue(false);
+      }
+    });
+  }
+
   return (
     <Transition.Root show={isOpened} as={Fragment}>
-      <Dialog as="div" className="relative z-20" onClose={(): void => {}}>
+      <Dialog as="div" className="relative z-20" onClose={closeDialog}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -208,7 +283,7 @@ export default function SubmitForReviewModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-1/2 h-1/2">
+              <Dialog.Panel className="relative transform text-left transition-all w-full lg:w-1/2 h-1/2">
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
@@ -227,74 +302,30 @@ export default function SubmitForReviewModal({
                       <Close />
                     </div>
                   </div>
-                  <form
-                    onSubmit={handleSubmit(onSubmit)}
-                    className="w-full mt-4"
-                  >
+                  <form onSubmit={onSubmit} className="w-full mt-4">
                     <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
-                      <div className="w-full mr-12">
-                        <select
-                          {...register('option', { required: true })}
-                          className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none"
-                        >
-                          <option value="">Select an option</option>
-                          {options.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.option && (
-                          <span className="text-red-500 text-sm">
-                            You must choose one or more reviewers.
-                          </span>
-                        )}
+                      <div className="w-full mr-12 relative">
+                        <RadioCombobox
+                          values={workflowsValues}
+                          selectedValue={selectedWorkflowId}
+                          setSelectedValue={onSelectWorkflowId}
+                          placeholderText="Select a workflow"
+                        />
+                        {!isWorkflowHasQueue &&
+                          selectedWorkflowId.length > 0 && (
+                            <span className="text-red-500 text-sm">
+                              This workflow has no approval queue step. Please
+                              select another workflow or add a queue step for
+                              this workflow.
+                            </span>
+                          )}
+                        {/*{selectedReviewers.length === 0 && (*/}
+                        {/*  <span className="text-red-500 text-sm">*/}
+                        {/*    You must choose one or more reviewers.*/}
+                        {/*  </span>*/}
+                        {/*)}*/}
                       </div>
                     </div>
-                    {selectedOption === 'test' && (
-                      <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
-                        <div className="w-full mr-12">
-                          <div className="space-y-2">
-                            {standardOptions.map((option) => (
-                              <label
-                                key={option.value}
-                                className="flex items-center space-x-2"
-                              >
-                                <input
-                                  type="checkbox"
-                                  {...register('customOptions')}
-                                  value={option.value}
-                                  className="form-checkbox h-5 w-5 text-blue-600"
-                                />
-                                <span className="pl-2">{option.label}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {selectedOption === 'custom' && (
-                      <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
-                        <div className="w-full mr-12">
-                          <div className="space-y-2">
-                            {customOptions.map((option) => (
-                              <label
-                                key={option.value}
-                                className="flex items-center space-x-2"
-                              >
-                                <input
-                                  type="checkbox"
-                                  {...register('customOptions')}
-                                  value={option.value}
-                                  className="form-checkbox h-5 w-5 text-blue-600"
-                                />
-                                <span className="pl-2">{option.label}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
                     <div className="w-full flex justify-center">
                       <button
                         type="submit"
@@ -310,14 +341,15 @@ export default function SubmitForReviewModal({
                         Cancel
                       </button>
                     </div>
-                    {isSpinnerDisplayed && (
-                      <div
-                        className="absolute"
-                        style={{ right: 'calc(50% - 110px)', top: '5px' }}
-                      >
-                        <Spinner />
-                      </div>
-                    )}
+                    {isSpinnerDisplayed ||
+                      (workflowsLoadingStatus === RequestStatus.pending && (
+                        <div
+                          className="absolute"
+                          style={{ right: 'calc(50% - 110px)', top: '5px' }}
+                        >
+                          <Spinner />
+                        </div>
+                      ))}
                   </form>
                 </div>
               </Dialog.Panel>
