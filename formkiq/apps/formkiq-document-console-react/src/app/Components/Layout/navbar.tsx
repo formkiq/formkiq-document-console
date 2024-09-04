@@ -815,17 +815,7 @@ function Navbar() {
                                     </ButtonTertiary>
                                     <ButtonTertiary
                                       className={
-                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
-                                      }
-                                      onClick={(e: any) =>
-                                        viewFolder(e, 'attributes')
-                                      }
-                                    >
-                                      View / Edit Attributes
-                                    </ButtonTertiary>
-                                    <ButtonTertiary
-                                      className={
-                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                        'hidden text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
                                       }
                                       onClick={(e: any) =>
                                         viewFolder(e, 'submitForReview')
@@ -836,7 +826,7 @@ function Navbar() {
                                     {hasDocumentVersions && (
                                       <ButtonTertiary
                                         className={
-                                          'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                          'hidden text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
                                         }
                                         onClick={(e: any) =>
                                           viewFolder(e, 'history')

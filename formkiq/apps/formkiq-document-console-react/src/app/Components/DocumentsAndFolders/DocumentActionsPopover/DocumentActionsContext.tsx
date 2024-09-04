@@ -1,14 +1,14 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { ILine } from '../../../helpers/types/line';
+import moment from 'moment/moment';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { IDocumentTag } from '../../../helpers/types/documentTag';
-import moment from 'moment/moment';
+import { ILine } from '../../../helpers/types/line';
+import { AuthState } from '../../../Store/reducers/auth';
+import { deleteDocument } from '../../../Store/reducers/documentsList';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
-import { deleteDocument } from '../../../Store/reducers/documentsList';
-import { useSelector } from 'react-redux';
-import { AuthState } from '../../../Store/reducers/auth';
-import {useNavigate} from "react-router-dom";
 
 interface DocumentActionsContextType {
   shareModalValue: ILine | null;
@@ -25,6 +25,8 @@ interface DocumentActionsContextType {
   documentWorkflowsModalOpened: boolean;
   eSignaturesModalValue: ILine | null;
   eSignaturesModalOpened: boolean;
+  submitForReviewModalValue: ILine | null;
+  submitForReviewModalOpened: boolean;
   documentReviewModalValue: ILine | null;
   documentReviewModalOpened: boolean;
   onShareClick: (event: any, value: any) => void;
@@ -45,6 +47,8 @@ interface DocumentActionsContextType {
   onDocumentWorkflowsModalClose: () => void;
   onESignaturesModalClick: (event: any, value: any) => void;
   onESignaturesModalClose: () => void;
+  onSubmitForReviewModalClick: (event: any, value: any) => void;
+  onSubmitForReviewModalClose: () => void;
   onDocumentReviewModalClick: (event: any, value: any) => void;
   onDocumentReviewModalClose: () => void;
 
@@ -74,8 +78,8 @@ interface DocumentActionsContextType {
   getShareModalValue: () => any;
   getEditAttributesModalValue: () => any;
   onMultiValuedAttributeModalClose: () => void;
-  multivaluedAttributeModalValue:  any;
-  isMultivaluedAttributeModalOpened:  boolean;
+  multivaluedAttributeModalValue: any;
+  isMultivaluedAttributeModalOpened: boolean;
 }
 
 const DocumentActionsContext = createContext<
@@ -107,6 +111,10 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   const [eSignaturesModalValue, setESignaturesModalValue] =
     useState<ILine | null>(null);
   const [eSignaturesModalOpened, setESignaturesModalOpened] = useState(false);
+  const [submitForReviewModalValue, setSubmitForReviewModalValue] =
+    useState<ILine | null>(null);
+  const [submitForReviewModalOpened, setSubmitForReviewModalOpened] =
+    useState(false);
   const [documentReviewModalValue, setDocumentReviewModalValue] =
     useState<ILine | null>(null);
   const [documentReviewModalOpened, setDocumentReviewModalOpened] =
@@ -135,7 +143,7 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   const dispatch = useAppDispatch();
   const { user } = useSelector(AuthState);
   const navigate = useNavigate();
-  const pathname =  window.location.pathname;
+  const pathname = window.location.pathname;
 
   const onShareClick = (event: any, value: ILine | null) => {
     setShareModalValue(value);
@@ -205,7 +213,14 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     setESignaturesModalValue(null);
     setESignaturesModalOpened(false);
   };
+  const onSubmitForReviewModalClick = (event: any, value: ILine | null) => {
+    setSubmitForReviewModalValue(value);
+    setSubmitForReviewModalOpened(true);
+  };
 
+  const onSubmitForReviewModalClose = () => {
+    setSubmitForReviewModalOpened(false);
+  };
   const onDocumentReviewModalClick = (event: any, value: ILine | null) => {
     setDocumentReviewModalValue(value);
     setDocumentReviewModalOpened(true);
@@ -297,7 +312,7 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
       setSelectedDocuments((docs) => docs.filter((doc: any) => doc !== id));
     } else {
       const folderLocation = pathname.split('/').slice(0, -1).join('/');
-      navigate(folderLocation)
+      navigate(folderLocation);
     }
   };
 
@@ -356,6 +371,8 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     onDocumentWorkflowsModalClose,
     onESignaturesModalClick,
     onESignaturesModalClose,
+    onSubmitForReviewModalClick,
+    onSubmitForReviewModalClose,
     onDocumentReviewModalClick,
     onDocumentReviewModalClose,
     updateTags,
@@ -376,6 +393,8 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     onMultiValuedAttributeModalClose,
     multivaluedAttributeModalValue,
     isMultivaluedAttributeModalOpened,
+    submitForReviewModalOpened,
+    submitForReviewModalValue,
   };
 
   return (

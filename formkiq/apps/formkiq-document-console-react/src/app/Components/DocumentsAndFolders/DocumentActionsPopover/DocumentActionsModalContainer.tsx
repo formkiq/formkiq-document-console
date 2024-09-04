@@ -1,17 +1,17 @@
-import { useDocumentActions } from './DocumentActionsContext';
+import { useSelector } from 'react-redux';
+import { ILine } from '../../../helpers/types/line';
+import { AttributesDataState } from '../../../Store/reducers/attributesData';
 import ShareModal from '../../Share/share';
-import EditAttributesModal from '../EditAttributesModal/editAttributesModal';
+import DocumentReviewModal from '../DocumentReviewModal/DocumentReviewModal';
 import DocumentVersionsModal from '../DocumentVersionsModal/documentVersionsModal';
 import DocumentWorkflowsModal from '../DocumentWorkflowsModal/documentWorkflowsModal';
+import EditAttributesModal from '../EditAttributesModal/editAttributesModal';
 import ESignaturesModal from '../ESignatures/eSignaturesModal';
-import RenameModal from '../RenameModal/renameModal';
 import MoveModal from '../MoveModal/moveModal';
-import DocumentReviewModal from '../DocumentReviewModal/DocumentReviewModal';
 import MultiValuedAttributeModal from '../MultivaluedAttributeModal/MultivaluedAttributeModal';
-import {IDocumentTag} from "../../../helpers/types/documentTag";
-import {ILine} from "../../../helpers/types/line";
-import {useSelector} from "react-redux";
-import {AttributesDataState} from "../../../Store/reducers/attributesData";
+import RenameModal from '../RenameModal/renameModal';
+import SubmitForReviewModal from '../SubmitForReviewModal/submitForReviewModal';
+import { useDocumentActions } from './DocumentActionsContext';
 
 const DocumentActionsModalContainer = ({
   currentSiteId,
@@ -19,10 +19,10 @@ const DocumentActionsModalContainer = ({
   currentDocumentsRootUri,
   onDocumentDataChange,
 }: {
-    currentSiteId: string;
-    isSiteReadOnly: boolean;
-    currentDocumentsRootUri: string;
-    onDocumentDataChange: (event: any, value: ILine | null) => void;
+  currentSiteId: string;
+  isSiteReadOnly: boolean;
+  currentDocumentsRootUri: string;
+  onDocumentDataChange: (event: any, value: ILine | null) => void;
 }) => {
   const {
     shareModalOpened,
@@ -48,6 +48,9 @@ const DocumentActionsModalContainer = ({
     onMoveModalClose,
     uploadModalOpened,
     onUploadClose,
+    submitForReviewModalOpened,
+    submitForReviewModalValue,
+    onSubmitForReviewModalClose,
     documentReviewModalOpened,
     documentReviewModalValue,
     onDocumentReviewModalClose,
@@ -117,6 +120,13 @@ const DocumentActionsModalContainer = ({
         siteId={currentSiteId}
         value={moveModalValue}
         allTags={allTags}
+        onDocumentDataChange={onDocumentDataChange}
+      />
+      <SubmitForReviewModal
+        isOpened={submitForReviewModalOpened}
+        onClose={onSubmitForReviewModalClose}
+        siteId={currentSiteId}
+        value={submitForReviewModalValue}
         onDocumentDataChange={onDocumentDataChange}
       />
       <DocumentReviewModal

@@ -66,7 +66,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     // onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
     // onMoveModalClick,
-    onSubmitForReviewModalClick,
+    // onSubmitForReviewModalClick,
     isArchiveTabExpanded,
     addToPendingArchive,
     deleteFromPendingArchive,

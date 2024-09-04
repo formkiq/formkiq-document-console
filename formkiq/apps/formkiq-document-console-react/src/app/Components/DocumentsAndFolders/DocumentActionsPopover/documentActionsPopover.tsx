@@ -65,6 +65,7 @@ export default function DocumentActionsPopover({
     onDocumentVersionsModalClick,
     onDocumentWorkflowsModalClick,
     onESignaturesModalClick,
+    onSubmitForReviewModalClick,
     onDocumentReviewModalClick,
     onDeleteClick,
     onEditAttributesModalClick,

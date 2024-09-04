@@ -372,6 +372,7 @@ function Documents() {
                 });
                 break;
               case 'submitForReview':
+                /*
                 onSubmitForReviewModalClick(null, {
                   lineType: 'document',
                   folder: subfolderUri,
@@ -379,8 +380,10 @@ function Documents() {
                   documentInstance: response as IDocument,
                   folderInstance: null,
                 });
+                */
                 break;
               case 'reviewDocument':
+                /*
                 onDocumentReviewModalClick(null, {
                   lineType: 'document',
                   folder: subfolderUri,
@@ -388,6 +391,7 @@ function Documents() {
                   documentInstance: response as IDocument,
                   folderInstance: null,
                 });
+                */
                 break;
             }
             setInfoDocumentAction('');

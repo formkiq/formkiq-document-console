@@ -29,22 +29,21 @@ interface FormData {
 
 const options: Option[] = [
   {
-    value: 'reviewFacilitiesManagement',
-    label: 'Facilities Management Review',
+    value: 'test',
+    label: 'Test',
   },
-  { value: 'reviewHazardousWaste', label: 'Hazardous Waste Review' },
-  { value: 'reviewPeopleOperations', label: 'People Operations Review' },
-  { value: 'custom', label: 'Custom Review Workflow' },
+  {
+    value: 'custom',
+    label: 'Custom',
+  },
 ];
 
 const standardOptions: Option[] = [
-  { value: 'regan.wolfrom.ext@veolia.com', label: 'Submit to Yourself (TEST)' },
-  { value: 'elizabeth.shepperd@veolia.com', label: 'Elizabeth Shepperd' },
-  { value: 'ashley.spence@veolia.com', label: 'Ashley Spence' },
+  { value: 'test', label: 'Submit to Yourself (TEST)' },
 ];
 
 const customOptions: Option[] = [
-  { value: 'regan.wolfrom.ext@veolia.com', label: 'Submit to Yourself (TEST)' },
+  { value: 'test', label: 'Submit to Yourself (TEST)' },
 ];
 
 export default function SubmitForReviewModal({
@@ -124,21 +123,13 @@ export default function SubmitForReviewModal({
 
               let workflowId = '';
               switch (data.option) {
-                case 'reviewFacilitiesManagement':
-                  console.log('fm');
-                  workflowId = '87c6bcd5-c3c2-4141-8098-068e9cb2f1d2';
-                  break;
-                case 'reviewHazardousWaste':
-                  console.log('hw');
-                  workflowId = '133a9271-1742-446d-97fd-7cf9ef1486c3';
-                  break;
-                case 'reviewPeopleOperations':
-                  console.log('peopleops');
-                  workflowId = 'c46cd20e-42a9-41d7-9a21-400e21f4b485';
+                case 'test':
+                  console.log('test');
+                  workflowId = '';
                   break;
                 case 'custom':
                   console.log('custom');
-                  workflowId = 'e095820f-eb8e-4053-9684-0c88bbc58232';
+                  workflowId = '';
                   break;
               }
 
@@ -260,9 +251,7 @@ export default function SubmitForReviewModal({
                         )}
                       </div>
                     </div>
-                    {(selectedOption === 'reviewFacilitiesManagement' ||
-                      selectedOption === 'reviewHazardousWaste' ||
-                      selectedOption === 'reviewPeopleOperations') && (
+                    {selectedOption === 'test' && (
                       <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
                         <div className="w-full mr-12">
                           <div className="space-y-2">
