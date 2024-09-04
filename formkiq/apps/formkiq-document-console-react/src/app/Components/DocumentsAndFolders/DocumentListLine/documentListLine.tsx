@@ -20,6 +20,7 @@ import {
 import { IDocument } from '../../../helpers/types/document';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import {
+  Checkmark,
   Info,
   Minus,
   Plus,
@@ -106,7 +107,12 @@ function DocumentListLine({
     pendingArchive,
   } = useSelector(ConfigState);
 
-  const { onShareClick, onDeleteClick } = useDocumentActions();
+  const {
+    onShareClick,
+    onDeleteClick,
+    onSubmitForReviewModalClick,
+    onDocumentReviewModalClick,
+  } = useDocumentActions();
 
   const restoreDocument = () => {
     onRestoreClick();
@@ -495,6 +501,38 @@ function DocumentListLine({
                 </div>
               )}
             </div>
+            {folder !== 'deleted' &&
+              (location.pathname.indexOf('/queues') === -1 ? (
+                <button
+                  title="Submit for review"
+                  className="w-5 pt-0.5 text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
+                  onClick={(event) =>
+                    onSubmitForReviewModalClick(event, {
+                      lineType: 'document',
+                      documentId: file.documentId,
+                      folder: folder,
+                      documentInstance: file,
+                    })
+                  }
+                >
+                  <Checkmark />
+                </button>
+              ) : (
+                <button
+                  title="Review"
+                  className="w-5 pt-0.5 text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
+                  onClick={(event) =>
+                    onDocumentReviewModalClick(event, {
+                      lineType: 'document',
+                      documentId: file.documentId,
+                      folder: folder,
+                      documentInstance: file,
+                    })
+                  }
+                >
+                  <Checkmark />
+                </button>
+              ))}
             {folder !== 'deleted' && (
               <Link
                 to={`${location.pathname}?${searchParams.toString()}#id=${

@@ -59,6 +59,7 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
+import {useDocumentActions} from "../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext";
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -138,6 +139,7 @@ function Navbar() {
     React.useState(false);
 
   const location = useLocation();
+  const {onSubmitForReviewModalClick,} = useDocumentActions();
 
   const locationPrefix = useMemo(() => {
     let locationPrefix = decodeURI(location.pathname);
@@ -815,10 +817,18 @@ function Navbar() {
                                     </ButtonTertiary>
                                     <ButtonTertiary
                                       className={
-                                        'hidden text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
                                       }
-                                      onClick={(e: any) =>
-                                        viewFolder(e, 'submitForReview')
+                                      onClick={(event:any) =>
+                                        onSubmitForReviewModalClick(event, {
+                                          lineType: "document",
+                                          documentId: documentId,
+                                          folder: currentDocumentPath.substring(
+                                            0,
+                                            currentDocumentPath.lastIndexOf('/')
+                                          ),
+                                          documentInstance: currentDocument,
+                                        })
                                       }
                                     >
                                       Submit for Review

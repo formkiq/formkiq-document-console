@@ -12,7 +12,7 @@ import DocumentActionsPopover from '../../Components/DocumentsAndFolders/Documen
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import AdvancedSearchTab from '../../Components/DocumentsAndFolders/Search/advancedSearchTab';
-import SubmitForReviewModal from '../../Components/DocumentsAndFolders/SubmitForReviewModal/submitForReviewModal';
+// import SubmitForReviewModal from '../../Components/DocumentsAndFolders/SubmitForReviewModal/submitForReviewModal';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
@@ -955,13 +955,13 @@ function Documents() {
   // const onMoveModalClose = () => {
   //   setMoveModalOpened(false);
   // };
-  const onSubmitForReviewModalClick = (event: any, value: ILine | null) => {
-    setSubmitForReviewModalValue(value);
-    setSubmitForReviewModalOpened(true);
-  };
-  const onSubmitForReviewModalClose = () => {
-    setSubmitForReviewModalOpened(false);
-  };
+  // const onSubmitForReviewModalClick = (event: any, value: ILine | null) => {
+  //   setSubmitForReviewModalValue(value);
+  //   setSubmitForReviewModalOpened(true);
+  // };
+  // const onSubmitForReviewModalClose = () => {
+  //   setSubmitForReviewModalOpened(false);
+  // };
   const DownloadDocument = () => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentUrl(
@@ -2805,13 +2805,13 @@ function Documents() {
       {/*  onDocumentDataChange={onDocumentDataChange}*/}
       {/*/>*/}
 
-      <SubmitForReviewModal
-        isOpened={isSubmitForReviewModalOpened}
-        onClose={onSubmitForReviewModalClose}
-        siteId={currentSiteId}
-        value={submitForReviewModalValue}
-        onDocumentDataChange={onDocumentDataChange}
-      />
+      {/*<SubmitForReviewModal*/}
+      {/*  isOpened={isSubmitForReviewModalOpened}*/}
+      {/*  onClose={onSubmitForReviewModalClose}*/}
+      {/*  siteId={currentSiteId}*/}
+      {/*  value={submitForReviewModalValue}*/}
+      {/*  onDocumentDataChange={onDocumentDataChange}*/}
+      {/*/>*/}
 
       <UploadModal
         isOpened={isUploadModalOpened}
