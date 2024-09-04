@@ -154,6 +154,7 @@ function Documents() {
     onEditAttributesModalClick,
     // onRenameModalClick,
     // onMoveModalClick,
+    onAttributeQuantityClick,
   } = useDocumentActions();
 
   useEffect(() => {
@@ -939,10 +940,6 @@ function Documents() {
   // const onRenameModalClose = () => {
   //   setRenameModalOpened(false);
   // };
-  const onAttributeQuantityClick = (item: any) => {
-    setMultivaluedAttributeModalOpened(true);
-    setMultivaluedAttributeModalValue(item);
-  };
   // const onMultiValuedAttributeModalClose = () => {
   //   setMultivaluedAttributeModalOpened(false);
   //   setMultivaluedAttributeModalValue([]);

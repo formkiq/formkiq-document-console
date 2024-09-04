@@ -80,6 +80,7 @@ interface DocumentActionsContextType {
   onMultiValuedAttributeModalClose: () => void;
   multivaluedAttributeModalValue: any;
   isMultivaluedAttributeModalOpened: boolean;
+  onAttributeQuantityClick: (item: any) => void;
 }
 
 const DocumentActionsContext = createContext<
@@ -248,6 +249,10 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     setMultivaluedAttributeModalOpened(false);
     setMultivaluedAttributeModalValue([]);
   };
+  const onAttributeQuantityClick = (item: any) => {
+    setMultivaluedAttributeModalOpened(true);
+    setMultivaluedAttributeModalValue(item);
+  };
 
   const updateTags = (
     infoDocumentId: string,
@@ -395,6 +400,7 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     isMultivaluedAttributeModalOpened,
     submitForReviewModalOpened,
     submitForReviewModalValue,
+    onAttributeQuantityClick
   };
 
   return (
