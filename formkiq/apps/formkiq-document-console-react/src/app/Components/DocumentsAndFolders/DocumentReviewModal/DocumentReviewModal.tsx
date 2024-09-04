@@ -20,11 +20,13 @@ export default function DocumentReviewModal({
   onClose,
   siteId,
   value,
+  onDocumentDataChange,
 }: {
   isOpened: boolean;
   onClose: () => void;
   siteId: string;
   value: ILine | null;
+  onDocumentDataChange: any;
 }) {
   const [comments, setComments] = useState<string>('');
   const [documentWorkflows, setDocumentWorkflows] = useState<Workflow[] | null>(
@@ -127,6 +129,7 @@ export default function DocumentReviewModal({
           })
         );
       } else {
+        onDocumentDataChange();
         closeDialog();
       }
     });

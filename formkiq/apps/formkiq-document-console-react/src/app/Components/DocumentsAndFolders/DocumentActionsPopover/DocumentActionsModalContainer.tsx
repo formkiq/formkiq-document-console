@@ -129,6 +129,7 @@ const DocumentActionsModalContainer = ({
         onClose={onDocumentReviewModalClose}
         siteId={currentSiteId}
         value={documentReviewModalValue}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <MultiValuedAttributeModal
         item={multivaluedAttributeModalValue}
