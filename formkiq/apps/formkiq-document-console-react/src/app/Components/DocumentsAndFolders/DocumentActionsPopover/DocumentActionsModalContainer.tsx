@@ -57,11 +57,6 @@ const DocumentActionsModalContainer = ({
     isMultivaluedAttributeModalOpened,
     multivaluedAttributeModalValue,
     onMultiValuedAttributeModalClose,
-    // currentSiteId,
-    // isSiteReadOnly,
-    // currentDocumentsRootUri,
-    // onDocumentDataChange,
-    // allTags,
     getShareModalValue,
     getEditAttributesModalValue,
   } = useDocumentActions();

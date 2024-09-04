@@ -12,7 +12,6 @@ import DocumentActionsPopover from '../../Components/DocumentsAndFolders/Documen
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import AdvancedSearchTab from '../../Components/DocumentsAndFolders/Search/advancedSearchTab';
-// import SubmitForReviewModal from '../../Components/DocumentsAndFolders/SubmitForReviewModal/submitForReviewModal';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
@@ -145,15 +144,9 @@ function Documents() {
   );
 
   const {
-    // onShareClick,
     onDocumentVersionsModalClick,
     onDocumentWorkflowsModalClick,
-    // onESignaturesModalClick,
-    // onDocumentReviewModalClick,
-    // onDeleteClick,
     onEditAttributesModalClick,
-    // onRenameModalClick,
-    // onMoveModalClick,
     onAttributeQuantityClick,
   } = useDocumentActions();
 
@@ -178,7 +171,6 @@ function Documents() {
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
   const [infoDocumentAction, setInfoDocumentAction] = useState('');
-  const [infoTagEditMode, setInfoTagEditMode] = useState(false);
   // NOTE: not fully implemented;
   // using the edit metadata modal for now, to be replaced with new system to indicate diff between tag, metadata, and versioned metadata
   // const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
@@ -200,43 +192,8 @@ function Documents() {
   const [uploadModalDocumentId, setUploadModalDocumentId] = useState('');
   const [folderUploadModalDocumentId, setFolderUploadModalDocumentId] =
     useState('');
-  const [shareModalValue, setShareModalValue] = useState<ILine | null>(null);
-  const [isShareModalOpened, setShareModalOpened] = useState(false);
-  const [editAttributesModalValue, setEditAttributesModalValue] =
-    useState<ILine | null>(null);
-  const [isEditAttributesModalOpened, setEditAttributesModalOpened] =
-    useState(false);
-  const [documentVersionsModalValue, setDocumentVersionsModalValue] =
-    useState<ILine | null>(null);
-  const [isDocumentVersionsModalOpened, setDocumentVersionsModalOpened] =
-    useState(false);
-  const [documentWorkflowsModalValue, setDocumentWorkflowsModalValue] =
-    useState<ILine | null>(null);
-  const [isDocumentWorkflowsModalOpened, setDocumentWorkflowsModalOpened] =
-    useState(false);
-  const [eSignaturesModalValue, setESignaturesModalValue] =
-    useState<ILine | null>(null);
-  const [documentReviewModalValue, setDocumentReviewModalValue] =
-    useState<ILine | null>(null);
-  const [isDocumentReviewModalOpened, setDocumentReviewModalOpened] =
-    useState(false);
-  const [isESignaturesModalOpened, setESignaturesModalOpened] = useState(false);
   const [newModalValue, setNewModalValue] = useState<ILine | null>(null);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
-  const [renameModalValue, setRenameModalValue] = useState<ILine | null>(null);
-  const [isRenameModalOpened, setRenameModalOpened] = useState(false);
-  const [
-    isMultivaluedAttributeModalOpened,
-    setMultivaluedAttributeModalOpened,
-  ] = useState(false);
-  const [multivaluedAttributeModalValue, setMultivaluedAttributeModalValue] =
-    useState<any[]>([]);
-  const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
-  const [isMoveModalOpened, setMoveModalOpened] = useState(false);
-  const [submitForReviewModalValue, setSubmitForReviewModalValue] =
-    useState<ILine | null>(null);
-  const [isSubmitForReviewModalOpened, setSubmitForReviewModalOpened] =
-    useState(false);
   const dispatch = useAppDispatch();
   const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
     []
@@ -254,6 +211,7 @@ function Documents() {
     event.stopPropagation();
     setIsDropZoneVisible(true);
   }
+
   function handleDrop(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
     event.preventDefault();
@@ -267,6 +225,7 @@ function Documents() {
     setDropUploadDocuments(event.dataTransfer.files);
     onUploadClick(event, '');
   }
+
   useEffect(() => {
     const handleDragOver = (event: any) => {
       if (!event.dataTransfer?.types.includes('Files')) return;
@@ -834,16 +793,7 @@ function Documents() {
       );
     }
   };
-  // const onShareClick = (event: any, value: ILine | null) => {
-  //   setShareModalValue(value);
-  //   setShareModalOpened(true);
-  // };
-  // const onShareClose = () => {
-  //   setShareModalOpened(false);
-  // };
-  // const getShareModalValue = () => {
-  //   return shareModalValue;
-  // };
+
   const onUploadClick = (event: any, documentId: string) => {
     dispatch(setCurrentActionEvent(''));
     setUploadModalOpened(true);
@@ -860,46 +810,7 @@ function Documents() {
   const onFolderUploadClose = () => {
     setFolderUploadModalOpened(false);
   };
-  // const onEditAttributesModalClick = (event: any, value: ILine | null) => {
-  //   setEditAttributesModalValue(value);
-  //   setEditAttributesModalOpened(true);
-  // };
-  // const onEditAttributesModalClose = () => {
-  //   setEditAttributesModalOpened(false);
-  //   updateTags();
-  // };
-  // const getEditAttributesModalValue = () => {
-  //   return editAttributesModalValue;
-  // };
-  // const onDocumentVersionsModalClick = (event: any, value: ILine | null) => {
-  //   setDocumentVersionsModalValue(value);
-  //   setDocumentVersionsModalOpened(true);
-  // };
-  // const onDocumentVersionsModalClose = () => {
-  //   setDocumentVersionsModalOpened(false);
-  // };
-  // const onDocumentWorkflowsModalClick = (event: any, value: ILine | null) => {
-  //   setDocumentWorkflowsModalValue(value);
-  //   setDocumentWorkflowsModalOpened(true);
-  // };
-  // const onDocumentWorkflowsModalClose = () => {
-  //   setDocumentWorkflowsModalOpened(false);
-  // };
-  // const onESignaturesModalClick = (event: any, value: ILine | null) => {
-  //   setESignaturesModalValue(value);
-  //   setESignaturesModalOpened(true);
-  // };
-  // const onESignaturesModalClose = () => {
-  //   setESignaturesModalValue(null);
-  //   setESignaturesModalOpened(false);
-  // };
-  // const onDocumentReviewModalClick = (event: any, value: ILine | null) => {
-  //   setDocumentReviewModalValue(value);
-  //   setDocumentReviewModalOpened(true);
-  // };
-  // const onDocumentReviewModalClose = () => {
-  //   setDocumentReviewModalOpened(false);
-  // };
+
   const onDocumentDataChange = (event: any, value: ILine | null) => {
     dispatch(setDocuments({ documents: null }));
     dispatch(
@@ -933,32 +844,7 @@ function Documents() {
   const onNewClose = () => {
     setNewModalOpened(false);
   };
-  // const onRenameModalClick = (event: any, value: ILine | null) => {
-  //   setRenameModalValue(value);
-  //   setRenameModalOpened(true);
-  // };
-  // const onRenameModalClose = () => {
-  //   setRenameModalOpened(false);
-  // };
-  // const onMultiValuedAttributeModalClose = () => {
-  //   setMultivaluedAttributeModalOpened(false);
-  //   setMultivaluedAttributeModalValue([]);
-  // };
-  //
-  // const onMoveModalClick = (event: any, value: ILine | null) => {
-  //   setMoveModalValue(value);
-  //   setMoveModalOpened(true);
-  // };
-  // const onMoveModalClose = () => {
-  //   setMoveModalOpened(false);
-  // };
-  // const onSubmitForReviewModalClick = (event: any, value: ILine | null) => {
-  //   setSubmitForReviewModalValue(value);
-  //   setSubmitForReviewModalOpened(true);
-  // };
-  // const onSubmitForReviewModalClose = () => {
-  //   setSubmitForReviewModalOpened(false);
-  // };
+
   const DownloadDocument = () => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentUrl(
@@ -1712,23 +1598,14 @@ function Documents() {
                 </div>
               )}
               <DocumentsTable
-                // onDeleteDocument={onDeleteDocument}
                 onRestoreDocument={restoreDocument}
-                // onRenameModalClick={onRenameModalClick}
-                // onMoveModalClick={onMoveModalClick}
-                // onShareClick={onShareClick}
                 documentsScrollpaneRef={documentsScrollpaneRef}
                 documentsWrapperRef={documentsWrapperRef}
                 currentSiteId={currentSiteId}
                 currentDocumentsRootUri={currentDocumentsRootUri}
-                // onESignaturesModalClick={onESignaturesModalClick}
                 onDocumentDataChange={onDocumentDataChange}
                 isSiteReadOnly={isSiteReadOnly}
-                // onEditTagsAndMetadataModalClick={onEditAttributesModalClick}
                 filterTag={filterTag}
-                // onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                // onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
-                // onDocumentReviewModalClick={onDocumentReviewModalClick}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
                 isArchiveTabExpanded={isArchiveTabExpanded}
@@ -2705,20 +2582,6 @@ function Documents() {
                             siteId={currentSiteId}
                             isSiteReadOnly={isSiteReadOnly}
                             formkiqVersion={formkiqVersion}
-                            // onDeleteClick={deleteFolder(currentDocument)}
-                            // onShareClick={onShareClick}
-                            // onEditTagsAndMetadataModalClick={
-                            //   onEditAttributesModalClick
-                            // }
-                            // onRenameModalClick={onRenameModalClick}
-                            // onMoveModalClick={onMoveModalClick}
-                            // onDocumentVersionsModalClick={
-                            //   onDocumentVersionsModalClick
-                            // }
-                            // onDocumentWorkflowsModalClick={
-                            //   onDocumentWorkflowsModalClick
-                            // }
-                            // onESignaturesModalClick={onESignaturesModalClick}
                             onInfoPage={true}
                             user={user}
                             useIndividualSharing={useIndividualSharing}
@@ -2739,45 +2602,6 @@ function Documents() {
           <></>
         )}
       </div>
-      {/*<ShareModal*/}
-      {/*  isOpened={isShareModalOpened}*/}
-      {/*  onClose={onShareClose}*/}
-      {/*  getValue={getShareModalValue}*/}
-      {/*  value={shareModalValue}*/}
-      {/*/>*/}
-      {/*<EditAttributesModal*/}
-      {/*  isOpened={isEditAttributesModalOpened}*/}
-      {/*  onClose={onEditAttributesModalClose}*/}
-      {/*  siteId={currentSiteId}*/}
-      {/*  getValue={getEditAttributesModalValue}*/}
-      {/*  value={editAttributesModalValue}*/}
-      {/*  onDocumentDataChange={onDocumentDataChange}*/}
-      {/*/>*/}
-      {/*<DocumentVersionsModal*/}
-      {/*  isOpened={isDocumentVersionsModalOpened}*/}
-      {/*  onClose={onDocumentVersionsModalClose}*/}
-      {/*  onUploadClick={onUploadClick}*/}
-      {/*  isUploadModalOpened={isUploadModalOpened}*/}
-      {/*  siteId={currentSiteId}*/}
-      {/*  isSiteReadOnly={isSiteReadOnly}*/}
-      {/*  documentsRootUri={currentDocumentsRootUri}*/}
-      {/*  value={documentVersionsModalValue}*/}
-      {/*/>*/}
-      {/*<DocumentWorkflowsModal*/}
-      {/*  isOpened={isDocumentWorkflowsModalOpened}*/}
-      {/*  onClose={onDocumentWorkflowsModalClose}*/}
-      {/*  siteId={currentSiteId}*/}
-      {/*  isSiteReadOnly={isSiteReadOnly}*/}
-      {/*  documentsRootUri={currentDocumentsRootUri}*/}
-      {/*  value={documentWorkflowsModalValue}*/}
-      {/*/>*/}
-      {/*<ESignaturesModal*/}
-      {/*  isOpened={isESignaturesModalOpened}*/}
-      {/*  onClose={onESignaturesModalClose}*/}
-      {/*  siteId={currentSiteId}*/}
-      {/*  value={eSignaturesModalValue}*/}
-      {/*/>*/}
-
       <NewModal
         isOpened={isNewModalOpened}
         onClose={onNewClose}
@@ -2786,30 +2610,6 @@ function Documents() {
         value={newModalValue}
         onDocumentDataChange={onDocumentDataChange}
       />
-      {/*<RenameModal*/}
-      {/*  isOpened={isRenameModalOpened}*/}
-      {/*  onClose={onRenameModalClose}*/}
-      {/*  siteId={currentSiteId}*/}
-      {/*  value={renameModalValue}*/}
-      {/*  onDocumentDataChange={onDocumentDataChange}*/}
-      {/*/>*/}
-      {/*<MoveModal*/}
-      {/*  isOpened={isMoveModalOpened}*/}
-      {/*  onClose={onMoveModalClose}*/}
-      {/*  siteId={currentSiteId}*/}
-      {/*  value={moveModalValue}*/}
-      {/*  allTags={allTags}*/}
-      {/*  onDocumentDataChange={onDocumentDataChange}*/}
-      {/*/>*/}
-
-      {/*<SubmitForReviewModal*/}
-      {/*  isOpened={isSubmitForReviewModalOpened}*/}
-      {/*  onClose={onSubmitForReviewModalClose}*/}
-      {/*  siteId={currentSiteId}*/}
-      {/*  value={submitForReviewModalValue}*/}
-      {/*  onDocumentDataChange={onDocumentDataChange}*/}
-      {/*/>*/}
-
       <UploadModal
         isOpened={isUploadModalOpened}
         onClose={onUploadClose}
@@ -2832,17 +2632,6 @@ function Documents() {
         isFolderUpload={true}
         onDocumentDataChange={onDocumentDataChange}
       />
-      {/*<DocumentReviewModal*/}
-      {/*  isOpened={isDocumentReviewModalOpened}*/}
-      {/*  onClose={onDocumentReviewModalClose}*/}
-      {/*  siteId={currentSiteId}*/}
-      {/*  value={documentReviewModalValue}*/}
-      {/*/>*/}
-      {/*<MultiValuedAttributeModal*/}
-      {/*  item={multivaluedAttributeModalValue}*/}
-      {/*  isOpened={isMultivaluedAttributeModalOpened}*/}
-      {/*  onClose={onMultiValuedAttributeModalClose}*/}
-      {/*/>*/}
       <DocumentActionsModalContainer
         currentSiteId={currentSiteId}
         isSiteReadOnly={isSiteReadOnly}

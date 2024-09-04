@@ -25,16 +25,7 @@ interface IProps {
   isSiteReadOnly: boolean;
   onDeleteClick: (folder: IFolder) => () => void;
   onRestoreDocument: (documentId: string) => void;
-  // onDeleteDocument: (documentId: string, softDelete: boolean) => void;
   currentDocumentsRootUri: string;
-  // onShareClick: (event: any, value: ILine | null) => void;
-  // onEditTagsAndMetadataModalClick: any;
-  // onRenameModalClick: any;
-  // onMoveModalClick: any;
-  // onDocumentVersionsModalClick: any;
-  // onDocumentWorkflowsModalClick: any;
-  // onDocumentReviewModalClick: any;
-  // onESignaturesModalClick: any;
   onDocumentDataChange: any;
   filterTag: string | null;
   isArchiveTabExpanded?: boolean;
@@ -52,16 +43,7 @@ function FolderListLine({
   isSiteReadOnly,
   onDeleteClick,
   currentDocumentsRootUri,
-  // onShareClick,
-  // onEditTagsAndMetadataModalClick,
-  // onRenameModalClick,
-  // onMoveModalClick,
-  // onDocumentVersionsModalClick,
-  // onDocumentWorkflowsModalClick,
-  // onDocumentReviewModalClick,
-  // onESignaturesModalClick,
   onRestoreDocument,
-  // onDeleteDocument,
   onDocumentDataChange,
   filterTag,
   isArchiveTabExpanded,
@@ -131,22 +113,7 @@ function FolderListLine({
                       isSiteReadOnly={isSiteReadOnly}
                       onDeleteClick={onDeleteClick}
                       currentDocumentsRootUri={currentDocumentsRootUri}
-                      // onShareClick={onShareClick}
-                      // onEditTagsAndMetadataModalClick={
-                      //   onEditTagsAndMetadataModalClick
-                      // }
-                      // onRenameModalClick={onRenameModalClick}
-                      // onMoveModalClick={onMoveModalClick}
-                      // onDocumentVersionsModalClick={
-                      //   onDocumentVersionsModalClick
-                      // }
-                      // onDocumentWorkflowsModalClick={
-                      //   onDocumentWorkflowsModalClick
-                      // }
-                      // onDocumentReviewModalClick={onDocumentReviewModalClick}
-                      // onESignaturesModalClick={onESignaturesModalClick}
                       onRestoreDocument={onRestoreDocument}
-                      // onDeleteDocument={onDeleteDocument}
                       onDocumentDataChange={onDocumentDataChange}
                       filterTag={filterTag}
                       isArchiveTabExpanded={isArchiveTabExpanded}
@@ -169,19 +136,8 @@ function FolderListLine({
                   siteId={currentSiteId}
                   isSiteReadOnly={isSiteReadOnly}
                   documentsRootUri={currentDocumentsRootUri}
-                  // onShareClick={onShareClick}
                   searchDocuments={folderInstance.documents}
-                  // onDeleteClick={onDeleteDocument}
                   onRestoreClick={onRestoreDocument}
-                  // onEditTagsAndMetadataModalClick={
-                  //   onEditTagsAndMetadataModalClick
-                  // }
-                  // onRenameModalClick={onRenameModalClick}
-                  // onMoveModalClick={onMoveModalClick}
-                  // onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                  // onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
-                  // onDocumentReviewModalClick={onDocumentReviewModalClick}
-                  // onESignaturesModalClick={onESignaturesModalClick}
                   onDocumentDataChange={onDocumentDataChange}
                   filterTag={filterTag}
                   leftOffset={4}
@@ -342,20 +298,6 @@ function FolderListLine({
                         isSiteReadOnly={isSiteReadOnly}
                         formkiqVersion={formkiqVersion}
                         onDeleteClick={onDeleteClick(folderInstance)}
-                        // onShareClick={onShareClick}
-                        // onEditTagsAndMetadataModalClick={
-                        //   onEditTagsAndMetadataModalClick
-                        // }
-                        // onRenameModalClick={onRenameModalClick}
-                        // onMoveModalClick={onMoveModalClick}
-                        // onDocumentVersionsModalClick={
-                        //   onDocumentVersionsModalClick
-                        // }
-                        // onDocumentWorkflowsModalClick={
-                        //   onDocumentWorkflowsModalClick
-                        // }
-                        // onDocumentReviewModalClick={onDocumentReviewModalClick}
-                        // onESignaturesModalClick={onESignaturesModalClick}
                         user={user}
                         useIndividualSharing={useIndividualSharing}
                         useCollections={useCollections}

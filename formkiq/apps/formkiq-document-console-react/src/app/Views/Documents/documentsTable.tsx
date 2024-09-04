@@ -18,20 +18,11 @@ import { EmptyDocumentsTable } from './EmptyDocumentsTable';
 type DocumentTableProps = {
   documentsWrapperRef: Ref<any>;
   documentsScrollpaneRef: Ref<any>;
-  // onDeleteDocument: (documentId: string, softDelete: boolean) => void;
   onRestoreDocument: (documentId: string) => void;
   currentSiteId: string;
   currentDocumentsRootUri: string;
   isSiteReadOnly: boolean;
   onDocumentDataChange: (event: any, value: ILine | null) => void;
-  // onESignaturesModalClick: (event: any, value: ILine | null) => void;
-  // onShareClick: (event: any, value: ILine | null) => void;
-  // onRenameModalClick: (event: any, value: ILine | null) => void;
-  // onMoveModalClick: (event: any, value: ILine | null) => void;
-  // onDocumentVersionsModalClick: (event: any, value: ILine | null) => void;
-  // onDocumentWorkflowsModalClick: (event: any, value: ILine | null) => void;
-  // onDocumentReviewModalClick: (event: any, value: ILine | null) => void;
-  // onEditTagsAndMetadataModalClick: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
   isArchiveTabExpanded: boolean;
@@ -51,22 +42,12 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   const {
     documentsWrapperRef,
     documentsScrollpaneRef,
-    // onDeleteDocument,
     onRestoreDocument,
-    // onShareClick,
-    // onRenameModalClick,
     currentSiteId,
     onDocumentDataChange,
-    // onESignaturesModalClick,
     currentDocumentsRootUri,
     filterTag,
-    // onDocumentVersionsModalClick,
-    // onDocumentWorkflowsModalClick,
-    // onDocumentReviewModalClick: onDocumentReviewModalClick,
-    // onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
-    // onMoveModalClick,
-    // onSubmitForReviewModalClick,
     isArchiveTabExpanded,
     addToPendingArchive,
     deleteFromPendingArchive,
@@ -328,19 +309,8 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 siteId={currentSiteId}
                 isSiteReadOnly={isSiteReadOnly}
                 documentsRootUri={currentDocumentsRootUri}
-                // onShareClick={onShareClick}
                 searchDocuments={documents}
-                // onDeleteClick={onDeleteDocument}
                 onRestoreClick={() => onRestoreDocument(file.documentId)}
-                // onEditTagsAndMetadataModalClick={
-                //   onEditTagsAndMetadataModalClick
-                // }
-                // onRenameModalClick={onRenameModalClick}
-                // onMoveModalClick={onMoveModalClick}
-                // onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                // onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
-                // onDocumentReviewModalClick={onDocumentReviewModalClick}
-                // onESignaturesModalClick={onESignaturesModalClick}
                 onDocumentDataChange={onDocumentDataChange}
                 filterTag={filterTag}
                 isArchiveTabExpanded={isArchiveTabExpanded}
@@ -381,21 +351,12 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
   const { folders } = useSelector(DocumentListState);
 
   const {
-    // onDeleteDocument,
     onRestoreDocument,
-    // onShareClick,
-    // onRenameModalClick,
     currentSiteId,
     onDocumentDataChange,
-    // onESignaturesModalClick,
     currentDocumentsRootUri,
     filterTag,
-    // onDocumentVersionsModalClick,
-    // onDocumentWorkflowsModalClick,
-    // onDocumentReviewModalClick,
-    // onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
-    // onMoveModalClick,
     deleteFolder,
     isArchiveTabExpanded,
     addToPendingArchive,
@@ -418,17 +379,8 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               isSiteReadOnly={isSiteReadOnly}
               onDeleteClick={deleteFolder}
               currentDocumentsRootUri={currentDocumentsRootUri}
-              // onShareClick={onShareClick}
-              // onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
-              // onRenameModalClick={onRenameModalClick}
-              // onMoveModalClick={onMoveModalClick}
-              // onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-              // onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
-              // onDocumentReviewModalClick={onDocumentReviewModalClick}
-              // onESignaturesModalClick={onESignaturesModalClick}
               onDocumentDataChange={onDocumentDataChange}
               onRestoreDocument={onRestoreDocument}
-              // onDeleteDocument={onDeleteDocument}
               filterTag={filterTag}
               isArchiveTabExpanded={isArchiveTabExpanded}
               archiveStatus={archiveStatus}

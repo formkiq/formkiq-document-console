@@ -39,16 +39,7 @@ function DocumentListLine({
   siteId,
   isSiteReadOnly,
   documentsRootUri,
-  // onShareClick,
-  // onDeleteClick,
   onRestoreClick,
-  // onEditTagsAndMetadataModalClick,
-  // onRenameModalClick,
-  // onMoveModalClick,
-  // onDocumentVersionsModalClick,
-  // onDocumentWorkflowsModalClick,
-  // onDocumentReviewModalClick,
-  // onESignaturesModalClick,
   onDocumentDataChange,
   leftOffset = 0,
   isArchiveTabExpanded,
@@ -65,17 +56,8 @@ function DocumentListLine({
   siteId: string;
   isSiteReadOnly: boolean;
   documentsRootUri: string;
-  // onShareClick: any;
   searchDocuments: any;
-  // onDeleteClick: any;
   onRestoreClick: any;
-  // onEditTagsAndMetadataModalClick: any;
-  // onRenameModalClick: any;
-  // onMoveModalClick: any;
-  // onDocumentVersionsModalClick: any;
-  // onDocumentWorkflowsModalClick: any;
-  // onDocumentReviewModalClick: any;
-  // onESignaturesModalClick: any;
   onDocumentDataChange: any;
   filterTag: string | null;
   leftOffset?: number;
@@ -641,20 +623,6 @@ function DocumentListLine({
                     siteId={siteId}
                     isSiteReadOnly={isSiteReadOnly}
                     formkiqVersion={formkiqVersion}
-                    // onDeleteClick={()=>onDeleteClick(file.documentId, useSoftDelete)}
-                    // onShareClick={onShareClick}
-                    // onEditTagsAndMetadataModalClick={
-                    //   onEditTagsAndMetadataModalClick
-                    // }
-                    // onRenameModalClick={onRenameModalClick}
-                    // onMoveModalClick={onMoveModalClick}
-                    // onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                    // onDocumentWorkflowsModalClick={
-                    //   onDocumentWorkflowsModalClick
-                    // }
-                    // onDocumentReviewModalClick={onDocumentReviewModalClick}
-                    // onESignaturesModalClick={onESignaturesModalClick}
-                    // user={user}
                     useIndividualSharing={useIndividualSharing}
                     useCollections={useCollections}
                     useSoftDelete={useSoftDelete}
