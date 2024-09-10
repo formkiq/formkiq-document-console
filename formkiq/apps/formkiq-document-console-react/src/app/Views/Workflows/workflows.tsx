@@ -23,6 +23,11 @@ import {
   WorkflowsState,
 } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
+import RadioListbox from '../../Components/Generic/Listboxes/RadioListbox';
+import {
+  ConfigState,
+  setWorkflowFilterPreference,
+} from '../../Store/reducers/config';
 
 export function Workflows() {
   const dispatch = useAppDispatch();
@@ -48,7 +53,7 @@ export function Workflows() {
     currentSearchPage,
     isLastSearchPageLoaded,
   } = useSelector(WorkflowsState);
-
+  const { workflowFilterPreference } = useSelector(ConfigState);
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
@@ -60,6 +65,7 @@ export function Workflows() {
   const [originalName, setOriginalName] = useState('');
   const [duplicatedWorkflow, setDuplicatedWorkflow] = useState<any>({});
   const [showTooltipId, setShowTooltipId] = useState('');
+  const [filteredWorkflows, setFilteredWorkflows] = useState<any[]>([]);
 
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -83,6 +89,22 @@ export function Workflows() {
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
   }, [pathname]);
+
+  useEffect(() => {
+    if (workflowFilterPreference === 'active') {
+      const newWorkflows = [...workflows].filter(
+        (workflow) => workflow.status === 'ACTIVE'
+      );
+      setFilteredWorkflows(newWorkflows);
+    } else if (workflowFilterPreference === 'inactive') {
+        const newWorkflows = [...workflows].filter(
+            (workflow) => workflow.status === 'INACTIVE'
+        );
+        setFilteredWorkflows(newWorkflows);
+    } else {
+        setFilteredWorkflows(workflows);
+    }
+  }, [workflows, workflowFilterPreference]);
 
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
@@ -140,6 +162,18 @@ export function Workflows() {
       }
     }
   }, [nextToken, workflowsLoadingStatus, isLastSearchPageLoaded]);
+
+  useEffect(() => {
+    // Trigger scrolling in cases when table smaller than page after filtering and next page loading can't be triggered by scroll.
+    const scrollpane = document.getElementById('workflowsScrollPane');
+    const wrapper = document.getElementById('workflowsWrapper');
+    if(!scrollpane || !wrapper) {
+        return;
+    }
+    if (scrollpane.offsetHeight < wrapper.offsetHeight) {
+        trackScrolling();
+    }
+  }, [filteredWorkflows]);
 
   const handleScroll = (event: any) => {
     const el = event.target;
@@ -336,11 +370,20 @@ export function Workflows() {
                 <span>Create new (OLD)</span>
                 <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
               </button>
+
+              <RadioListbox
+                values={['active', 'inactive', 'all']}
+                titles={['Active', 'Inactive', 'All Workflows']}
+                selectedValue={workflowFilterPreference}
+                setSelectedValue={(val: 'active' | 'inactive' | 'all') => {
+                  dispatch(setWorkflowFilterPreference(val));
+                }}
+              />
             </div>
           )}
-          <div className="relative overflow-hidden h-full">
+          <div className="relative overflow-hidden h-full" id='workflowsWrapper'>
             <WorkflowList
-              workflows={workflows as []}
+              workflows={filteredWorkflows as []}
               onDelete={onWorkflowDelete}
               siteId={currentSiteId}
               handleScroll={handleScroll}
