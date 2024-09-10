@@ -123,14 +123,6 @@ export function Workflows() {
     updateWorkflows();
   }, [user, currentSiteId]);
 
-  useEffect(() => {
-    dispatch(
-      fetchWorkflows({
-        siteId: currentSiteId,
-      })
-    );
-  }, [currentSiteId]);
-
   const updateWorkflows = async () => {
     dispatch(fetchWorkflows({ siteId: currentSiteId }));
   };
