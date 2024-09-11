@@ -1,4 +1,4 @@
-import {Position} from 'reactflow';
+import { Position } from 'reactflow';
 
 export interface Step {
   id: string;
@@ -28,7 +28,7 @@ export type NodeType = {
 type Queue = {
   queueId?: string;
   approvalGroups?: string[];
-}
+};
 
 type WorkflowStatus = 'ACTIVE' | 'INACTIVE';
 export type WorkflowStepActionType =
