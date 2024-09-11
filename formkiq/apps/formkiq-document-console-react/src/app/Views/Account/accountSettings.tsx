@@ -55,6 +55,8 @@ export function AccountSettings() {
         setValue('maxWebhooks', response.maxWebhooks);
         setValue('notificationEmail', response.notificationEmail);
         setValue('chatGptApiKey', response.chatGptApiKey);
+        setValue('google', response.google);
+        setValue('docusign', response.docusign);
       }
     });
   }, [currentSiteId]);
@@ -89,6 +91,13 @@ export function AccountSettings() {
     if (data.chatGptApiKey.length) {
       configuration.chatGptApiKey = data.chatGptApiKey;
     }
+    if (Object.values(data.google).some((value) => value !== '')) {
+      configuration.google = data.google;
+    }
+
+    if (Object.values(data.docusign).some((value) => value !== '')) {
+      configuration.docusign = data.docusign;
+    }
     DocumentsService.updateConfiguration(configuration, currentSiteId).then(
       (response) => {
         if (response.status === 200) {
@@ -103,11 +112,17 @@ export function AccountSettings() {
           closeDialog();
         } else {
           let message = '';
-          if (
-            response.status === 400 &&
-            response.message.indexOf('missing required body parameters') > -1
-          ) {
-            message = ' has no settings to save.';
+          if (response.status === 400) {
+            if (
+              response.message &&
+              response.message.indexOf('missing required body parameters') > -1
+            ) {
+              message = ' has no settings to save.';
+            } else if (response.errors) {
+              message =
+                ' did not update correctly. ' +
+                response.errors.map((error: any) => error.error).join(', \n');
+            }
           } else {
             message =
               ' did not update correctly. Please contact your document management system administrator for more info.';
@@ -251,6 +266,104 @@ export function AccountSettings() {
             />
           </div>
         </div>
+
+        <div className="flex flex-col w-full max-w-full rounded-md bg-white p-4 shadow border border-neutral-100 my-4">
+          <h6 className="w-full my-2 text-base tracking-normal leading-10 font-bold text-neutral-700 sm:leading-none">
+            Google Configuration
+          </h6>
+          <div className="md:flex md:items-center mb-4 relative">
+            <div className="w-full md:w-1/4">
+              <label className="block text-neutral-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                Workload Identity Audience:
+              </label>
+            </div>
+            <div className="w-full md:w-1/4">
+              <input
+                aria-label="Workload Identity Audience"
+                type="text"
+                {...register('google.workloadIdentityAudience')}
+                className="appearance-none rounded-md relative block w-full px-3 py-3 border border-neutral-600
+                  placeholder-neutral-500 text-neutral-900 rounded-t-md
+                  focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+              />
+            </div>
+          </div>
+          <div className="md:flex md:items-center mb-4 relative">
+            <div className="w-full md:w-1/4">
+              <label className="block text-neutral-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                Workload Service Account:
+              </label>
+            </div>
+            <div className="w-full md:w-1/4">
+              <input
+                aria-label="Workload Service Account"
+                type="text"
+                {...register('google.workloadIdentityServiceAccount')}
+                className="appearance-none rounded-md relative block w-full px-3 py-3 border border-neutral-600
+                  placeholder-neutral-500 text-neutral-900 rounded-t-md
+                  focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col w-full max-w-full rounded-md bg-white p-4 shadow border border-neutral-100 my-4">
+          <h6 className="w-full my-2 text-base tracking-normal leading-10 font-bold text-neutral-700 sm:leading-none">
+            Docusign Configuration
+          </h6>
+          <div className="md:flex md:items-center mb-4 relative">
+            <div className="w-full md:w-1/4">
+              <label className="block text-neutral-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                Docusign UserId:
+              </label>
+            </div>
+            <div className="w-full md:w-1/4">
+              <input
+                aria-label="Docusign UserId"
+                type="text"
+                {...register('docusign.userId')}
+                className="appearance-none rounded-md relative block w-full px-3 py-3 border border-neutral-600
+                  placeholder-neutral-500 text-neutral-900 rounded-t-md
+                  focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+              />
+            </div>
+          </div>
+          <div className="md:flex md:items-center mb-4 relative">
+            <div className="w-full md:w-1/4">
+              <label className="block text-neutral-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                Docusign Integration Key or ClientId:
+              </label>
+            </div>
+            <div className="w-full md:w-1/4">
+              <input
+                aria-label="Docusign Integration Key or ClientId"
+                type="text"
+                {...register('docusign.integrationKey')}
+                className="appearance-none rounded-md relative block w-full px-3 py-3 border border-neutral-600
+                  placeholder-neutral-500 text-neutral-900 rounded-t-md
+                  focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+              />
+            </div>
+          </div>
+          <div className="md:flex md:items-center mb-4 relative">
+            <div className="w-full md:w-1/4">
+              <label className="block text-neutral-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                Docusign Rsa Private Key:
+              </label>
+            </div>
+            <div className="w-full md:w-1/4">
+              <input
+                aria-label="Docusign Rsa Private Key"
+                type="text"
+                {...register('docusign.rsaPrivateKey')}
+                className="appearance-none rounded-md relative block w-full px-3 py-3 border border-neutral-600
+                  placeholder-neutral-500 text-neutral-900 rounded-t-md
+                  focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="flex w-full justify-center ml-2">
           <input
             type="submit"
