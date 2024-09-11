@@ -27,6 +27,7 @@ import {NodeNameSelector} from "./NodeComponents/NodeNameSelector";
 import Publish from "./Steps/Publish";
 import IntelligentDocumentProcessing from "./Steps/IntelligentDocumentProcessing";
 import ButtonPrimary from "../../Generic/Buttons/ButtonPrimary";
+import EventBridge from "./Steps/EventBridge";
 
 
 const getNodeId = () => `node_${uuid()}`;
@@ -158,6 +159,10 @@ export const DefaultNode = (props: NodeProps<WorkflowNodeProps>) => {
           <IntelligentDocumentProcessing isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
                    readOnly={workflow.inUse}/>
         )}
+        {data?.label === 'EVENTBRIDGE' && (
+          <EventBridge isEditing={false} data={data} edges={edges} id={props.id} addCreatorNode={addCreatorNode}
+                       readOnly={workflow.inUse}/>
+        )}
       </div>
     </>
   );
@@ -265,6 +270,9 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
         )}
         {newStep?.name === 'IDP' && (
           <IntelligentDocumentProcessing newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
+        )}
+        {newStep?.name === 'EVENTBRIDGE' && (
+            <EventBridge newStep={newStep} setNewStep={setNewStep} isEditing={true} onChange={onChange}/>
         )}
 
         <div className="flex flex-row justify-end w-full gap-2">

@@ -24,6 +24,7 @@ export const NodeNameSelector = ({
     QUEUE: 'Review / Approval Queue',
     PUBLISH: 'Publish',
     IDP: 'Intelligent Document Processing',
+    EVENTBRIDGE: 'Event Bridge'
   };
 
   if (formkiqVersion.modules.indexOf('typesense') > -1 || formkiqVersion.modules.indexOf('opensearch') > -1) {
