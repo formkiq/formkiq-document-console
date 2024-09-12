@@ -81,6 +81,10 @@ interface DocumentActionsContextType {
   multivaluedAttributeModalValue: any;
   isMultivaluedAttributeModalOpened: boolean;
   onAttributeQuantityClick: (item: any) => void;
+  onDocumentRelationshipsModalClick: (event: any, value: any) => void;
+  documentRelationshipsModalOpened:  boolean;
+  documentRelationshipsModalValue:  ILine | null;
+  onDocumentRelationshipsModalClose:  () => void;
 }
 
 const DocumentActionsContext = createContext<
@@ -124,6 +128,11 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   const [moveModalOpened, setMoveModalOpened] = useState(false);
   const [renameModalValue, setRenameModalValue] = useState<ILine | null>(null);
   const [renameModalOpened, setRenameModalOpened] = useState(false);
+
+  const [documentRelationshipsModalValue, setDocumentRelationshipsModalValue] =
+    useState<ILine | null>(null);
+  const [documentRelationshipsModalOpened, setDocumentRelationshipsModalOpened] =
+    useState(false);
 
   const [
     isMultivaluedAttributeModalOpened,
@@ -230,6 +239,16 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   const onDocumentReviewModalClose = () => {
     setDocumentReviewModalOpened(false);
   };
+
+  const onDocumentRelationshipsModalClick = (event: any, value: ILine | null) => {
+    setDocumentRelationshipsModalValue(value);
+    setDocumentRelationshipsModalOpened(true);
+  };
+
+  const onDocumentRelationshipsModalClose = () => {
+    setDocumentRelationshipsModalOpened(false);
+  };
+
   const onMoveModalClick = (event: any, value: ILine | null) => {
     setMoveModalValue(value);
     setMoveModalOpened(true);
@@ -400,7 +419,11 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     isMultivaluedAttributeModalOpened,
     submitForReviewModalOpened,
     submitForReviewModalValue,
-    onAttributeQuantityClick
+    onAttributeQuantityClick,
+    documentRelationshipsModalOpened,
+    documentRelationshipsModalValue,
+    onDocumentRelationshipsModalClose,
+    onDocumentRelationshipsModalClick,
   };
 
   return (
