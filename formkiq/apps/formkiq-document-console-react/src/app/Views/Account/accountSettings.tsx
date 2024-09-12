@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useForm } from 'react-hook-form';
+import {useForm, useFormState} from 'react-hook-form';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import {
   closeDialog,
@@ -39,7 +39,7 @@ export function AccountSettings() {
   }, [user]);
   const {
     register,
-    formState: { errors },
+    formState: { errors, isDirty, dirtyFields },
     handleSubmit,
     reset,
     setValue,
@@ -59,7 +59,8 @@ export function AccountSettings() {
         setValue('notificationEmail', response.notificationEmail);
         setValue('chatGptApiKey', response.chatGptApiKey);
         setValue('google', response.google);
-        setValue('docusign', response.docusign);
+        setValue('docusign.userId', response?.docusign.userId);
+        setValue('docusign.integrationKey', response?.docusign.integrationKey);
       }
     });
   }, [currentSiteId]);
@@ -91,14 +92,19 @@ export function AccountSettings() {
     ) {
       configuration.maxWebhooks = data.maxWebhooks;
     }
-    if (data.chatGptApiKey.length) {
+    if (data.chatGptApiKey.length && dirtyFields['chatGptApiKey']) {
       configuration.chatGptApiKey = data.chatGptApiKey;
     }
-    if (Object.values(data.google).some((value) => value !== '')) {
+    if (
+      Object.values(data.google).some((value) => value !== '') &&
+      dirtyFields['google']
+    ) {
       configuration.google = data.google;
     }
-
-    if (Object.values(data.docusign).some((value) => value !== '')) {
+    if (
+      Object.values(data.docusign).some((value) => value !== '') &&
+      dirtyFields['docusign']
+    ) {
       configuration.docusign = data.docusign;
     }
     DocumentsService.updateConfiguration(configuration, currentSiteId).then(
@@ -362,6 +368,7 @@ export function AccountSettings() {
                   aria-label="Docusign Rsa Private Key"
                   type="text"
                   {...register('docusign.rsaPrivateKey')}
+                  placeholder="******"
                   className="appearance-none rounded-md relative block w-full px-3 py-3 border border-neutral-600
                   placeholder-neutral-500 text-neutral-900 rounded-t-md
                   focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
