@@ -9,7 +9,7 @@ import {
   setCurrentDocumentPath,
 } from '../../Store/reducers/data';
 import {
-  DocumentListState,
+  DocumentListState, fetchDocuments,
   setCurrentDocument,
   setDocuments,
 } from '../../Store/reducers/documentsList';
@@ -60,6 +60,7 @@ import {
 } from '../Icons/icons';
 import Notifications from './notifications';
 import {useDocumentActions} from "../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext";
+import {useQueueId} from "../../hooks/queue-id.hook";
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -82,7 +83,11 @@ function Navbar() {
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const advancedSearch = new URLSearchParams(search).get('advancedSearch');
+  const searchFolder = new URLSearchParams(search).get('searchFolder');
+  const filterTag = new URLSearchParams(search).get('filterTag');
+  const filterAttribute = new URLSearchParams(search).get('filterAttribute');
   const searchParams = new URLSearchParams(search);
+  const queueId = useQueueId();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(AuthState);
@@ -389,6 +394,22 @@ function Navbar() {
   };
 
   const onDocumentDataChange = (event: any, value: ILine | null) => {
+    if (currentSection === 'DocumentsAndFolders') {
+      dispatch(setDocuments({ documents: null }));
+      dispatch(
+        fetchDocuments({
+          siteId: currentSiteId,
+          formkiqVersion,
+          searchWord,
+          searchFolder,
+          queueId,
+          subfolderUri,
+          filterTag,
+          filterAttribute,
+        })
+      );
+    }
+
     if (!currentDocument) return;
     DocumentsService.getDocumentById(
       (currentDocument as IDocument).documentId,

@@ -2632,12 +2632,6 @@ function Documents() {
         isFolderUpload={true}
         onDocumentDataChange={onDocumentDataChange}
       />
-      <DocumentActionsModalContainer
-        currentSiteId={currentSiteId}
-        isSiteReadOnly={isSiteReadOnly}
-        currentDocumentsRootUri={currentDocumentsRootUri}
-        onDocumentDataChange={onDocumentDataChange}
-      />
     </>
   );
 }
