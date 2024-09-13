@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import DuplicateDialog from '../../Components/Generic/Dialogs/DuplicateDialog';
+import RadioListbox from '../../Components/Generic/Listboxes/RadioListbox';
 import { Plus } from '../../Components/Icons/icons';
 import NewWorkflowModal from '../../Components/Workflows/NewWorkflow/newWorkflow';
 import WorkflowList from '../../Components/Workflows/WorkflowList/WorkflowList';
@@ -14,6 +15,10 @@ import {
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
 import { AuthState } from '../../Store/reducers/auth';
+import {
+  ConfigState,
+  setWorkflowFilterPreference,
+} from '../../Store/reducers/config';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import {
@@ -23,11 +28,6 @@ import {
   WorkflowsState,
 } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
-import RadioListbox from '../../Components/Generic/Listboxes/RadioListbox';
-import {
-  ConfigState,
-  setWorkflowFilterPreference,
-} from '../../Store/reducers/config';
 
 export function Workflows() {
   const dispatch = useAppDispatch();
@@ -97,12 +97,12 @@ export function Workflows() {
       );
       setFilteredWorkflows(newWorkflows);
     } else if (workflowFilterPreference === 'inactive') {
-        const newWorkflows = [...workflows].filter(
-            (workflow) => workflow.status === 'INACTIVE'
-        );
-        setFilteredWorkflows(newWorkflows);
+      const newWorkflows = [...workflows].filter(
+        (workflow) => workflow.status === 'INACTIVE'
+      );
+      setFilteredWorkflows(newWorkflows);
     } else {
-        setFilteredWorkflows(workflows);
+      setFilteredWorkflows(workflows);
     }
   }, [workflows, workflowFilterPreference]);
 
@@ -159,11 +159,11 @@ export function Workflows() {
     // Trigger scrolling in cases when table smaller than page after filtering and next page loading can't be triggered by scroll.
     const scrollpane = document.getElementById('workflowsScrollPane');
     const wrapper = document.getElementById('workflowsWrapper');
-    if(!scrollpane || !wrapper) {
-        return;
+    if (!scrollpane || !wrapper) {
+      return;
     }
     if (scrollpane.offsetHeight < wrapper.offsetHeight) {
-        trackScrolling();
+      trackScrolling();
     }
   }, [filteredWorkflows]);
 
@@ -366,14 +366,19 @@ export function Workflows() {
               <RadioListbox
                 values={['active', 'inactive', 'all']}
                 titles={['Active', 'Inactive', 'All Workflows']}
-                selectedValue={workflowFilterPreference}
+                selectedValue={
+                  workflowFilterPreference ? workflowFilterPreference : 'active'
+                }
                 setSelectedValue={(val: 'active' | 'inactive' | 'all') => {
                   dispatch(setWorkflowFilterPreference(val));
                 }}
               />
             </div>
           )}
-          <div className="relative overflow-hidden h-full" id='workflowsWrapper'>
+          <div
+            className="relative overflow-hidden h-full"
+            id="workflowsWrapper"
+          >
             <WorkflowList
               workflows={filteredWorkflows as []}
               onDelete={onWorkflowDelete}
