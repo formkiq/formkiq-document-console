@@ -43,7 +43,7 @@ import {
   Documents,
   Examine,
   Group,
-  HistoryIcon,
+  HistoryIcon, Mapping,
   Queue,
   Recent,
   Rules,
@@ -555,7 +555,8 @@ function Navbar() {
                       locationPrefix === '/object-examine-tool' ||
                       locationPrefix === '/rulesets' ||
                       locationPrefix === '/admin' ||
-                      locationPrefix === '/attributes' ? (
+                      locationPrefix === '/attributes' ||
+                      locationPrefix === '/mappings' ? (
                         <>
                           <div className="w-6 mr-1 text-primary-600">
                             {pathname.indexOf('/workflows') > -1 && (
@@ -632,6 +633,11 @@ function Navbar() {
                                 <Attribute />
                               </div>
                             )}
+                            {pathname.indexOf('/mappings') > -1 && (
+                              <div className="w-5">
+                                <Mapping />
+                              </div>
+                            )}
                           </div>
 
                           <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
@@ -675,6 +681,9 @@ function Navbar() {
                             {pathname.indexOf('/attributes') > -1 && (
                               <span>Attributes</span>
                             )}
+                            {pathname.indexOf('/mappings') > -1 && (
+                              <span>Mappings</span>
+                            )}
                           </div>
                           {(pathname.indexOf('/rulesets') > -1 ||
                             pathname.indexOf('/schemas') > -1 ||
@@ -682,7 +691,8 @@ function Navbar() {
                             pathname.indexOf('/admin/api-keys') > -1 ||
                             pathname.indexOf('/admin/user-activities') > -1 ||
                             pathname.indexOf('/queues') > -1 ||
-                            pathname.indexOf('/attributes') > -1) &&
+                            pathname.indexOf('/attributes') > -1 ||
+                              pathname.indexOf('/mappings') > -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
                               (hasDefaultSite && hasWorkspaces) ||
