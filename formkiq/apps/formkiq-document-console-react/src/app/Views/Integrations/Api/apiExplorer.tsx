@@ -146,6 +146,11 @@ import {
   putWorkflowsApiItem,
   restoreDocumentApiItem,
   searchDocumentQueryApiItem,
+  getMappingsApiItem,
+  postMappingApiItem,
+  deleteMappingApiItem,
+  putMappingApiItem,
+  getMappingApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -540,6 +545,18 @@ export function ApiExplorer() {
                     </div>
                   </div>
                 </ApiSegment>
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Mappings">
+            <div className="ml-2 mb-4 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={getMappingsApiItem} sites={sites} />
+                <ApiItem apiItem={postMappingApiItem} sites={sites} />
+                <ApiItem apiItem={getMappingApiItem} sites={sites} />
+                <ApiItem apiItem={putMappingApiItem} sites={sites} />
+                <ApiItem apiItem={deleteMappingApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>

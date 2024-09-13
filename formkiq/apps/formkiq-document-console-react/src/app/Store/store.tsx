@@ -19,6 +19,7 @@ import schemasState from './reducers/schemas';
 import userManagementState from './reducers/userManagement';
 import workflowsState from './reducers/workflows';
 import userActivitiesState from './reducers/userActivities';
+import mappingsState from './reducers/mappings';
 
 export const store = configureStore({
   reducer: {
@@ -37,6 +38,7 @@ export const store = configureStore({
     userManagementState,
     attributesDataState,
     userActivitiesState,
+    mappingsState,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
