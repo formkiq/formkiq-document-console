@@ -1,28 +1,37 @@
-import {useEffect, useRef, useState} from 'react';
-import {useForm} from 'react-hook-form';
-import {useSelector} from 'react-redux';
-import {AttributesState, fetchDocumentAttributes} from '../../../Store/reducers/attributes';
-import {AttributesDataState} from '../../../Store/reducers/attributesData';
-import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../../Store/store';
-import {DocumentsService} from '../../../helpers/services/documentsService';
-import {Attribute} from '../../../helpers/types/attributes';
+import { useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
+import {
+  AttributesState,
+  fetchDocumentAttributes,
+} from '../../../Store/reducers/attributes';
+import {
+  AttributesDataState,
+  fetchAttributesData,
+} from '../../../Store/reducers/attributesData';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { Attribute } from '../../../helpers/types/attributes';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
-import {Close, Plus} from '../../Icons/icons';
+import { Close, Plus } from '../../Icons/icons';
 import AddAttributeForm from './AddAttributeForm';
+import { getAllAttributes } from '../../../helpers/tools/useCacheStorage';
 
 function AddDocumentAttributeForm({
-                                    onDocumentDataChange,
-                                    siteId,
-                                    value,
-                                    getValue,
-                                  }: any) {
-  const {allAttributes} = useSelector(AttributesDataState);
-  const {documentAttributes} = useSelector(AttributesState)
+  onDocumentDataChange,
+  siteId,
+  value,
+  getValue,
+}: any) {
+  const { allAttributes } = useSelector(AttributesDataState);
+  const { documentAttributes } = useSelector(AttributesState);
   const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
-  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
+  const [attributeKeys, setAttributeKeys] = useState<
+    { key: string; title: string }[]
+  >([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
   );
@@ -33,17 +42,23 @@ function AddDocumentAttributeForm({
   const [numberValues, setNumberValues] = useState<any[]>([]);
 
   useEffect(() => {
+    if (allAttributes.length === 0) {
+      dispatch(fetchAttributesData({ siteId }));
+    }
+  }, []);
+
+  useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
     const unusedAttributes = allAttributes.filter(
       (attribute) =>
-            !documentAttributes.find((item) => item.key === attribute.key)
+        !documentAttributes.find((item) => item.key === attribute.key)
     );
     const keys = unusedAttributes.map((item) => ({
       key: item.key,
       title: item.key,
     }));
     setAttributeKeys(keys);
-  }, [allAttributes,  documentAttributes]);
+  }, [allAttributes, documentAttributes]);
 
   useEffect(() => {
     if (!selectedAttributeKey) return;
@@ -61,7 +76,7 @@ function AddDocumentAttributeForm({
 
   const {
     register,
-    formState: {errors},
+    formState: { errors },
     handleSubmit,
     reset,
     setValue,
@@ -259,90 +274,99 @@ function AddDocumentAttributeForm({
           className="w-full"
           ref={addTagFormRef}
         >
-          {allAttributes.length > 0 && <div className="flex items-start mx-2 mb-4 relative w-full h-8 gap-2">
-            <div className="flex items-start gap-2 w-full">
-              <div className="h-8 flex gap-2 w-full max-w-[300px]">
-                <RadioCombobox
-                  values={attributeKeys}
-                  selectedValue={selectedAttributeKey}
-                  setSelectedValue={setSelectedAttributeKey}
-                  placeholderText="Attribute"
-                />
-              </div>
-              {selectedAttribute && (
-                <div className="text-xs bg-neutral-100 rounded-md font-bold h-8 p-2 text-center whitespace-nowrap">
-                  {selectedAttribute.dataType}
+          {allAttributes.length > 0 && (
+            <div className="flex items-start mx-2 mb-4 relative w-full h-8 gap-2">
+              <div className="flex items-start gap-2 w-full">
+                <div className="h-8 flex gap-2 w-full max-w-[300px]">
+                  <RadioCombobox
+                    values={attributeKeys}
+                    selectedValue={selectedAttributeKey}
+                    setSelectedValue={setSelectedAttributeKey}
+                    placeholderText="Attribute"
+                  />
                 </div>
-              )}
-              <div className="h-8 flex gap-2 items-center">
-                {selectedAttribute && selectedAttribute.dataType === 'STRING' && (
-                  <div className="flex items-center h-full gap-2">
-                    <input
-                      type="text"
-                      className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                      {...register('stringValue', {
-                        required: stringValues.length === 0,
-                      })}
-                      placeholder="Value"
-                    />
-                    <button
-                      type="button"
-                      onClick={addStringValue}
-                      title="Add"
-                      className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
-                    >
-                      <Plus/>
-                    </button>
+                {selectedAttribute && (
+                  <div className="text-xs bg-neutral-100 rounded-md font-bold h-8 p-2 text-center whitespace-nowrap">
+                    {selectedAttribute.dataType}
                   </div>
                 )}
+                <div className="h-8 flex gap-2 items-center">
+                  {selectedAttribute &&
+                    selectedAttribute.dataType === 'STRING' && (
+                      <div className="flex items-center h-full gap-2">
+                        <input
+                          type="text"
+                          className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                          {...register('stringValue', {
+                            required: stringValues.length === 0,
+                          })}
+                          placeholder="Value"
+                        />
+                        <button
+                          type="button"
+                          onClick={addStringValue}
+                          title="Add"
+                          className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
+                        >
+                          <Plus />
+                        </button>
+                      </div>
+                    )}
 
-                {selectedAttribute && selectedAttribute.dataType === 'NUMBER' && (
-                  <div className="flex items-center h-full gap-2">
-                    <input
-                      type="number"
-                      className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                      {...register('numberValue', {required: true})}
-                      placeholder="Value"
-                      step="any"
-                      onKeyDown={(e) => ["e", "E", "+"].includes(e.key) && e.preventDefault()}
-                    />
-                    <button
-                      type="button"
-                      onClick={addNumberValue}
-                      title="Add"
-                      className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
-                    >
-                      <Plus/>
-                    </button>
-                  </div>
-                )}
-                {selectedAttribute &&
-                  selectedAttribute.dataType === 'BOOLEAN' && (
-                    <input
-                      type="checkbox"
-                      className="appearance-none text-primary-600 bg-neutral-100 border-neutral-300 rounded focus:ring-primary-500 focus:ring-2 h-4 w-4 border border-neutral-300 text-sm rounded-md "
-                      {...register('booleanValue')}
-                    />
-                  )}
-                {selectedAttribute &&
-                  selectedAttribute.dataType === 'COMPOSITE_STRING' && (
-                    <input
-                      type="text"
-                      className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                      {...register('compositeStringValue', {required: true})}
-                      placeholder="Coma-separated values"
-                    />
-                  )}
+                  {selectedAttribute &&
+                    selectedAttribute.dataType === 'NUMBER' && (
+                      <div className="flex items-center h-full gap-2">
+                        <input
+                          type="number"
+                          className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                          {...register('numberValue', { required: true })}
+                          placeholder="Value"
+                          step="any"
+                          onKeyDown={(e) =>
+                            ['e', 'E', '+'].includes(e.key) &&
+                            e.preventDefault()
+                          }
+                        />
+                        <button
+                          type="button"
+                          onClick={addNumberValue}
+                          title="Add"
+                          className="text-neutral-500 bg-neutral-100 w-6 h-6 flex items-center justify-center rounded-full p-1 border border-neutral-500"
+                        >
+                          <Plus />
+                        </button>
+                      </div>
+                    )}
+                  {selectedAttribute &&
+                    selectedAttribute.dataType === 'BOOLEAN' && (
+                      <input
+                        type="checkbox"
+                        className="appearance-none text-primary-600 bg-neutral-100 border-neutral-300 rounded focus:ring-primary-500 focus:ring-2 h-4 w-4 border border-neutral-300 text-sm rounded-md "
+                        {...register('booleanValue')}
+                      />
+                    )}
+                  {selectedAttribute &&
+                    selectedAttribute.dataType === 'COMPOSITE_STRING' && (
+                      <input
+                        type="text"
+                        className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                        {...register('compositeStringValue', {
+                          required: true,
+                        })}
+                        placeholder="Coma-separated values"
+                      />
+                    )}
+                </div>
               </div>
+              <ButtonPrimaryGradient
+                type="submit"
+                title="Add"
+                className="h-8 mr-2"
+              >
+                Add
+              </ButtonPrimaryGradient>
             </div>
-            <ButtonPrimaryGradient
-              type="submit"
-              title="Add"
-              className="h-8 mr-2"
-            >
-              Add
-            </ButtonPrimaryGradient>
-          </div>}
+          )}
           <div className="flex flex-row justify-start flex-wrap gap-2 items-end ml-2">
             {stringValues.map((val: string, i: number) => (
               <div
@@ -359,7 +383,7 @@ function AddDocumentAttributeForm({
                   className="w-4 h-4 min-w-4 text-neutral-900"
                   onClick={() => handleRemoveStringValue(i)}
                 >
-                  <Close/>
+                  <Close />
                 </button>
               </div>
             ))}
@@ -378,7 +402,7 @@ function AddDocumentAttributeForm({
                   className="w-4 h-4 min-w-4 text-neutral-900"
                   onClick={() => handleRemoveNumberValue(i)}
                 >
-                  <Close/>
+                  <Close />
                 </button>
               </div>
             ))}

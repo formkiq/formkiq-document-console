@@ -3,13 +3,17 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
-import { DocumentListState, toggleExpandFolder } from '../../../Store/reducers/documentsList';
+import {
+  DocumentListState,
+  toggleExpandFolder,
+} from '../../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../../Store/store';
 import { formatDate } from '../../../helpers/services/toolService';
 import { IDocument, RequestStatus } from '../../../helpers/types/document';
 import { IFolder } from '../../../helpers/types/folder';
 import { ILine } from '../../../helpers/types/line';
 import { ArrowBottom, ArrowRight, Share, Star, Trash } from '../../Icons/icons';
+import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentListLine from '../DocumentListLine/documentListLine';
 import FolderDropWrapper from '../FolderDropWrapper/folderDropWrapper';
@@ -20,27 +24,16 @@ interface IProps {
   currentSiteId: string;
   isSiteReadOnly: boolean;
   onDeleteClick: (folder: IFolder) => () => void;
-  onRestoreDocument: (
-    file: IDocument,
-    siteId: string,
-    searchDocuments: any
-  ) => () => void;
-  onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void;
+  onRestoreDocument: (documentId: string) => void;
   currentDocumentsRootUri: string;
-  onShareClick: (event: any, value: ILine | null) => void;
-  onEditTagsAndMetadataModalClick: any;
-  onRenameModalClick: any;
-  onMoveModalClick: any;
-  onDocumentVersionsModalClick: any;
-  onDocumentWorkflowsModalClick: any;
-  onDocumentReviewModalClick: any;
-  onESignaturesModalClick: any;
   onDocumentDataChange: any;
   filterTag: string | null;
   isArchiveTabExpanded?: boolean;
   addToPendingArchive?: (file: IDocument) => void;
   deleteFromPendingArchive?: (file: IDocument) => void;
   archiveStatus?: string;
+  selectedDocuments: string[];
+  setSelectedDocuments: (documents: string[]) => void;
 }
 
 function FolderListLine({
@@ -50,26 +43,17 @@ function FolderListLine({
   isSiteReadOnly,
   onDeleteClick,
   currentDocumentsRootUri,
-  onShareClick,
-  onEditTagsAndMetadataModalClick,
-  onRenameModalClick,
-  onMoveModalClick,
-  onDocumentVersionsModalClick,
-  onDocumentWorkflowsModalClick,
-  onDocumentReviewModalClick,
-  onESignaturesModalClick,
   onRestoreDocument,
-  onDeleteDocument,
   onDocumentDataChange,
   filterTag,
   isArchiveTabExpanded,
   addToPendingArchive,
   deleteFromPendingArchive,
   archiveStatus,
+  selectedDocuments,
+  setSelectedDocuments,
 }: IProps) {
-  const {
-    loadingStatus,
-  } = useSelector(DocumentListState);
+  const { loadingStatus } = useSelector(DocumentListState);
 
   let folderPath = folderInstance.path;
   if (folderInstance.path.indexOf('/') === -1) {
@@ -84,11 +68,11 @@ function FolderListLine({
     useCollections,
     useSoftDelete,
   } = useSelector(ConfigState);
+  const { onShareClick } = useDocumentActions();
 
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1);
   const trElem = React.forwardRef((props: any, ref) => (
-    <tr {...props} ref={ref} data-folder-path={folderPath}
-    >
+    <tr {...props} ref={ref} data-folder-path={folderPath}>
       {props.childs}
     </tr>
   ));
@@ -129,28 +113,15 @@ function FolderListLine({
                       isSiteReadOnly={isSiteReadOnly}
                       onDeleteClick={onDeleteClick}
                       currentDocumentsRootUri={currentDocumentsRootUri}
-                      onShareClick={onShareClick}
-                      onEditTagsAndMetadataModalClick={
-                        onEditTagsAndMetadataModalClick
-                      }
-                      onRenameModalClick={onRenameModalClick}
-                      onMoveModalClick={onMoveModalClick}
-                      onDocumentVersionsModalClick={
-                        onDocumentVersionsModalClick
-                      }
-                      onDocumentWorkflowsModalClick={
-                        onDocumentWorkflowsModalClick
-                      }
-                      onDocumentReviewModalClick={onDocumentReviewModalClick}
-                      onESignaturesModalClick={onESignaturesModalClick}
                       onRestoreDocument={onRestoreDocument}
-                      onDeleteDocument={onDeleteDocument}
                       onDocumentDataChange={onDocumentDataChange}
                       filterTag={filterTag}
                       isArchiveTabExpanded={isArchiveTabExpanded}
                       archiveStatus={archiveStatus}
                       addToPendingArchive={addToPendingArchive}
                       deleteFromPendingArchive={deleteFromPendingArchive}
+                      selectedDocuments={selectedDocuments}
+                      setSelectedDocuments={setSelectedDocuments}
                     />
                   );
                 })}
@@ -165,19 +136,8 @@ function FolderListLine({
                   siteId={currentSiteId}
                   isSiteReadOnly={isSiteReadOnly}
                   documentsRootUri={currentDocumentsRootUri}
-                  onShareClick={onShareClick}
                   searchDocuments={folderInstance.documents}
-                  onDeleteClick={onDeleteDocument(file, null)}
-                  onRestoreClick={onRestoreDocument(file, currentSiteId, null)}
-                  onEditTagsAndMetadataModalClick={
-                    onEditTagsAndMetadataModalClick
-                  }
-                  onRenameModalClick={onRenameModalClick}
-                  onMoveModalClick={onMoveModalClick}
-                  onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                  onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
-                  onDocumentReviewModalClick={onDocumentReviewModalClick}
-                  onESignaturesModalClick={onESignaturesModalClick}
+                  onRestoreClick={onRestoreDocument}
                   onDocumentDataChange={onDocumentDataChange}
                   filterTag={filterTag}
                   leftOffset={4}
@@ -185,6 +145,8 @@ function FolderListLine({
                   archiveStatus={archiveStatus}
                   addToPendingArchive={addToPendingArchive}
                   deleteFromPendingArchive={deleteFromPendingArchive}
+                  selectedDocuments={selectedDocuments}
+                  setSelectedDocuments={setSelectedDocuments}
                 />
               );
             })}
@@ -258,7 +220,11 @@ function FolderListLine({
                 </div>
                 <div className="flex grow w-full justify-start">
                   <Link
-                    to={loadingStatus===RequestStatus.pending? "#":`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={
+                      loadingStatus === RequestStatus.pending
+                        ? '#'
+                        : `${currentDocumentsRootUri}/folders/${folderPath}`
+                    }
                     className="w-16 pl-1 pt-1.5 cursor-pointer"
                   >
                     <svg
@@ -275,7 +241,11 @@ function FolderListLine({
                     </svg>
                   </Link>
                   <Link
-                    to={loadingStatus===RequestStatus.pending? "#":`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={
+                      loadingStatus === RequestStatus.pending
+                        ? '#'
+                        : `${currentDocumentsRootUri}/folders/${folderPath}`
+                    }
                     className="cursor-pointer grow p-1"
                   >
                     {folderName}
@@ -328,20 +298,6 @@ function FolderListLine({
                         isSiteReadOnly={isSiteReadOnly}
                         formkiqVersion={formkiqVersion}
                         onDeleteClick={onDeleteClick(folderInstance)}
-                        onShareClick={onShareClick}
-                        onEditTagsAndMetadataModalClick={
-                          onEditTagsAndMetadataModalClick
-                        }
-                        onRenameModalClick={onRenameModalClick}
-                        onMoveModalClick={onMoveModalClick}
-                        onDocumentVersionsModalClick={
-                          onDocumentVersionsModalClick
-                        }
-                        onDocumentWorkflowsModalClick={
-                          onDocumentWorkflowsModalClick
-                        }
-                        onDocumentReviewModalClick={onDocumentReviewModalClick}
-                        onESignaturesModalClick={onESignaturesModalClick}
                         user={user}
                         useIndividualSharing={useIndividualSharing}
                         useCollections={useCollections}
