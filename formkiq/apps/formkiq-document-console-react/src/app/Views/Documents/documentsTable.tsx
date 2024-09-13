@@ -14,7 +14,6 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { EmptyDocumentsTable } from './EmptyDocumentsTable';
-import { useLocation, useNavigate } from 'react-router-dom';
 
 type DocumentTableProps = {
   documentsWrapperRef: Ref<any>;
