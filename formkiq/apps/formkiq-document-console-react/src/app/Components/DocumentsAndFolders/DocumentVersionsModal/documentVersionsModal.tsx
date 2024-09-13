@@ -83,6 +83,7 @@ export default function DocumentVersionsModal({
     }
   };
   const viewDocumentVersion = (event: any, versionKey: string) => {
+    console.log('viewDocumentVersion', versionKey, value);
     if (value) {
       if (versionKey !== undefined) {
         /*
@@ -285,9 +286,9 @@ export default function DocumentVersionsModal({
                                 </td>
                                 <td className="border-b border-slate-100 nodark:border-slate-700 p-2 pr-2 text-slate-500 nodark:text-slate-400">
                                   <div className="flex flex-wrap justify-left gap-4">
-                                    {InlineViewableContentTypes.indexOf(
+                                    {(InlineViewableContentTypes.indexOf(
                                       version.contentType
-                                    ) > -1 && (
+                                    ) > -1) && (
                                       <button
                                         className="flex items-center bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-smaller font-semibold py-2 px-7 rounded-2xl flex cursor-pointer focus:outline-none"
                                         onClick={(event) =>

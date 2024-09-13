@@ -30,7 +30,8 @@ import {
   Api,
   ApiKey,
   ArrowBottom,
-  ArrowRight, Attribute,
+  ArrowRight,
+  Attribute,
   ChevronLeft,
   ChevronRight,
   Documents,
@@ -500,7 +501,7 @@ export function Sidebar() {
                     {currentSiteId === 'default' && (
                       <>
                         <li
-                          className="hidden w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
+                          className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
                           onClick={toggleDefaultSiteDocumentQueuesExpand}
                         >
                           <div className="flex justify-end mt-3 mr-1">

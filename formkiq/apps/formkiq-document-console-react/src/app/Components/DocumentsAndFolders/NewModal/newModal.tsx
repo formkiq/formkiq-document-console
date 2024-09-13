@@ -473,14 +473,14 @@ export default function NewModal({
                       ref={newFormRef}
                       onSubmit={(event) => onNewFormSubmit(event, value)}
                     >
-                      <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
+                      <div className="flex flex-wrap items-start relative w-full">
                         {value && (
-                          <div className="w-full mr-12 text-sm font-semibold pb-2">
+                          <h4 className="w-full text-lg font-bold mb-2 px-2 py-1 bg-gray-100">
                             Location: /
                             {value.folder && value.folder.length && (
                               <span>{value.folder}/</span>
                             )}
-                          </div>
+                          </h4>
                         )}
                         <div
                           className={

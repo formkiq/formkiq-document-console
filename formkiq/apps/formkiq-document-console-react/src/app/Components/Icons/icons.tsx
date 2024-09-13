@@ -1920,37 +1920,53 @@ export function AccessControl() {
 
 export function LinkIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg"
-         width="100%"
-         height="100%"
-         viewBox="0 0 24 24">
-      <path fill="currentColor"
-            d="M11 17H7q-2.075 0-3.537-1.463T2 12t1.463-3.537T7 7h4v2H7q-1.25 0-2.125.875T4 12t.875 2.125T7 15h4zm-3-4v-2h8v2zm5 4v-2h4q1.25 0 2.125-.875T20 12t-.875-2.125T17 9h-4V7h4q2.075 0 3.538 1.463T22 12t-1.463 3.538T17 17z"/>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 24 24"
+    >
+      <path
+        fill="currentColor"
+        d="M11 17H7q-2.075 0-3.537-1.463T2 12t1.463-3.537T7 7h4v2H7q-1.25 0-2.125.875T4 12t.875 2.125T7 15h4zm-3-4v-2h8v2zm5 4v-2h4q1.25 0 2.125-.875T20 12t-.875-2.125T17 9h-4V7h4q2.075 0 3.538 1.463T22 12t-1.463 3.538T17 17z"
+      />
     </svg>
-  )
+  );
 }
 
 export function HistoryIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg"
-         width="100%"
-         height="100%"
-         viewBox="0 0 24 24">
-      <path fill="currentColor"
-            d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89l.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7s-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18m-1 5v5l4.28 2.54l.72-1.21l-3.5-2.08V8z"/>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 24 24"
+    >
+      <path
+        fill="currentColor"
+        d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89l.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7s-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18m-1 5v5l4.28 2.54l.72-1.21l-3.5-2.08V8z"
+      />
     </svg>
-  )
+  );
 }
 
 export function Attribute() {
-  return(
-    <svg xmlns="http://www.w3.org/2000/svg"
-         width="100%"
-         height="100%"
-         viewBox="0 0 14 14">
-      <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" d="M5.5 1h-5v5h5zm7.75 12.5h-5m0-5h5m-5 2.5h5m.25-5H8L10.75.5zM3 13.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5"/>
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 14 14"
+    >
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5.5 1h-5v5h5zm7.75 12.5h-5m0-5h5m-5 2.5h5m.25-5H8L10.75.5zM3 13.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5"
+      />
     </svg>
-  )
+  );
 }
 
 export function Retry() {
@@ -1973,13 +1989,37 @@ export function Retry() {
 
 export function Mapping() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="100%"
-         height="100%" viewBox="0 0 48 48">
-      <g fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="4">
-        <path
-          d="M8 28a4 4 0 1 0 0-8a4 4 0 0 0 0 8ZM42 8a2 2 0 1 0 0-4a2 2 0 0 0 0 4Zm0 18a2 2 0 1 0 0-4a2 2 0 0 0 0 4Zm0 18a2 2 0 1 0 0-4a2 2 0 0 0 0 4Z"/>
-        <path strokeLinecap="round" d="M32 6H20v36h12M12 24h20"/>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 48 48"
+    >
+      <g
+        fill="none"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="4"
+      >
+        <path d="M8 28a4 4 0 1 0 0-8a4 4 0 0 0 0 8ZM42 8a2 2 0 1 0 0-4a2 2 0 0 0 0 4Zm0 18a2 2 0 1 0 0-4a2 2 0 0 0 0 4Zm0 18a2 2 0 1 0 0-4a2 2 0 0 0 0 4Z" />
+        <path strokeLinecap="round" d="M32 6H20v36h12M12 24h20" />
       </g>
     </svg>
-  )
+  );
+}
+
+export function RestoreFile() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 24 24"
+    >
+      <path
+        fill="currentColor"
+        d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm4 18H6V4h7l5 5zm-1-6.76c0 2.62-2.13 4.76-4.76 4.76c-1.95 0-3.63-1.18-4.36-2.86H9.5c.61.86 1.61 1.43 2.74 1.43c1.84 0 3.33-1.5 3.33-3.33S14.08 9.9 12.24 9.9c-1.29 0-2.38.75-2.95 1.81l1.52 1.53H7V9.43l1.24 1.24a4.71 4.71 0 0 1 4-2.17c2.63-.03 4.76 2.11 4.76 4.74"
+      />
+    </svg>
+  );
 }

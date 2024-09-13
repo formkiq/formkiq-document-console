@@ -12,6 +12,7 @@ import Sidebar from '../Layout/sidebar';
 import LoadingPage from '../LoadingPage';
 import ProtectedRoute from '../ProtectedRoute/protected-route';
 import RoutesMapper from './Routes';
+import {DocumentActionsProvider} from "../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext";
 
 const Router = () => {
   const { isSidebarExpanded } = useSelector(ConfigState);
@@ -19,26 +20,28 @@ const Router = () => {
   return (
     <HelmetProvider>
       <DndProvider backend={HTML5Backend}>
-        <div className="flex overflow-x-hidden">
-          <div className={(isSidebarExpanded ? 'w-64' : 'w-14') + ' grow-0'}>
-            <Sidebar />
-          </div>
-          <div className="grow overflow-y-hidden">
-            <Navbar />
-            <div className="flex grow flex-row">
-              <div className="main-content flex-1">
-                <ProtectedRoute>
-                  <Suspense fallback={<LoadingPage />}>
-                    <RoutesMapper />
-                  </Suspense>
-                </ProtectedRoute>
+        <DocumentActionsProvider>
+          <div className="flex overflow-x-hidden">
+            <div className={(isSidebarExpanded ? 'w-64' : 'w-14') + ' grow-0'}>
+              <Sidebar />
+            </div>
+            <div className="grow overflow-y-hidden">
+              <Navbar />
+              <div className="flex grow flex-row">
+                <div className="main-content flex-1">
+                  <ProtectedRoute>
+                    <Suspense fallback={<LoadingPage />}>
+                      <RoutesMapper />
+                    </Suspense>
+                  </ProtectedRoute>
+                </div>
               </div>
             </div>
+            <GlobalConfirmDialog />
+            <GlobalNotificationDialog />
+            <GlobalProgressDialog />
           </div>
-          <GlobalConfirmDialog />
-          <GlobalNotificationDialog />
-          <GlobalProgressDialog />
-        </div>
+        </DocumentActionsProvider>
       </DndProvider>
     </HelmetProvider>
   );
