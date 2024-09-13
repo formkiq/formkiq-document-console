@@ -365,7 +365,11 @@ export function Workflows() {
 
               <RadioListbox
                 values={['active', 'inactive', 'all']}
-                titles={['Active', 'Inactive', 'All Workflows']}
+                titles={[
+                  'Active Workflows',
+                  'Inactive Workflows',
+                  'All Workflows',
+                ]}
                 selectedValue={
                   workflowFilterPreference ? workflowFilterPreference : 'active'
                 }
