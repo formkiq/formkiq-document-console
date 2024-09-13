@@ -495,7 +495,7 @@ export default function UploadModal({
                       />
                     </div>
                     <div className="flex flex-wrap">
-                      <h4 className="w-full font-semibold">
+                      <h4 className="w-full text-lg font-bold mb-2 px-2 py-1 bg-gray-100">
                         Location: {folderPath}
                       </h4>
                       <h4 className="w-full font-semibold">
