@@ -19,6 +19,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { IDocument } from '../../helpers/types/document';
+import { setCurrentDocument } from '../../Store/reducers/documentsList';
 
 interface CSVRow {
   [key: string]: string;
@@ -119,6 +120,7 @@ export function DocumentView() {
       DocumentsService.getDocumentById(id, currentSiteId).then(
         (response: IDocument) => {
           setDocument(response);
+          dispatch(setCurrentDocument(response));
           setDocumentExtension(
             response.path
               .substring(response.path.lastIndexOf('.') + 1)

@@ -4,18 +4,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Tooltip } from 'react-tooltip';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
+import { useDocumentActions } from '../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
+import DocumentActionsModalContainer from '../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
-import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentReviewModal/DocumentReviewModal';
-import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
-import DocumentWorkflowsModal from '../../Components/DocumentsAndFolders/DocumentWorkflowsModal/documentWorkflowsModal';
-import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
-import EditAttributesModal from '../../Components/DocumentsAndFolders/EditAttributesModal/editAttributesModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
-import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal';
-import MultiValuedAttributeModal from '../../Components/DocumentsAndFolders/MultivaluedAttributeModal/MultivaluedAttributeModal';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
-import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
 import AdvancedSearchTab from '../../Components/DocumentsAndFolders/Search/advancedSearchTab';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
@@ -38,7 +33,6 @@ import {
   Undo,
   View,
 } from '../../Components/Icons/icons';
-import ShareModal from '../../Components/Share/share';
 import {
   AttributesState,
   fetchDocumentAttributes,
@@ -99,6 +93,7 @@ function Documents() {
   const navigate = useNavigate();
   const { user } = useAuthenticatedState();
   const {
+    documents,
     nextToken,
     loadingStatus,
     currentSearchPage,
@@ -148,6 +143,13 @@ function Documents() {
     workspaceSites
   );
 
+  const {
+    onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
+    onEditAttributesModalClick,
+    onAttributeQuantityClick,
+  } = useDocumentActions();
+
   useEffect(() => {
     if (siteRedirectUrl.length) {
       navigate(
@@ -168,7 +170,7 @@ function Documents() {
   const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
-  const [infoTagEditMode, setInfoTagEditMode] = useState(false);
+  const [infoDocumentAction, setInfoDocumentAction] = useState('');
   // NOTE: not fully implemented;
   // using the edit metadata modal for now, to be replaced with new system to indicate diff between tag, metadata, and versioned metadata
   // const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
@@ -190,39 +192,8 @@ function Documents() {
   const [uploadModalDocumentId, setUploadModalDocumentId] = useState('');
   const [folderUploadModalDocumentId, setFolderUploadModalDocumentId] =
     useState('');
-  const [shareModalValue, setShareModalValue] = useState<ILine | null>(null);
-  const [isShareModalOpened, setShareModalOpened] = useState(false);
-  const [editAttributesModalValue, setEditAttributesModalValue] =
-    useState<ILine | null>(null);
-  const [isEditAttributesModalOpened, setEditAttributesModalOpened] =
-    useState(false);
-  const [documentVersionsModalValue, setDocumentVersionsModalValue] =
-    useState<ILine | null>(null);
-  const [isDocumentVersionsModalOpened, setDocumentVersionsModalOpened] =
-    useState(false);
-  const [documentWorkflowsModalValue, setDocumentWorkflowsModalValue] =
-    useState<ILine | null>(null);
-  const [isDocumentWorkflowsModalOpened, setDocumentWorkflowsModalOpened] =
-    useState(false);
-  const [eSignaturesModalValue, setESignaturesModalValue] =
-    useState<ILine | null>(null);
-  const [documentReviewModalValue, setDocumentReviewModalValue] =
-    useState<ILine | null>(null);
-  const [isDocumentReviewModalOpened, setDocumentReviewModalOpened] =
-    useState(false);
-  const [isESignaturesModalOpened, setESignaturesModalOpened] = useState(false);
   const [newModalValue, setNewModalValue] = useState<ILine | null>(null);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
-  const [renameModalValue, setRenameModalValue] = useState<ILine | null>(null);
-  const [isRenameModalOpened, setRenameModalOpened] = useState(false);
-  const [
-    isMultivaluedAttributeModalOpened,
-    setMultivaluedAttributeModalOpened,
-  ] = useState(false);
-  const [multivaluedAttributeModalValue, setMultivaluedAttributeModalValue] =
-    useState<any[]>([]);
-  const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
-  const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
   const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
     []
@@ -232,6 +203,7 @@ function Documents() {
   const documentsPageWrapper = document.getElementById('documentsPageWrapper');
   const closeDropZoneRef = useRef(null);
   const [isDropZoneVisible, setIsDropZoneVisible] = useState(false);
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
 
   function handleDragEnter(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
@@ -239,6 +211,7 @@ function Documents() {
     event.stopPropagation();
     setIsDropZoneVisible(true);
   }
+
   function handleDrop(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
     event.preventDefault();
@@ -252,6 +225,7 @@ function Documents() {
     setDropUploadDocuments(event.dataTransfer.files);
     onUploadClick(event, '');
   }
+
   useEffect(() => {
     const handleDragOver = (event: any) => {
       if (!event.dataTransfer?.types.includes('Files')) return;
@@ -338,14 +312,49 @@ function Documents() {
           // TODO: set folder to selected document path?
           updateTags();
           updateDocumentActions();
-
           // close history tab if deeplink file
           if (
             infoDocumentView === 'history' &&
-            response.deepLinkPath &&
-            response.deepLinkPath.length > 0
+            response.deepLinkPath?.length > 0
           ) {
             setInfoDocumentView('info');
+          }
+          // CHECK FOR MODAL ACTION
+          if (infoDocumentAction.length) {
+            switch (infoDocumentAction) {
+              case 'attributes':
+                onEditAttributesModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                break;
+              case 'submitForReview':
+                /*
+                onSubmitForReviewModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                */
+                break;
+              case 'reviewDocument':
+                /*
+                onDocumentReviewModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                */
+                break;
+            }
+            setInfoDocumentAction('');
           }
         }
       );
@@ -387,10 +396,22 @@ function Documents() {
 
   useEffect(() => {
     if (hash.indexOf('#id=') > -1) {
-      setInfoDocumentId(hash.substring(4));
-    } else if (hash.indexOf('#history_id') > -1) {
-      setInfoDocumentId(hash.substring(12));
-      setInfoDocumentView('history');
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const id = hashParams.get('id');
+      const action = hashParams.get('action');
+      if (id) {
+        setInfoDocumentId(id);
+      } else {
+        setInfoDocumentId(''); // Handle case where id might be null
+      }
+      if (action) {
+        setInfoDocumentAction(action);
+        if (action === 'history') {
+          setInfoDocumentView('history');
+        }
+      } else {
+        setInfoDocumentAction('');
+      }
     } else {
       setInfoDocumentId('');
     }
@@ -621,6 +642,7 @@ function Documents() {
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
+    setSelectedDocuments([]);
   }, [pathname]);
 
   useEffect(() => {
@@ -649,24 +671,60 @@ function Documents() {
     formkiqVersion,
   ]);
 
-  const onDeleteDocument = (file: IDocument, searchDocuments: any) => () => {
-    const deleteFunc = () => {
+  const deleteFunc = async (id: string, softDelete: boolean) => {
+    const res: any = await dispatch(
+      deleteDocument({
+        siteId: currentSiteId,
+        user,
+        documentId: id,
+        softDelete,
+      })
+    );
+    if (res.error) {
       dispatch(
-        deleteDocument({
-          siteId: currentSiteId,
-          user,
-          document: file,
-          documents: searchDocuments,
+        openDialog({
+          dialogTitle: res.error.message,
         })
       );
-    };
+      return;
+    }
+    setSelectedDocuments((docs) => docs.filter((doc: any) => doc !== id));
+  };
+
+  const onDeleteDocument = (id: string, softDelete: boolean) => {
+    const dialogTitle = softDelete
+      ? 'Are you sure you want to delete this document?'
+      : 'Are you sure you want to delete this document permanently?';
     dispatch(
       openDialog({
-        callback: deleteFunc,
-        dialogTitle: 'Are you sure you want to delete this document?',
+        callback: () => deleteFunc(id, softDelete),
+        dialogTitle,
       })
     );
   };
+
+  const onDeleteSelectedDocuments = (softDelete: boolean) => {
+    function deleteMultipleDocuments(
+      documentIds: string[],
+      softDelete: boolean
+    ) {
+      documentIds.forEach((id: string) => {
+        deleteFunc(id, softDelete);
+      });
+    }
+
+    dispatch(
+      openDialog({
+        callback: () => deleteMultipleDocuments(selectedDocuments, softDelete),
+        dialogTitle: `Are you sure you want to delete ${
+          selectedDocuments.length
+        } selected document${selectedDocuments.length === 1 ? '' : 's'}${
+          softDelete ? '' : ' permanently'
+        }?`,
+      })
+    );
+  };
+
   const deleteFolder = (folder: IFolder | IDocument) => () => {
     const deleteFunc = () => {
       dispatch(fetchDeleteFolder({ folder, siteId }));
@@ -678,23 +736,40 @@ function Documents() {
       })
     );
   };
-  const restoreDocument =
-    (file: IDocument, siteId: string, searchDocuments: any) => () => {
-      DocumentsService.restoreDocument(siteId, file.documentId).then(() => {
-        let newDocs = null;
-        if (searchDocuments) {
-          newDocs = searchDocuments.filter((doc: any) => {
-            return doc.documentId !== file.documentId;
-          });
-        }
+  const restoreDocument = (documentId: string) => {
+    DocumentsService.restoreDocument(currentSiteId, documentId).then((res) => {
+      if (res.status !== 200) {
         dispatch(
-          updateDocumentsList({
-            documents: newDocs,
-            user: user,
+          openDialog({
+            dialogTitle: 'Error restoring document. Please try again later.',
           })
         );
-      });
-    };
+        return;
+      }
+      let newDocs = null;
+      if (documents) {
+        newDocs = documents.filter((doc: any) => {
+          return doc.documentId !== documentId;
+        });
+      }
+      dispatch(
+        updateDocumentsList({
+          documents: newDocs,
+          user: user,
+        })
+      );
+      setSelectedDocuments((docs) =>
+        docs.filter((doc: any) => doc !== documentId)
+      );
+    });
+  };
+
+  const onRestoreSelectedDocuments = async () => {
+    await selectedDocuments.forEach((id: string) => {
+      restoreDocument(id);
+    });
+  };
+
   const onTagDelete = (tagKey: string) => {
     if (infoDocumentId.length) {
       const deleteFunc = () => {
@@ -718,16 +793,7 @@ function Documents() {
       );
     }
   };
-  const onShareClick = (event: any, value: ILine | null) => {
-    setShareModalValue(value);
-    setShareModalOpened(true);
-  };
-  const onShareClose = () => {
-    setShareModalOpened(false);
-  };
-  const getShareModalValue = () => {
-    return shareModalValue;
-  };
+
   const onUploadClick = (event: any, documentId: string) => {
     dispatch(setCurrentActionEvent(''));
     setUploadModalOpened(true);
@@ -744,46 +810,7 @@ function Documents() {
   const onFolderUploadClose = () => {
     setFolderUploadModalOpened(false);
   };
-  const onEditAttributesModalClick = (event: any, value: ILine | null) => {
-    setEditAttributesModalValue(value);
-    setEditAttributesModalOpened(true);
-  };
-  const onEditAttributesModalClose = () => {
-    setEditAttributesModalOpened(false);
-    updateTags();
-  };
-  const getEditAttributesModalValue = () => {
-    return editAttributesModalValue;
-  };
-  const onDocumentVersionsModalClick = (event: any, value: ILine | null) => {
-    setDocumentVersionsModalValue(value);
-    setDocumentVersionsModalOpened(true);
-  };
-  const onDocumentVersionsModalClose = () => {
-    setDocumentVersionsModalOpened(false);
-  };
-  const onDocumentWorkflowsModalClick = (event: any, value: ILine | null) => {
-    setDocumentWorkflowsModalValue(value);
-    setDocumentWorkflowsModalOpened(true);
-  };
-  const onDocumentWorkflowsModalClose = () => {
-    setDocumentWorkflowsModalOpened(false);
-  };
-  const onESignaturesModalClick = (event: any, value: ILine | null) => {
-    setESignaturesModalValue(value);
-    setESignaturesModalOpened(true);
-  };
-  const onESignaturesModalClose = () => {
-    setESignaturesModalValue(null);
-    setESignaturesModalOpened(false);
-  };
-  const onDocumentReviewModalClick = (event: any, value: ILine | null) => {
-    setDocumentReviewModalValue(value);
-    setDocumentReviewModalOpened(true);
-  };
-  const onDocumentReviewModalClose = () => {
-    setDocumentReviewModalOpened(false);
-  };
+
   const onDocumentDataChange = (event: any, value: ILine | null) => {
     dispatch(setDocuments({ documents: null }));
     dispatch(
@@ -817,29 +844,7 @@ function Documents() {
   const onNewClose = () => {
     setNewModalOpened(false);
   };
-  const onRenameModalClick = (event: any, value: ILine | null) => {
-    setRenameModalValue(value);
-    setRenameModalOpened(true);
-  };
-  const onRenameModalClose = () => {
-    setRenameModalOpened(false);
-  };
-  const onAttributeQuantityClick = (item: any) => {
-    setMultivaluedAttributeModalOpened(true);
-    setMultivaluedAttributeModalValue(item);
-  };
-  const onMultiValuedAttributeModalClose = () => {
-    setMultivaluedAttributeModalOpened(false);
-    setMultivaluedAttributeModalValue([]);
-  };
 
-  const onMoveModalClick = (event: any, value: ILine | null) => {
-    setMoveModalValue(value);
-    setMoveModalOpened(true);
-  };
-  const onMoveModalClose = () => {
-    setMoveModalOpened(false);
-  };
   const DownloadDocument = () => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentUrl(
@@ -1471,6 +1476,16 @@ function Documents() {
     }
   };
 
+  const [publicationLinkCopyTooltipText, setPublicationLinkCopyTooltipText] =
+    useState('Copy Link');
+  const CopyPublicationLink = (documentId: string) => {
+    window.navigator.clipboard.writeText(`/publications/${documentId}`);
+    setPublicationLinkCopyTooltipText('Copied!');
+    setTimeout(() => {
+      setPublicationLinkCopyTooltipText('Copy Link');
+    }, 2000);
+  };
+
   return (
     <>
       <Helmet>
@@ -1583,23 +1598,14 @@ function Documents() {
                 </div>
               )}
               <DocumentsTable
-                onDeleteDocument={onDeleteDocument}
                 onRestoreDocument={restoreDocument}
-                onRenameModalClick={onRenameModalClick}
-                onMoveModalClick={onMoveModalClick}
-                onShareClick={onShareClick}
                 documentsScrollpaneRef={documentsScrollpaneRef}
                 documentsWrapperRef={documentsWrapperRef}
                 currentSiteId={currentSiteId}
                 currentDocumentsRootUri={currentDocumentsRootUri}
-                onESignaturesModalClick={onESignaturesModalClick}
                 onDocumentDataChange={onDocumentDataChange}
                 isSiteReadOnly={isSiteReadOnly}
-                onEditTagsAndMetadataModalClick={onEditAttributesModalClick}
                 filterTag={filterTag}
-                onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
-                onDocumentReviewModalClick={onDocumentReviewModalClick}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
                 isArchiveTabExpanded={isArchiveTabExpanded}
@@ -1608,6 +1614,10 @@ function Documents() {
                 archiveStatus={archiveStatus}
                 infoDocumentId={infoDocumentId}
                 onDocumentInfoClick={onDocumentInfoClick}
+                selectedDocuments={selectedDocuments}
+                setSelectedDocuments={setSelectedDocuments}
+                onDeleteSelectedDocuments={onDeleteSelectedDocuments}
+                onRestoreSelectedDocuments={onRestoreSelectedDocuments}
               />
               <Dialog
                 open={isDropZoneVisible}
@@ -1703,8 +1713,7 @@ function Documents() {
                       </div>
                     </div>
                     {formkiqVersion.type !== 'core' &&
-                      (currentDocument as IDocument).deepLinkPath &&
-                      (currentDocument as IDocument).deepLinkPath.length ===
+                      (currentDocument as IDocument).deepLinkPath?.length ===
                         0 && (
                         <div
                           className="w-1/3 text-sm font-semibold cursor-pointer"
@@ -2041,8 +2050,55 @@ function Documents() {
                                     </dt>
                                     <dd className="text-sm">
                                       {/*Attributes*/}
-                                      {item?.stringValue && (
-                                        <span>{item.stringValue}</span>
+                                      {item?.key === 'Publication' ||
+                                      item?.key === 'Relationships' ? (
+                                        <>
+                                          {item?.stringValue && (
+                                            <div>
+                                              <span className="text-xs pr-2">
+                                                {item.stringValue}
+                                                <span className="mx-1"></span>
+                                                <CopyButton
+                                                  value={item.stringValue}
+                                                />
+                                              </span>
+                                              {item?.key === 'Publication' && (
+                                                <span className="block mt-1 text-xs">
+                                                  <Tooltip
+                                                    id={
+                                                      'publication-link-copy-tooltip'
+                                                    }
+                                                  />
+                                                  <ButtonTertiary
+                                                    className="px-2 py-0.5"
+                                                    data-tooltip-id={
+                                                      'publication-link-copy-tooltip'
+                                                    }
+                                                    data-tooltip-content={
+                                                      publicationLinkCopyTooltipText
+                                                    }
+                                                    onClick={() => {
+                                                      CopyPublicationLink(
+                                                        (
+                                                          currentDocument as IDocument
+                                                        ).documentId
+                                                      );
+                                                    }}
+                                                    type="button"
+                                                  >
+                                                    Copy Publication Link
+                                                  </ButtonTertiary>
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <>
+                                          {item?.stringValue && (
+                                            <span>{item.stringValue}</span>
+                                          )}
+                                        </>
                                       )}
                                       {item?.numberValue !== undefined && (
                                         <span>{item.numberValue}</span>
@@ -2062,14 +2118,31 @@ function Documents() {
                                         <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
                                           {item.stringValues.map(
                                             (val: any, index: number) => (
-                                              <span
-                                                key={`attr_string_${item.key}_${index}`}
-                                              >
-                                                {val}
-                                                {index <
-                                                  item.stringValues.length -
-                                                    1 && <hr />}
-                                              </span>
+                                              <>
+                                                {item?.key ===
+                                                'Relationships' ? (
+                                                  <span
+                                                    className="text-xs"
+                                                    key={`attr_string_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    <span className="mx-1"></span>
+                                                    <CopyButton value={val} />
+                                                    {index <
+                                                      item.stringValues.length -
+                                                        1 && <hr />}
+                                                  </span>
+                                                ) : (
+                                                  <span
+                                                    key={`attr_string_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    {index <
+                                                      item.stringValues.length -
+                                                        1 && <hr />}
+                                                  </span>
+                                                )}
+                                              </>
                                             )
                                           )}
                                         </div>
@@ -2466,11 +2539,11 @@ function Documents() {
                         {isCurrentDocumentSoftDeleted ? (
                           <button
                             className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                            onClick={restoreDocument(
-                              currentDocument,
-                              currentSiteId,
-                              null
-                            )}
+                            onClick={() =>
+                              restoreDocument(
+                                (currentDocument as IDocument).documentId
+                              )
+                            }
                           >
                             <span className="">Restore</span>
                             <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
@@ -2482,10 +2555,12 @@ function Documents() {
                             {useSoftDelete && (
                               <button
                                 className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                                onClick={onDeleteDocument(
-                                  currentDocument,
-                                  null
-                                )}
+                                onClick={() =>
+                                  onDeleteDocument(
+                                    (currentDocument as IDocument).documentId,
+                                    useSoftDelete
+                                  )
+                                }
                               >
                                 <span className="">Delete</span>
                                 <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
@@ -2507,20 +2582,6 @@ function Documents() {
                             siteId={currentSiteId}
                             isSiteReadOnly={isSiteReadOnly}
                             formkiqVersion={formkiqVersion}
-                            onDeleteClick={deleteFolder(currentDocument)}
-                            onShareClick={onShareClick}
-                            onEditTagsAndMetadataModalClick={
-                              onEditAttributesModalClick
-                            }
-                            onRenameModalClick={onRenameModalClick}
-                            onMoveModalClick={onMoveModalClick}
-                            onDocumentVersionsModalClick={
-                              onDocumentVersionsModalClick
-                            }
-                            onDocumentWorkflowsModalClick={
-                              onDocumentWorkflowsModalClick
-                            }
-                            onESignaturesModalClick={onESignaturesModalClick}
                             onInfoPage={true}
                             user={user}
                             useIndividualSharing={useIndividualSharing}
@@ -2541,65 +2602,12 @@ function Documents() {
           <></>
         )}
       </div>
-      <ShareModal
-        isOpened={isShareModalOpened}
-        onClose={onShareClose}
-        getValue={getShareModalValue}
-        value={shareModalValue}
-      />
-      <EditAttributesModal
-        isOpened={isEditAttributesModalOpened}
-        onClose={onEditAttributesModalClose}
-        siteId={currentSiteId}
-        getValue={getEditAttributesModalValue}
-        value={editAttributesModalValue}
-        onDocumentDataChange={onDocumentDataChange}
-      />
-      <DocumentVersionsModal
-        isOpened={isDocumentVersionsModalOpened}
-        onClose={onDocumentVersionsModalClose}
-        onUploadClick={onUploadClick}
-        isUploadModalOpened={isUploadModalOpened}
-        siteId={currentSiteId}
-        isSiteReadOnly={isSiteReadOnly}
-        documentsRootUri={currentDocumentsRootUri}
-        value={documentVersionsModalValue}
-      />
-      <DocumentWorkflowsModal
-        isOpened={isDocumentWorkflowsModalOpened}
-        onClose={onDocumentWorkflowsModalClose}
-        siteId={currentSiteId}
-        isSiteReadOnly={isSiteReadOnly}
-        documentsRootUri={currentDocumentsRootUri}
-        value={documentWorkflowsModalValue}
-      />
-      <ESignaturesModal
-        isOpened={isESignaturesModalOpened}
-        onClose={onESignaturesModalClose}
-        siteId={currentSiteId}
-        value={eSignaturesModalValue}
-      />
       <NewModal
         isOpened={isNewModalOpened}
         onClose={onNewClose}
         siteId={currentSiteId}
         formkiqVersion={formkiqVersion}
         value={newModalValue}
-        onDocumentDataChange={onDocumentDataChange}
-      />
-      <RenameModal
-        isOpened={isRenameModalOpened}
-        onClose={onRenameModalClose}
-        siteId={currentSiteId}
-        value={renameModalValue}
-        onDocumentDataChange={onDocumentDataChange}
-      />
-      <MoveModal
-        isOpened={isMoveModalOpened}
-        onClose={onMoveModalClose}
-        siteId={currentSiteId}
-        value={moveModalValue}
-        allTags={allTags}
         onDocumentDataChange={onDocumentDataChange}
       />
       <UploadModal
@@ -2633,17 +2641,6 @@ function Documents() {
             ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
             : pathname
         }
-      />
-      <DocumentReviewModal
-        isOpened={isDocumentReviewModalOpened}
-        onClose={onDocumentReviewModalClose}
-        siteId={currentSiteId}
-        value={documentReviewModalValue}
-      />
-      <MultiValuedAttributeModal
-        item={multivaluedAttributeModalValue}
-        isOpened={isMultivaluedAttributeModalOpened}
-        onClose={onMultiValuedAttributeModalClose}
       />
     </>
   );

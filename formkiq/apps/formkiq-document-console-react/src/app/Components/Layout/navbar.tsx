@@ -4,7 +4,15 @@ import { matchPath } from 'react-router';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthState, logout } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
-import { DataCacheState } from '../../Store/reducers/data';
+import {
+  DataCacheState,
+  setCurrentDocumentPath,
+} from '../../Store/reducers/data';
+import {
+  DocumentListState, fetchDocuments,
+  setCurrentDocument,
+  setDocuments,
+} from '../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../Store/store';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import {
@@ -17,8 +25,14 @@ import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
+import { IDocument } from '../../helpers/types/document';
+import { ILine } from '../../helpers/types/line';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
+import DocumentActionsModalContainer from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer';
+import DocumentActionsPopover from '../DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import SearchInput from '../DocumentsAndFolders/Search/searchInput';
+import ButtonPrimary from '../Generic/Buttons/ButtonPrimary';
+import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 import {
   Admin,
   Api,
@@ -45,7 +59,8 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
-import { setDocuments } from '../../Store/reducers/documentsList';
+import {useDocumentActions} from "../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext";
+import {useQueueId} from "../../hooks/queue-id.hook";
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -68,28 +83,42 @@ function Navbar() {
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const advancedSearch = new URLSearchParams(search).get('advancedSearch');
+  const searchFolder = new URLSearchParams(search).get('searchFolder');
+  const filterTag = new URLSearchParams(search).get('filterTag');
+  const filterAttribute = new URLSearchParams(search).get('filterAttribute');
   const searchParams = new URLSearchParams(search);
+  const queueId = useQueueId();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(AuthState);
-  const { formkiqVersion, useNotifications, isSidebarExpanded } =
-    useSelector(ConfigState);
+  const {
+    formkiqVersion,
+    useIndividualSharing,
+    useCollections,
+    useSoftDelete,
+    useNotifications,
+    isSidebarExpanded,
+  } = useSelector(ConfigState);
   const { currentDocumentPath } = useSelector(DataCacheState);
 
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const { hash } = useLocation();
-  const { siteId, siteDocumentsRootUri, siteDocumentsRootName } =
-    getCurrentSiteInfo(
-      pathname,
-      user,
-      hasUserSite,
-      hasDefaultSite,
-      hasWorkspaces,
-      workspaceSites
-    );
-
+  const {
+    siteId,
+    siteDocumentsRootUri,
+    siteDocumentsRootName,
+    isSiteReadOnly,
+  } = getCurrentSiteInfo(
+    pathname,
+    user,
+    hasUserSite,
+    hasDefaultSite,
+    hasWorkspaces,
+    workspaceSites
+  );
+  const { currentDocument } = useSelector(DocumentListState);
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
@@ -115,6 +144,7 @@ function Navbar() {
     React.useState(false);
 
   const location = useLocation();
+  const {onSubmitForReviewModalClick,} = useDocumentActions();
 
   const locationPrefix = useMemo(() => {
     let locationPrefix = decodeURI(location.pathname);
@@ -278,6 +308,7 @@ function Navbar() {
   };
 
   const [hasDocumentVersions, setHasDocumentVersions] = useState(false);
+  const [hasInProgressWorkflow, setHasInProgressWorkflow] = useState(false);
 
   useEffect(() => {
     DocumentsService.getDocumentVersions(documentId, currentSiteId).then(
@@ -289,9 +320,31 @@ function Navbar() {
         }
       }
     );
+    DocumentsService.getWorkflowsInDocument(currentSiteId, documentId).then(
+      (response: any) => {
+        if (response.workflows?.length) {
+          const inProgressWorkflows = response.workflows.filter(
+            (workflow: any) => {
+              if (workflow.status === 'IN_PROGRESS') {
+                return true;
+              } else {
+                return false;
+              }
+            }
+          );
+          if (inProgressWorkflows.length > 0) {
+            setHasInProgressWorkflow(true);
+          } else {
+            setHasInProgressWorkflow(false);
+          }
+        } else {
+          setHasInProgressWorkflow(false);
+        }
+      }
+    );
   }, [documentId]);
 
-  const viewFolder = () => {
+  const viewFolder = (event: any, action = '') => {
     dispatch(setDocuments({ documents: [] }));
     navigate(
       {
@@ -304,7 +357,9 @@ function Navbar() {
           ) +
           '?scrollToDocumentLine=true' +
           '#id=' +
-          documentId,
+          documentId +
+          '&action=' +
+          action,
       },
       {
         replace: true,
@@ -330,12 +385,50 @@ function Navbar() {
           pathname +
           '?' +
           searchParams.toString() +
-          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}`:""),
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}` : ''),
       },
       {
         replace: true,
       }
     );
+  };
+
+  const onDocumentDataChange = (event: any, value: ILine | null) => {
+    if (currentSection === 'DocumentsAndFolders') {
+      dispatch(setDocuments({ documents: null }));
+      dispatch(
+        fetchDocuments({
+          siteId: currentSiteId,
+          formkiqVersion,
+          searchWord,
+          searchFolder,
+          queueId,
+          subfolderUri,
+          filterTag,
+          filterAttribute,
+        })
+      );
+    }
+
+    if (!currentDocument) return;
+    DocumentsService.getDocumentById(
+      (currentDocument as IDocument).documentId,
+      currentSiteId
+    ).then((response: IDocument) => {
+      if (response) {
+        dispatch(setCurrentDocument(response));
+        dispatch(setCurrentDocumentPath(response.path));
+      } else {
+        navigate(
+          {
+            pathname: siteDocumentsRootUri,
+          },
+          {
+            replace: true,
+          }
+        );
+      }
+    });
   };
 
   return (
@@ -703,42 +796,115 @@ function Navbar() {
                               <span>
                                 <span className="px-2">|</span>
                                 {currentDocumentPath}
-                                <span className="pl-8">
-                                  <button
-                                    type="button"
-                                    onClick={viewFolder}
-                                    className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                  >
-                                    view folder
-                                  </button>
-                                </span>
-                                <span className="pl-6">
-                                  <span
-                                    className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                    onClick={DownloadDocument}
-                                  >
-                                    download
-                                  </span>
-                                </span>
-                                {hasDocumentVersions && (
-                                  <span className="pl-6">
-                                    <a
-                                      href={
-                                        siteDocumentsRootUri +
-                                        '/folders/' +
-                                        currentDocumentPath.substring(
-                                          0,
-                                          currentDocumentPath.lastIndexOf('/')
-                                        ) +
-                                        '#history_id=' +
-                                        documentId
+                                <span className="px-2"></span>
+                                {hasInProgressWorkflow ? (
+                                  <>
+                                    <ButtonPrimary
+                                      className={
+                                        'text-small font-bold mx-2 px-4 cursor-pointer whitespace-nowrap'
                                       }
-                                      className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
+                                      onClick={(e: any) =>
+                                        viewFolder(e, 'reviewDocument')
+                                      }
                                     >
-                                      view versions
-                                    </a>
-                                  </span>
+                                      Submit Document Review
+                                    </ButtonPrimary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) => viewFolder(e, '')}
+                                    >
+                                      View in Folder
+                                    </ButtonTertiary>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) => viewFolder(e, '')}
+                                    >
+                                      View in Folder
+                                    </ButtonTertiary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={DownloadDocument}
+                                    >
+                                      Download
+                                    </ButtonTertiary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(event:any) =>
+                                        onSubmitForReviewModalClick(event, {
+                                          lineType: "document",
+                                          documentId: documentId,
+                                          folder: currentDocumentPath.substring(
+                                            0,
+                                            currentDocumentPath.lastIndexOf('/')
+                                          ),
+                                          documentInstance: currentDocument,
+                                        })
+                                      }
+                                    >
+                                      Submit for Review
+                                    </ButtonTertiary>
+                                    {hasDocumentVersions && (
+                                      <ButtonTertiary
+                                        className={
+                                          'hidden text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                        }
+                                        onClick={(e: any) =>
+                                          viewFolder(e, 'history')
+                                        }
+                                      >
+                                        View Versions
+                                      </ButtonTertiary>
+                                    )}
+                                  </>
                                 )}
+                                {documentId &&
+                                  currentDocumentPath?.length &&
+                                  currentDocument && (
+                                    <span className="w-5 pt-0.5 text-neutral-900 cursor-pointer inline-flex pl-6 text-gray-500 ">
+                                      <DocumentActionsPopover
+                                        value={{
+                                          lineType: 'document',
+                                          folder: currentDocument
+                                            ? (
+                                                currentDocument as IDocument
+                                              ).path
+                                                .split('/')
+                                                .slice(0, -1)
+                                                .join('/')
+                                            : '',
+                                          documentId: (
+                                            currentDocument as IDocument
+                                          ).documentId,
+                                          documentInstance: currentDocument,
+                                        }}
+                                        siteId={siteId}
+                                        isSiteReadOnly={isSiteReadOnly}
+                                        formkiqVersion={formkiqVersion}
+                                        useIndividualSharing={
+                                          useIndividualSharing
+                                        }
+                                        useCollections={useCollections}
+                                        useSoftDelete={useSoftDelete}
+                                        isDeeplinkPath={
+                                          (currentDocument as IDocument)
+                                            ?.deepLinkPath &&
+                                          (currentDocument as IDocument)
+                                            .deepLinkPath.length > 0
+                                        }
+                                      />
+                                    </span>
+                                  )}
                               </span>
                             ) : (
                               <span></span>
@@ -843,6 +1009,12 @@ function Navbar() {
             </div>
           </div>
         </div>
+        <DocumentActionsModalContainer
+          currentSiteId={currentSiteId}
+          isSiteReadOnly={isSiteReadOnly}
+          currentDocumentsRootUri={currentDocumentsRootUri}
+          onDocumentDataChange={onDocumentDataChange}
+        />
       </div>
     )
   );
