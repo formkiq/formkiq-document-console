@@ -6,7 +6,14 @@ import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import { CopyButton } from '../../Generic/Buttons/CopyButton';
-import { Checkmark, Close, Plus } from '../../Icons/icons';
+import {
+  Checkmark,
+  Close,
+  Pencil,
+  Plus,
+  Relationship,
+  Trash,
+} from '../../Icons/icons';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
@@ -15,8 +22,10 @@ import {
   transformRelationshipValueFromString,
   transformRelationshipValueToString,
 } from '../../../helpers/services/toolService';
+import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
+import { RelationshipType } from '../../../helpers/types/attributes';
 
-const RELATIONSHIP_TYPES = [
+const RELATIONSHIP_TYPES: RelationshipType[] = [
   'PRIMARY',
   'ATTACHMENT',
   'APPENDIX',
@@ -40,13 +49,17 @@ export default function DocumentRelationshipsModal({
 }) {
   const dispatch = useAppDispatch();
   const approveButtonRef = useRef<HTMLButtonElement>(null);
-  const [relationshipType, setRelationshipType] = useState(
+  const [relationshipType, setRelationshipType] = useState<RelationshipType>(
     RELATIONSHIP_TYPES[0]
   );
   const [documentId, setDocumentId] = useState('');
   const [documentRelationships, setDocumentRelationships] = useState<any[]>([]);
   const [isDocumentRelationshipsExist, setIsDocumentRelationshipsExist] =
     useState(false);
+  const [editingRelationshipValue, setEditingRelationshipValue] = useState<{
+    relationship: RelationshipType;
+    documentId: string;
+  } | null>(null);
 
   const getDocumentRelationships = () => {
     if (!value?.documentId) return;
@@ -83,31 +96,83 @@ export default function DocumentRelationshipsModal({
     getDocumentRelationships();
   }, [value, siteId]);
 
-  function updateDocumentRelationships() {}
-
   const closeDialog = () => {
     onClose();
   };
 
-  function addRelationship() {
-    const newRelationship = {
-      documentId: documentId,
-      relationship: relationshipType,
-    };
-    setDocumentRelationships([...documentRelationships, newRelationship]);
+  function relationshipExistsExcludingIndex(
+    documentId: string,
+    relationshipType: RelationshipType,
+    excludeIndex: number
+  ) {
+    return documentRelationships.some(
+      (el, index) =>
+        index !== excludeIndex &&
+        el.documentId === documentId &&
+        el.relationship === relationshipType
+    );
   }
 
-  function onSave() {
+  async function validateRelationship(
+    documentId: string,
+    relationshipType: RelationshipType,
+    currentIndex = -1
+  ) {
+    if (!documentId) {
+      throw new Error('Please enter a document ID');
+    }
+
+    if (documentId === value?.documentId) {
+      throw new Error('You cannot add a relationship to the same document');
+    }
+
+    if (
+      relationshipExistsExcludingIndex(
+        documentId,
+        relationshipType,
+        currentIndex
+      )
+    ) {
+      throw new Error('This relationship already exists');
+    }
+
+    // Check if document exists
+    const response = await DocumentsService.getDocumentById(documentId, siteId);
+    if (response.status !== 200) {
+      throw new Error('Document not found. Please enter a valid document ID');
+    }
+  }
+
+  async function addRelationship() {
+    try {
+      await validateRelationship(documentId, relationshipType);
+      const newRelationship = { documentId, relationship: relationshipType };
+      setDocumentRelationships((prevRelationships) => [
+        ...prevRelationships,
+        newRelationship,
+      ]);
+    } catch (error: any) {
+      dispatch(openDialog({ dialogTitle: error.message }));
+    }
+  }
+
+  async function onSave() {
     if (!value?.documentId) return;
     if (!isDocumentRelationshipsExist) {
-      DocumentsService.addDocumentAttributes(
+      await DocumentsService.addDocumentAttributes(
         siteId,
         'false',
         value.documentId,
         { attributes: documentRelationships }
       );
+    } else if (documentRelationships.length === 0) {
+      await DocumentsService.deleteDocumentAttribute(
+        siteId,
+        value.documentId,
+        'Relationships'
+      );
     } else {
-      DocumentsService.setDocumentAttributeValue(
+      await DocumentsService.setDocumentAttributeValue(
         siteId,
         value.documentId,
         'Relationships',
@@ -120,11 +185,62 @@ export default function DocumentRelationshipsModal({
         }
       );
     }
+    dispatch(
+      fetchDocumentAttributes({
+        siteId,
+        documentId: value.documentId,
+        limit: 100,
+        page: 1,
+        nextToken: null,
+      })
+    );
   }
 
   useEffect(() => {
     console.log(documentRelationships);
   }, [documentRelationships]);
+
+  function deleteRelationship(index: number) {
+    const newRelationships = [...documentRelationships];
+    newRelationships.splice(index, 1);
+    setDocumentRelationships(newRelationships);
+  }
+
+  function handleEditRelationship(index: number) {
+    const newRelationships = [...documentRelationships];
+    newRelationships.map((el, i) => {
+      el.isEdit = i === index;
+    });
+    setDocumentRelationships(newRelationships);
+    setEditingRelationshipValue({
+      relationship: newRelationships[index].relationship,
+      documentId: newRelationships[index].documentId,
+    });
+  }
+
+  async function saveRelationship(index: number) {
+    if (!editingRelationshipValue) return;
+    try {
+      const { documentId, relationship } = editingRelationshipValue;
+      await validateRelationship(documentId, relationship, index);
+
+      // Save the edited relationship
+      setDocumentRelationships((prevRelationships) => {
+        const newRelationships = [...prevRelationships];
+        newRelationships[index] = editingRelationshipValue;
+        return newRelationships;
+      });
+    } catch (error: any) {
+      dispatch(openDialog({ dialogTitle: error.message }));
+    }
+  }
+
+  function resetRelationship(index: number) {
+    const newRelationships = [...documentRelationships];
+    newRelationships[index].isEdit = false;
+    setDocumentRelationships(newRelationships);
+  }
+
   return (
     <Transition.Root show={isOpened} as={Fragment}>
       <Dialog
@@ -156,7 +272,7 @@ export default function DocumentRelationshipsModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-4/5">
+              <Dialog.Panel className="relative transform text-left transition-all w-full lg:w-4/5">
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 inline-block pr-6">
@@ -188,44 +304,134 @@ export default function DocumentRelationshipsModal({
                     />
                     <button
                       type="button"
-                      className="w-8 h-8"
+                      title="Add Relationship"
+                      className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full p-1 hover:bg-gray-300 text-gray-500"
                       onClick={addRelationship}
                     >
                       <Plus />
                     </button>
                   </div>
 
-                  <table className="w-full">
-                    <thead>
-                      <tr>
-                        <th className="text-left">Relationship</th>
-                        <th className="text-left">Document ID</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {documentRelationships.map((el, i) => (
-                        <tr key={i}>
-                          <td>{el.relationship}</td>
-                          <td>{el.documentId}</td>
-                          <td>
-                            <div
-                              className="w-5 h-5 cursor-pointer text-gray-400"
-                              onClick={() => {
-                                setDocumentRelationships(
-                                  documentRelationships.filter(
-                                    (el2, i2) => i2 !== i
-                                  )
-                                );
-                              }}
+                  {documentRelationships.length > 0 ? (
+                    <div className="overflow-y-auto overflow-x-visible max-h-64 h-64 px-4 my-4">
+                      <table
+                        className="max-w-full overflow-visible table-fixed border border-neutral-300 border-collapse table-auto w-full max-w-full text-sm"
+                        id="documentAttributesScrollPane"
+                      >
+                        <thead className="sticky top-0 bg-white font-bold py-3 bg-neutral-100 z-20">
+                          <tr>
+                            <th className="w-40 p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                              Relationship
+                            </th>
+                            <th className="max-w-2/3 p-4 pr-8 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+                              Document
+                            </th>
+                            <th className="w-52 p-4 text-left text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-end">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+
+                        <tbody className="bg-white nodark:bg-slate-800 overflow-visible">
+                          {documentRelationships.map((relationship, index) => (
+                            <tr
+                              key={index}
+                              className="border-t border-neutral-300 overflow-visible"
                             >
-                              <Close />
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                              <td
+                                className="p-4 text-start truncate w-40 "
+                                style={{ overflow: 'visible' }}
+                              >
+                                {relationship.isEdit &&
+                                editingRelationshipValue ? (
+                                  <div className="w-full h-8 overflow-visible">
+                                    <RadioListbox
+                                      values={RELATIONSHIP_TYPES}
+                                      titles={RELATIONSHIP_TYPES}
+                                      selectedValue={
+                                        editingRelationshipValue.relationship
+                                      }
+                                      setSelectedValue={(val) =>
+                                        setEditingRelationshipValue({
+                                          ...editingRelationshipValue,
+                                          relationship: val,
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                ) : (
+                                  relationship.relationship
+                                )}
+                              </td>
+                              <td className="p-4 text-start max-w-2/3">
+                                {relationship.isEdit &&
+                                editingRelationshipValue ? (
+                                  <input
+                                    type="text"
+                                    className="w-full h-8 px-2 border border-gray-300 rounded-md"
+                                    placeholder="Document ID"
+                                    value={editingRelationshipValue.documentId}
+                                    onChange={(e) =>
+                                      setEditingRelationshipValue({
+                                        ...editingRelationshipValue,
+                                        documentId: e.target.value,
+                                      })
+                                    }
+                                  />
+                                ) : (
+                                  relationship.documentId
+                                )}
+                              </td>
+                              <td className="p-4 text-end w-52">
+                                {relationship.isEdit ? (
+                                  <>
+                                    <ButtonPrimaryGradient
+                                      onClick={() => saveRelationship(index)}
+                                    >
+                                      Save
+                                    </ButtonPrimaryGradient>
+                                    <ButtonGhost
+                                      className="ml-2"
+                                      onClick={() => resetRelationship(index)}
+                                    >
+                                      Cancel
+                                    </ButtonGhost>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      className="w-4 h-4 hover:text-primary-500 mr-2"
+                                      type="button"
+                                      onClick={() =>
+                                        handleEditRelationship(index)
+                                      }
+                                    >
+                                      <Pencil />
+                                    </button>
+                                    <button
+                                      className="w-4 h-4 hover:text-primary-500 mr-2"
+                                      type="button"
+                                      onClick={() => deleteRelationship(index)}
+                                    >
+                                      <Trash />
+                                    </button>
+                                  </>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-center mt-4 px-4">
+                      <div role="status">
+                        <div className="overflow-x-auto relative h-64">
+                          No document attributes found
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="w-full flex justify-end h-8 gap-2">
                     <ButtonPrimaryGradient type="button" onClick={onSave}>

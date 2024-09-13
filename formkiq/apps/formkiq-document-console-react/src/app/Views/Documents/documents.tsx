@@ -74,8 +74,9 @@ import {
   getCurrentSiteInfo,
   getFileIcon,
   getUserSites,
+  transformRelationshipValueFromString,
 } from '../../helpers/services/toolService';
-import { Attribute } from '../../helpers/types/attributes';
+import { Attribute, RelationshipType } from '../../helpers/types/attributes';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
@@ -205,6 +206,16 @@ function Documents() {
   const closeDropZoneRef = useRef(null);
   const [isDropZoneVisible, setIsDropZoneVisible] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+
+  const [relationshipDocumentsMap, setRelationshipDocumentsMap] = useState<{
+    [key: string]: string;
+  }>({});
+  const [relationships, setRelationships] = useState<
+    {
+      relationship: RelationshipType;
+      documentId: string;
+    }[]
+  >([]);
 
   function handleDragEnter(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
@@ -371,6 +382,69 @@ function Documents() {
       })
     );
   }
+
+  const getDocumentNameFromDocuments = (documentId: string) => {
+    const doc = documents.find(
+      (document) => document.documentId === documentId
+    );
+    if (doc) return doc.path.substring(doc.path.lastIndexOf('/') + 1);
+    return null;
+  };
+
+  // update document relationships
+  useEffect(() => {
+    const relationshipsAttribute = documentAttributes.find(
+      (attribute) => attribute.key === 'Relationships'
+    );
+    if (!relationshipsAttribute) return;
+    const newRelationships: {
+      relationship: RelationshipType;
+      documentId: string;
+    }[] = [];
+    if (relationshipsAttribute.stringValue) {
+      newRelationships.push(
+        transformRelationshipValueFromString(relationshipsAttribute.stringValue)
+      );
+    } else if (relationshipsAttribute.stringValues) {
+      newRelationships.push(
+        ...relationshipsAttribute.stringValues.map((val) =>
+          transformRelationshipValueFromString(val)
+        )
+      );
+    }
+
+    setRelationships(newRelationships);
+    for (const relationship of newRelationships) {
+      if (relationshipDocumentsMap[relationship.documentId]) return;
+      if (getDocumentNameFromDocuments(relationship.documentId)) {
+        setRelationshipDocumentsMap({
+          ...relationshipDocumentsMap,
+          [relationship.documentId]: getDocumentNameFromDocuments(
+            relationship.documentId
+          ),
+        });
+      } else {
+        DocumentsService.getDocumentById(
+          relationship.documentId,
+          currentSiteId
+        ).then((response: any) => {
+          if (response.status === 200) {
+            setRelationshipDocumentsMap({
+              ...relationshipDocumentsMap,
+              [relationship.documentId]: response.path.substring(
+                response.path.lastIndexOf('/') + 1
+              ),
+            });
+          } else {
+            setRelationshipDocumentsMap({
+              ...relationshipDocumentsMap,
+              [relationship.documentId]: relationship.documentId,
+            });
+          }
+        });
+      }
+    }
+  }, [documentAttributes]);
 
   useEffect(() => {
     onDocumentInfoClick();
@@ -1902,35 +1976,56 @@ function Documents() {
                         <div className="w-68 flex mr-3 border-b"></div>
                         <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
                           Relationships
-                          {!isSiteReadOnly &&
-                            documentAttributes.find(
-                              (attribute) => attribute.key === 'Relationships'
-                            ) && (
-                              <div
-                                className="w-3/5 self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
-                                onClick={(event) =>
-                                  onDocumentRelationshipsModalClick(event, {
-                                    lineType: 'document',
-                                    folder: subfolderUri,
-                                    documentId: (currentDocument as IDocument)
-                                      .documentId,
-                                    documentInstance:
-                                      currentDocument as IDocument,
-                                    folderInstance: null,
-                                  })
-                                }
-                              >
-                                <>
-                                  <span className="pt-0.5 whitespace-nowrap">
-                                    add/edit relationships
-                                  </span>
-                                  <div className="w-4">
-                                    <ChevronRight />
-                                  </div>
-                                </>
-                              </div>
-                            )}
+                          {!isSiteReadOnly && (
+                            <div
+                              className="w-3/5 self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                              onClick={(event) =>
+                                onDocumentRelationshipsModalClick(event, {
+                                  lineType: 'document',
+                                  folder: subfolderUri,
+                                  documentId: (currentDocument as IDocument)
+                                    .documentId,
+                                  documentInstance:
+                                    currentDocument as IDocument,
+                                  folderInstance: null,
+                                })
+                              }
+                            >
+                              <>
+                                <span className="pt-0.5 whitespace-nowrap">
+                                  add/edit relationships
+                                </span>
+                                <div className="w-4">
+                                  <ChevronRight />
+                                </div>
+                              </>
+                            </div>
+                          )}
                         </div>
+                        {relationships.length>0 ? (
+                          <div>
+                            {relationships.map((relationship) => (
+                              <div><h3 className="text-sm font-semibold text-neutral-900">
+                                {relationship.relationship}
+                                : {relationshipDocumentsMap[relationship.documentId] ? (
+                                  <Link to={`${siteDocumentsRootUri}/${relationship.documentId}/view`}
+                                        className="underline hover:text-primary-500 break-words font-normal"
+                                  >
+                                    {relationshipDocumentsMap[relationship.documentId]}
+                                  </Link>
+                                ): (
+                                <span className="text-neutral-700">
+                                  {relationship.documentId}
+                                </span>)}
+                              </h3>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                            <span className="text-xs">
+                            (no relationships have been added)
+                          </span>
+                        )}
                         <div className="w-68 flex mr-3 border-b"></div>
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
                           Attributes

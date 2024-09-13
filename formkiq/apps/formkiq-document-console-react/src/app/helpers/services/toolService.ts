@@ -1,6 +1,7 @@
 import moment from 'moment';
 import { IDocument } from './../types/document';
 import { IFolder } from './../types/folder';
+import {RelationshipType} from "../types/attributes";
 
 export function getFileIcon(path: string, deepLinkPath: string) {
   let fileIcon = '';
@@ -660,7 +661,8 @@ export function parseEmailInitials(email: string) {
 }
 
 export function transformRelationshipValueFromString(value: string) {
-  const [relationship, documentId] = value.split('#');
+  const [relationshipString, documentId] = value.split('#');
+  const relationship = relationshipString as RelationshipType;
   return {
     documentId,
     relationship
@@ -668,7 +670,7 @@ export function transformRelationshipValueFromString(value: string) {
 }
 
 export function transformRelationshipValueToString(value: {
-  relationship: string;
+  relationship: RelationshipType;
   documentId: string;
 }) {
   return `${value.relationship}#${value.documentId}`;
