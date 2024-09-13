@@ -293,7 +293,7 @@ export default function DocumentActionsPopover({
                     <span className="mr-2 w-3.5 text-neutral-900">
                       <Checkmark />
                     </span>
-                    <span>Submit for Review</span>
+                    <span>Submit for review</span>
                     <span
                       className="ml-auto"
                       style={{ width: '15px', height: '13px' }}
