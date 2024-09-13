@@ -2621,6 +2621,11 @@ function Documents() {
         onDocumentDataChange={onDocumentDataChange}
         dropUploadDocuments={dropUploadDocuments}
         resetDropUploadDocuments={resetDropUploadDocuments}
+        folderPath={
+          dropFolderPath
+            ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
+            : pathname
+        }
       />
       <UploadModal
         isOpened={isFolderUploadModalOpened}
@@ -2631,6 +2636,11 @@ function Documents() {
         documentId={folderUploadModalDocumentId}
         isFolderUpload={true}
         onDocumentDataChange={onDocumentDataChange}
+        folderPath={
+          dropFolderPath
+            ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
+            : pathname
+        }
       />
     </>
   );
