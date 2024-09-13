@@ -1,12 +1,12 @@
 import { Listbox } from '@headlessui/react';
+import { useSelector } from 'react-redux';
 import { v4 as uuid } from 'uuid';
 import {
   Step,
   WorkflowStepActionType,
 } from '../../../../helpers/types/workflows';
-import { ChevronRight } from '../../../Icons/icons';
-import { useSelector } from 'react-redux';
 import { ConfigState } from '../../../../Store/reducers/config';
+import { ChevronRight } from '../../../Icons/icons';
 
 export const NodeNameSelector = ({
   newStep,
@@ -17,25 +17,25 @@ export const NodeNameSelector = ({
 }) => {
   const { formkiqVersion } = useSelector(ConfigState);
   const parametersMap: Record<string, string> = {
-    DOCUMENTTAGGING: 'Intelligent Document Tagging',
-    NOTIFICATION: 'Send Notification (requires "FROM" address in SES)',
-    WEBHOOK: 'Webhook',
-    OCR: 'Optical Character Recognition (OCR)',
-    QUEUE: 'Review / Approval Queue',
-    PUBLISH: 'Publish',
-    IDP: 'Intelligent Document Processing',
-    EVENTBRIDGE: 'Event Bridge',
+    EVENTBRIDGE: 'Amazon EventBridge',
   };
-
+  if (formkiqVersion.modules.indexOf('antivirus') > -1) {
+    parametersMap['ANTIVIRUS'] = 'Anti-Malware Scan';
+  }
   if (
     formkiqVersion.modules.indexOf('typesense') > -1 ||
     formkiqVersion.modules.indexOf('opensearch') > -1
   ) {
     parametersMap['FULLTEXT'] = 'Fulltext Search';
   }
-  if (formkiqVersion.modules.indexOf('antivirus') > -1) {
-    parametersMap['ANTIVIRUS'] = 'Anti-Malware Scan';
-  }
+  parametersMap['IDP'] = 'Intelligent Document Processing';
+  parametersMap['DOCUMENTTAGGING'] = 'Intelligent Document Tagging with OpenAI';
+  parametersMap['OCR'] = 'Optical Character Recognition (OCR)';
+  parametersMap['PUBLISH'] = 'Publish';
+  parametersMap['QUEUE'] = 'Review / Approval Queue';
+  parametersMap['NOTIFICATION'] =
+    'Send Notification (requires "FROM" address in SES)';
+  parametersMap['WEBHOOK'] = 'Webhook';
 
   const getNodeId = () => `node_${uuid()}`;
   // Set name
