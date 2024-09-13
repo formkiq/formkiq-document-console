@@ -148,6 +148,7 @@ function Documents() {
     onDocumentWorkflowsModalClick,
     onEditAttributesModalClick,
     onAttributeQuantityClick,
+    onDocumentRelationshipsModalClick,
   } = useDocumentActions();
 
   useEffect(() => {
@@ -1898,6 +1899,38 @@ function Documents() {
                             </dd>
                           </div>
                         )}
+                        <div className="w-68 flex mr-3 border-b"></div>
+                        <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
+                          Relationships
+                          {!isSiteReadOnly &&
+                            documentAttributes.find(
+                              (attribute) => attribute.key === 'Relationships'
+                            ) && (
+                              <div
+                                className="w-3/5 self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                                onClick={(event) =>
+                                  onDocumentRelationshipsModalClick(event, {
+                                    lineType: 'document',
+                                    folder: subfolderUri,
+                                    documentId: (currentDocument as IDocument)
+                                      .documentId,
+                                    documentInstance:
+                                      currentDocument as IDocument,
+                                    folderInstance: null,
+                                  })
+                                }
+                              >
+                                <>
+                                  <span className="pt-0.5 whitespace-nowrap">
+                                    add/edit relationships
+                                  </span>
+                                  <div className="w-4">
+                                    <ChevronRight />
+                                  </div>
+                                </>
+                              </div>
+                            )}
+                        </div>
                         <div className="w-68 flex mr-3 border-b"></div>
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
                           Attributes

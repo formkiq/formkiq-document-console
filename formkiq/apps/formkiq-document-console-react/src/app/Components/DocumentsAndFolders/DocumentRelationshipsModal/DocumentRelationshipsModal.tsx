@@ -11,6 +11,10 @@ import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
+import {
+  transformRelationshipValueFromString,
+  transformRelationshipValueToString,
+} from '../../../helpers/services/toolService';
 
 const RELATIONSHIP_TYPES = [
   'PRIMARY',
@@ -49,10 +53,25 @@ export default function DocumentRelationshipsModal({
     DocumentsService.getDocumentAttribute(
       siteId,
       value?.documentId,
-      'relationships'
+      'Relationships'
     ).then((response) => {
       if (response.status === 200) {
-        setDocumentRelationships(response.attribute);
+        const relationships = [];
+        if (response.attribute.stringValue) {
+          relationships.push(
+            transformRelationshipValueFromString(response.attribute.stringValue)
+          );
+        } else if (response.attribute.stringValues) {
+          relationships.push(
+            ...response.attribute.stringValues
+              .map((el: string) => transformRelationshipValueFromString(el))
+              .filter(
+                (el: any) =>
+                  el.documentId !== '5939fb26-4498-4b4b-a30d-8191480973ec'
+              )
+          );
+        }
+        setDocumentRelationships(relationships);
         setIsDocumentRelationshipsExist(true);
       } else {
         setIsDocumentRelationshipsExist(false);
@@ -85,13 +104,27 @@ export default function DocumentRelationshipsModal({
         siteId,
         'false',
         value.documentId,
-        { attributes: [{ relationships: documentRelationships }] }
+        { attributes: documentRelationships }
+      );
+    } else {
+      DocumentsService.setDocumentAttributeValue(
+        siteId,
+        value.documentId,
+        'Relationships',
+        {
+          attribute: {
+            stringValues: documentRelationships.map((rel) =>
+              transformRelationshipValueToString(rel)
+            ),
+          },
+        }
       );
     }
   }
-useEffect(() => {
-   console.log(documentRelationships);
-}, [documentRelationships]);
+
+  useEffect(() => {
+    console.log(documentRelationships);
+  }, [documentRelationships]);
   return (
     <Transition.Root show={isOpened} as={Fragment}>
       <Dialog
@@ -139,7 +172,7 @@ useEffect(() => {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 h-8 my-4">
+                  <div className="flex gap-2 h-8 my-4 px-4">
                     <RadioListbox
                       values={RELATIONSHIP_TYPES}
                       titles={RELATIONSHIP_TYPES}
@@ -161,6 +194,38 @@ useEffect(() => {
                       <Plus />
                     </button>
                   </div>
+
+                  <table className="w-full">
+                    <thead>
+                      <tr>
+                        <th className="text-left">Relationship</th>
+                        <th className="text-left">Document ID</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {documentRelationships.map((el, i) => (
+                        <tr key={i}>
+                          <td>{el.relationship}</td>
+                          <td>{el.documentId}</td>
+                          <td>
+                            <div
+                              className="w-5 h-5 cursor-pointer text-gray-400"
+                              onClick={() => {
+                                setDocumentRelationships(
+                                  documentRelationships.filter(
+                                    (el2, i2) => i2 !== i
+                                  )
+                                );
+                              }}
+                            >
+                              <Close />
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
 
                   <div className="w-full flex justify-end h-8 gap-2">
                     <ButtonPrimaryGradient type="button" onClick={onSave}>

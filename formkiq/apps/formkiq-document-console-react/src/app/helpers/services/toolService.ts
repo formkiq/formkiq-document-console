@@ -658,3 +658,20 @@ export function parseEmailInitials(email: string) {
   initials = initials.substring(0, 3).toUpperCase();
   return initials;
 }
+
+export function transformRelationshipValueFromString(value: string) {
+  const [relationship, documentId] = value.split('#');
+  return {
+    documentId,
+    relationship
+  };
+}
+
+export function transformRelationshipValueToString(value: {
+  relationship: string;
+  documentId: string;
+}) {
+  return `${value.relationship}#${value.documentId}`;
+}
+
+
