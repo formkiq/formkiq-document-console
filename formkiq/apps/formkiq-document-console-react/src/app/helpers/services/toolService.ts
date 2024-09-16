@@ -695,7 +695,7 @@ export function transformRelationshipValueToString(value: {
   relationship: RelationshipType;
   documentId: string;
 }) {
-  return `${value.relationship}#${value.documentId}`;
+  return `${value.relationship}#${value.documentId.trim()}`;
 }
 
 
