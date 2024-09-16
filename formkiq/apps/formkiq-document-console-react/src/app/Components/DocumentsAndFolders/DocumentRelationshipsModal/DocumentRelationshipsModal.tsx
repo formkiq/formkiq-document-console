@@ -4,12 +4,7 @@ import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
-import {
-  Close,
-  Pencil,
-  Plus,
-  Trash,
-} from '../../Icons/icons';
+import { Close, Pencil, Trash } from '../../Icons/icons';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
@@ -47,6 +42,9 @@ export default function DocumentRelationshipsModal({
   const [relationshipType, setRelationshipType] = useState<RelationshipType>(
     RELATIONSHIP_TYPES[0]
   );
+  const [inverseRelationshipType, setInverseRelationshipType] = useState<
+    RelationshipType | ''
+  >('');
   const [documentId, setDocumentId] = useState('');
   const [documentRelationships, setDocumentRelationships] = useState<any[]>([]);
   const [isDocumentRelationshipsExist, setIsDocumentRelationshipsExist] =
@@ -54,6 +52,7 @@ export default function DocumentRelationshipsModal({
   const [editingRelationshipValue, setEditingRelationshipValue] = useState<{
     relationship: RelationshipType;
     documentId: string;
+    inverseRelationship?: RelationshipType | '';
   } | null>(null);
 
   const getDocumentRelationships = () => {
@@ -71,8 +70,9 @@ export default function DocumentRelationshipsModal({
           );
         } else if (response.attribute.stringValues) {
           relationships.push(
-            ...response.attribute.stringValues
-              .map((el: string) => transformRelationshipValueFromString(el))
+            ...response.attribute.stringValues.map((el: string) =>
+              transformRelationshipValueFromString(el)
+            )
           );
         }
         setDocumentRelationships(relationships);
@@ -142,28 +142,41 @@ export default function DocumentRelationshipsModal({
   }
 
   async function addRelationship() {
+    if (!value?.documentId) return;
     try {
       await validateRelationship(documentId, relationshipType);
-      const newRelationship = { documentId, relationship: relationshipType };
-      setDocumentRelationships((prevRelationships) => [
-        ...prevRelationships,
-        newRelationship,
-      ]);
+      const newRelationship: any = {
+        documentId,
+        relationship: relationshipType,
+      };
+      if (inverseRelationshipType.length > 0) {
+        newRelationship['inverseRelationship'] = inverseRelationshipType;
+      }
+      DocumentsService.addDocumentAttributes(
+        siteId,
+        'false',
+        value.documentId,
+        { attributes: [newRelationship] }
+      ).then(() => {
+        getDocumentRelationships()
+        dispatch(
+          fetchDocumentAttributes({
+            siteId,
+            documentId: value.documentId,
+            limit: 100,
+            page: 1,
+            nextToken: null,
+          })
+        );
+      });
     } catch (error: any) {
       dispatch(openDialog({ dialogTitle: error.message }));
     }
   }
 
-  async function onSave() {
+  async function onSave(relationships: any[]) {
     if (!value?.documentId) return;
-    if (!isDocumentRelationshipsExist) {
-      await DocumentsService.addDocumentAttributes(
-        siteId,
-        'false',
-        value.documentId,
-        { attributes: documentRelationships }
-      );
-    } else if (documentRelationships.length === 0) {
+    if (relationships.length === 0) {
       await DocumentsService.deleteDocumentAttribute(
         siteId,
         value.documentId,
@@ -176,7 +189,7 @@ export default function DocumentRelationshipsModal({
         'Relationships',
         {
           attribute: {
-            stringValues: documentRelationships.map((rel) =>
+            stringValues: relationships.map((rel) =>
               transformRelationshipValueToString(rel)
             ),
           },
@@ -194,14 +207,11 @@ export default function DocumentRelationshipsModal({
     );
   }
 
-  useEffect(() => {
-    console.log(documentRelationships);
-  }, [documentRelationships]);
-
   function deleteRelationship(index: number) {
     const newRelationships = [...documentRelationships];
     newRelationships.splice(index, 1);
     setDocumentRelationships(newRelationships);
+    onSave(newRelationships);
   }
 
   function handleEditRelationship(index: number) {
@@ -216,7 +226,7 @@ export default function DocumentRelationshipsModal({
     });
   }
 
-  async function saveRelationship(index: number) {
+  async function saveEditedRelationship(index: number) {
     if (!editingRelationshipValue) return;
     try {
       const { documentId, relationship } = editingRelationshipValue;
@@ -226,6 +236,7 @@ export default function DocumentRelationshipsModal({
       setDocumentRelationships((prevRelationships) => {
         const newRelationships = [...prevRelationships];
         newRelationships[index] = editingRelationshipValue;
+        onSave(newRelationships);
         return newRelationships;
       });
     } catch (error: any) {
@@ -286,28 +297,50 @@ export default function DocumentRelationshipsModal({
                     </div>
                   </div>
 
-                  <div className="flex gap-2 h-8 my-4 px-4">
-                    <RadioListbox
-                      values={RELATIONSHIP_TYPES}
-                      titles={RELATIONSHIP_TYPES}
-                      selectedValue={relationshipType}
-                      setSelectedValue={setRelationshipType}
-                    />
-                    <input
-                      type="text"
-                      className="w-full h-8 px-2 border border-gray-300 rounded-md"
-                      placeholder="Document ID"
-                      value={documentId}
-                      onChange={(e) => setDocumentId(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      title="Add Relationship"
-                      className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded-full p-1 hover:bg-gray-300 text-gray-500"
-                      onClick={addRelationship}
-                    >
-                      <Plus />
-                    </button>
+                  <div className="flex gap-2 my-4 px-4 flex-col xl:w-1/2 ">
+                    <div className="flex gap-2 ">
+                      <div className="w-1/2 ">
+                        <h3 className="text-sm font-semibold text-gray-500">
+                          Relationship
+                        </h3>
+                        <div className=" h-8">
+                          <RadioListbox
+                            values={RELATIONSHIP_TYPES}
+                            titles={RELATIONSHIP_TYPES}
+                            selectedValue={relationshipType}
+                            setSelectedValue={setRelationshipType}
+                          />
+                        </div>
+                      </div>
+                      <div className="w-1/2">
+                        <h3 className="text-sm font-semibold text-gray-500">
+                          Inverse Relationship{' '}
+                          <span className="text-xs text-gray-400">
+                            (optional)
+                          </span>
+                        </h3>
+                        <div className=" h-8">
+                          <RadioListbox
+                            values={[...RELATIONSHIP_TYPES, '']}
+                            titles={[...RELATIONSHIP_TYPES, 'None']}
+                            selectedValue={inverseRelationshipType}
+                            setSelectedValue={setInverseRelationshipType}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 w-full h-8">
+                      <input
+                        type="text"
+                        className="w-full h-8 px-2 border border-gray-300 rounded-md"
+                        placeholder="Document ID"
+                        value={documentId}
+                        onChange={(e) => setDocumentId(e.target.value)}
+                      />
+                      <ButtonPrimaryGradient onClick={addRelationship}>
+                        +ADD
+                      </ButtonPrimaryGradient>
+                    </div>
                   </div>
 
                   {documentRelationships.length > 0 ? (
@@ -372,7 +405,7 @@ export default function DocumentRelationshipsModal({
                                     onChange={(e) =>
                                       setEditingRelationshipValue({
                                         ...editingRelationshipValue,
-                                        documentId: e.target.value,
+                                        documentId: e.target.value.trim(),
                                       })
                                     }
                                   />
@@ -384,7 +417,9 @@ export default function DocumentRelationshipsModal({
                                 {relationship.isEdit ? (
                                   <>
                                     <ButtonPrimaryGradient
-                                      onClick={() => saveRelationship(index)}
+                                      onClick={() =>
+                                        saveEditedRelationship(index)
+                                      }
                                     >
                                       Save
                                     </ButtonPrimaryGradient>
@@ -432,11 +467,8 @@ export default function DocumentRelationshipsModal({
                   )}
 
                   <div className="w-full flex justify-end h-8 gap-2">
-                    <ButtonPrimaryGradient type="button" onClick={onSave}>
-                      SAVE
-                    </ButtonPrimaryGradient>
                     <ButtonGhost type="button" onClick={closeDialog}>
-                      CANCEL
+                      CLOSE
                     </ButtonGhost>
                   </div>
                 </div>
