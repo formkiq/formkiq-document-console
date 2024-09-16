@@ -321,8 +321,8 @@ export default function DocumentRelationshipsModal({
                         </h3>
                         <div className=" h-8">
                           <RadioListbox
-                            values={[...RELATIONSHIP_TYPES, '']}
-                            titles={[...RELATIONSHIP_TYPES, 'None']}
+                            values={['', ...RELATIONSHIP_TYPES]}
+                            titles={['NONE',...RELATIONSHIP_TYPES]}
                             selectedValue={inverseRelationshipType}
                             setSelectedValue={setInverseRelationshipType}
                           />
