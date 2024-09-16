@@ -417,15 +417,14 @@ function Documents() {
     }
 
     setRelationships(newRelationships);
-    for (const relationship of newRelationships) {
-      if (relationshipDocumentsMap[relationship.documentId]) return;
-      if (getDocumentNameFromDocuments(relationship.documentId)) {
-        setRelationshipDocumentsMap({
-          ...relationshipDocumentsMap,
-          [relationship.documentId]: getDocumentNameFromDocuments(
-            relationship.documentId
-          ),
-        });
+    for (const relationship of newRelationships){
+    if (relationshipDocumentsMap[relationship.documentId]) return;
+      const documentName = getDocumentNameFromDocuments(relationship.documentId)
+      if (documentName) {
+        setRelationshipDocumentsMap((prev)=>({
+          ...prev,
+          [relationship.documentId]: documentName,
+        }));
       } else {
         DocumentsService.getDocumentById(
           relationship.documentId,
