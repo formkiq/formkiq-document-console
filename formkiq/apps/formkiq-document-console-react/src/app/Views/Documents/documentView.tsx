@@ -139,8 +139,8 @@ export function DocumentView() {
       DocumentsService.getDocumentById(id, currentSiteId).then(
         (response: IDocument) => {
           setDocument(response);
-          dispatch(setCurrentDocumentPath(response.path));
           dispatch(setCurrentDocument(response));
+          dispatch(setCurrentDocumentPath(response.path));
           // redirect if file is not editable type
           if (
             !isDocumentContentTypeEditable(response.contentType) &&

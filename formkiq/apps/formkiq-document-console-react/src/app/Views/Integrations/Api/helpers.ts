@@ -30,6 +30,7 @@ export interface ApiItem {
   requiresUserOperation: boolean;
   requiresWS: boolean;
   requiresClassificationID:  boolean;
+  requiresMappingID: boolean;
   allowsVersionKey: boolean;
   allowsDate: boolean;
   allowsLimit: boolean;
@@ -1861,6 +1862,65 @@ export const getDocumentUserActivitiesApiItem = {
     allowsLimit: true,
     hasPagingTokens: true,
     license: 'Core',
+};
+
+export const getMappingsApiItem = {
+    method: 'GET',
+    path: '/mappings',
+    description: 'Returns the list of mappings',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    allowsLimit: true,
+    hasPagingTokens: true,
+    license: 'Pro|Enterprise',
+};
+
+export const postMappingApiItem = {
+    method: 'POST',
+    path: '/mappings',
+    description: 'Create a new mapping',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"mapping":{"name":"mappingName","description":"mappingDescription","attributes":[{"attributeKey":"keyOnly","sourceType":"CONTENT","labelTexts":["string"],"labelMatchingType":"FUZZY","metadataField":"USERNAME","validationRegex":"string"}]}}',
+    license: 'Pro|Enterprise',
+};
+
+export const getMappingApiItem = {
+    method: 'GET',
+    path: '/mappings/ MAPPING_ID ',
+    description: 'Returns a mapping',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresMappingID: true,
+    license: 'Pro|Enterprise',
+};
+
+export const putMappingApiItem = {
+    method: 'PUT',
+    path: '/mappings/ MAPPING_ID ',
+    description: 'Updates a mapping',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresMappingID: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"mapping":{"name":"newMappingName","description":"mappingDescription","attributes":[{"attributeKey":"keyOnly","sourceType":"CONTENT","labelTexts":["string"],"labelMatchingType":"FUZZY","metadataField":"USERNAME","validationRegex":"string"}]}}',
+    license: 'Pro|Enterprise',
+};
+
+export const deleteMappingApiItem = {
+    method: 'DELETE',
+    path: '/mappings/ MAPPING_ID ',
+    description: 'Deletes a mapping',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresMappingID: true,
+    license: 'Pro|Enterprise',
 };
 
 export const postRetryDocumentActionsApiItem = {

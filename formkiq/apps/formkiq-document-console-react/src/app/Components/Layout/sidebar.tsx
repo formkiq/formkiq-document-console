@@ -30,13 +30,14 @@ import {
   Api,
   ApiKey,
   ArrowBottom,
-  ArrowRight, Attribute,
+  ArrowRight,
+  Attribute,
   ChevronLeft,
   ChevronRight,
   Documents,
   Examine,
   FolderOutline,
-  Group,
+  Group, Mapping,
   Plus,
   Queue,
   Rules,
@@ -248,6 +249,7 @@ export function Sidebar() {
       '/rulesets',
       '/object-examine-tool',
       '/schemas',
+      '/mappings',
       '/admin/settings',
       '/admin/groups',
       '/admin/users',
@@ -499,7 +501,7 @@ export function Sidebar() {
                     {currentSiteId === 'default' && (
                       <>
                         <li
-                          className="hidden w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
+                          className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
                           onClick={toggleDefaultSiteDocumentQueuesExpand}
                         >
                           <div className="flex justify-end mt-3 mr-1">
@@ -947,6 +949,29 @@ export function Sidebar() {
                     </div>
                   </NavLink>
                 </li>
+                {formkiqVersion.type !== 'core' && (
+                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                    <NavLink
+                      to="/mappings"
+                      data-test-id="nav-mappings"
+                      className={({ isActive }) =>
+                        (isActive
+                          ? 'text-primary-600 bg-neutral-200 '
+                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                        ' w-full text-sm font-bold flex '
+                      }
+                    >
+                      <div
+                        className={'w-full text-sm font-bold flex pl-5 py-2 '}
+                      >
+                        <div className="w-4 flex items-center mr-2">
+                          <Mapping />
+                        </div>
+                        <div>Mappings</div>
+                      </div>
+                    </NavLink>
+                  </li>
+                )}
                 <div className="flex w-full">
                   <div className="w-full mt-4 border-b border-neutral-300"></div>
                 </div>
@@ -1390,6 +1415,29 @@ export function Sidebar() {
                 </div>
               </NavLink>
             </li>
+            {formkiqVersion.type !== 'core' && (
+              <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+                <NavLink
+                  to="/mappings"
+                  className={({ isActive }) =>
+                    (isActive
+                      ? 'text-primary-600 bg-neutral-200 '
+                      : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+                    ' w-full text-sm font-bold flex '
+                  }
+                >
+                  <div
+                    className={
+                      'w-full text-sm font-bold flex items-center pl-5 py-3 '
+                    }
+                  >
+                    <div className="w-4 flex items-center mr-2">
+                      <Mapping />
+                    </div>
+                  </div>
+                </NavLink>
+              </li>
+            )}
             {user?.isAdmin && (
               <>
                 <div className="flex w-full">

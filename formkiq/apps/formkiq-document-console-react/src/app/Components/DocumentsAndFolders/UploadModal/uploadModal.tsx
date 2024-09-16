@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import {
-  BeforeUploadEventArgs, FileInfo,
+  BeforeUploadEventArgs,
   SelectedEventArgs,
   UploaderComponent,
   UploadingEventArgs,
@@ -86,6 +86,7 @@ export default function UploadModal({
   onDocumentDataChange,
   dropUploadDocuments,
   resetDropUploadDocuments,
+  folderPath,
 }: {
   isOpened: boolean;
   onClose: any;
@@ -97,6 +98,7 @@ export default function UploadModal({
   onDocumentDataChange: any;
   dropUploadDocuments?: any;
   resetDropUploadDocuments?: any;
+  folderPath: string;
 }) {
   const dispatch = useAppDispatch();
   const cancelButtonRef = useRef(null);
@@ -124,13 +126,13 @@ export default function UploadModal({
     if (!dropUploadDocuments) return;
     setTimeout(() => {
       const uploader = document.getElementById('uploader') as HTMLInputElement;
-      if(!uploader) return;
+      if (!uploader) return;
       uploader.files = dropUploadDocuments;
       uploader.dispatchEvent(new Event('change'));
     }, 0);
-  }, [dropUploadDocuments])
+  }, [dropUploadDocuments]);
 
-    useEffect(() => {
+  useEffect(() => {
     const siteId = DocumentsService.determineSiteId();
     DocumentsService.getConfiguration(siteId).then((response) => {
       if (response.chatGptApiKey) {
@@ -174,7 +176,7 @@ export default function UploadModal({
   };
 
   const closeDialog = () => {
-    if(resetDropUploadDocuments) resetDropUploadDocuments();
+    if (resetDropUploadDocuments) resetDropUploadDocuments();
     setUploaded([]);
     onClose();
   };
@@ -507,6 +509,9 @@ export default function UploadModal({
                       />
                     </div>
                     <div className="flex flex-wrap">
+                      <h4 className="w-full text-lg font-bold mb-2 px-2 py-1 bg-gray-100">
+                        Location: {folderPath}
+                      </h4>
                       <h4 className="w-full font-semibold">
                         Run the following actions, when available:
                       </h4>
@@ -639,32 +644,32 @@ export default function UploadModal({
                             Uploaded files:
                           </div>
                           <div className=" max-h-56 overflow-y-auto">
-                          <table className="border-separate border-spacing-0 table-fixed w-full text-sm border-none">
-                            <thead className="sticky top-0 bg-white" >
-                              <tr>
-                                <th
-                                  className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left"
-                                  data-test-id="uploaded-filename"
-                                >
-                                  Filename
-                                </th>
-                                <th className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
-                                  Uploaded by
-                                </th>
-                                <th className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
-                                  Date added
-                                </th>
-                                <th className="hidden border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
-                                  Workflow(s)
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white nodark:bg-slate-800">
-                              {uploadedDocs.map((file, i) => {
-                                return uploadedFileLine(file, i);
-                              })}
-                            </tbody>
-                          </table>
+                            <table className="border-separate border-spacing-0 table-fixed w-full text-sm border-none">
+                              <thead className="sticky top-0 bg-white">
+                                <tr>
+                                  <th
+                                    className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left"
+                                    data-test-id="uploaded-filename"
+                                  >
+                                    Filename
+                                  </th>
+                                  <th className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                    Uploaded by
+                                  </th>
+                                  <th className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                    Date added
+                                  </th>
+                                  <th className="hidden border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                    Workflow(s)
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white nodark:bg-slate-800">
+                                {uploadedDocs.map((file, i) => {
+                                  return uploadedFileLine(file, i);
+                                })}
+                              </tbody>
+                            </table>
                           </div>
                         </div>
                       </div>

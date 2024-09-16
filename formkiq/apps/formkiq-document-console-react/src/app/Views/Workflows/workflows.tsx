@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import DuplicateDialog from '../../Components/Generic/Dialogs/DuplicateDialog';
+import RadioListbox from '../../Components/Generic/Listboxes/RadioListbox';
 import { Plus } from '../../Components/Icons/icons';
 import NewWorkflowModal from '../../Components/Workflows/NewWorkflow/newWorkflow';
 import WorkflowList from '../../Components/Workflows/WorkflowList/WorkflowList';
@@ -14,6 +15,10 @@ import {
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
 import { AuthState } from '../../Store/reducers/auth';
+import {
+  ConfigState,
+  setWorkflowFilterPreference,
+} from '../../Store/reducers/config';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import {
@@ -48,7 +53,7 @@ export function Workflows() {
     currentSearchPage,
     isLastSearchPageLoaded,
   } = useSelector(WorkflowsState);
-
+  const { workflowFilterPreference } = useSelector(ConfigState);
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
@@ -60,6 +65,7 @@ export function Workflows() {
   const [originalName, setOriginalName] = useState('');
   const [duplicatedWorkflow, setDuplicatedWorkflow] = useState<any>({});
   const [showTooltipId, setShowTooltipId] = useState('');
+  const [filteredWorkflows, setFilteredWorkflows] = useState<any[]>([]);
 
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -84,6 +90,22 @@ export function Workflows() {
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
   }, [pathname]);
 
+  useEffect(() => {
+    if (workflowFilterPreference === 'active') {
+      const newWorkflows = [...workflows].filter(
+        (workflow) => workflow.status === 'ACTIVE'
+      );
+      setFilteredWorkflows(newWorkflows);
+    } else if (workflowFilterPreference === 'inactive') {
+      const newWorkflows = [...workflows].filter(
+        (workflow) => workflow.status === 'INACTIVE'
+      );
+      setFilteredWorkflows(newWorkflows);
+    } else {
+      setFilteredWorkflows(workflows);
+    }
+  }, [workflows, workflowFilterPreference]);
+
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
     setNewModalOpened(true);
@@ -100,14 +122,6 @@ export function Workflows() {
   useEffect(() => {
     updateWorkflows();
   }, [user, currentSiteId]);
-
-  useEffect(() => {
-    dispatch(
-      fetchWorkflows({
-        siteId: currentSiteId,
-      })
-    );
-  }, [currentSiteId]);
 
   const updateWorkflows = async () => {
     dispatch(fetchWorkflows({ siteId: currentSiteId }));
@@ -140,6 +154,18 @@ export function Workflows() {
       }
     }
   }, [nextToken, workflowsLoadingStatus, isLastSearchPageLoaded]);
+
+  useEffect(() => {
+    // Trigger scrolling in cases when table smaller than page after filtering and next page loading can't be triggered by scroll.
+    const scrollpane = document.getElementById('workflowsScrollPane');
+    const wrapper = document.getElementById('workflowsWrapper');
+    if (!scrollpane || !wrapper) {
+      return;
+    }
+    if (scrollpane.offsetHeight < wrapper.offsetHeight) {
+      trackScrolling();
+    }
+  }, [filteredWorkflows]);
 
   const handleScroll = (event: any) => {
     const el = event.target;
@@ -336,11 +362,29 @@ export function Workflows() {
                 <span>Create new (OLD)</span>
                 <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
               </button>
+
+              <RadioListbox
+                values={['active', 'inactive', 'all']}
+                titles={[
+                  'Active Workflows',
+                  'Inactive Workflows',
+                  'All Workflows',
+                ]}
+                selectedValue={
+                  workflowFilterPreference ? workflowFilterPreference : 'active'
+                }
+                setSelectedValue={(val: 'active' | 'inactive' | 'all') => {
+                  dispatch(setWorkflowFilterPreference(val));
+                }}
+              />
             </div>
           )}
-          <div className="relative overflow-hidden h-full">
+          <div
+            className="relative overflow-hidden h-full"
+            id="workflowsWrapper"
+          >
             <WorkflowList
-              workflows={workflows as []}
+              workflows={filteredWorkflows as []}
               onDelete={onWorkflowDelete}
               siteId={currentSiteId}
               handleScroll={handleScroll}
