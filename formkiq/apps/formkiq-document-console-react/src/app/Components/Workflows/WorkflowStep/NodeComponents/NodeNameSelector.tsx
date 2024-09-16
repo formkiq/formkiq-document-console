@@ -1,37 +1,41 @@
-import {Listbox} from '@headlessui/react';
-import {v4 as uuid} from 'uuid';
+import { Listbox } from '@headlessui/react';
+import { useSelector } from 'react-redux';
+import { v4 as uuid } from 'uuid';
 import {
   Step,
   WorkflowStepActionType,
 } from '../../../../helpers/types/workflows';
-import {ChevronRight} from '../../../Icons/icons';
-import {useSelector} from "react-redux";
-import {ConfigState} from "../../../../Store/reducers/config";
+import { ConfigState } from '../../../../Store/reducers/config';
+import { ChevronRight } from '../../../Icons/icons';
 
 export const NodeNameSelector = ({
-                                   newStep,
-                                   setNewStep,
-                                 }: {
+  newStep,
+  setNewStep,
+}: {
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
 }) => {
-  const {formkiqVersion} = useSelector(ConfigState);
+  const { formkiqVersion } = useSelector(ConfigState);
   const parametersMap: Record<string, string> = {
-    DOCUMENTTAGGING: 'Intelligent Document Tagging',
-    NOTIFICATION: 'Send Notification (requires "FROM" address in SES)',
-    WEBHOOK: 'Webhook',
-    OCR: 'Optical Character Recognition (OCR)',
-    QUEUE: 'Review / Approval Queue',
-    PUBLISH: 'Publish',
-    IDP: 'Intelligent Document Processing',
+    EVENTBRIDGE: 'Amazon EventBridge',
   };
-
-  if (formkiqVersion.modules.indexOf('typesense') > -1 || formkiqVersion.modules.indexOf('opensearch') > -1) {
-    parametersMap['FULLTEXT'] = 'Fulltext Search';
-  }
   if (formkiqVersion.modules.indexOf('antivirus') > -1) {
     parametersMap['ANTIVIRUS'] = 'Anti-Malware Scan';
   }
+  if (
+    formkiqVersion.modules.indexOf('typesense') > -1 ||
+    formkiqVersion.modules.indexOf('opensearch') > -1
+  ) {
+    parametersMap['FULLTEXT'] = 'Fulltext Search';
+  }
+  parametersMap['IDP'] = 'Intelligent Document Processing';
+  parametersMap['DOCUMENTTAGGING'] = 'Intelligent Document Tagging with OpenAI';
+  parametersMap['OCR'] = 'Optical Character Recognition (OCR)';
+  parametersMap['PUBLISH'] = 'Publish';
+  parametersMap['QUEUE'] = 'Review / Approval Queue';
+  parametersMap['NOTIFICATION'] =
+    'Send Notification (requires "FROM" address in SES)';
+  parametersMap['WEBHOOK'] = 'Webhook';
 
   const getNodeId = () => `node_${uuid()}`;
   // Set name
@@ -52,7 +56,7 @@ export const NodeNameSelector = ({
         type: type,
       };
     }
-      setNewStep(step);
+    setNewStep(step);
   };
 
   const stepsNames: { [key: string]: string }[] = Object.keys(
@@ -69,22 +73,20 @@ export const NodeNameSelector = ({
 
   return (
     <Listbox value="" onChange={selectStepName}>
-      <Listbox.Button
-        className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag">
+      <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300 nodrag">
         <span className="block truncate">{stepName}</span>
         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
           <div className="rotate-90 w-4">
-            <ChevronRight/>
+            <ChevronRight />
           </div>
         </span>
       </Listbox.Button>
-      <Listbox.Options
-        className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel">
+      <Listbox.Options className="mt-1 max-h-60  overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm nodrag nowheel">
         {stepsNames.map((step) => (
           <Listbox.Option
             key={Object.keys(step)[0]}
             value={Object.keys(step)[0]}
-            className={({active}) =>
+            className={({ active }) =>
               `relative cursor-default select-none py-2 pl-10 pr-4 ${
                 active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
               }`

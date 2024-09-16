@@ -1,4 +1,4 @@
-import {Position} from 'reactflow';
+import { Position } from 'reactflow';
 
 export interface Step {
   id: string;
@@ -28,7 +28,7 @@ export type NodeType = {
 type Queue = {
   queueId?: string;
   approvalGroups?: string[];
-}
+};
 
 type WorkflowStatus = 'ACTIVE' | 'INACTIVE';
 export type WorkflowStepActionType =
@@ -40,7 +40,8 @@ export type WorkflowStepActionType =
   | 'NOTIFICATION'
   | 'QUEUE'
   | 'PUBLISH'
-  | 'IDP';
+  | 'IDP'
+  | 'EVENTBRIDGE';
 export type DecisionType = 'APPROVE' | 'REJECT';
 type OcrEngine = 'TESSERACT' | 'TEXTRACT';
 type OcrParseTypes = 'TEXT' | 'FORMS' | 'TABLES';
@@ -63,6 +64,7 @@ export type WorkflowStepActionParameters = {
   notificationHtml?: string;
   tags?: string;
   mappingId?: string;
+  eventBusName: string;
 };
 export type WorkflowStep = {
   stepId: string;

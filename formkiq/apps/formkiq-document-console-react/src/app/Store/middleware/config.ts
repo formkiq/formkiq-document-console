@@ -12,6 +12,7 @@ import {
   setUseAuthApiForSignIn,
   setUserAuthenticationType,
   setUserPoolId,
+  setWorkflowFilterPreference,
 } from '../reducers/config';
 
 const storage: LocalStorage = LocalStorage.Instance;
@@ -58,6 +59,9 @@ const updateConfig = async (action: any) => {
       case 'config/setFormkiqVersion/fulfilled':
         config.formkiqVersion = action.payload;
         break;
+      case 'config/setWorkflowFilterPreference/fulfilled':
+        config.workflowFilterPreference = action.payload;
+        break;
     }
     storage.setConfig(config);
   }
@@ -79,6 +83,7 @@ configMiddleware.startListening({
     setTagColors.fulfilled,
     setIsSidebarExpanded.fulfilled,
     setDocumentApi.fulfilled,
+    setWorkflowFilterPreference.fulfilled
   ),
   effect: updateConfig,
 });

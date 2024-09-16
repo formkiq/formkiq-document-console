@@ -2196,4 +2196,51 @@ export class DocumentsService {
       documentId,
     });
   }
+
+  @formkiqAPIHandler
+    public static async addMapping(
+        siteId: string,
+        addMappingParameters: any,
+    ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.addMapping({
+      siteId,
+      addMappingParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getMapping(
+      siteId: string,
+      mappingId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getMapping({
+      siteId,
+      mappingId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async setMapping(
+      siteId: string,
+      mappingId: string,
+      setMappingParameters: any,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.setMapping({
+      siteId,
+      mappingId,
+      setMappingParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+    public static async deleteMapping(
+        siteId: string,
+        mappingId: string,
+    ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.deleteMapping({
+      siteId,
+      mappingId,
+    });
+  }
+
 }

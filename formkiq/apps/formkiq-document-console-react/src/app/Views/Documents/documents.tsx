@@ -269,7 +269,7 @@ function Documents() {
   const trackScrolling = useCallback(async () => {
     const isBottom = (el: HTMLElement) => {
       if (el) {
-        return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
+        return el.offsetHeight + el.scrollTop + 600 > el.scrollHeight;
       }
       return false;
     };
@@ -2752,6 +2752,11 @@ function Documents() {
         onDocumentDataChange={onDocumentDataChange}
         dropUploadDocuments={dropUploadDocuments}
         resetDropUploadDocuments={resetDropUploadDocuments}
+        folderPath={
+          dropFolderPath
+            ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
+            : pathname
+        }
       />
       <UploadModal
         isOpened={isFolderUploadModalOpened}
@@ -2762,6 +2767,11 @@ function Documents() {
         documentId={folderUploadModalDocumentId}
         isFolderUpload={true}
         onDocumentDataChange={onDocumentDataChange}
+        folderPath={
+          dropFolderPath
+            ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
+            : pathname
+        }
       />
     </>
   );

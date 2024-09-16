@@ -23,7 +23,7 @@ function RadioListbox({
   return (
     <div className="relative h-full">
       <Listbox value={selectedValue} onChange={setSelectedValue}>
-        <Listbox.Button className="h-full max-h-8 bg-neutral-100 px-4 w-full text-start font-medium flex flex-row justify-between items-center text-xs  rounded-md">
+        <Listbox.Button className="h-full max-h-10 bg-neutral-100 px-4 w-full text-start font-medium flex flex-row justify-between items-center text-xs  rounded-md">
           <div className="flex items-center justify-start gap-2 truncate">
             {icon && (
               <div

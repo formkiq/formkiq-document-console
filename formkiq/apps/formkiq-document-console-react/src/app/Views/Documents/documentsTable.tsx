@@ -77,6 +77,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
 
   useEffect(() => {
     // load more items if bottom of a table is visible
+    if (!documents || documents.length === 0) return; // prevent execution if documents are not loaded yet
     trackScrolling();
     // when user opens document folder after viewing document, scroll to list to display document line
     if (!scrollToDocumentLine) return;
@@ -115,7 +116,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   const handleScroll = (event: any) => {
     const el = event.target;
     //track scroll when table reaches bottom
-    if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
+    if (el.offsetHeight + el.scrollTop + 600 > el.scrollHeight) {
       if (el.scrollTop > 0) {
         trackScrolling();
       }
