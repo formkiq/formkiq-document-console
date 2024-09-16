@@ -441,7 +441,7 @@ function Documents() {
           } else {
             setRelationshipDocumentsMap((prev) => ({
               ...prev,
-              [relationship.documentId]: relationship.documentId,
+              [relationship.documentId]: "NOT_FOUND",
             }));
           }
         });
@@ -2005,27 +2005,39 @@ function Documents() {
                             </div>
                           )}
                         </div>
-                        {relationships.length>0 ? (
+                        {relationships.length > 0 ? (
                           <div>
                             {relationships.map((relationship) => (
-                              <div><h3 className="text-sm font-semibold text-neutral-900">
-                                {relationship.relationship}
-                                : {relationshipDocumentsMap[relationship.documentId] ? (
-                                  <Link to={`${siteDocumentsRootUri}/${relationship.documentId}/view`}
-                                        className="underline hover:text-primary-500 break-words font-normal"
-                                  >
-                                    {relationshipDocumentsMap[relationship.documentId]}
-                                  </Link>
-                                ): (
-                                <span className="text-neutral-700">
-                                  {relationship.documentId}
-                                </span>)}
-                              </h3>
+                              <div>
+                                <h3 className="text-sm font-semibold text-neutral-900">
+                                  {relationship.relationship}:{' '}
+                                  {relationshipDocumentsMap[
+                                    relationship.documentId
+                                  ] &&
+                                  relationshipDocumentsMap[
+                                    relationship.documentId
+                                  ] !== 'NOT_FOUND' ? (
+                                    <Link
+                                      to={`${siteDocumentsRootUri}/${relationship.documentId}/view`}
+                                      className="underline hover:text-primary-500 break-words font-normal"
+                                    >
+                                      {
+                                        relationshipDocumentsMap[
+                                          relationship.documentId
+                                        ]
+                                      }
+                                    </Link>
+                                  ) : (
+                                    <span className="text-neutral-500">
+                                      {relationship.documentId}
+                                    </span>
+                                  )}
+                                </h3>
                               </div>
                             ))}
                           </div>
                         ) : (
-                            <span className="text-xs">
+                          <span className="text-xs">
                             (no relationships have been added)
                           </span>
                         )}
