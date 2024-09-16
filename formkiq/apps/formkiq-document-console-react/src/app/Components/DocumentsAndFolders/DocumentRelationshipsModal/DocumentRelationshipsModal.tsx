@@ -4,19 +4,14 @@ import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
-import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
-import { CopyButton } from '../../Generic/Buttons/CopyButton';
 import {
-  Checkmark,
   Close,
   Pencil,
   Plus,
-  Relationship,
   Trash,
 } from '../../Icons/icons';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
-import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
 import {
   transformRelationshipValueFromString,
@@ -78,10 +73,6 @@ export default function DocumentRelationshipsModal({
           relationships.push(
             ...response.attribute.stringValues
               .map((el: string) => transformRelationshipValueFromString(el))
-              .filter(
-                (el: any) =>
-                  el.documentId !== '5939fb26-4498-4b4b-a30d-8191480973ec'
-              )
           );
         }
         setDocumentRelationships(relationships);
@@ -97,6 +88,13 @@ export default function DocumentRelationshipsModal({
   }, [value, siteId]);
 
   const closeDialog = () => {
+    // Reset the state
+    setDocumentId('');
+    setRelationshipType(RELATIONSHIP_TYPES[0]);
+    setEditingRelationshipValue(null);
+    setIsDocumentRelationshipsExist(false);
+    setDocumentRelationships([]);
+    // Close the dialog
     onClose();
   };
 

@@ -396,7 +396,10 @@ function Documents() {
     const relationshipsAttribute = documentAttributes.find(
       (attribute) => attribute.key === 'Relationships'
     );
-    if (!relationshipsAttribute) return;
+    if (!relationshipsAttribute) {
+      setRelationships([]);
+      return;
+    }
     const newRelationships: {
       relationship: RelationshipType;
       documentId: string;
@@ -429,17 +432,17 @@ function Documents() {
           currentSiteId
         ).then((response: any) => {
           if (response.status === 200) {
-            setRelationshipDocumentsMap({
-              ...relationshipDocumentsMap,
+            setRelationshipDocumentsMap((prev) => ({
+              ...prev,
               [relationship.documentId]: response.path.substring(
                 response.path.lastIndexOf('/') + 1
               ),
-            });
+            }));
           } else {
-            setRelationshipDocumentsMap({
-              ...relationshipDocumentsMap,
+            setRelationshipDocumentsMap((prev) => ({
+              ...prev,
               [relationship.documentId]: relationship.documentId,
-            });
+            }));
           }
         });
       }
