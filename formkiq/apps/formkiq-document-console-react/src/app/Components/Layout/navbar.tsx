@@ -904,10 +904,39 @@ function Navbar() {
                                     )}
                                   </>
                                 )}
+
+                                {!isSiteReadOnly &&
+                                  currentDocument &&
+                                  (InlineEditableContentTypes.indexOf(
+                                    currentDocument.contentType
+                                  ) > -1 ||
+                                    TextFileEditorEditableContentTypes.indexOf(
+                                      currentDocument.contentType
+                                    ) > -1) && (
+                                    <>
+                                      {pathname.indexOf('/view') > -1 && (
+                                        <ButtonTertiary
+                                          className="text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap"
+                                          onClick={editDocument}
+                                        >
+                                          Edit Document
+                                        </ButtonTertiary>
+                                      )}
+                                      {pathname.indexOf('/edit') > -1 && (
+                                        <ButtonTertiary
+                                          className="text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap"
+                                          onClick={viewDocument}
+                                        >
+                                          View Document
+                                        </ButtonTertiary>
+                                      )}
+                                    </>
+                                  )}
+
                                 {documentId &&
                                   currentDocumentPath?.length &&
                                   currentDocument && (
-                                    <span className="w-5 pt-0.5 text-neutral-900 cursor-pointer inline-flex pl-6 text-gray-500 ">
+                                    <div className="w-5 h-5 text-neutral-900 inline-flex mx-2 pt-2 items-end">
                                       <DocumentActionsPopover
                                         value={{
                                           lineType: 'document',
@@ -939,38 +968,7 @@ function Navbar() {
                                             .deepLinkPath.length > 0
                                         }
                                       />
-                                    </span>
-                                  )}
-                                {!isSiteReadOnly &&
-                                  currentDocument &&
-                                  (InlineEditableContentTypes.indexOf(
-                                    currentDocument.contentType
-                                  ) > -1 ||
-                                    TextFileEditorEditableContentTypes.indexOf(
-                                      currentDocument.contentType
-                                    ) > -1) && (
-                                    <>
-                                      {pathname.indexOf('/view') > -1 && (
-                                        <span className="pl-6">
-                                          <span
-                                            className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                            onClick={editDocument}
-                                          >
-                                            edit document
-                                          </span>
-                                        </span>
-                                      )}
-                                      {pathname.indexOf('/edit') > -1 && (
-                                        <span className="pl-6">
-                                          <span
-                                            className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                            onClick={viewDocument}
-                                          >
-                                            view document
-                                          </span>
-                                        </span>
-                                      )}
-                                    </>
+                                    </div>
                                   )}
                               </span>
                             ) : (
