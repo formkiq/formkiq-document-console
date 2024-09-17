@@ -255,10 +255,12 @@ export function Sidebar() {
       '/admin/users',
       '/admin/access-control',
     ];
+    const documentViewPathRegex = /^\/(?:documents|my-documents|team-documents|workspaces\/[^/]+)\/[^/]+\/(?:view|edit)$/;
     const isNonDocumentPath = nonDocumentPaths.some(
       (path) => pathname.indexOf(path) > -1
     );
-    if (isNonDocumentPath) {
+    const isDocumentViewPath = documentViewPathRegex.test(pathname);
+    if (isNonDocumentPath || isDocumentViewPath) {
       window.location.href = `${currentDocumentsRootUri}?actionEvent=${action}`;
     } else {
       dispatch(setCurrentActionEvent(action));
