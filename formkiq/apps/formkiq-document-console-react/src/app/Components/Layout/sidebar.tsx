@@ -328,23 +328,80 @@ export function Sidebar() {
     }
   };
 
+  const NavigationItem = ({
+    to,
+    icon,
+    title,
+    testId = '',
+  }: {
+    to: string;
+    icon: any;
+    title: string;
+    testId?: string;
+  }) => {
+    return (
+      <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+        <NavLink
+          to={to}
+          className={({ isActive }) =>
+            (isActive
+              ? 'text-primary-600 bg-neutral-200 '
+              : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+            ' w-full text-sm font-bold flex '
+          }
+          data-test-id={testId}
+          end
+        >
+          <div className="w-full text-sm font-bold flex items-center pl-5 py-3">
+            <div className="w-4 flex items-center mr-2">{icon}</div>
+            {isSidebarExpanded && <div>{title}</div>}
+          </div>
+        </NavLink>
+      </li>
+    );
+  };
+
+  const ExpendableSection = (props: any) => {
+    const { isExpanded, toggleExpand, children, title, testId } = props;
+    return (
+      isSidebarExpanded ? (
+
+          <>
+        <li
+          className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
+          onClick={toggleExpand}
+          data-test-id={testId}
+        >
+          <div className="flex justify-end mt-2 mr-1">
+            {isExpanded ? <ArrowBottom /> : <ArrowRight />}
+          </div>
+          <div className="uppercase font-bold text-sm">{title}</div>
+        </li>
+        {isExpanded && children}
+      </>):(
+       <> {children}</>
+      )
+    );
+  };
+
   const SidebarItems = () => {
     return (
       <div className="tracking-normal">
-        {isSidebarExpanded ? (
+        {/*{isSidebarExpanded ? (*/}
           <>
-            <li
-              className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
-              onClick={toggleDocumentsExpand}
-              data-test-id="expand-documents"
-            >
-              <div className="flex justify-end mt-2 mr-1">
-                {documentsExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="uppercase font-bold text-sm">
-                Documents & Folders
-              </div>
-            </li>
+            {/*<li*/}
+            {/*  className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"*/}
+            {/*  onClick={toggleDocumentsExpand}*/}
+            {/*  data-test-id="expand-documents"*/}
+            {/*>*/}
+            {/*  <div className="flex justify-end mt-2 mr-1">*/}
+            {/*    {documentsExpanded ? <ArrowBottom /> : <ArrowRight />}*/}
+            {/*  </div>*/}
+            {/*  <div className="uppercase font-bold text-sm">*/}
+            {/*    Documents & Folders*/}
+            {/*  </div>*/}
+            {/*</li>*/}
+            <ExpendableSection isExpanded={documentsExpanded} toggleExpand={toggleDocumentsExpand} title="Documents & Folders" testId="expand-documents">
             {documentsExpanded && (
               <>
                 {hasUserSite && (
@@ -383,53 +440,63 @@ export function Sidebar() {
                     )}
                     {currentSiteId === user?.email && (
                       <>
-                        <li
-                          className="hidden w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"
-                          onClick={toggleUserSiteDocumentQueuesExpand}
+                        {/*<li*/}
+                        {/*  className="hidden w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap pt-2 pl-6 px-4 pb-2 cursor-pointer"*/}
+                        {/*  onClick={toggleUserSiteDocumentQueuesExpand}*/}
+                        {/*>*/}
+                        {/*  <div className="flex justify-end mt-3 mr-1">*/}
+                        {/*    {userSiteDocumentQueuesExpanded ? (*/}
+                        {/*      <ArrowBottom />*/}
+                        {/*    ) : (*/}
+                        {/*      <ArrowRight />*/}
+                        {/*    )}*/}
+                        {/*  </div>*/}
+                        {/*  <div className="pl-1 font-bold text-sm">Queues</div>*/}
+                        {/*</li>*/}
+                        <ExpendableSection
+                          isExpanded={userSiteDocumentQueuesExpanded}
+                          toggleExpand={toggleUserSiteDocumentQueuesExpand}
+                          title="Queues"
+                          testId="expand-queues"
                         >
-                          <div className="flex justify-end mt-3 mr-1">
-                            {userSiteDocumentQueuesExpanded ? (
-                              <ArrowBottom />
-                            ) : (
-                              <ArrowRight />
-                            )}
-                          </div>
-                          <div className="pl-1 font-bold text-sm">Queues</div>
-                        </li>
                         {userSiteDocumentQueuesExpanded &&
                           userSiteDocumentQueues.map(
                             (queue: any, i: number) => {
                               return (
                                 <span key={i}>
-                                  <li className="pl-5 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                                    <NavLink
-                                      to={
-                                        '/my-documents/queues/' + queue.queueId
-                                      }
-                                      end
-                                      className={({ isActive }) =>
-                                        (isActive
-                                          ? 'text-primary-600 bg-neutral-200 '
-                                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                                        ' w-full text-sm font-bold flex'
-                                      }
-                                    >
-                                      <div className="ml-2 w-4 flex flex-wrap items-center mr-2">
-                                        <Queue />
-                                      </div>
-                                      <div>
-                                        <span className="tracking-tighter">
-                                          {queue.name.length > 28 ? (
-                                            <span>
-                                              {queue.name.substring(0, 28)}...
-                                            </span>
-                                          ) : (
-                                            <span>{queue.name}</span>
-                                          )}
-                                        </span>
-                                      </div>
-                                    </NavLink>
-                                  </li>
+                                  {/*<li className="pl-5 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+                                  {/*  <NavLink*/}
+                                  {/*    to={*/}
+                                  {/*      '/my-documents/queues/' + queue.queueId*/}
+                                  {/*    }*/}
+                                  {/*    end*/}
+                                  {/*    className={({ isActive }) =>*/}
+                                  {/*      (isActive*/}
+                                  {/*        ? 'text-primary-600 bg-neutral-200 '*/}
+                                  {/*        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+                                  {/*      ' w-full text-sm font-bold flex'*/}
+                                  {/*    }*/}
+                                  {/*  >*/}
+                                  {/*    <div className="ml-2 w-4 flex flex-wrap items-center mr-2">*/}
+                                  {/*      <Queue />*/}
+                                  {/*    </div>*/}
+                                  {/*    <div>*/}
+                                  {/*      <span className="tracking-tighter">*/}
+                                  {/*        {queue.name.length > 28 ? (*/}
+                                  {/*          <span>*/}
+                                  {/*            {queue.name.substring(0, 28)}...*/}
+                                  {/*          </span>*/}
+                                  {/*        ) : (*/}
+                                  {/*          <span>{queue.name}</span>*/}
+                                  {/*        )}*/}
+                                  {/*      </span>*/}
+                                  {/*    </div>*/}
+                                  {/*  </NavLink>*/}
+                                  {/*</li>*/}
+                                  <NavigationItem to={`/my-documents/queues/${queue.queueId}`}
+                                                  icon={<Queue />}
+                                                  title={queue.name.length > 28 ? `${queue.name.substring(0, 28)}...` : queue.name}
+                                                  testId="nav-queue" />
                                 </span>
                               );
                             }
@@ -443,6 +510,7 @@ export function Sidebar() {
                         {userSiteDocumentQueuesExpanded && (
                           <div className="mb-2"></div>
                         )}
+                        </ExpendableSection>
                       </>
                     )}
                   </>
@@ -758,7 +826,7 @@ export function Sidebar() {
                   <div className="w-full mt-2 border-b border-neutral-300"></div>
                 </div>
               </>
-            )}
+            )}</ExpendableSection>
             <li
               className="mt-2 w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
               data-test-id="expand-integrations"
@@ -1116,443 +1184,443 @@ export function Sidebar() {
               </>
             )}
           </>
-        ) : (
-          <>
-            {hasUserSite && (
-              <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                <NavLink
-                  to="/my-documents"
-                  end
-                  className={({ isActive }) =>
-                    (isActive
-                      ? 'text-primary-600 bg-neutral-200 '
-                      : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                    ' w-full text-sm font-bold flex '
-                  }
-                >
-                  <FolderDropWrapper
-                    folder={''}
-                    sourceSiteId={currentSiteId}
-                    targetSiteId={user?.email || ''}
-                    className={'w-full text-sm font-bold flex pl-5 py-3 '}
-                  >
-                    <div className="w-4 flex items-center mr-2">
-                      <Documents />
-                    </div>
-                  </FolderDropWrapper>
-                </NavLink>
-              </li>
-            )}
-            {hasDefaultSite && (
-              <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                <NavLink
-                  to={hasUserSite ? '/team-documents' : '/documents'}
-                  end
-                  className={({ isActive }) =>
-                    (isActive
-                      ? 'text-primary-600 bg-neutral-200 '
-                      : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                    ' w-full text-sm font-bold flex '
-                  }
-                >
-                  <FolderDropWrapper
-                    folder={''}
-                    sourceSiteId={currentSiteId}
-                    targetSiteId={'default'}
-                    className={'w-full text-sm font-bold flex pl-5 py-3 '}
-                  >
-                    {hasUserSite ? (
-                      <div className="w-4 flex flex-wrap items-center mr-2">
-                        <div className="-mt-0.5">
-                          <Documents />
-                        </div>
-                        <div className="-mt-2.5 -ml-0.5">
-                          <ShareHand />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="w-4 flex items-center mr-2">
-                        <Documents />
-                      </div>
-                    )}
-                  </FolderDropWrapper>
-                </NavLink>
-              </li>
-            )}
-            {hasWorkspaces && (
-              <div className="w-full text-sm font-bold flex pl-5 py-3 bg-neutral-100">
-                <div
-                  className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
-                  onClick={onWorkspacesClick}
-                >
-                  <Workspace />
-                </div>
-              </div>
-            )}
-            {!isSiteReadOnly && (
-              <>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to={`${specialFoldersRootUri}/folders/favorites`}
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
-                      <div className="w-4 flex items-center mr-2">
-                        <Star />
-                      </div>
-                    </div>
-                  </NavLink>
-                </li>
-                {useSoftDelete && (
-                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                    <NavLink
-                      to={`${specialFoldersRootUri}/folders/deleted`}
-                      className={({ isActive }) =>
-                        (isActive
-                          ? 'text-primary-600 bg-neutral-200 '
-                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                        ' w-full text-sm font-bold flex '
-                      }
-                    >
-                      <div
-                        className={'w-full text-sm font-bold flex pl-5 py-3 '}
-                      >
-                        <div className="w-4 h-4 flex items-center mr-2">
-                          <Trash />
-                        </div>
-                      </div>
-                    </NavLink>
-                  </li>
-                )}
-              </>
-            )}
-            <div className="flex w-full">
-              <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>
-            </div>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to={
-                  '/workflows' +
-                  (pathname.indexOf('workspaces') > 0
-                    ? '/workspaces/' + currentSiteId
-                    : '')
-                }
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-primary-600 bg-neutral-200 '
-                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                  ' w-full text-sm font-bold flex '
-                }
-              >
-                <div
-                  className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-3 '
-                  }
-                >
-                  <div className="w-4 flex items-center mr-2">
-                    <Workflow />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to={
-                  '/queues' +
-                  (pathname.indexOf('workspaces') > 0
-                    ? '/workspaces/' + currentSiteId
-                    : '')
-                }
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-primary-600 bg-neutral-200 '
-                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                  ' w-full text-sm font-bold flex '
-                }
-              >
-                <div
-                  className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-3 '
-                  }
-                >
-                  <div className="w-4 flex items-center mr-2">
-                    <Queue />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to={
-                  '/attributes' +
-                  (pathname.indexOf('workspaces') > 0
-                    ? '/workspaces/' + currentSiteId
-                    : '')
-                }
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-primary-600 bg-neutral-200 '
-                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                  ' w-full text-sm font-bold flex '
-                }
-              >
-                <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
-                  <div className="w-4 flex items-center mr-2">
-                    <Attribute />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to="/integrations/api"
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-primary-600 bg-neutral-200 '
-                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                  ' w-full text-sm font-bold flex '
-                }
-              >
-                <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
-                  <div className="w-4 flex items-center mr-2">
-                    <Api />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to="/integrations/webhooks"
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-primary-600 bg-neutral-200 '
-                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                  ' w-full text-sm font-bold flex '
-                }
-              >
-                <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
-                  <div className="w-4 flex items-center mr-2">
-                    <Webhook />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to={
-                  '/rulesets' +
-                  (pathname.indexOf('workspaces') > 0
-                    ? '/workspaces/' + currentSiteId
-                    : '')
-                }
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-primary-600 bg-neutral-200 '
-                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                  ' w-full text-sm font-bold flex '
-                }
-              >
-                <div
-                  className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-3 '
-                  }
-                >
-                  <div className="w-4 flex items-center mr-2">
-                    <Rules />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to="/object-examine-tool"
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-primary-600 bg-neutral-200 '
-                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                  ' w-full text-sm font-bold flex '
-                }
-              >
-                <div
-                  className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-3 '
-                  }
-                >
-                  <div className="w-4 flex items-center mr-2">
-                    <Examine />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to={
-                  '/schemas' +
-                  (pathname.indexOf('workspaces') > 0
-                    ? '/workspaces/' + currentSiteId
-                    : '')
-                }
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-primary-600 bg-neutral-200 '
-                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                  ' w-full text-sm font-bold flex '
-                }
-              >
-                <div
-                  className={
-                    'w-full text-sm font-bold flex items-center pl-5 py-3 '
-                  }
-                >
-                  <div className="w-4 flex items-center mr-2">
-                    <Schema />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            {formkiqVersion.type !== 'core' && (
-              <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                <NavLink
-                  to="/mappings"
-                  className={({ isActive }) =>
-                    (isActive
-                      ? 'text-primary-600 bg-neutral-200 '
-                      : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                    ' w-full text-sm font-bold flex '
-                  }
-                >
-                  <div
-                    className={
-                      'w-full text-sm font-bold flex items-center pl-5 py-3 '
-                    }
-                  >
-                    <div className="w-4 flex items-center mr-2">
-                      <Mapping />
-                    </div>
-                  </div>
-                </NavLink>
-              </li>
-            )}
-            {user?.isAdmin && (
-              <>
-                <div className="flex w-full">
-                  <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>
-                </div>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/admin/settings"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
-                      <div className="w-4 flex items-center mr-2">
-                        <Settings />
-                      </div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to={
-                      '/admin/api-keys' +
-                      (pathname.indexOf('workspaces') > 0
-                        ? '/workspaces/' + currentSiteId
-                        : '')
-                    }
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-primary-600 bg-neutral-200 '
-                        : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                      ' w-full text-sm font-bold flex '
-                    }
-                  >
-                    <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>
-                      <div className="w-4 flex items-center mr-2">
-                        <ApiKey />
-                      </div>
-                    </div>
-                  </NavLink>
-                </li>
-                {userAuthenticationType === 'cognito' && (
-                  <>
-                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                      <NavLink
-                        to="/admin/groups"
-                        className={({ isActive }) =>
-                          (isActive
-                            ? 'text-primary-600 bg-neutral-200 '
-                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                          ' w-full text-sm font-bold flex '
-                        }
-                      >
-                        <div
-                          className={
-                            'w-full text-sm font-bold flex items-center pl-5 py-3 '
-                          }
-                        >
-                          <div className="w-4 flex items-center mr-2">
-                            <Group />
-                          </div>
-                        </div>
-                      </NavLink>
-                    </li>
-                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                      <NavLink
-                        to="/admin/users"
-                        className={({ isActive }) =>
-                          (isActive
-                            ? 'text-primary-600 bg-neutral-200 '
-                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                          ' w-full text-sm font-bold flex '
-                        }
-                      >
-                        <div
-                          className={
-                            'w-full text-sm font-bold flex items-center pl-5 py-3 '
-                          }
-                        >
-                          <div className="w-4 flex items-center mr-2">
-                            <Users />
-                          </div>
-                        </div>
-                      </NavLink>
-                    </li>
-                  </>
-                )}
-                {formkiqVersion.modules?.includes('opa') && (
-                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                    <NavLink
-                      to="/admin/access-control"
-                      className={({ isActive }) =>
-                        (isActive
-                          ? 'text-primary-600 bg-neutral-200 '
-                          : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
-                        ' w-full text-sm font-bold flex '
-                      }
-                    >
-                      <div
-                        className={'w-full text-sm font-bold flex pl-5 py-3 '}
-                      >
-                        <div className="w-4 flex items-center mr-2">
-                          <AccessControl />
-                        </div>
-                      </div>
-                    </NavLink>
-                  </li>
-                )}
-              </>
-            )}
-          </>
-        )}
+        {/*) : (*/}
+        {/*  <>*/}
+        {/*    {hasUserSite && (*/}
+        {/*      <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*        <NavLink*/}
+        {/*          to="/my-documents"*/}
+        {/*          end*/}
+        {/*          className={({ isActive }) =>*/}
+        {/*            (isActive*/}
+        {/*              ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*              : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*            ' w-full text-sm font-bold flex '*/}
+        {/*          }*/}
+        {/*        >*/}
+        {/*          <FolderDropWrapper*/}
+        {/*            folder={''}*/}
+        {/*            sourceSiteId={currentSiteId}*/}
+        {/*            targetSiteId={user?.email || ''}*/}
+        {/*            className={'w-full text-sm font-bold flex pl-5 py-3 '}*/}
+        {/*          >*/}
+        {/*            <div className="w-4 flex items-center mr-2">*/}
+        {/*              <Documents />*/}
+        {/*            </div>*/}
+        {/*          </FolderDropWrapper>*/}
+        {/*        </NavLink>*/}
+        {/*      </li>*/}
+        {/*    )}*/}
+        {/*    {hasDefaultSite && (*/}
+        {/*      <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*        <NavLink*/}
+        {/*          to={hasUserSite ? '/team-documents' : '/documents'}*/}
+        {/*          end*/}
+        {/*          className={({ isActive }) =>*/}
+        {/*            (isActive*/}
+        {/*              ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*              : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*            ' w-full text-sm font-bold flex '*/}
+        {/*          }*/}
+        {/*        >*/}
+        {/*          <FolderDropWrapper*/}
+        {/*            folder={''}*/}
+        {/*            sourceSiteId={currentSiteId}*/}
+        {/*            targetSiteId={'default'}*/}
+        {/*            className={'w-full text-sm font-bold flex pl-5 py-3 '}*/}
+        {/*          >*/}
+        {/*            {hasUserSite ? (*/}
+        {/*              <div className="w-4 flex flex-wrap items-center mr-2">*/}
+        {/*                <div className="-mt-0.5">*/}
+        {/*                  <Documents />*/}
+        {/*                </div>*/}
+        {/*                <div className="-mt-2.5 -ml-0.5">*/}
+        {/*                  <ShareHand />*/}
+        {/*                </div>*/}
+        {/*              </div>*/}
+        {/*            ) : (*/}
+        {/*              <div className="w-4 flex items-center mr-2">*/}
+        {/*                <Documents />*/}
+        {/*              </div>*/}
+        {/*            )}*/}
+        {/*          </FolderDropWrapper>*/}
+        {/*        </NavLink>*/}
+        {/*      </li>*/}
+        {/*    )}*/}
+        {/*    {hasWorkspaces && (*/}
+        {/*      <div className="w-full text-sm font-bold flex pl-5 py-3 bg-neutral-100">*/}
+        {/*        <div*/}
+        {/*          className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"*/}
+        {/*          onClick={onWorkspacesClick}*/}
+        {/*        >*/}
+        {/*          <Workspace />*/}
+        {/*        </div>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*    {!isSiteReadOnly && (*/}
+        {/*      <>*/}
+        {/*        <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*          <NavLink*/}
+        {/*            to={`${specialFoldersRootUri}/folders/favorites`}*/}
+        {/*            className={({ isActive }) =>*/}
+        {/*              (isActive*/}
+        {/*                ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*                : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*              ' w-full text-sm font-bold flex '*/}
+        {/*            }*/}
+        {/*          >*/}
+        {/*            <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>*/}
+        {/*              <div className="w-4 flex items-center mr-2">*/}
+        {/*                <Star />*/}
+        {/*              </div>*/}
+        {/*            </div>*/}
+        {/*          </NavLink>*/}
+        {/*        </li>*/}
+        {/*        {useSoftDelete && (*/}
+        {/*          <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*            <NavLink*/}
+        {/*              to={`${specialFoldersRootUri}/folders/deleted`}*/}
+        {/*              className={({ isActive }) =>*/}
+        {/*                (isActive*/}
+        {/*                  ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*                  : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*                ' w-full text-sm font-bold flex '*/}
+        {/*              }*/}
+        {/*            >*/}
+        {/*              <div*/}
+        {/*                className={'w-full text-sm font-bold flex pl-5 py-3 '}*/}
+        {/*              >*/}
+        {/*                <div className="w-4 h-4 flex items-center mr-2">*/}
+        {/*                  <Trash />*/}
+        {/*                </div>*/}
+        {/*              </div>*/}
+        {/*            </NavLink>*/}
+        {/*          </li>*/}
+        {/*        )}*/}
+        {/*      </>*/}
+        {/*    )}*/}
+        {/*    <div className="flex w-full">*/}
+        {/*      <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>*/}
+        {/*    </div>*/}
+        {/*    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*      <NavLink*/}
+        {/*        to={*/}
+        {/*          '/workflows' +*/}
+        {/*          (pathname.indexOf('workspaces') > 0*/}
+        {/*            ? '/workspaces/' + currentSiteId*/}
+        {/*            : '')*/}
+        {/*        }*/}
+        {/*        className={({ isActive }) =>*/}
+        {/*          (isActive*/}
+        {/*            ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*          ' w-full text-sm font-bold flex '*/}
+        {/*        }*/}
+        {/*      >*/}
+        {/*        <div*/}
+        {/*          className={*/}
+        {/*            'w-full text-sm font-bold flex items-center pl-5 py-3 '*/}
+        {/*          }*/}
+        {/*        >*/}
+        {/*          <div className="w-4 flex items-center mr-2">*/}
+        {/*            <Workflow />*/}
+        {/*          </div>*/}
+        {/*        </div>*/}
+        {/*      </NavLink>*/}
+        {/*    </li>*/}
+        {/*    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*      <NavLink*/}
+        {/*        to={*/}
+        {/*          '/queues' +*/}
+        {/*          (pathname.indexOf('workspaces') > 0*/}
+        {/*            ? '/workspaces/' + currentSiteId*/}
+        {/*            : '')*/}
+        {/*        }*/}
+        {/*        className={({ isActive }) =>*/}
+        {/*          (isActive*/}
+        {/*            ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*          ' w-full text-sm font-bold flex '*/}
+        {/*        }*/}
+        {/*      >*/}
+        {/*        <div*/}
+        {/*          className={*/}
+        {/*            'w-full text-sm font-bold flex items-center pl-5 py-3 '*/}
+        {/*          }*/}
+        {/*        >*/}
+        {/*          <div className="w-4 flex items-center mr-2">*/}
+        {/*            <Queue />*/}
+        {/*          </div>*/}
+        {/*        </div>*/}
+        {/*      </NavLink>*/}
+        {/*    </li>*/}
+        {/*    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*      <NavLink*/}
+        {/*        to={*/}
+        {/*          '/attributes' +*/}
+        {/*          (pathname.indexOf('workspaces') > 0*/}
+        {/*            ? '/workspaces/' + currentSiteId*/}
+        {/*            : '')*/}
+        {/*        }*/}
+        {/*        className={({ isActive }) =>*/}
+        {/*          (isActive*/}
+        {/*            ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*          ' w-full text-sm font-bold flex '*/}
+        {/*        }*/}
+        {/*      >*/}
+        {/*        <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>*/}
+        {/*          <div className="w-4 flex items-center mr-2">*/}
+        {/*            <Attribute />*/}
+        {/*          </div>*/}
+        {/*        </div>*/}
+        {/*      </NavLink>*/}
+        {/*    </li>*/}
+        {/*    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*      <NavLink*/}
+        {/*        to="/integrations/api"*/}
+        {/*        className={({ isActive }) =>*/}
+        {/*          (isActive*/}
+        {/*            ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*          ' w-full text-sm font-bold flex '*/}
+        {/*        }*/}
+        {/*      >*/}
+        {/*        <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>*/}
+        {/*          <div className="w-4 flex items-center mr-2">*/}
+        {/*            <Api />*/}
+        {/*          </div>*/}
+        {/*        </div>*/}
+        {/*      </NavLink>*/}
+        {/*    </li>*/}
+        {/*    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*      <NavLink*/}
+        {/*        to="/integrations/webhooks"*/}
+        {/*        className={({ isActive }) =>*/}
+        {/*          (isActive*/}
+        {/*            ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*          ' w-full text-sm font-bold flex '*/}
+        {/*        }*/}
+        {/*      >*/}
+        {/*        <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>*/}
+        {/*          <div className="w-4 flex items-center mr-2">*/}
+        {/*            <Webhook />*/}
+        {/*          </div>*/}
+        {/*        </div>*/}
+        {/*      </NavLink>*/}
+        {/*    </li>*/}
+        {/*    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*      <NavLink*/}
+        {/*        to={*/}
+        {/*          '/rulesets' +*/}
+        {/*          (pathname.indexOf('workspaces') > 0*/}
+        {/*            ? '/workspaces/' + currentSiteId*/}
+        {/*            : '')*/}
+        {/*        }*/}
+        {/*        className={({ isActive }) =>*/}
+        {/*          (isActive*/}
+        {/*            ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*          ' w-full text-sm font-bold flex '*/}
+        {/*        }*/}
+        {/*      >*/}
+        {/*        <div*/}
+        {/*          className={*/}
+        {/*            'w-full text-sm font-bold flex items-center pl-5 py-3 '*/}
+        {/*          }*/}
+        {/*        >*/}
+        {/*          <div className="w-4 flex items-center mr-2">*/}
+        {/*            <Rules />*/}
+        {/*          </div>*/}
+        {/*        </div>*/}
+        {/*      </NavLink>*/}
+        {/*    </li>*/}
+        {/*    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*      <NavLink*/}
+        {/*        to="/object-examine-tool"*/}
+        {/*        className={({ isActive }) =>*/}
+        {/*          (isActive*/}
+        {/*            ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*          ' w-full text-sm font-bold flex '*/}
+        {/*        }*/}
+        {/*      >*/}
+        {/*        <div*/}
+        {/*          className={*/}
+        {/*            'w-full text-sm font-bold flex items-center pl-5 py-3 '*/}
+        {/*          }*/}
+        {/*        >*/}
+        {/*          <div className="w-4 flex items-center mr-2">*/}
+        {/*            <Examine />*/}
+        {/*          </div>*/}
+        {/*        </div>*/}
+        {/*      </NavLink>*/}
+        {/*    </li>*/}
+        {/*    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*      <NavLink*/}
+        {/*        to={*/}
+        {/*          '/schemas' +*/}
+        {/*          (pathname.indexOf('workspaces') > 0*/}
+        {/*            ? '/workspaces/' + currentSiteId*/}
+        {/*            : '')*/}
+        {/*        }*/}
+        {/*        className={({ isActive }) =>*/}
+        {/*          (isActive*/}
+        {/*            ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*          ' w-full text-sm font-bold flex '*/}
+        {/*        }*/}
+        {/*      >*/}
+        {/*        <div*/}
+        {/*          className={*/}
+        {/*            'w-full text-sm font-bold flex items-center pl-5 py-3 '*/}
+        {/*          }*/}
+        {/*        >*/}
+        {/*          <div className="w-4 flex items-center mr-2">*/}
+        {/*            <Schema />*/}
+        {/*          </div>*/}
+        {/*        </div>*/}
+        {/*      </NavLink>*/}
+        {/*    </li>*/}
+        {/*    {formkiqVersion.type !== 'core' && (*/}
+        {/*      <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*        <NavLink*/}
+        {/*          to="/mappings"*/}
+        {/*          className={({ isActive }) =>*/}
+        {/*            (isActive*/}
+        {/*              ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*              : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*            ' w-full text-sm font-bold flex '*/}
+        {/*          }*/}
+        {/*        >*/}
+        {/*          <div*/}
+        {/*            className={*/}
+        {/*              'w-full text-sm font-bold flex items-center pl-5 py-3 '*/}
+        {/*            }*/}
+        {/*          >*/}
+        {/*            <div className="w-4 flex items-center mr-2">*/}
+        {/*              <Mapping />*/}
+        {/*            </div>*/}
+        {/*          </div>*/}
+        {/*        </NavLink>*/}
+        {/*      </li>*/}
+        {/*    )}*/}
+        {/*    {user?.isAdmin && (*/}
+        {/*      <>*/}
+        {/*        <div className="flex w-full">*/}
+        {/*          <div className="w-full mt-2 mx-2 border-b border-neutral-300"></div>*/}
+        {/*        </div>*/}
+        {/*        <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*          <NavLink*/}
+        {/*            to="/admin/settings"*/}
+        {/*            className={({ isActive }) =>*/}
+        {/*              (isActive*/}
+        {/*                ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*                : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*              ' w-full text-sm font-bold flex '*/}
+        {/*            }*/}
+        {/*          >*/}
+        {/*            <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>*/}
+        {/*              <div className="w-4 flex items-center mr-2">*/}
+        {/*                <Settings />*/}
+        {/*              </div>*/}
+        {/*            </div>*/}
+        {/*          </NavLink>*/}
+        {/*        </li>*/}
+        {/*        <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*          <NavLink*/}
+        {/*            to={*/}
+        {/*              '/admin/api-keys' +*/}
+        {/*              (pathname.indexOf('workspaces') > 0*/}
+        {/*                ? '/workspaces/' + currentSiteId*/}
+        {/*                : '')*/}
+        {/*            }*/}
+        {/*            className={({ isActive }) =>*/}
+        {/*              (isActive*/}
+        {/*                ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*                : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*              ' w-full text-sm font-bold flex '*/}
+        {/*            }*/}
+        {/*          >*/}
+        {/*            <div className={'w-full text-sm font-bold flex pl-5 py-3 '}>*/}
+        {/*              <div className="w-4 flex items-center mr-2">*/}
+        {/*                <ApiKey />*/}
+        {/*              </div>*/}
+        {/*            </div>*/}
+        {/*          </NavLink>*/}
+        {/*        </li>*/}
+        {/*        {userAuthenticationType === 'cognito' && (*/}
+        {/*          <>*/}
+        {/*            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*              <NavLink*/}
+        {/*                to="/admin/groups"*/}
+        {/*                className={({ isActive }) =>*/}
+        {/*                  (isActive*/}
+        {/*                    ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*                  ' w-full text-sm font-bold flex '*/}
+        {/*                }*/}
+        {/*              >*/}
+        {/*                <div*/}
+        {/*                  className={*/}
+        {/*                    'w-full text-sm font-bold flex items-center pl-5 py-3 '*/}
+        {/*                  }*/}
+        {/*                >*/}
+        {/*                  <div className="w-4 flex items-center mr-2">*/}
+        {/*                    <Group />*/}
+        {/*                  </div>*/}
+        {/*                </div>*/}
+        {/*              </NavLink>*/}
+        {/*            </li>*/}
+        {/*            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*              <NavLink*/}
+        {/*                to="/admin/users"*/}
+        {/*                className={({ isActive }) =>*/}
+        {/*                  (isActive*/}
+        {/*                    ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*                    : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*                  ' w-full text-sm font-bold flex '*/}
+        {/*                }*/}
+        {/*              >*/}
+        {/*                <div*/}
+        {/*                  className={*/}
+        {/*                    'w-full text-sm font-bold flex items-center pl-5 py-3 '*/}
+        {/*                  }*/}
+        {/*                >*/}
+        {/*                  <div className="w-4 flex items-center mr-2">*/}
+        {/*                    <Users />*/}
+        {/*                  </div>*/}
+        {/*                </div>*/}
+        {/*              </NavLink>*/}
+        {/*            </li>*/}
+        {/*          </>*/}
+        {/*        )}*/}
+        {/*        {formkiqVersion.modules?.includes('opa') && (*/}
+        {/*          <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">*/}
+        {/*            <NavLink*/}
+        {/*              to="/admin/access-control"*/}
+        {/*              className={({ isActive }) =>*/}
+        {/*                (isActive*/}
+        {/*                  ? 'text-primary-600 bg-neutral-200 '*/}
+        {/*                  : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +*/}
+        {/*                ' w-full text-sm font-bold flex '*/}
+        {/*              }*/}
+        {/*            >*/}
+        {/*              <div*/}
+        {/*                className={'w-full text-sm font-bold flex pl-5 py-3 '}*/}
+        {/*              >*/}
+        {/*                <div className="w-4 flex items-center mr-2">*/}
+        {/*                  <AccessControl />*/}
+        {/*                </div>*/}
+        {/*              </div>*/}
+        {/*            </NavLink>*/}
+        {/*          </li>*/}
+        {/*        )}*/}
+        {/*      </>*/}
+        {/*    )}*/}
+        {/*  </>*/}
+        {/*)}*/}
       </div>
     );
   };
