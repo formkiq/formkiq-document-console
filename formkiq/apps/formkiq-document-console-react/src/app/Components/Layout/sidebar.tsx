@@ -37,7 +37,8 @@ import {
   Documents,
   Examine,
   FolderOutline,
-  Group, Mapping,
+  Group,
+  Mapping,
   Plus,
   Queue,
   Rules,
@@ -333,7 +334,7 @@ export function Sidebar() {
     icon,
     title,
     testId = '',
-    level = 0
+    level = 0,
   }: {
     to: string;
     icon: any;
@@ -342,8 +343,9 @@ export function Sidebar() {
     level?: number;
   }) => {
     return (
-      <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap"
-          style={{ paddingLeft:  isSidebarExpanded ? `${level * 16}px` : '0px' }}
+      <li
+        className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap"
+        style={{ paddingLeft: isSidebarExpanded ? `${level * 16}px` : '0px' }}
       >
         <NavLink
           to={to}
@@ -370,7 +372,7 @@ export function Sidebar() {
     title,
     testId = '',
     folder = '',
-    targetSiteId = ""
+    targetSiteId = '',
   }: {
     to: string;
     icon: any;
@@ -398,9 +400,7 @@ export function Sidebar() {
             targetSiteId={targetSiteId}
             className="w-full text-sm font-bold flex pl-5 py-2"
           >
-            <div className="w-4 flex items-center mr-2">
-              {icon}
-            </div>
+            <div className="w-4 flex items-center mr-2">{icon}</div>
             {isSidebarExpanded && <div>{title}</div>}
           </FolderDropWrapper>
         </NavLink>
@@ -409,13 +409,17 @@ export function Sidebar() {
   };
 
   const ExpandableSection = (props: any) => {
-    const { isExpanded, toggleExpand, title, testId, level=0 } = props;
+    const { isExpanded, toggleExpand, title, testId, level = 0 } = props;
     return isSidebarExpanded ? (
       <li
         className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
         onClick={toggleExpand}
         data-test-id={testId}
-        style={{ paddingLeft: isSidebarExpanded ?`${level===0?10:level * 16}px`: '0px'}}
+        style={{
+          paddingLeft: isSidebarExpanded
+            ? `${level === 0 ? 10 : level * 16}px`
+            : '0px',
+        }}
       >
         <div className="flex justify-end mt-2 mr-1">
           {isExpanded ? <ArrowBottom /> : <ArrowRight />}
@@ -430,392 +434,433 @@ export function Sidebar() {
   const SidebarItems = () => {
     return (
       <div className="tracking-normal pb-16">
-          <>
-            <ExpandableSection isExpanded={documentsExpanded} toggleExpand={toggleDocumentsExpand} title="Documents & Folders" testId="expand-documents"/>
-            {(documentsExpanded||!isSidebarExpanded) && (
-              <>
-                {hasUserSite && (
-                  <>
-                    <DocumentsNavigationItem
-                      to="/my-documents"
-                      icon={<Documents />}
-                      title="My Documents"
-                      testId="nav-my-documents"
-                      targetSiteId={user?.email || ''}
-                      folder={""}
-                   />
-                    {QuickFolderList(
-                      user?.email || '',
-                      currentSiteId === user?.email && subfolderUri.length
-                        ? subfolderUri.split('/')
-                        : [],
-                      folders
-                    )}
-                    {currentSiteId === user?.email && (
-                      <>
-                        <ExpandableSection
-                          isExpanded={userSiteDocumentQueuesExpanded}
-                          toggleExpand={toggleUserSiteDocumentQueuesExpand}
-                          title="Queues"
-                          testId="expand-queues"
-                          level={1}
-                        />
-                        {userSiteDocumentQueuesExpanded &&
-                          isSidebarExpanded &&
-                          userSiteDocumentQueues.map(
-                            (queue: any, i: number) => {
-                              return (
-                                <span key={i}>
-                                  <NavigationItem to={`/my-documents/queues/${queue.queueId}`}
-                                                  icon={<Queue />}
-                                                  title={queue.name.length > 20 ? `${queue.name.substring(0, 20)}...` : queue.name}
-                                                  testId="nav-queue"
-                                                  level={1}
-                                  />
-                                </span>
-                              );
-                            }
-                          )}
-                        {userSiteDocumentQueuesExpanded &&
-                          isSidebarExpanded &&
-                          !userSiteDocumentQueues.length && (
-                            <div className="text-xs pl-8">
-                              (no queues found)
-                            </div>
-                          )}
-                        {userSiteDocumentQueuesExpanded &&
-                          isSidebarExpanded && (
-                          <div className="mb-2"></div>
+        <>
+          <ExpandableSection
+            isExpanded={documentsExpanded}
+            toggleExpand={toggleDocumentsExpand}
+            title="Documents & Folders"
+            testId="expand-documents"
+          />
+          {(documentsExpanded || !isSidebarExpanded) && (
+            <>
+              {hasUserSite && (
+                <>
+                  <DocumentsNavigationItem
+                    to="/my-documents"
+                    icon={<Documents />}
+                    title="My Documents"
+                    testId="nav-my-documents"
+                    targetSiteId={user?.email || ''}
+                    folder={''}
+                  />
+                  {QuickFolderList(
+                    user?.email || '',
+                    currentSiteId === user?.email && subfolderUri.length
+                      ? subfolderUri.split('/')
+                      : [],
+                    folders
+                  )}
+                  {currentSiteId === user?.email && (
+                    <>
+                      <ExpandableSection
+                        isExpanded={userSiteDocumentQueuesExpanded}
+                        toggleExpand={toggleUserSiteDocumentQueuesExpand}
+                        title="Queues"
+                        testId="expand-queues"
+                        level={1}
+                      />
+                      {userSiteDocumentQueuesExpanded &&
+                        isSidebarExpanded &&
+                        userSiteDocumentQueues.map((queue: any, i: number) => {
+                          return (
+                            <span key={i}>
+                              <NavigationItem
+                                to={`/my-documents/queues/${queue.queueId}`}
+                                icon={<Queue />}
+                                title={
+                                  queue.name.length > 20
+                                    ? `${queue.name.substring(0, 20)}...`
+                                    : queue.name
+                                }
+                                testId="nav-queue"
+                                level={1}
+                              />
+                            </span>
+                          );
+                        })}
+                      {userSiteDocumentQueuesExpanded &&
+                        isSidebarExpanded &&
+                        !userSiteDocumentQueues.length && (
+                          <div className="text-xs pl-8">(no queues found)</div>
                         )}
-                      </>
-                    )}
-                  </>
-                )}
-                {hasDefaultSite && (
-                  <>
-                    <DocumentsNavigationItem
-                      to={hasUserSite ? '/team-documents' : '/documents'}
-                      icon={hasUserSite ?<><div className="-mt-0.5"><Documents /></div><div className="-mt-2.5 -ml-0.5"><ShareHand /></div></> : <Documents />}
-                      title={hasUserSite ? 'Team Documents' : 'Documents'}
-                      testId="nav-team-documents"
-                      targetSiteId={'default'}
-                      folder={""}
-                    />
-                    {isSidebarExpanded && QuickFolderList(
+                      {userSiteDocumentQueuesExpanded && isSidebarExpanded && (
+                        <div className="mb-2"></div>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+              {hasDefaultSite && (
+                <>
+                  <DocumentsNavigationItem
+                    to={hasUserSite ? '/team-documents' : '/documents'}
+                    icon={
+                      hasUserSite ? (
+                        <>
+                          <div className="-mt-0.5">
+                            <Documents />
+                          </div>
+                          <div className="-mt-2.5 -ml-0.5">
+                            <ShareHand />
+                          </div>
+                        </>
+                      ) : (
+                        <Documents />
+                      )
+                    }
+                    title={hasUserSite ? 'Team Documents' : 'Documents'}
+                    testId="nav-team-documents"
+                    targetSiteId={'default'}
+                    folder={''}
+                  />
+                  {isSidebarExpanded &&
+                    QuickFolderList(
                       'default',
                       currentSiteId === 'default' && subfolderUri.length
                         ? subfolderUri.split('/')
                         : [],
                       folders
                     )}
-                    {currentSiteId === 'default' && (
-                      <>
-                        <ExpandableSection
-                          isExpanded={defaultSiteDocumentQueuesExpanded}
-                          toggleExpand={toggleDefaultSiteDocumentQueuesExpand}
-                          title="Queues"
-                          testId="expand-queues"
-                          level={1}
-                        />
-                        {defaultSiteDocumentQueuesExpanded &&
-                          isSidebarExpanded &&
-                          defaultSiteDocumentQueues.map(
-                            (queue: any, i: number) => {
-                              return (
-                                <span key={i}>
-                                  <NavigationItem to={(hasUserSite ? '/team-documents' : '/documents') + '/queues/' + queue.queueId}
-                                                  icon={<Queue />}
-                                                  title={queue.name.length > 20 ? `${queue.name.substring(0, 20)}...` : queue.name}
-                                                  testId="nav-queue"
-                                                  level={1}
-                                  />
-
-                                </span>
-                              );
-                            }
-                          )}
-                        {defaultSiteDocumentQueuesExpanded &&
-                          isSidebarExpanded &&
-                          !defaultSiteDocumentQueues.length && (
-                            <div className="text-xs pl-8 mb-2">
-                              (no queues found)
-                            </div>
-                          )}
-                      </>
-                    )}
-                  </>
-                )}
-                {hasWorkspaces && (
-                  <>
-                    {(hasUserSite || hasDefaultSite) && (
+                  {currentSiteId === 'default' && (
+                    <>
                       <ExpandableSection
-                        isExpanded={workspacesExpanded}
-                        toggleExpand={toggleWorkspacesExpand}
-                        title="Workspaces"
-                        testId="expand-workspaces"/>
-                    )}
-                    {isSidebarExpanded ?((workspacesExpanded ||
-                      (!hasUserSite && !hasDefaultSite)) &&
-                      workspaceSites.map((site: any, i: number) => {
-                        return (
-                          <span key={i}>
-                            <DocumentsNavigationItem
-                              to={'/workspaces/' + site.siteId}
-                              icon={<Workspace />}
-                              title={site.siteId.replaceAll('_', ' ')}
-                              testId="nav-workspace"
-                              targetSiteId={site.siteId}
-                              folder={""}
-                            />
-                            { QuickFolderList(
-                              site.siteId,
-                              currentSiteId === site.siteId &&
-                                subfolderUri.length
-                                ? subfolderUri.split('/')
-                                : [],
-                              folders
-                            )}
-                            {currentSiteId === site.siteId && (
-                              <>
-                                <ExpandableSection
-                                  isExpanded={otherSiteDocumentQueuesExpanded}
-                                  toggleExpand={toggleOtherSiteDocumentQueuesExpand}
-                                  title="Queues"
-                                  testId="expand-queues"
-                                  level={2}
+                        isExpanded={defaultSiteDocumentQueuesExpanded}
+                        toggleExpand={toggleDefaultSiteDocumentQueuesExpand}
+                        title="Queues"
+                        testId="expand-queues"
+                        level={1}
+                      />
+                      {defaultSiteDocumentQueuesExpanded &&
+                        isSidebarExpanded &&
+                        defaultSiteDocumentQueues.map(
+                          (queue: any, i: number) => {
+                            return (
+                              <span key={i}>
+                                <NavigationItem
+                                  to={
+                                    (hasUserSite
+                                      ? '/team-documents'
+                                      : '/documents') +
+                                    '/queues/' +
+                                    queue.queueId
+                                  }
+                                  icon={<Queue />}
+                                  title={
+                                    queue.name.length > 20
+                                      ? `${queue.name.substring(0, 20)}...`
+                                      : queue.name
+                                  }
+                                  testId="nav-queue"
+                                  level={1}
                                 />
-                                {otherSiteDocumentQueuesExpanded &&
-                                  otherSiteDocumentQueues.map(
-                                    (queue: any, i: number) => {
-                                      return (
-                                        <span key={i}>
-                                          <NavigationItem
-                                            to={
-                                                  '/workspaces/' +
-                                                  currentSiteId +
-                                                  '/queues/' +
-                                                  queue.queueId
-                                              }
-                                            icon={<Queue />}
-                                            title={queue.name.length > 20 ? `${queue.name.substring(0, 20)}...` : queue.name}
-                                            testId="nav-queue"
-                                            level={1}
-                                          />
-                                        </span>
-                                      );
-                                    }
-                                  )}
-                                {otherSiteDocumentQueuesExpanded &&
-                                  !otherSiteDocumentQueues.length && (
-                                    <div className="text-xs pl-10 mb-2">
-                                      (no queues found)
-                                    </div>
-                                  )}
-                              </>
-                            )}
-                          </span>
-                        );
-                      })):<>
-                          {hasWorkspaces && (
-                            <div className="w-full text-sm font-bold flex pl-5 py-3 bg-neutral-100">
-                              <div
-                                className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
-                                onClick={onWorkspacesClick}
-                              >
-                                <Workspace />
-                              </div>
-                            </div>
+                              </span>
+                            );
+                          }
+                        )}
+                      {defaultSiteDocumentQueuesExpanded &&
+                        isSidebarExpanded &&
+                        !defaultSiteDocumentQueues.length && (
+                          <div className="text-xs pl-8 mb-2">
+                            (no queues found)
+                          </div>
+                        )}
+                    </>
+                  )}
+                </>
+              )}
+              {hasWorkspaces && (
+                <>
+                  {(hasUserSite || hasDefaultSite) && (
+                    <ExpandableSection
+                      isExpanded={workspacesExpanded}
+                      toggleExpand={toggleWorkspacesExpand}
+                      title="Workspaces"
+                      testId="expand-workspaces"
+                    />
+                  )}
+                  {isSidebarExpanded ? (
+                    (workspacesExpanded || (!hasUserSite && !hasDefaultSite)) &&
+                    workspaceSites.map((site: any, i: number) => {
+                      return (
+                        <span key={i}>
+                          <DocumentsNavigationItem
+                            to={'/workspaces/' + site.siteId}
+                            icon={<Workspace />}
+                            title={site.siteId.replaceAll('_', ' ')}
+                            testId="nav-workspace"
+                            targetSiteId={site.siteId}
+                            folder={''}
+                          />
+                          {QuickFolderList(
+                            site.siteId,
+                            currentSiteId === site.siteId && subfolderUri.length
+                              ? subfolderUri.split('/')
+                              : [],
+                            folders
                           )}
-                    </>}
-                  </>
-                )}
-                {!isSiteReadOnly && (
-                  <>
+                          {currentSiteId === site.siteId && (
+                            <>
+                              <ExpandableSection
+                                isExpanded={otherSiteDocumentQueuesExpanded}
+                                toggleExpand={
+                                  toggleOtherSiteDocumentQueuesExpand
+                                }
+                                title="Queues"
+                                testId="expand-queues"
+                                level={2}
+                              />
+                              {otherSiteDocumentQueuesExpanded &&
+                                otherSiteDocumentQueues.map(
+                                  (queue: any, i: number) => {
+                                    return (
+                                      <span key={i}>
+                                        <NavigationItem
+                                          to={
+                                            '/workspaces/' +
+                                            currentSiteId +
+                                            '/queues/' +
+                                            queue.queueId
+                                          }
+                                          icon={<Queue />}
+                                          title={
+                                            queue.name.length > 20
+                                              ? `${queue.name.substring(
+                                                  0,
+                                                  20
+                                                )}...`
+                                              : queue.name
+                                          }
+                                          testId="nav-queue"
+                                          level={1}
+                                        />
+                                      </span>
+                                    );
+                                  }
+                                )}
+                              {otherSiteDocumentQueuesExpanded &&
+                                !otherSiteDocumentQueues.length && (
+                                  <div className="text-xs pl-10 mb-2">
+                                    (no queues found)
+                                  </div>
+                                )}
+                            </>
+                          )}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    <>
+                      {hasWorkspaces && (
+                        <div className="w-full text-sm font-bold flex pl-5 py-3 bg-neutral-100">
+                          <div
+                            className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
+                            onClick={onWorkspacesClick}
+                          >
+                            <Workspace />
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+              {!isSiteReadOnly && (
+                <>
+                  <NavigationItem
+                    to={`${specialFoldersRootUri}/folders/favorites`}
+                    icon={<Star />}
+                    title="Favorites"
+                    testId="nav-favorites"
+                    level={0}
+                  />
+
+                  {useSoftDelete && (
                     <NavigationItem
-                      to={`${specialFoldersRootUri}/folders/favorites`}
-                      icon={<Star />}
-                      title="Favorites"
-                      testId="nav-favorites"
+                      to={`${specialFoldersRootUri}/folders/deleted`}
+                      icon={<Trash />}
+                      title="Trash"
+                      testId="nav-trash"
                       level={0}
                     />
-
-                    {useSoftDelete && (
-                      <NavigationItem
-                        to={`${specialFoldersRootUri}/folders/deleted`}
-                        icon={<Trash />}
-                        title="Trash"
-                        testId="nav-trash"
-                        level={0}
-                      />
-                    )}
-                  </>
-                )}
-                <div className="flex w-full">
-                  <div className="w-full mt-2 border-b border-neutral-300"></div>
-                </div>
-              </>
-            )}
-            <ExpandableSection
-              isExpanded={integrationsExpanded}
-              toggleExpand={toggleIntegrationsExpand}
-              title={
-                  formkiqVersion.type !== 'core'
-                      ? 'Workflows & Integrations'
-                      : 'Integrations'
-              }
-              testId="expand-integrations"
-              />
-            {(integrationsExpanded || !isSidebarExpanded) && (
-              <>
-                {formkiqVersion.type !== 'core' && (
-                  <NavigationItem
-                    to={
-                          '/workflows' +
-                          (pathname.indexOf('workspaces') > 0
-                              ? '/workspaces/' + currentSiteId
-                              : '')
-                      }
-                    icon={<Workflow />}
-                    title="Workflows"
-                    testId="nav-workflows"
-                  />
-                )}
-                {formkiqVersion.type !== 'core' && (
-                  <NavigationItem
-                    to={
-                          '/queues' +
-                          (pathname.indexOf('workspaces') > 0
-                              ? '/workspaces/' + currentSiteId
-                              : '')
-                      }
-                    icon={<Queue />}
-                    title="Queues"
-                    testId="nav-queues"
-                  />
-                )}
+                  )}
+                </>
+              )}
+              <div className="flex w-full">
+                <div className="w-full mt-2 border-b border-neutral-300"></div>
+              </div>
+            </>
+          )}
+          <ExpandableSection
+            isExpanded={integrationsExpanded}
+            toggleExpand={toggleIntegrationsExpand}
+            title={
+              formkiqVersion.type !== 'core'
+                ? 'Workflows & Integrations'
+                : 'Integrations'
+            }
+            testId="expand-integrations"
+          />
+          {(integrationsExpanded || !isSidebarExpanded) && (
+            <>
+              {formkiqVersion.type !== 'core' && (
                 <NavigationItem
                   to={
-                    '/attributes' +
+                    '/workflows' +
                     (pathname.indexOf('workspaces') > 0
                       ? '/workspaces/' + currentSiteId
                       : '')
                   }
-                  icon={<Attribute />}
-                  title="Attributes"
-                  testId="nav-attributes"
+                  icon={<Workflow />}
+                  title="Workflows"
+                  testId="nav-workflows"
                 />
-                <NavigationItem
-                  to="/integrations/api"
-                  icon={<Api />}
-                  title="API Explorer"
-                  testId="nav-api-explorer"
-                />
-                <NavigationItem
-                  to="/integrations/webhooks"
-                  icon={<Webhook />}
-                  title="Webhooks"
-                  testId="nav-webhooks"
-                />
-                {formkiqVersion.type !== 'core' && (
-                  <NavigationItem
-                    to={
-                          '/rulesets' +
-                          (pathname.indexOf('workspaces') > 0
-                              ? '/workspaces/' + currentSiteId
-                              : '')
-                      }
-                    icon={<Rules />}
-                    title="Rulesets"
-                    testId="nav-rulesets"
-                  />
-                )}
-                <NavigationItem
-                  to="/object-examine-tool"
-                  icon={<Examine />}
-                  title="Object Examine Tool"
-                  testId="nav-object-examine"
-                />
+              )}
+              {formkiqVersion.type !== 'core' && (
                 <NavigationItem
                   to={
-                        '/schemas' +
-                        (pathname.indexOf('workspaces') > 0
-                            ? '/workspaces/' + currentSiteId
-                            : '')
-                    }
-                  icon={<Schema />}
-                  title="Schemas"
-                  testId="nav-schemas"
+                    '/queues' +
+                    (pathname.indexOf('workspaces') > 0
+                      ? '/workspaces/' + currentSiteId
+                      : '')
+                  }
+                  icon={<Queue />}
+                  title="Queues"
+                  testId="nav-queues"
                 />
-                {formkiqVersion.type !== 'core' && (
-                  <NavigationItem
-                    to="/mappings"
-                    icon={<Mapping />}
-                    title="Mappings"
-                    testId="nav-mappings"
-                  />
-                )}
-                <div className="flex w-full">
-                  <div className="w-full mt-4 border-b border-neutral-300"></div>
-                </div>
-              </>
-            )}
-            {user?.isAdmin && (
-              <>
-                <ExpandableSection
-                  title="Administration"
-                  expanded={adminExpanded}
-                  toggleExpand={toggleAdminExpand}
-                  testId="nav-admin"
+              )}
+              <NavigationItem
+                to={
+                  '/attributes' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
+                icon={<Attribute />}
+                title="Attributes"
+                testId="nav-attributes"
+              />
+              <NavigationItem
+                to="/integrations/api"
+                icon={<Api />}
+                title="API Explorer"
+                testId="nav-api-explorer"
+              />
+              <NavigationItem
+                to="/integrations/webhooks"
+                icon={<Webhook />}
+                title="Webhooks"
+                testId="nav-webhooks"
+              />
+              {formkiqVersion.type !== 'core' && (
+                <NavigationItem
+                  to={
+                    '/rulesets' +
+                    (pathname.indexOf('workspaces') > 0
+                      ? '/workspaces/' + currentSiteId
+                      : '')
+                  }
+                  icon={<Rules />}
+                  title="Rulesets"
+                  testId="nav-rulesets"
                 />
+              )}
+              <NavigationItem
+                to="/object-examine-tool"
+                icon={<Examine />}
+                title="Object Examine Tool"
+                testId="nav-object-examine"
+              />
+              <NavigationItem
+                to={
+                  '/schemas' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
+                icon={<Schema />}
+                title="Schemas"
+                testId="nav-schemas"
+              />
+              {formkiqVersion.type !== 'core' && (
+                <NavigationItem
+                  to="/mappings"
+                  icon={<Mapping />}
+                  title="Mappings"
+                  testId="nav-mappings"
+                />
+              )}
+              <div className="flex w-full">
+                <div className="w-full mt-4 border-b border-neutral-300"></div>
+              </div>
+            </>
+          )}
+          {user?.isAdmin && (
+            <>
+              <ExpandableSection
+                title="Administration"
+                expanded={adminExpanded}
+                toggleExpand={toggleAdminExpand}
+                testId="nav-admin"
+              />
 
-                {(adminExpanded || !isSidebarExpanded) && (
-                  <>
-                    <NavigationItem
-                      to="/admin/settings"
-                      icon={<Settings />}
-                      title="Settings"
-                      testId="nav-settings"
-                    />
-                    <NavigationItem
-                      to={
-                            '/admin/api-keys' +
-                            (pathname.indexOf('workspaces') > 0
-                                ? '/workspaces/' + currentSiteId
-                                : '')
-                        }
-                      icon={<ApiKey />}
-                      title="API Keys"
-                      testId="nav-api-keys"
-                    />
-                    {userAuthenticationType === 'cognito' && (
-                      <>
-                        <NavigationItem
-                          to="/admin/groups"
-                          icon={<Group />}
-                          title="Groups"
-                          testId="nav-groups"
-                        />
-                        <NavigationItem
-                          to="/admin/users"
-                          icon={<Users />}
-                          title="Users"
-                          testId="nav-users"
-                        />
-                      </>
-                    )}
-                    {formkiqVersion.modules.includes('opa') && (
+              {(adminExpanded || !isSidebarExpanded) && (
+                <>
+                  <NavigationItem
+                    to="/admin/settings"
+                    icon={<Settings />}
+                    title="Settings"
+                    testId="nav-settings"
+                  />
+                  <NavigationItem
+                    to={
+                      '/admin/api-keys' +
+                      (pathname.indexOf('workspaces') > 0
+                        ? '/workspaces/' + currentSiteId
+                        : '')
+                    }
+                    icon={<ApiKey />}
+                    title="API Keys"
+                    testId="nav-api-keys"
+                  />
+                  {userAuthenticationType === 'cognito' && (
+                    <>
                       <NavigationItem
-                        to="/admin/access-control"
-                        icon={<AccessControl />}
-                        title="Access Control"
-                        testId="nav-access-control"
+                        to="/admin/groups"
+                        icon={<Group />}
+                        title="Groups"
+                        testId="nav-groups"
                       />
-                    )}
-                  </>
-                )}
-              </>
-            )}
-          </>
+                      <NavigationItem
+                        to="/admin/users"
+                        icon={<Users />}
+                        title="Users"
+                        testId="nav-users"
+                      />
+                    </>
+                  )}
+                  {formkiqVersion.modules.includes('opa') && (
+                    <NavigationItem
+                      to="/admin/access-control"
+                      icon={<AccessControl />}
+                      title="Access Control"
+                      testId="nav-access-control"
+                    />
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </>
       </div>
     );
   };
