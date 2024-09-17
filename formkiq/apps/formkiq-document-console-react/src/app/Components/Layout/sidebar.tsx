@@ -1904,7 +1904,7 @@ export function Sidebar() {
     <div
       className={
         (sidebarExpanded ? 'w-64' : 'w-14') +
-        'relative bg-neutral-100 h-screen overflow-y-auto'
+        ' relative bg-neutral-100 h-screen overflow-y-auto'
       }
     >
       <div className="pb-20">
