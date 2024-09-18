@@ -250,6 +250,18 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
   editedStep.parameters = props.data?.parameters;
   editedStep.queue = props.data?.queue;
 
+  const { user } = useAuthenticatedState();
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
+    getUserSites(user);
+  const pathname = decodeURI(useLocation().pathname);
+  const { siteId } = getCurrentSiteInfo(
+    pathname,
+    user,
+    hasUserSite,
+    hasDefaultSite,
+    hasWorkspaces,
+    workspaceSites
+  );
   const [newStep, setNewStep] = useState<Step | null>(editedStep);
   const [isAddButtonDisabled, setIsAddButtonDisabled] = useState(true);
   const dispatch = useAppDispatch();
@@ -372,7 +384,7 @@ export const CreatorNode = (props: NodeProps<WorkflowNodeProps>) => {
             newStep={newStep}
             setNewStep={setNewStep}
             isEditing={true}
-            site
+            siteId={siteId}
             onChange={onChange}
           />
         )}
