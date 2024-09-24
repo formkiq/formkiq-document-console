@@ -150,7 +150,7 @@ import {
   postMappingApiItem,
   deleteMappingApiItem,
   putMappingApiItem,
-  getMappingApiItem,
+  getMappingApiItem, postDocumentGenerateApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -724,6 +724,14 @@ export function ApiExplorer() {
                   apiItem={getDocumentUserActivitiesApiItem}
                   sites={sites}
                 />
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Document Generation">
+            <div className="ml-2 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={postDocumentGenerateApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>

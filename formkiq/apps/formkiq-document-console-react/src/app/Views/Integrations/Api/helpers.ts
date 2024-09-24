@@ -1944,3 +1944,16 @@ export const restoreDocumentApiItem = {
     requiresSite: true,
     license: 'Core',
 };
+
+export const postDocumentGenerateApiItem = {
+  method: 'POST',
+  path: '/documents/ DOCUMENT_ID /generate',
+  description: 'Generates a new document using a specified template file and data sources. This operation allows users to merge data from multiple documents into a template to create a new document in the desired output format (e.g., DOCX). Each data source must include a data object, which contains key-value pairs that will be merged into the template. The value can be any valid JSON object. { "data":{}}; ',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"datasources": [{"name": "Data source name","documentId": "DOCUMENT_ID"}],"outputType": "DOCX"}',
+  license: 'Pro|Enterprise',
+};
