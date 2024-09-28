@@ -26,6 +26,7 @@ import {
   Download,
   Edit,
   FolderOutline,
+  Pencil,
   Retry,
   Spinner,
   Tag,
@@ -63,8 +64,11 @@ import {
 import { fetchWorkflows, WorkflowsState } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
 import {
+  InlineEditableContentTypes,
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
+  TextFileEditorEditableContentTypes,
+  TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import { TagsForFilterAndDisplay } from '../../helpers/constants/primaryTags';
@@ -166,6 +170,8 @@ function Documents() {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
+  const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
+    useState<boolean>(isSiteReadOnly);
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
   const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
   const [infoDocumentId, setInfoDocumentId] = useState('');
@@ -643,6 +649,7 @@ function Documents() {
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
     setSelectedDocuments([]);
+    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
   useEffect(() => {
@@ -864,6 +871,13 @@ function Documents() {
       navigate(`${currentDocumentsRootUri}/${infoDocumentId}/view`);
     }
   };
+
+  const editDocument = () => {
+    if (infoDocumentId.length) {
+      navigate(`${currentDocumentsRootUri}/${infoDocumentId}/edit`);
+    }
+  };
+
   const onFilterTag = (event: any, tag: string) => {
     if (filterTag === tag || filterAttribute === tag) {
       if (subfolderUri && subfolderUri.length) {
@@ -1604,7 +1618,7 @@ function Documents() {
                 currentSiteId={currentSiteId}
                 currentDocumentsRootUri={currentDocumentsRootUri}
                 onDocumentDataChange={onDocumentDataChange}
-                isSiteReadOnly={isSiteReadOnly}
+                isSiteReadOnly={isCurrentSiteReadonly}
                 filterTag={filterTag}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
@@ -1901,7 +1915,7 @@ function Documents() {
                         <div className="w-68 flex mr-3 border-b"></div>
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
                           Attributes
-                          {!isSiteReadOnly && (
+                          {!isCurrentSiteReadonly && (
                             <div
                               className="w-3/5 flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
@@ -2198,6 +2212,9 @@ function Documents() {
                       (InlineViewableContentTypes.indexOf(
                         (currentDocument as IDocument).contentType
                       ) > -1 ||
+                        TextFileEditorViewableContentTypes.indexOf(
+                          (currentDocument as IDocument).contentType
+                        ) > -1 ||
                         (formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
                           OnlyOfficeContentTypes.indexOf(
                             (currentDocument as IDocument).contentType
@@ -2222,6 +2239,34 @@ function Documents() {
                           </ButtonPrimaryGradient>
                         </div>
                       )}
+                    {currentDocument &&
+                      (InlineEditableContentTypes.indexOf(
+                        (currentDocument as IDocument).contentType
+                      ) > -1 ||
+                        TextFileEditorEditableContentTypes.indexOf(
+                          (currentDocument as IDocument).contentType
+                        ) > -1) &&
+                      !isCurrentSiteReadonly && (
+                        <div className="mt-4 w-full flex justify-center">
+                          <ButtonPrimaryGradient
+                            onClick={editDocument}
+                            type="button"
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                          >
+                            <div className="w-full flex justify-center px-4 py-1">
+                              <span className="">Edit Document</span>
+                              <span className="w-7 pl-1">
+                                <Pencil />
+                              </span>
+                            </div>
+                          </ButtonPrimaryGradient>
+                        </div>
+                      )}
+
                     {(currentDocument as IDocument).deepLinkPath &&
                       (currentDocument as IDocument).deepLinkPath.length ===
                         0 && (
@@ -2267,7 +2312,7 @@ function Documents() {
                             }}
                           >
                             View
-                            {isSiteReadOnly ? (
+                            {isCurrentSiteReadonly ? (
                               <span>&nbsp;</span>
                             ) : (
                               <span>&nbsp;/ Assign&nbsp;</span>
@@ -2357,7 +2402,7 @@ function Documents() {
                           }}
                         >
                           View
-                          {isSiteReadOnly ? (
+                          {isCurrentSiteReadonly ? (
                             <span>&nbsp;</span>
                           ) : (
                             <span>&nbsp;/ Edit&nbsp;</span>
@@ -2580,7 +2625,7 @@ function Documents() {
                               documentInstance: currentDocument as IDocument,
                             }}
                             siteId={currentSiteId}
-                            isSiteReadOnly={isSiteReadOnly}
+                            isSiteReadOnly={isCurrentSiteReadonly}
                             formkiqVersion={formkiqVersion}
                             onInfoPage={true}
                             user={user}

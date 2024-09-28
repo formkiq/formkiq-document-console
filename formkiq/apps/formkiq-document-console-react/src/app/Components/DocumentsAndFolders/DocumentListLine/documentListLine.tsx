@@ -10,6 +10,10 @@ import {
   removeDocumentTag,
 } from '../../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../../Store/store';
+import {
+  InlineEditableContentTypes,
+  TextFileEditorEditableContentTypes,
+} from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import {
   formatBytes,
@@ -23,6 +27,7 @@ import {
   Checkmark,
   Info,
   Minus,
+  Pencil,
   Plus,
   Share,
   Star,
@@ -419,6 +424,20 @@ function DocumentListLine({
                           </div>
                         );
                       })}
+                    {(TextFileEditorEditableContentTypes.indexOf(
+                      file.contentType
+                    ) > -1 ||
+                      InlineEditableContentTypes.indexOf(file.contentType) >
+                        -1) &&
+                      !isSiteReadOnly && (
+                        <Link
+                          title="Edit Document"
+                          to={`${documentsRootUri}/${file.documentId}/edit`}
+                          className="w-6 pt-0.5 text-neutral-900 mr-1 cursor-pointer hover:text-primary-500"
+                        >
+                          <Pencil />
+                        </Link>
+                      )}
 
                     {file.tags &&
                       Object.getOwnPropertyNames(file.tags)

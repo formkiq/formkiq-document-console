@@ -6,12 +6,14 @@ import TextFileEditor from '../../Components/DocumentsAndFolders/TextFileEditor/
 import { Spinner } from '../../Components/Icons/icons';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
-import { setCurrentDocumentPath } from '../../Store/reducers/data';
+import {setCurrentDocument, setCurrentDocumentPath} from '../../Store/reducers/data';
 import { useAppDispatch } from '../../Store/store';
 import {
-  InlineViewableContentExtensions,
+  InlineEditableContentTypes,
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
+  TextFileEditorEditableContentTypes,
+  TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -19,7 +21,6 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { IDocument } from '../../helpers/types/document';
-import { setCurrentDocument } from '../../Store/reducers/documentsList';
 
 interface CSVRow {
   [key: string]: string;
@@ -68,6 +69,24 @@ export function DocumentView() {
   const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
     siteDocumentsRootName
   );
+  const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
+    useState<boolean>(true);
+
+  const [mode, setMode] = useState(getModeFromPath());
+  const isDocumentContentTypeEditable = (contentType: string) => {
+    return (
+      TextFileEditorEditableContentTypes.indexOf(contentType) > -1 ||
+      InlineEditableContentTypes.indexOf(contentType) > -1
+    );
+  };
+  function getModeFromPath() {
+    const mode = pathname.split('/').pop();
+    if (mode === 'view' || mode === 'edit') {
+      return mode;
+    } else {
+      return 'view';
+    }
+  }
 
   const customParse = (csvText: string): CSVRow[] => {
     const lines = csvText.split('\n').filter((line) => line.trim() !== '');
@@ -121,12 +140,15 @@ export function DocumentView() {
         (response: IDocument) => {
           setDocument(response);
           dispatch(setCurrentDocument(response));
-          setDocumentExtension(
-            response.path
-              .substring(response.path.lastIndexOf('.') + 1)
-              .toLowerCase()
-          );
           dispatch(setCurrentDocumentPath(response.path));
+          // redirect if file is not editable type
+          if (
+            !isDocumentContentTypeEditable(response.contentType) &&
+            mode === 'edit'
+          ) {
+            navigate(pathname.replace(/\/edit$/, '/view'));
+          }
+
           if (
             formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
             OnlyOfficeContentTypes.indexOf(
@@ -188,10 +210,8 @@ export function DocumentView() {
               }
             });
           } else if (
-            InlineViewableContentExtensions.indexOf(
-              response.path
-                .substring(response.path.lastIndexOf('.') + 1)
-                .toLowerCase()
+            TextFileEditorViewableContentTypes.indexOf(
+              (response as IDocument).contentType
             ) > -1
           ) {
             let viewVersionKey = '';
@@ -204,18 +224,9 @@ export function DocumentView() {
               viewVersionKey,
               true
             ).then((res: any) => {
-              fetch(res.contentUrl)
-                .then((response) => response.body)
-                .then((body: any) => {
-                  const reader = body.getReader();
-                  reader.read().then(({ value }: any) => {
-                    if (value) {
-                      setDocumentContent(new TextDecoder().decode(value));
-                    } else {
-                      setDocumentContent('');
-                    }
-                  });
-                });
+              if (res.content) {
+                setDocumentContent(res.content);
+              }
             });
           } else {
             let viewVersionKey = '';
@@ -279,8 +290,12 @@ export function DocumentView() {
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
-    // TODO: determine if readonly check required here
-    //setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly)
+    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
+    setMode(getModeFromPath());
+    // redirect if user doesn't have editing rights
+    if (recheckSiteInfo.isSiteReadOnly && getModeFromPath() === 'edit') {
+      navigate(pathname.replace(/\/edit$/, '/view'));
+    }
   }, [pathname]);
 
   const [document, setDocument]: [IDocument | null, any] = useState(null);
@@ -288,7 +303,6 @@ export function DocumentView() {
   const [documentContent, setDocumentContent]: [string | null, any] =
     useState('');
   const [documentCsvContent, setDocumentCsvContent] = useState<CSVRow[]>([]);
-  const [documentExtension, setDocumentExtension] = useState<string>('');
 
   const DocumentViewer = () => {
     //return (<></>)
@@ -362,15 +376,24 @@ export function DocumentView() {
             </>
           )}
 
-        {/*Text File Editor (currently only for .md files) */}
+        {/*Text File Editor (currently only for 'text/markdown' files) */}
         {document &&
-          InlineViewableContentExtensions.indexOf(documentExtension) > -1 &&
+          TextFileEditorViewableContentTypes.indexOf(
+            (document as IDocument).contentType
+          ) > -1 &&
           documentContent !== undefined && (
             <TextFileEditor
               currentDocument={document}
               documentContent={documentContent}
-              extension={documentExtension}
+              contentType={(document as IDocument).contentType}
               siteId={currentSiteId}
+              readOnly={
+                isCurrentSiteReadonly ||
+                TextFileEditorEditableContentTypes.indexOf(
+                  (document as IDocument).contentType
+                ) === -1 ||
+                mode === 'view'
+              }
             />
           )}
       </div>

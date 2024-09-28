@@ -6,11 +6,11 @@ import { AuthState, logout } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
 import {
   DataCacheState,
+  setCurrentDocument,
   setCurrentDocumentPath,
 } from '../../Store/reducers/data';
 import {
-  DocumentListState, fetchDocuments,
-  setCurrentDocument,
+  fetchDocuments,
   setDocuments,
 } from '../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../Store/store';
@@ -43,7 +43,8 @@ import {
   Documents,
   Examine,
   Group,
-  HistoryIcon, Mapping,
+  HistoryIcon,
+  Mapping,
   Queue,
   Recent,
   Rules,
@@ -59,8 +60,12 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
-import {useDocumentActions} from "../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext";
-import {useQueueId} from "../../hooks/queue-id.hook";
+import { useDocumentActions } from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
+import { useQueueId } from '../../hooks/queue-id.hook';
+import {
+  InlineEditableContentTypes,
+  TextFileEditorEditableContentTypes,
+} from '../../helpers/constants/contentTypes';
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -99,7 +104,7 @@ function Navbar() {
     useNotifications,
     isSidebarExpanded,
   } = useSelector(ConfigState);
-  const { currentDocumentPath } = useSelector(DataCacheState);
+  const { currentDocumentPath, currentDocument } = useSelector(DataCacheState);
 
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
@@ -118,7 +123,6 @@ function Navbar() {
     hasWorkspaces,
     workspaceSites
   );
-  const { currentDocument } = useSelector(DocumentListState);
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
@@ -144,7 +148,7 @@ function Navbar() {
     React.useState(false);
 
   const location = useLocation();
-  const {onSubmitForReviewModalClick,} = useDocumentActions();
+  const { onSubmitForReviewModalClick } = useDocumentActions();
 
   const locationPrefix = useMemo(() => {
     let locationPrefix = decodeURI(location.pathname);
@@ -360,6 +364,28 @@ function Navbar() {
           documentId +
           '&action=' +
           action,
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const editDocument = () => {
+    navigate(
+      {
+        pathname: pathname.replace(/\/view$/, '/edit'),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const viewDocument = () => {
+    navigate(
+      {
+        pathname: pathname.replace(/\/edit$/, '/view'),
       },
       {
         replace: true,
@@ -692,7 +718,7 @@ function Navbar() {
                             pathname.indexOf('/admin/user-activities') > -1 ||
                             pathname.indexOf('/queues') > -1 ||
                             pathname.indexOf('/attributes') > -1 ||
-                              pathname.indexOf('/mappings') > -1) &&
+                            pathname.indexOf('/mappings') > -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
                               (hasDefaultSite && hasWorkspaces) ||
@@ -850,9 +876,9 @@ function Navbar() {
                                       className={
                                         'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
                                       }
-                                      onClick={(event:any) =>
+                                      onClick={(event: any) =>
                                         onSubmitForReviewModalClick(event, {
-                                          lineType: "document",
+                                          lineType: 'document',
                                           documentId: documentId,
                                           folder: currentDocumentPath.substring(
                                             0,
@@ -878,10 +904,39 @@ function Navbar() {
                                     )}
                                   </>
                                 )}
+
+                                {!isSiteReadOnly &&
+                                  currentDocument &&
+                                  (InlineEditableContentTypes.indexOf(
+                                    currentDocument.contentType
+                                  ) > -1 ||
+                                    TextFileEditorEditableContentTypes.indexOf(
+                                      currentDocument.contentType
+                                    ) > -1) && (
+                                    <>
+                                      {pathname.indexOf('/view') > -1 && (
+                                        <ButtonTertiary
+                                          className="text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap"
+                                          onClick={editDocument}
+                                        >
+                                          Edit Document
+                                        </ButtonTertiary>
+                                      )}
+                                      {pathname.indexOf('/edit') > -1 && (
+                                        <ButtonTertiary
+                                          className="text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap"
+                                          onClick={viewDocument}
+                                        >
+                                          View Document
+                                        </ButtonTertiary>
+                                      )}
+                                    </>
+                                  )}
+
                                 {documentId &&
                                   currentDocumentPath?.length &&
                                   currentDocument && (
-                                    <span className="w-5 pt-0.5 text-neutral-900 cursor-pointer inline-flex pl-6 text-gray-500 ">
+                                    <div className="w-5 h-5 text-neutral-900 inline-flex mx-2 pt-2 items-end">
                                       <DocumentActionsPopover
                                         value={{
                                           lineType: 'document',
@@ -913,7 +968,7 @@ function Navbar() {
                                             .deepLinkPath.length > 0
                                         }
                                       />
-                                    </span>
+                                    </div>
                                   )}
                               </span>
                             ) : (
