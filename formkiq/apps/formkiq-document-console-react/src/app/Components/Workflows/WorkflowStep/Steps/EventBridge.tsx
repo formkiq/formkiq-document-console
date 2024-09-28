@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Position } from 'reactflow';
-import { Plus, Rule } from '../../../Icons/icons';
+import { Plus, EventBridgeIcon} from '../../../Icons/icons';
 import { DefaultSourceHandle } from '../../Handles/handles';
 import { NodeNameSelector } from '../NodeComponents/NodeNameSelector';
 import NodeTitle from '../NodeComponents/NodeTitle';
@@ -33,7 +33,7 @@ function EventBridge({
       {isEditing && (
         <NodeNameSelector newStep={newStep} setNewStep={setNewStep} />
       )}
-      {!isEditing && <NodeTitle icon={<Rule />} title="Amazon EventBridge" />}
+      {!isEditing && <NodeTitle icon={<EventBridgeIcon />} title="Amazon EventBridge" />}
       {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
 
       <TextInput
