@@ -2243,4 +2243,16 @@ export class DocumentsService {
     });
   }
 
+  @formkiqAPIHandler
+  public static async addDocumentGenerate(
+      siteId: string,
+      documentId: string,
+      addDocumentGenerateParameters: any
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.addDocumentGenerate({
+      siteId,
+      documentId,
+      addDocumentGenerateParameters,
+    });
+  }
 }
