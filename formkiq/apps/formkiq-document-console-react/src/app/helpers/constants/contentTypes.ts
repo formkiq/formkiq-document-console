@@ -37,6 +37,8 @@ export const InlineViewableContentTypes: string[] = [
   'video/webm',
 ];
 
+export const InlineEditableContentTypes: string[] = [];
+
 export const OcrContentTypes: string[] = [
   'application/pdf',
   'image/png',
@@ -60,4 +62,5 @@ export const ESignatureContentTypes: string[] = [
   'application/vnd.oasis.opendocument.spreadsheet',
 ];
 
-export const InlineViewableContentExtensions: string[] = ['md'];
+export const TextFileEditorViewableContentTypes: string[] = ['text/markdown'];
+export const TextFileEditorEditableContentTypes: string[] = ['text/markdown'];

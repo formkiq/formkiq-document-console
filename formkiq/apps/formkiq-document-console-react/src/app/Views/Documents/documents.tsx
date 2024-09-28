@@ -26,6 +26,7 @@ import {
   Download,
   Edit,
   FolderOutline,
+  Pencil,
   Retry,
   Spinner,
   Tag,
@@ -63,8 +64,11 @@ import {
 import { fetchWorkflows, WorkflowsState } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
 import {
+  InlineEditableContentTypes,
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
+  TextFileEditorEditableContentTypes,
+  TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import { TagsForFilterAndDisplay } from '../../helpers/constants/primaryTags';
@@ -74,8 +78,9 @@ import {
   getCurrentSiteInfo,
   getFileIcon,
   getUserSites,
+  transformRelationshipValueFromString,
 } from '../../helpers/services/toolService';
-import { Attribute } from '../../helpers/types/attributes';
+import { Attribute, RelationshipType } from '../../helpers/types/attributes';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
@@ -148,6 +153,7 @@ function Documents() {
     onDocumentWorkflowsModalClick,
     onEditAttributesModalClick,
     onAttributeQuantityClick,
+    onDocumentRelationshipsModalClick,
   } = useDocumentActions();
 
   useEffect(() => {
@@ -166,6 +172,8 @@ function Documents() {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
+  const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
+    useState<boolean>(isSiteReadOnly);
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
   const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
   const [infoDocumentId, setInfoDocumentId] = useState('');
@@ -204,6 +212,16 @@ function Documents() {
   const closeDropZoneRef = useRef(null);
   const [isDropZoneVisible, setIsDropZoneVisible] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+
+  const [relationshipDocumentsMap, setRelationshipDocumentsMap] = useState<{
+    [key: string]: string;
+  }>({});
+  const [relationships, setRelationships] = useState<
+    {
+      relationship: RelationshipType;
+      documentId: string;
+    }[]
+  >([]);
 
   function handleDragEnter(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
@@ -370,6 +388,71 @@ function Documents() {
       })
     );
   }
+
+  const getDocumentNameFromDocuments = (documentId: string) => {
+    const doc = documents.find(
+      (document) => document.documentId === documentId
+    );
+    if (doc) return doc.path.substring(doc.path.lastIndexOf('/') + 1);
+    return null;
+  };
+
+  // update document relationships
+  useEffect(() => {
+    const relationshipsAttribute = documentAttributes.find(
+      (attribute) => attribute.key === 'Relationships'
+    );
+    if (!relationshipsAttribute) {
+      setRelationships([]);
+      return;
+    }
+    const newRelationships: {
+      relationship: RelationshipType;
+      documentId: string;
+    }[] = [];
+    if (relationshipsAttribute.stringValue) {
+      newRelationships.push(
+        transformRelationshipValueFromString(relationshipsAttribute.stringValue)
+      );
+    } else if (relationshipsAttribute.stringValues) {
+      newRelationships.push(
+        ...relationshipsAttribute.stringValues.map((val) =>
+          transformRelationshipValueFromString(val)
+        )
+      );
+    }
+
+    setRelationships(newRelationships);
+    for (const relationship of newRelationships){
+    if (relationshipDocumentsMap[relationship.documentId]) return;
+      const documentName = getDocumentNameFromDocuments(relationship.documentId)
+      if (documentName) {
+        setRelationshipDocumentsMap((prev)=>({
+          ...prev,
+          [relationship.documentId]: documentName,
+        }));
+      } else {
+        DocumentsService.getDocumentById(
+          relationship.documentId,
+          currentSiteId
+        ).then((response: any) => {
+          if (response.status === 200) {
+            setRelationshipDocumentsMap((prev) => ({
+              ...prev,
+              [relationship.documentId]: response.path.substring(
+                response.path.lastIndexOf('/') + 1
+              ),
+            }));
+          } else {
+            setRelationshipDocumentsMap((prev) => ({
+              ...prev,
+              [relationship.documentId]: "NOT_FOUND",
+            }));
+          }
+        });
+      }
+    }
+  }, [documentAttributes]);
 
   useEffect(() => {
     onDocumentInfoClick();
@@ -643,6 +726,7 @@ function Documents() {
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
     setSelectedDocuments([]);
+    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
   useEffect(() => {
@@ -864,6 +948,13 @@ function Documents() {
       navigate(`${currentDocumentsRootUri}/${infoDocumentId}/view`);
     }
   };
+
+  const editDocument = () => {
+    if (infoDocumentId.length) {
+      navigate(`${currentDocumentsRootUri}/${infoDocumentId}/edit`);
+    }
+  };
+
   const onFilterTag = (event: any, tag: string) => {
     if (filterTag === tag || filterAttribute === tag) {
       if (subfolderUri && subfolderUri.length) {
@@ -1604,7 +1695,7 @@ function Documents() {
                 currentSiteId={currentSiteId}
                 currentDocumentsRootUri={currentDocumentsRootUri}
                 onDocumentDataChange={onDocumentDataChange}
-                isSiteReadOnly={isSiteReadOnly}
+                isSiteReadOnly={isCurrentSiteReadonly}
                 filterTag={filterTag}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
@@ -1899,9 +1990,74 @@ function Documents() {
                           </div>
                         )}
                         <div className="w-68 flex mr-3 border-b"></div>
+                        <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
+                          Relationships
+                          {!isSiteReadOnly && (
+                            <div
+                              className="w-3/5 self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                              onClick={(event) =>
+                                onDocumentRelationshipsModalClick(event, {
+                                  lineType: 'document',
+                                  folder: subfolderUri,
+                                  documentId: (currentDocument as IDocument)
+                                    .documentId,
+                                  documentInstance:
+                                    currentDocument as IDocument,
+                                  folderInstance: null,
+                                })
+                              }
+                            >
+                              <>
+                                <span className="pt-0.5 whitespace-nowrap">
+                                  add/edit relationships
+                                </span>
+                                <div className="w-4">
+                                  <ChevronRight />
+                                </div>
+                              </>
+                            </div>
+                          )}
+                        </div>
+                        {relationships.length > 0 ? (
+                          <div>
+                            {relationships.map((relationship) => (
+                              <div>
+                                <h3 className="text-sm font-semibold text-neutral-900">
+                                  {relationship.relationship}:{' '}
+                                  {relationshipDocumentsMap[
+                                    relationship.documentId
+                                  ] &&
+                                  relationshipDocumentsMap[
+                                    relationship.documentId
+                                  ] !== 'NOT_FOUND' ? (
+                                    <Link
+                                      to={`${siteDocumentsRootUri}/${relationship.documentId}/view`}
+                                      className="underline hover:text-primary-500 break-words font-normal"
+                                    >
+                                      {
+                                        relationshipDocumentsMap[
+                                          relationship.documentId
+                                        ]
+                                      }
+                                    </Link>
+                                  ) : (
+                                    <span className="text-neutral-500">
+                                      {relationship.documentId}
+                                    </span>
+                                  )}
+                                </h3>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs">
+                            (no relationships have been added)
+                          </span>
+                        )}
+                        <div className="w-68 flex mr-3 border-b"></div>
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
                           Attributes
-                          {!isSiteReadOnly && (
+                          {!isCurrentSiteReadonly && (
                             <div
                               className="w-3/5 flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
@@ -2198,6 +2354,9 @@ function Documents() {
                       (InlineViewableContentTypes.indexOf(
                         (currentDocument as IDocument).contentType
                       ) > -1 ||
+                        TextFileEditorViewableContentTypes.indexOf(
+                          (currentDocument as IDocument).contentType
+                        ) > -1 ||
                         (formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
                           OnlyOfficeContentTypes.indexOf(
                             (currentDocument as IDocument).contentType
@@ -2222,6 +2381,34 @@ function Documents() {
                           </ButtonPrimaryGradient>
                         </div>
                       )}
+                    {currentDocument &&
+                      (InlineEditableContentTypes.indexOf(
+                        (currentDocument as IDocument).contentType
+                      ) > -1 ||
+                        TextFileEditorEditableContentTypes.indexOf(
+                          (currentDocument as IDocument).contentType
+                        ) > -1) &&
+                      !isCurrentSiteReadonly && (
+                        <div className="mt-4 w-full flex justify-center">
+                          <ButtonPrimaryGradient
+                            onClick={editDocument}
+                            type="button"
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                          >
+                            <div className="w-full flex justify-center px-4 py-1">
+                              <span className="">Edit Document</span>
+                              <span className="w-7 pl-1">
+                                <Pencil />
+                              </span>
+                            </div>
+                          </ButtonPrimaryGradient>
+                        </div>
+                      )}
+
                     {(currentDocument as IDocument).deepLinkPath &&
                       (currentDocument as IDocument).deepLinkPath.length ===
                         0 && (
@@ -2267,7 +2454,7 @@ function Documents() {
                             }}
                           >
                             View
-                            {isSiteReadOnly ? (
+                            {isCurrentSiteReadonly ? (
                               <span>&nbsp;</span>
                             ) : (
                               <span>&nbsp;/ Assign&nbsp;</span>
@@ -2357,7 +2544,7 @@ function Documents() {
                           }}
                         >
                           View
-                          {isSiteReadOnly ? (
+                          {isCurrentSiteReadonly ? (
                             <span>&nbsp;</span>
                           ) : (
                             <span>&nbsp;/ Edit&nbsp;</span>
@@ -2580,7 +2767,7 @@ function Documents() {
                               documentInstance: currentDocument as IDocument,
                             }}
                             siteId={currentSiteId}
-                            isSiteReadOnly={isSiteReadOnly}
+                            isSiteReadOnly={isCurrentSiteReadonly}
                             formkiqVersion={formkiqVersion}
                             onInfoPage={true}
                             user={user}

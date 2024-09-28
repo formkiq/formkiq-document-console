@@ -17,6 +17,10 @@ import {
 import { formatDate } from '../../../helpers/services/toolService';
 
 const foldersWithNoUpload = ['favorites', 'shared', 'deleted'];
+const fileTypesMap = {
+  // add here more filetypes if syncfusion does not recognize them
+  'md': 'text/markdown',
+};
 
 const uploadProcessLine = (fileData: IFileUploadData, i: number) => {
   return (
@@ -191,8 +195,18 @@ export default function UploadModal({
       const filesData: IFileUploadData[] = uploaderRef.current
         .getFilesData()
         .map((e: any) => {
+          let newFile = e.rawFile;
+          // manually update file types that are not recognized by syncfusion uploader
+          const fileExtension = e.rawFile.name.split('.').pop();
+          const mimeType =
+            fileTypesMap[fileExtension as keyof typeof fileTypesMap];
+          if (mimeType) {
+            newFile = new File([e.rawFile], e.rawFile.name, {
+              type: mimeType,
+            });
+          }
           const obj: IFileUploadData = {
-            originalFile: e.rawFile,
+            originalFile: newFile,
             uploadedSize: 0,
           };
           return obj;

@@ -1870,7 +1870,7 @@ export class DocumentsService {
     siteId: string,
     documentId: string,
     attributeKey: string,
-    setDocumentsAttributeValueParameters: string
+    setDocumentsAttributeValueParameters: any
   ): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();

@@ -107,6 +107,7 @@ const RoutesMapper = () => {
       <Route path="/documents/new/:extension" element={<DocumentNew />}></Route>
       <Route path="/documents/:id" element={<Documents />}></Route>
       <Route path="/documents/:id/view" element={<DocumentView />}></Route>
+      <Route path="/documents/:id/edit" element={<DocumentView />}></Route>
       <Route path="/documents" element={<Documents />}></Route>
       <Route path="/my-documents/folders/*" element={<Documents />}></Route>
       <Route
@@ -125,6 +126,7 @@ const RoutesMapper = () => {
       ></Route>
       <Route path="/my-documents/:id" element={<Documents />}></Route>
       <Route path="/my-documents/:id/view" element={<DocumentView />}></Route>
+      <Route path="/my-documents/:id/edit" element={<DocumentView />}></Route>
 
       <Route path="/team-documents" element={<Documents />}></Route>
       <Route path="/team-documents/folders/*" element={<Documents />}></Route>
@@ -143,6 +145,7 @@ const RoutesMapper = () => {
       ></Route>
       <Route path="/team-documents/:id" element={<Documents />}></Route>
       <Route path="/team-documents/:id/view" element={<DocumentView />}></Route>
+      <Route path="/team-documents/:id/edit" element={<DocumentView />}></Route>
       <Route path="/team-documents" element={<Documents />}></Route>
 
       <Route path="/workspaces/" element={<Documents />}></Route>
@@ -167,6 +170,10 @@ const RoutesMapper = () => {
       <Route path="/workspaces/:siteId/:id" element={<Documents />}></Route>
       <Route
         path="/workspaces/:siteId/:id/view"
+        element={<DocumentView />}
+      ></Route>
+      <Route
+        path="/workspaces/:siteId/:id/edit"
         element={<DocumentView />}
       ></Route>
 

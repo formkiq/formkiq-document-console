@@ -52,3 +52,11 @@ export type OpaAttributeType = {
     stringValue?: string;
   };
 };
+
+export type RelationshipType =
+  | 'PRIMARY'
+  | 'ATTACHMENT'
+  | 'APPENDIX'
+  | 'SUPPLEMENT'
+  | 'ASSOCIATED'
+  | 'RENDITION';
