@@ -12,6 +12,7 @@ import MultiValuedAttributeModal from '../MultivaluedAttributeModal/MultivaluedA
 import RenameModal from '../RenameModal/renameModal';
 import SubmitForReviewModal from '../SubmitForReviewModal/submitForReviewModal';
 import { useDocumentActions } from './DocumentActionsContext';
+import DocumentRelationshipsModal from "../DocumentRelationshipsModal/DocumentRelationshipsModal";
 
 const DocumentActionsModalContainer = ({
   currentSiteId,
@@ -59,6 +60,9 @@ const DocumentActionsModalContainer = ({
     onMultiValuedAttributeModalClose,
     getShareModalValue,
     getEditAttributesModalValue,
+    documentRelationshipsModalOpened,
+    documentRelationshipsModalValue,
+    onDocumentRelationshipsModalClose,
   } = useDocumentActions();
   const { allTags } = useSelector(AttributesDataState);
 
@@ -129,6 +133,13 @@ const DocumentActionsModalContainer = ({
         onClose={onDocumentReviewModalClose}
         siteId={currentSiteId}
         value={documentReviewModalValue}
+        onDocumentDataChange={onDocumentDataChange}
+      />
+      <DocumentRelationshipsModal
+        isOpened={documentRelationshipsModalOpened}
+        onClose={onDocumentRelationshipsModalClose}
+        siteId={currentSiteId}
+        value={documentRelationshipsModalValue}
         onDocumentDataChange={onDocumentDataChange}
       />
       <MultiValuedAttributeModal
