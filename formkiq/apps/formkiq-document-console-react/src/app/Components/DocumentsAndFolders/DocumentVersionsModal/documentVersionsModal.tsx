@@ -7,8 +7,8 @@ import { useAppDispatch } from '../../../Store/store';
 import { InlineViewableContentTypes } from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
-import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
-import ButtonTertiary from "../../Generic/Buttons/ButtonTertiary";
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
 import { Close, Upload } from '../../Icons/icons';
 
 export default function DocumentVersionsModal({
@@ -86,20 +86,12 @@ export default function DocumentVersionsModal({
     console.log('viewDocumentVersion', versionKey, value);
     if (value) {
       if (versionKey !== undefined) {
-        /*
-        window.open(
-          `${window.location.origin}${documentsRootUri}/${value.documentId}/view?versionKey=${versionKey}`
-        );
-        */
         navigate(
-          `${documentsRootUri}/${value.documentId}/view?versionKey=${versionKey}`
+          `${documentsRootUri}/${
+            value.documentId
+          }/view?versionKey=${encodeURIComponent(versionKey)}`
         );
       } else {
-        /*
-        window.open(
-          `${window.location.origin}${documentsRootUri}/${value.documentId}/view`
-        );
-        */
         navigate(`${documentsRootUri}/${value.documentId}/view`);
       }
     }
@@ -131,11 +123,13 @@ export default function DocumentVersionsModal({
             siteId,
             value.documentId,
             encodeURIComponent(versionKey)
-          ).catch((err) => {
-            console.error('Failed to delete document version: ', err);
-          }).then(() => {
+          )
+            .catch((err) => {
+              console.error('Failed to delete document version: ', err);
+            })
+            .then(() => {
               updateVersions();
-          });
+            });
         }
       };
 
@@ -210,15 +204,15 @@ export default function DocumentVersionsModal({
                     </div>
                     <div className="w-100">
                       {!isSiteReadOnly && (
-                          <ButtonTertiary
-                            onClick={(event:any) =>
+                        <ButtonTertiary
+                          onClick={(event: any) =>
                             onUploadClick(event, (value as any).documentId)
                           }
-                            className="flex font-semibold py-2"
+                          className="flex font-semibold py-2"
                         >
                           <div className="mx-4">Upload New Version 1</div>
                           <div className="w-4 h-4 ml-2 mt-1">{Upload()}</div>
-                          </ButtonTertiary>
+                        </ButtonTertiary>
                       )}
                     </div>
                     <div
@@ -286,9 +280,9 @@ export default function DocumentVersionsModal({
                                 </td>
                                 <td className="border-b border-slate-100 nodark:border-slate-700 p-2 pr-2 text-slate-500 nodark:text-slate-400">
                                   <div className="flex flex-wrap justify-left gap-4">
-                                    {(InlineViewableContentTypes.indexOf(
+                                    {InlineViewableContentTypes.indexOf(
                                       version.contentType
-                                    ) > -1) && (
+                                    ) > -1 && (
                                       <button
                                         className="flex items-center bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-smaller font-semibold py-2 px-7 rounded-2xl flex cursor-pointer focus:outline-none"
                                         onClick={(event) =>
@@ -303,7 +297,7 @@ export default function DocumentVersionsModal({
                                     )}
                                     <ButtonTertiary
                                       className="flex items-center text-smaller font-semibold py-2 px-5 focus:outline-none"
-                                      onClick={(event:any) =>
+                                      onClick={(event: any) =>
                                         downloadDocumentVersion(
                                           event,
                                           version.versionKey
