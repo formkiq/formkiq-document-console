@@ -7,7 +7,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Tooltip } from 'react-tooltip';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
 import { useDocumentActions } from '../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
-import DocumentActionsModalContainer from '../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
@@ -423,11 +422,13 @@ function Documents() {
     }
 
     setRelationships(newRelationships);
-    for (const relationship of newRelationships){
-    if (relationshipDocumentsMap[relationship.documentId]) return;
-      const documentName = getDocumentNameFromDocuments(relationship.documentId)
+    for (const relationship of newRelationships) {
+      if (relationshipDocumentsMap[relationship.documentId]) return;
+      const documentName = getDocumentNameFromDocuments(
+        relationship.documentId
+      );
       if (documentName) {
-        setRelationshipDocumentsMap((prev)=>({
+        setRelationshipDocumentsMap((prev) => ({
           ...prev,
           [relationship.documentId]: documentName,
         }));
@@ -446,7 +447,7 @@ function Documents() {
           } else {
             setRelationshipDocumentsMap((prev) => ({
               ...prev,
-              [relationship.documentId]: "NOT_FOUND",
+              [relationship.documentId]: 'NOT_FOUND',
             }));
           }
         });
@@ -1559,7 +1560,9 @@ function Documents() {
     if (infoDocumentId) {
       if (versionKey !== undefined) {
         navigate(
-          `${currentDocumentsRootUri}/${infoDocumentId}/view?versionKey=${versionKey}`
+          `${currentDocumentsRootUri}/${infoDocumentId}/view?versionKey=${encodeURIComponent(
+            versionKey
+          )}`
         );
       } else {
         navigate(`${currentDocumentsRootUri}/${infoDocumentId}/view`);
@@ -2515,6 +2518,7 @@ function Documents() {
                                     <div
                                       className="font-medium pt-1 ml-12 flex text-primary-500 cursor-pointer"
                                       onClick={(event) => {
+                                        console.log(version.versionKey);
                                         viewDocumentVersion(version.versionKey);
                                       }}
                                     >
