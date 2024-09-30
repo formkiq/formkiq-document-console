@@ -1558,7 +1558,6 @@ function Documents() {
 
   const viewDocumentVersion = (versionKey: string) => {
     if (infoDocumentId) {
-      console.log(versionKey);
       if (versionKey !== undefined) {
         navigate(
           `${currentDocumentsRootUri}/${infoDocumentId}/view?versionKey=${encodeURIComponent(
