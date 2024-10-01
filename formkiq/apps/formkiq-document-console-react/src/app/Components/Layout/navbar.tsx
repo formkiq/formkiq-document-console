@@ -14,6 +14,10 @@ import {
   setDocuments,
 } from '../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../Store/store';
+import {
+  InlineEditableContentTypes,
+  TextFileEditorEditableContentTypes,
+} from '../../helpers/constants/contentTypes';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import {
   AdminPrefixes,
@@ -27,7 +31,9 @@ import {
 } from '../../helpers/services/toolService';
 import { IDocument } from '../../helpers/types/document';
 import { ILine } from '../../helpers/types/line';
+import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
+import { useDocumentActions } from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsModalContainer from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer';
 import DocumentActionsPopover from '../DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import SearchInput from '../DocumentsAndFolders/Search/searchInput';
@@ -60,12 +66,6 @@ import {
   Workspace,
 } from '../Icons/icons';
 import Notifications from './notifications';
-import { useDocumentActions } from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
-import { useQueueId } from '../../hooks/queue-id.hook';
-import {
-  InlineEditableContentTypes,
-  TextFileEditorEditableContentTypes,
-} from '../../helpers/constants/contentTypes';
 
 const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
@@ -324,28 +324,32 @@ function Navbar() {
         }
       }
     );
-    DocumentsService.getWorkflowsInDocument(currentSiteId, documentId).then(
-      (response: any) => {
-        if (response.workflows?.length) {
-          const inProgressWorkflows = response.workflows.filter(
-            (workflow: any) => {
-              if (workflow.status === 'IN_PROGRESS') {
-                return true;
-              } else {
-                return false;
+    if (documentId.length) {
+      DocumentsService.getWorkflowsInDocument(currentSiteId, documentId).then(
+        (response: any) => {
+          if (response.workflows?.length) {
+            const inProgressWorkflows = response.workflows.filter(
+              (workflow: any) => {
+                if (workflow.status === 'IN_PROGRESS') {
+                  return true;
+                } else {
+                  return false;
+                }
               }
+            );
+            if (inProgressWorkflows.length > 0) {
+              setHasInProgressWorkflow(true);
+            } else {
+              setHasInProgressWorkflow(false);
             }
-          );
-          if (inProgressWorkflows.length > 0) {
-            setHasInProgressWorkflow(true);
           } else {
             setHasInProgressWorkflow(false);
           }
-        } else {
-          setHasInProgressWorkflow(false);
         }
-      }
-    );
+      );
+    } else {
+      setHasInProgressWorkflow(false);
+    }
   }, [documentId]);
 
   const viewFolder = (event: any, action = '') => {
