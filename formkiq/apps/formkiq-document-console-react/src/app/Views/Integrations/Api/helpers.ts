@@ -79,7 +79,7 @@ export const postDocumentsApiItem = {
   requiresAuthentication: true,
   requiresPostJson: true,
   defaultPostJsonValue:
-    '{"path":"user.json","content":{"name":"John Smith"},"tags":[{"key":"content","value":"text"}]}',
+    '{"path":"user.json","content":"{\\"name\\": \\"John Smith\\"}","tags":[{"key":"content","value":"text"}]}',
   license: 'Core',
 };
 
