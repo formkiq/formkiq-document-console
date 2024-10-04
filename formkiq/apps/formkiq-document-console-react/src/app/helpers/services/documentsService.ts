@@ -2255,4 +2255,58 @@ export class DocumentsService {
       addDocumentGenerateParameters,
     });
   }
+
+  @formkiqAPIHandler
+  public static async addSite(
+    addSiteParameters: any
+  ):  Promise<any> {
+    return this.getFormkiqClient().sitesApi.addSite({
+      addSiteParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async updateSite(
+      siteId: string,
+      updateSiteParameters: any
+  ):  Promise<any> {
+    return this.getFormkiqClient().sitesApi.updateSite({
+      siteId,
+      updateSiteParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getSiteGroups(
+      siteId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.getSiteGroups({
+      siteId
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getSiteGroupPermissions(
+      siteId: string,
+      groupName: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.getSiteGroupPermissions({
+      siteId,
+      groupName,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async setSiteGroupPermissions(
+      siteId: string,
+      groupName: string,
+      updateSiteGroupPermissions: any,
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.setSiteGroupPermissions({
+      siteId,
+      groupName,
+      updateSiteGroupPermissions,
+    });
+  }
+
 }
