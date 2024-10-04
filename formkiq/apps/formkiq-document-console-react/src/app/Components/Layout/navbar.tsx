@@ -57,7 +57,7 @@ import {
   Schema,
   Settings,
   Share,
-  ShareHand,
+  ShareHand, SitesManagement,
   Star,
   Trash,
   Users,
@@ -648,6 +648,12 @@ function Navbar() {
                                 <Admin />
                               </div>
                             )}
+                            {pathname.indexOf('/admin/sites-management') >
+                              -1 && (
+                              <div className="w-5">
+                                <SitesManagement />
+                              </div>
+                            )}
                             {pathname.indexOf('/admin/groups') > -1 && (
                               <div className="w-5">
                                 <Group />
@@ -696,6 +702,8 @@ function Navbar() {
                             {pathname.indexOf('/admin/access-control') > -1 && (
                               <span>Access Control (OPA)</span>
                             )}
+                            {pathname.indexOf('/admin/sites-management') >
+                              -1 && <span>Sites Management</span>}
                             {pathname.indexOf('/schemas') > -1 && (
                               <span>Schemas</span>
                             )}

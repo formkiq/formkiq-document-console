@@ -44,7 +44,7 @@ import {
   Rules,
   Schema,
   Settings,
-  ShareHand,
+  ShareHand, SitesManagement,
   Star,
   Trash,
   Upload,
@@ -834,6 +834,14 @@ export function Sidebar() {
                     title="API Keys"
                     testId="nav-api-keys"
                   />
+                  {user.isAdmin && (
+                      <NavigationItem
+                          to="/admin/sites-management"
+                          icon={<SitesManagement />}
+                          title="Sites Management"
+                          testId="nav-sites-management"
+                      />
+                  )}
                   {userAuthenticationType === 'cognito' && (
                     <>
                       <NavigationItem
