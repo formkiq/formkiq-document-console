@@ -48,6 +48,7 @@ function SitesManagement() {
   const [selectedStatus, setSelectedStatus] = useState<
     'ACTIVE' | 'INACTIVE' | ''
   >('');
+  const [isEditingStatus, setIsEditingStatus] = useState<boolean>(false);
   const [siteGroups, setSiteGroups] = useState<string[]>([]);
   const [siteTitle, setSiteTitle] = useState<string>('');
   const [isEditingSiteTitle, setIsEditingSiteTitle] = useState<boolean>(false);
@@ -159,6 +160,30 @@ function SitesManagement() {
     });
   }
 
+  function saveSiteStatus() {
+      if (!editingSiteId || !selectedStatus) {
+          return;
+      }
+      DocumentsService.updateSite(editingSiteId, {
+          site: { status: selectedStatus },
+      }).then((res) => {
+          if (res.status === 200) {
+              setIsEditingStatus(false);
+              dispatch(
+                  openNotificationDialog({
+                      dialogTitle: 'Site status has been saved.',
+                  })
+              );
+          } else {
+              dispatch(
+                  openNotificationDialog({
+                      dialogTitle: 'Error. Site status has not been saved.',
+                  })
+              );
+          }
+      });
+  }
+
   console.log(sites);
   return (
     <>
@@ -248,28 +273,42 @@ function SitesManagement() {
                       </div>
                       {editingSiteId === site.siteId && (
                         <>
-                          <h1 className="font-bold text-lg">Status</h1>
+                          <h1 className="font-bold text-lg mt-4">Status</h1>
                           <div className="flex gap-2 items-end h-10">
                             <div className="w-1/2 max-w-[250px] h-10 mt-4">
                               <RadioListbox
                                 selectedValue={selectedStatus}
-                                setSelectedValue={setSelectedStatus}
+                                setSelectedValue={(
+                                  value: 'ACTIVE' | 'INACTIVE'
+                                ) => {
+                                  setSelectedStatus(value);
+                                  setIsEditingStatus(true);
+                                }}
                                 values={['ACTIVE', 'INACTIVE']}
                                 titles={['Active', 'Inactive']}
                                 placeholderText="Status"
                               />
                             </div>
-                            <ButtonTertiary
-                              onClick={() => setIsEditingSiteTitle(false)}
-                            >
-                              Cancel
-                            </ButtonTertiary>
-                            <ButtonPrimaryGradient onClick={saveSiteTitle}>
-                              Save
-                            </ButtonPrimaryGradient>
+                            {isEditingStatus && (
+                              <>
+                                <ButtonTertiary
+                                  onClick={() => {
+                                    setSelectedStatus('');
+                                    setIsEditingStatus(false);
+                                  }}
+                                >
+                                  Cancel
+                                </ButtonTertiary>
+                                <ButtonPrimaryGradient onClick={saveSiteStatus}>
+                                  Save
+                                </ButtonPrimaryGradient>
+                              </>
+                            )}
                           </div>
-                          <h1 className="font-bold text-lg">Site Groups</h1>
-                          <div className="w-1/2 max-w-[250px] h-10 mt-4">
+                          <h1 className="font-bold text-lg mt-4">
+                            Site Groups
+                          </h1>
+                          <div className="w-1/2 max-w-[250px] h-10">
                             <RadioListbox
                               selectedValue={selectedGroupName}
                               setSelectedValue={setSelectedGroupName}
