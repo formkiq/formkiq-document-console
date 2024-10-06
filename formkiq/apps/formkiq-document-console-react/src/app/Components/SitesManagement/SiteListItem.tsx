@@ -14,6 +14,7 @@ interface SiteListItemProps {
   isEditing: boolean;
   onEditToggle: (siteId: string | null) => void;
   groups: any[];
+  onSitesChange: () => void;
 }
 
 export function SiteListItem({
@@ -21,19 +22,24 @@ export function SiteListItem({
   isEditing,
   onEditToggle,
   groups,
+  onSitesChange,
 }: SiteListItemProps) {
   const [siteGroups, setSiteGroups] = useState<string[]>([]);
+
+  const updateSiteGroups = () => {
+    DocumentsService.getSiteGroups(site.siteId).then((res) => {
+      if (res.groupNames) {
+        setSiteGroups(res.groupNames);
+      }
+    });
+  };
 
   useEffect(() => {
     if (!isEditing) {
       setSiteGroups([]);
       return;
     }
-    DocumentsService.getSiteGroups(site.siteId).then((res) => {
-      if (res.groupNames) {
-        setSiteGroups(res.groupNames);
-      }
-    });
+    updateSiteGroups();
   }, [isEditing, site.siteId]);
 
   return (
@@ -43,6 +49,7 @@ export function SiteListItem({
           siteId={site.siteId}
           currentTitle={site.title}
           isEditingSite={isEditing}
+          onSitesChange={onSitesChange}
         />
 
         {!isEditing ? (
@@ -66,12 +73,13 @@ export function SiteListItem({
       {isEditing && (
         <>
           <hr className="my-4" />
-          <SiteStatus siteId={site.siteId} />
+          <SiteStatus siteId={site.siteId}/>
           <hr className="my-4" />
           <SiteGroupPermissions
             siteId={site.siteId}
             groups={groups}
             siteGroups={siteGroups}
+            onGroupsChange={updateSiteGroups}
           />
         </>
       )}

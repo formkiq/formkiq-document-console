@@ -19,6 +19,7 @@ interface SiteGroupPermissionsEditorProps {
   siteId: string;
   groups: any[];
   siteGroups: string[];
+  onGroupsChange: () => void;
 }
 
 interface PermissionCheckboxProps {
@@ -42,7 +43,7 @@ const PermissionCheckbox: React.FC<PermissionCheckboxProps> = ({
 
 export const SiteGroupPermissions: React.FC<
   SiteGroupPermissionsEditorProps
-> = ({ siteId, groups, siteGroups }) => {
+> = ({ siteId, groups, siteGroups, onGroupsChange }) => {
   const dispatch = useAppDispatch();
   const [selectedGroupName, setSelectedGroupName] = useState('');
   const [editingPermissions, setEditingPermissions] = useState<
@@ -128,9 +129,12 @@ export const SiteGroupPermissions: React.FC<
 
   const handleSaveGroupPermissions = (groupName: string) => {
     if (!groupName) return;
+    const isAddingNewGroup = !siteGroups.includes(groupName);
 
     DocumentsService.setSiteGroupPermissions(siteId, groupName, {
-      permissions: editingPermissions,
+      permissions: isAddingNewGroup
+        ? newGroupEditingSitePermissions
+        : editingPermissions,
     }).then((res) => {
       if (res.status === 200) {
         dispatch(
@@ -138,6 +142,13 @@ export const SiteGroupPermissions: React.FC<
             dialogTitle: 'Site group permissions have been saved.',
           })
         );
+        if (isAddingNewGroup) {
+          setSelectedNewGroupName('');
+          onGroupsChange()
+          setIsAddingNewGroupPermissions(false);
+        } else {
+          setSelectedGroupName('');
+        }
       } else {
         dispatch(
           openNotificationDialog({
@@ -158,6 +169,8 @@ export const SiteGroupPermissions: React.FC<
             dialogTitle: 'Site group permissions have been deleted.',
           })
         );
+        onGroupsChange()
+        setSelectedGroupName('');
       } else {
         dispatch(
           openNotificationDialog({

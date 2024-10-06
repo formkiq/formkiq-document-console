@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { Pencil } from '../Icons/icons';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
@@ -10,9 +10,15 @@ interface SiteTitleEditorProps {
   siteId: string;
   currentTitle: string;
   isEditingSite: boolean;
+  onSitesChange: () => void;
 }
 
-export const SiteTitle: React.FC<SiteTitleEditorProps> = ({ siteId, currentTitle,isEditingSite }) => {
+export const SiteTitle: React.FC<SiteTitleEditorProps> = ({
+  siteId,
+  currentTitle,
+  isEditingSite,
+  onSitesChange,
+}) => {
   const dispatch = useAppDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(currentTitle);
@@ -24,6 +30,7 @@ export const SiteTitle: React.FC<SiteTitleEditorProps> = ({ siteId, currentTitle
       site: { title },
     }).then((res) => {
       if (res.status === 200) {
+        onSitesChange();
         setIsEditing(false);
         dispatch(
           openNotificationDialog({
@@ -40,9 +47,13 @@ export const SiteTitle: React.FC<SiteTitleEditorProps> = ({ siteId, currentTitle
     });
   };
 
+  useEffect(() => {
+    setIsEditing(false);
+  }, [siteId,isEditingSite]);
+
   return (
     <div className="flex flex-col">
-      {isEditing ? (
+      {isEditing && isEditingSite ? (
         <div className="flex gap-2 items-end h-10">
           <input
             type="text"
@@ -61,13 +72,14 @@ export const SiteTitle: React.FC<SiteTitleEditorProps> = ({ siteId, currentTitle
         <h1 className="text-lg font-bold">
           {currentTitle}{' '}
           {isEditingSite && (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="text-neutral-500 underline hover:text-primary-500 w-4 h-4"
-            title="Edit Site Name"
-          >
-            <Pencil />
-          </button>)}
+            <button
+              onClick={() => setIsEditing(true)}
+              className="text-neutral-500 underline hover:text-primary-500 w-4 h-4"
+              title="Edit Site Name"
+            >
+              <Pencil />
+            </button>
+          )}
         </h1>
       )}
       <span className="text-xs text-neutral-500 font-bold">

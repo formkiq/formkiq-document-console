@@ -8,6 +8,8 @@ import {
 } from '../../Store/reducers/userManagement';
 import { useAppDispatch } from '../../Store/store';
 import { SiteListItem } from '../../Components/SitesManagement/SiteListItem';
+import CreateSiteModal from '../../Components/SitesManagement/CreateSiteModal';
+import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
 
 function SitesManagement() {
   const { groups } = useSelector(UserManagementState);
@@ -15,6 +17,7 @@ function SitesManagement() {
 
   const [editingSiteId, setEditingSiteId] = useState<string | null>(null);
   const [sites, setSites] = useState<any[]>([]);
+  const [isCreateSiteModalOpen, setIsCreateSiteModalOpen] = useState(false);
 
   function updateSites() {
     DocumentsService.getSites().then((res) => {
@@ -35,7 +38,14 @@ function SitesManagement() {
       <div className="flex flex-row">
         <div className="flex-1 inline-block h-full">
           <div className="flex flex-col w-full h-full px-6 mt-6">
-            <h1 className="text-xl font-bold">Sites Management</h1>
+            <div className="flex flex-row justify-between items-center h-10">
+              <h1 className="text-xl font-bold">Sites Management</h1>
+              <ButtonPrimaryGradient
+              onClick={() => setIsCreateSiteModalOpen(true)}>
+                + New Site
+              </ButtonPrimaryGradient>
+            </div>
+
             <ul className="flex flex-col gap-4 mt-4">
               {sites.length > 0 ? (
                 sites.map((site) => (
@@ -45,6 +55,7 @@ function SitesManagement() {
                     isEditing={editingSiteId === site.siteId}
                     onEditToggle={setEditingSiteId}
                     groups={groups}
+                    onSitesChange={updateSites}
                   />
                 ))
               ) : (
@@ -54,6 +65,11 @@ function SitesManagement() {
           </div>
         </div>
       </div>
+      <CreateSiteModal
+        isOpen={isCreateSiteModalOpen}
+        setIsOpen={setIsCreateSiteModalOpen}
+        onSitesChange={updateSites}
+      />
     </>
   );
 }
