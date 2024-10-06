@@ -1807,8 +1807,9 @@ function Documents() {
                       </div>
                     </div>
                     {formkiqVersion.type !== 'core' &&
-                      (currentDocument as IDocument).deepLinkPath?.length ===
-                        0 && (
+                      (!(currentDocument as IDocument).deepLinkPath ||
+                        ((currentDocument as IDocument).deepLinkPath?.length ??
+                          0) === 0) && (
                         <div
                           className="w-1/3 text-sm font-semibold cursor-pointer"
                           onClick={(event) => {
@@ -1836,7 +1837,6 @@ function Documents() {
                           </div>
                         </div>
                       )}
-
                     <div
                       className="w-1/3 text-sm font-semibold cursor-pointer"
                       onClick={(event) => {
