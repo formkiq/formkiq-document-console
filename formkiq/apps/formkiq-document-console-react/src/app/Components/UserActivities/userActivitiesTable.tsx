@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { formatDate, getFileIcon } from '../../helpers/services/toolService';
 import { UserActivity } from '../../helpers/types/userActivities';
+import { ChevronDown } from '../Icons/icons';
 
 type UserActivitiesTableProps = {
   userActivities: UserActivity[];
@@ -17,6 +18,8 @@ function UserActivitiesTable({
 }: UserActivitiesTableProps) {
   const [documents, setDocuments] = useState<any>({});
   const [users, setUsers] = useState<any>({});
+  const [showDetailsIds, setShowDetailsIds] = useState<string[]>([]);
+
   async function getUser(id: string) {
     DocumentsService.getUser(id).then((res) => {
       if (res.status === 200 && res.user) {
@@ -70,6 +73,14 @@ function UserActivitiesTable({
       });
     }
   }, [userActivities]);
+
+  function toggleShowDetails(id: string) {
+    if (showDetailsIds.includes(id)) {
+      setShowDetailsIds(showDetailsIds.filter((value) => value !== id));
+    } else {
+      setShowDetailsIds([...showDetailsIds, id]);
+    }
+  }
 
   return (
     <table className="w-full border-collapse text-sm table-fixed ">
@@ -128,7 +139,42 @@ function UserActivitiesTable({
                   <td className="p-4 ">
                     {users[activity.userId]?.email || activity.userId}
                   </td>
-                  <td className="p-4 ">{activity.type}</td>
+                  <td className="p-4 ">
+                    <div className="flex justify-between items-center">
+                      {activity.type}
+                      {activity.document && (
+                        <button
+                          className="text-primary-500 hover:text-primary-600 cursor-pointer underline flex gap-2 items-center"
+                          onClick={() => toggleShowDetails(activity.activityId)}
+                        >
+                          {showDetailsIds.includes(activity.activityId) ? (
+                            <>
+                              Hide Details{' '}
+                              <div className="rotate-180 h-3">
+                                <ChevronDown />
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              Show Details{' '}
+                              <div className="h-3">
+                                <ChevronDown />
+                              </div>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+
+                    {showDetailsIds.includes(activity.activityId) &&
+                      activity.document && (
+                        <div className="bg-neutral-100 rounded-md p-2 mt-2">
+                          <pre>
+                            {JSON.stringify(activity.document, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+                  </td>
                   <td className="p-4 ">{formatDate(activity.insertedDate)}</td>
 
                   <td className="p-4 pr-8">
