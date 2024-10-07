@@ -9,9 +9,11 @@ import {
 import { useAppDispatch } from '../../Store/store';
 import { SiteListItem } from '../../Components/SitesManagement/SiteListItem';
 import CreateSiteModal from '../../Components/SitesManagement/CreateSiteModal';
-import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
+import { login, useAuthenticatedState } from '../../Store/reducers/auth';
 
 function SitesManagement() {
+  const { user } = useAuthenticatedState();
   const { groups } = useSelector(UserManagementState);
   const dispatch = useAppDispatch();
 
@@ -19,15 +21,22 @@ function SitesManagement() {
   const [sites, setSites] = useState<any[]>([]);
   const [isCreateSiteModalOpen, setIsCreateSiteModalOpen] = useState(false);
 
-  function updateSites() {
+  function updateUserSites() {
     DocumentsService.getSites().then((res) => {
-      if (res.status === 200) setSites(res.sites);
+      if (res.status === 200) {
+        setSites(res.sites);
+        dispatch(login({ ...user, sites: res.sites }));
+      }
     });
   }
 
   useEffect(() => {
     dispatch(fetchGroups({ limit: 60 }));
-    updateSites();
+    DocumentsService.getSites().then((res) => {
+      if (res.status === 200) {
+        setSites(res.sites);
+      }
+    });
   }, []);
 
   return (
@@ -41,7 +50,8 @@ function SitesManagement() {
             <div className="flex flex-row justify-between items-center h-10">
               <h1 className="text-xl font-bold">Sites Management</h1>
               <ButtonPrimaryGradient
-              onClick={() => setIsCreateSiteModalOpen(true)}>
+                onClick={() => setIsCreateSiteModalOpen(true)}
+              >
                 + New Site
               </ButtonPrimaryGradient>
             </div>
@@ -55,7 +65,7 @@ function SitesManagement() {
                     isEditing={editingSiteId === site.siteId}
                     onEditToggle={setEditingSiteId}
                     groups={groups}
-                    onSitesChange={updateSites}
+                    onSitesChange={updateUserSites}
                   />
                 ))
               ) : (
@@ -68,7 +78,7 @@ function SitesManagement() {
       <CreateSiteModal
         isOpen={isCreateSiteModalOpen}
         setIsOpen={setIsCreateSiteModalOpen}
-        onSitesChange={updateSites}
+        onSitesChange={updateUserSites}
       />
     </>
   );

@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { Pencil } from '../Icons/icons';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
@@ -49,7 +49,7 @@ export const SiteTitle: React.FC<SiteTitleEditorProps> = ({
 
   useEffect(() => {
     setIsEditing(false);
-  }, [siteId,isEditingSite]);
+  }, [siteId, isEditingSite]);
 
   return (
     <div className="flex flex-col">
@@ -88,4 +88,3 @@ export const SiteTitle: React.FC<SiteTitleEditorProps> = ({
     </div>
   );
 };
-
