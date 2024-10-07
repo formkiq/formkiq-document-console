@@ -150,7 +150,13 @@ import {
   postMappingApiItem,
   deleteMappingApiItem,
   putMappingApiItem,
-  getMappingApiItem, postDocumentGenerateApiItem,
+  getMappingApiItem,
+  postDocumentGenerateApiItem,
+  postSitesApiItem,
+  patchSitesApiItem,
+  getSiteGroupsApiItem,
+  getSiteGroupApiItem,
+  putSiteGroupPermissionsApiItem
 } from './helpers';
 
 export function ApiExplorer() {
@@ -496,6 +502,11 @@ export function ApiExplorer() {
               <div className="w-4 border-l"></div>
               <div className="grow">
                 <ApiItem apiItem={getSitesApiItem} sites={sites} />
+                <ApiItem apiItem={postSitesApiItem} sites={sites}/>
+                <ApiItem apiItem={patchSitesApiItem} sites={sites}/>
+                <ApiItem apiItem={getSiteGroupsApiItem} sites={sites} />
+                <ApiItem apiItem={getSiteGroupApiItem} sites={sites}/>
+                <ApiItem apiItem={putSiteGroupPermissionsApiItem} sites={sites}/>
               </div>
             </div>
           </ApiSegment>
