@@ -191,6 +191,7 @@ export default function NewModal({
               (res) => {
                 if (res.status === 201) {
                   navigate(pathname + '/' + res.documentId + '/edit');
+                  closeDialog();
                 } else {
                   dispatch(
                     openDialog({
@@ -209,8 +210,8 @@ export default function NewModal({
                 '/' +
                 nameValue
             );
+            closeDialog();
           }
-          closeDialog();
         }
       } else {
         dispatch(
