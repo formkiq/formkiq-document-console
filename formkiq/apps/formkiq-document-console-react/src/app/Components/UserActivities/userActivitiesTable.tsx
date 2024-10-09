@@ -92,7 +92,7 @@ function UserActivitiesTable({
           <th className=" w-full max-w-52 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
             User
           </th>
-          <th className=" w-full max-w-52 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+          <th className=" w-full max-w-72 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
             Activity
           </th>
           <th className=" w-full border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
@@ -168,7 +168,7 @@ function UserActivitiesTable({
 
                     {showDetailsIds.includes(activity.activityId) &&
                       activity.document && (
-                        <div className="bg-neutral-100 rounded-md p-2 mt-2">
+                        <div className="bg-neutral-100 rounded-md p-2 mt-2 max-w-72 overflow-x-auto">
                           <pre>
                             {JSON.stringify(activity.document, null, 2)}
                           </pre>
