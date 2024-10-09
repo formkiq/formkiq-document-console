@@ -37,7 +37,7 @@ export default function DocumentVersionsModal({
   };
   const navigate = useNavigate();
 
-  const doneButtonRef = useRef() as React.MutableRefObject<HTMLButtonElement>;
+  const doneButtonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     updateVersions();
@@ -210,7 +210,7 @@ export default function DocumentVersionsModal({
                           }
                           className="flex font-semibold py-2"
                         >
-                          <div className="mx-4">Upload New Version 1</div>
+                          <div className="mx-4">Upload New Version</div>
                           <div className="w-4 h-4 ml-2 mt-1">{Upload()}</div>
                         </ButtonTertiary>
                       )}
@@ -337,9 +337,11 @@ export default function DocumentVersionsModal({
                       </tbody>
                     </table>
                   </div>
-                  <div className="w-full flex justify-center mt-4">
+                  <div
+                    ref={doneButtonRef}
+                    className="w-full flex justify-center mt-4"
+                  >
                     <ButtonPrimaryGradient
-                      ref={doneButtonRef}
                       className="py-2"
                       onClick={closeDialog}
                     >
