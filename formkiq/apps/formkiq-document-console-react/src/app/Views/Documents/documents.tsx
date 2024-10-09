@@ -2367,7 +2367,7 @@ function Documents() {
                         ((currentDocument as IDocument).deepLinkPath &&
                           (currentDocument as IDocument).deepLinkPath.length >
                             0)) && (
-                        <div className="mt-4 w-full flex justify-center">
+                        <div className="mt-2 w-full flex justify-center">
                           <ButtonPrimaryGradient
                             onClick={viewDocument}
                             type="button"
@@ -2392,7 +2392,7 @@ function Documents() {
                           (currentDocument as IDocument).contentType
                         ) > -1) &&
                       !isCurrentSiteReadonly && (
-                        <div className="mt-4 w-full flex justify-center">
+                        <div className="mt-2 w-full flex justify-center">
                           <ButtonPrimaryGradient
                             onClick={editDocument}
                             type="button"
@@ -2412,7 +2412,7 @@ function Documents() {
                         </div>
                       )}
 
-                    {(currentDocument as IDocument).deepLinkPath &&
+                    {(currentDocument as IDocument).deepLinkPath !== undefined &&
                       (currentDocument as IDocument).deepLinkPath.length ===
                         0 && (
                         <div className="mt-2 w-full flex justify-center">
@@ -2432,7 +2432,7 @@ function Documents() {
                         </div>
                       )}
                     {formkiqVersion.type !== 'core' &&
-                      (currentDocument as IDocument).deepLinkPath &&
+                      (currentDocument as IDocument).deepLinkPath !== undefined &&
                       (currentDocument as IDocument).deepLinkPath.length ===
                         0 && (
                         <div className="mt-2 flex justify-center">
