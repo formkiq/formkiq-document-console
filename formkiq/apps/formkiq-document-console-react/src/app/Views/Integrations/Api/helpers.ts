@@ -1853,7 +1853,7 @@ export const getUserActivitiesApiItem = {
 
 export const getDocumentUserActivitiesApiItem = {
     method: 'GET',
-    path: '/documents/ DOCUMENT_ID /url',
+    path: '/documents/ DOCUMENT_ID /userActivities',
     description: "Retrieve a user's activities",
     username: 'Cognito User',
     requiresAuthentication: true,
