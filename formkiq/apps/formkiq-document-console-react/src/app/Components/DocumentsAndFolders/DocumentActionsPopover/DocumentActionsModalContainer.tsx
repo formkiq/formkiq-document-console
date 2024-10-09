@@ -47,8 +47,8 @@ const DocumentActionsModalContainer = ({
     moveModalOpened,
     moveModalValue,
     onMoveModalClose,
-    uploadModalOpened,
-    onUploadClose,
+    isUploadModalOpened,
+    onUploadClick,
     submitForReviewModalOpened,
     submitForReviewModalValue,
     onSubmitForReviewModalClose,
@@ -85,8 +85,8 @@ const DocumentActionsModalContainer = ({
       <DocumentVersionsModal
         isOpened={documentVersionsModalOpened}
         onClose={onDocumentVersionsModalClose}
-        onUploadClick={onUploadClose}
-        isUploadModalOpened={uploadModalOpened}
+        onUploadClick={onUploadClick}
+        isUploadModalOpened={isUploadModalOpened}
         siteId={currentSiteId}
         isSiteReadOnly={isSiteReadOnly}
         documentsRootUri={currentDocumentsRootUri}

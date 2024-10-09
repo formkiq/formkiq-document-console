@@ -9,13 +9,15 @@ import { AuthState } from '../../../Store/reducers/auth';
 import { deleteDocument } from '../../../Store/reducers/documentsList';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
+import {setCurrentActionEvent} from "../../../Store/reducers/config";
+import {TopLevelFolders} from "../../../helpers/constants/folders";
 
 interface DocumentActionsContextType {
   shareModalValue: ILine | null;
   shareModalOpened: boolean;
-  uploadModalOpened: boolean;
+  isUploadModalOpened:  boolean;
   uploadModalDocumentId: string;
-  folderUploadModalOpened: boolean;
+  isFolderUploadModalOpened:  boolean;
   folderUploadModalDocumentId: string;
   editAttributesModalValue: ILine | null;
   editAttributesModalOpened: boolean;
@@ -85,6 +87,10 @@ interface DocumentActionsContextType {
   documentRelationshipsModalOpened:  boolean;
   documentRelationshipsModalValue:  ILine | null;
   onDocumentRelationshipsModalClose:  () => void;
+  onNewClick: (event: any, value: ILine | null, subfolderUri: string) => void;
+  isNewModalOpened: boolean;
+  newModalValue: ILine | null;
+  onNewClose:  () => void;
 }
 
 const DocumentActionsContext = createContext<
@@ -96,11 +102,6 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [shareModalValue, setShareModalValue] = useState<ILine | null>(null);
   const [shareModalOpened, setShareModalOpened] = useState(false);
-  const [uploadModalOpened, setUploadModalOpened] = useState(false);
-  const [uploadModalDocumentId, setUploadModalDocumentId] = useState('');
-  const [folderUploadModalOpened, setFolderUploadModalOpened] = useState(false);
-  const [folderUploadModalDocumentId, setFolderUploadModalDocumentId] =
-    useState('');
   const [editAttributesModalValue, setEditAttributesModalValue] =
     useState<ILine | null>(null);
   const [editAttributesModalOpened, setEditAttributesModalOpened] =
@@ -150,6 +151,15 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     []
   );
 
+  const [isUploadModalOpened, setUploadModalOpened] = useState(false);
+  const [isFolderUploadModalOpened, setFolderUploadModalOpened] =
+    useState(false);
+  const [uploadModalDocumentId, setUploadModalDocumentId] = useState('');
+  const [folderUploadModalDocumentId, setFolderUploadModalDocumentId] =
+    useState('');
+  const [newModalValue, setNewModalValue] = useState<ILine | null>(null);
+  const [isNewModalOpened, setNewModalOpened] = useState(false);
+
   const dispatch = useAppDispatch();
   const { user } = useSelector(AuthState);
   const navigate = useNavigate();
@@ -165,6 +175,7 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const onUploadClick = (event: any, documentId: string) => {
+    dispatch(setCurrentActionEvent(''));
     setUploadModalOpened(true);
     setUploadModalDocumentId(documentId);
   };
@@ -174,12 +185,32 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const onFolderUploadClick = (event: any) => {
+    dispatch(setCurrentActionEvent(''));
     setFolderUploadModalOpened(true);
     setFolderUploadModalDocumentId('');
   };
 
   const onFolderUploadClose = () => {
     setFolderUploadModalOpened(false);
+  };
+  const onNewClose = () => {
+    setNewModalOpened(false);
+  };
+
+  const onNewClick = (event: any, value: ILine | null, subfolderUri: string) => {
+    dispatch(setCurrentActionEvent(''));
+    if (TopLevelFolders.indexOf(subfolderUri) !== -1) {
+      // TODO: add redirect or messaging of location of new file, as it won't be in the TopLevelFolder
+      value = {
+        lineType: 'folder',
+        folder: '',
+        documentId: '',
+        documentInstance: null,
+        folderInstance: null,
+      };
+    }
+    setNewModalValue(value);
+    setNewModalOpened(true);
   };
 
   const onEditAttributesModalClick = (event: any, value: ILine | null) => {
@@ -367,9 +398,9 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   const value = {
     shareModalValue,
     shareModalOpened,
-    uploadModalOpened,
+    isUploadModalOpened,
     uploadModalDocumentId,
-    folderUploadModalOpened,
+    isFolderUploadModalOpened,
     folderUploadModalDocumentId,
     editAttributesModalValue,
     editAttributesModalOpened,
@@ -385,6 +416,10 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     onShareClose,
     onUploadClick,
     onUploadClose,
+    onNewClick,
+    onNewClose,
+    newModalValue,
+    isNewModalOpened,
     onFolderUploadClick,
     onFolderUploadClose,
     onEditAttributesModalClick,
