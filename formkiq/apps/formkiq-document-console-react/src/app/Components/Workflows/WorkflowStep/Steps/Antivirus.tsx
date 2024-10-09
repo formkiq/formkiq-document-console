@@ -1,60 +1,31 @@
-import {useMemo} from "react";
-import {Position} from "reactflow";
-import {Plus, Antivirus as AntivirusIcon} from "../../../Icons/icons";
-import {OneConditionSourceHandle} from "../../Handles/handles";
-import NodeTitle from "../NodeComponents/NodeTitle";
-import {NodeNameSelector} from "../NodeComponents/NodeNameSelector";
+import { Antivirus as AntivirusIcon } from '../../../Icons/icons';
+import { NodeContentProps, NodeWrapper } from '../NodeComponents/NodeWrapper';
 
-function Antivirus({newStep, setNewStep, isEditing, edges, id, addCreatorNode, onChange, readOnly}: any) {
+export function AntivirusContent({
+  isEditing,
+  data,
+  newStep,
+  onChange,
+}: NodeContentProps) {
+  return null;
+}
 
-  const MAX_CONNECTIONS = 2;
-  let isHandleConnectable = false
-  let connectionsNumber = MAX_CONNECTIONS
-  if (edges) {
-    connectionsNumber = edges.filter((e: any) => e.source === id).length;
-  }
-  isHandleConnectable = useMemo(() => {
-    if(readOnly) return false;
-    return connectionsNumber < MAX_CONNECTIONS;
-  }, [connectionsNumber, MAX_CONNECTIONS]);
+function Antivirus(props: any) {
   return (
-    <>
-      {isEditing && <NodeNameSelector newStep={newStep} setNewStep={setNewStep}/>}
-      {!isEditing &&
-        <NodeTitle icon={<AntivirusIcon/>} title="Anti-Malware Scan"/>}
-      {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
-
-
-      {!isEditing && <>
-        <OneConditionSourceHandle
-          type="source"
-          position={Position.Right}
-          nodeId={id}
-          maxConnections={1}
-          top="33%"
-          id="approve"
-          readOnly={readOnly}
-        />
-        <OneConditionSourceHandle
-          type="source"
-          position={Position.Right}
-          nodeId={id}
-          maxConnections={1}
-          top="66%"
-          id="reject"
-          readOnly={readOnly}
-        />
-      </>}
-      {isHandleConnectable && (
-        <div
-          className="w-6 mt-6 rounded-full bg-green-400 text-white hover:border-green-700 p-1  cursor-pointer absolute right-[-36px] border-2 border-white hover:text-green-700 nodrag"
-          style={{top: 'calc(50% - 12px)'}}
-          onClick={addCreatorNode}
-        >
-          <Plus/>
-        </div>
-      )}
-    </>
+    <NodeWrapper
+      id={props.id}
+      icon={<AntivirusIcon />}
+      title="Anti-Malware Scan"
+      isEditing={props.isEditing}
+      readOnly={props.readOnly}
+      newStep={props.newStep}
+      setNewStep={props.setNewStep}
+      edges={props.edges}
+      addCreatorNode={props.addCreatorNode}
+      maxConnections={2}
+    >
+      <AntivirusContent {...props} />
+    </NodeWrapper>
   );
 }
 

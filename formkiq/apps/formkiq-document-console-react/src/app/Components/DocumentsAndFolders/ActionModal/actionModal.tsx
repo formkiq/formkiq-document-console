@@ -2,8 +2,10 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
 import { useAppDispatch } from '../../../Store/store';
 import { ILine } from '../../../helpers/types/line';
-import { Close} from '../../Icons/icons';
-
+import { Close } from '../../Icons/icons';
+import { NodeNameSelector } from '../../Workflows/WorkflowStep/NodeComponents/NodeNameSelector';
+import { AntivirusContent } from '../../Workflows/WorkflowStep/Steps/Antivirus';
+import { DocumentTaggingContent } from '../../Workflows/WorkflowStep/Steps/DocumentTagging';
 
 export default function ActionModal({
   isOpened,
@@ -23,13 +25,14 @@ export default function ActionModal({
 
   const [newStep, setNewStep] = useState<any>(null);
 
-  const onChange = (value: any, key: string) => {
-    setNewStep((prev: any) => {
-      return {
-        ...prev,
+  const onChange = (value: any, key: any) => {
+    setNewStep((prev: any) => ({
+      ...prev,
+      parameters: {
+        ...prev.parameters,
         [key]: value,
-      };
-    });
+      },
+    }));
   };
   return (
     <Transition.Root show={isOpened} as={Fragment}>
@@ -70,6 +73,23 @@ export default function ActionModal({
                       <Close />
                     </div>
                   </div>
+                  <NodeNameSelector newStep={newStep} setNewStep={setNewStep} />
+                  {newStep?.name === 'ANTIVIRUS' && (
+                    <AntivirusContent
+                      newStep={newStep}
+                      isEditing={true}
+                      data={null}
+                      onChange={onChange}
+                    />
+                  )}
+                  {newStep?.name === 'DOCUMENTTAGGING' && (
+                    <DocumentTaggingContent
+                      newStep={newStep}
+                      isEditing={true}
+                      data={null}
+                      onChange={onChange}
+                    />
+                  )}
                 </div>
               </Dialog.Panel>
             </Transition.Child>
