@@ -1,7 +1,7 @@
 import { Publish as PublishIcon } from '../../../Icons/icons';
 import { NodeContentProps, NodeWrapper } from '../NodeComponents/NodeWrapper';
 
-function PublishContent({
+export function PublishContent({
   isEditing,
   data,
   newStep,

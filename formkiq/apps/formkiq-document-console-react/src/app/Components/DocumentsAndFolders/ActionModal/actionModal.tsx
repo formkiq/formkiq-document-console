@@ -6,6 +6,14 @@ import { Close } from '../../Icons/icons';
 import { NodeNameSelector } from '../../Workflows/WorkflowStep/NodeComponents/NodeNameSelector';
 import { AntivirusContent } from '../../Workflows/WorkflowStep/Steps/Antivirus';
 import { DocumentTaggingContent } from '../../Workflows/WorkflowStep/Steps/DocumentTagging';
+import { EventBridgeContent } from '../../Workflows/WorkflowStep/Steps/EventBridge';
+import { FulltextSearchContent } from '../../Workflows/WorkflowStep/Steps/FulltextSearch';
+import { WebhookContent } from '../../Workflows/WorkflowStep/Steps/Webhook';
+import { IntelligentDocumentProcessingContent } from '../../Workflows/WorkflowStep/Steps/IntelligentDocumentProcessing';
+import { NotificationContent } from '../../Workflows/WorkflowStep/Steps/Notification';
+import { OcrContent } from '../../Workflows/WorkflowStep/Steps/Ocr';
+import { PublishContent } from '../../Workflows/WorkflowStep/Steps/Publish';
+import { QueueContent } from '../../Workflows/WorkflowStep/Steps/Queue';
 
 export default function ActionModal({
   isOpened,
@@ -84,6 +92,78 @@ export default function ActionModal({
                   )}
                   {newStep?.name === 'DOCUMENTTAGGING' && (
                     <DocumentTaggingContent
+                      newStep={newStep}
+                      isEditing={true}
+                      data={null}
+                      onChange={onChange}
+                    />
+                  )}
+                  {newStep?.name === 'EVENTBRIDGE' && (
+                    <EventBridgeContent
+                      newStep={newStep}
+                      isEditing={true}
+                      data={null}
+                      onChange={onChange}
+                    />
+                  )}
+                  {newStep?.name === 'FULLTEXT' && (
+                    <FulltextSearchContent
+                      newStep={newStep}
+                      isEditing={true}
+                      data={null}
+                      onChange={onChange}
+                    />
+                  )}
+
+                  {newStep?.name === 'IDP' && (
+                    <IntelligentDocumentProcessingContent
+                      newStep={newStep}
+                      isEditing={true}
+                      data={null}
+                      onChange={onChange}
+                    />
+                  )}
+
+                  {newStep?.name === 'NOTIFICATION' && (
+                    <NotificationContent
+                      newStep={newStep}
+                      isEditing={true}
+                      data={null}
+                      onChange={onChange}
+                    />
+                  )}
+
+                  {newStep?.name === 'OCR' && (
+                    <OcrContent
+                      newStep={newStep}
+                      isEditing={true}
+                      data={null}
+                      onChange={onChange}
+                    />
+                  )}
+
+                  {newStep?.name === 'PUBLISH' && (
+                    <PublishContent
+                      newStep={newStep}
+                      isEditing={true}
+                      data={null}
+                      onChange={onChange}
+                    />
+                  )}
+
+                  {newStep?.name === 'QUEUE' && (
+                    <QueueContent
+                      newStep={newStep}
+                      isEditing={true}
+                      data={null}
+                      onChange={onChange}
+                      siteId={siteId}
+                      setNewStep={setNewStep}
+                    />
+                  )}
+
+                  {newStep?.name === 'WEBHOOK' && (
+                    <WebhookContent
                       newStep={newStep}
                       isEditing={true}
                       data={null}

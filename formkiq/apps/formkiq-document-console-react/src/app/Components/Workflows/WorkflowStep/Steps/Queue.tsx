@@ -5,7 +5,7 @@ import ApprovalGroupsSelector from '../NodeComponents/ApprovalGroupsSelector';
 import QueueSelector from '../NodeComponents/QueueSelector';
 import { NodeContentProps, NodeWrapper } from '../NodeComponents/NodeWrapper';
 
-function QueueContent({
+export function QueueContent({
   isEditing,
   data,
   newStep,

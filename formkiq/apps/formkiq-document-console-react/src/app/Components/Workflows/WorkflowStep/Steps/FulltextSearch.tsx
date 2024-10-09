@@ -2,7 +2,7 @@ import { Search } from '../../../Icons/icons';
 import NumberInput from '../NodeComponents/NumberInput';
 import { NodeWrapper } from '../NodeComponents/NodeWrapper';
 
-function FulltextSearchContent({ isEditing, data, newStep, onChange }: any) {
+export function FulltextSearchContent({ isEditing, data, newStep, onChange }: any) {
   return (
     <>
       <NumberInput

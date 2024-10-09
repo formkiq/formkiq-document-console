@@ -2,7 +2,7 @@ import { Webhook as WebhookIcon } from '../../../Icons/icons';
 import TextInput from '../NodeComponents/TextInput';
 import { NodeWrapper } from '../NodeComponents/NodeWrapper';
 
-function WebhookContent({ isEditing, data, newStep, onChange }: any) {
+export function WebhookContent({ isEditing, data, newStep, onChange }: any) {
   return (
     <>
       <TextInput
