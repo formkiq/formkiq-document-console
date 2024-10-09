@@ -153,6 +153,7 @@ function Documents() {
     onEditAttributesModalClick,
     onAttributeQuantityClick,
     onDocumentRelationshipsModalClick,
+    onActionModalClick
   } = useDocumentActions();
 
   useEffect(() => {
@@ -2566,6 +2567,29 @@ function Documents() {
                     }
                   >
                     <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
+                      {formkiqVersion.type !== 'core' &&
+                        (currentDocument as IDocument).deepLinkPath !== undefined &&
+                        (currentDocument as IDocument).deepLinkPath.length ===
+                        0 && (
+                            <ButtonSecondary
+                              className="text-sm h-9 w-full mb-2"
+                              onClick={(event: any) => {
+                                const documentLine: ILine = {
+                                  lineType: 'document',
+                                  folder: '',
+                                  documentId: infoDocumentId,
+                                  documentInstance: currentDocument,
+                                  folderInstance: null,
+                                };
+                                onActionModalClick(
+                                  event,
+                                  documentLine
+                                );
+                              }}
+                            >
+                              Add Action
+                            </ButtonSecondary>
+                        )}
                       {currentDocumentActions.length === 0 && (
                         <div className="flex w-full justify-center italic text-smaller">
                           (no actions exist for this document)

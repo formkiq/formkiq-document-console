@@ -51,7 +51,6 @@ interface DocumentActionsContextType {
   onSubmitForReviewModalClose: () => void;
   onDocumentReviewModalClick: (event: any, value: any) => void;
   onDocumentReviewModalClose: () => void;
-
   currentDocumentTags: IDocumentTag[];
   isCurrentDocumentSoftDeleted: boolean;
   currentDocumentVersions: any[];
@@ -82,9 +81,13 @@ interface DocumentActionsContextType {
   isMultivaluedAttributeModalOpened: boolean;
   onAttributeQuantityClick: (item: any) => void;
   onDocumentRelationshipsModalClick: (event: any, value: any) => void;
-  documentRelationshipsModalOpened:  boolean;
-  documentRelationshipsModalValue:  ILine | null;
-  onDocumentRelationshipsModalClose:  () => void;
+  documentRelationshipsModalOpened: boolean;
+  documentRelationshipsModalValue: ILine | null;
+  onDocumentRelationshipsModalClose: () => void;
+  onActionModalClick: (event: any, value: any) => void;
+  onActionModalClose: () => void;
+  actionModalValue: ILine | null;
+  isActionModalOpened: boolean;
 }
 
 const DocumentActionsContext = createContext<
@@ -149,6 +152,11 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   const [currentDocumentVersions, setCurrentDocumentVersions] = useState<any[]>(
     []
   );
+
+  const [actionModalValue, setActionModalValue] = useState<ILine | null>(
+      null
+  );
+  const [isActionModalOpened, setIsActionModalOpened] = useState(false);
 
   const dispatch = useAppDispatch();
   const { user } = useSelector(AuthState);
@@ -271,6 +279,14 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   const onAttributeQuantityClick = (item: any) => {
     setMultivaluedAttributeModalOpened(true);
     setMultivaluedAttributeModalValue(item);
+  };
+
+  const onActionModalClick = (event: any, value: ILine | null) => {
+    setActionModalValue(value);
+    setIsActionModalOpened(true);
+  };
+  const onActionModalClose = () => {
+    setIsActionModalOpened(false);
   };
 
   const updateTags = (
@@ -424,6 +440,10 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     documentRelationshipsModalValue,
     onDocumentRelationshipsModalClose,
     onDocumentRelationshipsModalClick,
+    onActionModalClick,
+    onActionModalClose,
+    actionModalValue,
+    isActionModalOpened,
   };
 
   return (
