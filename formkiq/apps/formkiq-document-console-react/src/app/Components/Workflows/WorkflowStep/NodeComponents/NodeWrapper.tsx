@@ -13,6 +13,8 @@ export interface NodeContentProps {
   data: any;
   newStep: any;
   onChange: (value: any, key: string) => void;
+  siteId?: string;
+  setNewStep?: (step: any) => void;
 }
 
 interface NodeWrapperProps {
