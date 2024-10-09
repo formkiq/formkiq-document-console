@@ -32,7 +32,6 @@ function UserActivitiesTable({
 
   useEffect(() => {
     if (userActivities && userActivities.length > 0) {
-      // create array of unique user ids
       const userIds = userActivities.map(
         (activity: UserActivity) => activity.userId
       );
@@ -59,7 +58,6 @@ function UserActivitiesTable({
 
   useEffect(() => {
     if (userActivities && userActivities.length > 0) {
-      // create array of unique document ids
       const documentIds = userActivities.map(
         (activity: UserActivity) => activity.activityId
       );
@@ -75,6 +73,7 @@ function UserActivitiesTable({
   }, [userActivities]);
 
   function toggleShowDetails(id: string) {
+    console.log(id);
     if (showDetailsIds.includes(id)) {
       setShowDetailsIds(showDetailsIds.filter((value) => value !== id));
     } else {
@@ -83,33 +82,37 @@ function UserActivitiesTable({
   }
 
   return (
-    <table className="w-full border-collapse text-sm table-fixed ">
+    <table className="w-full border-collapse text-xs table-fixed">
       <thead className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
         <tr>
-          <th className=" w-full max-w-52 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+          <th className="w-1/2 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
             Document
           </th>
-          <th className=" w-full max-w-52 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+          <th className="w-1/4 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
             User
           </th>
-          <th className=" w-full max-w-72 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
-            Activity
-          </th>
-          <th className=" w-full border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+          <th className="w-1/4 border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
             Time
+          </th>
+          <th className="w-1/8 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+            Activity
           </th>
         </tr>
       </thead>
-      <tbody className="bg-white ">
+      <tbody className="bg-white">
         {userActivities && userActivities.length > 0 ? (
           <>
-            {userActivities.map((activity: UserActivity, i) => {
-              return (
+            {userActivities.map((activity: UserActivity, i) => (
+              <>
                 <tr
                   key={'activity_' + i}
-                  className="text-neutral-900 border-b border-neutral-300"
+                  className="text-neutral-900 border-t border-neutral-300"
                 >
-                  <td className="p-4 pl-8 truncate">
+                  <td
+                    className={`pt-4 pl-8 truncate ${
+                      !activity.document ? 'pb-4' : ''
+                    } `}
+                  >
                     {documents[activity.activityId]?.path ? (
                       <Link
                         to={`${documentsRootUri}/${activity.activityId}/view`}
@@ -136,57 +139,56 @@ function UserActivitiesTable({
                       </p>
                     )}
                   </td>
-                  <td className="p-4 ">
+                  <td className="p-4">
                     {users[activity.userId]?.email || activity.userId}
                   </td>
-                  <td className="p-4 ">
-                    <div className="flex justify-between items-center">
-                      {activity.type}
-                      {activity.document && (
-                        <button
-                          className="text-primary-500 hover:text-primary-600 cursor-pointer underline flex gap-2 items-center"
-                          onClick={() => toggleShowDetails(activity.activityId)}
-                        >
-                          {showDetailsIds.includes(activity.activityId) ? (
-                            <>
-                              Hide Details{' '}
-                              <div className="rotate-180 h-3">
-                                <ChevronDown />
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              Show Details{' '}
-                              <div className="h-3">
-                                <ChevronDown />
-                              </div>
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-
-                    {showDetailsIds.includes(activity.activityId) &&
-                      activity.document && (
-                        <div className="bg-neutral-100 rounded-md p-2 mt-2 max-w-72 overflow-x-auto">
-                          <pre>
-                            {JSON.stringify(activity.document, null, 2)}
-                          </pre>
-                        </div>
-                      )}
-                  </td>
-                  <td className="p-4 ">{formatDate(activity.insertedDate)}</td>
-
-                  <td className="p-4 pr-8">
-                    <div className="flex items-center justify-end gap-2 mr-3"></div>
-                  </td>
+                  <td className="p-4">{formatDate(activity.insertedDate)}</td>
+                  <td className="p-4 font-bold">{activity.type}</td>
                 </tr>
-              );
-            })}
+                {activity.document && (
+                  <>
+                    <tr
+                      className="cursor-pointer hover:bg-neutral-100 transition-colors duration-150"
+                      onClick={() => toggleShowDetails(activity.activityId)}
+                    >
+                      <td colSpan={4} className="p-2">
+                        <div className="flex flex-wrap items-center mx-8 p-2 bg-neutral-50">
+                          <span className="font-semibold text-primary-500 hover:text-primary-600 flex gap-2 items-center">
+                            {showDetailsIds.includes(activity.activityId) ? (
+                              <>
+                                Hide Details{''}
+                                <div className="rotate-180 h-3">
+                                  <ChevronDown />
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                Show Details{' '}
+                                <div className="h-3">
+                                  <ChevronDown />
+                                </div>
+                              </>
+                            )}
+                          </span>
+                          {showDetailsIds.includes(activity.activityId) && (
+                            <div className="w-full mx-8 p-2 bg-neutral-50 overflow-x-auto">
+                              <pre>
+                                {JSON.stringify(activity.document, null, 2)}
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                        <div></div>
+                      </td>
+                    </tr>
+                  </>
+                )}
+              </>
+            ))}
           </>
         ) : (
           <tr>
-            <td colSpan={3} className="text-center p-2">
+            <td colSpan={4} className="text-center p-2">
               No activities found.
             </td>
           </tr>
