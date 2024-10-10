@@ -1,9 +1,9 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useAppDispatch } from '../../../Store/store';
 import { ILine } from '../../../helpers/types/line';
 import { Close } from '../../Icons/icons';
-import { NodeNameSelector } from '../../Workflows/WorkflowStep/NodeComponents/NodeNameSelector';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { AntivirusContent } from '../../Workflows/WorkflowStep/Steps/Antivirus';
 import { DocumentTaggingContent } from '../../Workflows/WorkflowStep/Steps/DocumentTagging';
 import { EventBridgeContent } from '../../Workflows/WorkflowStep/Steps/EventBridge';
@@ -13,7 +13,10 @@ import { IntelligentDocumentProcessingContent } from '../../Workflows/WorkflowSt
 import { NotificationContent } from '../../Workflows/WorkflowStep/Steps/Notification';
 import { OcrContent } from '../../Workflows/WorkflowStep/Steps/Ocr';
 import { PublishContent } from '../../Workflows/WorkflowStep/Steps/Publish';
-import { QueueContent } from '../../Workflows/WorkflowStep/Steps/Queue';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import { ActionSelector } from './ActionSelector';
 
 export default function ActionModal({
   isOpened,
@@ -31,10 +34,10 @@ export default function ActionModal({
     onClose();
   };
 
-  const [newStep, setNewStep] = useState<any>(null);
+  const [newAction, setNewAction] = useState<any>(null);
 
   const onChange = (value: any, key: any) => {
-    setNewStep((prev: any) => ({
+    setNewAction((prev: any) => ({
       ...prev,
       parameters: {
         ...prev.parameters,
@@ -42,6 +45,36 @@ export default function ActionModal({
       },
     }));
   };
+
+  const onAddAction = () => {
+    if (!newAction) {
+      dispatch(
+        openNotificationDialog({
+          dialogTitle: 'Please select a step',
+        })
+      );
+    }
+    DocumentsService.postDocumentActions(
+      value!.documentId,
+      [newAction],
+      siteId
+    ).then((res) => {
+      if (res.status === 200) {
+        setNewAction(null);
+        onClose();
+      } else {
+        if (res?.errors) {
+          const errors = res.errors.map((error: any) => error.error).join('\n');
+          dispatch(openNotificationDialog({ dialogTitle: errors }));
+        } else {
+          dispatch(
+            openNotificationDialog({ dialogTitle: 'Error saving workflow' })
+          );
+        }
+      }
+    });
+  };
+
   return (
     <Transition.Root show={isOpened} as={Fragment}>
       <Dialog as="div" className="relative z-20" onClose={onClose}>
@@ -68,7 +101,7 @@ export default function ActionModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-4/5">
+              <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full max-w-lg">
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="w-full flex justify-between items-center">
                     <Dialog.Title className="text-2xl font-bold mb-4 mx-2">
@@ -81,95 +114,100 @@ export default function ActionModal({
                       <Close />
                     </div>
                   </div>
-                  <NodeNameSelector newStep={newStep} setNewStep={setNewStep} />
-                  {newStep?.name === 'ANTIVIRUS' && (
+                  <ActionSelector
+                    newAction={newAction}
+                    setNewAction={setNewAction}
+                  />
+                  {newAction?.type === 'ANTIVIRUS' && (
                     <AntivirusContent
-                      newStep={newStep}
+                      newStep={newAction}
                       isEditing={true}
                       data={null}
                       onChange={onChange}
                     />
                   )}
-                  {newStep?.name === 'DOCUMENTTAGGING' && (
+                  {newAction?.type === 'DOCUMENTTAGGING' && (
                     <DocumentTaggingContent
-                      newStep={newStep}
+                      newStep={newAction}
                       isEditing={true}
                       data={null}
                       onChange={onChange}
                     />
                   )}
-                  {newStep?.name === 'EVENTBRIDGE' && (
+                  {newAction?.type === 'EVENTBRIDGE' && (
                     <EventBridgeContent
-                      newStep={newStep}
+                      newStep={newAction}
                       isEditing={true}
                       data={null}
                       onChange={onChange}
                     />
                   )}
-                  {newStep?.name === 'FULLTEXT' && (
+                  {newAction?.type === 'FULLTEXT' && (
                     <FulltextSearchContent
-                      newStep={newStep}
+                      newStep={newAction}
                       isEditing={true}
                       data={null}
                       onChange={onChange}
                     />
                   )}
 
-                  {newStep?.name === 'IDP' && (
+                  {newAction?.type === 'IDP' && (
                     <IntelligentDocumentProcessingContent
-                      newStep={newStep}
+                      newStep={newAction}
                       isEditing={true}
                       data={null}
                       onChange={onChange}
                     />
                   )}
 
-                  {newStep?.name === 'NOTIFICATION' && (
+                  {newAction?.type === 'NOTIFICATION' && (
                     <NotificationContent
-                      newStep={newStep}
+                      newStep={newAction}
                       isEditing={true}
                       data={null}
                       onChange={onChange}
                     />
                   )}
 
-                  {newStep?.name === 'OCR' && (
+                  {newAction?.type === 'OCR' && (
                     <OcrContent
-                      newStep={newStep}
+                      newStep={newAction}
                       isEditing={true}
                       data={null}
                       onChange={onChange}
                     />
                   )}
 
-                  {newStep?.name === 'PUBLISH' && (
+                  {newAction?.type === 'PUBLISH' && (
                     <PublishContent
-                      newStep={newStep}
+                      newStep={newAction}
                       isEditing={true}
                       data={null}
                       onChange={onChange}
                     />
                   )}
 
-                  {newStep?.name === 'QUEUE' && (
-                    <QueueContent
-                      newStep={newStep}
-                      isEditing={true}
-                      data={null}
-                      onChange={onChange}
-                      siteId={siteId}
-                      setNewStep={setNewStep}
-                    />
-                  )}
-
-                  {newStep?.name === 'WEBHOOK' && (
+                  {newAction?.type === 'WEBHOOK' && (
                     <WebhookContent
-                      newStep={newStep}
+                      newStep={newAction}
                       isEditing={true}
                       data={null}
                       onChange={onChange}
                     />
                   )}
+                  <div className="w-full flex justify-end mt-4 h-10 gap-2">
+                    <ButtonGhost
+                      onClick={() => {
+                        setNewAction(null);
+                        onClose();
+                      }}
+                    >
+                      CANCEL
+                    </ButtonGhost>
+                    <ButtonPrimaryGradient onClick={onAddAction}>
+                      ADD
+                    </ButtonPrimaryGradient>
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
