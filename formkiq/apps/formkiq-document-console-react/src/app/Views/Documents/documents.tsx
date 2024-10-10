@@ -164,8 +164,8 @@ function Documents() {
     isUploadModalOpened,
     onUploadClose,
     uploadModalDocumentId,
-    onNewClose
-    onActionModalClick
+    onNewClose,
+    onActionModalClick,
   } = useDocumentActions();
 
   useEffect(() => {
