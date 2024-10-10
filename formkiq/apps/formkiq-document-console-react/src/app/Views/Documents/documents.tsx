@@ -153,6 +153,18 @@ function Documents() {
     onEditAttributesModalClick,
     onAttributeQuantityClick,
     onDocumentRelationshipsModalClick,
+    onUploadClick,
+    onNewClick,
+    onFolderUploadClick,
+    isFolderUploadModalOpened,
+    folderUploadModalDocumentId,
+    onFolderUploadClose,
+    isNewModalOpened,
+    newModalValue,
+    isUploadModalOpened,
+    onUploadClose,
+    uploadModalDocumentId,
+    onNewClose
     onActionModalClick
   } = useDocumentActions();
 
@@ -194,14 +206,6 @@ function Documents() {
   );
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
-  const [isUploadModalOpened, setUploadModalOpened] = useState(false);
-  const [isFolderUploadModalOpened, setFolderUploadModalOpened] =
-    useState(false);
-  const [uploadModalDocumentId, setUploadModalDocumentId] = useState('');
-  const [folderUploadModalDocumentId, setFolderUploadModalDocumentId] =
-    useState('');
-  const [newModalValue, setNewModalValue] = useState<ILine | null>(null);
-  const [isNewModalOpened, setNewModalOpened] = useState(false);
   const dispatch = useAppDispatch();
   const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
     []
@@ -517,7 +521,8 @@ function Documents() {
               documentId: '',
               documentInstance: null,
               folderInstance: null,
-            }
+            },
+            subfolderUri
           );
           break;
         case 'folderUpload':
@@ -542,7 +547,8 @@ function Documents() {
               documentId: '',
               documentInstance: null,
               folderInstance: null,
-            }
+            },
+              subfolderUri
           );
           break;
         case 'folderUpload':
@@ -880,23 +886,6 @@ function Documents() {
     }
   };
 
-  const onUploadClick = (event: any, documentId: string) => {
-    dispatch(setCurrentActionEvent(''));
-    setUploadModalOpened(true);
-    setUploadModalDocumentId(documentId);
-  };
-  const onUploadClose = () => {
-    setUploadModalOpened(false);
-  };
-  const onFolderUploadClick = (event: any) => {
-    dispatch(setCurrentActionEvent(''));
-    setFolderUploadModalOpened(true);
-    setFolderUploadModalDocumentId('');
-  };
-  const onFolderUploadClose = () => {
-    setFolderUploadModalOpened(false);
-  };
-
   const onDocumentDataChange = (event: any, value: ILine | null) => {
     dispatch(setDocuments({ documents: null }));
     dispatch(
@@ -911,24 +900,6 @@ function Documents() {
         filterAttribute,
       })
     );
-  };
-  const onNewClick = (event: any, value: ILine | null) => {
-    dispatch(setCurrentActionEvent(''));
-    if (TopLevelFolders.indexOf(subfolderUri) !== -1) {
-      // TODO: add redirect or messaging of location of new file, as it won't be in the TopLevelFolder
-      value = {
-        lineType: 'folder',
-        folder: '',
-        documentId: '',
-        documentInstance: null,
-        folderInstance: null,
-      };
-    }
-    setNewModalValue(value);
-    setNewModalOpened(true);
-  };
-  const onNewClose = () => {
-    setNewModalOpened(false);
   };
 
   const DownloadDocument = () => {
