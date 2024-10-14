@@ -5,7 +5,12 @@ import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLaye
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import FolderListLine from '../../Components/DocumentsAndFolders/FolderListLine/FolderListLine';
-import { RestoreFile, Spinner, Trash } from '../../Components/Icons/icons';
+import {
+  Download,
+  RestoreFile,
+  Spinner,
+  Trash,
+} from '../../Components/Icons/icons';
 import { ConfigState } from '../../Store/reducers/config';
 import { DocumentListState } from '../../Store/reducers/documentsList';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
@@ -36,6 +41,7 @@ type DocumentTableProps = {
   setSelectedDocuments: (selectedDocuments: string[]) => void;
   onDeleteSelectedDocuments: (softDelete: boolean) => void;
   onRestoreSelectedDocuments: () => void;
+  toggleArchiveTab:  () => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -59,6 +65,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     setSelectedDocuments,
     onDeleteSelectedDocuments,
     onRestoreSelectedDocuments,
+    toggleArchiveTab,
   } = props;
 
   const { formkiqVersion, useIndividualSharing, useSoftDelete } =
@@ -216,9 +223,11 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                   )}
                   {subfolderUri !== 'deleted' &&
                     (selectedDocuments.length > 0 && !isArchiveTabExpanded ? (
+                      <div className="inline-flex items-end">
+
                       <button
                         onClick={() => onDeleteSelectedDocuments(useSoftDelete)}
-                        className="w-8 h-8 p-[6px] relative text-neutral-700 hover:text-neutral-900 group ml-4"
+                        className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group ml-4"
                         title="Delete Selected"
                       >
                         <div className="relative z-10">
@@ -226,6 +235,20 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                         </div>
                         <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
                       </button>
+
+                        <button
+                          onClick={toggleArchiveTab}
+                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
+                          title="Create Archive"
+                        >
+                          <div className="relative z-10">
+                            <Download />
+                          </div>
+                          <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
+
+
+                      </div>
                     ) : (
                       'Name'
                     ))}
