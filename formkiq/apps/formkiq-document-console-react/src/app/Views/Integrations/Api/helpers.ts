@@ -2014,3 +2014,14 @@ export const putSiteGroupPermissionsApiItem = {
     defaultPostJsonValue: '{"permissions": ["ADMIN"]}',
     license: 'Core',
 };
+
+export const deleteSiteGroupPermissionsApiItem = {
+    method: 'DELETE',
+    path: '/sites/ SITE_ID /groups/ GROUP_NAME ',
+    description: 'Deletes a group from a site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresGroupName: true,
+    license: 'Core',
+};

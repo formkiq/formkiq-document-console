@@ -156,7 +156,8 @@ import {
   patchSitesApiItem,
   getSiteGroupsApiItem,
   getSiteGroupApiItem,
-  putSiteGroupPermissionsApiItem
+  putSiteGroupPermissionsApiItem,
+  deleteSiteGroupPermissionsApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -506,6 +507,7 @@ export function ApiExplorer() {
                 <ApiItem apiItem={patchSitesApiItem} sites={sites}/>
                 <ApiItem apiItem={getSiteGroupsApiItem} sites={sites} />
                 <ApiItem apiItem={getSiteGroupApiItem} sites={sites}/>
+                <ApiItem apiItem={deleteSiteGroupPermissionsApiItem} sites={sites}/>
                 <ApiItem apiItem={putSiteGroupPermissionsApiItem} sites={sites}/>
               </div>
             </div>
