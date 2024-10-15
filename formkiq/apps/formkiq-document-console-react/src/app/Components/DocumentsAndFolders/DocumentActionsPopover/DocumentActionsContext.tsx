@@ -364,7 +364,7 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
       return;
     }
     if (setSelectedDocuments) {
-      setSelectedDocuments((docs) => docs.filter((doc: any) => doc !== id));
+      setSelectedDocuments((docs) => docs.filter((doc: any) => doc.documentId !== id));
     } else {
       const folderLocation = pathname.split('/').slice(0, -1).join('/');
       navigate(folderLocation);

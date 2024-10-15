@@ -30,18 +30,19 @@ type DocumentTableProps = {
   onDocumentDataChange: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
-  isArchiveTabExpanded: boolean;
   addToPendingArchive: (file: IDocument) => void;
   deleteFromPendingArchive: (file: IDocument) => void;
   archiveStatus: string;
   trackScrolling: () => void;
   infoDocumentId: string;
   onDocumentInfoClick: () => void;
-  selectedDocuments: string[];
-  setSelectedDocuments: (selectedDocuments: string[]) => void;
+  selectedDocuments: IDocument[];
+  setSelectedDocuments: (selectedDocuments: IDocument[]) => void;
   onDeleteSelectedDocuments: (softDelete: boolean) => void;
   onRestoreSelectedDocuments: () => void;
-  toggleArchiveTab:  () => void;
+  openArchiveTab : () => void;
+  archiveTabStatus: "open" | "closed"| "minimized"
+  getExpandedFoldersDocuments: (folders:IFolder[])=>IDocument[]
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -54,7 +55,6 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     currentDocumentsRootUri,
     filterTag,
     isSiteReadOnly,
-    isArchiveTabExpanded,
     addToPendingArchive,
     deleteFromPendingArchive,
     archiveStatus,
@@ -65,7 +65,9 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     setSelectedDocuments,
     onDeleteSelectedDocuments,
     onRestoreSelectedDocuments,
-    toggleArchiveTab,
+    openArchiveTab,
+    archiveTabStatus,
+    getExpandedFoldersDocuments,
   } = props;
 
   const { formkiqVersion, useIndividualSharing, useSoftDelete } =
@@ -156,26 +158,8 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     }
   }
   function selectAllDocuments() {
-    const documentsIds = documents.map((item) => item.documentId);
-    const expandedFoldersDocumentsIds = getExpandedFoldersDocumentsIds(folders);
-    setSelectedDocuments([...documentsIds, ...expandedFoldersDocumentsIds]);
-  }
-
-  function getExpandedFoldersDocumentsIds(folders: IFolder[]): string[] {
-    return folders.reduce((acc: string[], folder: IFolder) => {
-      if (folder.isExpanded) {
-        // Add document IDs from the current folder
-        const folderDocumentIds = folder.documents.map((doc) => doc.documentId);
-
-        // Recursively get document IDs from subfolders
-        const subFolderDocumentIds = getExpandedFoldersDocumentsIds(
-          folder.folders
-        );
-
-        return [...acc, ...folderDocumentIds, ...subFolderDocumentIds];
-      }
-      return acc;
-    }, []);
+    const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
+    setSelectedDocuments([...documents, ...expandedFoldersDocuments]);
   }
 
   function unselectAllDocuments() {
@@ -204,7 +188,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 className="px-4 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
               >
                 <div className="flex items-center">
-                  {!isArchiveTabExpanded && (
+                  {archiveTabStatus === "closed" && (
                     <div className="inline-flex items-end">
                       <input
                         id="checkbox-all"
@@ -222,7 +206,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                     </div>
                   )}
                   {subfolderUri !== 'deleted' &&
-                    (selectedDocuments.length > 0 && !isArchiveTabExpanded ? (
+                    (selectedDocuments.length > 0 && archiveTabStatus === "closed" ? (
                       <div className="inline-flex items-end">
 
                       <button
@@ -237,7 +221,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                       </button>
 
                         <button
-                          onClick={toggleArchiveTab}
+                          onClick={openArchiveTab}
                           className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
                           title="Create Archive"
                         >
@@ -254,7 +238,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                     ))}
 
                   {subfolderUri === 'deleted' &&
-                    (selectedDocuments.length > 0 && !isArchiveTabExpanded ? (
+                    (selectedDocuments.length > 0 && archiveTabStatus === "closed" ? (
                       <>
                         <button
                           onClick={onRestoreSelectedDocuments}
@@ -337,7 +321,6 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onRestoreClick={() => onRestoreDocument(file.documentId)}
                 onDocumentDataChange={onDocumentDataChange}
                 filterTag={filterTag}
-                isArchiveTabExpanded={isArchiveTabExpanded}
                 archiveStatus={archiveStatus}
                 addToPendingArchive={addToPendingArchive}
                 deleteFromPendingArchive={deleteFromPendingArchive}
@@ -345,6 +328,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 onDocumentInfoClick={onDocumentInfoClick}
                 selectedDocuments={selectedDocuments}
                 setSelectedDocuments={setSelectedDocuments}
+                archiveTabStatus={archiveTabStatus}
               />
             ))}
           </tbody>
@@ -382,12 +366,12 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     filterTag,
     isSiteReadOnly,
     deleteFolder,
-    isArchiveTabExpanded,
     addToPendingArchive,
     deleteFromPendingArchive,
     archiveStatus,
     selectedDocuments,
     setSelectedDocuments,
+    archiveTabStatus,
   } = props;
 
   return (
@@ -406,12 +390,12 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               onDocumentDataChange={onDocumentDataChange}
               onRestoreDocument={onRestoreDocument}
               filterTag={filterTag}
-              isArchiveTabExpanded={isArchiveTabExpanded}
               archiveStatus={archiveStatus}
               addToPendingArchive={addToPendingArchive}
               deleteFromPendingArchive={deleteFromPendingArchive}
               selectedDocuments={selectedDocuments}
               setSelectedDocuments={setSelectedDocuments}
+              archiveTabStatus={archiveTabStatus}
             />
           );
         })}

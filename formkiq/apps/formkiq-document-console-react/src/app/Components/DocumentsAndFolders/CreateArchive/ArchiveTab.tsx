@@ -15,7 +15,7 @@ export const PendingArchiveTab = ({
   documentsRootUri,
   archiveStatus,
   setArchiveStatus,
-  clearPendingArchive,
+  closeArchiveTab,
   deleteFromPendingArchive,
   setSelectedDocuments,
 }: {
@@ -23,9 +23,9 @@ export const PendingArchiveTab = ({
   documentsRootUri: string;
   archiveStatus: string;
   setArchiveStatus: (value: string) => void;
-  clearPendingArchive: () => void;
+  closeArchiveTab: () => void;
   deleteFromPendingArchive: (file: IDocument) => void;
-  setSelectedDocuments: (documentIds: string[]) => void;
+  setSelectedDocuments: (documents: IDocument[]) => void;
 }) => {
   const dispatch = useAppDispatch();
   const { pendingArchive } = useSelector(ConfigState);
@@ -207,7 +207,7 @@ export const PendingArchiveTab = ({
           </ButtonPrimary>
         )}
         {archiveStatus === ARCHIVE_STATUSES.COMPLETE && (
-          <ButtonGhost onClick={clearPendingArchive} type="button">
+          <ButtonGhost onClick={closeArchiveTab} type="button">
             <span>Done</span>
           </ButtonGhost>
         )}

@@ -99,6 +99,7 @@ function Documents() {
   const { user } = useAuthenticatedState();
   const {
     documents,
+    folders,
     nextToken,
     loadingStatus,
     currentSearchPage,
@@ -187,7 +188,9 @@ function Documents() {
   const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
     useState<boolean>(isSiteReadOnly);
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
-  const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
+  const [archiveTabStatus, setArchiveTabStatus] = useState<
+    'open' | 'closed' | 'minimized'
+  >('closed');
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
   const [infoDocumentAction, setInfoDocumentAction] = useState('');
@@ -215,7 +218,7 @@ function Documents() {
   const documentsPageWrapper = document.getElementById('documentsPageWrapper');
   const closeDropZoneRef = useRef(null);
   const [isDropZoneVisible, setIsDropZoneVisible] = useState(false);
-  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+  const [selectedDocuments, setSelectedDocuments] = useState<IDocument[]>([]);
 
   const [relationshipDocumentsMap, setRelationshipDocumentsMap] = useState<{
     [key: string]: string;
@@ -731,9 +734,12 @@ function Documents() {
         }
       );
     }
+    if (recheckSiteInfo.siteId !== currentSiteId) {
+      dispatch(setPendingArchive([]))
+      setSelectedDocuments([]);
+    }
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    setSelectedDocuments([]);
     setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
@@ -763,6 +769,21 @@ function Documents() {
     formkiqVersion,
   ]);
 
+  useEffect(() => {
+    // unselect documents that are not in the expanded/open folders
+    if (selectedDocuments.length > 0) {
+      const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
+      const allDisplayedDocuments = [...documents, ...expandedFoldersDocuments];
+      const filteredDocuments = selectedDocuments.filter(
+        (document) =>
+          allDisplayedDocuments.findIndex(
+            (doc) => doc.documentId === document.documentId
+          ) !== -1
+      );
+      setSelectedDocuments(filteredDocuments);
+    }
+  }, [documents, folders]);
+
   const deleteFunc = async (id: string, softDelete: boolean) => {
     const res: any = await dispatch(
       deleteDocument({
@@ -780,7 +801,7 @@ function Documents() {
       );
       return;
     }
-    setSelectedDocuments((docs) => docs.filter((doc: any) => doc !== id));
+    setSelectedDocuments((docs) => docs.filter((doc: any) => doc.documentId !== id));
   };
 
   const onDeleteDocument = (id: string, softDelete: boolean) => {
@@ -807,7 +828,7 @@ function Documents() {
 
     dispatch(
       openDialog({
-        callback: () => deleteMultipleDocuments(selectedDocuments, softDelete),
+        callback: () => deleteMultipleDocuments(selectedDocuments.map((doc)=>doc.documentId), softDelete),
         dialogTitle: `Are you sure you want to delete ${
           selectedDocuments.length
         } selected document${selectedDocuments.length === 1 ? '' : 's'}${
@@ -851,14 +872,14 @@ function Documents() {
         })
       );
       setSelectedDocuments((docs) =>
-        docs.filter((doc: any) => doc !== documentId)
+        docs.filter((doc: IDocument) => doc.documentId !== documentId)
       );
     });
   };
 
   const onRestoreSelectedDocuments = async () => {
-    await selectedDocuments.forEach((id: string) => {
-      restoreDocument(id);
+    await selectedDocuments.forEach((doc: IDocument) => {
+        restoreDocument(doc.documentId);
     });
   };
 
@@ -1308,29 +1329,49 @@ function Documents() {
     );
   };
 
-  const toggleArchiveTab = () => {
-    if (!isArchiveTabExpanded) {
-      const docs: IDocument[] = [];
-      if (selectedDocuments.length > 0) {
-        selectedDocuments.forEach((documentId: string) => {
-          const doc = documents.find((d) => d.documentId === documentId);
-          if (doc) {
-            docs.push(doc);
-          }
-        });
-        dispatch(setPendingArchive(docs));
+  function getExpandedFoldersDocuments(folders: IFolder[]): IDocument[] {
+    return folders.reduce((acc: IDocument[], folder: IFolder) => {
+      if (folder.isExpanded) {
+        // Add document IDs from the current folder
+        const folderDocuments = folder.documents
+        // Recursively get document IDs from subfolders
+        const subFolderDocuments = getExpandedFoldersDocuments(
+          folder.folders
+        );
+        return [...acc, ...folderDocuments, ...subFolderDocuments];
       }
-    } else {
-      const documentIds: string[] = [];
-      if (pendingArchive.length > 0) {
-        pendingArchive.forEach((document: IDocument) => {
-          documentIds.push(document.documentId);
-        });
-      }
-      setSelectedDocuments(documentIds);
-    }
-    setIsArchiveTabExpanded(!isArchiveTabExpanded);
+      return acc;
+    }, []);
+  }
+
+  const openArchiveTab = () => {
+      dispatch(setPendingArchive(selectedDocuments));
+      setArchiveTabStatus("open")
   };
+  const closeArchiveTab = () => {
+    setArchiveStatus(ARCHIVE_STATUSES.INITIAL)
+    const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
+    const allDisplayedDocuments = [...documents, ...expandedFoldersDocuments];
+    const filteredDocuments = pendingArchive.filter(
+      (document) =>
+        allDisplayedDocuments.findIndex(
+          (doc) => doc.documentId === document.documentId
+        ) !== -1
+    );
+    dispatch(setPendingArchive([]));
+    setSelectedDocuments(filteredDocuments);
+    setArchiveTabStatus('closed');
+  };
+
+  const minimizeArchiveTab = () => {
+    setArchiveTabStatus("minimized")
+  };
+
+  const expandArchiveTab = () => {
+      setArchiveTabStatus("open")
+  };
+
+
   const deleteFromPendingArchive = (file: IDocument) => {
     dispatch(
       setPendingArchive(
@@ -1338,18 +1379,18 @@ function Documents() {
       )
     );
     setSelectedDocuments(
-      selectedDocuments.filter((f) => f !== file.documentId)
+      selectedDocuments.filter((f) => f.documentId  !== file.documentId)
     );
   };
   const addToPendingArchive = (file: IDocument) => {
     if (pendingArchive) {
-      if (pendingArchive.indexOf(file) === -1) {
+      if (pendingArchive.findIndex((doc)=>doc.documentId===file.documentId) === -1) {
         dispatch(setPendingArchive([...pendingArchive, file]));
-        setSelectedDocuments([...selectedDocuments, file.documentId]);
+        setSelectedDocuments([...selectedDocuments, file]);
       }
     } else {
       dispatch(setPendingArchive([file]));
-      setSelectedDocuments([file.documentId]);
+      setSelectedDocuments([file]);
     }
   };
 
@@ -1361,11 +1402,11 @@ function Documents() {
   };
   const [archiveStatus, setArchiveStatus] = useState(ARCHIVE_STATUSES.INITIAL);
 
-  const clearPendingArchive = () => {
-    setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
-    dispatch(setPendingArchive([]));
-    setIsArchiveTabExpanded(!isArchiveTabExpanded);
-  };
+  // const clearPendingArchive = () => {
+  //   setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+  //   dispatch(setPendingArchive([]));
+  //   setIsArchiveTabExpanded(!isArchiveTabExpanded);
+  // };
 
   const viewDocumentVersion = (versionKey: string) => {
     if (infoDocumentId) {
@@ -1401,26 +1442,27 @@ function Documents() {
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
             <div className="flex items-center gap-4 pr-8 z-10">
-              {archiveStatus !== ARCHIVE_STATUSES.COMPLETE && (
-                <ButtonSecondary onClick={toggleArchiveTab} type="button">
-                  {isArchiveTabExpanded ? (
-                    <>
-                      <span>Minimize Archive</span>
-                    </>
-                  ) : (
-                    <>
-                      {pendingArchive.length ? (
-                        <span>View Pending Archive</span>
-                      ) : (
-                        <span>Create Archive</span>
-                      )}
-                    </>
-                  )}
+
+              {archiveTabStatus === 'closed' && (
+                <ButtonSecondary onClick={openArchiveTab} type="button">
+                  Create Archive
                 </ButtonSecondary>
               )}
-              {isArchiveTabExpanded &&
+              {archiveTabStatus === 'minimized' && (
+                <ButtonSecondary onClick={expandArchiveTab} type="button">
+                  View Pending Archive
+                </ButtonSecondary>
+              )}
+              {archiveTabStatus === 'open' && (
+                <ButtonSecondary onClick={minimizeArchiveTab}>
+                  Minimize Archive
+                </ButtonSecondary>
+              )}
+
+              {/*// )}*/}
+              {archiveTabStatus === 'open' &&
                 archiveStatus === ARCHIVE_STATUSES.INITIAL && (
-                  <ButtonTertiary onClick={clearPendingArchive} type="button">
+                  <ButtonTertiary onClick={closeArchiveTab} type="button">
                     Cancel
                   </ButtonTertiary>
                 )}
@@ -1487,14 +1529,14 @@ function Documents() {
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
-              {isArchiveTabExpanded && (
+              {archiveTabStatus === 'open' && (
                 <div className="pt-2 pr-8">
                   <PendingArchiveTab
                     siteId={currentSiteId}
                     documentsRootUri={currentDocumentsRootUri}
                     archiveStatus={archiveStatus}
                     setArchiveStatus={setArchiveStatus}
-                    clearPendingArchive={clearPendingArchive}
+                    closeArchiveTab={closeArchiveTab}
                     deleteFromPendingArchive={deleteFromPendingArchive}
                     setSelectedDocuments={setSelectedDocuments}
                   />
@@ -1521,7 +1563,6 @@ function Documents() {
                 filterTag={filterTag}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
-                isArchiveTabExpanded={isArchiveTabExpanded}
                 addToPendingArchive={addToPendingArchive}
                 deleteFromPendingArchive={deleteFromPendingArchive}
                 archiveStatus={archiveStatus}
@@ -1531,7 +1572,9 @@ function Documents() {
                 setSelectedDocuments={setSelectedDocuments}
                 onDeleteSelectedDocuments={onDeleteSelectedDocuments}
                 onRestoreSelectedDocuments={onRestoreSelectedDocuments}
-                toggleArchiveTab={toggleArchiveTab}
+                openArchiveTab={openArchiveTab}
+                archiveTabStatus={archiveTabStatus}
+                getExpandedFoldersDocuments={getExpandedFoldersDocuments}
               />
               <Dialog
                 open={isDropZoneVisible}
