@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { ConfigState } from '../../Store/reducers/config';
 import {
   closeDialog,
   openDialog,
 } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
 import { DocumentsService } from '../../helpers/services/documentsService';
-import { useSelector } from 'react-redux';
-import { ConfigState } from '../../Store/reducers/config';
 
 export function AccountSettings() {
   const { user } = useAuthenticatedState();
@@ -364,15 +364,14 @@ export function AccountSettings() {
                 </label>
               </div>
               <div className="w-full md:w-1/4">
-                <input
+                <textarea
                   aria-label="Docusign Rsa Private Key"
-                  type="text"
                   {...register('docusign.rsaPrivateKey')}
                   placeholder="******"
                   className="appearance-none rounded-md relative block w-full px-3 py-3 border border-neutral-600
                   placeholder-neutral-500 text-neutral-900 rounded-t-md
                   focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
-                />
+                ></textarea>
               </div>
             </div>
           </div>
