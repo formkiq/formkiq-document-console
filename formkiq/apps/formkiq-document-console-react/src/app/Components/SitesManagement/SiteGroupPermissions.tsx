@@ -310,7 +310,7 @@ export const SiteGroupPermissions: React.FC<
                       ))}
                     </div>
                   </div>
-                  <div className="flex justify-end h-10 gap-2">
+                  <div className="flex justify-end h-8 gap-2">
                     <ButtonTertiary onClick={() => setSelectedNewGroupName('')}>
                       Cancel
                     </ButtonTertiary>
