@@ -46,53 +46,51 @@ function SitesManagement() {
       <Helmet>
         <title>Sites Management</title>
       </Helmet>
-      {user.isAdmin && (
-        <>
-          <div className="flex flex-row">
-            <div className="flex-1 inline-block h-full">
-              <div className="flex flex-col w-full h-full px-6 mt-6">
-                <div className="flex flex-row justify-between items-center h-10">
-                  <h1 className="text-xl font-bold">Sites Management</h1>
-                  {formkiqVersion.modules.includes(
-                    'site_permissions_defined'
-                  ) && (
-                    <ButtonPrimaryGradient
-                      onClick={() => setIsCreateSiteModalOpen(true)}
-                    >
-                      + New Site
-                    </ButtonPrimaryGradient>
-                  )}
-                </div>
 
-                <ul className="flex flex-col gap-4 mt-4">
-                  {sites.length > 0 ? (
-                    sites.map((site) => (
-                      <SiteListItem
-                        key={site.siteId}
-                        site={site}
-                        isEditing={editingSiteId === site.siteId}
-                        onEditToggle={setEditingSiteId}
-                        groups={groups}
-                        onSitesChange={updateUserSites}
-                        formkiqVersion={formkiqVersion}
-                      />
-                    ))
-                  ) : (
-                    <h3 className="text-center">
-                      There are no sites created yet.
-                    </h3>
-                  )}
-                </ul>
-              </div>
+      <div className="flex flex-row">
+        <div className="flex-1 inline-block h-full">
+          <div className="flex flex-col w-full h-full px-6 mt-6">
+            <div className="flex flex-row justify-between items-center h-10">
+              <h1 className="text-xl font-bold">Sites Management</h1>
+              {((formkiqVersion.modules.includes('site_permissions_defined') &&
+                user.sites.length === 0) ||
+                user.isAdmin) && (
+                <ButtonPrimaryGradient
+                  onClick={() => setIsCreateSiteModalOpen(true)}
+                >
+                  + New Site
+                </ButtonPrimaryGradient>
+              )}
             </div>
+            {user.isAdmin && (
+              <ul className="flex flex-col gap-4 mt-4">
+                {sites.length > 0 ? (
+                  sites.map((site) => (
+                    <SiteListItem
+                      key={site.siteId}
+                      site={site}
+                      isEditing={editingSiteId === site.siteId}
+                      onEditToggle={setEditingSiteId}
+                      groups={groups}
+                      onSitesChange={updateUserSites}
+                      formkiqVersion={formkiqVersion}
+                    />
+                  ))
+                ) : (
+                  <h3 className="text-center">
+                    There are no sites created yet.
+                  </h3>
+                )}
+              </ul>
+            )}
           </div>
-          <CreateSiteModal
-            isOpen={isCreateSiteModalOpen}
-            setIsOpen={setIsCreateSiteModalOpen}
-            onSitesChange={updateUserSites}
-          />
-        </>
-      )}
+        </div>
+      </div>
+      <CreateSiteModal
+        isOpen={isCreateSiteModalOpen}
+        setIsOpen={setIsCreateSiteModalOpen}
+        onSitesChange={updateUserSites}
+      />
     </>
   );
 }

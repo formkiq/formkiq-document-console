@@ -46,14 +46,21 @@ function CreateSiteModal({
         onSitesChange();
         closeModal();
       } else {
-        dispatch(
-          openNotificationDialog({
-            dialogTitle: 'Error. Site has not been created.',
-          })
-        );
+        if (res.errors) {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error. ' + res.errors[0].error,
+            })
+          );
+        } else {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error. Site has not been created.',
+            })
+          );
+        }
       }
     });
-
   };
 
   const preventDialogClose = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -94,7 +101,6 @@ function CreateSiteModal({
               </Dialog.Title>
 
               <form className="flex flex-col gap-4 mt-6" onSubmit={onSubmit}>
-
                 <input
                   type="text"
                   className="h-12 px-4 border border-neutral-300 text-sm rounded-md"
@@ -117,15 +123,16 @@ function CreateSiteModal({
                 />
                 <div className="h-10 max-w-[200px]">
                   <p className="text-sm font-bold">Status</p>
-                <RadioListbox
-                  selectedValue={siteValue.status}
-                  setSelectedValue={(value: 'ACTIVE' | 'INACTIVE') => {
-                    setSiteValue({ ...siteValue, status: value });
-                  }}
-                  values={['ACTIVE', 'INACTIVE']}
-                  titles={['Active', 'Inactive']}
-                  placeholderText="Status"
-                /></div>
+                  <RadioListbox
+                    selectedValue={siteValue.status}
+                    setSelectedValue={(value: 'ACTIVE' | 'INACTIVE') => {
+                      setSiteValue({ ...siteValue, status: value });
+                    }}
+                    values={['ACTIVE', 'INACTIVE']}
+                    titles={['Active', 'Inactive']}
+                    placeholderText="Status"
+                  />
+                </div>
 
                 <div className="flex flex-row justify-end gap-4 text-base font-bold h-10 mt-4">
                   <ButtonGhost type="button" onClick={closeModal} className="">

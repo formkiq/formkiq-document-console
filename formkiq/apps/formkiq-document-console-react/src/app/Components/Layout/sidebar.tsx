@@ -834,13 +834,17 @@ export function Sidebar() {
                     title="API Keys"
                     testId="nav-api-keys"
                   />
-                  {user.isAdmin && (
-                      <NavigationItem
-                          to="/admin/sites-management"
-                          icon={<SitesManagement />}
-                          title="Sites Management"
-                          testId="nav-sites-management"
-                      />
+                  {((formkiqVersion.modules.includes(
+                    'site_permissions_defined'
+                  ) &&
+                    user.sites.length === 0) ||
+                    user.isAdmin) && (
+                    <NavigationItem
+                      to="/admin/sites-management"
+                      icon={<SitesManagement />}
+                      title="Sites Management"
+                      testId="nav-sites-management"
+                    />
                   )}
                   {userAuthenticationType === 'cognito' && (
                     <>
