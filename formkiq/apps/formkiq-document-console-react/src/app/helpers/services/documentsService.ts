@@ -2308,5 +2308,15 @@ export class DocumentsService {
       updateSiteGroupPermissions,
     });
   }
+  @formkiqAPIHandler
+  public static async deleteSiteGroupPermissions(
+    siteId: string,
+    groupName: string,
+  ):  Promise<any> {
+    return this.getFormkiqClient().sitesApi.deleteSiteGroupPermissions({
+      siteId,
+      groupName,
+    });
+  }
 
 }

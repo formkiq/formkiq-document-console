@@ -11,10 +11,12 @@ import { SiteListItem } from '../../Components/SitesManagement/SiteListItem';
 import CreateSiteModal from '../../Components/SitesManagement/CreateSiteModal';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import { login, useAuthenticatedState } from '../../Store/reducers/auth';
+import { ConfigState } from '../../Store/reducers/config';
 
 function SitesManagement() {
   const { user } = useAuthenticatedState();
   const { groups } = useSelector(UserManagementState);
+  const { formkiqVersion } = useSelector(ConfigState);
   const dispatch = useAppDispatch();
 
   const [editingSiteId, setEditingSiteId] = useState<string | null>(null);
@@ -44,42 +46,53 @@ function SitesManagement() {
       <Helmet>
         <title>Sites Management</title>
       </Helmet>
-      <div className="flex flex-row">
-        <div className="flex-1 inline-block h-full">
-          <div className="flex flex-col w-full h-full px-6 mt-6">
-            <div className="flex flex-row justify-between items-center h-10">
-              <h1 className="text-xl font-bold">Sites Management</h1>
-              <ButtonPrimaryGradient
-                onClick={() => setIsCreateSiteModalOpen(true)}
-              >
-                + New Site
-              </ButtonPrimaryGradient>
-            </div>
+      {user.isAdmin && (
+        <>
+          <div className="flex flex-row">
+            <div className="flex-1 inline-block h-full">
+              <div className="flex flex-col w-full h-full px-6 mt-6">
+                <div className="flex flex-row justify-between items-center h-10">
+                  <h1 className="text-xl font-bold">Sites Management</h1>
+                  {formkiqVersion.modules.includes(
+                    'site_permissions_defined'
+                  ) && (
+                    <ButtonPrimaryGradient
+                      onClick={() => setIsCreateSiteModalOpen(true)}
+                    >
+                      + New Site
+                    </ButtonPrimaryGradient>
+                  )}
+                </div>
 
-            <ul className="flex flex-col gap-4 mt-4">
-              {sites.length > 0 ? (
-                sites.map((site) => (
-                  <SiteListItem
-                    key={site.siteId}
-                    site={site}
-                    isEditing={editingSiteId === site.siteId}
-                    onEditToggle={setEditingSiteId}
-                    groups={groups}
-                    onSitesChange={updateUserSites}
-                  />
-                ))
-              ) : (
-                <h3 className="text-center">There are no sites created yet.</h3>
-              )}
-            </ul>
+                <ul className="flex flex-col gap-4 mt-4">
+                  {sites.length > 0 ? (
+                    sites.map((site) => (
+                      <SiteListItem
+                        key={site.siteId}
+                        site={site}
+                        isEditing={editingSiteId === site.siteId}
+                        onEditToggle={setEditingSiteId}
+                        groups={groups}
+                        onSitesChange={updateUserSites}
+                        formkiqVersion={formkiqVersion}
+                      />
+                    ))
+                  ) : (
+                    <h3 className="text-center">
+                      There are no sites created yet.
+                    </h3>
+                  )}
+                </ul>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <CreateSiteModal
-        isOpen={isCreateSiteModalOpen}
-        setIsOpen={setIsCreateSiteModalOpen}
-        onSitesChange={updateUserSites}
-      />
+          <CreateSiteModal
+            isOpen={isCreateSiteModalOpen}
+            setIsOpen={setIsCreateSiteModalOpen}
+            onSitesChange={updateUserSites}
+          />
+        </>
+      )}
     </>
   );
 }

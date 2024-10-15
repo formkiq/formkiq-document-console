@@ -11,6 +11,7 @@ interface SiteTitleEditorProps {
   currentTitle: string;
   isEditingSite: boolean;
   onSitesChange: () => void;
+  formkiqVersion: any;
 }
 
 export const SiteTitle: React.FC<SiteTitleEditorProps> = ({
@@ -18,6 +19,7 @@ export const SiteTitle: React.FC<SiteTitleEditorProps> = ({
   currentTitle,
   isEditingSite,
   onSitesChange,
+  formkiqVersion,
 }) => {
   const dispatch = useAppDispatch();
   const [isEditing, setIsEditing] = useState(false);
@@ -53,7 +55,9 @@ export const SiteTitle: React.FC<SiteTitleEditorProps> = ({
 
   return (
     <div className="flex flex-col">
-      {isEditing && isEditingSite ? (
+      {isEditing &&
+      isEditingSite &&
+      formkiqVersion.modules?.includes('site_permissions_defined') ? (
         <div className="flex gap-2 items-end h-10">
           <input
             type="text"
@@ -71,15 +75,16 @@ export const SiteTitle: React.FC<SiteTitleEditorProps> = ({
       ) : (
         <h1 className="text-lg font-bold">
           {currentTitle}{' '}
-          {isEditingSite && (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="text-neutral-500 underline hover:text-primary-500 w-4 h-4"
-              title="Edit Site Name"
-            >
-              <Pencil />
-            </button>
-          )}
+          {isEditingSite &&
+            formkiqVersion.modules?.includes('site_permissions_defined') && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-neutral-500 underline hover:text-primary-500 w-4 h-4"
+                title="Edit Site Name"
+              >
+                <Pencil />
+              </button>
+            )}
         </h1>
       )}
       <span className="text-xs text-neutral-500 font-bold">

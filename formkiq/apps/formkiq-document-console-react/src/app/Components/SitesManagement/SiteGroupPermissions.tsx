@@ -130,11 +130,19 @@ export const SiteGroupPermissions: React.FC<
   const handleSaveGroupPermissions = (groupName: string) => {
     if (!groupName) return;
     const isAddingNewGroup = !siteGroups.includes(groupName);
-
+    const permissions = isAddingNewGroup
+      ? newGroupEditingSitePermissions
+      : editingPermissions;
+    if (permissions.length === 0) {
+      dispatch(
+        openNotificationDialog({
+          dialogTitle: 'Please select at least one permission.',
+        })
+      );
+      return;
+    }
     DocumentsService.setSiteGroupPermissions(siteId, groupName, {
-      permissions: isAddingNewGroup
-        ? newGroupEditingSitePermissions
-        : editingPermissions,
+      permissions,
     }).then((res) => {
       if (res.status === 200) {
         dispatch(
@@ -144,41 +152,51 @@ export const SiteGroupPermissions: React.FC<
         );
         if (isAddingNewGroup) {
           setSelectedNewGroupName('');
-          onGroupsChange()
+          onGroupsChange();
           setIsAddingNewGroupPermissions(false);
         } else {
           setSelectedGroupName('');
         }
       } else {
-        dispatch(
-          openNotificationDialog({
-            dialogTitle: 'Error. Site group permissions have not been saved.',
-          })
-        );
+        if (res.errors) {
+          const errors = res.errors.map((err:any)=>err.error)
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error. \n ' + errors.join('\n'),
+            })
+          );
+        } else {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Error. Site group permissions have not been saved.',
+            })
+          );
+        }
       }
     });
   };
 
   const deleteGroupPermissions = (groupName: string) => {
-    DocumentsService.setSiteGroupPermissions(siteId, groupName, {
-      permissions: [],
-    }).then((res) => {
-      if (res.status === 200) {
-        dispatch(
-          openNotificationDialog({
-            dialogTitle: 'Site group permissions have been deleted.',
-          })
-        );
-        onGroupsChange()
-        setSelectedGroupName('');
-      } else {
-        dispatch(
-          openNotificationDialog({
-            dialogTitle: 'Error. Site group permissions have not been deleted.',
-          })
-        );
+    DocumentsService.deleteSiteGroupPermissions(siteId, groupName).then(
+      (res) => {
+        if (res.status === 200) {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Site group permissions have been deleted.',
+            })
+          );
+          onGroupsChange();
+          setSelectedGroupName('');
+        } else {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle:
+                'Error. Site group permissions have not been deleted.',
+            })
+          );
+        }
       }
-    });
+    );
   };
   return (
     <div className="mt-4">

@@ -15,6 +15,7 @@ interface SiteListItemProps {
   onEditToggle: (siteId: string | null) => void;
   groups: any[];
   onSitesChange: () => void;
+  formkiqVersion: any;
 }
 
 export function SiteListItem({
@@ -23,6 +24,7 @@ export function SiteListItem({
   onEditToggle,
   groups,
   onSitesChange,
+  formkiqVersion,
 }: SiteListItemProps) {
   const [siteGroups, setSiteGroups] = useState<string[]>([]);
 
@@ -50,16 +52,19 @@ export function SiteListItem({
           currentTitle={site.title}
           isEditingSite={isEditing}
           onSitesChange={onSitesChange}
+          formkiqVersion={formkiqVersion}
         />
 
         {!isEditing ? (
-          <button
-            className="w-6 h-6 text-neutral-500 hover:text-neutral-900"
-            onClick={() => onEditToggle(site.siteId)}
-            title="Edit Site Permissions"
-          >
-            <Settings />
-          </button>
+          formkiqVersion.modules.includes('site_permissions_defined') && (
+            <button
+              className="w-6 h-6 text-neutral-500 hover:text-neutral-900"
+              onClick={() => onEditToggle(site.siteId)}
+              title="Edit Site Permissions"
+            >
+              <Settings />
+            </button>
+          )
         ) : (
           <button
             className="w-6 h-6 text-neutral-500 hover:text-neutral-900"
@@ -70,19 +75,20 @@ export function SiteListItem({
           </button>
         )}
       </div>
-      {isEditing && (
-        <>
-          <hr className="my-4" />
-          <SiteStatus siteId={site.siteId}/>
-          <hr className="my-4" />
-          <SiteGroupPermissions
-            siteId={site.siteId}
-            groups={groups}
-            siteGroups={siteGroups}
-            onGroupsChange={updateSiteGroups}
-          />
-        </>
-      )}
+      {isEditing &&
+        formkiqVersion.modules.includes('site_permissions_defined') && (
+          <>
+            <hr className="my-4" />
+            <SiteStatus siteId={site.siteId} />
+            <hr className="my-4" />
+            <SiteGroupPermissions
+              siteId={site.siteId}
+              groups={groups}
+              siteGroups={siteGroups}
+              onGroupsChange={updateSiteGroups}
+            />
+          </>
+        )}
     </li>
   );
 }
