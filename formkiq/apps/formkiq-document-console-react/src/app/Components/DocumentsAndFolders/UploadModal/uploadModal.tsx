@@ -193,6 +193,45 @@ export default function UploadModal({
       // console.log(event.loaded + ' / ' + event.total);
     };
   };
+
+  interface UploadResponse {
+    status: number;
+    file: { name: string };
+    errors?: { error: string }[];
+  }
+
+  function handleFileUploadErrors(
+    responses: UploadResponse[],
+    dispatch: (action: any) => void
+  ) {
+    const notUploadedFilesErrors: {
+      fileName: string;
+      errorMessage: string;
+    }[] = responses
+      .filter((response) => response.status !== 200)
+      .map((response) => ({
+        fileName: response.file.name,
+        errorMessage: response.errors
+          ? response.errors.map((err) => err.error).join(', ')
+          : '',
+      }));
+
+    if (notUploadedFilesErrors.length > 0) {
+      const errorMessages = notUploadedFilesErrors.map(
+        (error) =>
+          `${error.fileName}  ${
+            error.errorMessage !== '' && ': ' + error.errorMessage
+          }`
+      );
+      dispatch(
+        openDialog({
+          dialogTitle: `Error uploading files: \n ${errorMessages.join('\n')}`,
+        })
+      );
+    }
+    return notUploadedFilesErrors;
+  }
+
   const uploadFiles = () => {
     if (uploaderRef.current) {
       const filesData: IFileUploadData[] = uploaderRef.current
@@ -226,26 +265,17 @@ export default function UploadModal({
           filesData,
           onprogress
         ).then((res) => {
-          const ids = res.filter((item) => {
-            return item.status === 200;
-          }).map((item) => {
-            return item.documentId;
-          });
-          const notUploadedFiles: string[] = []
-          for (const response of res) {
-            if (response.status !== 200) {
-              notUploadedFiles.push(response.file.name);
-            }
-          }
-          if (notUploadedFiles.length > 0) {
-            dispatch(
-              openDialog({
-                dialogTitle: `Error uploading files: \n ${notUploadedFiles.join(
-                  ',\n '
-                )}`,
-              })
-            );
-          }
+          const ids = res
+            .filter((item) => {
+              return item.status === 200;
+            })
+            .map((item) => {
+              return item.documentId;
+            });
+          const notUploadedFilesErrors: {
+              fileName: string;
+              errorMessage: string;
+          }[] = handleFileUploadErrors(res, dispatch);
           DocumentsService.getDocumentsById(ids, siteId).then(
             (uploaded: []) => {
               setUploadProcess([]);
@@ -261,7 +291,7 @@ export default function UploadModal({
                 });
               }
               setUploaded([...uploadedDocs, ...uploaded]);
-              setNotUploadedDocs(notUploadedFiles)
+              setNotUploadedDocs(notUploadedFilesErrors.map((f) => f.fileName));
               onDocumentDataChange();
             }
           );
@@ -279,21 +309,10 @@ export default function UploadModal({
           }).map((item) => {
               return item.documentId;
           });
-          const notUploadedFiles: string[] = []
-          for (const response of res) {
-            if (response.status !== 200) {
-              notUploadedFiles.push(response.file.name);
-            }
-          }
-          if (notUploadedFiles.length > 0) {
-            dispatch(
-              openDialog({
-                dialogTitle: `Error uploading files: \n ${notUploadedFiles.join(
-                  ',\n '
-                )}`,
-              })
-            );
-          }
+          const notUploadedFilesErrors: {
+                fileName: string;
+                errorMessage: string;
+            }[] = handleFileUploadErrors(res, dispatch);
           DocumentsService.getDocumentsById(ids, siteId).then(
             (uploaded: []) => {
               setUploadProcess([]);
@@ -389,7 +408,7 @@ export default function UploadModal({
               });
 
               setUploaded([...uploadedDocs, ...uploaded]);
-              setNotUploadedDocs(notUploadedFiles)
+              setNotUploadedDocs(notUploadedFilesErrors.map((f) => f.fileName));
               onDocumentDataChange();
             }
           );
