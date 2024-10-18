@@ -100,10 +100,7 @@ export function AccountSettings() {
     if (dirtyFields['google']) {
       configuration.google = data.google;
     }
-    if (
-      Object.values(data.docusign).some((value) => value !== '') &&
-      dirtyFields['docusign']
-    ) {
+    if (dirtyFields['docusign']) {
       configuration.docusign = data.docusign;
     }
     DocumentsService.updateConfiguration(configuration, currentSiteId).then(
