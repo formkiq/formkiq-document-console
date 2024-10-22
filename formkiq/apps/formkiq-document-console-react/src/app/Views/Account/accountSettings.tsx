@@ -71,6 +71,30 @@ export function AccountSettings() {
     setCurrentSiteId(val);
   };
 
+  const cleanKey = (key: string): string => {
+    if (key === '' || !key) return ''; // Return empty string if the input is empty
+
+    // Strip leading and trailing spaces/newlines from each line
+    const strippedKey = key
+      .split('\n')
+      .map((line) => line.trim())
+      .join('');
+
+    // Ensure proper RSA key structure
+    const header = '-----BEGIN RSA PRIVATE KEY-----';
+    const footer = '-----END RSA PRIVATE KEY-----';
+
+    const base64Key = strippedKey
+      .replace(header, '')
+      .replace(footer, '')
+      .trim();
+    const formattedKey = base64Key
+      .match(/.{1,64}/g) // Split into chunks of 64 characters
+      ?.join('\n');
+
+    return `${header}\n${formattedKey || ''}\n${footer}`;
+  };
+
   const onSubmit = (data: any) => {
     const configuration: any = {};
     if (
@@ -101,7 +125,7 @@ export function AccountSettings() {
       configuration.google = data.google;
     }
     if (dirtyFields['docusign']) {
-      configuration.docusign = data.docusign;
+      configuration.docusign = {...data.docusign, rsaPrivateKey: cleanKey(data.docusign.rsaPrivateKey)};
     }
     DocumentsService.updateConfiguration(configuration, currentSiteId).then(
       (response) => {
