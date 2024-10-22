@@ -1,32 +1,26 @@
-import {useEffect, useMemo, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {Position} from 'reactflow';
-import {ConfigState} from '../../../../Store/reducers/config';
-import {Documents, Plus} from '../../../Icons/icons';
-import {DefaultSourceHandle} from '../../Handles/handles';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { ConfigState } from '../../../../Store/reducers/config';
+import { Documents } from '../../../Icons/icons';
 import Checkbox from '../NodeComponents/Checkbox';
-import {NodeNameSelector} from '../NodeComponents/NodeNameSelector';
-import NodeTitle from '../NodeComponents/NodeTitle';
 import NumberInput from '../NodeComponents/NumberInput';
 import ParametersSelector from '../NodeComponents/ParametersSelector';
-import MultipleParametersSelector from "../NodeComponents/MultipleParametersSelector";
+import MultipleParametersSelector from '../NodeComponents/MultipleParametersSelector';
+import { NodeContentProps, NodeWrapper } from '../NodeComponents/NodeWrapper';
 
-function Ocr({
-               newStep,
-               setNewStep,
-               isEditing,
-               data,
-               edges,
-               id,
-               addCreatorNode,
-               onChange,
-               readOnly
-             }: any) {
-  const {formkiqVersion} = useSelector(ConfigState);
+export function OcrContent({
+  isEditing,
+  data,
+  newStep,
+  onChange,
+}: NodeContentProps) {
+  const { formkiqVersion } = useSelector(ConfigState);
 
-  const [ocrEngineSelectorOptions, setOcrEngineSelectorOptions] = useState<any>({
-    TESSERACT: 'Tesseract',
-  });
+  const [ocrEngineSelectorOptions, setOcrEngineSelectorOptions] = useState<any>(
+    {
+      TESSERACT: 'Tesseract',
+    }
+  );
   const [ocrTypesSelectorOptions, setOcrTypesSelectorOptions] = useState<any>({
     TEXT: 'Text Recognition',
   });
@@ -42,7 +36,6 @@ function Ocr({
     }
   };
 
-
   useEffect(() => {
     updateOcrEngineSelectorOptions();
   }, []);
@@ -56,41 +49,14 @@ function Ocr({
         TABLES: 'Table Recognition',
       });
     } else {
-      onChange("TEXT", 'ocrParseTypes')
-      setOcrTypesSelectorOptions(
-        {
-          TEXT: 'Text Recognition',
-        });
+      onChange('TEXT', 'ocrParseTypes');
+      setOcrTypesSelectorOptions({
+        TEXT: 'Text Recognition',
+      });
     }
   };
-
-  const MAX_CONNECTIONS = 1;
-  let isHandleConnectable = false;
-  let connectionsNumber = MAX_CONNECTIONS;
-  if (edges) {
-    connectionsNumber = edges.filter((e: any) => e.source === id).length;
-  }
-  isHandleConnectable = useMemo(() => {
-    if (readOnly) return false;
-    return connectionsNumber < MAX_CONNECTIONS;
-  }, [connectionsNumber, MAX_CONNECTIONS]);
-
   return (
     <>
-      {isEditing && (
-        <NodeNameSelector
-          newStep={newStep}
-          setNewStep={setNewStep}
-        />
-      )}
-      {!isEditing && (
-        <NodeTitle
-          icon={<Documents/>}
-          title="Optical Character Recognition (OCR)"
-        />
-      )}
-      {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
-
       <ParametersSelector
         options={ocrEngineSelectorOptions}
         description="OCR Engine to use"
@@ -108,7 +74,9 @@ function Ocr({
         description="OCR Parsing strategy to use"
         onChange={(value: any) => onChange(value, 'ocrParseTypes')}
         selectedValues={
-          isEditing ? newStep?.parameters?.ocrParseTypes : data.parameters?.ocrParseTypes
+          isEditing
+            ? newStep?.parameters?.ocrParseTypes
+            : data.parameters?.ocrParseTypes
         }
         isEditing={isEditing}
       />
@@ -139,27 +107,26 @@ function Ocr({
         }
         isEditing={isEditing}
       />
-
-      {!isEditing && (
-        <DefaultSourceHandle
-          type="source"
-          position={Position.Right}
-          id="approve"
-          maxConnections={1}
-          nodeId={id}
-          readOnly={readOnly}
-        ></DefaultSourceHandle>
-      )}
-      {isHandleConnectable && (
-        <div
-          className="w-6 mt-6 rounded-full bg-green-400 text-white hover:border-green-700 p-1  cursor-pointer absolute right-[-36px] border-2 border-white hover:text-green-700 nodrag"
-          style={{top: 'calc(50% - 12px)'}}
-          onClick={addCreatorNode}
-        >
-          <Plus/>
-        </div>
-      )}
     </>
+  );
+}
+
+function Ocr(props: any) {
+  return (
+    <NodeWrapper
+      id={props.id}
+      icon={<Documents />}
+      title="Optical Character Recognition (OCR)"
+      isEditing={props.isEditing}
+      readOnly={props.readOnly}
+      newStep={props.newStep}
+      setNewStep={props.setNewStep}
+      edges={props.edges}
+      addCreatorNode={props.addCreatorNode}
+      maxConnections={1}
+    >
+      <OcrContent {...props} />
+    </NodeWrapper>
   );
 }
 

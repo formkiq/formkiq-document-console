@@ -1,12 +1,11 @@
 import { Listbox } from '@headlessui/react';
-import { useSelector } from 'react-redux';
 import { v4 as uuid } from 'uuid';
 import {
   Step,
   WorkflowStepActionType,
 } from '../../../../helpers/types/workflows';
-import { ConfigState } from '../../../../Store/reducers/config';
 import { ChevronRight } from '../../../Icons/icons';
+import {useWorkflowActionMap} from "../../../../hooks/workflow-action-map.hook";
 
 export const NodeNameSelector = ({
   newStep,
@@ -15,28 +14,7 @@ export const NodeNameSelector = ({
   newStep: Step | null;
   setNewStep: (step: Step | null) => void;
 }) => {
-  const { formkiqVersion } = useSelector(ConfigState);
-  const parametersMap: Record<string, string> = {
-    EVENTBRIDGE: 'Amazon EventBridge',
-  };
-  if (formkiqVersion.modules.indexOf('antivirus') > -1) {
-    parametersMap['ANTIVIRUS'] = 'Anti-Malware Scan';
-  }
-  if (
-    formkiqVersion.modules.indexOf('typesense') > -1 ||
-    formkiqVersion.modules.indexOf('opensearch') > -1
-  ) {
-    parametersMap['FULLTEXT'] = 'Fulltext Search';
-  }
-  parametersMap['IDP'] = 'Intelligent Document Processing';
-  parametersMap['DOCUMENTTAGGING'] = 'Intelligent Document Tagging with OpenAI';
-  parametersMap['OCR'] = 'Optical Character Recognition (OCR)';
-  parametersMap['PUBLISH'] = 'Publish';
-  parametersMap['QUEUE'] = 'Review / Approval Queue';
-  parametersMap['NOTIFICATION'] =
-    'Send Notification (requires "FROM" address in SES)';
-  parametersMap['WEBHOOK'] = 'Webhook';
-
+  const parametersMap = useWorkflowActionMap()
   const getNodeId = () => `node_${uuid()}`;
   // Set name
   const selectStepName = (name: WorkflowStepActionType | '') => {
