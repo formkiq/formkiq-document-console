@@ -28,12 +28,12 @@ interface IProps {
   currentDocumentsRootUri: string;
   onDocumentDataChange: any;
   filterTag: string | null;
-  isArchiveTabExpanded?: boolean;
   addToPendingArchive?: (file: IDocument) => void;
   deleteFromPendingArchive?: (file: IDocument) => void;
   archiveStatus?: string;
-  selectedDocuments: string[];
-  setSelectedDocuments: (documents: string[]) => void;
+  selectedDocuments: IDocument[];
+  setSelectedDocuments: (documents: IDocument[]) => void;
+  archiveTabStatus: "open" | "closed" | "minimized"
 }
 
 function FolderListLine({
@@ -46,12 +46,12 @@ function FolderListLine({
   onRestoreDocument,
   onDocumentDataChange,
   filterTag,
-  isArchiveTabExpanded,
   addToPendingArchive,
   deleteFromPendingArchive,
   archiveStatus,
   selectedDocuments,
   setSelectedDocuments,
+  archiveTabStatus,
 }: IProps) {
   const { loadingStatus } = useSelector(DocumentListState);
 
@@ -116,12 +116,12 @@ function FolderListLine({
                       onRestoreDocument={onRestoreDocument}
                       onDocumentDataChange={onDocumentDataChange}
                       filterTag={filterTag}
-                      isArchiveTabExpanded={isArchiveTabExpanded}
                       archiveStatus={archiveStatus}
                       addToPendingArchive={addToPendingArchive}
                       deleteFromPendingArchive={deleteFromPendingArchive}
                       selectedDocuments={selectedDocuments}
                       setSelectedDocuments={setSelectedDocuments}
+                      archiveTabStatus={archiveTabStatus}
                     />
                   );
                 })}
@@ -141,12 +141,12 @@ function FolderListLine({
                   onDocumentDataChange={onDocumentDataChange}
                   filterTag={filterTag}
                   leftOffset={4}
-                  isArchiveTabExpanded={isArchiveTabExpanded}
                   archiveStatus={archiveStatus}
                   addToPendingArchive={addToPendingArchive}
                   deleteFromPendingArchive={deleteFromPendingArchive}
                   selectedDocuments={selectedDocuments}
                   setSelectedDocuments={setSelectedDocuments}
+                  archiveTabStatus={archiveTabStatus}
                 />
               );
             })}

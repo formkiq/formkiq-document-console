@@ -13,7 +13,7 @@ const NumberInput = ({
                      }: any) => {
   const handleNumberInput = (name: string) => {
     if (!onChange) return;
-    onChange(name);
+    onChange(name.toString());
   };
 
   const handleNumberFocus = (target: EventTarget | null) => {
