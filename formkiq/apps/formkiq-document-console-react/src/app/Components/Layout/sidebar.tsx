@@ -44,7 +44,7 @@ import {
   Rules,
   Schema,
   Settings,
-  ShareHand,
+  ShareHand, SitesManagement,
   Star,
   Trash,
   Upload,
@@ -414,7 +414,7 @@ export function Sidebar() {
     const { isExpanded, toggleExpand, title, testId, level = 0 } = props;
     return isSidebarExpanded ? (
       <li
-        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-center lg:justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
+        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
         onClick={toggleExpand}
         data-test-id={testId}
         style={{
@@ -834,6 +834,18 @@ export function Sidebar() {
                     title="API Keys"
                     testId="nav-api-keys"
                   />
+                  {((formkiqVersion.modules.includes(
+                    'site_permissions_defined'
+                  ) &&
+                    user.sites.length === 0) ||
+                    user.isAdmin) && (
+                    <NavigationItem
+                      to="/admin/sites-management"
+                      icon={<SitesManagement />}
+                      title="Sites Management"
+                      testId="nav-sites-management"
+                    />
+                  )}
                   {userAuthenticationType === 'cognito' && (
                     <>
                       <NavigationItem
