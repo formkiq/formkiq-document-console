@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Tooltip } from 'react-tooltip';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
+import { PendingArchiveTab } from '../../Components/DocumentsAndFolders/CreateArchive/ArchiveTab';
 import { useDocumentActions } from '../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
@@ -13,7 +14,6 @@ import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import AdvancedSearchTab from '../../Components/DocumentsAndFolders/Search/advancedSearchTab';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
-import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
 import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
@@ -39,11 +39,7 @@ import {
 } from '../../Store/reducers/attributes';
 import { AttributesDataState } from '../../Store/reducers/attributesData';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
-import {
-  ConfigState,
-  setCurrentActionEvent,
-  setPendingArchive,
-} from '../../Store/reducers/config';
+import { ConfigState, setPendingArchive } from '../../Store/reducers/config';
 import { setCurrentDocumentPath } from '../../Store/reducers/data';
 import {
   deleteDocument,
@@ -69,7 +65,6 @@ import {
   TextFileEditorEditableContentTypes,
   TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
-import { TopLevelFolders } from '../../helpers/constants/folders';
 import { TagsForFilterAndDisplay } from '../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -98,6 +93,7 @@ function Documents() {
   const { user } = useAuthenticatedState();
   const {
     documents,
+    folders,
     nextToken,
     loadingStatus,
     currentSearchPage,
@@ -164,7 +160,8 @@ function Documents() {
     isUploadModalOpened,
     onUploadClose,
     uploadModalDocumentId,
-    onNewClose
+    onNewClose,
+    onActionModalClick,
   } = useDocumentActions();
 
   useEffect(() => {
@@ -186,7 +183,9 @@ function Documents() {
   const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
     useState<boolean>(isSiteReadOnly);
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
-  const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
+  const [archiveTabStatus, setArchiveTabStatus] = useState<
+    'open' | 'closed' | 'minimized'
+  >('closed');
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
   const [infoDocumentAction, setInfoDocumentAction] = useState('');
@@ -214,7 +213,7 @@ function Documents() {
   const documentsPageWrapper = document.getElementById('documentsPageWrapper');
   const closeDropZoneRef = useRef(null);
   const [isDropZoneVisible, setIsDropZoneVisible] = useState(false);
-  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+  const [selectedDocuments, setSelectedDocuments] = useState<IDocument[]>([]);
 
   const [relationshipDocumentsMap, setRelationshipDocumentsMap] = useState<{
     [key: string]: string;
@@ -547,7 +546,7 @@ function Documents() {
               documentInstance: null,
               folderInstance: null,
             },
-              subfolderUri
+            subfolderUri
           );
           break;
         case 'folderUpload':
@@ -730,9 +729,12 @@ function Documents() {
         }
       );
     }
+    if (recheckSiteInfo.siteId !== currentSiteId) {
+      dispatch(setPendingArchive([]));
+      setSelectedDocuments([]);
+    }
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    setSelectedDocuments([]);
     setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
@@ -762,6 +764,21 @@ function Documents() {
     formkiqVersion,
   ]);
 
+  useEffect(() => {
+    // unselect documents that are not in the expanded/open folders
+    if (selectedDocuments.length > 0) {
+      const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
+      const allDisplayedDocuments = [...documents, ...expandedFoldersDocuments];
+      const filteredDocuments = selectedDocuments.filter(
+        (document) =>
+          allDisplayedDocuments.findIndex(
+            (doc) => doc.documentId === document.documentId
+          ) !== -1
+      );
+      setSelectedDocuments(filteredDocuments);
+    }
+  }, [documents, folders]);
+
   const deleteFunc = async (id: string, softDelete: boolean) => {
     const res: any = await dispatch(
       deleteDocument({
@@ -779,7 +796,9 @@ function Documents() {
       );
       return;
     }
-    setSelectedDocuments((docs) => docs.filter((doc: any) => doc !== id));
+    setSelectedDocuments((docs) =>
+      docs.filter((doc: any) => doc.documentId !== id)
+    );
   };
 
   const onDeleteDocument = (id: string, softDelete: boolean) => {
@@ -806,7 +825,11 @@ function Documents() {
 
     dispatch(
       openDialog({
-        callback: () => deleteMultipleDocuments(selectedDocuments, softDelete),
+        callback: () =>
+          deleteMultipleDocuments(
+            selectedDocuments.map((doc) => doc.documentId),
+            softDelete
+          ),
         dialogTitle: `Are you sure you want to delete ${
           selectedDocuments.length
         } selected document${selectedDocuments.length === 1 ? '' : 's'}${
@@ -850,14 +873,14 @@ function Documents() {
         })
       );
       setSelectedDocuments((docs) =>
-        docs.filter((doc: any) => doc !== documentId)
+        docs.filter((doc: IDocument) => doc.documentId !== documentId)
       );
     });
   };
 
   const onRestoreSelectedDocuments = async () => {
-    await selectedDocuments.forEach((id: string) => {
-      restoreDocument(id);
+    await selectedDocuments.forEach((doc: IDocument) => {
+      restoreDocument(doc.documentId);
     });
   };
 
@@ -1307,26 +1330,73 @@ function Documents() {
     );
   };
 
-  const ToggleArchiveTab = () => {
-    if (!isArchiveTabExpanded) {
-      setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
-    }
-    setIsArchiveTabExpanded(!isArchiveTabExpanded);
+  function getExpandedFoldersDocuments(folders: IFolder[]): IDocument[] {
+    return folders.reduce((acc: IDocument[], folder: IFolder) => {
+      if (folder.isExpanded) {
+        // Add document IDs from the current folder
+        const folderDocuments = folder.documents;
+        // Recursively get document IDs from subfolders
+        const subFolderDocuments = getExpandedFoldersDocuments(folder.folders);
+        return [...acc, ...folderDocuments, ...subFolderDocuments];
+      }
+      return acc;
+    }, []);
+  }
+
+  const openArchiveTab = () => {
+    const filteredDocuments = selectedDocuments.filter(
+      (document: IDocument) =>
+        !document.deepLinkPath || (document.deepLinkPath?.length ?? 0) === 0
+    );
+    dispatch(setPendingArchive(filteredDocuments));
+    setArchiveTabStatus('open');
   };
+  const closeArchiveTab = () => {
+    setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+    const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
+    const allDisplayedDocuments = [...documents, ...expandedFoldersDocuments];
+    const filteredDocuments = pendingArchive.filter(
+      (document) =>
+        allDisplayedDocuments.findIndex(
+          (doc) => doc.documentId === document.documentId
+        ) !== -1
+    );
+    dispatch(setPendingArchive([]));
+    setSelectedDocuments(filteredDocuments);
+    setArchiveTabStatus('closed');
+  };
+
+  const minimizeArchiveTab = () => {
+    setArchiveTabStatus('minimized');
+  };
+
+  const expandArchiveTab = () => {
+    setArchiveTabStatus('open');
+  };
+
   const deleteFromPendingArchive = (file: IDocument) => {
     dispatch(
       setPendingArchive(
         pendingArchive.filter((f) => f.documentId !== file.documentId)
       )
     );
+    setSelectedDocuments(
+      selectedDocuments.filter((f) => f.documentId !== file.documentId)
+    );
   };
   const addToPendingArchive = (file: IDocument) => {
     if (pendingArchive) {
-      if (pendingArchive.indexOf(file) === -1) {
+      if (
+        pendingArchive.findIndex(
+          (doc) => doc.documentId === file.documentId
+        ) === -1
+      ) {
         dispatch(setPendingArchive([...pendingArchive, file]));
+        setSelectedDocuments([...selectedDocuments, file]);
       }
     } else {
       dispatch(setPendingArchive([file]));
+      setSelectedDocuments([file]);
     }
   };
 
@@ -1337,195 +1407,12 @@ function Documents() {
     ERROR: 'ERROR',
   };
   const [archiveStatus, setArchiveStatus] = useState(ARCHIVE_STATUSES.INITIAL);
-  const [intervalId, setIntervalId] = useState<
-    string | number | NodeJS.Timeout | undefined
-  >(0);
-  const [archiveDownloadUrl, setArchiveDownloadUrl] = useState<
-    string | undefined
-  >(undefined);
-  const [isCompressButtonDisabled, setIsCompressButtonDisabled] =
-    useState(true);
 
-  const compressDocuments = () => {
-    setArchiveStatus(ARCHIVE_STATUSES.PENDING);
-    const documentIds: string[] = [];
-    pendingArchive.forEach((document) => {
-      documentIds.push(document.documentId);
-    });
-
-    DocumentsService.compressDocuments(documentIds, currentSiteId).then(
-      (response: any) => {
-        setArchiveStatus(ARCHIVE_STATUSES.PENDING);
-        if (response.status === 201) {
-          let counter = 0;
-          const downloadArchive = async () => {
-            try {
-              await fetch(response.downloadUrl).then((r) => {
-                if (r.ok) {
-                  setArchiveDownloadUrl(response.downloadUrl);
-                  setArchiveStatus(ARCHIVE_STATUSES.COMPLETE);
-                  dispatch(setPendingArchive([]));
-                  clearInterval(downloadInterval);
-                }
-              });
-              if (counter === 120) {
-                setArchiveStatus(ARCHIVE_STATUSES.ERROR);
-                clearInterval(downloadInterval);
-              } else {
-                counter += 1;
-              }
-            } catch (e) {
-              console.log(e, 'error');
-            }
-          };
-          const downloadInterval = setInterval(downloadArchive, 500);
-          setIntervalId(downloadInterval);
-          downloadArchive();
-        }
-      }
-    );
-  };
-  const ClearPendingArchive = () => {
-    setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
-    dispatch(setPendingArchive([]));
-    setIsArchiveTabExpanded(!isArchiveTabExpanded);
-  };
-
-  useEffect(() => {
-    if (
-      pendingArchive === undefined ||
-      pendingArchive.length === 0 ||
-      archiveStatus === ARCHIVE_STATUSES.COMPLETE ||
-      archiveStatus === ARCHIVE_STATUSES.PENDING
-    ) {
-      setIsCompressButtonDisabled(true);
-    } else {
-      setIsCompressButtonDisabled(false);
-    }
-
-    if (
-      archiveStatus === ARCHIVE_STATUSES.COMPLETE &&
-      pendingArchive.length > 0
-    ) {
-      setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
-    }
-  }, [pendingArchive, archiveStatus, isCompressButtonDisabled]);
-
-  const PendingArchiveTab = () => {
-    return (
-      <div className="w-full h-56 p-4 flex flex-col justify-between relative">
-        <div className="absolute flex w-full h-40 justify-center items-center font-bold text-5xl text-gray-100 mb-2">
-          Document Archive (ZIP)
-        </div>
-        <div className="h-full border-gray-400 border overflow-y-auto z-20">
-          {archiveStatus === ARCHIVE_STATUSES.INITIAL ? (
-            pendingArchive ? (
-              <div className="grid grid-cols-2 2xl:grid-cols-3">
-                {pendingArchive.map((file: IDocument) => (
-                  <div key={file.documentId} className="flex flex-row p-2">
-                    <button
-                      className="w-6 mr-2 text-gray-400 cursor-pointer hover:text-primary-500"
-                      onClick={() => deleteFromPendingArchive(file)}
-                    >
-                      <Close />
-                    </button>
-                    <Link
-                      to={`${currentDocumentsRootUri}/${file.documentId}/view`}
-                      className="cursor-pointer w-16 flex items-center justify-start"
-                    >
-                      <img
-                        src={getFileIcon(file.path, file.deepLinkPath)}
-                        className="w-8 inline-block"
-                        alt="icon"
-                      />
-                    </Link>
-                    <Link
-                      to={`${currentDocumentsRootUri}/${file.documentId}/view`}
-                      className="cursor-pointer pt-1.5 flex items-center"
-                      title={file.path.substring(
-                        file.path.lastIndexOf('/') + 1
-                      )}
-                    >
-                      <span>
-                        {file.path.substring(file.path.lastIndexOf('/') + 1)
-                          .length > 50 ? (
-                          <span className="tracking-tighter text-clip overflow-hidden">
-                            {file.path.substring(
-                              file.path.lastIndexOf('/') + 1,
-                              file.path.lastIndexOf('/') + 60
-                            )}
-                            {file.path.substring(file.path.lastIndexOf('/') + 1)
-                              .length > 60 && <span>...</span>}
-                          </span>
-                        ) : (
-                          <span>
-                            {file.path.substring(
-                              file.path.lastIndexOf('/') + 1
-                            )}
-                          </span>
-                        )}
-                      </span>
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-md text-gray-500 ml-2">
-                No files in archive
-              </div>
-            )
-          ) : archiveStatus === ARCHIVE_STATUSES.PENDING ? (
-            <div className="h-full flex flex-col justify-center">
-              <Spinner />
-              <div className="text-md text-gray-500 ml-2 text-center">
-                compressing...
-              </div>
-            </div>
-          ) : (
-            <>
-              {archiveStatus === ARCHIVE_STATUSES.ERROR ? (
-                <div className="h-full flex flex-col justify-center font-semibold text-center">
-                  <span className="text-red-600">Error: please try again.</span>
-                  <a
-                    href="JavaScript://"
-                    onClick={compressDocuments}
-                    className="block font-bold hover:underline"
-                  >
-                    retry
-                  </a>
-                </div>
-              ) : (
-                <div className="flex w-full pt-10 justify-center items-center">
-                  <ButtonPrimary type="button" style={{ padding: 0 }}>
-                    <a
-                      href={archiveDownloadUrl}
-                      className="w-full h-full block"
-                    >
-                      <div className="text-lg mx-4 text-center cursor-pointer">
-                        Download Archive
-                      </div>
-                    </a>
-                  </ButtonPrimary>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-        <div className="h-12 flex justify-end mt-2">
-          {!isCompressButtonDisabled && (
-            <ButtonPrimary onClick={compressDocuments} type="button">
-              <span>Compress</span>
-            </ButtonPrimary>
-          )}
-          {archiveStatus === ARCHIVE_STATUSES.COMPLETE && (
-            <ButtonGhost onClick={ClearPendingArchive} type="button">
-              <span>Done</span>
-            </ButtonGhost>
-          )}
-        </div>
-      </div>
-    );
-  };
+  // const clearPendingArchive = () => {
+  //   setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+  //   dispatch(setPendingArchive([]));
+  //   setIsArchiveTabExpanded(!isArchiveTabExpanded);
+  // };
 
   const viewDocumentVersion = (versionKey: string) => {
     if (infoDocumentId) {
@@ -1561,27 +1448,27 @@ function Documents() {
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
             <div className="flex items-center gap-4 pr-8 z-10">
-              {archiveStatus !== ARCHIVE_STATUSES.COMPLETE && (
-                <ButtonSecondary onClick={ToggleArchiveTab} type="button">
-                  {isArchiveTabExpanded ? (
-                    <>
-                      <span>Minimize Archive</span>
-                    </>
-                  ) : (
-                    <>
-                      {pendingArchive.length ? (
-                        <span>View Pending Archive</span>
-                      ) : (
-                        <span>Create Archive</span>
-                      )}
-                    </>
-                  )}
+              {archiveTabStatus === 'closed' && (
+                <ButtonSecondary onClick={openArchiveTab} type="button">
+                  Download Multiple Files (ZIP)
                 </ButtonSecondary>
               )}
-              {isArchiveTabExpanded &&
+              {archiveTabStatus === 'minimized' && (
+                <ButtonSecondary onClick={expandArchiveTab} type="button">
+                  View Pending File Download (ZIP)
+                </ButtonSecondary>
+              )}
+              {archiveTabStatus === 'open' && (
+                <ButtonSecondary onClick={minimizeArchiveTab}>
+                  Minimize Pending File Download (ZIP)
+                </ButtonSecondary>
+              )}
+
+              {/*// )}*/}
+              {archiveTabStatus === 'open' &&
                 archiveStatus === ARCHIVE_STATUSES.INITIAL && (
-                  <ButtonTertiary onClick={ClearPendingArchive} type="button">
-                    Cancel
+                  <ButtonTertiary onClick={closeArchiveTab} type="button">
+                    Cancel Pending File Download
                   </ButtonTertiary>
                 )}
               {!formkiqVersion.modules.includes('typesense') &&
@@ -1647,9 +1534,17 @@ function Documents() {
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
-              {isArchiveTabExpanded && (
+              {archiveTabStatus === 'open' && (
                 <div className="pt-2 pr-8">
-                  <PendingArchiveTab />
+                  <PendingArchiveTab
+                    siteId={currentSiteId}
+                    documentsRootUri={currentDocumentsRootUri}
+                    archiveStatus={archiveStatus}
+                    setArchiveStatus={setArchiveStatus}
+                    closeArchiveTab={closeArchiveTab}
+                    deleteFromPendingArchive={deleteFromPendingArchive}
+                    setSelectedDocuments={setSelectedDocuments}
+                  />
                 </div>
               )}
               {advancedSearch && (
@@ -1673,7 +1568,6 @@ function Documents() {
                 filterTag={filterTag}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
-                isArchiveTabExpanded={isArchiveTabExpanded}
                 addToPendingArchive={addToPendingArchive}
                 deleteFromPendingArchive={deleteFromPendingArchive}
                 archiveStatus={archiveStatus}
@@ -1683,6 +1577,9 @@ function Documents() {
                 setSelectedDocuments={setSelectedDocuments}
                 onDeleteSelectedDocuments={onDeleteSelectedDocuments}
                 onRestoreSelectedDocuments={onRestoreSelectedDocuments}
+                openArchiveTab={openArchiveTab}
+                archiveTabStatus={archiveTabStatus}
+                getExpandedFoldersDocuments={getExpandedFoldersDocuments}
               />
               <Dialog
                 open={isDropZoneVisible}
@@ -2335,10 +2232,11 @@ function Documents() {
                           OnlyOfficeContentTypes.indexOf(
                             (currentDocument as IDocument).contentType
                           ) > -1) ||
-                        ((currentDocument as IDocument).deepLinkPath &&
-                          (currentDocument as IDocument).deepLinkPath.length >
-                            0)) && (
-                        <div className="mt-4 w-full flex justify-center">
+                        ((currentDocument as IDocument).deepLinkPath !==
+                          undefined &&
+                          ((currentDocument as IDocument).deepLinkPath
+                            ?.length ?? 0) > 0)) && (
+                        <div className="mt-2 w-full flex justify-center">
                           <ButtonPrimaryGradient
                             onClick={viewDocument}
                             type="button"
@@ -2363,7 +2261,7 @@ function Documents() {
                           (currentDocument as IDocument).contentType
                         ) > -1) &&
                       !isCurrentSiteReadonly && (
-                        <div className="mt-4 w-full flex justify-center">
+                        <div className="mt-2 w-full flex justify-center">
                           <ButtonPrimaryGradient
                             onClick={editDocument}
                             type="button"
@@ -2383,29 +2281,29 @@ function Documents() {
                         </div>
                       )}
 
-                    {(currentDocument as IDocument).deepLinkPath &&
-                      (currentDocument as IDocument).deepLinkPath.length ===
-                        0 && (
-                        <div className="mt-2 w-full flex justify-center">
-                          <ButtonPrimaryGradient
-                            onClick={DownloadDocument}
-                            style={{
-                              height: '36px',
-                              width: '100%',
-                              margin: '0 16px',
-                            }}
-                          >
-                            <div className="w-full flex justify-center px-4 py-1">
-                              <span className="">Download</span>
-                              <span className="w-7 pl-1">{Download()}</span>
-                            </div>
-                          </ButtonPrimaryGradient>
-                        </div>
-                      )}
+                    {(!(currentDocument as IDocument).deepLinkPath ||
+                      ((currentDocument as IDocument).deepLinkPath?.length ??
+                        0) === 0) && (
+                      <div className="mt-2 w-full flex justify-center">
+                        <ButtonPrimaryGradient
+                          onClick={DownloadDocument}
+                          style={{
+                            height: '36px',
+                            width: '100%',
+                            margin: '0 16px',
+                          }}
+                        >
+                          <div className="w-full flex justify-center px-4 py-1">
+                            <span className="">Download</span>
+                            <span className="w-7 pl-1">{Download()}</span>
+                          </div>
+                        </ButtonPrimaryGradient>
+                      </div>
+                    )}
                     {formkiqVersion.type !== 'core' &&
-                      (currentDocument as IDocument).deepLinkPath &&
-                      (currentDocument as IDocument).deepLinkPath.length ===
-                        0 && (
+                      (!(currentDocument as IDocument).deepLinkPath ||
+                        ((currentDocument as IDocument).deepLinkPath?.length ??
+                          0) === 0) && (
                         <div className="mt-2 flex justify-center">
                           <ButtonSecondary
                             style={{
@@ -2537,6 +2435,26 @@ function Documents() {
                     }
                   >
                     <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
+                      {formkiqVersion.type !== 'core' &&
+                        (!(currentDocument as IDocument).deepLinkPath ||
+                          ((currentDocument as IDocument).deepLinkPath
+                            ?.length ?? 0) === 0) && (
+                          <ButtonSecondary
+                            className="text-sm h-9 w-full mb-2"
+                            onClick={(event: any) => {
+                              const documentLine: ILine = {
+                                lineType: 'document',
+                                folder: '',
+                                documentId: infoDocumentId,
+                                documentInstance: currentDocument,
+                                folderInstance: null,
+                              };
+                              onActionModalClick(event, documentLine);
+                            }}
+                          >
+                            Add Action
+                          </ButtonSecondary>
+                        )}
                       {currentDocumentActions.length === 0 && (
                         <div className="flex w-full justify-center italic text-smaller">
                           (no actions exist for this document)

@@ -81,6 +81,9 @@ const Mappings = React.lazy(
 const Mapping = React.lazy(
     () => import('../../Views/Mappings/mapping')
 );
+const SitesManagement = React.lazy(
+    () => import('../../Views/Account/sitesManagement')
+);
 
 const RoutesMapper = () => {
   return (
@@ -248,6 +251,7 @@ const RoutesMapper = () => {
       ></Route>
       <Route path="/admin/user-activities" element={<UserActivities />}></Route>
       <Route path="/admin/user-activities/workspaces/:siteId" element={<UserActivities />}></Route>
+      <Route path="/admin/sites-management" element={<SitesManagement />}></Route>
       <Route path="/attributes" element={<Attributes />}></Route>
       <Route path="/attributes/workspaces/:siteId" element={<Attributes />}></Route>
       <Route path="*" element={<Page404 />}></Route>

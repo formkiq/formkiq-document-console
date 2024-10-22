@@ -1853,7 +1853,7 @@ export const getUserActivitiesApiItem = {
 
 export const getDocumentUserActivitiesApiItem = {
     method: 'GET',
-    path: '/documents/ DOCUMENT_ID /url',
+    path: '/documents/ DOCUMENT_ID /userActivities',
     description: "Retrieve a user's activities",
     username: 'Cognito User',
     requiresAuthentication: true,
@@ -1933,7 +1933,7 @@ export const postRetryDocumentActionsApiItem = {
     requiresSite: true,
     license: 'Core',
 };
- 
+
 export const restoreDocumentApiItem = {
     method: 'PUT',
     path: '/documents/ DOCUMENT_ID /restore',
@@ -1956,4 +1956,72 @@ export const postDocumentGenerateApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue: '{"datasources": [{"name": "Data source name","documentId": "DOCUMENT_ID"}],"outputType": "DOCX"}',
   license: 'Pro|Enterprise',
+};
+
+export const postSitesApiItem  = {
+    method: 'POST',
+    path: '/sites',
+    description: 'Add a new site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"site": {"id": "siteId","title": "siteTitle", "status": "ACTIVE"}}',
+    license: 'Core',
+};
+
+export const patchSitesApiItem  = {
+    method: 'PATCH',
+    path: '/sites/ SITE_ID ',
+    description: 'Update a site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"site": {"title": "siteTitle", "status": "ACTIVE"}}',
+    license: 'Core',
+};
+
+export const getSiteGroupsApiItem = {
+    method: 'GET',
+    path: '/sites/ SITE_ID /groups',
+    description: 'Returns list of groups and permissions belonging to site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    license: 'Core',
+};
+
+export const getSiteGroupApiItem = {
+    method: 'GET',
+    path: '/sites/ SITE_ID /groups/ GROUP_NAME ',
+    description: 'Returns details of a group and permissions belonging to site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresGroupName: true,
+    license: 'Core',
+};
+
+export const putSiteGroupPermissionsApiItem = {
+    method: 'PUT',
+    path: '/sites/ SITE_ID /groups/ GROUP_NAME /permissions',
+    description: 'Set Site\'s Group Permissions',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresGroupName: true,
+    requiresPostJson: true,
+    defaultPostJsonValue: '{"permissions": ["ADMIN"]}',
+    license: 'Core',
+};
+
+export const deleteSiteGroupPermissionsApiItem = {
+    method: 'DELETE',
+    path: '/sites/ SITE_ID /groups/ GROUP_NAME ',
+    description: 'Deletes a group from a site',
+    username: 'Cognito User',
+    requiresAuthentication: true,
+    requiresSite: true,
+    requiresGroupName: true,
+    license: 'Core',
 };

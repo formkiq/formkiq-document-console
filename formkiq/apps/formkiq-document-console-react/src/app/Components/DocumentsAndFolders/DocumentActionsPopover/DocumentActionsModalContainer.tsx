@@ -13,6 +13,7 @@ import RenameModal from '../RenameModal/renameModal';
 import SubmitForReviewModal from '../SubmitForReviewModal/submitForReviewModal';
 import { useDocumentActions } from './DocumentActionsContext';
 import DocumentRelationshipsModal from "../DocumentRelationshipsModal/DocumentRelationshipsModal";
+import ActionModal from "../ActionModal/actionModal";
 
 const DocumentActionsModalContainer = ({
   currentSiteId,
@@ -63,6 +64,9 @@ const DocumentActionsModalContainer = ({
     documentRelationshipsModalOpened,
     documentRelationshipsModalValue,
     onDocumentRelationshipsModalClose,
+    onActionModalClose,
+    actionModalValue,
+    isActionModalOpened,
   } = useDocumentActions();
   const { allTags } = useSelector(AttributesDataState);
 
@@ -146,6 +150,12 @@ const DocumentActionsModalContainer = ({
         item={multivaluedAttributeModalValue}
         isOpened={isMultivaluedAttributeModalOpened}
         onClose={onMultiValuedAttributeModalClose}
+      />
+      <ActionModal
+        isOpened={isActionModalOpened}
+        onClose={onActionModalClose}
+        value={actionModalValue}
+        siteId={currentSiteId}
       />
     </>
   );

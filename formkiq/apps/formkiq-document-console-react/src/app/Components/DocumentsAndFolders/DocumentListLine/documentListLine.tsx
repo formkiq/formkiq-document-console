@@ -47,7 +47,6 @@ function DocumentListLine({
   onRestoreClick,
   onDocumentDataChange,
   leftOffset = 0,
-  isArchiveTabExpanded,
   addToPendingArchive,
   deleteFromPendingArchive,
   archiveStatus,
@@ -55,6 +54,7 @@ function DocumentListLine({
   onDocumentInfoClick,
   selectedDocuments,
   setSelectedDocuments,
+  archiveTabStatus,
 }: {
   file: any;
   folder: any;
@@ -66,14 +66,14 @@ function DocumentListLine({
   onDocumentDataChange: any;
   filterTag: string | null;
   leftOffset?: number;
-  isArchiveTabExpanded?: boolean;
   addToPendingArchive?: (file: IDocument) => void;
   deleteFromPendingArchive?: (file: IDocument) => void;
   archiveStatus?: string;
   infoDocumentId?: string;
   onDocumentInfoClick?: () => void;
-  selectedDocuments: string[];
-  setSelectedDocuments: (documents: string[]) => void;
+  selectedDocuments: IDocument[];
+  setSelectedDocuments: (documents: IDocument[]) => void;
+  archiveTabStatus?: 'open' | 'closed' | 'minimized';
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
@@ -215,12 +215,14 @@ function DocumentListLine({
   }, [file]);
 
   // checkboxes functions
-  function addToSelectedDocuments(documentId: string) {
-    setSelectedDocuments([...selectedDocuments, documentId]);
+  function addToSelectedDocuments(document: IDocument) {
+    setSelectedDocuments([...selectedDocuments, document]);
   }
 
   function removeFromSelectedDocuments(documentId: string) {
-    setSelectedDocuments(selectedDocuments.filter((id) => id !== documentId));
+    setSelectedDocuments(
+      selectedDocuments.filter((document) => document.documentId !== documentId)
+    );
   }
 
   return (
@@ -240,7 +242,7 @@ function DocumentListLine({
       >
         <td className={`text-neutral-900 table-cell pl-${leftOffset} relative`}>
           <div className="flex w-full justify-start">
-            {!isArchiveTabExpanded && (
+            {archiveTabStatus === 'closed' && (
               <div className="flex items-center justify-center">
                 {folder !== 'deleted' &&
                 folder !== 'shared' &&
@@ -257,11 +259,17 @@ function DocumentListLine({
                 <input
                   id="checkbox-all"
                   type="checkbox"
-                  checked={selectedDocuments.includes(file.documentId)}
+                  checked={
+                    selectedDocuments.findIndex(
+                      (document) => document.documentId === file.documentId
+                    ) > -1
+                  }
                   onChange={() =>
-                    selectedDocuments.includes(file.documentId)
+                    selectedDocuments.findIndex(
+                      (document) => document.documentId === file.documentId
+                    ) > -1
                       ? removeFromSelectedDocuments(file.documentId)
-                      : addToSelectedDocuments(file.documentId)
+                      : addToSelectedDocuments(file)
                   }
                   className="rounded-none w-4 h-4 bg-transparent  border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900 cursor-pointer"
                 />
@@ -270,9 +278,13 @@ function DocumentListLine({
                 </label>
               </div>
             )}
-            {isArchiveTabExpanded &&
+            {archiveTabStatus !== 'closed' &&
               (archiveStatus === 'INITIAL' || archiveStatus === 'COMPLETE') &&
-              (pendingArchive.indexOf(file) === -1 ? (
+              (!(file as IDocument).deepLinkPath ||
+                ((file as IDocument).deepLinkPath?.length ?? 0) === 0) &&
+              (pendingArchive.findIndex(
+                (document) => document.documentId === file.documentId
+              ) === -1 ? (
                 <div
                   className={
                     `py-2 ml-2 px-1 cursor-pointer text-neutral-900 hover:text-primary-500 ` +
@@ -348,7 +360,9 @@ function DocumentListLine({
                   style={{
                     fontWeight:
                       selectedDocuments &&
-                      selectedDocuments.includes(file.documentId)
+                      selectedDocuments.findIndex(
+                        (document) => document.documentId === file.documentId
+                      ) > -1
                         ? '700'
                         : '400',
                   }}
@@ -370,7 +384,9 @@ function DocumentListLine({
                   style={{
                     fontWeight:
                       selectedDocuments &&
-                      selectedDocuments.includes(file.documentId)
+                      selectedDocuments.findIndex(
+                        (document) => document.documentId === file.documentId
+                      ) > -1
                         ? '700'
                         : '400',
                   }}
