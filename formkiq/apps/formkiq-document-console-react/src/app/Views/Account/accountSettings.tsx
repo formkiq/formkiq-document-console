@@ -58,9 +58,11 @@ export function AccountSettings() {
         setValue('maxWebhooks', response.maxWebhooks);
         setValue('notificationEmail', response.notificationEmail);
         setValue('chatGptApiKey', response.chatGptApiKey);
-        setValue('google', response.google);
-        setValue('docusign.userId', response?.docusign.userId);
-        setValue('docusign.integrationKey', response?.docusign.integrationKey);
+        setValue('google.workloadIdentityAudience', response?.google?.workloadIdentityAudience);
+        setValue('google.workloadIdentityServiceAccount', response?.google?.workloadIdentityServiceAccount);
+        setValue('docusign.userId', response?.docusign?.userId);
+        setValue('docusign.integrationKey', response?.docusign?.integrationKey);
+        setValue('docusign.rsaPrivateKey', response?.docusign?.rsaPrivateKey);
       }
     });
   }, [currentSiteId]);
@@ -95,16 +97,10 @@ export function AccountSettings() {
     if (data.chatGptApiKey.length && dirtyFields['chatGptApiKey']) {
       configuration.chatGptApiKey = data.chatGptApiKey;
     }
-    if (
-      Object.values(data.google).some((value) => value !== '') &&
-      dirtyFields['google']
-    ) {
+    if (dirtyFields['google']) {
       configuration.google = data.google;
     }
-    if (
-      Object.values(data.docusign).some((value) => value !== '') &&
-      dirtyFields['docusign']
-    ) {
+    if (dirtyFields['docusign']) {
       configuration.docusign = data.docusign;
     }
     DocumentsService.updateConfiguration(configuration, currentSiteId).then(
