@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Tooltip } from 'react-tooltip';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
+import { PendingArchiveTab } from '../../Components/DocumentsAndFolders/CreateArchive/ArchiveTab';
 import { useDocumentActions } from '../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
@@ -13,7 +14,6 @@ import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
 import AdvancedSearchTab from '../../Components/DocumentsAndFolders/Search/advancedSearchTab';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
-import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
 import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
@@ -39,11 +39,7 @@ import {
 } from '../../Store/reducers/attributes';
 import { AttributesDataState } from '../../Store/reducers/attributesData';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
-import {
-  ConfigState,
-  setCurrentActionEvent,
-  setPendingArchive,
-} from '../../Store/reducers/config';
+import { ConfigState, setPendingArchive } from '../../Store/reducers/config';
 import { setCurrentDocumentPath } from '../../Store/reducers/data';
 import {
   deleteDocument,
@@ -69,7 +65,6 @@ import {
   TextFileEditorEditableContentTypes,
   TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
-import { TopLevelFolders } from '../../helpers/constants/folders';
 import { TagsForFilterAndDisplay } from '../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -90,7 +85,6 @@ import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
-import { PendingArchiveTab } from '../../Components/DocumentsAndFolders/CreateArchive/ArchiveTab';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -166,7 +160,7 @@ function Documents() {
     isUploadModalOpened,
     onUploadClose,
     uploadModalDocumentId,
-    onNewClose
+    onNewClose,
   } = useDocumentActions();
 
   useEffect(() => {
@@ -551,7 +545,7 @@ function Documents() {
               documentInstance: null,
               folderInstance: null,
             },
-              subfolderUri
+            subfolderUri
           );
           break;
         case 'folderUpload':
@@ -735,7 +729,7 @@ function Documents() {
       );
     }
     if (recheckSiteInfo.siteId !== currentSiteId) {
-      dispatch(setPendingArchive([]))
+      dispatch(setPendingArchive([]));
       setSelectedDocuments([]);
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
@@ -801,7 +795,9 @@ function Documents() {
       );
       return;
     }
-    setSelectedDocuments((docs) => docs.filter((doc: any) => doc.documentId !== id));
+    setSelectedDocuments((docs) =>
+      docs.filter((doc: any) => doc.documentId !== id)
+    );
   };
 
   const onDeleteDocument = (id: string, softDelete: boolean) => {
@@ -828,7 +824,11 @@ function Documents() {
 
     dispatch(
       openDialog({
-        callback: () => deleteMultipleDocuments(selectedDocuments.map((doc)=>doc.documentId), softDelete),
+        callback: () =>
+          deleteMultipleDocuments(
+            selectedDocuments.map((doc) => doc.documentId),
+            softDelete
+          ),
         dialogTitle: `Are you sure you want to delete ${
           selectedDocuments.length
         } selected document${selectedDocuments.length === 1 ? '' : 's'}${
@@ -879,7 +879,7 @@ function Documents() {
 
   const onRestoreSelectedDocuments = async () => {
     await selectedDocuments.forEach((doc: IDocument) => {
-        restoreDocument(doc.documentId);
+      restoreDocument(doc.documentId);
     });
   };
 
@@ -1333,11 +1333,9 @@ function Documents() {
     return folders.reduce((acc: IDocument[], folder: IFolder) => {
       if (folder.isExpanded) {
         // Add document IDs from the current folder
-        const folderDocuments = folder.documents
+        const folderDocuments = folder.documents;
         // Recursively get document IDs from subfolders
-        const subFolderDocuments = getExpandedFoldersDocuments(
-          folder.folders
-        );
+        const subFolderDocuments = getExpandedFoldersDocuments(folder.folders);
         return [...acc, ...folderDocuments, ...subFolderDocuments];
       }
       return acc;
@@ -1345,11 +1343,11 @@ function Documents() {
   }
 
   const openArchiveTab = () => {
-      dispatch(setPendingArchive(selectedDocuments));
-      setArchiveTabStatus("open")
+    dispatch(setPendingArchive(selectedDocuments));
+    setArchiveTabStatus('open');
   };
   const closeArchiveTab = () => {
-    setArchiveStatus(ARCHIVE_STATUSES.INITIAL)
+    setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
     const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
     const allDisplayedDocuments = [...documents, ...expandedFoldersDocuments];
     const filteredDocuments = pendingArchive.filter(
@@ -1364,13 +1362,12 @@ function Documents() {
   };
 
   const minimizeArchiveTab = () => {
-    setArchiveTabStatus("minimized")
+    setArchiveTabStatus('minimized');
   };
 
   const expandArchiveTab = () => {
-      setArchiveTabStatus("open")
+    setArchiveTabStatus('open');
   };
-
 
   const deleteFromPendingArchive = (file: IDocument) => {
     dispatch(
@@ -1379,12 +1376,16 @@ function Documents() {
       )
     );
     setSelectedDocuments(
-      selectedDocuments.filter((f) => f.documentId  !== file.documentId)
+      selectedDocuments.filter((f) => f.documentId !== file.documentId)
     );
   };
   const addToPendingArchive = (file: IDocument) => {
     if (pendingArchive) {
-      if (pendingArchive.findIndex((doc)=>doc.documentId===file.documentId) === -1) {
+      if (
+        pendingArchive.findIndex(
+          (doc) => doc.documentId === file.documentId
+        ) === -1
+      ) {
         dispatch(setPendingArchive([...pendingArchive, file]));
         setSelectedDocuments([...selectedDocuments, file]);
       }
@@ -1442,20 +1443,19 @@ function Documents() {
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
             <div className="flex items-center gap-4 pr-8 z-10">
-
               {archiveTabStatus === 'closed' && (
                 <ButtonSecondary onClick={openArchiveTab} type="button">
-                  Create Archive
+                  Download Multiple Files (ZIP)
                 </ButtonSecondary>
               )}
               {archiveTabStatus === 'minimized' && (
                 <ButtonSecondary onClick={expandArchiveTab} type="button">
-                  View Pending Archive
+                  View Pending File Download (ZIP)
                 </ButtonSecondary>
               )}
               {archiveTabStatus === 'open' && (
                 <ButtonSecondary onClick={minimizeArchiveTab}>
-                  Minimize Archive
+                  Minimize Pending File Download (ZIP)
                 </ButtonSecondary>
               )}
 
@@ -1463,7 +1463,7 @@ function Documents() {
               {archiveTabStatus === 'open' &&
                 archiveStatus === ARCHIVE_STATUSES.INITIAL && (
                   <ButtonTertiary onClick={closeArchiveTab} type="button">
-                    Cancel
+                    Cancel Pending File Download
                   </ButtonTertiary>
                 )}
               {!formkiqVersion.modules.includes('typesense') &&

@@ -1,14 +1,14 @@
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { getFileIcon } from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
 import { ConfigState, setPendingArchive } from '../../../Store/reducers/config';
-import { useEffect, useState } from 'react';
-import { DocumentsService } from '../../../helpers/services/documentsService';
-import { Close, Spinner } from '../../Icons/icons';
-import { Link } from 'react-router-dom';
-import { getFileIcon } from '../../../helpers/services/toolService';
-import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
-import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import { useAppDispatch } from '../../../Store/store';
-import { useSelector } from 'react-redux';
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
+import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
+import { Close, Spinner } from '../../Icons/icons';
 
 export const PendingArchiveTab = ({
   siteId,
@@ -111,7 +111,11 @@ export const PendingArchiveTab = ({
   return (
     <div className="w-full h-56 p-4 flex flex-col justify-between relative">
       <div className="absolute flex w-full h-40 justify-center items-center font-bold text-5xl text-gray-100 mb-2">
-        Document Archive (ZIP)
+        {archiveStatus === ARCHIVE_STATUSES.COMPLETE ? (
+          ''
+        ) : (
+          <span>Documents Pending Download (ZIP)</span>
+        )}
       </div>
       <div className="h-full border-gray-400 border overflow-y-auto z-20">
         {archiveStatus === ARCHIVE_STATUSES.INITIAL ? (
@@ -191,7 +195,7 @@ export const PendingArchiveTab = ({
                 <ButtonPrimary type="button" style={{ padding: 0 }}>
                   <a href={archiveDownloadUrl} className="w-full h-full block">
                     <div className="text-lg mx-4 text-center cursor-pointer">
-                      Download Archive
+                      Download Files (ZIP)
                     </div>
                   </a>
                 </ButtonPrimary>
@@ -203,7 +207,7 @@ export const PendingArchiveTab = ({
       <div className="h-12 flex justify-end mt-2">
         {!isCompressButtonDisabled && (
           <ButtonPrimary onClick={compressDocuments} type="button">
-            <span>Compress</span>
+            <span>Download Files (ZIP)</span>
           </ButtonPrimary>
         )}
         {archiveStatus === ARCHIVE_STATUSES.COMPLETE && (
