@@ -161,6 +161,7 @@ function Documents() {
     onUploadClose,
     uploadModalDocumentId,
     onNewClose,
+    onActionModalClick,
   } = useDocumentActions();
 
   useEffect(() => {
@@ -2231,10 +2232,11 @@ function Documents() {
                           OnlyOfficeContentTypes.indexOf(
                             (currentDocument as IDocument).contentType
                           ) > -1) ||
-                        ((currentDocument as IDocument).deepLinkPath &&
-                          (currentDocument as IDocument).deepLinkPath.length >
-                            0)) && (
-                        <div className="mt-4 w-full flex justify-center">
+                        ((currentDocument as IDocument).deepLinkPath !==
+                          undefined &&
+                          ((currentDocument as IDocument).deepLinkPath
+                            ?.length ?? 0) > 0)) && (
+                        <div className="mt-2 w-full flex justify-center">
                           <ButtonPrimaryGradient
                             onClick={viewDocument}
                             type="button"
@@ -2259,7 +2261,7 @@ function Documents() {
                           (currentDocument as IDocument).contentType
                         ) > -1) &&
                       !isCurrentSiteReadonly && (
-                        <div className="mt-4 w-full flex justify-center">
+                        <div className="mt-2 w-full flex justify-center">
                           <ButtonPrimaryGradient
                             onClick={editDocument}
                             type="button"
@@ -2279,29 +2281,29 @@ function Documents() {
                         </div>
                       )}
 
-                    {(currentDocument as IDocument).deepLinkPath &&
-                      (currentDocument as IDocument).deepLinkPath.length ===
-                        0 && (
-                        <div className="mt-2 w-full flex justify-center">
-                          <ButtonPrimaryGradient
-                            onClick={DownloadDocument}
-                            style={{
-                              height: '36px',
-                              width: '100%',
-                              margin: '0 16px',
-                            }}
-                          >
-                            <div className="w-full flex justify-center px-4 py-1">
-                              <span className="">Download</span>
-                              <span className="w-7 pl-1">{Download()}</span>
-                            </div>
-                          </ButtonPrimaryGradient>
-                        </div>
-                      )}
+                    {(!(currentDocument as IDocument).deepLinkPath ||
+                      ((currentDocument as IDocument).deepLinkPath?.length ??
+                        0) === 0) && (
+                      <div className="mt-2 w-full flex justify-center">
+                        <ButtonPrimaryGradient
+                          onClick={DownloadDocument}
+                          style={{
+                            height: '36px',
+                            width: '100%',
+                            margin: '0 16px',
+                          }}
+                        >
+                          <div className="w-full flex justify-center px-4 py-1">
+                            <span className="">Download</span>
+                            <span className="w-7 pl-1">{Download()}</span>
+                          </div>
+                        </ButtonPrimaryGradient>
+                      </div>
+                    )}
                     {formkiqVersion.type !== 'core' &&
-                      (currentDocument as IDocument).deepLinkPath &&
-                      (currentDocument as IDocument).deepLinkPath.length ===
-                        0 && (
+                      (!(currentDocument as IDocument).deepLinkPath ||
+                        ((currentDocument as IDocument).deepLinkPath?.length ??
+                          0) === 0) && (
                         <div className="mt-2 flex justify-center">
                           <ButtonSecondary
                             style={{
@@ -2433,6 +2435,26 @@ function Documents() {
                     }
                   >
                     <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
+                      {formkiqVersion.type !== 'core' &&
+                        (!(currentDocument as IDocument).deepLinkPath ||
+                          ((currentDocument as IDocument).deepLinkPath
+                            ?.length ?? 0) === 0) && (
+                          <ButtonSecondary
+                            className="text-sm h-9 w-full mb-2"
+                            onClick={(event: any) => {
+                              const documentLine: ILine = {
+                                lineType: 'document',
+                                folder: '',
+                                documentId: infoDocumentId,
+                                documentInstance: currentDocument,
+                                folderInstance: null,
+                              };
+                              onActionModalClick(event, documentLine);
+                            }}
+                          >
+                            Add Action
+                          </ButtonSecondary>
+                        )}
                       {currentDocumentActions.length === 0 && (
                         <div className="flex w-full justify-center italic text-smaller">
                           (no actions exist for this document)

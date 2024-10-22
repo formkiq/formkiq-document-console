@@ -1,6 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+import { openDialog as openConfirmationDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
@@ -14,6 +15,9 @@ import {
 } from '../../../helpers/services/toolService';
 import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
 import { RelationshipType } from '../../../helpers/types/attributes';
+import { useSelector } from 'react-redux';
+import { DocumentListState } from '../../../Store/reducers/documentsList';
+import {CopyButton} from "../../Generic/Buttons/CopyButton";
 
 const RELATIONSHIP_TYPES: RelationshipType[] = [
   'PRIMARY',
@@ -47,13 +51,33 @@ export default function DocumentRelationshipsModal({
   >('');
   const [documentId, setDocumentId] = useState('');
   const [documentRelationships, setDocumentRelationships] = useState<any[]>([]);
-  const [isDocumentRelationshipsExist, setIsDocumentRelationshipsExist] =
-    useState(false);
   const [editingRelationshipValue, setEditingRelationshipValue] = useState<{
     relationship: RelationshipType;
     documentId: string;
     inverseRelationship?: RelationshipType | '';
   } | null>(null);
+  const [relationshipDocumentsMap, setRelationshipDocumentsMap] = useState<{
+    [key: string]: string;
+  }>({});
+  const [infoDocumentId, setInfoDocumentId] = useState('');
+
+  const { documents } = useSelector(DocumentListState);
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const documentId = hash.substring(4);
+      setInfoDocumentId(documentId);
+    }
+  }, [isOpened]);
+
+  const getDocumentNameFromDocuments = (documentId: string) => {
+    const doc = documents.find(
+      (document) => document.documentId === documentId
+    );
+    if (doc) return doc.path.substring(doc.path.lastIndexOf('/') + 1);
+    return null;
+  };
 
   const getDocumentRelationships = () => {
     if (!value?.documentId) return;
@@ -76,9 +100,38 @@ export default function DocumentRelationshipsModal({
           );
         }
         setDocumentRelationships(relationships);
-        setIsDocumentRelationshipsExist(true);
-      } else {
-        setIsDocumentRelationshipsExist(false);
+
+        for (const relationship of relationships) {
+          if (relationshipDocumentsMap[relationship.documentId]) return;
+          const documentName = getDocumentNameFromDocuments(
+            relationship.documentId
+          );
+          if (documentName) {
+            setRelationshipDocumentsMap((prev) => ({
+              ...prev,
+              [relationship.documentId]: documentName,
+            }));
+          } else {
+            DocumentsService.getDocumentById(
+              relationship.documentId,
+              siteId
+            ).then((response: any) => {
+              if (response.status === 200) {
+                setRelationshipDocumentsMap((prev) => ({
+                  ...prev,
+                  [relationship.documentId]: response.path.substring(
+                    response.path.lastIndexOf('/') + 1
+                  ),
+                }));
+              } else {
+                setRelationshipDocumentsMap((prev) => ({
+                  ...prev,
+                  [relationship.documentId]: 'NOT_FOUND',
+                }));
+              }
+            });
+          }
+        }
       }
     });
   };
@@ -92,7 +145,6 @@ export default function DocumentRelationshipsModal({
     setDocumentId('');
     setRelationshipType(RELATIONSHIP_TYPES[0]);
     setEditingRelationshipValue(null);
-    setIsDocumentRelationshipsExist(false);
     setDocumentRelationships([]);
     // Close the dialog
     onClose();
@@ -152,13 +204,75 @@ export default function DocumentRelationshipsModal({
       if (inverseRelationshipType.length > 0) {
         newRelationship['inverseRelationship'] = inverseRelationshipType;
       }
-      DocumentsService.addDocumentAttributes(
+
+      const response = await DocumentsService.addDocumentAttributes(
         siteId,
         'false',
         value.documentId,
         { attributes: [newRelationship] }
-      ).then(() => {
-        getDocumentRelationships()
+      );
+
+      if (response.status === 201) {
+        // Only update state after successful save
+        await getDocumentRelationships();
+        if (value.documentId === infoDocumentId) {
+          dispatch(
+            fetchDocumentAttributes({
+              siteId,
+              documentId: value.documentId,
+              limit: 100,
+              page: 1,
+              nextToken: null,
+            })
+          );
+        }
+        // Clear input fields after successful addition
+        setDocumentId('');
+        setRelationshipType(RELATIONSHIP_TYPES[0]);
+        setInverseRelationshipType('');
+      } else {
+        dispatch(openDialog({ dialogTitle: 'Error adding relationship' }));
+      }
+    } catch (error: any) {
+      dispatch(openDialog({ dialogTitle: error.message }));
+    }
+  }
+
+  async function onSave(relationships: any[]) {
+    if (!value?.documentId) return;
+    try {
+      if (relationships.length === 0) {
+        const response = await DocumentsService.deleteDocumentAttribute(
+          siteId,
+          value.documentId,
+          'Relationships'
+        );
+        if (response.status !== 200) {
+          dispatch(openDialog({ dialogTitle: 'Error deleting relationships' }));
+          return false;
+        }
+      } else {
+        const response = await DocumentsService.setDocumentAttributeValue(
+          siteId,
+          value.documentId,
+          'Relationships',
+          {
+            attribute: {
+              stringValues: relationships.map((rel) =>
+                transformRelationshipValueToString(rel)
+              ),
+            },
+          }
+        );
+        if (response.status !== 200) {
+          dispatch(openDialog({ dialogTitle: 'Error saving changes' }));
+          return false;
+        }
+      }
+
+      // Only update state after successful save
+      await getDocumentRelationships();
+      if (value.documentId === infoDocumentId) {
         dispatch(
           fetchDocumentAttributes({
             siteId,
@@ -168,62 +282,45 @@ export default function DocumentRelationshipsModal({
             nextToken: null,
           })
         );
-      });
-    } catch (error: any) {
-      dispatch(openDialog({ dialogTitle: error.message }));
+      }
+      return true;
+    } catch (error) {
+      dispatch(openDialog({ dialogTitle: 'Error saving changes' }));
+      return false;
     }
   }
 
-  async function onSave(relationships: any[]) {
-    if (!value?.documentId) return;
-    if (relationships.length === 0) {
-      await DocumentsService.deleteDocumentAttribute(
-        siteId,
-        value.documentId,
-        'Relationships'
-      );
-    } else {
-      await DocumentsService.setDocumentAttributeValue(
-        siteId,
-        value.documentId,
-        'Relationships',
-        {
-          attribute: {
-            stringValues: relationships.map((rel) =>
-              transformRelationshipValueToString(rel)
-            ),
-          },
-        }
-      );
-    }
+  function deleteRelationship(index: number) {
+    const onDelete = async () => {
+      const newRelationships = [...documentRelationships];
+      newRelationships.splice(index, 1);
+      const success = await onSave(newRelationships);
+      if (!success) {
+        getDocumentRelationships();
+      }
+    };
     dispatch(
-      fetchDocumentAttributes({
-        siteId,
-        documentId: value.documentId,
-        limit: 100,
-        page: 1,
-        nextToken: null,
+      openConfirmationDialog({
+        dialogTitle: 'Are you sure you want to delete this relationship?',
+        callback: onDelete,
       })
     );
   }
 
-  function deleteRelationship(index: number) {
-    const newRelationships = [...documentRelationships];
-    newRelationships.splice(index, 1);
-    setDocumentRelationships(newRelationships);
-    onSave(newRelationships);
-  }
-
   function handleEditRelationship(index: number) {
-    const newRelationships = [...documentRelationships];
-    newRelationships.map((el, i) => {
-      el.isEdit = i === index;
-    });
-    setDocumentRelationships(newRelationships);
+    const relationship = documentRelationships[index];
     setEditingRelationshipValue({
-      relationship: newRelationships[index].relationship,
-      documentId: newRelationships[index].documentId,
+      relationship: relationship.relationship,
+      documentId: relationship.documentId,
+      inverseRelationship: relationship.inverseRelationship || '',
     });
+
+    // Update the isEdit flag in the relationships array
+    const newRelationships = documentRelationships.map((rel, i) => ({
+      ...rel,
+      isEdit: i === index,
+    }));
+    setDocumentRelationships(newRelationships);
   }
 
   async function saveEditedRelationship(index: number) {
@@ -232,22 +329,26 @@ export default function DocumentRelationshipsModal({
       const { documentId, relationship } = editingRelationshipValue;
       await validateRelationship(documentId, relationship, index);
 
-      // Save the edited relationship
-      setDocumentRelationships((prevRelationships) => {
-        const newRelationships = [...prevRelationships];
-        newRelationships[index] = editingRelationshipValue;
-        onSave(newRelationships);
-        return newRelationships;
-      });
+      const newRelationships = [...documentRelationships];
+      newRelationships[index] = {
+        ...editingRelationshipValue,
+        isEdit: false,
+      };
+
+      const success = await onSave(newRelationships);
+      if (success) {
+        setEditingRelationshipValue(null);
+      } else {
+        getDocumentRelationships();
+      }
     } catch (error: any) {
       dispatch(openDialog({ dialogTitle: error.message }));
     }
   }
 
-  function resetRelationship(index: number) {
-    const newRelationships = [...documentRelationships];
-    newRelationships[index].isEdit = false;
-    setDocumentRelationships(newRelationships);
+  function resetRelationships() {
+    getDocumentRelationships();
+    setEditingRelationshipValue(null);
   }
 
   return (
@@ -322,7 +423,7 @@ export default function DocumentRelationshipsModal({
                         <div className=" h-8">
                           <RadioListbox
                             values={['', ...RELATIONSHIP_TYPES]}
-                            titles={['NONE',...RELATIONSHIP_TYPES]}
+                            titles={['NONE', ...RELATIONSHIP_TYPES]}
                             selectedValue={inverseRelationshipType}
                             setSelectedValue={setInverseRelationshipType}
                           />
@@ -410,7 +511,33 @@ export default function DocumentRelationshipsModal({
                                     }
                                   />
                                 ) : (
-                                  relationship.documentId
+                                  <div className="flex flex-col gap-2">
+                                    {relationshipDocumentsMap[
+                                      relationship.documentId
+                                    ] &&
+                                      relationshipDocumentsMap[
+                                        relationship.documentId
+                                      ] !== 'NOT_FOUND' && (
+                                        <p className="break-words font-normal  truncate"
+                                           title={
+                                               relationshipDocumentsMap[
+                                                   relationship.documentId
+                                                   ]
+                                           }
+                                      >
+                                          {
+                                            relationshipDocumentsMap[
+                                              relationship.documentId
+                                            ]
+                                          }
+                                        </p>
+                                      )}
+                                    <p className="text-xs font-bold">ID:{" "}
+                                    <span className="text-neutral-500">
+                                      {relationship.documentId}
+                                    </span>{" "}<div className="inline-block relative"> <CopyButton value={relationship.documentId} /></div></p>
+
+                                  </div>
                                 )}
                               </td>
                               <td className="p-4 text-end w-52">
@@ -425,7 +552,7 @@ export default function DocumentRelationshipsModal({
                                     </ButtonPrimaryGradient>
                                     <ButtonGhost
                                       className="ml-2"
-                                      onClick={() => resetRelationship(index)}
+                                      onClick={resetRelationships}
                                     >
                                       Cancel
                                     </ButtonGhost>

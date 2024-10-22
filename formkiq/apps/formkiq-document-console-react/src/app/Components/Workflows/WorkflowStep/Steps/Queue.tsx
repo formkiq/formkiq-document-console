@@ -1,40 +1,22 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Position } from 'reactflow';
+import { useEffect, useState } from 'react';
 import { DocumentsService } from '../../../../helpers/services/documentsService';
-import { Plus, Wildcard } from '../../../Icons/icons';
-import { OneConditionSourceHandle } from '../../Handles/handles';
+import { Queue as QueueIcon } from '../../../Icons/icons';
 import ApprovalGroupsSelector from '../NodeComponents/ApprovalGroupsSelector';
-import { NodeNameSelector } from '../NodeComponents/NodeNameSelector';
-import NodeTitle from '../NodeComponents/NodeTitle';
 import QueueSelector from '../NodeComponents/QueueSelector';
+import { NodeContentProps, NodeWrapper } from '../NodeComponents/NodeWrapper';
 
-function Queue({
-  newStep,
-  setNewStep,
+export function QueueContent({
   isEditing,
-  edges,
-  id,
-  addCreatorNode,
-  siteId,
   data,
+  newStep,
   onChange,
-  readOnly
-}: any) {
-  const MAX_CONNECTIONS = 2;
-  let isHandleConnectable = false;
-  let connectionsNumber = MAX_CONNECTIONS;
-  if (edges) {
-    connectionsNumber = edges.filter((e: any) => e.source === id).length;
-  }
-  isHandleConnectable = useMemo(() => {
-    if(readOnly) return false;
-    return connectionsNumber < MAX_CONNECTIONS;
-  }, [connectionsNumber, MAX_CONNECTIONS]);
-
+  siteId,
+  setNewStep,
+}: NodeContentProps) {
   const [queue, setQueue] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!data?.queue) return;
+    if (!data?.queue || !siteId) return;
     if (data.queue.queueId) {
       DocumentsService.getQueue(siteId, data.queue.queueId).then((res) => {
         if (res.status === 200) setQueue(res.name);
@@ -58,65 +40,41 @@ function Queue({
 
   return (
     <>
-      {isEditing && (
-        <NodeNameSelector
-          newStep={newStep}
-          setNewStep={setNewStep}
-        />
-      )}
-      {!isEditing && (
-        <NodeTitle icon={<Wildcard />} title="Review / Approval Queue" />
-      )}
-      {!isEditing && <div className="h-px bg-gray-400 my-1.5 w-full"></div>}
-
       <QueueSelector
         newStep={newStep}
-        setNewStep={setNewStep}
-        siteId={siteId}
+        setNewStep={setNewStep ? setNewStep : () => {}}
+        siteId={siteId ? siteId : ''}
         isEditing={isEditing}
         queue={isEditing ? newStep?.queue : queue}
       />
 
       <ApprovalGroupsSelector
         newStep={newStep}
-        setNewStep={setNewStep}
-        siteId={siteId}
+        setNewStep={setNewStep ? setNewStep : () => {}}
+        siteId={siteId ? siteId : ''}
         isEditing={isEditing}
         approvalGroups={approvalGroups}
       />
-
-      {!isEditing && (
-        <>
-          <OneConditionSourceHandle
-            type="source"
-            position={Position.Right}
-            nodeId={id}
-            maxConnections={1}
-            top="33%"
-            id="approve"
-            readOnly={readOnly}
-          />
-          <OneConditionSourceHandle
-            type="source"
-            position={Position.Right}
-            nodeId={id}
-            maxConnections={1}
-            top="66%"
-            id="reject"
-            readOnly={readOnly}
-          />
-        </>
-      )}
-      {isHandleConnectable && (
-        <div
-          className="w-6 mt-6 rounded-full bg-green-400 text-white hover:border-green-700 p-1  cursor-pointer absolute right-[-36px] border-2 border-white hover:text-green-700 nodrag"
-          style={{ top: 'calc(50% - 12px)' }}
-          onClick={addCreatorNode}
-        >
-          <Plus />
-        </div>
-      )}
     </>
+  );
+}
+
+function Queue(props: any) {
+  return (
+    <NodeWrapper
+      id={props.id}
+      icon={<QueueIcon />}
+      title="Review / Approval Queue"
+      isEditing={props.isEditing}
+      readOnly={props.readOnly}
+      newStep={props.newStep}
+      setNewStep={props.setNewStep}
+      edges={props.edges}
+      addCreatorNode={props.addCreatorNode}
+      maxConnections={2}
+    >
+      <QueueContent {...props} />
+    </NodeWrapper>
   );
 }
 
