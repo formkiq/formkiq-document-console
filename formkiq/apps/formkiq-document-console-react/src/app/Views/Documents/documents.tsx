@@ -39,11 +39,7 @@ import {
 } from '../../Store/reducers/attributes';
 import { AttributesDataState } from '../../Store/reducers/attributesData';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
-import {
-  ConfigState,
-  setCurrentActionEvent,
-  setPendingArchive,
-} from '../../Store/reducers/config';
+import { ConfigState, setPendingArchive } from '../../Store/reducers/config';
 import { setCurrentDocumentPath } from '../../Store/reducers/data';
 import {
   deleteDocument,
@@ -69,7 +65,6 @@ import {
   TextFileEditorEditableContentTypes,
   TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
-import { TopLevelFolders } from '../../helpers/constants/folders';
 import { TagsForFilterAndDisplay } from '../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -548,7 +543,7 @@ function Documents() {
               documentInstance: null,
               folderInstance: null,
             },
-              subfolderUri
+            subfolderUri
           );
           break;
         case 'folderUpload':
@@ -2336,9 +2331,10 @@ function Documents() {
                           OnlyOfficeContentTypes.indexOf(
                             (currentDocument as IDocument).contentType
                           ) > -1) ||
-                        ((currentDocument as IDocument).deepLinkPath &&
-                          (currentDocument as IDocument).deepLinkPath.length >
-                            0)) && (
+                        ((currentDocument as IDocument).deepLinkPath !==
+                          undefined &&
+                          ((currentDocument as IDocument).deepLinkPath
+                            ?.length ?? 0) > 0)) && (
                         <div className="mt-2 w-full flex justify-center">
                           <ButtonPrimaryGradient
                             onClick={viewDocument}
@@ -2384,29 +2380,29 @@ function Documents() {
                         </div>
                       )}
 
-                    {(currentDocument as IDocument).deepLinkPath !== undefined &&
-                      (currentDocument as IDocument).deepLinkPath.length ===
-                        0 && (
-                        <div className="mt-2 w-full flex justify-center">
-                          <ButtonPrimaryGradient
-                            onClick={DownloadDocument}
-                            style={{
-                              height: '36px',
-                              width: '100%',
-                              margin: '0 16px',
-                            }}
-                          >
-                            <div className="w-full flex justify-center px-4 py-1">
-                              <span className="">Download</span>
-                              <span className="w-7 pl-1">{Download()}</span>
-                            </div>
-                          </ButtonPrimaryGradient>
-                        </div>
-                      )}
+                    {(!(currentDocument as IDocument).deepLinkPath ||
+                      ((currentDocument as IDocument).deepLinkPath?.length ??
+                        0) === 0) && (
+                      <div className="mt-2 w-full flex justify-center">
+                        <ButtonPrimaryGradient
+                          onClick={DownloadDocument}
+                          style={{
+                            height: '36px',
+                            width: '100%',
+                            margin: '0 16px',
+                          }}
+                        >
+                          <div className="w-full flex justify-center px-4 py-1">
+                            <span className="">Download</span>
+                            <span className="w-7 pl-1">{Download()}</span>
+                          </div>
+                        </ButtonPrimaryGradient>
+                      </div>
+                    )}
                     {formkiqVersion.type !== 'core' &&
-                      (currentDocument as IDocument).deepLinkPath !== undefined &&
-                      (currentDocument as IDocument).deepLinkPath.length ===
-                        0 && (
+                      (!(currentDocument as IDocument).deepLinkPath ||
+                        ((currentDocument as IDocument).deepLinkPath?.length ??
+                          0) === 0) && (
                         <div className="mt-2 flex justify-center">
                           <ButtonSecondary
                             style={{
@@ -2539,27 +2535,24 @@ function Documents() {
                   >
                     <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
                       {formkiqVersion.type !== 'core' &&
-                        (currentDocument as IDocument).deepLinkPath !== undefined &&
-                        (currentDocument as IDocument).deepLinkPath.length ===
-                        0 && (
-                            <ButtonSecondary
-                              className="text-sm h-9 w-full mb-2"
-                              onClick={(event: any) => {
-                                const documentLine: ILine = {
-                                  lineType: 'document',
-                                  folder: '',
-                                  documentId: infoDocumentId,
-                                  documentInstance: currentDocument,
-                                  folderInstance: null,
-                                };
-                                onActionModalClick(
-                                  event,
-                                  documentLine
-                                );
-                              }}
-                            >
-                              Add Action
-                            </ButtonSecondary>
+                        (!(currentDocument as IDocument).deepLinkPath ||
+                          ((currentDocument as IDocument).deepLinkPath
+                            ?.length ?? 0) === 0) && (
+                          <ButtonSecondary
+                            className="text-sm h-9 w-full mb-2"
+                            onClick={(event: any) => {
+                              const documentLine: ILine = {
+                                lineType: 'document',
+                                folder: '',
+                                documentId: infoDocumentId,
+                                documentInstance: currentDocument,
+                                folderInstance: null,
+                              };
+                              onActionModalClick(event, documentLine);
+                            }}
+                          >
+                            Add Action
+                          </ButtonSecondary>
                         )}
                       {currentDocumentActions.length === 0 && (
                         <div className="flex w-full justify-center italic text-smaller">
