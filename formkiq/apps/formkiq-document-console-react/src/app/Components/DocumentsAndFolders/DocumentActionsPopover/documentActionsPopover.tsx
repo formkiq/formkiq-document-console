@@ -11,8 +11,10 @@ import {
   Download,
   History,
   MoreActions,
-  Move, Relationship,
+  Move,
+  Relationship,
   Rename,
+  Settings,
   Share,
   Signature,
   Star,
@@ -63,6 +65,7 @@ export default function DocumentActionsPopover({
     onRenameModalClick,
     onMoveModalClick,
     onDocumentRelationshipsModalClick,
+    onActionModalClick,
   } = useDocumentActions();
   const line: ILine = value;
   const [visible, setVisibility] = useState(false);
@@ -277,6 +280,34 @@ export default function DocumentActionsPopover({
                 </li>
               )}
 
+            {formkiqVersion.type !== 'core' &&
+              line.lineType === 'document' &&
+              !isDeeplinkPath && (
+                <li
+                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(event) =>
+                    onActionModalClick(event, {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      folder: line.folder,
+                    })
+                  }
+                >
+                  <span className={'flex items-baseline'}>
+                    <span className="mr-2 w-3.5 text-neutral-900">
+                      {Settings()}
+                    </span>
+                    <span>Action</span>
+                    <span
+                      className="ml-auto"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {ArrowRight()}
+                    </span>
+                  </span>
+                </li>
+              )}
+
             {line.lineType === 'document' &&
               pathname.indexOf('/queues') === -1 && (
                 <li
@@ -432,7 +463,7 @@ export default function DocumentActionsPopover({
               >
                 <span className={'flex items-baseline'}>
                   <span className="mr-2 w-3.5 text-neutral-900">
-                    <Relationship/>
+                    <Relationship />
                   </span>
                   <span>Document Relationships</span>
                   <span
