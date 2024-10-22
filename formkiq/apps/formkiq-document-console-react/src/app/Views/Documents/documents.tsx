@@ -1343,7 +1343,11 @@ function Documents() {
   }
 
   const openArchiveTab = () => {
-    dispatch(setPendingArchive(selectedDocuments));
+    const filteredDocuments = selectedDocuments.filter(
+      (document: IDocument) =>
+        !document.deepLinkPath || (document.deepLinkPath?.length ?? 0) === 0
+    );
+    dispatch(setPendingArchive(filteredDocuments));
     setArchiveTabStatus('open');
   };
   const closeArchiveTab = () => {

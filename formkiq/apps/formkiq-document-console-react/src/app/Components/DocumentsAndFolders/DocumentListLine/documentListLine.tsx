@@ -280,6 +280,8 @@ function DocumentListLine({
             )}
             {archiveTabStatus !== 'closed' &&
               (archiveStatus === 'INITIAL' || archiveStatus === 'COMPLETE') &&
+              (!(file as IDocument).deepLinkPath ||
+                ((file as IDocument).deepLinkPath?.length ?? 0) === 0) &&
               (pendingArchive.findIndex(
                 (document) => document.documentId === file.documentId
               ) === -1 ? (
