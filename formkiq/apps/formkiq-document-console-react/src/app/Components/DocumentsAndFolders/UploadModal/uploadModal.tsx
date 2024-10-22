@@ -15,6 +15,7 @@ import {
   IFileUploadData,
 } from '../../../helpers/services/documentsService';
 import { formatDate } from '../../../helpers/services/toolService';
+import {Close} from "../../Icons/icons";
 
 const foldersWithNoUpload = ['favorites', 'shared', 'deleted'];
 const fileTypesMap = {
@@ -104,6 +105,7 @@ export default function UploadModal({
   const cancelButtonRef = useRef(null);
   const uploaderRef = useRef<UploaderComponent>(null);
   const [uploadedDocs, setUploaded] = useState([]);
+  const [notUploadedDocs, setNotUploadedDocs] = useState<string[]>([]);
   const [uploadProcessDocs, setUploadProcess]: [
     uploadProcessDocs: IFileUploadData[],
     setUploadProcess: any
@@ -178,6 +180,7 @@ export default function UploadModal({
   const closeDialog = () => {
     if (resetDropUploadDocuments) resetDropUploadDocuments();
     setUploaded([]);
+    setNotUploadedDocs([]);
     onClose();
   };
 
@@ -190,6 +193,45 @@ export default function UploadModal({
       // console.log(event.loaded + ' / ' + event.total);
     };
   };
+
+  interface UploadResponse {
+    status: number;
+    file: { name: string };
+    errors?: { error: string }[];
+  }
+
+  function handleFileUploadErrors(
+    responses: UploadResponse[],
+    dispatch: (action: any) => void
+  ) {
+    const notUploadedFilesErrors: {
+      fileName: string;
+      errorMessage: string;
+    }[] = responses
+      .filter((response) => response.status !== 200)
+      .map((response) => ({
+        fileName: response.file.name,
+        errorMessage: response.errors
+          ? response.errors.map((err) => err.error).join(', ')
+          : '',
+      }));
+
+    if (notUploadedFilesErrors.length > 0) {
+      const errorMessages = notUploadedFilesErrors.map(
+        (error) =>
+          `${error.fileName}  ${
+            error.errorMessage !== '' && ': ' + error.errorMessage
+          }`
+      );
+      dispatch(
+        openDialog({
+          dialogTitle: `Error uploading files: \n ${errorMessages.join('\n')}`,
+        })
+      );
+    }
+    return notUploadedFilesErrors;
+  }
+
   const uploadFiles = () => {
     if (uploaderRef.current) {
       const filesData: IFileUploadData[] = uploaderRef.current
@@ -223,9 +265,17 @@ export default function UploadModal({
           filesData,
           onprogress
         ).then((res) => {
-          const ids = res.map((item) => {
-            return item.documentId;
-          });
+          const ids = res
+            .filter((item) => {
+              return item.status === 200;
+            })
+            .map((item) => {
+              return item.documentId;
+            });
+          const notUploadedFilesErrors: {
+              fileName: string;
+              errorMessage: string;
+          }[] = handleFileUploadErrors(res, dispatch);
           DocumentsService.getDocumentsById(ids, siteId).then(
             (uploaded: []) => {
               setUploadProcess([]);
@@ -241,6 +291,7 @@ export default function UploadModal({
                 });
               }
               setUploaded([...uploadedDocs, ...uploaded]);
+              setNotUploadedDocs(notUploadedFilesErrors.map((f) => f.fileName));
               onDocumentDataChange();
             }
           );
@@ -253,9 +304,15 @@ export default function UploadModal({
           filesData,
           onprogress
         ).then((res) => {
-          const ids = res.map((item) => {
-            return item.documentId;
+          const ids = res.filter((item) => {
+              return item.status === 200;
+          }).map((item) => {
+              return item.documentId;
           });
+          const notUploadedFilesErrors: {
+                fileName: string;
+                errorMessage: string;
+            }[] = handleFileUploadErrors(res, dispatch);
           DocumentsService.getDocumentsById(ids, siteId).then(
             (uploaded: []) => {
               setUploadProcess([]);
@@ -351,6 +408,7 @@ export default function UploadModal({
               });
 
               setUploaded([...uploadedDocs, ...uploaded]);
+              setNotUploadedDocs(notUploadedFilesErrors.map((f) => f.fileName));
               onDocumentDataChange();
             }
           );
@@ -667,6 +725,47 @@ export default function UploadModal({
                               <tbody className="bg-white nodark:bg-slate-800">
                                 {uploadedDocs.map((file, i) => {
                                   return uploadedFileLine(file, i);
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {notUploadedDocs.length > 0 && (
+                      <div className="relative rounded-xl">
+                        <div className="shadow-sm overflow-hidden my-8">
+                          <div className="font-bold text-lg inline-block pr-6 pb-6">
+                            Files not uploaded:
+                          </div>
+                          <div className=" max-h-56 overflow-y-auto">
+                            <table className="border-separate border-spacing-0 table-fixed w-full text-sm border-none">
+                              <thead className="sticky top-0 bg-white">
+                                <tr>
+                                  <th
+                                    className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 text-left"
+                                    data-test-id="uploaded-filename"
+                                  >
+                                    Filename
+                                  </th>
+                                  <th className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 text-left"></th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white nodark:bg-slate-800">
+                                {notUploadedDocs.map((fileName, i) => {
+                                  return (
+                                    <tr key={i + fileName}>
+                                      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 text-slate-500">
+                                        {fileName}
+                                      </td>
+                                      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 text-red-500 flex gap-2">
+                                        <div className="w-5 h-5 mr-2 ">
+                                          <Close />
+                                        </div>
+                                        Error: File upload failed.
+                                      </td>
+                                    </tr>
+                                  );
                                 })}
                               </tbody>
                             </table>

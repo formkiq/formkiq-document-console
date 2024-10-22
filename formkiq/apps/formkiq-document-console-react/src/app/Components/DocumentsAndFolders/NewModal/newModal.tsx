@@ -167,11 +167,21 @@ export default function NewModal({
               if (res.status === 201) {
                 closeDialog();
               } else {
-                dispatch(
-                  openDialog({
-                    dialogTitle: 'An error has occurred.',
-                  })
-                );
+                if (res.errors) {
+                  dispatch(
+                    openDialog({
+                      dialogTitle:
+                        'Error.' +
+                        res.errors.map((err:any) => err.error).join(', \n'),
+                    })
+                  );
+                } else {
+                  dispatch(
+                    openDialog({
+                      dialogTitle: 'An error has occurred.',
+                    })
+                  );
+                }
               }
             }
           );
@@ -191,12 +201,23 @@ export default function NewModal({
               (res) => {
                 if (res.status === 201) {
                   navigate(pathname + '/' + res.documentId + '/edit');
+                  closeDialog();
                 } else {
-                  dispatch(
-                    openDialog({
-                      dialogTitle: 'An error has occurred.',
-                    })
-                  );
+                  if (res.errors) {
+                    dispatch(
+                      openDialog({
+                        dialogTitle:
+                          'Error.' +
+                          res.errors.map((err:any) => err.error).join(', \n'),
+                      })
+                    );
+                  } else {
+                    dispatch(
+                      openDialog({
+                        dialogTitle: 'An error has occurred.',
+                      })
+                    );
+                  }
                 }
               }
             );
@@ -209,8 +230,8 @@ export default function NewModal({
                 '/' +
                 nameValue
             );
+            closeDialog();
           }
-          closeDialog();
         }
       } else {
         dispatch(
