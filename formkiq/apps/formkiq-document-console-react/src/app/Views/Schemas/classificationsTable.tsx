@@ -56,7 +56,7 @@ function ClassificationsTable({
                     <div className="flex items-center justify-end gap-2 mr-3">
                       <NavLink
                         title="Open in editor"
-                        to={`/schemas/${classification.classificationId}?editor=true`}
+                        to={`${pathname}/${classification.classificationId}?editor=true`}
                         className="h-6"
                       >
                         <button
