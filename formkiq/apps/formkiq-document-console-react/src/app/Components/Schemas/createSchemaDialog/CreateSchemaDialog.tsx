@@ -38,7 +38,7 @@ function CreateSchemaDialog({
   const initialSchemaValue: Schema = {
     name: '',
     attributes: {
-      allowAdditionalAttributes: false,
+      allowAdditionalAttributes: true,
     },
   };
   const [schema, setSchema] = useState(initialSchemaValue);
