@@ -1,18 +1,16 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Edit, Json, Trash } from '../../Components/Icons/icons';
+import { Json, Trash } from '../../Components/Icons/icons';
 import { formatDate } from '../../helpers/services/toolService';
 import { Classification } from '../../helpers/types/schemas';
 
 type TagSchemaTableProps = {
   classifications: Classification[];
   onClassificationDelete: (classificationId: string) => void;
-  showClassificationEditTab: (classificationId: string) => void;
 };
 
 function ClassificationsTable({
   classifications,
   onClassificationDelete,
-  showClassificationEditTab,
 }: TagSchemaTableProps) {
   const pathname = decodeURI(useLocation().pathname);
   return (
@@ -66,18 +64,6 @@ function ClassificationsTable({
                           <Json />
                         </button>
                       </NavLink>
-
-                      <button
-                        title="Edit"
-                        className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
-                        onClick={() =>
-                          showClassificationEditTab(
-                            classification.classificationId
-                          )
-                        }
-                      >
-                        <Edit />
-                      </button>
 
                       <button
                         title="Delete"

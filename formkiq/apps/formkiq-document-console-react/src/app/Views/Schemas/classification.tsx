@@ -11,10 +11,6 @@ import {
 import { Mode } from 'vanilla-jsoneditor';
 import { Close, Save, Spinner, Trash } from '../../Components/Icons/icons';
 import SchemaMenu from '../../Components/Schemas/SchemaMenu';
-import EditSchemaDialog from '../../Components/Schemas/createSchemaDialog/EditSchemaDialog';
-import CompositeKeysTable from '../../Components/Schemas/tables/compositeKeysTable';
-import OptionalAttributesTable from '../../Components/Schemas/tables/optionalAttributesTable';
-import RequiredAttributesTable from '../../Components/Schemas/tables/requiredAttributesTable';
 import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
@@ -31,6 +27,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { Schema as SchemaType } from '../../helpers/types/schemas';
+import SchemaPage from "../../Components/Schemas/SchemaPage";
 
 function Classification() {
   const { user } = useAuthenticatedState();
@@ -45,11 +42,10 @@ function Classification() {
     hasWorkspaces,
     workspaceSites
   );
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const { classificationId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const editor = searchParams.get('editor');
-
   const { classificationSchema } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -240,47 +236,24 @@ function Classification() {
             </div>
           </div>
         ) : (
-          <div className="p-4">
+          <div className="p-4 ">
             <SchemaMenu
-              schema={classificationSchema}
-              updateSchema={updateClassification}
               deleteSchema={onDeleteClick}
-              openEditDialog={() => setIsEditDialogOpen(true)}
+              onEditClick={() => setIsEditing(true)}
+              isEditing={isEditing}
             />
-            <p className="text-neutral-900 text-md font-bold my-4">
-              Composite Keys
-            </p>
-            <CompositeKeysTable
-              compositeKeys={classificationSchema.attributes.compositeKeys}
-            />
-
-            <p className="text-neutral-900 text-md font-bold my-4">
-              Required Attributes
-            </p>
-            <RequiredAttributesTable
-              attributes={classificationSchema.attributes.required}
-            />
-
-            <p className="text-neutral-900 text-md font-bold my-4">
-              Optional Attributes
-            </p>
-            <OptionalAttributesTable
-              attributes={classificationSchema.attributes.optional}
+            <SchemaPage
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+              siteId={siteId}
+              schemaType="classification"
+              initialSchemaValue={classificationSchema}
+              classificationId={classificationId}
             />
           </div>
         )
       ) : (
         <Spinner />
-      )}
-      {classificationSchema && (
-        <EditSchemaDialog
-          isOpen={isEditDialogOpen}
-          setIsOpen={setIsEditDialogOpen}
-          siteId={siteId}
-          schemaType="classification"
-          initialSchemaValue={classificationSchema}
-          classificationId={classificationId}
-        />
       )}
     </>
   );
