@@ -347,7 +347,7 @@ function SchemaPage({
   return (
     <>
       <form className="flex flex-col gap-4 mt-6" onSubmit={onSubmit}>
-        {isEditing ? (
+        {(isEditing && schemaType === 'classification') ? (
           <input
             type="text"
             className="h-12 px-4 border border-neutral-300 text-sm rounded-md xl:w-[550px]"
@@ -359,7 +359,7 @@ function SchemaPage({
             onKeyDown={(e) => preventDialogClose(e)}
           />
         ) : (
-          <h2 className="text-xl font-bold">{schema.name}</h2>
+          <h2 className="text-xl font-bold">{schemaType === 'classification'?schema.name:`${siteId} Site Schema`}</h2>
         )}
         {isEditing ? (
           <div className="flex items-center">
