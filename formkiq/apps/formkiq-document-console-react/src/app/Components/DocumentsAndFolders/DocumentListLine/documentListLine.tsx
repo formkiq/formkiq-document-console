@@ -25,6 +25,7 @@ import { IDocument } from '../../../helpers/types/document';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import {
   Checkmark,
+  Download,
   Info,
   Minus,
   Pencil,
@@ -55,6 +56,7 @@ function DocumentListLine({
   selectedDocuments,
   setSelectedDocuments,
   archiveTabStatus,
+  downloadDocument,
 }: {
   file: any;
   folder: any;
@@ -74,6 +76,7 @@ function DocumentListLine({
   selectedDocuments: IDocument[];
   setSelectedDocuments: (documents: IDocument[]) => void;
   archiveTabStatus?: 'open' | 'closed' | 'minimized';
+  downloadDocument: (documentId: string) => void;
 }) {
   const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
@@ -454,7 +457,16 @@ function DocumentListLine({
                           <Pencil />
                         </Link>
                       )}
-
+                    {(!file?.deepLinkPath ||
+                      file.deepLinkPath.length === 0) && (
+                      <button
+                        title="Download"
+                        onClick={() => downloadDocument(file.documentId)}
+                        className="w-5 pt-0.5 text-neutral-900 mr-1 hover:text-primary-500"
+                      >
+                        <Download />
+                      </button>
+                    )}
                     {file.tags &&
                       Object.getOwnPropertyNames(file.tags)
                         .sort() // This will sort the property names alphabetically

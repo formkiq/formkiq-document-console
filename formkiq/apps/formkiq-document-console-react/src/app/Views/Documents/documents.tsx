@@ -924,10 +924,10 @@ function Documents() {
     );
   };
 
-  const DownloadDocument = () => {
+  const downloadDocument = (documentId: string) => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentUrl(
-        infoDocumentId,
+        documentId,
         currentSiteId,
         '',
         false
@@ -1580,6 +1580,7 @@ function Documents() {
                 openArchiveTab={openArchiveTab}
                 archiveTabStatus={archiveTabStatus}
                 getExpandedFoldersDocuments={getExpandedFoldersDocuments}
+                downloadDocument={downloadDocument}
               />
               <Dialog
                 open={isDropZoneVisible}
@@ -2286,7 +2287,7 @@ function Documents() {
                         0) === 0) && (
                       <div className="mt-2 w-full flex justify-center">
                         <ButtonPrimaryGradient
-                          onClick={DownloadDocument}
+                          onClick={()=>downloadDocument(infoDocumentId)}
                           style={{
                             height: '36px',
                             width: '100%',
@@ -2608,7 +2609,7 @@ function Documents() {
                             </button>
                           )}
                         <ButtonPrimaryGradient
-                          onClick={DownloadDocument}
+                          onClick={()=>downloadDocument(infoDocumentId)}
                           style={{ height: '36px', width: '100%' }}
                         >
                           <div className="w-full flex justify-center px-4 py-1">
