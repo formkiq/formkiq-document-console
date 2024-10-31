@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import {NavLink, useLocation} from 'react-router-dom';
 import ButtonPrimary from '../Generic/Buttons/ButtonPrimary';
 import { Json, Trash } from '../Icons/icons';
 
@@ -13,6 +13,7 @@ function SchemaMenu({
   onEditClick,
   isEditing,
 }: CaseMenuPropsType) {
+  const {pathname} = useLocation();
   return (
     <>
       <div className="flex justify-between">
@@ -34,7 +35,7 @@ function SchemaMenu({
             </>
           )}
           <NavLink
-            to={'/schemas'}
+            to={pathname.substring(0, pathname.lastIndexOf('/'))}
             className="text-neutral-900 hover:text-primary-500 "
           >
             Return to Schemas

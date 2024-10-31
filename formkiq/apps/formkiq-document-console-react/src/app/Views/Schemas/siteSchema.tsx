@@ -163,7 +163,7 @@ function SiteSchema() {
                   </div>
                 </button>
                 <NavLink
-                  to={'/schemas'}
+                  to={pathname.substring(0, pathname.lastIndexOf('/'))}
                   className="h-6 text-neutral-900 hover:text-primary-500 "
                 >
                   Return to Schemas
