@@ -228,7 +228,7 @@ function DocumentListLine({
   return (
     <>
       <tr
-        className={`text-sm tracking-normal ${
+        className={`text-sm tracking-normal  file-drop-wrapper ${
           infoDocumentId === file.documentId && 'bg-neutral-100'
         }`}
         id={file.documentId}
