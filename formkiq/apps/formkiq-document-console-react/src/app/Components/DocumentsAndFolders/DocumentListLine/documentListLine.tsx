@@ -353,7 +353,7 @@ function DocumentListLine({
                 />
               </Link>
             )}
-            <div className="grow flex">
+            <div className="grow flex break-all">
               {folder === 'deleted' ? (
                 <span
                   className="pt-1.5 flex items-center"

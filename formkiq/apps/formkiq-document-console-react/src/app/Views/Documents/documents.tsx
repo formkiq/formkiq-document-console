@@ -1443,8 +1443,8 @@ function Documents() {
       <Helmet>
         <title>Documents</title>
       </Helmet>
-      <div className="h-[calc(100vh-3.68rem)] flex">
-        <div className="grow flex flex-col justify-stretch">
+      <div className="h-[calc(100vh-3.68rem)] flex ">
+        <div className="grow flex flex-col justify-stretch flex-1">
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
             <div className="flex items-center gap-4 pr-8 z-10">
@@ -1612,10 +1612,10 @@ function Documents() {
           </div>
         </div>
         {infoDocumentId.length ? (
-          <div className="h-[calc(100vh-3.68rem)] overflow-y-auto flex w-72 bg-white border-l border-neutral-300">
+          <div className="h-[calc(100vh-3.68rem)] overflow-y-auto flex w-[17rem] bg-white border-l border-neutral-300">
             <div className="flex-1 inline-block">
               {currentDocument ? (
-                <div className="flex flex-wrap justify-center">
+                <div className="flex flex-wrap justify-start">
                   <div className="w-full flex grow-0 pl-2 pt-3 justify-start">
                     <div className="w-12">
                       <img
@@ -1647,7 +1647,7 @@ function Documents() {
                       </div>
                     </div>
                   </div>
-                  <div className="w-64 flex mt-4 mr-12 mb-2 border-b">
+                  <div className="w-64 flex mt-4 mr-2 mb-2 border-b">
                     <div
                       className="w-1/3 text-sm font-semibold cursor-pointer"
                       onClick={(event) => {
@@ -1735,7 +1735,7 @@ function Documents() {
                   <div
                     className={
                       (infoDocumentView === 'info' ? 'block ' : 'hidden ') +
-                      ' w-64 mr-12'
+                      ' w-64 mr-2'
                     }
                   >
                     {currentDocument && (currentDocument as IDocument).path && (
@@ -1860,7 +1860,7 @@ function Documents() {
                             </dd>
                           </div>
                         )}
-                        <div className="w-68 flex mr-3 border-b"></div>
+                        <div className="w-64 flex mr-3 border-b"></div>
                         <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
                           Relationships
                           {!isSiteReadOnly && (
@@ -1925,7 +1925,7 @@ function Documents() {
                             (no relationships have been added)
                           </span>
                         )}
-                        <div className="w-68 flex mr-3 border-b"></div>
+                        <div className="w-64 flex mr-3 border-b"></div>
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
                           Attributes
                           {!isCurrentSiteReadonly && (
