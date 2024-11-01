@@ -1,5 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useAppDispatch } from '../../../Store/store';
 import { ILine } from '../../../helpers/types/line';
 import { Close } from '../../Icons/icons';
@@ -17,6 +17,7 @@ import { DocumentsService } from '../../../helpers/services/documentsService';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import { ActionSelector } from './ActionSelector';
+import {useDocumentActions} from "../DocumentActionsPopover/DocumentActionsContext";
 
 export default function ActionModal({
   isOpened,
@@ -33,7 +34,7 @@ export default function ActionModal({
   const closeDialog = () => {
     onClose();
   };
-
+const { updateDocumentActions } = useDocumentActions();
   const [newAction, setNewAction] = useState<any>(null);
 
   const onChange = (value: any, key: any) => {
@@ -61,6 +62,7 @@ export default function ActionModal({
     ).then((res) => {
       if (res.status === 200) {
         setNewAction(null);
+        updateDocumentActions(value!.documentId, siteId);
         onClose();
       } else {
         if (res?.errors) {

@@ -162,6 +162,9 @@ function Documents() {
     uploadModalDocumentId,
     onNewClose,
     onActionModalClick,
+    currentDocumentActions,
+    setCurrentDocumentActions,
+    updateDocumentActions,
   } = useDocumentActions();
 
   useEffect(() => {
@@ -199,9 +202,6 @@ function Documents() {
     any
   ] = useState([]);
   const [currentDocumentVersions, setCurrentDocumentVersions] = useState(null);
-  const [currentDocumentActions, setCurrentDocumentActions] = useState<any[]>(
-    []
-  );
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
   const dispatch = useAppDispatch();
@@ -331,7 +331,7 @@ function Documents() {
           setCurrentDocument(response);
           // TODO: set folder to selected document path?
           updateTags();
-          updateDocumentActions();
+          updateDocumentActions(infoDocumentId, currentSiteId);
           // close history tab if deeplink file
           if (
             infoDocumentView === 'history' &&
@@ -590,100 +590,11 @@ function Documents() {
     }
   };
 
-  const updateDocumentActions = () => {
-    if (infoDocumentId.length) {
-      DocumentsService.getDocumentActions(infoDocumentId, currentSiteId).then(
-        (response: any) => {
-          if (response.status === 200) {
-            const actions = [...response.actions];
-            let isWorkflowsUpToDate = true;
-            let isQueuesUpToDate = true;
-            const addWorkflowNames = () => {
-              actions.forEach((action: any) => {
-                if (action.workflowId) {
-                  const workflowName = workflows.find(
-                    (workflow: WorkflowSummary) =>
-                      workflow.workflowId === action.workflowId
-                  )?.name;
-                  if (!workflowName) {
-                    isWorkflowsUpToDate = false;
-                  } else {
-                    action.workflowName = workflowName;
-                  }
-                }
-              });
-            };
-            const addQueueNames = () => {
-              actions.forEach((action: any) => {
-                if (action.queueId) {
-                  const queueName = queues.find(
-                    (queue: Queue) => queue.queueId === action.queueId
-                  )?.name;
-                  if (!queueName) {
-                    isQueuesUpToDate = false;
-                  } else {
-                    action.queueName = queueName;
-                  }
-                }
-              });
-            };
-            const addUserEmails = () => {
-              actions.forEach((action: any) => {
-                if (action.userId) {
-                  const userEmail = users.find(
-                    (user: User) => user.username === action.userId
-                  )?.email;
-                  action.userEmail = userEmail;
-                }
-              });
-            };
-            addWorkflowNames();
-            addQueueNames();
-            if (user.isAdmin && users?.length) {
-              addUserEmails();
-            }
-
-            // re-fetch workflows and queues only if new IDs appeared
-            if (!isWorkflowsUpToDate || !isQueuesUpToDate) {
-              if (!isWorkflowsUpToDate) {
-                dispatch(
-                  fetchWorkflows({
-                    siteId: currentSiteId,
-                    limit: 100,
-                    page: 1,
-                    nextToken: null,
-                  })
-                );
-              }
-              if (!isQueuesUpToDate) {
-                dispatch(
-                  fetchQueues({
-                    siteId: currentSiteId,
-                    limit: 100,
-                    page: 1,
-                    nextToken: null,
-                  })
-                );
-              }
-              setTimeout(() => {
-                addWorkflowNames();
-                addQueueNames();
-                setCurrentDocumentActions(actions);
-              }, 500);
-            } else {
-              setCurrentDocumentActions(actions);
-            }
-          }
-        }
-      );
-    }
-  };
-
   function retryFailedActions() {
     DocumentsService.retryDocumentActions(currentSiteId, infoDocumentId).then(
       (response: any) => {
         if (response.status === 200) {
-          updateDocumentActions();
+          updateDocumentActions(infoDocumentId, currentSiteId);
         } else if (response.status === 400) {
           dispatch(
             openDialog({
@@ -704,7 +615,7 @@ function Documents() {
   // update document actions every 5 seconds
   useEffect(() => {
     if (infoDocumentId && infoDocumentView === 'actions') {
-      const interval = setInterval(updateDocumentActions, 5000);
+      const interval = setInterval(()=>updateDocumentActions(infoDocumentId, currentSiteId), 5000);
       return () => clearInterval(interval);
     }
     return () => {};
@@ -1731,6 +1642,13 @@ function Documents() {
                         />
                       </div>
                     </div>
+                    <button
+                      className="w-5 h-5 ml-2 text-neutral-500 hover:text-primary-500"
+                      title="Referesh"
+                      onClick={onDocumentInfoClick}
+                    >
+                      <Retry />
+                    </button>
                   </div>
                   <div
                     className={
