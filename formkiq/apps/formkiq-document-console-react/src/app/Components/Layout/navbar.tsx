@@ -1001,9 +1001,7 @@ function Navbar() {
               </div>
               {!documentId.length &&
                 currentSection === 'DocumentsAndFolders' &&
-                !advancedSearch &&
-                (formkiqVersion.modules.includes('typesense') ||
-                  formkiqVersion.modules.includes('opensearch')) && (
+                !advancedSearch && (
                   <div className="flex items-center gap-5 w-1/2">
                     <SearchInput
                       onChange={updateInputValue}

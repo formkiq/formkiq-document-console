@@ -5,6 +5,7 @@ import {
   findFolderAndParent,
   findParentForDocument,
   isTagValueIncludes,
+  isUUIDv4orV5,
   removeTagOrTagValue,
 } from '../../helpers/services/toolService';
 import {
@@ -20,7 +21,6 @@ import { DocumentsService } from './../../helpers/services/documentsService';
 import { setAllAttributesData, setAllTagsData } from './attributesData';
 import { User } from './auth';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
-
 
 let callCounter = 0;
 export const fetchDocuments = createAsyncThunk(
@@ -107,7 +107,56 @@ export const fetchDocuments = createAsyncThunk(
       }
     }
     if (searchWord || searchAttributes) {
-      if (searchFolder && searchFolder.length) {
+      const cleanedSearchWord = searchWord
+        ? searchWord.replace(/\s+/g, ' ').trim()
+        : '';
+      if (isUUIDv4orV5(cleanedSearchWord)) {
+        // UUID detected, use document ID search
+        DocumentsService.searchById(
+          siteId,
+          searchWord.trim(),
+          allTags,
+          allAttributes
+        ).then((response: any) => {
+          if (response) {
+            if (currentCallId !== callCounter) return;
+            const data = {
+              siteId,
+              documents: response.documents,
+              user,
+              page,
+              isLoadingMore: false,
+              isLastSearchPageLoaded: response.documents?.length === 0,
+              next: response.next,
+            };
+            thunkAPI.dispatch(setDocuments(data));
+          }
+        });
+      } else if (cleanedSearchWord.split(' ').every(isUUIDv4orV5)) {
+        const uniqueDocumentIds: string[] = Array.from(
+          new Set(cleanedSearchWord.split(' '))
+        );
+        DocumentsService.searchByIds(
+          siteId,
+          uniqueDocumentIds,
+          allTags,
+          allAttributes
+        ).then((response: any) => {
+          if (response) {
+            if (currentCallId !== callCounter) return;
+            const data = {
+              siteId,
+              documents: response.documents,
+              user,
+              page,
+              isLoadingMore: false,
+              isLastSearchPageLoaded: response.documents?.length === 0,
+              next: response.next,
+            };
+            thunkAPI.dispatch(setDocuments(data));
+          }
+        });
+      } else if (searchFolder && searchFolder.length) {
         // TODO: see if now implemented on backend
         // NOTE: not yet implemented on backend
         DocumentsService.searchDocumentsInFolder(
@@ -278,7 +327,7 @@ export const fetchDocuments = createAsyncThunk(
             siteId,
             null,
             nextToken,
-            "true"
+            'true'
           ).then((response: any) => {
             if (response) {
               if (currentCallId !== callCounter) return;
@@ -519,8 +568,9 @@ export const toggleExpandFolder = createAsyncThunk(
                 val.path = folderPath + '/' + val.path;
                 return val;
               });
-            const childDocs = response.documents
-              .filter((val: any) => val.folder !== true)
+            const childDocs = response.documents.filter(
+              (val: any) => val.folder !== true
+            );
             const newValue: IFolder = {
               ...folder,
               siteId: siteId,
@@ -579,54 +629,56 @@ export const deleteDocument = createAsyncThunk(
       siteId,
       user,
       documentId,
-      softDelete
+      softDelete,
     }: {
       siteId: string;
       user: User;
       documentId: string;
       softDelete: boolean;
     } = data;
-    await DocumentsService.deleteDocument(documentId, siteId, softDelete.toString()).then(
-      (res) => {
-        if (res.status !== 200) {
-          const errors = res?.errors;
-          throw new Error(errors
-            ? errors[0].error
-            : 'Error deleting document.');
-        }
-        const infoDocumentId = window.location.hash.match(/id=(.*)/);
-        if (
-          infoDocumentId &&
-          infoDocumentId.length > 0 &&
-          documentId === infoDocumentId[1]
-        ) {
-          // close info tab if viewing deleted document
-          window.location.hash = '';
-        }
-        // remove file from document list
-        const state = thunkAPI.getState() as any;
-        const { documents, folders } = state?.documentListState || {};
-        const newDocs = documents.filter((doc: any) => {
-          return doc.documentId !== documentId;
-        });
-        const newFolders = [...folders].map((folder: any) => {
-          return {
-            ...folder,
-            documents: folder.documents ? folder.documents.filter(
-              (doc: any) => doc.documentId !== documentId
-            ):[],
-          };
-        });
-        thunkAPI.dispatch(
-          updateDocumentsList({
-            documents: newDocs,
-            folders: newFolders,
-            user: user,
-            isSystemDeletedByKey: false,
-          })
-        );
+    await DocumentsService.deleteDocument(
+      documentId,
+      siteId,
+      softDelete.toString()
+    ).then((res) => {
+      if (res.status !== 200) {
+        const errors = res?.errors;
+        throw new Error(errors ? errors[0].error : 'Error deleting document.');
       }
-    );
+      const infoDocumentId = window.location.hash.match(/id=(.*)/);
+      if (
+        infoDocumentId &&
+        infoDocumentId.length > 0 &&
+        documentId === infoDocumentId[1]
+      ) {
+        // close info tab if viewing deleted document
+        window.location.hash = '';
+      }
+      // remove file from document list
+      const state = thunkAPI.getState() as any;
+      const { documents, folders } = state?.documentListState || {};
+      const newDocs = documents.filter((doc: any) => {
+        return doc.documentId !== documentId;
+      });
+      const newFolders = [...folders].map((folder: any) => {
+        return {
+          ...folder,
+          documents: folder.documents
+            ? folder.documents.filter(
+                (doc: any) => doc.documentId !== documentId
+              )
+            : [],
+        };
+      });
+      thunkAPI.dispatch(
+        updateDocumentsList({
+          documents: newDocs,
+          folders: newFolders,
+          user: user,
+          isSystemDeletedByKey: false,
+        })
+      );
+    });
   }
 );
 const defaultState = {
@@ -658,10 +710,10 @@ export const documentsListSlice = createSlice({
           isLoadingMore = false,
           attribute,
           next,
-          page = 1
+          page = 1,
         } = action.payload;
 
-        let {  isLastSearchPageLoaded = false } = action.payload;
+        let { isLastSearchPageLoaded = false } = action.payload;
 
         if (next) {
           isLastSearchPageLoaded = false;

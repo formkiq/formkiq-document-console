@@ -1,16 +1,15 @@
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AttributesDataState } from '../../../Store/reducers/attributesData';
 import { ConfigState } from '../../../Store/reducers/config';
 import { DocumentsService } from '../../../helpers/services/documentsService';
-import { formatDate, getFileIcon } from '../../../helpers/services/toolService';
+import {
+  formatDate,
+  getFileIcon,
+  isUUIDv4orV5,
+} from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
 import { FolderSolid, MoreActions, Search, Spinner } from '../../Icons/icons';
 import AdvancedSearchModal from './advancedSearchModal';
@@ -50,42 +49,72 @@ export default function SearchInput({
 
   const { formkiqVersion, useAdvancedSearch } = useSelector(ConfigState);
   const { allTags, allAttributes } = useSelector(AttributesDataState);
-  const [searchParams, setSearchParams] = useSearchParams();
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, setExpanded);
+
+  function handleSearchResponse(response: any) {
+    if (response?.documents) {
+      const temp: any = [];
+      response.documents?.forEach((el: IDocument) => {
+        if (el.documentId) {
+          el.insertedDate = moment(el.insertedDate).format('YYYY-MM-DD HH:mm');
+          el.lastModifiedDate = moment(el.lastModifiedDate).format(
+            'YYYY-MM-DD HH:mm'
+          );
+          temp.push(el);
+        }
+      });
+      setDocuments(temp);
+      setIsSearchAvailable(true);
+    } else if (response.status === 400) {
+      setIsSearchAvailable(false);
+    }
+  }
 
   useEffect(() => {
     if (value) {
       // TODO: allow search across all sites and/or specify site
       // TODO: verify version modules and determine search function to use (DynamoDB, Typesense, OpenSearch)
-      DocumentsService.searchDocuments(
-        siteId,
-        formkiqVersion,
-        null,
-        value,
-        1,
-        allTags,
-        allAttributes
-      ).then((response: any) => {
-        if (response?.documents) {
-          const temp: any = [];
-          response.documents?.forEach((el: IDocument) => {
-            if (el.documentId) {
-              el.insertedDate = moment(el.insertedDate).format(
-                'YYYY-MM-DD HH:mm'
-              );
-              el.lastModifiedDate = moment(el.lastModifiedDate).format(
-                'YYYY-MM-DD HH:mm'
-              );
-              temp.push(el);
-            }
+      const cleanedValue = value.replace(/\s+/g, ' ').trim();
+      if (isUUIDv4orV5(cleanedValue)) {
+        DocumentsService.searchById(
+          siteId,
+          cleanedValue,
+          allTags,
+          allAttributes
+        ).then((response: any) => {
+          handleSearchResponse(response);
+        });
+      } else if (cleanedValue.split(' ').every(isUUIDv4orV5)) {
+        const uniqueValues: string[] = Array.from(
+          new Set(cleanedValue.split(' '))
+        );
+        DocumentsService.searchByIds(
+          siteId,
+          uniqueValues,
+          allTags,
+          allAttributes
+        ).then((response: any) => {
+          handleSearchResponse(response);
+        });
+      } else {
+        if (
+          formkiqVersion.modules.includes('typesense') ||
+          formkiqVersion.modules.includes('opensearch')
+        ) {
+          DocumentsService.searchDocuments(
+            siteId,
+            formkiqVersion,
+            null,
+            value,
+            1,
+            allTags,
+            allAttributes
+          ).then((response: any) => {
+            handleSearchResponse(response);
           });
-          setDocuments(temp);
-          setIsSearchAvailable(true);
-        } else if (response.status === 400) {
-          setIsSearchAvailable(false);
         }
-      });
+      }
     }
   }, [value, siteId]);
 
@@ -210,7 +239,12 @@ export default function SearchInput({
             value={value}
             aria-label="text"
             type="text"
-            placeholder="Search"
+            placeholder={
+              formkiqVersion.modules.includes('typesense') ||
+              formkiqVersion.modules.includes('opensearch')
+                ? 'Search'
+                : 'Document ID'
+            }
             className="block w-full appearance-none bg-transparent py-2 pl-4 pr-12 text-base text-neutral-900 placeholder:text-neutral-600 focus:outline-none sm:text-sm sm:leading-6 border-none focus:outline-none focus:ring-0"
           />
         </div>
