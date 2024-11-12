@@ -12,6 +12,7 @@ import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
 import { Close, Plus } from '../../Icons/icons';
+import SearchLine from "./searchLine";
 
 export default function DefaultSearchByAttributes({
   siteId,
@@ -61,6 +62,9 @@ export default function DefaultSearchByAttributes({
     string | number | boolean | null
   >('');
   const [attributeValues, setAttributeValues] = useState<any[]>([]);
+  const [searchInput, setSearchInput] = useState<string>(
+    searchWord ? searchWord : ''
+  );
 
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
@@ -254,9 +258,20 @@ export default function DefaultSearchByAttributes({
     setAttributeValues([]);
   };
 
+  function updateInputValue(value: string) {
+    setSearchInput(value);
+  }
+
   return (
     <div className="w-full h-full">
       <div className="h-full border-gray-400 border p-2">
+        <SearchLine
+          siteId={siteId}
+          searchWord={searchWord}
+          onSearch={onSearch}
+          updateInputValue={updateInputValue}
+          inputValue={searchInput}
+        />
         {attributeKeys.length ? (
           <div className="h-8 gap-2 flex items-center">
             <div className="h-8 flex items-center gap-2 w-full max-w-[350px]">
