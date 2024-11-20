@@ -1,8 +1,8 @@
 import * as dagre from 'dagre';
-import {useCallback, useEffect, useMemo, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {useLocation, useSearchParams} from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -11,16 +11,17 @@ import ReactFlow, {
   Panel,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
 import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
-import {Edit} from '../../Components/Icons/icons';
+import { Edit, Trash } from '../../Components/Icons/icons';
 import {
   CreatorNode,
   DefaultNode,
 } from '../../Components/Workflows/WorkflowStep/workflowNodes';
-import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
 import {
   addEdge,
   addNode,
@@ -31,13 +32,14 @@ import {
   setWorkflow,
   updateWorkflowSteps,
 } from '../../Store/reducers/workflows';
-import type {RootState} from '../../Store/store';
-import {useAppDispatch} from '../../Store/store';
+import type { RootState } from '../../Store/store';
+import { useAppDispatch } from '../../Store/store';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import {NodeType} from '../../helpers/types/workflows';
+import { NodeType } from '../../helpers/types/workflows';
+import { DocumentsService } from '../../helpers/services/documentsService';
 // import {DocumentsService} from "../../helpers/services/documentsService";
 
 const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -56,11 +58,11 @@ export function WorkflowDesigner() {
     (state: RootState) => state.workflowsState.workflow
   );
   const dispatch = useAppDispatch();
-  const {user} = useAuthenticatedState();
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { user } = useAuthenticatedState();
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId} = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -68,6 +70,7 @@ export function WorkflowDesigner() {
     hasWorkspaces,
     workspaceSites
   );
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const workflowId = searchParams.get('workflowId');
   const [loadingComplete, setLoadingComplete] = useState(false);
@@ -87,14 +90,14 @@ export function WorkflowDesigner() {
 
     edges.forEach((edge: any) => g.setEdge(edge.source, edge.target));
     nodes.forEach((node: NodeType) =>
-      g.setNode(node.id, {...node, width: 208})
+      g.setNode(node.id, { ...node, width: 208 })
     );
     dagre.layout(g);
 
     return {
       nodes: nodes.map((node) => {
-        const {x, y} = g.node(node.id);
-        return {...node, position: {x, y}};
+        const { x, y } = g.node(node.id);
+        return { ...node, position: { x, y } };
       }),
       edges,
     };
@@ -104,18 +107,18 @@ export function WorkflowDesigner() {
 
   // Change nodes position after workflow loading complete
   useEffect(() => {
-    const {nodes: layoutedNodes} = getLayoutedElements(nodes, edges, {
+    const { nodes: layoutedNodes } = getLayoutedElements(nodes, edges, {
       direction,
       nodesep: 300,
       edgesep: 50,
       ranksep: 100,
     });
     dispatch(setNodes(layoutedNodes));
-    setWorkflowInfo({name: workflow.name, description: workflow.description});
+    setWorkflowInfo({ name: workflow.name, description: workflow.description });
   }, [loadingComplete]);
 
   useEffect(() => {
-    dispatch(fetchWorkflow({siteId, workflowId})).then(() => {
+    dispatch(fetchWorkflow({ siteId, workflowId })).then(() => {
       setLoadingComplete(true);
     });
   }, []);
@@ -128,7 +131,7 @@ export function WorkflowDesigner() {
       const newEdge: Edge = {
         ...params,
         id: getEdgeId(),
-        markerEnd: {type: MarkerType.Arrow},
+        markerEnd: { type: MarkerType.Arrow },
       };
       dispatch(addEdge(newEdge));
     },
@@ -169,7 +172,7 @@ export function WorkflowDesigner() {
         id: getEdgeId(),
         source: source || '',
         target: id,
-        markerEnd: {type: MarkerType.Arrow},
+        markerEnd: { type: MarkerType.Arrow },
         sourceHandle: handle,
       };
 
@@ -180,7 +183,7 @@ export function WorkflowDesigner() {
   );
 
   // Add Node On Edge Drop
-  const onConnectStart = useCallback((_: any, {nodeId, handleId}: any) => {
+  const onConnectStart = useCallback((_: any, { nodeId, handleId }: any) => {
     setSourceId(nodeId);
     setSourceHandleId(handleId);
   }, []);
@@ -205,12 +208,12 @@ export function WorkflowDesigner() {
   }, [nodes]);
 
   const saveWorkflow = () => {
-    dispatch(updateWorkflowSteps({siteId, workflowId}));
+    dispatch(updateWorkflowSteps({ siteId, workflowId }));
   };
   const addStep = () => {
     const newStep: NodeType = {
       id: getNodeId(),
-      position: {x: 300, y: 0},
+      position: { x: 300, y: 0 },
       data: {
         label: '',
       },
@@ -231,7 +234,7 @@ export function WorkflowDesigner() {
   const changeWorkflowInfo = () => {
     if (workflowInfo.name === '' || workflowInfo.description === '') {
       dispatch(
-        openNotificationDialog({dialogTitle: 'This field cannot be empty'})
+        openNotificationDialog({ dialogTitle: 'This field cannot be empty' })
       );
       return;
     }
@@ -246,13 +249,31 @@ export function WorkflowDesigner() {
     setEditWorkflowInfo(false);
   };
 
+  const onDeleteWorkflow = () => {
+    if (workflow.inUse) return;
+
+    function deleteWorkflow() {
+      if (!workflowId) return;
+      DocumentsService.deleteWorkflow(workflowId, siteId).then(() => {
+        navigate(pathname.split('/').slice(0, -1).join('/'));
+      });
+    }
+
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: 'Are you sure you want to delete this workflow?',
+        callback: deleteWorkflow,
+      })
+    );
+  };
+
   return (
     <>
       <Helmet>
         <title>Workflow Designer</title>
       </Helmet>
 
-      <div className="w-full h-24 py-2 px-4 flex flex-row items-center justify-start text-neutral-900 border-b gap-4">
+      <div className="w-full h-24 py-2 px-4 flex flex-row items-center justify-between text-neutral-900 border-b gap-4">
         <div className="flex flex-col">
           {editWorkflowInfo ? (
             <div className="flex flex-row">
@@ -277,7 +298,7 @@ export function WorkflowDesigner() {
                   className="w-5 h-5 ml-2 hover:text-primary-500"
                   onClick={() => setEditWorkflowInfo(true)}
                 >
-                  <Edit/>
+                  <Edit />
                 </button>
               )}
             </div>
@@ -302,16 +323,24 @@ export function WorkflowDesigner() {
         {editWorkflowInfo && (
           <ButtonPrimary
             onClick={changeWorkflowInfo}
-            style={{height: '32px'}}
+            style={{ height: '32px' }}
             className="self-end"
           >
             Save
           </ButtonPrimary>
         )}
+        {!workflow.inUse && (
+          <button
+            className="h-6 w-6 hover:text-primary-500 "
+            onClick={onDeleteWorkflow}
+          >
+            <Trash />
+          </button>
+        )}
       </div>
       <div
         className="w-full h-[calc(100vh-9.68rem)] overflow-x-auto"
-        style={{maxHeight: 'calc(100vh - 9.68rem)'}}
+        style={{ maxHeight: 'calc(100vh - 9.68rem)' }}
       >
         <ReactFlow
           nodes={nodes}
@@ -321,7 +350,7 @@ export function WorkflowDesigner() {
           onConnect={onConnect}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{padding: 0.5, maxZoom: 1, minZoom: 0.1}}
+          fitViewOptions={{ padding: 0.5, maxZoom: 1, minZoom: 0.1 }}
           onConnectStart={onConnectStart}
           onConnectEnd={onConnectEnd}
           elementsSelectable={!workflow.inUse}
@@ -332,16 +361,18 @@ export function WorkflowDesigner() {
           nodesFocusable={!workflow.inUse}
           draggable={!workflow.inUse}
         >
-          <Background variant={BackgroundVariant.Dots}/>
-          {!workflow.inUse && <Panel position="top-right">
-            <ButtonSecondary onClick={addStep} className="m-2">
-              + Add New Step
-            </ButtonSecondary>
-            <ButtonPrimary onClick={saveWorkflow} className="m-2">
-              Save Workflow Steps
-            </ButtonPrimary>
-            {/*<button onClick={addConfiguration} className='bg-gray-300 mx-2 py-1 px-2'>Add Configuration</button>*/}
-          </Panel>}
+          <Background variant={BackgroundVariant.Dots} />
+          {!workflow.inUse && (
+            <Panel position="top-right">
+              <ButtonSecondary onClick={addStep} className="m-2">
+                + Add New Step
+              </ButtonSecondary>
+              <ButtonPrimary onClick={saveWorkflow} className="m-2">
+                Save Workflow Steps
+              </ButtonPrimary>
+              {/*<button onClick={addConfiguration} className='bg-gray-300 mx-2 py-1 px-2'>Add Configuration</button>*/}
+            </Panel>
+          )}
         </ReactFlow>
       </div>
     </>
