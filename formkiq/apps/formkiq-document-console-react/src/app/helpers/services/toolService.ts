@@ -698,4 +698,8 @@ export function transformRelationshipValueToString(value: {
   return `${value.relationship}#${value.documentId.trim()}`;
 }
 
+export function isUUIDv4orV5(value: string): boolean {
+  const uuidRegexV4V5 = /^[0-9a-f]{8}-[0-9a-f]{4}-(4|5)[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegexV4V5.test(value);
+}
 

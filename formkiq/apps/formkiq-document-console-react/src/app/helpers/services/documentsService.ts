@@ -703,6 +703,80 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async searchById(
+    siteId: string,
+    documentId: string,
+    allTags = [] as any[],
+    allAttributes = [] as any[]
+  ): Promise<any> {
+    if (!siteId || !siteId.length) {
+      siteId = this.determineSiteId();
+    }
+    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
+    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
+      if (customIncludeTags.indexOf(primaryTag) === -1) {
+        customIncludeTags.push(primaryTag);
+      }
+    });
+    allTags.forEach((allTag: any) => {
+      if (customIncludeTags.indexOf(allTag.value) === -1) {
+        customIncludeTags.push(allTag.value);
+      }
+    });
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
+    const searchBody = {
+      query: {
+        documentIds: [documentId],
+      },
+      responseFields: {
+        tags: customIncludeTags,
+        attributes: attributesKeys,
+      },
+    };
+    return this.getFormkiqClient().searchApi.search({
+      searchParameters: searchBody,
+      siteId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async searchByIds(
+    siteId: string,
+    documentIds: string[],
+    allTags = [] as any[],
+    allAttributes = [] as any[]
+  ): Promise<any> {
+    if (!siteId || !siteId.length) {
+      siteId = this.determineSiteId();
+    }
+    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
+    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
+      if (customIncludeTags.indexOf(primaryTag) === -1) {
+        customIncludeTags.push(primaryTag);
+      }
+    });
+    allTags.forEach((allTag: any) => {
+      if (customIncludeTags.indexOf(allTag.value) === -1) {
+        customIncludeTags.push(allTag.value);
+      }
+    });
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
+    const searchBody = {
+      query: {
+        documentIds: documentIds,
+      },
+      responseFields: {
+        tags: customIncludeTags,
+        attributes: attributesKeys,
+      },
+    };
+    return this.getFormkiqClient().searchApi.search({
+      searchParameters: searchBody,
+      siteId,
+    });
+  }
+
+  @formkiqAPIHandler
   public static async searchDocumentsInFolder(
     siteId = '',
     tag: string | null = null,
