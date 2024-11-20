@@ -1,18 +1,26 @@
-import {useCallback, useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {useLocation, useNavigate} from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import NewQueueModal from '../../Components/Workflows/NewQueue/newQueue';
 import QueueList from '../../Components/Workflows/QueueList/QueueList';
-import {AuthState} from '../../Store/reducers/auth';
-import {openDialog} from '../../Store/reducers/globalConfirmControls';
-import {useAppDispatch} from '../../Store/store';
+import { AuthState } from '../../Store/reducers/auth';
+import { openDialog } from '../../Store/reducers/globalConfirmControls';
+import { useAppDispatch } from '../../Store/store';
 
-import {getCurrentSiteInfo, getUserSites} from "../../helpers/services/toolService";
-import {deleteQueue, fetchQueues, QueuesState, setQueuesLoadingStatusPending} from "../../Store/reducers/queues";
-import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
-import {Plus} from "../../Components/Icons/icons";
-import {RequestStatus} from "../../helpers/types/document";
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
+import { Plus } from '../../Components/Icons/icons';
+import {
+  getCurrentSiteInfo,
+  getUserSites,
+} from '../../helpers/services/toolService';
+import { RequestStatus } from '../../helpers/types/document';
+import {
+  deleteQueue,
+  fetchQueues,
+  QueuesState,
+  setQueuesLoadingStatusPending,
+} from '../../Store/reducers/queues';
 
 type QueueItem = {
   siteId: string;
@@ -22,16 +30,12 @@ type QueueItem = {
 
 export function Queues() {
   const dispatch = useAppDispatch();
-  const {user} = useSelector(AuthState);
+  const { user } = useSelector(AuthState);
 
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {
-    siteId,
-    siteDocumentsRootUri,
-    isSiteReadOnly,
-  } = getCurrentSiteInfo(
+  const { siteId, siteDocumentsRootUri, isSiteReadOnly } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -45,9 +49,9 @@ export function Queues() {
     queuesLoadingStatus,
     nextQueuesToken,
     currentQueuesSearchPage,
-    isLastQueuesSearchPageLoaded
+    isLastQueuesSearchPageLoaded,
   } = useSelector(QueuesState);
-  const [currentSiteId, setCurrentSiteId] = useState(siteId)
+  const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
 
@@ -100,12 +104,10 @@ export function Queues() {
         siteId: currentSiteId,
       })
     );
-  }, [
-    currentSiteId,
-  ]);
+  }, [currentSiteId]);
 
   const updateQueues = async () => {
-    dispatch(fetchQueues({siteId: currentSiteId}));
+    dispatch(fetchQueues({ siteId: currentSiteId }));
   };
 
   const viewQueue = (queueId: string, siteId: string) => {
@@ -114,7 +116,7 @@ export function Queues() {
 
   const onDeleteQueue = (queueId: string, siteId: string) => {
     const deleteFunc = async () => {
-      dispatch(deleteQueue({queueId, siteId, queues}))
+      dispatch(deleteQueue({ queueId, siteId, queues }));
     };
     dispatch(
       openDialog({
@@ -144,7 +146,7 @@ export function Queues() {
         await dispatch(
           fetchQueues({
             siteId: currentSiteId,
-            nextToken:nextQueuesToken,
+            nextToken: nextQueuesToken,
             page: currentQueuesSearchPage + 1,
           })
         );
@@ -168,18 +170,24 @@ export function Queues() {
         <title>Queues</title>
       </Helmet>
 
-      <div className="flex" style={{
-        height: `calc(100vh - 3.68rem)`,
-      }}>
+      <div
+        className="flex"
+        style={{
+          height: `calc(100vh - 3.68rem)`,
+        }}
+      >
         <div className="grow flex flex-col justify-stretch">
-
           <div className="p-4 max-w-screen-lg font-semibold mb-4">
+            <div className="text-xl font-bold mb-4">
+              Queues (site: {siteId})
+            </div>
             <p>
               A queue is place where documents wait for manual actions to be
               performed.
             </p>
             <p className="mt-4">
-              NOTE: a queue cannot be deleted once it has been used by a document.
+              NOTE: a queue cannot be deleted once it has been used by a
+              document.
             </p>
           </div>
           {!isSiteReadOnly && (
@@ -188,7 +196,7 @@ export function Queues() {
                 data-test-id="create-queue"
                 onClick={(event: any) => onNewClick(event, siteId)}
                 className="flex items-center"
-                style={{height: '36px'}}
+                style={{ height: '36px' }}
               >
                 <span>Create new</span>
                 <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>

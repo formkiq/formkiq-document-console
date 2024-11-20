@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
+import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
@@ -20,9 +23,6 @@ import {
 import { RequestStatus } from '../../helpers/types/document';
 import { Ruleset } from '../../helpers/types/rulesets';
 import RulesetsTable from './rulesetsTable';
-import ButtonPrimaryGradient from "../../Components/Generic/Buttons/ButtonPrimaryGradient";
-import ButtonPrimary from "../../Components/Generic/Buttons/ButtonPrimary";
-import ButtonGhost from "../../Components/Generic/Buttons/ButtonGhost";
 
 function Rulesets() {
   const { user } = useAuthenticatedState();
@@ -198,13 +198,24 @@ function Rulesets() {
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-        <div className="w-full p-2 flex">
-          <ButtonPrimaryGradient
-            onClick={() => setIsRulesetEditTabVisible(true)}
-            style={{height: '36px'}}
-          >
-            + Create New Ruleset
-          </ButtonPrimaryGradient>
+        <div className="flex justify-between items-center px-4 py-2 border-b border-neutral-300">
+          <div className="pt-4 max-w-screen-lg font-semibold mb-4">
+            <div className="text-xl font-bold mb-4">
+              Rulesets (site: {siteId})
+            </div>
+            <p>
+              Rulesets will be evaluated for each document that is added to a
+              site
+            </p>
+          </div>
+          <div className="flex gap-2 p-2">
+            <ButtonPrimaryGradient
+              onClick={() => setIsRulesetEditTabVisible(true)}
+              style={{ height: '36px' }}
+            >
+              + Create New Ruleset
+            </ButtonPrimaryGradient>
+          </div>
         </div>
 
         {isRulesetEditTabVisible && (
@@ -349,15 +360,8 @@ const RulesetEditingTab = ({
         </select>
       </div>
       <div className="flex flex-row gap-2 h-[42px]">
-        <ButtonPrimary
-          type="submit"
-        >
-          Save
-        </ButtonPrimary>
-        <ButtonGhost
-          type="button"
-          onClick={onCancelEdit}
-        >
+        <ButtonPrimary type="submit">Save</ButtonPrimary>
+        <ButtonGhost type="button" onClick={onCancelEdit}>
           Cancel
         </ButtonGhost>
       </div>

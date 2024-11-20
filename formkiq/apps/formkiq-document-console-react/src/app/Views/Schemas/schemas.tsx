@@ -136,7 +136,7 @@ function Schemas() {
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-        <h3 className="text-lg p-4 font-bold">Site Schema</h3>
+        <h3 className="text-lg p-4 font-bold">Site Schema: {siteId}</h3>
 
         <table className="w-full border-collapse text-sm table-fixed ">
           <thead className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
@@ -201,7 +201,9 @@ function Schemas() {
 
         <div className="w-full h-px bg-gray-300 mt-4"></div>
         <div className="w-full flex justify-between items-center px-4 mt-2">
-          <h3 className="text-lg font-bold">Classification Schemas</h3>
+          <h3 className="text-lg font-bold">
+            Classification Schemas (site: {siteId})
+          </h3>
           <ButtonPrimaryGradient
             onClick={() => {
               setIsCreateDialogOpen(true);

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
 import {
@@ -17,11 +18,10 @@ import {
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
 import { Mapping } from '../../helpers/types/mappings';
-import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 
 import CreateMappingDialog from '../../Components/Mappings/Dialogs/MappingDialog/CreateMappingDialog';
-import MappingsTable from './mappingsTable';
 import EditMappingDialog from '../../Components/Mappings/Dialogs/MappingDialog/EditMappingDialog';
+import MappingsTable from './mappingsTable';
 
 function Mappings() {
   const { user } = useAuthenticatedState();
@@ -47,7 +47,7 @@ function Mappings() {
 
   const dispatch = useAppDispatch();
   const [isMappingEditTabVisible, setIsMappingEditTabVisible] = useState(false);
-  const [editingMapping, setEditingMapping] = useState<Mapping|null>(null);
+  const [editingMapping, setEditingMapping] = useState<Mapping | null>(null);
   const [isMappingAddTabVisible, setIsMappingAddTabVisible] = useState(false);
 
   // update siteId
@@ -117,9 +117,7 @@ function Mappings() {
       openConfirmationDialog({
         dialogTitle: 'Are you sure you want to delete this mapping?',
         callback: () => {
-          dispatch(
-            deleteMapping({ mappingId, siteId: currentSiteId })
-          );
+          dispatch(deleteMapping({ mappingId, siteId: currentSiteId }));
         },
       })
     );
@@ -128,7 +126,7 @@ function Mappings() {
   // Open tab to create/edit mapping
   const showMappingEditTab = (mapping: Mapping) => {
     setEditingMapping(mapping);
-    setTimeout(() => setIsMappingEditTabVisible(true),10);
+    setTimeout(() => setIsMappingEditTabVisible(true), 10);
   };
 
   return (
@@ -142,13 +140,24 @@ function Mappings() {
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-        <div className="w-full p-2 flex">
-          <ButtonPrimaryGradient
-            onClick={() => setIsMappingAddTabVisible(true)}
-            style={{ height: '36px' }}
-          >
-            + Create New Mapping
-          </ButtonPrimaryGradient>
+        <div className="flex justify-between items-center px-4 py-2 border-b border-neutral-300">
+          <div className="pt-4 max-w-screen-lg font-semibold mb-4">
+            <div className="text-xl font-bold mb-4">
+              Mappings (site: {siteId})
+            </div>
+            <p>
+              Mappings are used with Intelligent Document Processing to match
+              document content to determine attribute values.
+            </p>
+          </div>
+          <div className="flex gap-2 p-2">
+            <ButtonPrimaryGradient
+              onClick={() => setIsMappingAddTabVisible(true)}
+              style={{ height: '36px' }}
+            >
+              + Create New Mapping
+            </ButtonPrimaryGradient>
+          </div>
         </div>
         <div
           className="flex-1 inline-block overflow-y-scroll overflow-x-auto h-full"

@@ -1,4 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import {
+  AttributesDataState,
+  fetchAttributesData,
+} from '../../Store/reducers/attributesData';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import {
   fetchClassificationSchema,
@@ -7,17 +12,12 @@ import {
 import { useAppDispatch } from '../../Store/store';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { Schema } from '../../helpers/types/schemas';
-import { Close } from '../Icons/icons';
-import RadioCombobox from '../Generic/Listboxes/RadioCombobox';
-import { useSelector } from 'react-redux';
-import {
-  AttributesDataState,
-  fetchAttributesData,
-} from '../../Store/reducers/attributesData';
-import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonGhost from '../Generic/Buttons/ButtonGhost';
-import AddAttributesTab from './createSchemaDialog/addAttributesTab';
+import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonSecondary from '../Generic/Buttons/ButtonSecondary';
+import RadioCombobox from '../Generic/Listboxes/RadioCombobox';
+import { Close } from '../Icons/icons';
+import AddAttributesTab from './createSchemaDialog/addAttributesTab';
 
 type SchemaPagePropsType = {
   isEditing: boolean;
@@ -347,7 +347,7 @@ function SchemaPage({
   return (
     <>
       <form className="flex flex-col gap-4 mt-6" onSubmit={onSubmit}>
-        {(isEditing && schemaType === 'classification') ? (
+        {isEditing && schemaType === 'classification' ? (
           <input
             type="text"
             className="h-12 px-4 border border-neutral-300 text-sm rounded-md xl:w-[550px]"
@@ -359,7 +359,11 @@ function SchemaPage({
             onKeyDown={(e) => preventDialogClose(e)}
           />
         ) : (
-          <h2 className="text-xl font-bold">{schemaType === 'classification'?schema.name:`${siteId} Site Schema`}</h2>
+          <h2 className="text-xl font-bold">
+            {schemaType === 'classification'
+              ? schema.name
+              : `Site Schema: ${siteId}`}
+          </h2>
         )}
         {isEditing ? (
           <div className="flex items-center">
@@ -615,54 +619,54 @@ function SchemaPage({
         ) : (
           <table className="border border-neutral-300 w-full max-w-full table-fixed text-left">
             <thead className="sticky top-0 bg-neutral-100 text-sm border border-neutral-300 ">
-            <tr className="border border-neutral-300 px-4 text-neutral-900">
-              <th className="w-4 px-4"> #</th>
-              <th> Key</th>
-              <th> Allowed Values</th>
-              <th className="w-4 px-4"></th>
-            </tr>
+              <tr className="border border-neutral-300 px-4 text-neutral-900">
+                <th className="w-4 px-4"> #</th>
+                <th> Key</th>
+                <th> Allowed Values</th>
+                <th className="w-4 px-4"></th>
+              </tr>
             </thead>
             <tbody>
-            {schema.attributes.optional ? (
-              schema.attributes.optional.map(
-                (
-                  value: {
-                    attributeKey: string;
-                    defaultValue?: string;
-                    defaultValues?: string[];
-                    allowedValues?: string[];
-                  },
-                  i: number
-                ) => (
-                  <tr
-                    key={'tag_' + i}
-                    className="border border-neutral-300 px-4 h-12 text-neutral-900"
-                  >
-                    <td className="text-sm text-slate-500 px-4">
-                <span className="text-gray-900 font-medium">
-                  {i + 1}
-                </span>
-                    </td>
-                    <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.attributeKey}
-                    </td>
-                    <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.allowedValues && value.allowedValues.join(', ')}
-                    </td>
-                    <td></td>
-                  </tr>
+              {schema.attributes.optional ? (
+                schema.attributes.optional.map(
+                  (
+                    value: {
+                      attributeKey: string;
+                      defaultValue?: string;
+                      defaultValues?: string[];
+                      allowedValues?: string[];
+                    },
+                    i: number
+                  ) => (
+                    <tr
+                      key={'tag_' + i}
+                      className="border border-neutral-300 px-4 h-12 text-neutral-900"
+                    >
+                      <td className="text-sm text-slate-500 px-4">
+                        <span className="text-gray-900 font-medium">
+                          {i + 1}
+                        </span>
+                      </td>
+                      <td className="text-sm text-ellipsis overflow-hidden">
+                        {value.attributeKey}
+                      </td>
+                      <td className="text-sm text-ellipsis overflow-hidden">
+                        {value.allowedValues && value.allowedValues.join(', ')}
+                      </td>
+                      <td></td>
+                    </tr>
+                  )
                 )
-              )
-            ) : (
-              <tr className="border border-neutral-300 px-4 h-12 text-neutral-900">
-                <td
-                  colSpan={4}
-                  className="text-sm text-slate-500 px-4 text-center"
-                >
-                  No Optional Attributes
-                </td>
-              </tr>
-            )}
+              ) : (
+                <tr className="border border-neutral-300 px-4 h-12 text-neutral-900">
+                  <td
+                    colSpan={4}
+                    className="text-sm text-slate-500 px-4 text-center"
+                  >
+                    No Optional Attributes
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}
