@@ -15,12 +15,12 @@ import {
   IFileUploadData,
 } from '../../../helpers/services/documentsService';
 import { formatDate } from '../../../helpers/services/toolService';
-import {Close} from "../../Icons/icons";
+import { Close } from '../../Icons/icons';
 
 const foldersWithNoUpload = ['favorites', 'shared', 'deleted'];
 const fileTypesMap = {
   // add here more filetypes if syncfusion does not recognize them
-  'md': 'text/markdown',
+  md: 'text/markdown',
 };
 
 const uploadProcessLine = (fileData: IFileUploadData, i: number) => {
@@ -273,8 +273,8 @@ export default function UploadModal({
               return item.documentId;
             });
           const notUploadedFilesErrors: {
-              fileName: string;
-              errorMessage: string;
+            fileName: string;
+            errorMessage: string;
           }[] = handleFileUploadErrors(res, dispatch);
           DocumentsService.getDocumentsById(ids, siteId).then(
             (uploaded: []) => {
@@ -304,15 +304,17 @@ export default function UploadModal({
           filesData,
           onprogress
         ).then((res) => {
-          const ids = res.filter((item) => {
+          const ids = res
+            .filter((item) => {
               return item.status === 200;
-          }).map((item) => {
+            })
+            .map((item) => {
               return item.documentId;
-          });
+            });
           const notUploadedFilesErrors: {
-                fileName: string;
-                errorMessage: string;
-            }[] = handleFileUploadErrors(res, dispatch);
+            fileName: string;
+            errorMessage: string;
+          }[] = handleFileUploadErrors(res, dispatch);
           DocumentsService.getDocumentsById(ids, siteId).then(
             (uploaded: []) => {
               setUploadProcess([]);
@@ -526,8 +528,20 @@ export default function UploadModal({
                 data-test-id="upload-document-modal"
                 className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-screen-xl"
               >
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <div className="flex-1 bg-white p-5 inline-block w-full">
+                <div
+                  className={
+                    `px-4 pt-5 pb-4 sm:p-6 sm:pb-4 ` +
+                    (documentId.length ? 'bg-neutral-300' : 'bg-white')
+                  }
+                >
+                  <div
+                    className={
+                      'flex-1 bg-white border-2 rounded-md p-5 inline-block w-full ' +
+                      (documentId.length
+                        ? 'border-neutral-500'
+                        : 'border-neutral-300')
+                    }
+                  >
                     <div className="font-bold text-lg inline-block pr-6">
                       {documentId.length ? (
                         <span>Upload New Version</span>
@@ -774,7 +788,7 @@ export default function UploadModal({
                       </div>
                     )}
                   </div>
-                  <div className="flex justify-between mr-8">
+                  <div className="flex pt-4 justify-between mr-8">
                     <div></div>
                     <button
                       type="button"

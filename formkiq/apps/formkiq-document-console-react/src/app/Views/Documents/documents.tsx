@@ -239,6 +239,17 @@ function Documents() {
       const folderPath = folder.getAttribute('data-folder-path');
       setDropFolderPath(folderPath);
     }
+    if (event.dataTransfer.files.length === 1) {
+      const file = event.target.closest('.file-drop-wrapper');
+      if (file) {
+        const documentPath = file.getAttribute('data-test-id').split('/').pop();
+        if (documentPath === event.dataTransfer.files[0].name) {
+          setDropUploadDocuments(event.dataTransfer.files);
+          onUploadClick(event, file.getAttribute('id'));
+          return;
+        }
+      }
+    }
     setDropUploadDocuments(event.dataTransfer.files);
     onUploadClick(event, '');
   }
