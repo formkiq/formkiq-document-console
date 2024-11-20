@@ -457,16 +457,6 @@ function DocumentListLine({
                           <Pencil />
                         </Link>
                       )}
-                    {(!file?.deepLinkPath ||
-                      file.deepLinkPath.length === 0) && (
-                      <button
-                        title="Download"
-                        onClick={() => downloadDocument(file.documentId)}
-                        className="w-5 pt-0.5 text-neutral-900 mr-1 hover:text-primary-500"
-                      >
-                        <Download />
-                      </button>
-                    )}
                     {file.tags &&
                       Object.getOwnPropertyNames(file.tags)
                         .sort() // This will sort the property names alphabetically
@@ -641,10 +631,19 @@ function DocumentListLine({
                     <Share />
                   </div>
                 )}
+                {(!file?.deepLinkPath || file.deepLinkPath.length === 0) && (
+                  <button
+                    title="Download"
+                    onClick={() => downloadDocument(file.documentId)}
+                    className="w-4 pt-0.5 text-neutral-900 mr-3 hover:text-primary-500"
+                  >
+                    <Download />
+                  </button>
+                )}
                 {!isSiteReadOnly && (
                   <>
                     <div
-                      className="w-3 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
+                      className="w-4 pt-0.5 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
                       data-test-id="delete-action"
                       onClick={() =>
                         onDeleteClick(
