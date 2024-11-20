@@ -318,6 +318,9 @@ export function Workflows() {
       >
         <div className="grow flex flex-col justify-stretch">
           <div className="p-4 max-w-screen-lg font-semibold mb-4">
+            <div className="text-xl font-bold mb-4">
+              Workflows (site: {siteId})
+            </div>
             <p>
               A workflow is a series of steps, which can be document actions or
               a queue step, where documents await manual action (such as an

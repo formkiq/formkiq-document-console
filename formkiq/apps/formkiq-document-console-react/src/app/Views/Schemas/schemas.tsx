@@ -3,15 +3,13 @@ import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
-import { Edit, Json } from '../../Components/Icons/icons';
+import { Json } from '../../Components/Icons/icons';
 import CreateSchemaDialog from '../../Components/Schemas/createSchemaDialog/CreateSchemaDialog';
-import EditSchemaDialog from '../../Components/Schemas/createSchemaDialog/EditSchemaDialog';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
 import {
   SchemasState,
   deleteClassification,
-  fetchClassificationSchema,
   fetchClassifications,
   fetchSiteSchema,
   setClassificationsLoadingStatusPending,
@@ -22,7 +20,6 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
-import { Schema } from '../../helpers/types/schemas';
 import ClassificationsTable from './classificationsTable';
 
 function Schemas() {
@@ -41,7 +38,6 @@ function Schemas() {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const {
     siteSchema,
-    classificationSchema,
     classifications,
     nextToken,
     loadingStatus,
@@ -49,20 +45,11 @@ function Schemas() {
     currentSearchPage,
   } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
-  const [isSchemaEditTabVisible, setIsSchemaEditTabVisible] = useState(false);
-
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newSchemaType, setNewSchemaType] = useState<'site' | 'classification'>(
     'site'
   );
-  const [editSchemaType, setEditSchemaType] = useState<
-    'site' | 'classification'
-  >('site');
-  const [newSchemaValue, setNewSchemaValue] = useState<{
-    classification: Schema;
-  } | null>(null);
-  const [editClassificationId, setEditClassificationId] = useState<
-    string | null
-  >(null);
+
   // update siteId
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -138,24 +125,6 @@ function Schemas() {
     );
   };
 
-  // Open tab to create/edit schema
-  const showClassificationEditTab = (classificationId: string) => {
-    setEditSchemaType('classification');
-    setEditClassificationId(classificationId);
-    dispatch(
-      fetchClassificationSchema({ siteId: currentSiteId, classificationId })
-    );
-    setIsSchemaEditTabVisible(true);
-  };
-
-  const showSiteEditTab = () => {
-    setEditSchemaType('site');
-    setEditClassificationId(null);
-    setIsSchemaEditTabVisible(true);
-  };
-
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-
   return (
     <>
       <Helmet>
@@ -167,7 +136,7 @@ function Schemas() {
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-        <h3 className="text-lg p-4 font-bold">Site Schema</h3>
+        <h3 className="text-lg p-4 font-bold">Site Schema: {siteId}</h3>
 
         <table className="w-full border-collapse text-sm table-fixed ">
           <thead className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
@@ -207,14 +176,6 @@ function Schemas() {
                           <Json />
                         </button>
                       </NavLink>
-
-                      <button
-                        title="Edit"
-                        className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
-                        onClick={() => showSiteEditTab()}
-                      >
-                        <Edit />
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -240,7 +201,9 @@ function Schemas() {
 
         <div className="w-full h-px bg-gray-300 mt-4"></div>
         <div className="w-full flex justify-between items-center px-4 mt-2">
-          <h3 className="text-lg font-bold">Classification Schemas</h3>
+          <h3 className="text-lg font-bold">
+            Classification Schemas (site: {siteId})
+          </h3>
           <ButtonPrimaryGradient
             onClick={() => {
               setIsCreateDialogOpen(true);
@@ -267,7 +230,6 @@ function Schemas() {
           <ClassificationsTable
             classifications={classifications}
             onClassificationDelete={onClassificationDelete}
-            showClassificationEditTab={showClassificationEditTab}
           />
         </div>
       </div>
@@ -277,27 +239,6 @@ function Schemas() {
         siteId={currentSiteId}
         schemaType={newSchemaType}
       />
-      {editSchemaType === 'classification' &&
-        classificationSchema &&
-        editClassificationId && (
-          <EditSchemaDialog
-            isOpen={isSchemaEditTabVisible}
-            setIsOpen={setIsSchemaEditTabVisible}
-            siteId={siteId}
-            schemaType={editSchemaType}
-            initialSchemaValue={classificationSchema}
-            classificationId={editClassificationId}
-          />
-        )}
-      {editSchemaType === 'site' && siteSchema && (
-        <EditSchemaDialog
-          isOpen={isSchemaEditTabVisible}
-          setIsOpen={setIsSchemaEditTabVisible}
-          siteId={siteId}
-          schemaType={editSchemaType}
-          initialSchemaValue={siteSchema}
-        />
-      )}
     </>
   );
 }
