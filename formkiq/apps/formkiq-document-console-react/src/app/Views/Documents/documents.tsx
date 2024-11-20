@@ -51,12 +51,12 @@ import {
   updateDocumentsList,
 } from '../../Store/reducers/documentsList';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
-import { fetchQueues, QueuesState } from '../../Store/reducers/queues';
+import { QueuesState } from '../../Store/reducers/queues';
 import {
   fetchUsers,
   UserManagementState,
 } from '../../Store/reducers/userManagement';
-import { fetchWorkflows, WorkflowsState } from '../../Store/reducers/workflows';
+import { WorkflowsState } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
 import {
   InlineEditableContentTypes,
@@ -79,9 +79,6 @@ import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
-import { Queue } from '../../helpers/types/queues';
-import { User } from '../../helpers/types/userManagement';
-import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
@@ -615,7 +612,10 @@ function Documents() {
   // update document actions every 5 seconds
   useEffect(() => {
     if (infoDocumentId && infoDocumentView === 'actions') {
-      const interval = setInterval(()=>updateDocumentActions(infoDocumentId, currentSiteId), 5000);
+      const interval = setInterval(
+        () => updateDocumentActions(infoDocumentId, currentSiteId),
+        5000
+      );
       return () => clearInterval(interval);
     }
     return () => {};
@@ -1642,13 +1642,18 @@ function Documents() {
                         />
                       </div>
                     </div>
-                    <button
-                      className="w-5 h-5 ml-2 text-neutral-500 hover:text-primary-500"
-                      title="Referesh"
+                    <div className="absolute"></div>
+                    <ButtonSecondary
                       onClick={onDocumentInfoClick}
+                      type="button"
+                      style={{
+                        width: '36px',
+                      }}
                     >
-                      <Retry />
-                    </button>
+                      <div className="flex justify-center">
+                        <span className="w-4 -m-2 p-0.5">{Retry()}</span>
+                      </div>
+                    </ButtonSecondary>
                   </div>
                   <div
                     className={

@@ -297,7 +297,7 @@ export default function DocumentActionsPopover({
                     <span className="mr-2 w-3.5 text-neutral-900">
                       {Settings()}
                     </span>
-                    <span>Action</span>
+                    <span>Actions</span>
                     <span
                       className="ml-auto"
                       style={{ width: '15px', height: '13px' }}
