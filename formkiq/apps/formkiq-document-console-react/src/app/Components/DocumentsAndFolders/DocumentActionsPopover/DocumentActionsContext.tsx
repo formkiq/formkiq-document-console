@@ -11,6 +11,12 @@ import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import {setCurrentActionEvent} from "../../../Store/reducers/config";
 import {TopLevelFolders} from "../../../helpers/constants/folders";
+import {WorkflowSummary} from "../../../helpers/types/workflows";
+import {Queue} from "../../../helpers/types/queues";
+import {User} from "../../../helpers/types/userManagement";
+import {fetchWorkflows, WorkflowsState} from "../../../Store/reducers/workflows";
+import {fetchQueues, QueuesState} from "../../../Store/reducers/queues";
+import {UserManagementState} from "../../../Store/reducers/userManagement";
 
 interface DocumentActionsContextType {
   shareModalValue: ILine | null;
@@ -94,6 +100,9 @@ interface DocumentActionsContextType {
   isNewModalOpened: boolean;
   newModalValue: ILine | null;
   onNewClose:  () => void;
+  currentDocumentActions: any[];
+  setCurrentDocumentActions: (actions: any[]) => void;
+  updateDocumentActions: (infoDocumentId: string, currentSiteId: string) => void;
 }
 
 const DocumentActionsContext = createContext<
@@ -167,11 +176,15 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
       null
   );
   const [isActionModalOpened, setIsActionModalOpened] = useState(false);
+  const [currentDocumentActions, setCurrentDocumentActions] = useState<any[]>([]);
 
   const dispatch = useAppDispatch();
   const { user } = useSelector(AuthState);
   const navigate = useNavigate();
   const pathname = window.location.pathname;
+  const { workflows } = useSelector(WorkflowsState);
+  const { queues } = useSelector(QueuesState);
+  const { users } = useSelector(UserManagementState);
 
   const onShareClick = (event: any, value: ILine | null) => {
     setShareModalValue(value);
@@ -411,6 +424,95 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     return editAttributesModalValue;
   };
 
+  const updateDocumentActions = (infoDocumentId: string, currentSiteId: string) => {
+    if (infoDocumentId.length) {
+      DocumentsService.getDocumentActions(infoDocumentId, currentSiteId).then(
+        (response: any) => {
+          if (response.status === 200) {
+            const actions = [...response.actions];
+            let isWorkflowsUpToDate = true;
+            let isQueuesUpToDate = true;
+            const addWorkflowNames = () => {
+              actions.forEach((action: any) => {
+                if (action.workflowId) {
+                  const workflowName = workflows.find(
+                    (workflow: WorkflowSummary) =>
+                      workflow.workflowId === action.workflowId
+                  )?.name;
+                  if (!workflowName) {
+                    isWorkflowsUpToDate = false;
+                  } else {
+                    action.workflowName = workflowName;
+                  }
+                }
+              });
+            };
+            const addQueueNames = () => {
+              actions.forEach((action: any) => {
+                if (action.queueId) {
+                  const queueName = queues.find(
+                    (queue: Queue) => queue.queueId === action.queueId
+                  )?.name;
+                  if (!queueName) {
+                    isQueuesUpToDate = false;
+                  } else {
+                    action.queueName = queueName;
+                  }
+                }
+              });
+            };
+            const addUserEmails = () => {
+              actions.forEach((action: any) => {
+                if (action.userId) {
+                  const userEmail = users.find(
+                    (user: User) => user.username === action.userId
+                  )?.email;
+                  action.userEmail = userEmail;
+                }
+              });
+            };
+            addWorkflowNames();
+            addQueueNames();
+            if (user?.isAdmin && users?.length) {
+              addUserEmails();
+            }
+
+            // re-fetch workflows and queues only if new IDs appeared
+            if (!isWorkflowsUpToDate || !isQueuesUpToDate) {
+              if (!isWorkflowsUpToDate) {
+                dispatch(
+                  fetchWorkflows({
+                    siteId: currentSiteId,
+                    limit: 100,
+                    page: 1,
+                    nextToken: null,
+                  })
+                );
+              }
+              if (!isQueuesUpToDate) {
+                dispatch(
+                  fetchQueues({
+                    siteId: currentSiteId,
+                    limit: 100,
+                    page: 1,
+                    nextToken: null,
+                  })
+                );
+              }
+              setTimeout(() => {
+                addWorkflowNames();
+                addQueueNames();
+                setCurrentDocumentActions(actions);
+              }, 500);
+            } else {
+              setCurrentDocumentActions(actions);
+            }
+          }
+        }
+      );
+    }
+  };
+
   const value = {
     shareModalValue,
     shareModalOpened,
@@ -479,6 +581,9 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     onActionModalClose,
     actionModalValue,
     isActionModalOpened,
+    currentDocumentActions,
+    setCurrentDocumentActions,
+    updateDocumentActions,
   };
 
   return (

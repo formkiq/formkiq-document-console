@@ -51,12 +51,12 @@ import {
   updateDocumentsList,
 } from '../../Store/reducers/documentsList';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
-import { fetchQueues, QueuesState } from '../../Store/reducers/queues';
+import { QueuesState } from '../../Store/reducers/queues';
 import {
   fetchUsers,
   UserManagementState,
 } from '../../Store/reducers/userManagement';
-import { fetchWorkflows, WorkflowsState } from '../../Store/reducers/workflows';
+import { WorkflowsState } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
 import {
   InlineEditableContentTypes,
@@ -79,9 +79,6 @@ import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
-import { Queue } from '../../helpers/types/queues';
-import { User } from '../../helpers/types/userManagement';
-import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
@@ -162,6 +159,9 @@ function Documents() {
     uploadModalDocumentId,
     onNewClose,
     onActionModalClick,
+    currentDocumentActions,
+    setCurrentDocumentActions,
+    updateDocumentActions,
   } = useDocumentActions();
 
   useEffect(() => {
@@ -199,9 +199,6 @@ function Documents() {
     any
   ] = useState([]);
   const [currentDocumentVersions, setCurrentDocumentVersions] = useState(null);
-  const [currentDocumentActions, setCurrentDocumentActions] = useState<any[]>(
-    []
-  );
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
   const dispatch = useAppDispatch();
@@ -331,7 +328,7 @@ function Documents() {
           setCurrentDocument(response);
           // TODO: set folder to selected document path?
           updateTags();
-          updateDocumentActions();
+          updateDocumentActions(infoDocumentId, currentSiteId);
           // close history tab if deeplink file
           if (
             infoDocumentView === 'history' &&
@@ -590,100 +587,11 @@ function Documents() {
     }
   };
 
-  const updateDocumentActions = () => {
-    if (infoDocumentId.length) {
-      DocumentsService.getDocumentActions(infoDocumentId, currentSiteId).then(
-        (response: any) => {
-          if (response.status === 200) {
-            const actions = [...response.actions];
-            let isWorkflowsUpToDate = true;
-            let isQueuesUpToDate = true;
-            const addWorkflowNames = () => {
-              actions.forEach((action: any) => {
-                if (action.workflowId) {
-                  const workflowName = workflows.find(
-                    (workflow: WorkflowSummary) =>
-                      workflow.workflowId === action.workflowId
-                  )?.name;
-                  if (!workflowName) {
-                    isWorkflowsUpToDate = false;
-                  } else {
-                    action.workflowName = workflowName;
-                  }
-                }
-              });
-            };
-            const addQueueNames = () => {
-              actions.forEach((action: any) => {
-                if (action.queueId) {
-                  const queueName = queues.find(
-                    (queue: Queue) => queue.queueId === action.queueId
-                  )?.name;
-                  if (!queueName) {
-                    isQueuesUpToDate = false;
-                  } else {
-                    action.queueName = queueName;
-                  }
-                }
-              });
-            };
-            const addUserEmails = () => {
-              actions.forEach((action: any) => {
-                if (action.userId) {
-                  const userEmail = users.find(
-                    (user: User) => user.username === action.userId
-                  )?.email;
-                  action.userEmail = userEmail;
-                }
-              });
-            };
-            addWorkflowNames();
-            addQueueNames();
-            if (user.isAdmin && users?.length) {
-              addUserEmails();
-            }
-
-            // re-fetch workflows and queues only if new IDs appeared
-            if (!isWorkflowsUpToDate || !isQueuesUpToDate) {
-              if (!isWorkflowsUpToDate) {
-                dispatch(
-                  fetchWorkflows({
-                    siteId: currentSiteId,
-                    limit: 100,
-                    page: 1,
-                    nextToken: null,
-                  })
-                );
-              }
-              if (!isQueuesUpToDate) {
-                dispatch(
-                  fetchQueues({
-                    siteId: currentSiteId,
-                    limit: 100,
-                    page: 1,
-                    nextToken: null,
-                  })
-                );
-              }
-              setTimeout(() => {
-                addWorkflowNames();
-                addQueueNames();
-                setCurrentDocumentActions(actions);
-              }, 500);
-            } else {
-              setCurrentDocumentActions(actions);
-            }
-          }
-        }
-      );
-    }
-  };
-
   function retryFailedActions() {
     DocumentsService.retryDocumentActions(currentSiteId, infoDocumentId).then(
       (response: any) => {
         if (response.status === 200) {
-          updateDocumentActions();
+          updateDocumentActions(infoDocumentId, currentSiteId);
         } else if (response.status === 400) {
           dispatch(
             openDialog({
@@ -704,7 +612,10 @@ function Documents() {
   // update document actions every 5 seconds
   useEffect(() => {
     if (infoDocumentId && infoDocumentView === 'actions') {
-      const interval = setInterval(updateDocumentActions, 5000);
+      const interval = setInterval(
+        () => updateDocumentActions(infoDocumentId, currentSiteId),
+        5000
+      );
       return () => clearInterval(interval);
     }
     return () => {};
@@ -1443,8 +1354,8 @@ function Documents() {
       <Helmet>
         <title>Documents</title>
       </Helmet>
-      <div className="h-[calc(100vh-3.68rem)] flex">
-        <div className="grow flex flex-col justify-stretch">
+      <div className="h-[calc(100vh-3.68rem)] flex ">
+        <div className="grow flex flex-col justify-stretch flex-1">
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
             <div className="flex items-center gap-4 pr-8 z-10">
@@ -1612,10 +1523,10 @@ function Documents() {
           </div>
         </div>
         {infoDocumentId.length ? (
-          <div className="h-[calc(100vh-3.68rem)] overflow-y-auto flex w-72 bg-white border-l border-neutral-300">
+          <div className="h-[calc(100vh-3.68rem)] overflow-y-auto flex w-[17rem] bg-white border-l border-neutral-300">
             <div className="flex-1 inline-block">
               {currentDocument ? (
-                <div className="flex flex-wrap justify-center">
+                <div className="flex flex-wrap justify-start">
                   <div className="w-full flex grow-0 pl-2 pt-3 justify-start">
                     <div className="w-12">
                       <img
@@ -1647,7 +1558,7 @@ function Documents() {
                       </div>
                     </div>
                   </div>
-                  <div className="w-64 flex mt-4 mr-12 mb-2 border-b">
+                  <div className="w-64 flex mt-4 mr-2 mb-2 border-b">
                     <div
                       className="w-1/3 text-sm font-semibold cursor-pointer"
                       onClick={(event) => {
@@ -1731,11 +1642,23 @@ function Documents() {
                         />
                       </div>
                     </div>
+                    <div className="absolute"></div>
+                    <ButtonSecondary
+                      onClick={onDocumentInfoClick}
+                      type="button"
+                      style={{
+                        width: '36px',
+                      }}
+                    >
+                      <div className="flex justify-center">
+                        <span className="w-4 -m-2 p-0.5">{Retry()}</span>
+                      </div>
+                    </ButtonSecondary>
                   </div>
                   <div
                     className={
                       (infoDocumentView === 'info' ? 'block ' : 'hidden ') +
-                      ' w-64 mr-12'
+                      ' w-64 mr-2'
                     }
                   >
                     {currentDocument && (currentDocument as IDocument).path && (
@@ -1860,7 +1783,7 @@ function Documents() {
                             </dd>
                           </div>
                         )}
-                        <div className="w-68 flex mr-3 border-b"></div>
+                        <div className="w-64 flex mr-3 border-b"></div>
                         <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
                           Relationships
                           {!isSiteReadOnly && (
@@ -1925,7 +1848,7 @@ function Documents() {
                             (no relationships have been added)
                           </span>
                         )}
-                        <div className="w-68 flex mr-3 border-b"></div>
+                        <div className="w-64 flex mr-3 border-b"></div>
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
                           Attributes
                           {!isCurrentSiteReadonly && (
