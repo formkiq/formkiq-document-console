@@ -41,8 +41,9 @@ type DocumentTableProps = {
   onDeleteSelectedDocuments: (softDelete: boolean) => void;
   onRestoreSelectedDocuments: () => void;
   openArchiveTab : () => void;
-  archiveTabStatus: "open" | "closed"| "minimized"
-  getExpandedFoldersDocuments: (folders:IFolder[])=>IDocument[]
+  archiveTabStatus: "open" | "closed"| "minimized";
+  getExpandedFoldersDocuments: (folders:IFolder[])=>IDocument[];
+  downloadDocument: (documentId: string) => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -68,6 +69,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     openArchiveTab,
     archiveTabStatus,
     getExpandedFoldersDocuments,
+    downloadDocument
   } = props;
 
   const { formkiqVersion, useIndividualSharing, useSoftDelete } =
@@ -166,6 +168,16 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     setSelectedDocuments([]);
   }
 
+  function onDownloadClick() {
+    if (selectedDocuments.length === 1) {
+      if (!selectedDocuments[0].deepLinkPath || !selectedDocuments[0].deepLinkPath.length) {
+        downloadDocument(selectedDocuments[0].documentId);
+        return;
+      }
+    }
+    openArchiveTab();
+  }
+
   return (
     <div
       className="relative mt-5 overflow-hidden h-full"
@@ -221,7 +233,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                       </button>
 
                         <button
-                          onClick={openArchiveTab}
+                          onClick={onDownloadClick}
                           className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
                           title="Create Archive"
                         >
@@ -329,6 +341,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 selectedDocuments={selectedDocuments}
                 setSelectedDocuments={setSelectedDocuments}
                 archiveTabStatus={archiveTabStatus}
+                downloadDocument={downloadDocument}
               />
             ))}
           </tbody>
@@ -372,6 +385,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     selectedDocuments,
     setSelectedDocuments,
     archiveTabStatus,
+    downloadDocument,
   } = props;
 
   return (
@@ -396,6 +410,7 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               selectedDocuments={selectedDocuments}
               setSelectedDocuments={setSelectedDocuments}
               archiveTabStatus={archiveTabStatus}
+              downloadDocument={downloadDocument}
             />
           );
         })}
