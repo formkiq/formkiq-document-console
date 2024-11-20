@@ -40,9 +40,9 @@ type DocumentTableProps = {
   setSelectedDocuments: (selectedDocuments: IDocument[]) => void;
   onDeleteSelectedDocuments: (softDelete: boolean) => void;
   onRestoreSelectedDocuments: () => void;
-  openArchiveTab : () => void;
-  archiveTabStatus: "open" | "closed"| "minimized";
-  getExpandedFoldersDocuments: (folders:IFolder[])=>IDocument[];
+  openArchiveTab: () => void;
+  archiveTabStatus: 'open' | 'closed' | 'minimized';
+  getExpandedFoldersDocuments: (folders: IFolder[]) => IDocument[];
   downloadDocument: (documentId: string) => void;
 };
 
@@ -69,7 +69,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     openArchiveTab,
     archiveTabStatus,
     getExpandedFoldersDocuments,
-    downloadDocument
+    downloadDocument,
   } = props;
 
   const { formkiqVersion, useIndividualSharing, useSoftDelete } =
@@ -170,7 +170,10 @@ export const DocumentsTable = (props: DocumentTableProps) => {
 
   function onDownloadClick() {
     if (selectedDocuments.length === 1) {
-      if (!selectedDocuments[0].deepLinkPath || !selectedDocuments[0].deepLinkPath.length) {
+      if (
+        !selectedDocuments[0].deepLinkPath ||
+        !selectedDocuments[0].deepLinkPath.length
+      ) {
         downloadDocument(selectedDocuments[0].documentId);
         return;
       }
@@ -200,7 +203,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 className="px-4 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
               >
                 <div className="flex items-center">
-                  {archiveTabStatus === "closed" && (
+                  {archiveTabStatus === 'closed' && (
                     <div className="inline-flex items-end">
                       <input
                         id="checkbox-all"
@@ -218,23 +221,12 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                     </div>
                   )}
                   {subfolderUri !== 'deleted' &&
-                    (selectedDocuments.length > 0 && archiveTabStatus === "closed" ? (
+                    (selectedDocuments.length > 0 &&
+                    archiveTabStatus === 'closed' ? (
                       <div className="inline-flex items-end">
-
-                      <button
-                        onClick={() => onDeleteSelectedDocuments(useSoftDelete)}
-                        className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group ml-4"
-                        title="Delete Selected"
-                      >
-                        <div className="relative z-10">
-                          <Trash />
-                        </div>
-                        <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
-                      </button>
-
                         <button
                           onClick={onDownloadClick}
-                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
+                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group ml-3.5 mr-1"
                           title="Create Archive"
                         >
                           <div className="relative z-10">
@@ -242,15 +234,26 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                           </div>
                           <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
                         </button>
-
-
+                        <button
+                          onClick={() =>
+                            onDeleteSelectedDocuments(useSoftDelete)
+                          }
+                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
+                          title="Delete Selected"
+                        >
+                          <div className="relative z-10">
+                            <Trash />
+                          </div>
+                          <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
                       </div>
                     ) : (
                       'Name'
                     ))}
 
                   {subfolderUri === 'deleted' &&
-                    (selectedDocuments.length > 0 && archiveTabStatus === "closed" ? (
+                    (selectedDocuments.length > 0 &&
+                    archiveTabStatus === 'closed' ? (
                       <>
                         <button
                           onClick={onRestoreSelectedDocuments}
