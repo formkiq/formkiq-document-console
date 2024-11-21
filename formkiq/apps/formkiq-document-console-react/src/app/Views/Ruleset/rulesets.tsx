@@ -204,8 +204,8 @@ function Rulesets() {
               Rulesets (site: {siteId})
             </div>
             <p>
-              Rulesets will be evaluated for each document that is added to a
-              site
+              Rulesets will be evaluated for each document that is added,
+              including new versions of existing documents.
             </p>
           </div>
           <div className="flex gap-2 p-2">
