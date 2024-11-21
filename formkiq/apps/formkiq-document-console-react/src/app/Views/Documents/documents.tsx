@@ -283,24 +283,33 @@ function Documents() {
   }
 
   const trackScrolling = useCallback(async () => {
-    const isBottom = (el: HTMLElement) => {
-      if (el) {
-        return el.offsetHeight + el.scrollTop + 600 > el.scrollHeight;
-      }
-      return false;
-    };
-    const scrollpane = document.getElementById('documentsScrollpane');
+    // If we don't have a nextToken and we're not searching, or we're already loading, don't proceed
     if (
-      isBottom(scrollpane as HTMLElement) &&
-      nextToken &&
-      loadingStatus === RequestStatus.fulfilled
+      (!nextToken && !searchWord) ||
+      loadingStatus !== RequestStatus.fulfilled
+    ) {
+      return;
+    }
+
+    const scrollpane = document.getElementById('documentsScrollpane');
+    if (!scrollpane) return;
+
+    const isBottom =
+      scrollpane.offsetHeight + scrollpane.scrollTop + 600 >
+      scrollpane.scrollHeight;
+    const hasSpaceForMore = scrollpane.scrollHeight <= window.innerHeight;
+
+    if (
+      (isBottom || hasSpaceForMore) &&
+      (nextToken || (!isLastSearchPageLoaded && searchWord))
     ) {
       dispatch(setDocumentLoadingStatusPending());
+
       if (nextToken) {
         await dispatch(
           fetchDocuments({
             siteId: currentSiteId,
-            formkiqVersion: formkiqVersion,
+            formkiqVersion,
             searchWord,
             searchFolder,
             subfolderUri,
@@ -311,26 +320,51 @@ function Documents() {
             page: currentSearchPage + 1,
           })
         );
-      } else {
-        if (!isLastSearchPageLoaded && searchWord) {
-          await dispatch(
-            fetchDocuments({
-              // for next page results
-              siteId: currentSiteId,
-              formkiqVersion: formkiqVersion,
-              searchWord,
-              searchFolder,
-              subfolderUri,
-              queueId,
-              filterTag,
-              filterAttribute,
-              page: currentSearchPage + 1,
-            })
-          );
-        }
+      } else if (!isLastSearchPageLoaded && searchWord) {
+        await dispatch(
+          fetchDocuments({
+            siteId: currentSiteId,
+            formkiqVersion,
+            searchWord,
+            searchFolder,
+            subfolderUri,
+            queueId,
+            filterTag,
+            filterAttribute,
+            page: currentSearchPage + 1,
+          })
+        );
       }
     }
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
+
+  // Add a single useEffect for initial load and viewport check
+  useEffect(() => {
+    if (!documents && loadingStatus === RequestStatus.fulfilled) {
+      dispatch(setDocumentLoadingStatusPending());
+      dispatch(
+        fetchDocuments({
+          siteId: currentSiteId,
+          formkiqVersion,
+          searchWord,
+          searchFolder,
+          subfolderUri,
+          queueId,
+          filterTag,
+          filterAttribute,
+        })
+      );
+    } else if (documents && loadingStatus === RequestStatus.fulfilled) {
+      const scrollpane = document.getElementById('documentsScrollpane');
+      if (
+        scrollpane &&
+        scrollpane.scrollHeight <= window.innerHeight &&
+        nextToken
+      ) {
+        trackScrolling();
+      }
+    }
+  }, [documents, loadingStatus]);
 
   function onDocumentInfoClick() {
     if (infoDocumentId.length) {
@@ -2221,7 +2255,7 @@ function Documents() {
                         0) === 0) && (
                       <div className="mt-2 w-full flex justify-center">
                         <ButtonPrimaryGradient
-                          onClick={()=>downloadDocument(infoDocumentId)}
+                          onClick={() => downloadDocument(infoDocumentId)}
                           style={{
                             height: '36px',
                             width: '100%',
@@ -2543,7 +2577,7 @@ function Documents() {
                             </button>
                           )}
                         <ButtonPrimaryGradient
-                          onClick={()=>downloadDocument(infoDocumentId)}
+                          onClick={() => downloadDocument(infoDocumentId)}
                           style={{ height: '36px', width: '100%' }}
                         >
                           <div className="w-full flex justify-center px-4 py-1">
