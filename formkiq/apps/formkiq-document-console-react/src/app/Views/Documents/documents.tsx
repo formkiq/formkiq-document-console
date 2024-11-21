@@ -284,23 +284,29 @@ function Documents() {
 
   const trackScrolling = useCallback(async () => {
     const isBottom = (el: HTMLElement) => {
-      if (el) {
-        return el.offsetHeight + el.scrollTop + 600 > el.scrollHeight;
-      }
-      return false;
+      if (!el) return false;
+      return el.offsetHeight + el.scrollTop + 600 > el.scrollHeight;
     };
+
     const scrollpane = document.getElementById('documentsScrollpane');
-    if (
-      isBottom(scrollpane as HTMLElement) &&
-      nextToken &&
-      loadingStatus === RequestStatus.fulfilled
-    ) {
+
+    // Check if we need to load more content
+    const shouldLoadMore = () => {
+      if (!scrollpane) return false;
+
+      // If we have a nextToken and the content doesn't fill the viewport, we should load more
+      const hasSpaceForMore = scrollpane.scrollHeight <= window.innerHeight;
+      return (hasSpaceForMore && nextToken) || isBottom(scrollpane);
+    };
+
+    if (shouldLoadMore() && loadingStatus === RequestStatus.fulfilled) {
       dispatch(setDocumentLoadingStatusPending());
+
       if (nextToken) {
         await dispatch(
           fetchDocuments({
             siteId: currentSiteId,
-            formkiqVersion: formkiqVersion,
+            formkiqVersion,
             searchWord,
             searchFolder,
             subfolderUri,
@@ -311,26 +317,37 @@ function Documents() {
             page: currentSearchPage + 1,
           })
         );
-      } else {
-        if (!isLastSearchPageLoaded && searchWord) {
-          await dispatch(
-            fetchDocuments({
-              // for next page results
-              siteId: currentSiteId,
-              formkiqVersion: formkiqVersion,
-              searchWord,
-              searchFolder,
-              subfolderUri,
-              queueId,
-              filterTag,
-              filterAttribute,
-              page: currentSearchPage + 1,
-            })
-          );
-        }
+      } else if (!isLastSearchPageLoaded && searchWord) {
+        await dispatch(
+          fetchDocuments({
+            siteId: currentSiteId,
+            formkiqVersion,
+            searchWord,
+            searchFolder,
+            subfolderUri,
+            queueId,
+            filterTag,
+            filterAttribute,
+            page: currentSearchPage + 1,
+          })
+        );
       }
     }
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
+
+  // Add a useEffect to check if we need to load more content after the initial render
+  // and whenever the documents list changes
+  useEffect(() => {
+    const scrollpane = document.getElementById('documentsScrollpane');
+    if (
+      scrollpane &&
+      scrollpane.scrollHeight <= window.innerHeight &&
+      nextToken &&
+      loadingStatus === RequestStatus.fulfilled
+    ) {
+      trackScrolling();
+    }
+  }, [documents, folders, loadingStatus]);
 
   function onDocumentInfoClick() {
     if (infoDocumentId.length) {
@@ -2221,7 +2238,7 @@ function Documents() {
                         0) === 0) && (
                       <div className="mt-2 w-full flex justify-center">
                         <ButtonPrimaryGradient
-                          onClick={()=>downloadDocument(infoDocumentId)}
+                          onClick={() => downloadDocument(infoDocumentId)}
                           style={{
                             height: '36px',
                             width: '100%',
@@ -2543,7 +2560,7 @@ function Documents() {
                             </button>
                           )}
                         <ButtonPrimaryGradient
-                          onClick={()=>downloadDocument(infoDocumentId)}
+                          onClick={() => downloadDocument(infoDocumentId)}
                           style={{ height: '36px', width: '100%' }}
                         >
                           <div className="w-full flex justify-center px-4 py-1">

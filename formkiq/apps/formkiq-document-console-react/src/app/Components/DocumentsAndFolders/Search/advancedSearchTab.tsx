@@ -61,9 +61,6 @@ function AdvancedSearchTab({
         (advancedSearch === 'hidden' && 'hidden')
       }
     >
-      <div className="absolute flex w-full h-full justify-center items-center font-bold text-5xl text-gray-100 mb-2 -z-10">
-        Search
-      </div>
       {!formkiqVersion.modules.includes('opensearch') &&
         !formkiqVersion.modules.includes('typesense') && (
           <DefaultSearchByAttributes
