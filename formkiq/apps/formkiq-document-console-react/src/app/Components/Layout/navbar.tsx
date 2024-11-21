@@ -1059,17 +1059,6 @@ function Navbar() {
                           Sign out
                         </Link>
                       </li>
-                      {user.isAdmin && (
-                        <li>
-                          <Link
-                            to="/admin/user-activities"
-                            data-test-id="user-activities"
-                            className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                          >
-                            User Activities
-                          </Link>
-                        </li>
-                      )}
                     </ul>
                   )}
                 </div>

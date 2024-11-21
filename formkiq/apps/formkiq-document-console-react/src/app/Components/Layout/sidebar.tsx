@@ -38,6 +38,7 @@ import {
   Examine,
   FolderOutline,
   Group,
+  HistoryIcon,
   Mapping,
   Plus,
   Queue,
@@ -870,6 +871,12 @@ export function Sidebar() {
                       testId="nav-access-control"
                     />
                   )}
+                  <NavigationItem
+                    to="/admin/user-activities"
+                    icon={<HistoryIcon />}
+                    title="User Activities"
+                    testId="nav-user-activities"
+                  />
                 </>
               )}
             </>
