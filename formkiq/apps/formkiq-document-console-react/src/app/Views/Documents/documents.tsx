@@ -283,23 +283,26 @@ function Documents() {
   }
 
   const trackScrolling = useCallback(async () => {
-    const isBottom = (el: HTMLElement) => {
-      if (!el) return false;
-      return el.offsetHeight + el.scrollTop + 600 > el.scrollHeight;
-    };
+    // If we don't have a nextToken and we're not searching, or we're already loading, don't proceed
+    if (
+      (!nextToken && !searchWord) ||
+      loadingStatus !== RequestStatus.fulfilled
+    ) {
+      return;
+    }
 
     const scrollpane = document.getElementById('documentsScrollpane');
+    if (!scrollpane) return;
 
-    // Check if we need to load more content
-    const shouldLoadMore = () => {
-      if (!scrollpane) return false;
+    const isBottom =
+      scrollpane.offsetHeight + scrollpane.scrollTop + 600 >
+      scrollpane.scrollHeight;
+    const hasSpaceForMore = scrollpane.scrollHeight <= window.innerHeight;
 
-      // If we have a nextToken and the content doesn't fill the viewport, we should load more
-      const hasSpaceForMore = scrollpane.scrollHeight <= window.innerHeight;
-      return (hasSpaceForMore && nextToken) || isBottom(scrollpane);
-    };
-
-    if (shouldLoadMore() && loadingStatus === RequestStatus.fulfilled) {
+    if (
+      (isBottom || hasSpaceForMore) &&
+      (nextToken || (!isLastSearchPageLoaded && searchWord))
+    ) {
       dispatch(setDocumentLoadingStatusPending());
 
       if (nextToken) {
@@ -335,19 +338,33 @@ function Documents() {
     }
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
 
-  // Add a useEffect to check if we need to load more content after the initial render
-  // and whenever the documents list changes
+  // Add a single useEffect for initial load and viewport check
   useEffect(() => {
-    const scrollpane = document.getElementById('documentsScrollpane');
-    if (
-      scrollpane &&
-      scrollpane.scrollHeight <= window.innerHeight &&
-      nextToken &&
-      loadingStatus === RequestStatus.fulfilled
-    ) {
-      trackScrolling();
+    if (!documents && loadingStatus === RequestStatus.fulfilled) {
+      dispatch(setDocumentLoadingStatusPending());
+      dispatch(
+        fetchDocuments({
+          siteId: currentSiteId,
+          formkiqVersion,
+          searchWord,
+          searchFolder,
+          subfolderUri,
+          queueId,
+          filterTag,
+          filterAttribute,
+        })
+      );
+    } else if (documents && loadingStatus === RequestStatus.fulfilled) {
+      const scrollpane = document.getElementById('documentsScrollpane');
+      if (
+        scrollpane &&
+        scrollpane.scrollHeight <= window.innerHeight &&
+        nextToken
+      ) {
+        trackScrolling();
+      }
     }
-  }, [documents, folders, loadingStatus]);
+  }, [documents, loadingStatus]);
 
   function onDocumentInfoClick() {
     if (infoDocumentId.length) {
