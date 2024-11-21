@@ -290,7 +290,7 @@ function FolderListLine({
                 {!isSiteReadOnly && (
                   <>
                     <div
-                      className="w-3 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
+                      className="w-4 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
                       onClick={onDeleteClick(folderInstance)}
                     >
                       <Trash />
