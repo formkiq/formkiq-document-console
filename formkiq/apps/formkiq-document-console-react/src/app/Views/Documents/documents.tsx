@@ -516,7 +516,7 @@ function Documents() {
       return;
     }
     const sortedDocumentAttributesAndTags = [
-      ...currentDocumentTags,
+      ...(currentDocumentTags || []),
       ...documentAttributes,
     ];
     sortedDocumentAttributesAndTags.sort((a, b) => a.key.localeCompare(b.key));
