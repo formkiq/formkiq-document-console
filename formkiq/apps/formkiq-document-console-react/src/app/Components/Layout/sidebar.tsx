@@ -45,7 +45,8 @@ import {
   Rules,
   Schema,
   Settings,
-  ShareHand, SitesManagement,
+  ShareHand,
+  SitesManagement,
   Star,
   Trash,
   Upload,
@@ -257,7 +258,8 @@ export function Sidebar() {
       '/admin/users',
       '/admin/access-control',
     ];
-    const documentViewPathRegex = /^\/(?:documents|my-documents|team-documents|workspaces\/[^/]+)\/[^/]+\/(?:view|edit)$/;
+    const documentViewPathRegex =
+      /^\/(?:documents|my-documents|team-documents|workspaces\/[^/]+)\/[^/]+\/(?:view|edit)$/;
     const isNonDocumentPath = nonDocumentPaths.some(
       (path) => pathname.indexOf(path) > -1
     );
@@ -1008,7 +1010,7 @@ export function Sidebar() {
             </nav>
             {formkiqVersion && formkiqVersion.type && isSidebarExpanded && (
               <>
-                <div className="group text-xs fixed left-0 bottom-0 flex justify-start items-end pl-4 mb-2 bg-neutral-100">
+                <div className="group text-xs fixed left-0 bottom-0 flex justify-start items-end pl-4 mb-2">
                   FormKiQ
                   {formkiqVersion.type === 'enterprise' ? (
                     <span>&nbsp;Enterprise&nbsp;</span>
@@ -1016,7 +1018,7 @@ export function Sidebar() {
                     <span>&nbsp;</span>
                   )}
                   v{formkiqVersion.version}
-                  <div className="modulePane absolute invisible group-hover:visible bottom-full w-full mb-2">
+                  <div className="absolute invisible group-hover:visible bottom-full w-56 mb-2 p-2 bg-neutral-100 border">
                     {formkiqVersion.modules &&
                       formkiqVersion.modules.length && (
                         <h3 className="font-semibold mb-1">Modules:</h3>
