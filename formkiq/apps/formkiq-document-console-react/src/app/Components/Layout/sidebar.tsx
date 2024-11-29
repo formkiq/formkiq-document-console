@@ -761,7 +761,12 @@ export function Sidebar() {
                 testId="nav-api-explorer"
               />
               <NavigationItem
-                to="/integrations/webhooks"
+                to={
+                  '/integrations/webhooks' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
                 icon={<Webhook />}
                 title="Webhooks"
                 testId="nav-webhooks"

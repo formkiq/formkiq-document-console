@@ -271,6 +271,7 @@ function Navbar() {
     const pathsWithSubfolder: string[] = [
       'admin/api-keys',
       'admin/user-activities',
+      'integrations/webhooks',
     ];
 
     let newDocumentsRootUri;
@@ -730,7 +731,8 @@ function Navbar() {
                             pathname.indexOf('/admin/user-activities') > -1 ||
                             pathname.indexOf('/queues') > -1 ||
                             pathname.indexOf('/attributes') > -1 ||
-                            pathname.indexOf('/mappings') > -1) &&
+                            pathname.indexOf('/mappings') > -1 ||
+                            pathname.indexOf('/integrations/webhooks') > -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
                               (hasDefaultSite && hasWorkspaces) ||

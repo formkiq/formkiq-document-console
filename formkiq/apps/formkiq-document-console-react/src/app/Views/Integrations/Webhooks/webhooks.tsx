@@ -1,63 +1,76 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
-import { ArrowBottom, ArrowRight } from '../../../Components/Icons/icons';
 import NewWebhookModal from '../../../Components/Integrations/NewWebhook/newWebhook';
 import WebhookList from '../../../Components/Integrations/WebhookList/WebhookList';
 import { AuthState } from '../../../Store/reducers/auth';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
+import {
+  getCurrentSiteInfo,
+  getUserSites,
+} from '../../../helpers/services/toolService';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  fetchWebhooks,
+  setWebhooksLoadingStatusPending,
+  WebhooksState,
+} from '../../../Store/reducers/webhooks';
+import { RequestStatus } from '../../../helpers/types/document';
+import { Plus } from '../../../Components/Icons/icons';
 
-type HookItem = {
-  siteId: string;
-  readonly: boolean;
-  hooks: [] | null;
-};
 export function Webhooks() {
   const dispatch = useAppDispatch();
-  let userSite: any = null;
-  let defaultSite: any = null;
-  const workspaceSites: any[] = [];
   const { user } = useSelector(AuthState);
-  if (user && user.sites) {
-    user.sites.forEach((site: any) => {
-      if (site.siteId === user.email) {
-        userSite = site;
-      } else if (site.siteId === 'default') {
-        defaultSite = site;
-      } else {
-        workspaceSites.push(site);
-      }
-    });
-  }
-  const currentSite = userSite
-    ? userSite
-    : defaultSite
-    ? defaultSite
-    : workspaceSites[0];
-  if (currentSite === null) {
-    alert('No site configured for this user');
-    window.location.href = '/';
-  }
-
-  const [userSiteExpanded, setUserSiteExpanded] = useState(true);
-  const [userSiteWebhooks, setUserSiteWebhooks] = useState(null);
-  const [defaultSiteExpanded, setDefaultSiteExpanded] = useState(true);
-  const [defaultSiteWebhooks, setDefaultSiteWebhooks] = useState(null);
-  const [workspaceHooks, setWorkspaceHooks] = useState<HookItem[]>([]);
-  const [workspacesExpanded, setWorkspacesExpanded] = useState(false);
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
+    getUserSites(user);
+  const pathname = decodeURI(useLocation().pathname);
+  const { siteId, isSiteReadOnly } = getCurrentSiteInfo(
+    pathname,
+    user,
+    hasUserSite,
+    hasDefaultSite,
+    hasWorkspaces,
+    workspaceSites
+  );
+  const navigate = useNavigate();
+  const {
+    webhooks,
+    nextWebhooksToken,
+    webhooksLoadingStatus,
+    currentWebhooksSearchPage,
+    isLastWebhooksSearchPageLoaded,
+  } = useSelector(WebhooksState);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
-  const toggleUserSiteExpand = () => {
-    setUserSiteExpanded(!userSiteExpanded);
-  };
-  const toggleDefaultSiteExpand = () => {
-    setDefaultSiteExpanded(!defaultSiteExpanded);
-  };
-  const toggleWorkspacesExpand = () => {
-    setWorkspacesExpanded(!workspacesExpanded);
-  };
+  const [currentSiteId, setCurrentSiteId] = useState(siteId);
+  const [isCurrentSiteReadOnly, setIsCurrentSiteReadonly] =
+    useState(isSiteReadOnly);
+
+  useEffect(() => {
+    const recheckSiteInfo = getCurrentSiteInfo(
+      pathname,
+      user,
+      hasUserSite,
+      hasDefaultSite,
+      hasWorkspaces,
+      workspaceSites
+    );
+    if (recheckSiteInfo.siteRedirectUrl.length) {
+      navigate(
+        {
+          pathname: `${recheckSiteInfo.siteRedirectUrl}`,
+        },
+        {
+          replace: true,
+        }
+      );
+    }
+    setCurrentSiteId(recheckSiteInfo.siteId);
+    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
+  }, [pathname]);
+
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
     setNewModalOpened(true);
@@ -73,72 +86,14 @@ export function Webhooks() {
 
   useEffect(() => {
     updateWebhooks();
-  }, [user]);
+  }, [currentSiteId]);
 
-  const setWebhooks = (webhooks: [], siteId: string, readonly: boolean) => {
-    if (siteId === user?.email) {
-      // NOTE: does not allow for a readonly user site
-      setUserSiteWebhooks(webhooks as any);
-    } else if (siteId === 'default') {
-      // NOTE: does not allow for a readonly default site
-      setDefaultSiteWebhooks(webhooks as any);
-    }
-  };
-
-  const updateWebhooks = async () => {
-    if (userSite) {
-      let readonly = false;
-      if (userSite.permission && userSite.permission === 'READ_ONLY') {
-        readonly = true;
-      }
-      DocumentsService.getWebhooks(userSite.siteId).then(
-        (webhooksResponse: any) => {
-          setWebhooks(webhooksResponse.webhooks, userSite.siteId, readonly);
-        }
-      );
-    }
-    if (defaultSite) {
-      let readonly = false;
-      if (defaultSite.permission && defaultSite.permission === 'READ_ONLY') {
-        readonly = true;
-      }
-      DocumentsService.getWebhooks(defaultSite.siteId).then(
-        (webhooksResponse: any) => {
-          setWebhooks(webhooksResponse.webhooks, defaultSite.siteId, readonly);
-        }
-      );
-    }
-    if (workspaceSites.length > 0) {
-      const initialWorkspaceHooksPromises = workspaceSites.map((item) => {
-        let readonly = false;
-        if (item.permission && item.permission === 'READ_ONLY') {
-          readonly = true;
-        }
-        return DocumentsService.getWebhooks(item.siteId).then(
-          (webhooksResponse: any) => {
-            return {
-              hooks: webhooksResponse.webhooks,
-              siteId: item.siteId,
-              readonly,
-            };
-          }
-        );
-      });
-
-      Promise.all(initialWorkspaceHooksPromises)
-        .then((initialWorkspaceHooks) => {
-          setWorkspaceHooks(initialWorkspaceHooks);
-        })
-        .catch((error) => {
-          // Handle any errors that occurred during the requests
-          console.error('Error fetching webhooks:', error);
-        });
-    }
+  const updateWebhooks = () => {
+    dispatch(fetchWebhooks({ siteId: currentSiteId, limit: 20, page: 1 }));
   };
 
   const deleteWebhook = (webhookId: string, siteId: string) => {
     const deleteFunc = async () => {
-      setUserSiteWebhooks(null);
       await DocumentsService.deleteWebhook(webhookId, siteId).then(
         (webhooksResponse: any) => {
           updateWebhooks();
@@ -153,119 +108,77 @@ export function Webhooks() {
     );
   };
 
+  const trackScrolling = useCallback(async () => {
+    const isBottom = (el: HTMLElement) => {
+      if (el) {
+        return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
+      }
+      return false;
+    };
+
+    const scrollpane = document.getElementById('webhooksScrollPane');
+
+    if (
+      isBottom(scrollpane as HTMLElement) &&
+      nextWebhooksToken &&
+      webhooksLoadingStatus === RequestStatus.fulfilled
+    ) {
+      dispatch(setWebhooksLoadingStatusPending());
+      if (nextWebhooksToken) {
+        await dispatch(
+          fetchWebhooks({
+            siteId: currentSiteId,
+            nextToken: nextWebhooksToken,
+            page: currentWebhooksSearchPage + 1,
+            limit: 20,
+          })
+        );
+      }
+    }
+  }, [
+    nextWebhooksToken,
+    webhooksLoadingStatus,
+    isLastWebhooksSearchPageLoaded,
+  ]);
+
+  const handleScroll = (event: any) => {
+    const el = event.target;
+    // Track scroll when table reaches bottom
+    if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
+      if (el.scrollTop > 0) {
+        trackScrolling();
+      }
+    }
+  };
+
   return (
     <>
       <Helmet>
         <title>Webhooks</title>
       </Helmet>
-      <div className="p-4 max-w-screen-lg font-semibold mb-4">
+      <div className="p-4 max-w-screen-lg font-semibold">
         By posting an HTML web form or any other data to a webhook URL, FormKiQ
         will process that data and add it as a new document.
       </div>
-      <div className="p-4">
-        {userSite && (
-          <>
-            <div
-              className="w-full flex self-start text-neutral-900 hover:text-neutral-600 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleUserSiteExpand}
-            >
-              <div className="flex justify-end mt-3 mr-1">
-                {userSiteExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="pl-1 uppercase text-base">
-                Webhooks: My Documents
-                <span className="block normal-case">
-                  {' '}
-                  (Site ID: {userSite.siteId})
-                </span>
-              </div>
-            </div>
-            {userSiteExpanded && (
-              <WebhookList
-                siteId={userSite.siteId}
-                webhooks={userSiteWebhooks}
-                isSiteReadOnly={userSite.readonly}
-                onDelete={deleteWebhook}
-                onNewClick={onNewClick}
-              ></WebhookList>
-            )}
-          </>
-        )}
-        {defaultSite && defaultSite.siteId && (
-          <>
-            <div
-              className="w-full flex self-start text-neutral-900 hover:text-neutral-600 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleDefaultSiteExpand}
-            >
-              <div className="flex justify-end mt-3 mr-1">
-                {defaultSiteExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="pl-1 uppercase text-base">
-                {userSite ? (
-                  <span>
-                    Webhooks: Team Documents
-                    <span className="block normal-case">
-                      (Site ID: default)
-                    </span>
-                  </span>
-                ) : (
-                  <span>
-                    Webhooks: Documents
-                    <span className="block normal-case">
-                      (Site ID: default)
-                    </span>
-                  </span>
-                )}
-              </div>
-            </div>
-            {defaultSiteExpanded && (
-              <WebhookList
-                webhooks={defaultSiteWebhooks}
-                onDelete={deleteWebhook}
-                siteId={defaultSite.siteId}
-                isSiteReadOnly={defaultSite.readonly}
-                onNewClick={onNewClick}
-              ></WebhookList>
-            )}
-          </>
-        )}
-        {workspaceSites.length > 0 && (
-          <>
-            <div
-              className="w-full flex self-start text-neutral-900 hover:text-neutral-600 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-              onClick={toggleWorkspacesExpand}
-            >
-              <div className="flex justify-end mt-3 mr-1">
-                {workspacesExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="pl-1 uppercase text-base">
-                Webhooks: Workspaces
-              </div>
-            </div>
-            {workspacesExpanded &&
-              workspaceHooks.map((item: HookItem, i: number) => {
-                return (
-                  <div key={i}>
-                    <div className="mt-4 ml-4 flex flex-wrap w-full">
-                      <div className="pl-1 uppercase text-sm">
-                        Webhooks:{' '}
-                        <span className="normal-case">{item.siteId}</span>
-                      </div>
-                    </div>
-                    <div className="mt-4 ml-4">
-                      <WebhookList
-                        webhooks={item.hooks}
-                        siteId={item.siteId}
-                        isSiteReadOnly={item.readonly}
-                        onDelete={deleteWebhook}
-                        onNewClick={onNewClick}
-                      ></WebhookList>
-                    </div>
-                  </div>
-                );
-              })}
-          </>
-        )}
+      {!isCurrentSiteReadOnly && (
+        <div className="my-4 flex px-4">
+          <button
+            className="flex bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-md flex cursor-pointer focus:outline-none py-2 px-4"
+            data-test-id="create-webhook"
+            onClick={(event) => onNewClick(event, currentSiteId)}
+          >
+            <span>Create new</span>
+            <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
+          </button>
+        </div>
+      )}
+      <div className="relative overflow-hidden h-full" id="webhooksWrapper">
+        <WebhookList
+          siteId={currentSiteId}
+          webhooks={webhooks}
+          onDelete={deleteWebhook}
+          handleScroll={handleScroll}
+        ></WebhookList>
       </div>
       <NewWebhookModal
         isOpened={isNewModalOpened}
