@@ -6,6 +6,7 @@ import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListL
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import FolderListLine from '../../Components/DocumentsAndFolders/FolderListLine/FolderListLine';
 import {
+  Close,
   Download,
   RestoreFile,
   Spinner,
@@ -352,6 +353,14 @@ export const DocumentsTable = (props: DocumentTableProps) => {
         {loadingStatus === RequestStatus.pending && documents.length > 0 && (
           <div className="absolute bottom-0 w-full flex justify-center">
             <Spinner />
+          </div>
+        )}
+        {loadingStatus === RequestStatus.rejected && documents.length > 0 && (
+          <div className="w-full flex justify-center items-center gap-2 py-2">
+            <div className="w-6 h-6 p-0.5 text-neutral-500 border-neutral-500 border rounded-full border-2 ">
+              <Close/>
+            </div>
+            <p className="text-neutral-500">Failed to load more documents.</p>
           </div>
         )}
         <FolderDropWrapper
