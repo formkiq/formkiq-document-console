@@ -1,7 +1,5 @@
 import {Group, User} from '../../helpers/types/userManagement';
-import {useEffect, useState} from 'react';
 import UserActionPopover from '../../Components/UserManagement/Popovers/UserActionPopover';
-import {DocumentsService} from '../../helpers/services/documentsService';
 import {Link} from 'react-router-dom';
 
 type UsersTableProps = {
@@ -14,6 +12,7 @@ type UsersTableProps = {
   setSelectedUsers: (usernames: string[]) => void;
   onResetPasswordClick: (username: any) => void;
   onManageGroupsClick: (username: any) => void;
+  userGroups: { [key: string]: Group[] };
 };
 
 function UsersTable({
@@ -26,8 +25,8 @@ function UsersTable({
                       setSelectedUsers,
                       onResetPasswordClick,
                       onManageGroupsClick,
+                      userGroups,
                     }: UsersTableProps) {
-  const [userGroups, setUserGroups] = useState<any>({});
 
   function toggleSelectAll() {
     if (selectedUsers.length === users.length) {
@@ -53,20 +52,6 @@ function UsersTable({
   function unselectAllUsers() {
     setSelectedUsers([]);
   }
-
-  async function getUserGroups(username: string) {
-    DocumentsService.getUserGroups(username).then((response) => {
-      if (response.groups && response.groups.length > 0) {
-        setUserGroups((val: any) => ({...val, [username]: response.groups}));
-      }
-    });
-  }
-
-  useEffect(() => {
-    users.forEach((user) => {
-      getUserGroups(user.username);
-    });
-  }, [users]);
 
   return (
     <table className="table-auto text-neutral-900 text-sm border-b border-neutral-300 w-full ">

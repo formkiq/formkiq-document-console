@@ -20,6 +20,7 @@ import UsersTable from './usersTable';
 import {Plus} from "../../Components/Icons/icons";
 import CreateUserModal from "../../Components/UserManagement/Modals/CreateUserModal";
 import ManageUserGroupsModal from "../../Components/UserManagement/Modals/ManageUserGroupsModal";
+import {DocumentsService} from "../../helpers/services/documentsService";
 
 function Users() {
   const {
@@ -35,6 +36,7 @@ function Users() {
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [isManageGroupsModalOpen, setManageGroupsModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [userGroups, setUserGroups] = useState<any>({});
 
   function updateUsers() {
     dispatch(fetchUsers({ page: 1 }));
@@ -222,6 +224,21 @@ function Users() {
       setManageGroupsModalOpen(true);
   };
 
+  // user groups
+  async function getUserGroups(username: string) {
+    DocumentsService.getUserGroups(username).then((response) => {
+      if (response.groups && response.groups.length > 0) {
+        setUserGroups((val: any) => ({...val, [username]: response.groups}));
+      }
+    });
+  }
+
+  useEffect(() => {
+    users.forEach((user) => {
+      getUserGroups(user.username);
+    });
+  }, [users]);
+
   return (
     <>
       <Helmet>
@@ -269,6 +286,7 @@ function Users() {
                   onResetPasswordClick={onUserResetPassword}
                   onManageGroupsClick={onManageGroups}
                   setSelectedUsers={setSelectedUsers}
+                  userGroups={userGroups}
                 />
               </div>
             </div>
@@ -283,6 +301,7 @@ function Users() {
         isOpen={isManageGroupsModalOpen}
         setIsOpen={setManageGroupsModalOpen}
         userId={selectedUserId}
+        onUserGroupsUpdated={()=>getUserGroups(selectedUserId)}
       />
     </>
   );
