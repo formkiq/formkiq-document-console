@@ -368,7 +368,7 @@ export default function SubmitForReviewModal({
                         check its status in the following queues:
                       </p>
                       <div className="ml-4 mr-8">
-                        <table className="w-full mt-4">
+                        <table className="w-full mt-2">
                           <thead>
                             <tr className="bg-neutral-100 border border-neutral-300">
                               <th className="text-left text-sm font-semibold pl-2">
@@ -397,8 +397,8 @@ export default function SubmitForReviewModal({
                       </div>
                     </>
                   )}
-                  <h3 className="text-lg font-semibold mt-2">Workflows</h3>
-                  <form onSubmit={onSubmit} className="w-full mt-4">
+                  <h3 className="text-lg font-semibold mt-4">Workflows</h3>
+                  <form onSubmit={onSubmit} className="w-full mt-2">
                     <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
                       <div className="w-full mr-12 relative">
                         <RadioCombobox
