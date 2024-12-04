@@ -88,7 +88,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
 
   useEffect(() => {
     // load more items if bottom of a table is visible
-    if (!documents || documents.length === 0) return; // prevent execution if documents are not loaded yet
+    if ((!documents || documents.length === 0) && (!folders || folders.length === 0)) return; // prevent execution if documents and folders are not loaded yet
     trackScrolling();
     // when user opens document folder after viewing document, scroll to list to display document line
     if (!scrollToDocumentLine) return;
@@ -108,7 +108,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
       documentLine.scrollIntoView({ block: 'end' });
       navigate(pathname + '#id=' + infoDocumentId);
     }
-  }, [documents]);
+  }, [documents, folders]);
 
   if (
     documents.length === 0 &&
