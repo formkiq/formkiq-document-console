@@ -131,6 +131,7 @@ const DocumentActionsModalContainer = ({
         siteId={currentSiteId}
         value={submitForReviewModalValue}
         onDocumentDataChange={onDocumentDataChange}
+        currentDocumentsRootUri={currentDocumentsRootUri}
       />
       <DocumentReviewModal
         isOpened={documentReviewModalOpened}

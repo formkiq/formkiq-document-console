@@ -1036,7 +1036,9 @@ export class DocumentsService {
   @formkiqAPIHandler
   public static async getDocumentActions(
     documentId: string,
-    siteId = ''
+    siteId = '',
+    limit = 20,
+    next = null
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -1044,6 +1046,8 @@ export class DocumentsService {
     return this.getFormkiqClient().documentsApi.getDocumentActions({
       documentId,
       siteId,
+      limit,
+      next,
     });
   }
 
