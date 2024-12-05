@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Json, Trash } from '../../Components/Icons/icons';
+import { Json, Pencil, Trash } from '../../Components/Icons/icons';
 import { formatDate } from '../../helpers/services/toolService';
 import { Classification } from '../../helpers/types/schemas';
 
@@ -54,7 +54,16 @@ function ClassificationsTable({
                     <div className="flex items-center justify-end gap-2 mr-3">
                       <NavLink
                         title="Open in editor"
-                        to={`${pathname}/${classification.classificationId}?editor=true`}
+                        to={`${pathname}/${classification.classificationId}?editing=true`}
+                        className="h-6"
+                      >
+                        <button className="w-6 h-auto" title="Edit">
+                          <Pencil />
+                        </button>
+                      </NavLink>
+                      <NavLink
+                        title="Open in editor"
+                        to={`${pathname}/${classification.classificationId}?editing=true&jsonEditor=true`}
                         className="h-6"
                       >
                         <button

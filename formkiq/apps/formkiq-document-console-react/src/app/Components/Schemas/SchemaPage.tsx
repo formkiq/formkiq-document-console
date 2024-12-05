@@ -18,10 +18,10 @@ import ButtonSecondary from '../Generic/Buttons/ButtonSecondary';
 import RadioCombobox from '../Generic/Listboxes/RadioCombobox';
 import { Close } from '../Icons/icons';
 import AddAttributesTab from './createSchemaDialog/addAttributesTab';
+import {useSearchParams} from "react-router-dom";
 
 type SchemaPagePropsType = {
   isEditing: boolean;
-  setIsEditing: (value: boolean) => void;
   siteId: string;
   schemaType: 'site' | 'classification';
   initialSchemaValue: Schema;
@@ -30,13 +30,13 @@ type SchemaPagePropsType = {
 
 function SchemaPage({
   isEditing,
-  setIsEditing,
   siteId,
   schemaType,
   initialSchemaValue,
   classificationId,
 }: SchemaPagePropsType) {
   const dispatch = useAppDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [schema, setSchema] = useState(initialSchemaValue);
   const { allAttributes } = useSelector(AttributesDataState);
@@ -142,7 +142,8 @@ function SchemaPage({
       }).then((response) => {
         if (response.status === 200) {
           dispatch(fetchClassificationSchema({ siteId, classificationId }));
-          setIsEditing(false);
+          searchParams.delete('editing');
+          setSearchParams(searchParams);
           resetValues();
         } else {
           if (response.errors) {
@@ -156,7 +157,8 @@ function SchemaPage({
       DocumentsService.setSiteSchema(siteId, newSchema).then((response) => {
         if (response.status === 200) {
           dispatch(fetchSiteSchema({ siteId }));
-          setIsEditing(false);
+          searchParams.delete('editing');
+          setSearchParams(searchParams);
           resetValues();
         } else {
           if (response.errors) {
@@ -179,11 +181,12 @@ function SchemaPage({
     setOptionalAllowedValues([]);
     setCompositeKey('');
     setCompositeKeys([]);
-    setSchema(initialSchemaValue);
   };
   const cancelEditing = () => {
     resetValues();
-    setIsEditing(false);
+    setSchema(initialSchemaValue);
+    searchParams.delete('editing');
+    setSearchParams(searchParams);
   };
 
   const preventDialogClose = (e: React.KeyboardEvent<HTMLInputElement>) => {

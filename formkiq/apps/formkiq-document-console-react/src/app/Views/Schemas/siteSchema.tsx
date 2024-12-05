@@ -20,7 +20,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { Schema as SchemaType } from '../../helpers/types/schemas';
-import SchemaPage from "../../Components/Schemas/SchemaPage";
+import SchemaPage from '../../Components/Schemas/SchemaPage';
 
 function SiteSchema() {
   const { user } = useAuthenticatedState();
@@ -35,11 +35,13 @@ function SiteSchema() {
     hasWorkspaces,
     workspaceSites
   );
-  const [isEditing, setIsEditing] = useState(false);
+
   const [searchParams, setSearchParams] = useSearchParams();
-  const editor = searchParams.get('editor');
+  const editor = searchParams.get('jsonEditor');
+  const editing = searchParams.get('editing');
   const { siteSchema } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
+  const [isEditing, setIsEditing] = useState(editing === 'true');
 
   useEffect(() => {
     if (!siteId) {
@@ -132,9 +134,14 @@ function SiteSchema() {
     }
   };
   const closeEditor = () => {
-    searchParams.delete('editor');
+    searchParams.delete('jsonEditor');
+    searchParams.delete('editing');
     setSearchParams(searchParams);
   };
+
+  useEffect(() => {
+    setIsEditing(editing === 'true')
+  }, [editing])
 
   return (
     <>
@@ -192,14 +199,16 @@ function SiteSchema() {
         ) : (
           <div className="p-4">
             <SchemaMenu
-              onEditClick={() => setIsEditing(true)}
+              onEditClick={() => {
+                searchParams.set('editing', 'true');
+                setSearchParams(searchParams);
+              }}
               isEditing={isEditing}
             />
             <SchemaPage
               isEditing={isEditing}
-              setIsEditing={setIsEditing}
               siteId={siteId}
-              schemaType='site'
+              schemaType="site"
               initialSchemaValue={siteSchema}
             />
           </div>

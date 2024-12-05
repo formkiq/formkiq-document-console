@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useSelector } from 'react-redux';
+import {useEffect, useState} from 'react';
+import {Helmet} from 'react-helmet-async';
+import {useSelector} from 'react-redux';
 import {
   NavLink,
   useLocation,
@@ -8,33 +8,33 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { Mode } from 'vanilla-jsoneditor';
-import { Close, Save, Spinner, Trash } from '../../Components/Icons/icons';
+import {Mode} from 'vanilla-jsoneditor';
+import {Close, Save, Spinner, Trash} from '../../Components/Icons/icons';
 import SchemaMenu from '../../Components/Schemas/SchemaMenu';
-import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
-import { useAuthenticatedState } from '../../Store/reducers/auth';
-import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
-import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import {JSONEditorReact} from '../../Components/TextEditors/JsonEditor';
+import {useAuthenticatedState} from '../../Store/reducers/auth';
+import {openDialog as openConfirmationDialog} from '../../Store/reducers/globalConfirmControls';
+import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
 import {
   SchemasState,
   fetchClassificationSchema,
   setClassificationSchema,
 } from '../../Store/reducers/schemas';
-import { useAppDispatch } from '../../Store/store';
-import { DocumentsService } from '../../helpers/services/documentsService';
+import {useAppDispatch} from '../../Store/store';
+import {DocumentsService} from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import { Schema as SchemaType } from '../../helpers/types/schemas';
+import {Schema as SchemaType} from '../../helpers/types/schemas';
 import SchemaPage from "../../Components/Schemas/SchemaPage";
 
 function Classification() {
-  const { user } = useAuthenticatedState();
-  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
+  const {user} = useAuthenticatedState();
+  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const { siteId } = getCurrentSiteInfo(
+  const {siteId} = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -42,19 +42,21 @@ function Classification() {
     hasWorkspaces,
     workspaceSites
   );
-  const [isEditing, setIsEditing] = useState(false);
-  const { classificationId } = useParams();
+  const {classificationId} = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const editor = searchParams.get('editor');
-  const { classificationSchema } = useSelector(SchemasState);
+  const editor = searchParams.get('jsonEditor');
+  const editing = searchParams.get('editing');
+  const {classificationSchema} = useSelector(SchemasState);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(editing === 'true');
+
 
   useEffect(() => {
     if (!classificationId) {
       return;
     }
-    dispatch(fetchClassificationSchema({ siteId, classificationId }));
+    dispatch(fetchClassificationSchema({siteId, classificationId}));
   }, []);
 
   // JSON editor
@@ -170,9 +172,14 @@ function Classification() {
     }
   };
   const closeEditor = () => {
-    searchParams.delete('editor');
+    searchParams.delete('jsonEditor');
+    searchParams.delete('editing');
     setSearchParams(searchParams);
   };
+
+  useEffect(() => {
+    setIsEditing(editing === 'true')
+  }, [editing])
 
   return (
     <>
@@ -197,7 +204,7 @@ function Classification() {
                 >
                   Close JSON Editor
                   <div className="w-4 h-4">
-                    <Close />
+                    <Close/>
                   </div>
                 </button>
                 <NavLink
@@ -214,7 +221,7 @@ function Classification() {
                   className="h-7 w-7 text-neutral-900 hover:text-primary-500"
                   title="Save"
                 >
-                  <Save />
+                  <Save/>
                 </button>
                 <button
                   className="h-6 text-neutral-900 hover:text-primary-500"
@@ -222,7 +229,7 @@ function Classification() {
                   type="button"
                   onClick={onDeleteClick}
                 >
-                  <Trash />
+                  <Trash/>
                 </button>
               </div>
             </div>
@@ -239,12 +246,14 @@ function Classification() {
           <div className="p-4 ">
             <SchemaMenu
               deleteSchema={onDeleteClick}
-              onEditClick={() => setIsEditing(true)}
+              onEditClick={() => {
+                searchParams.set('editing', 'true');
+                setSearchParams(searchParams);
+              }}
               isEditing={isEditing}
             />
             <SchemaPage
               isEditing={isEditing}
-              setIsEditing={setIsEditing}
               siteId={siteId}
               schemaType="classification"
               initialSchemaValue={classificationSchema}
@@ -253,7 +262,7 @@ function Classification() {
           </div>
         )
       ) : (
-        <Spinner />
+        <Spinner/>
       )}
     </>
   );

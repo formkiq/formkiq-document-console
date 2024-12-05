@@ -24,7 +24,7 @@ function SchemaMenu({
             <>
               <ButtonPrimary onClick={onEditClick}>Edit Schema</ButtonPrimary>
               <NavLink
-                to="?editor=true"
+                to="?editing=true&jsonEditor=true"
                 className="h-8 text-neutral-900 bg-neutral-200 hover:bg-neutral-300 rounded-md p-2 flex items-center gap-2 mr-2 whitespace-nowrap font-bold text-sm"
               >
                 Open in JSON Editor
