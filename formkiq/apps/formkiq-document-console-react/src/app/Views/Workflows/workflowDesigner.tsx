@@ -196,14 +196,6 @@ export function WorkflowDesigner() {
     [sourceId, sourceHandleId]
   );
 
-  useEffect(() => {
-    //console.log(edges, 'edges');
-  }, [edges]);
-
-  useEffect(() => {
-    //console.log(nodes, 'nodes');
-  }, [nodes]);
-
   const saveWorkflow = () => {
     dispatch(updateWorkflowSteps({ siteId, workflowId }));
   };
@@ -229,20 +221,54 @@ export function WorkflowDesigner() {
   // console.log(workflow, 'workflow')
 
   const changeWorkflowInfo = () => {
+    if (!workflowId) return;
     if (workflowInfo.name === '' || workflowInfo.description === '') {
       dispatch(
         openNotificationDialog({ dialogTitle: 'This field cannot be empty' })
       );
       return;
     }
-    dispatch(
-      setWorkflow({
-        ...workflow,
-        name: workflowInfo.name,
-        description: workflowInfo.description,
-      })
-    );
-    saveWorkflow();
+
+    DocumentsService.getWorkflow(workflowId, siteId).then((res) => {
+      if (res) {
+        const updatedWorkflow = {
+          ...res,
+          name: workflowInfo.name,
+          description: workflowInfo.description,
+        };
+        DocumentsService.putWorkflow(workflowId, updatedWorkflow, siteId).then(
+          (res) => {
+            if (res.status === 200) {
+              dispatch(
+                openNotificationDialog({
+                  dialogTitle: 'Workflow Info Updated Successfully',
+                })
+              );
+              dispatch(
+                setWorkflow({
+                  ...workflow,
+                  name: workflowInfo.name,
+                  description: workflowInfo.description,
+                })
+              );
+            } else {
+              dispatch(
+                openNotificationDialog({
+                  dialogTitle: 'Error Updating Workflow Info',
+                })
+              );
+            }
+          }
+        );
+      } else {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Error Updating Workflow Info',
+          })
+        );
+      }
+    });
+
     setEditWorkflowInfo(false);
   };
 
