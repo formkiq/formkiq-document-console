@@ -4,6 +4,7 @@ import {
   MarkerType,
   applyEdgeChanges,
   applyNodeChanges,
+  NodeChange,
 } from 'reactflow';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import { DocumentsService } from '../../helpers/services/documentsService';
@@ -18,6 +19,14 @@ import {
 } from '../../helpers/types/workflows';
 import { RootState } from '../store';
 
+export enum WorkflowChangesState {
+  INITIAL = 'initial',
+  UNSAVED = 'unsaved',
+  SAVED = 'saved',
+  SAVING = 'saving',
+  ERROR = 'error',
+}
+
 export interface WorkflowsState {
   nodes: NodeType[];
   edges: Edge[];
@@ -28,6 +37,7 @@ export interface WorkflowsState {
   currentSearchPage: number;
   isLastSearchPageLoaded: boolean;
   isLoadingMore: boolean;
+  workflowChangesState: WorkflowChangesState;
 }
 
 const defaultState: WorkflowsState = {
@@ -45,6 +55,7 @@ const defaultState: WorkflowsState = {
   currentSearchPage: 1,
   isLastSearchPageLoaded: false,
   isLoadingMore: false,
+  workflowChangesState: WorkflowChangesState.INITIAL,
 };
 
 function workflowToNodes(workflow: Workflow) {
@@ -85,7 +96,6 @@ function workflowToNodes(workflow: Workflow) {
       });
     }
   }
-  // console.log(nodes, 'nodes workflowToNodes')
   return { nodes, edges };
 }
 
@@ -157,6 +167,9 @@ export const fetchWorkflow = createAsyncThunk(
         const { nodes, edges } = workflowToNodes(response);
         thunkAPI.dispatch(setNodes(nodes));
         thunkAPI.dispatch(setEdges(edges));
+        thunkAPI.dispatch(
+          setWorkflowChangesState(WorkflowChangesState.INITIAL)
+        );
       }
     );
   }
@@ -168,6 +181,7 @@ export const updateWorkflowSteps = createAsyncThunk(
     const { siteId, workflowId } = data;
     const { workflowsState } = thunkAPI.getState() as RootState;
     const { nodes, edges, workflow } = workflowsState;
+    thunkAPI.dispatch(setWorkflowChangesState(WorkflowChangesState.SAVING));
     const newWorkflow: Workflow = nodesToWorkflow(nodes, edges, workflow);
     await DocumentsService.putWorkflow(workflowId, newWorkflow, siteId).then(
       (response) => {
@@ -177,17 +191,24 @@ export const updateWorkflowSteps = createAsyncThunk(
               dialogTitle: 'Workflow was saved successfully',
             })
           );
+          thunkAPI.dispatch(
+            setWorkflowChangesState(WorkflowChangesState.SAVED)
+          );
+        } else if (response?.errors) {
+          thunkAPI.dispatch(
+            setWorkflowChangesState(WorkflowChangesState.ERROR)
+          );
+          const errors = response.errors
+            .map((error: any) => error.error)
+            .join('\n');
+          thunkAPI.dispatch(openNotificationDialog({ dialogTitle: errors }));
         } else {
-          if (response?.errors) {
-            const errors = response.errors
-              .map((error: any) => error.error)
-              .join('\n');
-            thunkAPI.dispatch(openNotificationDialog({ dialogTitle: errors }));
-          } else {
-            thunkAPI.dispatch(
-              openNotificationDialog({ dialogTitle: 'Error saving workflow' })
-            );
-          }
+          thunkAPI.dispatch(
+            setWorkflowChangesState(WorkflowChangesState.ERROR)
+          );
+          thunkAPI.dispatch(
+            openNotificationDialog({ dialogTitle: 'Error saving workflow' })
+          );
         }
         thunkAPI.dispatch(setWorkflow(newWorkflow));
       }
@@ -259,6 +280,7 @@ export const workflowsSlice = createSlice({
     addNode: (state, action) => {
       const node = action.payload;
       state.nodes.push(node);
+      state.workflowChangesState = WorkflowChangesState.UNSAVED;
     },
     removeNode: (state, action) => {
       const id = action.payload;
@@ -270,20 +292,38 @@ export const workflowsSlice = createSlice({
       state.edges = state.edges.filter(
         (edge) => !connectedEdges.includes(edge)
       );
+      state.workflowChangesState = WorkflowChangesState.UNSAVED;
     },
     addEdge: (state, action) => {
       const edge: Edge = action.payload;
       state.edges.push(edge);
+      state.workflowChangesState = WorkflowChangesState.UNSAVED;
     },
     removeEdge: (state, action) => {
       const id = action.payload;
       state.edges = state.edges.filter((edge) => edge.id !== id);
+      state.workflowChangesState = WorkflowChangesState.UNSAVED;
     },
     onNodesChange: (state, action) => {
       state.nodes = applyNodeChanges(action.payload, state.nodes);
+      const changesToIgnore = ['dimensions', 'position', 'select'];
+      const hasSignificantChanges = action.payload.some(
+        (change: NodeChange) => !changesToIgnore.includes(change.type)
+      );
+
+      if (hasSignificantChanges) {
+        state.workflowChangesState = WorkflowChangesState.UNSAVED;
+      }
     },
     onEdgesChange: (state, action) => {
       state.edges = applyEdgeChanges(action.payload, state.edges);
+      const changesToIgnore = ['select'];
+      const hasSignificantChanges = action.payload.some(
+        (change: NodeChange) => !changesToIgnore.includes(change.type)
+      );
+      if (hasSignificantChanges) {
+        state.workflowChangesState = WorkflowChangesState.UNSAVED;
+      }
     },
     setNodes: (state, action) => {
       state.nodes = action.payload;
@@ -309,6 +349,7 @@ export const workflowsSlice = createSlice({
           (edge) => !connectedEdges.includes(edge)
         );
       }
+      state.workflowChangesState = WorkflowChangesState.UNSAVED;
     },
     setWorkflow: (state, action) => {
       state.workflow = action.payload;
@@ -335,6 +376,9 @@ export const workflowsSlice = createSlice({
       }
       state.workflowsLoadingStatus = RequestStatus.fulfilled;
     },
+    setWorkflowChangesState: (state, action) => {
+      state.workflowChangesState = action.payload;
+    },
   },
 });
 
@@ -351,6 +395,7 @@ export const {
   setWorkflow,
   setWorkflowsLoadingStatusPending,
   setWorkflows,
+  setWorkflowChangesState,
 } = workflowsSlice.actions;
 
 export const WorkflowsState = (state: RootState) => state.workflowsState;
