@@ -6,7 +6,10 @@ import TextFileEditor from '../../Components/DocumentsAndFolders/TextFileEditor/
 import { Spinner } from '../../Components/Icons/icons';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
-import {setCurrentDocument, setCurrentDocumentPath} from '../../Store/reducers/data';
+import {
+  setCurrentDocument,
+  setCurrentDocumentPath,
+} from '../../Store/reducers/data';
 import { useAppDispatch } from '../../Store/store';
 import {
   InlineEditableContentTypes,
@@ -127,6 +130,47 @@ export function DocumentView() {
     return result;
   };
 
+  const handleTextContent = (content: string) => {
+    try {
+      // First try to decode base64 if it's base64 encoded
+      let decodedString;
+      try {
+        // Use TextDecoder to handle UTF-8 encoded base64 content
+        const decoded = atob(content);
+        const bytes = new Uint8Array(decoded.length);
+        for (let i = 0; i < decoded.length; i++) {
+          bytes[i] = decoded.charCodeAt(i);
+        }
+        decodedString = new TextDecoder('utf-8').decode(bytes);
+      } catch (e) {
+        // If not base64 or decoding fails, use the original content
+        decodedString = content;
+      }
+
+      // Try to decode HTML entities
+      const parser = new DOMParser();
+      let decodedContent =
+        parser.parseFromString(
+          `<!doctype html><body>${decodedString}`,
+          'text/html'
+        ).body.textContent || '';
+
+      // Remove BOM if present
+      decodedContent = decodedContent.replace(/^\uFEFF/, '');
+
+      // Handle specific character replacements
+      decodedContent = decodedContent
+        .replace(/Ã„/g, 'Ä')
+        .replace(/â€ž/g, '"')
+        .replace(/â€œ/g, '"');
+
+      return decodedContent;
+    } catch (error) {
+      console.error('Error processing text content:', error);
+      return content;
+    }
+  };
+
   useEffect(() => {
     if (id) {
       let ooConfig: any;
@@ -181,13 +225,39 @@ export function DocumentView() {
             if (versionKey && versionKey.length) {
               viewVersionKey = versionKey;
             }
-            DocumentsService.getDocumentUrl(
-              id,
-              currentSiteId,
-              viewVersionKey
-            ).then((urlResponse: any) => {
-              setDocumentContent(urlResponse.url);
-            });
+            // Check if it's a text file
+            const isTextFile = response.contentType.startsWith('text/');
+
+            if (isTextFile) {
+              DocumentsService.getDocumentContent(
+                currentSiteId,
+                id,
+                viewVersionKey,
+                true
+              ).then((contentResponse: any) => {
+                console.log('Raw text content:', contentResponse.content);
+
+                const processedContent = handleTextContent(
+                  contentResponse.content
+                );
+
+                // Create a Blob with UTF-8 encoding
+                const blob = new Blob([processedContent], {
+                  type: `${response.contentType};charset=utf-8`,
+                });
+                const url = URL.createObjectURL(blob);
+                setBlobUrl(url);
+                setDocumentContent(url);
+              });
+            } else {
+              DocumentsService.getDocumentUrl(
+                id,
+                currentSiteId,
+                viewVersionKey
+              ).then((urlResponse: any) => {
+                setDocumentContent(urlResponse.url);
+              });
+            }
           } else if (
             (response as IDocument).deepLinkPath &&
             (response as IDocument).deepLinkPath.length
@@ -303,6 +373,17 @@ export function DocumentView() {
   const [documentContent, setDocumentContent]: [string | null, any] =
     useState('');
   const [documentCsvContent, setDocumentCsvContent] = useState<CSVRow[]>([]);
+
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  // Cleanup function for blob URLs
+  useEffect(() => {
+    return () => {
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [blobUrl]);
 
   const DocumentViewer = () => {
     //return (<></>)
