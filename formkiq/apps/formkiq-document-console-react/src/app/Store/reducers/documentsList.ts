@@ -826,6 +826,8 @@ export const documentsListSlice = createSlice({
       return {
         ...state,
         documents: [] as any[],
+        folders: [] as any[],
+        nextToken: null,
       };
     },
     updateDocumentsList: (state, action) => {
