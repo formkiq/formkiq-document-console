@@ -8,10 +8,15 @@ import {
 export const isAttributeValid = (attribute: any) => {
   if (attribute.attributeKey.length === 0) return false;
   if (attribute.sourceType.length === 0) return false;
-  if (attribute.labelMatchingType.length === 0) return false;
   if (
+    attribute.sourceType !== 'MANUAL' &&
+    attribute.labelMatchingType.length === 0
+  )
+    return false;
+  if (
+    attribute.sourceType !== 'MANUAL' &&
     attribute.labelTexts.length === 0 &&
-    ( !attribute.labelText||attribute.labelText.length === 0 )
+    (!attribute.labelText || attribute.labelText.length === 0)
   )
     return false;
   return true;
@@ -26,12 +31,16 @@ export const getAttributeErrorMessages = (attribute: any) => {
   if (attribute.sourceType.length === 0) {
     errorMessages.push('Please select a source type.');
   }
-  if (attribute.labelMatchingType.length === 0) {
+  if (
+    attribute.sourceType !== 'MANUAL' &&
+    attribute.labelMatchingType.length === 0
+  ) {
     errorMessages.push('Please select a label matching type.');
   }
   if (
+    attribute.sourceType !== 'MANUAL' &&
     attribute.labelTexts.length === 0 &&
-    ( !attribute.labelText||attribute.labelText.length === 0 )
+    (!attribute.labelText || attribute.labelText.length === 0)
   ) {
     errorMessages.push('Please add a label text.');
   }
@@ -55,7 +64,7 @@ export const createNewAttribute = (attribute: any) => {
   }
   if (attribute.labelTexts?.length) {
     newAttribute.labelTexts = attribute.labelTexts;
-  } else if (attribute.labelText.length > 0) {
+  } else if (attribute.labelText?.length > 0) {
     newAttribute.labelTexts = [attribute.labelText];
   }
   return newAttribute;

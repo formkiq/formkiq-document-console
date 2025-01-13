@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { DocumentsService } from '../../helpers/services/documentsService';
+import { Mapping, RequestStatus } from '../../helpers/types/mappings';
 import { RootState } from '../store';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
-import { Mapping, RequestStatus } from '../../helpers/types/mappings';
 
 interface MappingsState {
   mappings: Mapping[];

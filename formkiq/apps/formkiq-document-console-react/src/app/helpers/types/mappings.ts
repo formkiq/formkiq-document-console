@@ -4,13 +4,20 @@ export enum RequestStatus {
   rejected = 'rejected',
 }
 
-export type MappingAttributeSourceType = 'CONTENT' | 'CONTENT_KEY_VALUE' | 'METADATA';
+export type MappingAttributeSourceType =
+  | 'CONTENT'
+  | 'CONTENT_KEY_VALUE'
+  | 'METADATA'
+  | 'MANUAL';
 export type MappingAttributeLabelMatchingType =
   | 'FUZZY'
   | 'EXACT'
   | 'BEGINS_WITH'
   | 'CONTAINS';
-export type MappingAttributeMetadataField = 'USERNAME' | 'PATH' | 'CONTENT_TYPE';
+export type MappingAttributeMetadataField =
+  | 'USERNAME'
+  | 'PATH'
+  | 'CONTENT_TYPE';
 
 export interface MappingAttribute {
   attributeKey: string;
