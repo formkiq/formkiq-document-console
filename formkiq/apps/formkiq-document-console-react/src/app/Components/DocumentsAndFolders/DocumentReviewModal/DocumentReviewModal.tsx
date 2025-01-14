@@ -62,7 +62,13 @@ export default function DocumentReviewModal({
     if (value) {
       DocumentsService.getWorkflowsInDocument(siteId, value.documentId).then(
         (workflowsResponse) => {
-          setDocumentWorkflows(workflowsResponse.workflows);
+          // Filter out completed workflows
+          const filteredWorkflows = workflowsResponse.workflows.filter(
+            (workflow: any) => {
+              return workflow.status !== 'COMPLETE';
+            }
+          );
+          setDocumentWorkflows(filteredWorkflows);
         }
       );
     }
@@ -75,6 +81,7 @@ export default function DocumentReviewModal({
   const selectWorkflow = (event: React.MouseEvent, workflowId: string) => {
     event.preventDefault();
     event.stopPropagation();
+    if (documentWorkflows && documentWorkflows.length === 1) return; // Don't allow deselection if there's only one workflow
     setSelectedWorkflowId(
       workflowId === selectedWorkflowId ? null : workflowId
     );
@@ -248,29 +255,31 @@ export default function DocumentReviewModal({
                       onChange={onCommentsChange}
                     />
                   </div>
-                  <div className="w-full flex justify-center mt-4 h-8 gap-2">
-                    <ButtonPrimary
-                      ref={approveButtonRef}
-                      className="flex justify-center items-center gap-2"
-                      onClick={() => reviewDocument('APPROVE')}
-                      style={{ background: '#22c55e' }}
-                    >
-                      <div className="w-5 h-5">
-                        <Checkmark />
-                      </div>
-                      APPROVE
-                    </ButtonPrimary>
-                    <ButtonPrimary
-                      className="flex justify-center items-center gap-2"
-                      onClick={() => reviewDocument('REJECT')}
-                      style={{ background: '#ef4444' }}
-                    >
-                      <div className="w-5 h-5">
-                        <Close />
-                      </div>
-                      REJECT
-                    </ButtonPrimary>
-                  </div>
+                  {selectedWorkflowId && (
+                    <div className="w-full flex justify-center mt-4 h-8 gap-2">
+                      <ButtonPrimary
+                        ref={approveButtonRef}
+                        className="flex justify-center items-center gap-2"
+                        onClick={() => reviewDocument('APPROVE')}
+                        style={{ background: '#22c55e' }}
+                      >
+                        <div className="w-5 h-5">
+                          <Checkmark />
+                        </div>
+                        APPROVE
+                      </ButtonPrimary>
+                      <ButtonPrimary
+                        className="flex justify-center items-center gap-2"
+                        onClick={() => reviewDocument('REJECT')}
+                        style={{ background: '#ef4444' }}
+                      >
+                        <div className="w-5 h-5">
+                          <Close />
+                        </div>
+                        REJECT
+                      </ButtonPrimary>
+                    </div>
+                  )}
                 </div>
               </Dialog.Panel>
             </Transition.Child>
