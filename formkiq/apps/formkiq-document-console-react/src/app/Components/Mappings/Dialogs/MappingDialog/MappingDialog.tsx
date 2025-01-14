@@ -41,21 +41,18 @@ function MappingDialog({
     attributeKey: string;
     defaultValue: string;
     defaultValues: string[];
-    sourceType: MappingAttributeSourceType | string;
+    sourceType?: MappingAttributeSourceType;
     labelText: string;
     labelTexts: string[];
-    labelMatchingType: MappingAttributeLabelMatchingType | string;
-    metadataField: MappingAttributeMetadataField | string;
+    labelMatchingType?: MappingAttributeLabelMatchingType;
+    metadataField?: MappingAttributeMetadataField;
     validationRegex: string;
   } = {
     attributeKey: '',
     defaultValue: '',
     defaultValues: [],
-    sourceType: '',
     labelText: '',
     labelTexts: [],
-    labelMatchingType: '',
-    metadataField: '',
     validationRegex: '',
   };
 

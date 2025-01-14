@@ -21,18 +21,20 @@ type Attribute = {
   attributeKey: string;
   defaultValue: string;
   defaultValues: string[];
-  sourceType: MappingAttributeSourceType;
+  sourceType?: MappingAttributeSourceType;
   labelText: string;
   labelTexts: string[];
-  labelMatchingType: MappingAttributeLabelMatchingType;
-  metadataField: MappingAttributeMetadataField;
+  labelMatchingType?: MappingAttributeLabelMatchingType;
+  metadataField?: MappingAttributeMetadataField;
   validationRegex: string;
 };
 
 type AttributeFormProps = {
   siteId: string;
   attribute: Attribute;
-  setAttribute: (attribute: Attribute) => void;
+  setAttribute: (
+    attributeOrUpdater: Attribute | ((prev: Attribute) => Attribute)
+  ) => void;
   addDefaultValue: () => void;
   addLabelText: () => void;
 };
@@ -278,13 +280,19 @@ function AttributeForm({
           <RadioListbox
             values={['CONTENT', 'METADATA', 'CONTENT_KEY_VALUE', 'MANUAL']}
             titles={['Content', 'Metadata', 'Content Key Value', 'Manual']}
-            selectedValue={attribute.sourceType}
+            selectedValue={attribute.sourceType as string}
             setSelectedValue={(sourceType) =>
               setAttribute((prev: Attribute) => ({
                 ...prev,
                 sourceType: sourceType as MappingAttributeSourceType,
                 ...(sourceType === 'MANUAL'
-                  ? { labelMatchingType: 'EXACT', labelTexts: [] }
+                  ? {
+                      labelMatchingType: 'EXACT',
+                      labelText: '',
+                      labelTexts: [],
+                      defaultValue: '',
+                      defaultValues: [],
+                    }
                   : {}),
               }))
             }
@@ -298,7 +306,7 @@ function AttributeForm({
               <RadioListbox
                 values={['USERNAME', 'PATH', 'CONTENT_TYPE']}
                 titles={['Username', 'Path', 'Content Type']}
-                selectedValue={attribute.metadataField}
+                selectedValue={attribute.metadataField as string}
                 setSelectedValue={(metadataField) =>
                   setAttribute((prev: Attribute) => ({
                     ...prev,
@@ -323,7 +331,7 @@ function AttributeForm({
                 <RadioListbox
                   values={['FUZZY', 'EXACT', 'BEGINS_WITH', 'CONTAINS']}
                   titles={['Fuzzy', 'Exact', 'Begins With', 'Contains']}
-                  selectedValue={attribute.labelMatchingType}
+                  selectedValue={attribute.labelMatchingType as string}
                   setSelectedValue={(labelMatchingType) =>
                     setAttribute((prev: Attribute) => ({
                       ...prev,

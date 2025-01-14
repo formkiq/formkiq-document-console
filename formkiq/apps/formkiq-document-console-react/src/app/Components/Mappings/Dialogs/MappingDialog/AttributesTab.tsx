@@ -15,11 +15,11 @@ type AttributesTabProps = {
     attributeKey: string;
     defaultValue: string;
     defaultValues: string[];
-    sourceType: MappingAttributeSourceType | string;
+    sourceType?: MappingAttributeSourceType;
     labelText: string;
     labelTexts: string[];
-    labelMatchingType: MappingAttributeLabelMatchingType | string;
-    metadataField: MappingAttributeMetadataField | string;
+    labelMatchingType?: MappingAttributeLabelMatchingType;
+    metadataField?: MappingAttributeMetadataField;
     validationRegex: string;
   };
   setAttribute: (attribute: any) => void;
