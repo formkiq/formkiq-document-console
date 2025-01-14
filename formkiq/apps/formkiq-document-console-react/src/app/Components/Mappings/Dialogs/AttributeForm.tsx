@@ -290,8 +290,6 @@ function AttributeForm({
                       labelMatchingType: 'EXACT',
                       labelText: '',
                       labelTexts: [],
-                      defaultValue: '',
-                      defaultValues: [],
                     }
                   : {}),
               }))
