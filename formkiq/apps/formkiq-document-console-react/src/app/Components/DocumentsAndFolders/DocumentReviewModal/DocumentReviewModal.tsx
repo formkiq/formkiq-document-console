@@ -39,6 +39,9 @@ export default function DocumentReviewModal({
 
   const closeDialog = () => {
     onClose();
+    setComments('');
+    setDocumentWorkflows(null);
+    setSelectedWorkflowId(null);
   };
 
   const approveButtonRef = useRef<HTMLButtonElement>(null);
