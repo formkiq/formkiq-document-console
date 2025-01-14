@@ -139,6 +139,18 @@ function AttributeForm({
   // **Determine if the current sourceType is MANUAL**
   const isManual = attribute.sourceType === 'MANUAL';
 
+  useEffect(() => {
+    if (dataType === 'KEY_ONLY' && attribute.sourceType === 'MANUAL') {
+      setAttribute((prev: Attribute) => ({
+        ...prev,
+        sourceType: 'CONTENT', // Default to CONTENT when MANUAL is disabled
+        labelMatchingType: undefined,
+        labelText: '',
+        labelTexts: [],
+      }));
+    }
+  }, [dataType, attribute.sourceType]);
+
   return (
     <>
       {/* Attribute selection and default value input */}
@@ -278,8 +290,16 @@ function AttributeForm({
         <div className="w-1/2 h-[60px] flex flex-col">
           <label className="text-xs font-bold">SOURCE TYPE</label>
           <RadioListbox
-            values={['CONTENT', 'METADATA', 'CONTENT_KEY_VALUE', 'MANUAL']}
-            titles={['Content', 'Metadata', 'Content Key Value', 'Manual']}
+            values={
+              dataType === 'KEY_ONLY'
+                ? ['CONTENT', 'METADATA', 'CONTENT_KEY_VALUE'] // do not show MANUAL for KEY_ONLY. Check if back-end updates and will allow this.
+                : ['CONTENT', 'METADATA', 'CONTENT_KEY_VALUE', 'MANUAL']
+            }
+            titles={
+              dataType === 'KEY_ONLY'
+                ? ['Content', 'Metadata', 'Content Key Value'] // do not show MANUAL for KEY_ONLY. Check if back-end updates and will allow this.
+                : ['Content', 'Metadata', 'Content Key Value', 'Manual']
+            }
             selectedValue={attribute.sourceType as string}
             setSelectedValue={(sourceType) =>
               setAttribute((prev: Attribute) => ({

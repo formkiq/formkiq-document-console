@@ -33,7 +33,7 @@ export const getAttributeErrorMessages = (attribute: any) => {
   }
   if (
     attribute.sourceType !== 'MANUAL' &&
-    attribute.labelMatchingType.length === 0
+    (!attribute.labelMatchingType || attribute.labelMatchingType.length === 0)
   ) {
     errorMessages.push('Please select a label matching type.');
   }
