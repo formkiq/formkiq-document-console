@@ -1465,6 +1465,32 @@ export const getNigosApiItem = {
   allowsLimit: true,
   hasPagingTokens: true,
   license: 'Pro|Enterprise',
+};
+
+export const postTaskApiItem = {
+  method: 'POST',
+  path: '/cases/ CASE_ID /tasks',
+  description: "Add new task",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: "{\"task\":{\"name\":\"New Task\",\"description\":\"New Task Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}}",
+  license: 'Pro|Enterprise',
+}
+
+export const postNigoApiItem = {
+  method: 'POST',
+  path: '/cases/ CASE_ID /nigos',
+  description: "Add new NIGO",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: "{\"nigo\":{\"name\":\"New NIGO\",\"description\":\"New Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}}",
+  license: 'Pro|Enterprise',
 }
 
 export const getRulesetsApiItem = {

@@ -154,7 +154,10 @@ import {
   getTaskDocumentsApiItem,
   deleteTaskDocumentApiItem,
   getNigoApiItem,
-  deleteNigoDocumentApiItem, getNigoDocumentsApiItem, deleteNigoApiItem, patchNigoApiItem,
+  deleteNigoDocumentApiItem,
+  getNigoDocumentsApiItem,
+  deleteNigoApiItem,
+  patchNigoApiItem,
   getMappingsApiItem,
   postMappingApiItem,
   deleteMappingApiItem,
@@ -171,7 +174,10 @@ import {
   postOnlyofficeNewApiItem,
   postOnlyofficeSaveApiItem,
   postEsignatureDocusignEnvelopeApiItem,
-  postEsignatureDocusignRecipientViewRequestApiItem, postEsignatureDocusignEventApiItem,
+  postEsignatureDocusignRecipientViewRequestApiItem,
+  postEsignatureDocusignEventApiItem,
+  postTaskApiItem,
+  postNigoApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -729,6 +735,8 @@ export function ApiExplorer() {
                 <ApiItem apiItem={deleteNigoDocumentApiItem} sites={sites} />
                 <ApiItem apiItem={getTasksApiItem} sites={sites} />
                 <ApiItem apiItem={getNigosApiItem} sites={sites} />
+                <ApiItem apiItem={postTaskApiItem} sites={sites} />
+                <ApiItem apiItem={postNigoApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>
