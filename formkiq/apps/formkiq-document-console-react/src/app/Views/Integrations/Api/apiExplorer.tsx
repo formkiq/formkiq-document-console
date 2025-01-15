@@ -178,6 +178,9 @@ import {
   postEsignatureDocusignEventApiItem,
   postTaskApiItem,
   postNigoApiItem,
+  getOpensearchIndexApiItem,
+  putOpensearchIndexApiItem,
+  deleteOpensearchIndexApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -529,6 +532,16 @@ export function ApiExplorer() {
                 <ApiItem apiItem={getSiteGroupApiItem} sites={sites}/>
                 <ApiItem apiItem={deleteSiteGroupPermissionsApiItem} sites={sites}/>
                 <ApiItem apiItem={putSiteGroupPermissionsApiItem} sites={sites}/>
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="OpenSearch Index Management">
+            <div className="ml-2 mb-4 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={getOpensearchIndexApiItem} sites={sites} />
+                <ApiItem apiItem={putOpensearchIndexApiItem} sites={sites} />
+                <ApiItem apiItem={deleteOpensearchIndexApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>

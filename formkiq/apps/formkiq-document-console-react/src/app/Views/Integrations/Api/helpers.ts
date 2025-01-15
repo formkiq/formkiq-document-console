@@ -2261,3 +2261,35 @@ export const postEsignatureDocusignEventApiItem = {
   requiresSite: true,
   license: 'Core',
 };
+
+export const getOpensearchIndexApiItem = {
+  method: 'GET',
+  path: '/sites/ SITE_ID /opensearch/index',
+  description: 'Get site(s) OpenSearch index settings',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+}
+
+export const putOpensearchIndexApiItem = {
+  method: 'PUT',
+  path: '/sites/ SITE_ID /opensearch/index',
+  description: 'Set site(s) OpenSearch index settings',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"indexSettings":{"numberOfReplicas":"1","numberOfShards":"1"}}',
+  license: 'Core',
+}
+
+export const deleteOpensearchIndexApiItem = {
+  method: 'DELETE',
+  path: '/sites/ SITE_ID /opensearch/index',
+  description: 'Deletes site(s) OpenSearch index',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+}
