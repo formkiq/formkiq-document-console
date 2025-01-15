@@ -158,6 +158,11 @@ import {
   getSiteGroupApiItem,
   putSiteGroupPermissionsApiItem,
   deleteSiteGroupPermissionsApiItem,
+  postOnlyofficeEditApiItem,
+  postOnlyofficeNewApiItem,
+  postOnlyofficeSaveApiItem,
+  postEsignatureDocusignEnvelopeApiItem,
+  postEsignatureDocusignRecipientViewRequestApiItem, postEsignatureDocusignEventApiItem,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -558,6 +563,26 @@ export function ApiExplorer() {
                     </div>
                   </div>
                 </ApiSegment>
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Onlyoffice">
+            <div className="ml-2 mb-4 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={postOnlyofficeEditApiItem} sites={sites} />
+                <ApiItem apiItem={postOnlyofficeNewApiItem} sites={sites} />
+                <ApiItem apiItem={postOnlyofficeSaveApiItem} sites={sites} />
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="E-Signature">
+            <div className="ml-2 mb-4 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={postEsignatureDocusignEnvelopeApiItem} sites={sites} />
+                <ApiItem apiItem={postEsignatureDocusignRecipientViewRequestApiItem} sites={sites} />
+                <ApiItem apiItem={postEsignatureDocusignEventApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>

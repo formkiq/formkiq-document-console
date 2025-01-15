@@ -223,6 +223,14 @@ function updateRequestsFromForm(
       );
     }
   }
+  if(apiItem.requiresEnvelopeID) {
+    if (getFormInput(formRef, 'envelopeID')?.validity?.valid) {
+      path = path.replace(
+        ' ENVELOPE_ID ',
+        getFormInput(formRef, 'envelopeID')?.value
+      );
+    }
+  }
 
 
   let httpRequest = apiItem.method + ' ' + path;
@@ -1007,6 +1015,26 @@ function getApiItem(
                   <input
                     aria-label="Mapping ID"
                     name="mappingID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresEnvelopeID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Envelope ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Envelope ID"
+                    name="envelopeID"
                     type="text"
                     required
                     className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600

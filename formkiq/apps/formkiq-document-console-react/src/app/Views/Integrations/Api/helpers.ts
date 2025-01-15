@@ -31,6 +31,7 @@ export interface ApiItem {
   requiresWS: boolean;
   requiresClassificationID:  boolean;
   requiresMappingID: boolean;
+  requiresEnvelopeID: boolean;
   allowsVersionKey: boolean;
   allowsDate: boolean;
   allowsLimit: boolean;
@@ -2025,3 +2026,76 @@ export const deleteSiteGroupPermissionsApiItem = {
     requiresGroupName: true,
     license: 'Core',
 };
+
+export const postOnlyofficeEditApiItem = {
+  method: 'POST',
+  path: '/onlyoffice/ DOCUMENT_ID /edit',
+  description: 'Provide ONLYOFFICE integration for editing documents',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '"string"',
+  license: 'Core',
+}
+
+export const postOnlyofficeNewApiItem = {
+  method: 'POST',
+  path: '/onlyoffice/new',
+  description: 'Provide ONLYOFFICE integration for the creation of new documents',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"extension": "DOCX"}',
+  license: 'Core',
+}
+
+export const postOnlyofficeSaveApiItem = {
+  method: 'POST',
+  path: '/onlyoffice/ DOCUMENT_ID /save',
+  description: 'Save an update document for ONLYOFFICE integration',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresSite: true,
+  license: 'Core',
+}
+
+export const postEsignatureDocusignEnvelopeApiItem = {
+  method: 'POST',
+  path: '/esignature/docusign/ DOCUMENT_ID /envelopes',
+  description: 'Create Docusign Envelope request',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"emailSubject":"string","environment":"PRODUCTION","signers":[{"name":"string","email":"string","clientUserId":"string","recipientId":"string","routingOrder":"string","suppressEmails":"string","tabs":{"signHereTabs":[{"anchorString":"string","anchorXOffset":"string","anchorYOffset":"string","anchorIgnoreIfNotPresent":"string","anchorUnits":"string","xPosition":"string","yPosition":"string","pageNumber":"string"}]}}],"inpersonSigners":[{"hostEmail":"string","hostName":"string","signerName":"string","signerEmail":"string","recipientId":"string","routingOrder":"string","suppressEmails":"string","tabs":{"signHereTabs":[{"anchorString":"string","anchorXOffset":"string","anchorYOffset":"string","anchorIgnoreIfNotPresent":"string","anchorUnits":"string","xPosition":"string","yPosition":"string","pageNumber":"string"}]}}],"notification":{"useAccountDefaults":"string","expirations":{"expireAfter":"string","expireEnabled":"string","expireWarn":"string"},"reminders":{"reminderDelay":"string","reminderEnabled":"string","reminderFrequency":"string"}}}',
+  license: 'Core',
+}
+
+export const postEsignatureDocusignRecipientViewRequestApiItem = {
+  method: 'POST',
+  path: '/esignature/docusign/ DOCUMENT_ID /envelopes/ ENVELOPE_ID /views/recipient',
+  description: 'Create Docusign Recipient View request',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresEnvelopeID: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"environment":"PRODUCTION","recipientView":{"returnUrl":"string","recipientId":"string","userName":"string","clientUserId":"string","email":"string","frameAncestors":["string"],"messageOrigins":["string"]}}',
+  license: 'Core',
+}
+
+export const postEsignatureDocusignEventApiItem = {
+  method: 'POST',
+  path: '/esignature/docusign/events',
+  description: 'Add E-signature event',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+}
