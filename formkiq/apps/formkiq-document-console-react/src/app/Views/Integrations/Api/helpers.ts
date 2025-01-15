@@ -2293,3 +2293,15 @@ export const deleteOpensearchIndexApiItem = {
   requiresSite: true,
   license: 'Core',
 }
+
+export const postReindexApiItem = {
+  method: 'POST',
+  path: '/reindex/documents/ DOCUMENT_ID ',
+  description: "The API allows for the reindexing of a document's metadata determined by the target.",
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"target":"ATTRIBUTES"}',
+  license: 'Core',
+}
