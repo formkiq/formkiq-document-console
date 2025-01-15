@@ -174,24 +174,6 @@ function updateRequestsFromForm(
     }
   }
 
-  if (apiItem.requiresCaseID) {
-    if (getFormInput(formRef, 'caseID')?.validity?.valid) {
-      path = path.replace(' CASE_ID ', getFormInput(formRef, 'caseID')?.value);
-    }
-  }
-
-  if (apiItem.requiresTaskID) {
-    if (getFormInput(formRef, 'taskID')?.validity?.valid) {
-      path = path.replace(' TASK_ID ', getFormInput(formRef, 'taskID')?.value);
-    }
-  }
-
-  if (apiItem.requiresCaseID) {
-    if (getFormInput(formRef, 'nigoID')?.validity?.valid) {
-      path = path.replace(' NIGO_ID ', getFormInput(formRef, 'nigoID')?.value);
-    }
-  }
-
   if (apiItem.requiresAttributeKey) {
     if (getFormInput(formRef, 'attributeKey')?.validity?.valid) {
       path = path.replace(
@@ -1778,69 +1760,6 @@ function getApiItem(
                     name="path"
                     type="text"
                     pattern="^[A-Za-z0-9._%!~*()\'-]*$"
-                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
-                      placeholder-gray-500 text-gray-900 rounded-t-md
-                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
-                  />
-                </div>
-              </div>
-            )}
-
-            {apiItem.requiresCaseID && (
-              <div className="md:flex md:items-center mx-4 mb-4 relative">
-                <div className="w-full md:w-1/4">
-                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    Case ID
-                  </label>
-                </div>
-                <div className="w-full md:w-3/4">
-                  <input
-                    aria-label="Case ID"
-                    name="caseID"
-                    type="text"
-                    required
-                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
-                      placeholder-gray-500 text-gray-900 rounded-t-md
-                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
-                  />
-                </div>
-              </div>
-            )}
-
-            {apiItem.requiresTaskID && (
-              <div className="md:flex md:items-center mx-4 mb-4 relative">
-                <div className="w-full md:w-1/4">
-                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    Task ID
-                  </label>
-                </div>
-                <div className="w-full md:w-3/4">
-                  <input
-                    aria-label="Task ID"
-                    name="taskID"
-                    type="text"
-                    required
-                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
-                      placeholder-gray-500 text-gray-900 rounded-t-md
-                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
-                  />
-                </div>
-              </div>
-            )}
-
-            {apiItem.requiresNigoID && (
-              <div className="md:flex md:items-center mx-4 mb-4 relative">
-                <div className="w-full md:w-1/4">
-                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    NIGO ID
-                  </label>
-                </div>
-                <div className="w-full md:w-3/4">
-                  <input
-                    aria-label="NIGO ID"
-                    name="nigoID"
-                    type="text"
-                    required
                     className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
                       placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"

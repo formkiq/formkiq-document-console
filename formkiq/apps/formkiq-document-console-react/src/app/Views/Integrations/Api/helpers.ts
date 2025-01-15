@@ -1273,7 +1273,8 @@ export const patchCaseApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue: "{\"case\":{\"insertedDate\":\"2024-04-05T17:11:31+0000\",\"name\":\"CaseName\",\"description\":\"string\",\"status\":\"NEW\",\"startDate\":\"2024-04-09T04:00:00.000Z\",\"endDate\":\"2024-04-09T04:00:00.000Z\",\"tasks\":[{\"name\":\"New Task\",\"description\":\"New Task Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}],\"nigos\":[{\"name\":\"New NIGO\",\"description\":\"New NIGO Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}]}}",
   license: 'Pro|Enterprise',
-}
+};
+
 export const deleteCaseApiItem = {
   method: 'DELETE',
   path: '/cases/ CASE_ID ',
@@ -1283,7 +1284,7 @@ export const deleteCaseApiItem = {
   requiresAuthentication: true,
   requiresCaseID: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const getCaseDocumentsApiItem = {
   method: 'GET',
@@ -1296,7 +1297,7 @@ export const getCaseDocumentsApiItem = {
   allowsLimit: true,
   hasPagingTokens: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const deleteCaseDocumentApiItem = {
   method: 'DELETE',
@@ -1308,7 +1309,7 @@ export const deleteCaseDocumentApiItem = {
   requiresCaseID: true,
   requiresDocumentID: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const getTaskApiItem = {
   method: 'GET',
@@ -1320,7 +1321,7 @@ export const getTaskApiItem = {
   requiresCaseID: true,
   requiresTaskID: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const patchTaskApiItem = {
   method: 'PATCH',
@@ -1331,9 +1332,10 @@ export const patchTaskApiItem = {
   requiresAuthentication: true,
   requiresCaseID: true,
   requiresTaskID: true,
+  requiresPostJson: true,
   defaultPostJsonValue: "{\"task\":{\"name\":\"New Task\",\"description\":\"New Task Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}}",
   license: 'Pro|Enterprise',
-}
+};
 
 export const deleteTaskApiItem = {
   method: 'DELETE',
@@ -1345,7 +1347,7 @@ export const deleteTaskApiItem = {
   requiresCaseID: true,
   requiresTaskID: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const getTaskDocumentsApiItem = {
   method: 'GET',
@@ -1359,7 +1361,7 @@ export const getTaskDocumentsApiItem = {
   allowsLimit: true,
   hasPagingTokens: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const deleteTaskDocumentApiItem = {
   method: 'DELETE',
@@ -1372,9 +1374,7 @@ export const deleteTaskDocumentApiItem = {
   requiresTaskID: true,
   requiresDocumentID: true,
   license: 'Pro|Enterprise',
-}
-
-// break
+};
 
 export const getNigoApiItem = {
   method: 'GET',
@@ -1386,7 +1386,7 @@ export const getNigoApiItem = {
   requiresCaseID: true,
   requiresTaskID: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const patchNigoApiItem = {
   method: 'PATCH',
@@ -1397,9 +1397,10 @@ export const patchNigoApiItem = {
   requiresAuthentication: true,
   requiresCaseID: true,
   requiresTaskID: true,
+  requiresPostJson: true,
   defaultPostJsonValue: "{\"nigo\":{\"name\":\"New NIGO\",\"description\":\"New Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}}",
   license: 'Pro|Enterprise',
-}
+};
 
 export const deleteNigoApiItem = {
   method: 'DELETE',
@@ -1411,7 +1412,7 @@ export const deleteNigoApiItem = {
   requiresCaseID: true,
   requiresTaskID: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const getNigoDocumentsApiItem = {
   method: 'GET',
@@ -1425,7 +1426,7 @@ export const getNigoDocumentsApiItem = {
   allowsLimit: true,
   hasPagingTokens: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const deleteNigoDocumentApiItem = {
   method: 'DELETE',
@@ -1438,7 +1439,7 @@ export const deleteNigoDocumentApiItem = {
   requiresTaskID: true,
   requiresDocumentID: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const getTasksApiItem = {
   method: 'GET',
@@ -1451,7 +1452,7 @@ export const getTasksApiItem = {
   allowsLimit: true,
   hasPagingTokens: true,
   license: 'Pro|Enterprise',
-}
+};
 
 export const getNigosApiItem = {
   method: 'GET',
@@ -2173,7 +2174,7 @@ export const postOnlyofficeEditApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue: '"string"',
   license: 'Core',
-}
+};
 
 export const postOnlyofficeNewApiItem = {
   method: 'POST',
@@ -2185,7 +2186,7 @@ export const postOnlyofficeNewApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue: '{"extension": "DOCX"}',
   license: 'Core',
-}
+};
 
 export const postOnlyofficeSaveApiItem = {
   method: 'POST',
@@ -2196,7 +2197,7 @@ export const postOnlyofficeSaveApiItem = {
   requiresDocumentID: true,
   requiresSite: true,
   license: 'Core',
-}
+};
 
 export const postEsignatureDocusignEnvelopeApiItem = {
   method: 'POST',
@@ -2209,7 +2210,7 @@ export const postEsignatureDocusignEnvelopeApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue: '{"emailSubject":"string","environment":"PRODUCTION","signers":[{"name":"string","email":"string","clientUserId":"string","recipientId":"string","routingOrder":"string","suppressEmails":"string","tabs":{"signHereTabs":[{"anchorString":"string","anchorXOffset":"string","anchorYOffset":"string","anchorIgnoreIfNotPresent":"string","anchorUnits":"string","xPosition":"string","yPosition":"string","pageNumber":"string"}]}}],"inpersonSigners":[{"hostEmail":"string","hostName":"string","signerName":"string","signerEmail":"string","recipientId":"string","routingOrder":"string","suppressEmails":"string","tabs":{"signHereTabs":[{"anchorString":"string","anchorXOffset":"string","anchorYOffset":"string","anchorIgnoreIfNotPresent":"string","anchorUnits":"string","xPosition":"string","yPosition":"string","pageNumber":"string"}]}}],"notification":{"useAccountDefaults":"string","expirations":{"expireAfter":"string","expireEnabled":"string","expireWarn":"string"},"reminders":{"reminderDelay":"string","reminderEnabled":"string","reminderFrequency":"string"}}}',
   license: 'Core',
-}
+};
 
 export const postEsignatureDocusignRecipientViewRequestApiItem = {
   method: 'POST',
@@ -2223,7 +2224,7 @@ export const postEsignatureDocusignRecipientViewRequestApiItem = {
   requiresPostJson: true,
   defaultPostJsonValue: '{"environment":"PRODUCTION","recipientView":{"returnUrl":"string","recipientId":"string","userName":"string","clientUserId":"string","email":"string","frameAncestors":["string"],"messageOrigins":["string"]}}',
   license: 'Core',
-}
+};
 
 export const postEsignatureDocusignEventApiItem = {
   method: 'POST',
@@ -2233,4 +2234,4 @@ export const postEsignatureDocusignEventApiItem = {
   requiresAuthentication: true,
   requiresSite: true,
   license: 'Core',
-}
+};
