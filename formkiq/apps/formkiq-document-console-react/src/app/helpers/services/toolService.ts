@@ -417,6 +417,25 @@ export function getCurrentSiteInfo(
           )}`;
         }
       }
+    } else if (pathname.indexOf('/integrations/webhooks') === 0) {
+      if (pathname.indexOf('/integrations/webhooks/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(34).split('/')[0]; // 34 is the length of '/integrations/webhooks/workspaces'
+        currentSiteInfo.siteDocumentsRootName = `Inbound Webhooks: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Inbound Webhooks';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/integrations/webhooks/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
     } else {
       if (hasDefaultSite) {
         currentSiteInfo.siteId = 'default';

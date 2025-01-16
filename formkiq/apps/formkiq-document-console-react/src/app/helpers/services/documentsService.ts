@@ -1301,11 +1301,15 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getApiKeys(siteId: string): Promise<any> {
+  public static async getApiKeys(
+    siteId: string,
+    limit = 20,
+    next = null
+  ): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().sitesApi.getApiKeys({ siteId });
+    return this.getFormkiqClient().sitesApi.getApiKeys({ siteId, limit, next });
   }
 
   @formkiqAPIHandler
@@ -1335,11 +1339,19 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getWebhooks(siteId: string): Promise<any> {
+  public static async getWebhooks(
+    siteId: string,
+    limit = 20,
+    next = null
+  ): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().webhooksApi.getWebhooks({ siteId });
+    return this.getFormkiqClient().webhooksApi.getWebhooks({
+      siteId,
+      limit,
+      next,
+    });
   }
 
   @formkiqAPIHandler

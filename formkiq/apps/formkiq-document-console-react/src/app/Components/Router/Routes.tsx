@@ -235,6 +235,7 @@ const RoutesMapper = () => {
         element={<ApiKeys />}
       ></Route>
       <Route path="/integrations/webhooks" element={<Webhooks />}></Route>
+      <Route path="/integrations/webhooks/workspaces/:siteId" element={<Webhooks />}></Route>
       <Route path="/admin/settings" element={<AccountSettings />}></Route>
       <Route path="/admin/api-keys" element={<ApiKeys />}></Route>
       <Route path="/admin/groups" element={<Groups />}></Route>
