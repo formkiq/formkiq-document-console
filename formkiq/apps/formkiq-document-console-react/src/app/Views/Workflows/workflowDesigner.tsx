@@ -31,8 +31,9 @@ import {
   setNodes,
   setWorkflow,
   updateWorkflowSteps,
+  WorkflowChangesState,
+  WorkflowsState,
 } from '../../Store/reducers/workflows';
-import type { RootState } from '../../Store/store';
 import { useAppDispatch } from '../../Store/store';
 import {
   getCurrentSiteInfo,
@@ -40,7 +41,7 @@ import {
 } from '../../helpers/services/toolService';
 import { NodeType } from '../../helpers/types/workflows';
 import { DocumentsService } from '../../helpers/services/documentsService';
-// import {DocumentsService} from "../../helpers/services/documentsService";
+import { useNavigationGuard } from '../../hooks/navigation-guard.hook';
 
 const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
@@ -48,15 +49,8 @@ const getNodeId = () => `node_${uuid()}`;
 const getEdgeId = () => `edge_${uuid()}`;
 
 export function WorkflowDesigner() {
-  const nodes: NodeType[] = useSelector(
-    (state: RootState) => state.workflowsState.nodes
-  );
-  const edges: Edge[] = useSelector(
-    (state: RootState) => state.workflowsState.edges
-  );
-  const workflow = useSelector(
-    (state: RootState) => state.workflowsState.workflow
-  );
+  const { nodes, edges, workflow, workflowChangesState } =
+    useSelector(WorkflowsState);
   const dispatch = useAppDispatch();
   const { user } = useAuthenticatedState();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
@@ -79,6 +73,9 @@ export function WorkflowDesigner() {
     name: workflow.name,
     description: workflow.description,
   });
+
+  // Pass a condition that determines when to show the guard
+  useNavigationGuard(workflowChangesState === WorkflowChangesState.UNSAVED);
 
   const getLayoutedElements = (nodes: NodeType[], edges: any, options: any) => {
     g.setGraph({
@@ -199,14 +196,6 @@ export function WorkflowDesigner() {
     [sourceId, sourceHandleId]
   );
 
-  useEffect(() => {
-    //console.log(edges, 'edges');
-  }, [edges]);
-
-  useEffect(() => {
-    //console.log(nodes, 'nodes');
-  }, [nodes]);
-
   const saveWorkflow = () => {
     dispatch(updateWorkflowSteps({ siteId, workflowId }));
   };
@@ -232,20 +221,54 @@ export function WorkflowDesigner() {
   // console.log(workflow, 'workflow')
 
   const changeWorkflowInfo = () => {
+    if (!workflowId) return;
     if (workflowInfo.name === '' || workflowInfo.description === '') {
       dispatch(
         openNotificationDialog({ dialogTitle: 'This field cannot be empty' })
       );
       return;
     }
-    dispatch(
-      setWorkflow({
-        ...workflow,
-        name: workflowInfo.name,
-        description: workflowInfo.description,
-      })
-    );
-    saveWorkflow();
+
+    DocumentsService.getWorkflow(workflowId, siteId).then((res) => {
+      if (res) {
+        const updatedWorkflow = {
+          ...res,
+          name: workflowInfo.name,
+          description: workflowInfo.description,
+        };
+        DocumentsService.putWorkflow(workflowId, updatedWorkflow, siteId).then(
+          (res) => {
+            if (res.status === 200) {
+              dispatch(
+                openNotificationDialog({
+                  dialogTitle: 'Workflow Info Updated Successfully',
+                })
+              );
+              dispatch(
+                setWorkflow({
+                  ...workflow,
+                  name: workflowInfo.name,
+                  description: workflowInfo.description,
+                })
+              );
+            } else {
+              dispatch(
+                openNotificationDialog({
+                  dialogTitle: 'Error Updating Workflow Info',
+                })
+              );
+            }
+          }
+        );
+      } else {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Error Updating Workflow Info',
+          })
+        );
+      }
+    });
+
     setEditWorkflowInfo(false);
   };
 
@@ -291,8 +314,8 @@ export function WorkflowDesigner() {
               />
             </div>
           ) : (
-            <div className="text-2xl font-medium">
-              {workflow.name}
+            <div className="flex items-center">
+              <h1 className="text-2xl font-medium">{workflow.name}</h1>
               {!workflow.inUse && (
                 <button
                   className="w-5 h-5 ml-2 hover:text-primary-500"
@@ -317,7 +340,42 @@ export function WorkflowDesigner() {
               placeholder="Workflow Description"
             />
           ) : (
-            <div className="text-sm">{workflow.description}</div>
+            <div>
+              <p className="text-sm">{workflow.description}</p>
+              {!workflow.inUse ? (
+                <>
+                  {workflowChangesState === WorkflowChangesState.INITIAL && (
+                    <span className="text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded ">
+                      No Changes
+                    </span>
+                  )}
+                  {workflowChangesState === WorkflowChangesState.UNSAVED && (
+                    <span className="text-xs text-yellow-600 bg-yellow-100 px-1.5 py-0.5 rounded ">
+                      Unsaved Changes
+                    </span>
+                  )}
+                  {workflowChangesState === WorkflowChangesState.SAVED && (
+                    <span className="text-xs text-green-600 bg-green-100 px-1.5 py-0.5 rounded ">
+                      Changes Saved
+                    </span>
+                  )}
+                  {workflowChangesState === WorkflowChangesState.SAVING && (
+                    <span className="text-xs text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded ">
+                      Saving Changes
+                    </span>
+                  )}
+                  {workflowChangesState === WorkflowChangesState.ERROR && (
+                    <span className="text-xs text-red-600 bg-red-100 px-1.5 py-0.5 rounded ">
+                      Error Saving Changes
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded ">
+                  Read-Only
+                </span>
+              )}
+            </div>
           )}
         </div>
         {editWorkflowInfo && (
