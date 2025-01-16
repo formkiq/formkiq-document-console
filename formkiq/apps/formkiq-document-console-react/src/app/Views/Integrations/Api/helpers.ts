@@ -10,11 +10,11 @@ export interface ApiItem {
   requiresDocumentID: boolean;
   requiresWebhookID: boolean;
   requiresWorkflowID: boolean;
-  requiresRulesetID: boolean;
-  requiresRuleID: boolean;
   requiresCaseID: boolean;
   requiresTaskID: boolean;
   requiresNigoID: boolean;
+  requiresRulesetID: boolean;
+  requiresRuleID: boolean;
   requiresObjectId: boolean;
   requiresTagKey: boolean;
   allowsIndexKey: boolean;
@@ -31,6 +31,7 @@ export interface ApiItem {
   requiresWS: boolean;
   requiresClassificationID:  boolean;
   requiresMappingID: boolean;
+  requiresEnvelopeID: boolean;
   allowsVersionKey: boolean;
   allowsDate: boolean;
   allowsLimit: boolean;
@@ -1226,6 +1227,272 @@ export const deleteApiKeyApiItem = {
   license: 'Core',
 };
 
+export const getCasesApiItem = {
+  method: 'GET',
+  path: '/cases',
+  description: 'Returns a list of the Cases',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const postCaseApiItem = {
+  method: 'POST',
+  path: '/cases',
+  description: 'Create a new case',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: "{\"case\":{\"insertedDate\":\"2024-04-05T17:11:31+0000\",\"name\":\"CaseName\",\"description\":\"string\",\"status\":\"NEW\",\"startDate\":\"2024-04-09T04:00:00.000Z\",\"endDate\":\"2024-04-09T04:00:00.000Z\",\"tasks\":[{\"name\":\"New Task\",\"description\":\"New Task Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}],\"nigos\":[{\"name\":\"New NIGO\",\"description\":\"New NIGO Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}]}}",
+  license: 'Pro|Enterprise',
+};
+
+export const getCaseApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID ',
+  description: "Returns a Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const patchCaseApiItem = {
+  method: 'PATCH',
+  path: '/cases/ CASE_ID ',
+  description: "Updates a Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: "{\"case\":{\"insertedDate\":\"2024-04-05T17:11:31+0000\",\"name\":\"CaseName\",\"description\":\"string\",\"status\":\"NEW\",\"startDate\":\"2024-04-09T04:00:00.000Z\",\"endDate\":\"2024-04-09T04:00:00.000Z\",\"tasks\":[{\"name\":\"New Task\",\"description\":\"New Task Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}],\"nigos\":[{\"name\":\"New NIGO\",\"description\":\"New NIGO Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}]}}",
+  license: 'Pro|Enterprise',
+};
+
+export const deleteCaseApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID ',
+  description: "Deletes a Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getCaseDocumentsApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /documents',
+  description: "Returns documents in a Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const deleteCaseDocumentApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID /documents/ DOCUMENT_ID ',
+  description: "Deletes a document in a Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresDocumentID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getTaskApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /tasks/ TASK_ID ',
+  description: "Returns a Task in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const patchTaskApiItem = {
+  method: 'PATCH',
+  path: '/cases/ CASE_ID /tasks/ TASK_ID ',
+  description: "Updates a Task in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: "{\"task\":{\"name\":\"New Task\",\"description\":\"New Task Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}}",
+  license: 'Pro|Enterprise',
+};
+
+export const deleteTaskApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID /tasks/ TASK_ID ',
+  description: "Deletes a Task in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getTaskDocumentsApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /tasks/ TASK_ID /documents',
+  description: "Returns a list documents in a Task",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const deleteTaskDocumentApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID /tasks/ TASK_ID /documents/ DOCUMENT_ID ',
+  description: "Deletes a document in a Task",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  requiresDocumentID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getNigoApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /nigos/ NIGO_ID ',
+  description: "Returns a NIGO in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const patchNigoApiItem = {
+  method: 'PATCH',
+  path: '/cases/ CASE_ID /nigos/ NIGO_ID ',
+  description: "Updates a NIGO in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: "{\"nigo\":{\"name\":\"New NIGO\",\"description\":\"New Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}}",
+  license: 'Pro|Enterprise',
+};
+
+export const deleteNigoApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID /nigos/ NIGO_ID ',
+  description: "Deletes a NIGO in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getNigoDocumentsApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /nigos/ NIGO_ID /documents',
+  description: "Returns a list documents in a NIGO",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const deleteNigoDocumentApiItem = {
+  method: 'DELETE',
+  path: '/cases/ CASE_ID /nigos/ NIGO_ID /documents/ DOCUMENT_ID ',
+  description: "Deletes a document in a NIGO",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresTaskID: true,
+  requiresDocumentID: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getTasksApiItem = {
+  method: 'GET',
+  path: '/cases/ CASE_ID /tasks',
+  description: "Returns a list of Tasks in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const getNigosApiItem = {
+  method: 'GET',
+  path: '/cases/ NIGO_ID /tasks',
+  description: "Returns a list of NIGOs in Case",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Pro|Enterprise',
+};
+
+export const postTaskApiItem = {
+  method: 'POST',
+  path: '/cases/ CASE_ID /tasks',
+  description: "Add new task",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: "{\"task\":{\"name\":\"New Task\",\"description\":\"New Task Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}}",
+  license: 'Pro|Enterprise',
+}
+
+export const postNigoApiItem = {
+  method: 'POST',
+  path: '/cases/ CASE_ID /nigos',
+  description: "Add new NIGO",
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresCaseID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: "{\"nigo\":{\"name\":\"New NIGO\",\"description\":\"New Description\",\"insertedDate\":\"2024-04-09T04:00:00.000Z\",\"status\":\"NEW\"}}",
+  license: 'Pro|Enterprise',
+}
+
 export const getRulesetsApiItem = {
   method: 'GET',
   path: '/rulesets',
@@ -1348,110 +1615,6 @@ export const deleteRuleApiItem = {
   requiresAuthentication: true,
   requiresRulesetID: true,
   requiresRuleID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCasesApiItem = {
-  method: 'GET',
-  path: '/cases',
-  description: 'Returns a list of cases',
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  allowsLimit: true,
-  hasPagingTokens: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID ',
-  description: "Returns a case's details, i.e., its metadata",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseDocumentsApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /documents',
-  description: "Returns a case's documents",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseTasksApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /tasks',
-  description: "Returns a case's tasks",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseTaskApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /tasks/ TASK_ID ',
-  description: "Returns a case's tasks",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  requiresTaskID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseTaskDocumentsApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /tasks/ TASK_ID /documents',
-  description: "Returns a specific Task's documents from the specified case",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  requiresTaskID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseNigosApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /nigos',
-  description: 'Returns a specific task from the specified case',
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseNigoApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /nigos/ NIGO_ID ',
-  description: 'Returns a specific NIGO from the specified case',
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  requiresNigoID: true,
-  license: 'Pro|Enterprise',
-};
-
-export const getCaseNigoDocumentsApiItem = {
-  method: 'GET',
-  path: '/cases/ CASE_ID /nigos/ NIGO_ID /documents',
-  description: "Returns a specific NIGO's documents from the specified case",
-  username: 'Cognito User',
-  requiresSite: true,
-  requiresAuthentication: true,
-  requiresCaseID: true,
-  requiresNigoID: true,
   license: 'Pro|Enterprise',
 };
 
@@ -2025,3 +2188,152 @@ export const deleteSiteGroupPermissionsApiItem = {
     requiresGroupName: true,
     license: 'Core',
 };
+
+export const postOnlyofficeEditApiItem = {
+  method: 'POST',
+  path: '/onlyoffice/ DOCUMENT_ID /edit',
+  description: 'Provide ONLYOFFICE integration for editing documents',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '"string"',
+  license: 'Core',
+};
+
+export const postOnlyofficeNewApiItem = {
+  method: 'POST',
+  path: '/onlyoffice/new',
+  description: 'Provide ONLYOFFICE integration for the creation of new documents',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"extension": "DOCX"}',
+  license: 'Core',
+};
+
+export const postOnlyofficeSaveApiItem = {
+  method: 'POST',
+  path: '/onlyoffice/ DOCUMENT_ID /save',
+  description: 'Save an update document for ONLYOFFICE integration',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresSite: true,
+  license: 'Core',
+};
+
+export const postEsignatureDocusignEnvelopeApiItem = {
+  method: 'POST',
+  path: '/esignature/docusign/ DOCUMENT_ID /envelopes',
+  description: 'Create Docusign Envelope request',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"emailSubject":"Email Subject","environment":"PRODUCTION","signers":[{"name":"John Smith","email":"john.smith@mail.com","clientUserId":"user123","recipientId":"1","routingOrder":"1","suppressEmails":"false","tabs":{"signHereTabs":[{"anchorString":"/signature1/","anchorXOffset":"0","anchorYOffset":"0","anchorIgnoreIfNotPresent":"false","anchorUnits":"pixels","xPosition":"100","yPosition":"200","pageNumber":"1"}]}}],"inpersonSigners":[{"hostEmail":"sarah.host@mail.com","hostName":"Sarah Johnson","signerName":"Michael Brown","signerEmail":"michael.brown@mail.com","recipientId":"2","routingOrder":"2","suppressEmails":"false","tabs":{"signHereTabs":[{"anchorString":"/signature2/","anchorXOffset":"10","anchorYOffset":"10","anchorIgnoreIfNotPresent":"false","anchorUnits":"pixels","xPosition":"300","yPosition":"400","pageNumber":"2"}]}}],"notification":{"useAccountDefaults":"true","expirations":{"expireAfter":"120","expireEnabled":"true","expireWarn":"96"},"reminders":{"reminderDelay":"24","reminderEnabled":"true","reminderFrequency":"72"}}}',
+  license: 'Core',
+};
+
+export const postEsignatureDocusignRecipientViewRequestApiItem = {
+  method: 'POST',
+  path: '/esignature/docusign/ DOCUMENT_ID /envelopes/ ENVELOPE_ID /views/recipient',
+  description: 'Create Docusign Recipient View request',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresEnvelopeID: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"environment":"PRODUCTION","recipientView":{"returnUrl":"https://www.example.com","recipientId":"1","userName":"John Smith","clientUserId":"user123","email":"john.smith@mail.com","frameAncestors":["https://www.example.com","https://app.example.com"],"messageOrigins":["https://www.example.com","https://app.example.com"]}}',
+  license: 'Core',
+};
+
+export const postEsignatureDocusignEventApiItem = {
+  method: 'POST',
+  path: '/esignature/docusign/events',
+  description: 'Add E-signature event',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+};
+
+export const getOpensearchIndexApiItem = {
+  method: 'GET',
+  path: '/sites/ SITE_ID /opensearch/index',
+  description: 'Get site(s) OpenSearch index settings',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+}
+
+export const putOpensearchIndexApiItem = {
+  method: 'PUT',
+  path: '/sites/ SITE_ID /opensearch/index',
+  description: 'Set site(s) OpenSearch index settings',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"indexSettings":{"numberOfReplicas":"1","numberOfShards":"1"}}',
+  license: 'Core',
+}
+
+export const deleteOpensearchIndexApiItem = {
+  method: 'DELETE',
+  path: '/sites/ SITE_ID /opensearch/index',
+  description: 'Deletes site(s) OpenSearch index',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresSite: true,
+  license: 'Core',
+}
+
+export const postReindexApiItem = {
+  method: 'POST',
+  path: '/reindex/documents/ DOCUMENT_ID ',
+  description: "The API allows for the reindexing of a document's metadata determined by the target.",
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"target":"ATTRIBUTES"}',
+  license: 'Core',
+}
+
+export const getPublicationApiItem = {
+  method: 'GET',
+  path: '/publications/ DOCUMENT_ID ',
+  description: "Get published document's contents",
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  license: 'Core',
+}
+
+export const deletePublicationApiItem = {
+  method: 'DELETE',
+  path: '/publications/ DOCUMENT_ID ',
+  description: "Delete published document's contents",
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  license: 'Core',
+}
+
+export const postGoogleDocumentExport = {
+  method: 'POST',
+  path: '/integrations/google/drive/documents/ DOCUMENT_ID /export',
+  description: 'Exports a Google Document',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"path":"file_path","outputType":"PDF"}',
+  license: 'Core',
+}
