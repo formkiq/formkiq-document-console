@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
-import { Json } from '../../Components/Icons/icons';
+import {Json, Pencil} from '../../Components/Icons/icons';
 import CreateSchemaDialog from '../../Components/Schemas/createSchemaDialog/CreateSchemaDialog';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
@@ -166,7 +166,19 @@ function Schemas() {
                     <div className="flex items-center justify-end gap-2 mr-3">
                       <NavLink
                         title="Open in editor"
-                        to={`${pathname}/site-schema?editor=true`}
+                        to={`${pathname}/site-schema?editing=true`}
+                        className="h-6"
+                      >
+                        <button
+                          className="w-6 h-auto"
+                          title="Edit"
+                        >
+                          <Pencil/>
+                        </button>
+                      </NavLink>
+                      <NavLink
+                        title="Open in editor"
+                        to={`${pathname}/site-schema?jsonEditor=true&editing=true`}
                         className="h-6"
                       >
                         <button
