@@ -297,11 +297,10 @@ function Documents() {
     const isBottom =
       scrollpane.offsetHeight + scrollpane.scrollTop + 600 >
       scrollpane.scrollHeight;
-    const hasSpaceForMore = scrollpane.scrollHeight <= window.innerHeight;
-
     if (
-      (isBottom || hasSpaceForMore) &&
-      (nextToken || (!isLastSearchPageLoaded && searchWord))
+      isBottom &&
+      nextToken &&
+      loadingStatus === RequestStatus.fulfilled
     ) {
       dispatch(setDocumentLoadingStatusPending());
 
@@ -337,34 +336,6 @@ function Documents() {
       }
     }
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
-
-  // Add a single useEffect for initial load and viewport check
-  useEffect(() => {
-    if (!documents && loadingStatus === RequestStatus.fulfilled) {
-      dispatch(setDocumentLoadingStatusPending());
-      dispatch(
-        fetchDocuments({
-          siteId: currentSiteId,
-          formkiqVersion,
-          searchWord,
-          searchFolder,
-          subfolderUri,
-          queueId,
-          filterTag,
-          filterAttribute,
-        })
-      );
-    } else if (documents && loadingStatus === RequestStatus.fulfilled) {
-      const scrollpane = document.getElementById('documentsScrollpane');
-      if (
-        scrollpane &&
-        scrollpane.scrollHeight <= window.innerHeight &&
-        nextToken
-      ) {
-        trackScrolling();
-      }
-    }
-  }, [documents, loadingStatus]);
 
   function onDocumentInfoClick() {
     if (infoDocumentId.length) {
