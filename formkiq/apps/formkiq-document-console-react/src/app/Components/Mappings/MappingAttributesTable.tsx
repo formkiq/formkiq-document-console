@@ -18,7 +18,7 @@ function MappingAttributesTable({
             Key
           </th>
           <th className=" border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
-            Default Values
+            Default Value(s)
           </th>
           <th className="border-b border-t p-4 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
             Source Type
@@ -54,15 +54,22 @@ function MappingAttributesTable({
                     {attribute.attributeKey}
                   </td>
                   <td className="border-b p-4">
-                    {attribute?.defaultValues &&
-                      attribute.defaultValues.join(', ')}
+                    {Array.isArray(attribute?.defaultValues) ? (
+                      <ul>
+                        {attribute.defaultValues.map((value, index) => (
+                          <li key={index}>{value}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      attribute?.defaultValue
+                    )}
                   </td>
                   <td className="border-b p-4">{attribute.sourceType}</td>
                   <td className="border-b p-4 ">
                     {attribute.labelMatchingType}
                   </td>
                   <td className="border-b p-4 ">
-                    {attribute.labelTexts.join(', ')}
+                    {attribute?.labelTexts && attribute.labelTexts.join(', ')}
                   </td>
                   <td className="border-b p-4 ">{attribute.metadataField}</td>
                   <td className="border-b p-4 ">{attribute.validationRegex}</td>

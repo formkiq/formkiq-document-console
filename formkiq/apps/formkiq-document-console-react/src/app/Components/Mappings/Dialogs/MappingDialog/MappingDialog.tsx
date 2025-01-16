@@ -1,5 +1,5 @@
 import { Dialog } from '@headlessui/react';
-import {useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Mapping,
   MappingAttributeLabelMatchingType,
@@ -7,12 +7,20 @@ import {
   MappingAttributeSourceType,
 } from '../../../../helpers/types/mappings';
 
-import { useAppDispatch } from '../../../../Store/store';
-import AttributesTab from './AttributesTab';
 import { openDialog as openNotificationDialog } from '../../../../Store/reducers/globalNotificationControls';
-import {addMapping, fetchMappings, updateMapping} from '../../../../Store/reducers/mappings';
+import {
+  addMapping,
+  fetchMappings,
+  updateMapping,
+} from '../../../../Store/reducers/mappings';
+import { useAppDispatch } from '../../../../Store/store';
+import {
+  createNewAttribute,
+  getAttributeErrorMessages,
+  isAttributeValid,
+} from '../helpers';
+import AttributesTab from './AttributesTab';
 import GeneralInfoTab from './GeneralInfoTab';
-import {createNewAttribute, getAttributeErrorMessages, isAttributeValid} from '../helpers';
 
 type MappingDialogPropsType = {
   isOpen: boolean;
@@ -33,21 +41,18 @@ function MappingDialog({
     attributeKey: string;
     defaultValue: string;
     defaultValues: string[];
-    sourceType: MappingAttributeSourceType | string;
+    sourceType?: MappingAttributeSourceType;
     labelText: string;
     labelTexts: string[];
-    labelMatchingType: MappingAttributeLabelMatchingType | string;
-    metadataField: MappingAttributeMetadataField | string;
+    labelMatchingType?: MappingAttributeLabelMatchingType;
+    metadataField?: MappingAttributeMetadataField;
     validationRegex: string;
   } = {
     attributeKey: '',
     defaultValue: '',
     defaultValues: [],
-    sourceType: '',
     labelText: '',
     labelTexts: [],
-    labelMatchingType: '',
-    metadataField: '',
     validationRegex: '',
   };
 
@@ -84,13 +89,12 @@ function MappingDialog({
           })
         ).unwrap();
       }
-      dispatch(fetchMappings({ siteId,  page: 1, limit: 20, nextToken: null}))
+      dispatch(fetchMappings({ siteId, page: 1, limit: 20, nextToken: null }));
       closeModal();
     } catch (error: any) {
       dispatch(openNotificationDialog({ dialogTitle: error.message }));
     }
   };
-
 
   const closeModal = () => {
     resetMapping();
@@ -99,22 +103,29 @@ function MappingDialog({
   };
 
   const addDefaultValue = () => {
-    if (attribute.defaultValue.length === 0) {
+    if (!attribute.defaultValue || attribute.defaultValue.trim().length === 0) {
       return;
     }
-    if (attribute.defaultValues.includes(attribute.defaultValue)) {
+
+    // Ensure defaultValues is an array
+    const currentDefaultValues = Array.isArray(attribute.defaultValues)
+      ? attribute.defaultValues
+      : [];
+
+    if (currentDefaultValues.includes(attribute.defaultValue)) {
       dispatch(openNotificationDialog({ dialogTitle: 'Value already exists' }));
       return;
     }
+
     setAttribute({
       ...attribute,
-      defaultValues: [...attribute.defaultValues, attribute.defaultValue],
+      defaultValues: [...currentDefaultValues, attribute.defaultValue],
       defaultValue: '',
     });
   };
 
   const addLabelText = () => {
-    if (attribute.labelText.length === 0) {
+    if (attribute.labelText?.length === 0) {
       return;
     }
     if (attribute.labelTexts.includes(attribute.labelText)) {
@@ -139,7 +150,7 @@ function MappingDialog({
       return;
     }
     const newMapping = { ...mapping };
-    const newAttributes  = [...newMapping.attributes];
+    const newAttributes = [...newMapping.attributes];
     const newAttribute = createNewAttribute(attribute);
     newAttributes.push(newAttribute);
     newMapping.attributes = newAttributes;
@@ -158,7 +169,7 @@ function MappingDialog({
       return 'failed';
     }
     const newMapping = { ...mapping };
-    const newAttributes  = [...newMapping.attributes];
+    const newAttributes = [...newMapping.attributes];
     newAttributes[index] = createNewAttribute(attribute);
     newMapping.attributes = newAttributes;
     setMapping(newMapping);
@@ -177,7 +188,7 @@ function MappingDialog({
 
   const deleteAttributeFromMapping = (index: number) => {
     const newMapping = { ...mapping };
-    const newAttributes  = [...newMapping.attributes];
+    const newAttributes = [...newMapping.attributes];
     newAttributes.splice(index, 1);
     newMapping.attributes = newAttributes;
     setMapping(newMapping);
