@@ -17,9 +17,10 @@ import {
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import UsersMenu from '../../Components/UserManagement/Menus/UsersMenu';
 import UsersTable from './usersTable';
-import {Plus} from "../../Components/Icons/icons";
-import CreateUserModal from "../../Components/UserManagement/Modals/CreateUserModal";
-import ManageUserGroupsModal from "../../Components/UserManagement/Modals/ManageUserGroupsModal";
+import { Plus } from '../../Components/Icons/icons';
+import CreateUserModal from '../../Components/UserManagement/Modals/CreateUserModal';
+import ManageUserGroupsModal from '../../Components/UserManagement/Modals/ManageUserGroupsModal';
+import { DocumentsService } from '../../helpers/services/documentsService';
 
 function Users() {
   const {
@@ -35,6 +36,7 @@ function Users() {
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [isManageGroupsModalOpen, setManageGroupsModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [userGroups, setUserGroups] = useState<any>({});
 
   function updateUsers() {
     dispatch(fetchUsers({ page: 1 }));
@@ -218,9 +220,24 @@ function Users() {
   };
 
   const onManageGroups = (userId: string) => {
-      setSelectedUserId(userId);
-      setManageGroupsModalOpen(true);
+    setSelectedUserId(userId);
+    setManageGroupsModalOpen(true);
   };
+
+  // user groups
+  async function getUserGroups(username: string) {
+    DocumentsService.getUserGroups(username).then((response) => {
+      if (response.groups && response.groups.length > 0) {
+        setUserGroups((val: any) => ({ ...val, [username]: response.groups }));
+      }
+    });
+  }
+
+  useEffect(() => {
+    users.forEach((user) => {
+      getUserGroups(user.username);
+    });
+  }, [users]);
 
   return (
     <>
@@ -243,12 +260,13 @@ function Users() {
               resetPasswords={onResetPasswordSelectedUsers}
             />
             <div className="w-full py-4 px-6">
-              <button type="button"
-                      className="p-6 border border-neutral-300 rounded-md flex items-center gap-4 justify-center hover:bg-neutral-100 font-bold text-sm"
-                      onClick={() => setIsCreateUserModalOpen(true)}>
-                <div
-                  className="w-6 h-6 p-1 flex items-center justify-center border border-2 border-neutral-900 rounded-full">
-                  <Plus/>
+              <button
+                type="button"
+                className="p-6 border border-neutral-300 rounded-md flex items-center gap-4 justify-center hover:bg-neutral-100 font-bold text-sm"
+                onClick={() => setIsCreateUserModalOpen(true)}
+              >
+                <div className="w-6 h-6 p-1 flex items-center justify-center border border-2 border-neutral-900 rounded-full">
+                  <Plus />
                 </div>
                 Add New User
               </button>
@@ -269,6 +287,7 @@ function Users() {
                   onResetPasswordClick={onUserResetPassword}
                   onManageGroupsClick={onManageGroups}
                   setSelectedUsers={setSelectedUsers}
+                  userGroups={userGroups}
                 />
               </div>
             </div>
@@ -283,6 +302,7 @@ function Users() {
         isOpen={isManageGroupsModalOpen}
         setIsOpen={setManageGroupsModalOpen}
         userId={selectedUserId}
+        onUserGroupsUpdated={() => getUserGroups(selectedUserId)}
       />
     </>
   );

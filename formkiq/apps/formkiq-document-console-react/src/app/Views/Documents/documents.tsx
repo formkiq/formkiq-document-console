@@ -297,11 +297,10 @@ function Documents() {
     const isBottom =
       scrollpane.offsetHeight + scrollpane.scrollTop + 600 >
       scrollpane.scrollHeight;
-    const hasSpaceForMore = scrollpane.scrollHeight <= window.innerHeight;
-
     if (
-      (isBottom || hasSpaceForMore) &&
-      (nextToken || (!isLastSearchPageLoaded && searchWord))
+      isBottom &&
+      nextToken &&
+      loadingStatus === RequestStatus.fulfilled
     ) {
       dispatch(setDocumentLoadingStatusPending());
 
@@ -337,34 +336,6 @@ function Documents() {
       }
     }
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
-
-  // Add a single useEffect for initial load and viewport check
-  useEffect(() => {
-    if (!documents && loadingStatus === RequestStatus.fulfilled) {
-      dispatch(setDocumentLoadingStatusPending());
-      dispatch(
-        fetchDocuments({
-          siteId: currentSiteId,
-          formkiqVersion,
-          searchWord,
-          searchFolder,
-          subfolderUri,
-          queueId,
-          filterTag,
-          filterAttribute,
-        })
-      );
-    } else if (documents && loadingStatus === RequestStatus.fulfilled) {
-      const scrollpane = document.getElementById('documentsScrollpane');
-      if (
-        scrollpane &&
-        scrollpane.scrollHeight <= window.innerHeight &&
-        nextToken
-      ) {
-        trackScrolling();
-      }
-    }
-  }, [documents, loadingStatus]);
 
   function onDocumentInfoClick() {
     if (infoDocumentId.length) {
@@ -1574,7 +1545,7 @@ function Documents() {
               {currentDocument ? (
                 <div className="flex flex-wrap justify-start">
                   <div className="w-full flex grow-0 pl-2 pt-3 justify-start">
-                    <div className="w-12">
+                    <div className="w-12 flex items-center">
                       <img
                         alt="File Icon"
                         src={getFileIcon(
@@ -1584,14 +1555,24 @@ function Documents() {
                         className="w-12 h-12"
                       />
                     </div>
-                    <div className="grow-0 w-44 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
-                      {(currentDocument as IDocument).path}
-                      {isCurrentDocumentSoftDeleted && (
-                        <small className="block text-red-500 uppercase">
-                          (deleted)
-                        </small>
-                      )}
+                    <div className="flex items-center">
+                      <h1 title={(currentDocument as IDocument).path} className="pl-2 w-40 text-base break-all leading-5 font-bold bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 bg-clip-text text-transparent">
+                        {(currentDocument as IDocument).path.substring(0, 30)}
+                        {(currentDocument as IDocument).path.length > 30 && <span>...</span>}
+                        {isCurrentDocumentSoftDeleted && (
+                          <small className="block text-red-500 uppercase">
+                            (deleted)
+                          </small>
+                        )}
+                        {(currentDocument as IDocument).contentType && (
+                          <small className="block text-gray-500 text-xs">
+                            {(currentDocument as IDocument).contentType}
+                          </small>
+                        )}
+                      </h1>
                     </div>
+
+
                     <div className="w-8 grow-0 flex justify-end">
                       <div
                         className="w-4 mt-0.5 h-4 cursor-pointer text-gray-400"

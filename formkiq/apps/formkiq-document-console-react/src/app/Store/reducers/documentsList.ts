@@ -1,7 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   addOrCreateTagValue,
-  excludeDocumentsWithTagFromAll,
   findFolderAndParent,
   findParentForDocument,
   isTagValueIncludes,
@@ -239,10 +238,12 @@ export const fetchDocuments = createAsyncThunk(
             if (currentCallId !== callCounter) return;
             const mappedDocuments: any = [];
             response.documents.map((val: any) => {
-              if (val.workflow) {
-                val.document.workflow = val.workflow;
+              if (val.document) {
+                if (val.workflow) {
+                  val.document.workflow = val.workflow;
+                }
+                mappedDocuments.push(val.document);
               }
-              mappedDocuments.push(val.document);
             });
             const data = {
               siteId,
@@ -826,6 +827,8 @@ export const documentsListSlice = createSlice({
       return {
         ...state,
         documents: [] as any[],
+        folders: [] as any[],
+        nextToken: null,
       };
     },
     updateDocumentsList: (state, action) => {
