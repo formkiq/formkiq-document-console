@@ -17,11 +17,7 @@ import {
   WorkflowSummary,
 } from '../../../helpers/types/workflows';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
-
-interface Option {
-  value: string;
-  label: string;
-}
+import { Queue } from '../../../helpers/types/queues';
 
 interface SubmitForReviewModalProps {
   isOpened: boolean;
@@ -29,6 +25,7 @@ interface SubmitForReviewModalProps {
   siteId: string;
   value: ILine | null;
   onDocumentDataChange: any;
+  currentDocumentsRootUri: string;
 }
 
 export default function SubmitForReviewModal({
@@ -37,6 +34,7 @@ export default function SubmitForReviewModal({
   siteId,
   value,
   onDocumentDataChange,
+  currentDocumentsRootUri,
 }: SubmitForReviewModalProps): JSX.Element {
   const dispatch = useAppDispatch();
   const [formActive, setFormActive] = useState<boolean>(true);
@@ -46,6 +44,7 @@ export default function SubmitForReviewModal({
   >([]);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
   const [isWorkflowHasQueue, setIsWorkflowHasQueue] = useState<boolean>(false);
+  const [queues, setQueues] = useState<Queue[]>([]);
 
   const { formkiqVersion } = useSelector(ConfigState);
   const { workflows, workflowsLoadingStatus } = useSelector(WorkflowsState);
@@ -221,7 +220,7 @@ export default function SubmitForReviewModal({
             searchDocument(value.documentId);
           } else {
             setIsSpinnerDisplayed(false);
-              // Handle error (e.g., show an error message to the user)
+            // Handle error (e.g., show an error message to the user)
             dispatch(
               openNotificationDialog({
                 dialogTitle: 'Something went wrong. Please try again later',
@@ -256,6 +255,62 @@ export default function SubmitForReviewModal({
       }
     });
   }
+
+  useEffect(() => {
+    if (!value) return;
+
+    const fetchDocumentQueues = async (next = null) => {
+      try {
+        const res = await DocumentsService.getDocumentActions(
+          value?.documentId,
+          siteId,
+          20,
+          next
+        );
+
+        if (res.status === 200) {
+          const queuePromises = res.actions
+            .filter(
+              (action: any) => action.queueId && action.status === 'IN_QUEUE'
+            )
+            .filter(
+              (action: any) =>
+                !queues.some(
+                  (existingQueue) => existingQueue.queueId === action.queueId
+                )
+            )
+            .map((action: any) =>
+              DocumentsService.getQueue(siteId, action.queueId).then(
+                (queueResponse) => ({
+                  ...queueResponse,
+                  queueId: action.queueId,
+                })
+              )
+            );
+
+          const newQueues = await Promise.all(queuePromises);
+
+          if (newQueues.length > 0) {
+            setQueues((prevQueues) => [...prevQueues, ...newQueues]);
+          }
+
+          if (res.next) {
+            await fetchDocumentQueues(res.next);
+          }
+        }
+      } catch (error: any) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: error.errors
+              ? 'Error fetching document queues:' + error.errors[0].error
+              : 'Error fetching document queues.',
+          })
+        );
+      }
+    };
+
+    fetchDocumentQueues();
+  }, [value, siteId]);
 
   return (
     <Transition.Root show={isOpened} as={Fragment}>
@@ -302,7 +357,48 @@ export default function SubmitForReviewModal({
                       <Close />
                     </div>
                   </div>
-                  <form onSubmit={onSubmit} className="w-full mt-4">
+                  {/*List of document Queues*/}
+                  {queues.length > 0 && (
+                    <>
+                      <h4 className="text-md font-semibold mt-2">
+                        Document Already in Review.
+                      </h4>
+                      <p className="text-sm text-neutral-500">
+                        This document is already in a review queue. You can
+                        check its status in the following queues:
+                      </p>
+                      <div className="ml-4 mr-8">
+                        <table className="w-full mt-2">
+                          <thead>
+                            <tr className="bg-neutral-100 border border-neutral-300">
+                              <th className="text-left text-sm font-semibold pl-2">
+                                Queue Name
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {queues.map((queue: any) => (
+                              <tr
+                                className="border border-neutral-300"
+                                key={queue.queueId}
+                              >
+                                <td>
+                                  <a
+                                    className="text-sm ml-2 text-neutral-900 hover:text-primary-500 cursor-pointer hover:underline"
+                                    href={`${currentDocumentsRootUri}/queues/${queue.queueId}`}
+                                  >
+                                    {queue.name}
+                                  </a>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  )}
+                  <h3 className="text-lg font-semibold mt-4">Workflows</h3>
+                  <form onSubmit={onSubmit} className="w-full mt-2">
                     <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
                       <div className="w-full mr-12 relative">
                         <RadioCombobox
