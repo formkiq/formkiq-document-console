@@ -2305,3 +2305,35 @@ export const postReindexApiItem = {
   defaultPostJsonValue: '{"target":"ATTRIBUTES"}',
   license: 'Core',
 }
+
+export const getPublicationApiItem = {
+  method: 'GET',
+  path: '/publications/ DOCUMENT_ID ',
+  description: "Get published document's contents",
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  license: 'Core',
+}
+
+export const deletePublicationApiItem = {
+  method: 'DELETE',
+  path: '/publications/ DOCUMENT_ID ',
+  description: "Delete published document's contents",
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  license: 'Core',
+}
+
+export const postGoogleDocumentExport = {
+  method: 'POST',
+  path: '/integrations/google/drive/documents/ DOCUMENT_ID /export',
+  description: 'Exports a Google Document',
+  username: 'Cognito User',
+  requiresAuthentication: true,
+  requiresDocumentID: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"path":"file_path","outputType":"PDF"}',
+  license: 'Core',
+}

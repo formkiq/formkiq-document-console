@@ -182,6 +182,9 @@ import {
   putOpensearchIndexApiItem,
   deleteOpensearchIndexApiItem,
   postReindexApiItem,
+  getPublicationApiItem,
+  deletePublicationApiItem,
+  postGoogleDocumentExport,
 } from './helpers';
 
 export function ApiExplorer() {
@@ -509,6 +512,15 @@ export function ApiExplorer() {
                     </div>
                   </div>
                 </ApiSegment>
+                <ApiSegment title="Publications">
+                  <div className="ml-2 flex flex-cols">
+                    <div className="w-4 border-l"></div>
+                    <div className="grow">
+                      <ApiItem apiItem={getPublicationApiItem} sites={sites} />
+                      <ApiItem apiItem={deletePublicationApiItem} sites={sites} />
+                    </div>
+                  </div>
+                </ApiSegment>
               </div>
             </div>
           </ApiSegment>
@@ -822,6 +834,14 @@ export function ApiExplorer() {
               <div className="w-4 border-l"></div>
               <div className="grow">
                 <ApiItem apiItem={postReindexApiItem} sites={sites} />
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Google Integration">
+            <div className="ml-2 mb-4 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={postGoogleDocumentExport} sites={sites} />
               </div>
             </div>
           </ApiSegment>
