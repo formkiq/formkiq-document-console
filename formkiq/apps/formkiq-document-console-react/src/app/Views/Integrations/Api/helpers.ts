@@ -2234,7 +2234,7 @@ export const postEsignatureDocusignEnvelopeApiItem = {
   requiresDocumentID: true,
   requiresSite: true,
   requiresPostJson: true,
-  defaultPostJsonValue: '{"emailSubject":"string","environment":"PRODUCTION","signers":[{"name":"string","email":"string","clientUserId":"string","recipientId":"string","routingOrder":"string","suppressEmails":"string","tabs":{"signHereTabs":[{"anchorString":"string","anchorXOffset":"string","anchorYOffset":"string","anchorIgnoreIfNotPresent":"string","anchorUnits":"string","xPosition":"string","yPosition":"string","pageNumber":"string"}]}}],"inpersonSigners":[{"hostEmail":"string","hostName":"string","signerName":"string","signerEmail":"string","recipientId":"string","routingOrder":"string","suppressEmails":"string","tabs":{"signHereTabs":[{"anchorString":"string","anchorXOffset":"string","anchorYOffset":"string","anchorIgnoreIfNotPresent":"string","anchorUnits":"string","xPosition":"string","yPosition":"string","pageNumber":"string"}]}}],"notification":{"useAccountDefaults":"string","expirations":{"expireAfter":"string","expireEnabled":"string","expireWarn":"string"},"reminders":{"reminderDelay":"string","reminderEnabled":"string","reminderFrequency":"string"}}}',
+  defaultPostJsonValue: '{"emailSubject":"Email Subject","environment":"PRODUCTION","signers":[{"name":"John Smith","email":"john.smith@mail.com","clientUserId":"user123","recipientId":"1","routingOrder":"1","suppressEmails":"false","tabs":{"signHereTabs":[{"anchorString":"/signature1/","anchorXOffset":"0","anchorYOffset":"0","anchorIgnoreIfNotPresent":"false","anchorUnits":"pixels","xPosition":"100","yPosition":"200","pageNumber":"1"}]}}],"inpersonSigners":[{"hostEmail":"sarah.host@mail.com","hostName":"Sarah Johnson","signerName":"Michael Brown","signerEmail":"michael.brown@mail.com","recipientId":"2","routingOrder":"2","suppressEmails":"false","tabs":{"signHereTabs":[{"anchorString":"/signature2/","anchorXOffset":"10","anchorYOffset":"10","anchorIgnoreIfNotPresent":"false","anchorUnits":"pixels","xPosition":"300","yPosition":"400","pageNumber":"2"}]}}],"notification":{"useAccountDefaults":"true","expirations":{"expireAfter":"120","expireEnabled":"true","expireWarn":"96"},"reminders":{"reminderDelay":"24","reminderEnabled":"true","reminderFrequency":"72"}}}',
   license: 'Core',
 };
 
@@ -2248,7 +2248,7 @@ export const postEsignatureDocusignRecipientViewRequestApiItem = {
   requiresEnvelopeID: true,
   requiresSite: true,
   requiresPostJson: true,
-  defaultPostJsonValue: '{"environment":"PRODUCTION","recipientView":{"returnUrl":"string","recipientId":"string","userName":"string","clientUserId":"string","email":"string","frameAncestors":["string"],"messageOrigins":["string"]}}',
+  defaultPostJsonValue: '{"environment":"PRODUCTION","recipientView":{"returnUrl":"https://www.example.com","recipientId":"1","userName":"John Smith","clientUserId":"user123","email":"john.smith@mail.com","frameAncestors":["https://www.example.com","https://app.example.com"],"messageOrigins":["https://www.example.com","https://app.example.com"]}}',
   license: 'Core',
 };
 
