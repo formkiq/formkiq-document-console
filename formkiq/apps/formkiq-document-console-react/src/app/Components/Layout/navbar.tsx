@@ -57,7 +57,8 @@ import {
   Schema,
   Settings,
   Share,
-  ShareHand, SitesManagement,
+  ShareHand,
+  SitesManagement,
   Star,
   Trash,
   Users,
@@ -148,7 +149,8 @@ function Navbar() {
     React.useState(false);
 
   const location = useLocation();
-  const { onSubmitForReviewModalClick } = useDocumentActions();
+  const { onSubmitForReviewModalClick, onDocumentReviewModalClick } =
+    useDocumentActions();
 
   const locationPrefix = useMemo(() => {
     let locationPrefix = decodeURI(location.pathname);
@@ -851,8 +853,16 @@ function Navbar() {
                                       className={
                                         'text-small font-bold mx-2 px-4 cursor-pointer whitespace-nowrap'
                                       }
-                                      onClick={(e: any) =>
-                                        viewFolder(e, 'reviewDocument')
+                                      onClick={(event: any) =>
+                                        onDocumentReviewModalClick(event, {
+                                          lineType: 'document',
+                                          documentId: documentId,
+                                          folder: currentDocumentPath.substring(
+                                            0,
+                                            currentDocumentPath.lastIndexOf('/')
+                                          ),
+                                          documentInstance: currentDocument,
+                                        })
                                       }
                                     >
                                       Submit Document Review
