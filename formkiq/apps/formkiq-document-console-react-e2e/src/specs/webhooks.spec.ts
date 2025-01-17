@@ -8,7 +8,7 @@ test.beforeEach(async ({ LoginPage }) => {
 test('can navigate to the webhooks page', async ({ page, Webhooks }) => {
   await Webhooks.openPage();
 
-  await page.waitForURL('/integrations/webhooks');
+  await page.waitForURL('/orchestrations/webhooks');
 });
 
 test('can add and delete a new webhook', async ({ page, Webhooks }) => {

@@ -1,7 +1,7 @@
 import moment from 'moment';
+import { RelationshipType } from '../types/attributes';
 import { IDocument } from './../types/document';
 import { IFolder } from './../types/folder';
-import {RelationshipType} from "../types/attributes";
 
 export function getFileIcon(path: string, deepLinkPath: string) {
   let fileIcon = '';
@@ -417,9 +417,9 @@ export function getCurrentSiteInfo(
           )}`;
         }
       }
-    } else if (pathname.indexOf('/integrations/webhooks') === 0) {
-      if (pathname.indexOf('/integrations/webhooks/workspaces') === 0) {
-        currentSiteInfo.siteId = pathname.substring(34).split('/')[0]; // 34 is the length of '/integrations/webhooks/workspaces'
+    } else if (pathname.indexOf('/orchestrations/webhooks') === 0) {
+      if (pathname.indexOf('/orchestrations/webhooks/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(34).split('/')[0]; // 34 is the length of '/orchestrations/webhooks/workspaces'
         currentSiteInfo.siteDocumentsRootName = `Inbound Webhooks: ${(
           currentSiteInfo.siteId as any
         ).replaceAll('_', ' ')}`;
@@ -429,7 +429,7 @@ export function getCurrentSiteInfo(
           currentSiteInfo.siteDocumentsRootName = 'Inbound Webhooks';
         } else if (hasWorkspaces) {
           currentSiteInfo.siteId = workspaceSites[0].siteId;
-          currentSiteInfo.siteRedirectUrl = `/integrations/webhooks/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/orchestrations/webhooks/workspaces/${workspaceSites[0].siteId}`;
           currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
             '_',
             ' '
@@ -657,7 +657,7 @@ export function findParentForDocument(
 export function excludeDocumentsWithTagFromAll(
   parentObj: { folders: null | IFolder[]; documents: IDocument[] },
   tagKey: string,
-  tagValue: string,
+  tagValue: string
 ) {
   const res = { ...parentObj };
   const updateDocumentsList = (documents: IDocument[]): IDocument[] => {
@@ -706,7 +706,7 @@ export function transformRelationshipValueFromString(value: string) {
   const relationship = relationshipString as RelationshipType;
   return {
     documentId,
-    relationship
+    relationship,
   };
 }
 
@@ -718,7 +718,7 @@ export function transformRelationshipValueToString(value: {
 }
 
 export function isUUIDv4orV5(value: string): boolean {
-  const uuidRegexV4V5 = /^[0-9a-f]{8}-[0-9a-f]{4}-(4|5)[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const uuidRegexV4V5 =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-(4|5)[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegexV4V5.test(value);
 }
-

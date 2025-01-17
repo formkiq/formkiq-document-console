@@ -9,7 +9,7 @@ test.beforeEach(async ({ LoginPage }) => {
 test('can navigate to the api explorer', async ({ page, ApiExplorer }) => {
   await ApiExplorer.openPage();
 
-  await page.waitForURL('/integrations/api');
+  await page.waitForURL('/orchestrations/api');
 });
 
 test('can fetch documents with default parameters', async ({

@@ -107,7 +107,7 @@ export function Sidebar() {
   ] = useState(false);
   const [otherSiteDocumentQueuesExpanded, setOtherSiteDocumentQueuesExpanded] =
     useState(false);
-  const [integrationsExpanded, setIntegrationsExpanded] = useState(false);
+  const [orchestrationsExpanded, setIntegrationsExpanded] = useState(false);
   const [adminExpanded, setAdminExpanded] = useState(false);
   const [isWorkspacesModalOpened, setWorkspacesModalOpened] = useState(false);
 
@@ -231,8 +231,8 @@ export function Sidebar() {
     }
     setOtherSiteDocumentQueuesExpanded(!otherSiteDocumentQueuesExpanded);
   };
-  const toggleIntegrationsExpand = () => {
-    setIntegrationsExpanded(!integrationsExpanded);
+  const toggleOrchestrationsExpand = () => {
+    setIntegrationsExpanded(!orchestrationsExpanded);
   };
   const toggleAdminExpand = () => {
     setAdminExpanded(!adminExpanded);
@@ -247,7 +247,7 @@ export function Sidebar() {
   const handleAction = (action: string) => {
     const nonDocumentPaths = [
       '/workflows',
-      '/integrations',
+      '/orchestrations',
       '/queues',
       '/rulesets',
       '/object-examine-tool',
@@ -378,6 +378,7 @@ export function Sidebar() {
     testId = '',
     folder = '',
     targetSiteId = '',
+    level = 0,
   }: {
     to: string;
     icon: any;
@@ -385,9 +386,13 @@ export function Sidebar() {
     testId?: string;
     folder?: string;
     targetSiteId?: string;
+    level?: number;
   }) => {
     return (
-      <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
+      <li
+        className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap"
+        style={{ paddingLeft: isSidebarExpanded ? `${level * 16}px` : '0px' }}
+      >
         <NavLink
           to={to}
           data-test-id={testId}
@@ -591,6 +596,7 @@ export function Sidebar() {
                       toggleExpand={toggleWorkspacesExpand}
                       title="Workspaces"
                       testId="expand-workspaces"
+                      level={1}
                     />
                   )}
                   {isSidebarExpanded ? (
@@ -605,6 +611,7 @@ export function Sidebar() {
                             testId="nav-workspace"
                             targetSiteId={site.siteId}
                             folder={''}
+                            level={1}
                           />
                           {QuickFolderList(
                             site.siteId,
@@ -646,7 +653,7 @@ export function Sidebar() {
                                               : queue.name
                                           }
                                           testId="nav-queue"
-                                          level={1}
+                                          level={2}
                                         />
                                       </span>
                                     );
@@ -706,17 +713,35 @@ export function Sidebar() {
             </>
           )}
           <ExpandableSection
-            isExpanded={integrationsExpanded}
-            toggleExpand={toggleIntegrationsExpand}
-            title={
-              formkiqVersion.type !== 'core'
-                ? 'Workflows & Integrations'
-                : 'Integrations'
-            }
-            testId="expand-integrations"
+            isExpanded={orchestrationsExpanded}
+            toggleExpand={toggleOrchestrationsExpand}
+            title="Orchestration"
+            testId="expand-orchestrations"
           />
-          {(integrationsExpanded || !isSidebarExpanded) && (
+          {(orchestrationsExpanded || !isSidebarExpanded) && (
             <>
+              <NavigationItem
+                to={
+                  '/attributes' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
+                icon={<Attribute />}
+                title="Attributes"
+                testId="nav-attributes"
+              />
+              <NavigationItem
+                to={
+                  '/schemas' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
+                icon={<Schema />}
+                title="Schemas"
+                testId="nav-schemas"
+              />
               {formkiqVersion.type !== 'core' && (
                 <NavigationItem
                   to={
@@ -743,34 +768,6 @@ export function Sidebar() {
                   testId="nav-queues"
                 />
               )}
-              <NavigationItem
-                to={
-                  '/attributes' +
-                  (pathname.indexOf('workspaces') > 0
-                    ? '/workspaces/' + currentSiteId
-                    : '')
-                }
-                icon={<Attribute />}
-                title="Attributes"
-                testId="nav-attributes"
-              />
-              <NavigationItem
-                to="/integrations/api"
-                icon={<Api />}
-                title="API Explorer"
-                testId="nav-api-explorer"
-              />
-              <NavigationItem
-                to={
-                  '/integrations/webhooks' +
-                  (pathname.indexOf('workspaces') > 0
-                    ? '/workspaces/' + currentSiteId
-                    : '')
-                }
-                icon={<Webhook />}
-                title="Webhooks"
-                testId="nav-webhooks"
-              />
               {formkiqVersion.type !== 'core' && (
                 <NavigationItem
                   to={
@@ -784,23 +781,6 @@ export function Sidebar() {
                   testId="nav-rulesets"
                 />
               )}
-              <NavigationItem
-                to="/object-examine-tool"
-                icon={<Examine />}
-                title="Object Examine Tool"
-                testId="nav-object-examine"
-              />
-              <NavigationItem
-                to={
-                  '/schemas' +
-                  (pathname.indexOf('workspaces') > 0
-                    ? '/workspaces/' + currentSiteId
-                    : '')
-                }
-                icon={<Schema />}
-                title="Schemas"
-                testId="nav-schemas"
-              />
               {formkiqVersion.type !== 'core' && (
                 <NavigationItem
                   to="/mappings"
@@ -809,6 +789,29 @@ export function Sidebar() {
                   testId="nav-mappings"
                 />
               )}
+              <NavigationItem
+                to={
+                  '/orchestrations/webhooks' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
+                icon={<Webhook />}
+                title="Webhooks"
+                testId="nav-webhooks"
+              />
+              <NavigationItem
+                to="/orchestrations/api"
+                icon={<Api />}
+                title="API Explorer"
+                testId="nav-api-explorer"
+              />
+              <NavigationItem
+                to="/object-examine-tool"
+                icon={<Examine />}
+                title="Object Examine Tool"
+                testId="nav-object-examine"
+              />
               <div className="flex w-full">
                 <div className="w-full mt-4 border-b border-neutral-300"></div>
               </div>

@@ -273,7 +273,7 @@ function Navbar() {
     const pathsWithSubfolder: string[] = [
       'admin/api-keys',
       'admin/user-activities',
-      'integrations/webhooks',
+      'orchestrations/webhooks',
     ];
 
     let newDocumentsRootUri;
@@ -583,7 +583,7 @@ function Navbar() {
                     <>
                       {locationPrefix === '/workflows' ||
                       locationPrefix === '/queues' ||
-                      locationPrefix === '/integrations' ||
+                      locationPrefix === '/orchestrations' ||
                       locationPrefix === '/schemas' ||
                       locationPrefix === '/object-examine-tool' ||
                       locationPrefix === '/rulesets' ||
@@ -618,12 +618,12 @@ function Navbar() {
                               </div>
                             )}
 
-                            {pathname.indexOf('/integrations/api') > -1 && (
+                            {pathname.indexOf('/orchestrations/api') > -1 && (
                               <div className="w-5">
                                 <Api />
                               </div>
                             )}
-                            {pathname.indexOf('/integrations/webhooks') >
+                            {pathname.indexOf('/orchestrations/webhooks') >
                               -1 && (
                               <div className="w-5">
                                 <Webhook />
@@ -686,13 +686,13 @@ function Navbar() {
                             {pathname.indexOf('/queues') > -1 && (
                               <span>Queues</span>
                             )}
-                            {pathname.indexOf('/integrations/api') > -1 && (
+                            {pathname.indexOf('/orchestrations/api') > -1 && (
                               <span>API Explorer</span>
                             )}
                             {pathname.indexOf('/object-examine-tool') > -1 && (
                               <span>Examine PDF</span>
                             )}
-                            {pathname.indexOf('/integrations/webhooks') >
+                            {pathname.indexOf('/orchestrations/webhooks') >
                               -1 && <span>Inbound Webhooks</span>}
                             {pathname.indexOf('/admin/settings') > -1 && (
                               <span>Settings</span>
@@ -734,7 +734,8 @@ function Navbar() {
                             pathname.indexOf('/queues') > -1 ||
                             pathname.indexOf('/attributes') > -1 ||
                             pathname.indexOf('/mappings') > -1 ||
-                            pathname.indexOf('/integrations/webhooks') > -1) &&
+                            pathname.indexOf('/orchestrations/webhooks') >
+                              -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
                               (hasDefaultSite && hasWorkspaces) ||

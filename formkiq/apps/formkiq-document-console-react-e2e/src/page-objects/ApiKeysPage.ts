@@ -10,7 +10,7 @@ export class ApiKeysPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.integrationDropdown = page.getByTestId('expand-integrations');
+    this.integrationDropdown = page.getByTestId('expand-orchestrations');
     this.navigateLink = page.getByTestId('nav-api-keys');
     this.createButton = page.getByTestId('create-api-key').first();
     this.newModal = new NewApiKeyModalObject(page);
