@@ -10,7 +10,7 @@ export class WebhooksPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.integrationDropdown = page.getByTestId('expand-integrations');
+    this.integrationDropdown = page.getByTestId('expand-orchestrations');
     this.navigateLink = page.getByTestId('nav-webhooks');
     this.createButton = page.getByTestId('create-webhook').first();
     this.newModal = new NewWebhookModalObject(page);

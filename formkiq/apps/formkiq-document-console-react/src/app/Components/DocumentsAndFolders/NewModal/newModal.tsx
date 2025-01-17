@@ -5,10 +5,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
-import {
-  DocumentsService,
-  IFileUploadData,
-} from '../../../helpers/services/documentsService';
+import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import {
   Close,
@@ -172,7 +169,7 @@ export default function NewModal({
                     openDialog({
                       dialogTitle:
                         'Error.' +
-                        res.errors.map((err:any) => err.error).join(', \n'),
+                        res.errors.map((err: any) => err.error).join(', \n'),
                     })
                   );
                 } else {
@@ -208,7 +205,7 @@ export default function NewModal({
                       openDialog({
                         dialogTitle:
                           'Error.' +
-                          res.errors.map((err:any) => err.error).join(', \n'),
+                          res.errors.map((err: any) => err.error).join(', \n'),
                       })
                     );
                   } else {
@@ -445,7 +442,7 @@ export default function NewModal({
                             : 'cursor-pointer hover:bg-gray-100'
                         } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
                         onClick={(event) =>
-                          (window.location.href = '/integrations/workflows')
+                          (window.location.href = '/orchestrations/workflows')
                         }
                       >
                         <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
@@ -463,7 +460,7 @@ export default function NewModal({
                           : 'cursor-pointer hover:bg-gray-100'
                       } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
                       onClick={(event) =>
-                        (window.location.href = '/integrations/webhooks')
+                        (window.location.href = '/orchestrations/webhooks')
                       }
                     >
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">

@@ -9,10 +9,10 @@ export class ApiExplorerPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.integrationDropdown = page.getByTestId('expand-integrations');
+    this.integrationDropdown = page.getByTestId('expand-orchestrations');
     this.navigateLink = page.getByTestId('nav-api-explorer');
     this.fetchButton = page.getByTestId('apiItem-fetch');
-    this.documentsSegment = page.getByTestId('Documents-&-Folders')
+    this.documentsSegment = page.getByTestId('Documents-&-Folders');
   }
 
   async openPage() {
