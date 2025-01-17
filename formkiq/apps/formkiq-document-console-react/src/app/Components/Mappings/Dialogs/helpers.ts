@@ -6,16 +6,16 @@ import {
 } from '../../../helpers/types/mappings';
 
 export const isAttributeValid = (attribute: any) => {
-  if (attribute.attributeKey.length === 0) return false;
-  if (attribute.sourceType.length === 0) return false;
+  if (attribute.attributeKey?.length === 0) return false;
+  if (attribute.sourceType?.length === 0) return false;
   if (
     attribute.sourceType !== 'MANUAL' &&
-    attribute.labelMatchingType.length === 0
+    attribute.labelMatchingType?.length === 0
   )
     return false;
   if (
     attribute.sourceType !== 'MANUAL' &&
-    attribute.labelTexts.length === 0 &&
+    attribute.labelTexts?.length === 0 &&
     (!attribute.labelText || attribute.labelText.length === 0)
   )
     return false;
@@ -25,22 +25,22 @@ export const isAttributeValid = (attribute: any) => {
 // Function to get error messages
 export const getAttributeErrorMessages = (attribute: any) => {
   const errorMessages = [];
-  if (attribute.attributeKey.length === 0) {
+  if (attribute.attributeKey?.length === 0) {
     errorMessages.push('Please select an attribute key.');
   }
-  if (attribute.sourceType.length === 0) {
+  if (attribute.sourceType?.length === 0) {
     errorMessages.push('Please select a source type.');
   }
   if (
     attribute.sourceType !== 'MANUAL' &&
-    (!attribute.labelMatchingType || attribute.labelMatchingType.length === 0)
+    (!attribute.labelMatchingType || attribute.labelMatchingType?.length === 0)
   ) {
     errorMessages.push('Please select a label matching type.');
   }
   if (
     attribute.sourceType !== 'MANUAL' &&
-    attribute.labelTexts.length === 0 &&
-    (!attribute.labelText || attribute.labelText.length === 0)
+    attribute.labelTexts?.length === 0 &&
+    (!attribute.labelText || attribute.labelText?.length === 0)
   ) {
     errorMessages.push('Please add a label text.');
   }
