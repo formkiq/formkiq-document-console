@@ -75,7 +75,7 @@ function Ruleset() {
       conditions: {
         must: [
           {
-            attribute: 'TEXT',
+            criterion: 'TEXT',
             value: '',
             operation: 'EQ',
           },
@@ -311,7 +311,7 @@ const RuleEditingTab = ({
           must: [
             ...ruleValue.rule.conditions.must,
             {
-              attribute: 'TEXT',
+              criterion: 'TEXT',
               value: '',
               operation: 'EQ',
             },
@@ -327,8 +327,11 @@ const RuleEditingTab = ({
       case 'fieldName':
         newMust[index] = { ...newMust[index], fieldName: e.target.value };
         break;
-      case 'attribute':
-        newMust[index] = { ...newMust[index], attribute: e.target.value };
+      case 'attributeKey':
+        newMust[index] = { ...newMust[index], attributeKey: e.target.value };
+        break;
+      case 'criterion':
+        newMust[index] = { ...newMust[index], criterion: e.target.value };
         if (e.target.value !== 'FIELD') {
           delete newMust[index].fieldName;
         }
@@ -460,25 +463,26 @@ const RuleEditingTab = ({
           >
             <div className="flex flex-col justify-start gap-2">
               <label
-                htmlFor="attribute"
+                htmlFor="criterion"
                 className="block text-sm font-bold text-neutral-900"
               >
-                Attribute
+                Criterion
               </label>
               <select
-                name="attribute"
+                name="criterion"
                 className="w-36 p-2 border border-neutral-300 rounded"
-                value={ruleValue.rule.conditions.must[index].attribute}
-                onChange={(e) => onConditionsChange(e, index, 'attribute')}
+                value={ruleValue.rule.conditions.must[index].criterion}
+                onChange={(e) => onConditionsChange(e, index, 'criterion')}
               >
                 <option value="TEXT">TEXT</option>
                 <option value="CONTENT_TYPE">CONTENT_TYPE</option>
                 <option value="BARCODE">BARCODE</option>
                 <option value="FIELD">FIELD</option>
+                <option value="ATTRIBUTE">ATTRIBUTE</option>
               </select>
             </div>
 
-            {ruleValue.rule.conditions.must[index].attribute === 'FIELD' && (
+            {ruleValue.rule.conditions.must[index].criterion === 'FIELD' && (
               <div className="flex flex-col justify-start gap-2">
                 <label
                   htmlFor="fieldName"
@@ -494,7 +498,29 @@ const RuleEditingTab = ({
                   onChange={(e) => onConditionsChange(e, index, 'fieldName')}
                   minLength={1}
                   required={true}
-                  className="w-52 p-2 border border-neutral-300 rounded"
+                  className="w-72 p-2 border border-neutral-300 rounded"
+                />
+              </div>
+            )}
+
+            {ruleValue.rule.conditions.must[index].criterion ===
+              'ATTRIBUTE' && (
+              <div className="flex flex-col justify-start gap-2">
+                <label
+                  htmlFor="attributeKey"
+                  className="block text-sm font-bold text-neutral-900"
+                >
+                  Attribute Key
+                </label>
+                <input
+                  name="attributeKey"
+                  placeholder="Attribute Key"
+                  type="text"
+                  value={ruleValue.rule.conditions.must[index].attributeKey}
+                  onChange={(e) => onConditionsChange(e, index, 'attributeKey')}
+                  minLength={1}
+                  required={true}
+                  className="w-72 p-2 border border-neutral-300 rounded"
                 />
               </div>
             )}
@@ -530,7 +556,7 @@ const RuleEditingTab = ({
                 type="text"
                 value={ruleValue.rule.conditions.must[index].value}
                 onChange={(e) => onConditionsChange(e, index, 'value')}
-                className="w-52 p-2 border border-neutral-300 rounded"
+                className="w-72 p-2 border border-neutral-300 rounded"
               />
             </div>
 

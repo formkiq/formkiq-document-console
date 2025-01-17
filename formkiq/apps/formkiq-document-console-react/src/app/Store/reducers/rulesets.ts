@@ -36,7 +36,7 @@ const defaultState: RulesetsState = {
     conditions: {
       must: [
         {
-          attribute: 'TEXT',
+          criterion: 'TEXT',
           fieldName: '',
           value: '',
           operation: 'EQ',

@@ -15,7 +15,12 @@ export enum RequestStatus {
   rejected = 'rejected',
 }
 
-type RuleConditionAttribute = 'TEXT' | 'CONTENT_TYPE' | 'BARCODE' | 'FIELD';
+type RuleConditionCriterion =
+  | 'TEXT'
+  | 'CONTENT_TYPE'
+  | 'BARCODE'
+  | 'FIELD'
+  | 'ATTRIBUTE';
 type RuleConditionOperation = 'EQ' | 'CONTAINS';
 
 export interface Rule {
@@ -27,8 +32,9 @@ export interface Rule {
   conditions: {
     must: [
       {
-        attribute: RuleConditionAttribute;
+        criterion: RuleConditionCriterion;
         fieldName?: string;
+        attributeKey?: string;
         value: string;
         operation: RuleConditionOperation;
       }
