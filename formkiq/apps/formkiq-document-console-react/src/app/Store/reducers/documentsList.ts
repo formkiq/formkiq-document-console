@@ -16,7 +16,7 @@ import {
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
 import { RootState } from '../store';
-import { DocumentsService } from './../../helpers/services/documentsService';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import { setAllAttributesData, setAllTagsData } from './attributesData';
 import { User } from './auth';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
@@ -117,7 +117,7 @@ export const fetchDocuments = createAsyncThunk(
           allTags,
           allAttributes
         ).then((response: any) => {
-          if (response) {
+          if (response && response.status === 200) {
             if (currentCallId !== callCounter) return;
             const data = {
               siteId,
@@ -129,6 +129,8 @@ export const fetchDocuments = createAsyncThunk(
               next: response.next,
             };
             thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
           }
         });
       } else if (cleanedSearchWord.split(' ').every(isUUIDv4orV5)) {
@@ -141,7 +143,7 @@ export const fetchDocuments = createAsyncThunk(
           allTags,
           allAttributes
         ).then((response: any) => {
-          if (response) {
+          if (response && response.status === 200) {
             if (currentCallId !== callCounter) return;
             const data = {
               siteId,
@@ -153,6 +155,8 @@ export const fetchDocuments = createAsyncThunk(
               next: response.next,
             };
             thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
           }
         });
       } else if (searchFolder && searchFolder.length) {
@@ -167,7 +171,7 @@ export const fetchDocuments = createAsyncThunk(
           allAttributes,
           searchAttributes
         ).then((response: any) => {
-          if (response) {
+          if (response && response.status === 200) {
             if (currentCallId !== callCounter) return; // After the async operation completes,this check ensures that only the result from the most recent call is used to update the state.
             const data = {
               siteId,
@@ -185,6 +189,8 @@ export const fetchDocuments = createAsyncThunk(
               data.isLastSearchPageLoaded = true;
             }
             thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
           }
         });
       } else {
@@ -198,7 +204,7 @@ export const fetchDocuments = createAsyncThunk(
           allAttributes,
           searchAttributes
         ).then((response: any) => {
-          if (response) {
+          if (response && response.status === 200) {
             if (currentCallId !== callCounter) return;
             const temp: any = response.documents?.filter(
               (document: IDocument) => {
@@ -221,6 +227,8 @@ export const fetchDocuments = createAsyncThunk(
               data.isLastSearchPageLoaded = true;
             }
             thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
           }
         });
       }
@@ -234,7 +242,7 @@ export const fetchDocuments = createAsyncThunk(
           20
         ).then((response: any) => {
           // putting workflow under document object, for top-level object consistency with other search results
-          if (response) {
+          if (response && response.status === 200) {
             if (currentCallId !== callCounter) return;
             const mappedDocuments: any = [];
             response.documents.map((val: any) => {
@@ -260,6 +268,8 @@ export const fetchDocuments = createAsyncThunk(
               data.isLastSearchPageLoaded = true;
             }
             thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
           }
         });
       } else if (subfolderUri) {
@@ -272,7 +282,7 @@ export const fetchDocuments = createAsyncThunk(
             attributeParam,
             allAttributes
           ).then((response: any) => {
-            if (response) {
+            if (response && response.status === 200) {
               if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
@@ -291,6 +301,8 @@ export const fetchDocuments = createAsyncThunk(
                 data.isLastSearchPageLoaded = true;
               }
               thunkAPI.dispatch(setDocuments(data));
+            } else {
+              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
             }
           });
         } else if (subfolderUri === 'favorites') {
@@ -302,7 +314,7 @@ export const fetchDocuments = createAsyncThunk(
             attributeParam,
             allAttributes
           ).then((response: any) => {
-            if (response) {
+            if (response && response.status === 200) {
               if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
@@ -321,6 +333,8 @@ export const fetchDocuments = createAsyncThunk(
                 data.isLastSearchPageLoaded = true;
               }
               thunkAPI.dispatch(setDocuments(data));
+            } else {
+              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
             }
           });
         } else if (subfolderUri === 'deleted') {
@@ -330,7 +344,7 @@ export const fetchDocuments = createAsyncThunk(
             nextToken,
             'true'
           ).then((response: any) => {
-            if (response) {
+            if (response && response.status === 200) {
               if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
@@ -349,6 +363,8 @@ export const fetchDocuments = createAsyncThunk(
                 data.isLastSearchPageLoaded = true;
               }
               thunkAPI.dispatch(setDocuments(data));
+            } else {
+              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
             }
           });
         } else if (subfolderUri === 'all') {
@@ -360,7 +376,7 @@ export const fetchDocuments = createAsyncThunk(
             attributeParam,
             allAttributes
           ).then((response: any) => {
-            if (response) {
+            if (response && response.status === 200) {
               if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
@@ -379,6 +395,8 @@ export const fetchDocuments = createAsyncThunk(
                 data.isLastSearchPageLoaded = true;
               }
               thunkAPI.dispatch(setDocuments(data));
+            } else {
+              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
             }
           });
         } else {
@@ -393,7 +411,7 @@ export const fetchDocuments = createAsyncThunk(
             attributeParam,
             allAttributes
           ).then((response: any) => {
-            if (response) {
+            if (response && response.status === 200) {
               if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
@@ -413,6 +431,8 @@ export const fetchDocuments = createAsyncThunk(
                 data.isLastSearchPageLoaded = true;
               }
               thunkAPI.dispatch(setDocuments(data));
+            } else {
+              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
             }
           });
         }
@@ -428,7 +448,7 @@ export const fetchDocuments = createAsyncThunk(
           attributeParam,
           allAttributes
         ).then((response: any) => {
-          if (response) {
+          if (response && response.status === 200) {
             if (currentCallId !== callCounter) return;
             const data = {
               siteId,
@@ -445,6 +465,8 @@ export const fetchDocuments = createAsyncThunk(
               data.isLoadingMore = true;
             }
             thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
           }
         });
       }
@@ -699,6 +721,12 @@ export const documentsListSlice = createSlice({
       return {
         ...state,
         loadingStatus: RequestStatus.pending,
+      };
+    },
+    setDocumentLoadingStatusRejected: (state) => {
+      return {
+        ...state,
+        loadingStatus: RequestStatus.rejected,
       };
     },
     setDocuments: (state, action: PayloadAction<any>) => {
@@ -1205,6 +1233,7 @@ export const documentsListSlice = createSlice({
 
 export const {
   setDocumentLoadingStatusPending,
+  setDocumentLoadingStatusRejected,
   setDocuments,
   addDocumentTag,
   removeDocumentTag,

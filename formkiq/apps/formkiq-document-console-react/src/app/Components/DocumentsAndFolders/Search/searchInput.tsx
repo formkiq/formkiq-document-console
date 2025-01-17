@@ -66,8 +66,11 @@ export default function SearchInput({
       });
       setDocuments(temp);
       setIsSearchAvailable(true);
-    } else if (response.status === 400) {
-      setIsSearchAvailable(false);
+    } else if (response.status === 200) { // if search is available but no documents found
+      setIsSearchAvailable(true);
+      setDocuments([] as any);
+    } else {
+      setIsSearchAvailable(false); // if search is not available
     }
   }
 
