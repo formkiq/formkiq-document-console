@@ -1457,7 +1457,7 @@ function Documents() {
             id="documentsPageWrapper"
             onDragEnter={handleDragEnter}
           >
-            <div className="flex-1 inline-block h-full">
+            <div className="flex-1 inline-block h-full flex flex-col">
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
