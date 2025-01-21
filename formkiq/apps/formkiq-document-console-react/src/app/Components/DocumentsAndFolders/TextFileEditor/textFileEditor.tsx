@@ -6,7 +6,7 @@ import {useEffect, useState} from "react";
 import "./markdown/markdown.css"
 import {useAppDispatch} from "../../../Store/store";
 import {openDialog} from "../../../Store/reducers/globalNotificationControls";
-import * as DOMPurify from 'dompurify';
+import DOMPurify from 'dompurify';
 
 function TextFileEditor({
   currentDocument,
