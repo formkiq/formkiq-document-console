@@ -1,10 +1,11 @@
 {
+  "name": "formkiq-document-console-react",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/formkiq-document-console-react/src",
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/web:webpack",
+      "executor": "@nx/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
@@ -21,7 +22,7 @@
         ],
         "styles": ["apps/formkiq-document-console-react/src/styles.scss"],
         "scripts": [],
-        "webpackConfig": "@nrwl/react/plugins/webpack",
+        "webpackConfig": "@nx/react/plugins/webpack",
         "postcssConfig": "apps/formkiq-document-console-react/postcss.config.js"
       },
       "configurations": {
@@ -48,7 +49,7 @@
       }
     },
     "serve": {
-      "executor": "@nrwl/web:dev-server",
+      "executor": "@nx/webpack:dev-server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "formkiq-document-console-react:build",
@@ -75,7 +76,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/formkiq-document-console-react"],
+      "outputs": [
+        "{workspaceRoot}/coverage/apps/formkiq-document-console-react"
+      ],
       "options": {
         "jestConfig": "apps/formkiq-document-console-react/jest.config.ts",
         "passWithNoTests": true
