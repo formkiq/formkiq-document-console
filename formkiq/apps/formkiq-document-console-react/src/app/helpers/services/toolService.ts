@@ -24,7 +24,7 @@ export function getFileIcon(path: string, deepLinkPath: string) {
   }
   if (!fileIcon.length) {
     if (path) {
-      const extension = path.split('.').pop();
+      const extension = path.split('.').pop()?.toLowerCase();
       switch (extension) {
         case 'png':
           fileIcon = '/assets/img/svg/icon-png.svg';
