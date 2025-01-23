@@ -12,7 +12,9 @@ import {
   History,
   MoreActions,
   Move,
+  Relationship,
   Rename,
+  Settings,
   Share,
   Signature,
   Star,
@@ -20,6 +22,7 @@ import {
   Trash,
   Workflow,
 } from '../../Icons/icons';
+import { useDocumentActions } from './DocumentActionsContext';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
@@ -28,6 +31,7 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
         setExpanded(false);
       }
     }
+
     // Bind the event listener
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -38,27 +42,31 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
 }
 
 export default function DocumentActionsPopover({
-  onChange,
-  onKeyDown,
   value,
   siteId,
   isSiteReadOnly,
   formkiqVersion,
-  onShareClick,
-  onDeleteClick,
-  onEditTagsAndMetadataModalClick,
-  onRenameModalClick,
-  onMoveModalClick,
-  onDocumentVersionsModalClick,
-  onDocumentWorkflowsModalClick,
-  onDocumentReviewModalClick,
-  onESignaturesModalClick,
   onInfoPage,
-  user,
   useIndividualSharing,
   useCollections,
   useSoftDelete,
+  isDeeplinkPath,
+  setSelectedDocuments,
 }: any) {
+  const {
+    onShareClick,
+    onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
+    onESignaturesModalClick,
+    onSubmitForReviewModalClick,
+    onDocumentReviewModalClick,
+    onDeleteClick,
+    onEditAttributesModalClick,
+    onRenameModalClick,
+    onMoveModalClick,
+    onDocumentRelationshipsModalClick,
+    onActionModalClick,
+  } = useDocumentActions();
   const line: ILine = value;
   const [visible, setVisibility] = useState(false);
   const [referenceRef, setReferenceRef] = useState(null);
@@ -81,11 +89,13 @@ export default function DocumentActionsPopover({
 
   const clickDelete = () => {
     setVisibility(false);
-    onDeleteClick();
+    onDeleteClick(line.documentId, useSoftDelete, siteId, setSelectedDocuments);
   };
+
   function handleDropdownClick(event: any) {
     setVisibility(!visible);
   }
+
   const DownloadDocument = () => {
     DocumentsService.getDocumentUrl(line.documentId, siteId, '', false).then(
       (urlResponse: any) => {
@@ -103,13 +113,13 @@ export default function DocumentActionsPopover({
           onClick={handleDropdownClick}
           className="w-20 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
         >
-          <span className="w-5 pt-1">{MoreActions()}</span>
+          <span className="w-5 pt-1 ">{MoreActions()}</span>
         </button>
       ) : (
         <button
           ref={setReferenceRef as any}
           onClick={handleDropdownClick}
-          className="w-5 hover:text-primary-500"
+          className="w-5 hover:text-primary-500 rotate-90 text-inherit "
         >
           <MoreActions />
         </button>
@@ -152,7 +162,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {line.lineType === 'document' && !onInfoPage && (
+            {line.lineType === 'document' && !onInfoPage && !isDeeplinkPath && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={DownloadDocument}
@@ -215,56 +225,116 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {formkiqVersion.type !== 'core' && line.lineType === 'document' && (
-              <li
-                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
-                onClick={(event) =>
-                  onDocumentVersionsModalClick(event, {
-                    lineType: line.lineType,
-                    documentId: line.documentId,
-                    folder: line.folder,
-                  })
-                }
-              >
-                <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-3.5 text-neutral-900">
-                    {History()}
+            {formkiqVersion.type !== 'core' &&
+              line.lineType === 'document' &&
+              !isDeeplinkPath && (
+                <li
+                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(event) =>
+                    onDocumentVersionsModalClick(event, {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      folder: line.folder,
+                    })
+                  }
+                >
+                  <span className={'flex items-baseline'}>
+                    <span className="mr-2 w-3.5 text-neutral-900">
+                      {History()}
+                    </span>
+                    <span>Versions</span>
+                    <span
+                      className="ml-auto"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {ArrowRight()}
+                    </span>
                   </span>
-                  <span>Versions</span>
-                  <span
-                    className="ml-auto"
-                    style={{ width: '15px', height: '13px' }}
-                  >
-                    {ArrowRight()}
+                </li>
+              )}
+            {formkiqVersion.type !== 'core' &&
+              line.lineType === 'document' &&
+              !isDeeplinkPath && (
+                <li
+                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(event) =>
+                    onDocumentWorkflowsModalClick(event, {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      folder: line.folder,
+                    })
+                  }
+                >
+                  <span className={'flex items-baseline'}>
+                    <span className="mr-2 w-3.5 text-neutral-900">
+                      {Workflow()}
+                    </span>
+                    <span>Workflows</span>
+                    <span
+                      className="ml-auto"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {ArrowRight()}
+                    </span>
                   </span>
-                </span>
-              </li>
-            )}
-            {formkiqVersion.type !== 'core' && line.lineType === 'document' && (
-              <li
-                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
-                onClick={(event) =>
-                  onDocumentWorkflowsModalClick(event, {
-                    lineType: line.lineType,
-                    documentId: line.documentId,
-                    folder: line.folder,
-                  })
-                }
-              >
-                <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-3.5 text-neutral-900">
-                    {Workflow()}
+                </li>
+              )}
+
+            {formkiqVersion.type !== 'core' &&
+              line.lineType === 'document' &&
+              !isDeeplinkPath && (
+                <li
+                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(event) =>
+                    onActionModalClick(event, {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      folder: line.folder,
+                    })
+                  }
+                >
+                  <span className={'flex items-baseline'}>
+                    <span className="mr-2 w-3.5 text-neutral-900">
+                      {Settings()}
+                    </span>
+                    <span>Actions</span>
+                    <span
+                      className="ml-auto"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {ArrowRight()}
+                    </span>
                   </span>
-                  <span>Workflows</span>
-                  <span
-                    className="ml-auto"
-                    style={{ width: '15px', height: '13px' }}
-                  >
-                    {ArrowRight()}
+                </li>
+              )}
+
+            {line.lineType === 'document' &&
+              pathname.indexOf('/queues') === -1 && (
+                <li
+                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(event) =>
+                    onSubmitForReviewModalClick(event, {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      folder: line.folder,
+                      documentInstance: line.documentInstance,
+                    })
+                  }
+                >
+                  <span className={'flex items-baseline'}>
+                    <span className="mr-2 w-3.5 text-neutral-900">
+                      <Checkmark />
+                    </span>
+                    <span>Submit for review</span>
+                    <span
+                      className="ml-auto"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {ArrowRight()}
+                    </span>
                   </span>
-                </span>
-              </li>
-            )}
+                </li>
+              )}
 
             {line.lineType === 'document' && pathname.indexOf('/queues') > -1 && (
               <li
@@ -355,7 +425,7 @@ export default function DocumentActionsPopover({
                 <li
                   className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(event) =>
-                    onEditTagsAndMetadataModalClick(event, {
+                    onEditAttributesModalClick(event, {
                       lineType: line.lineType,
                       documentId: line.documentId,
                       folder: line.folder,
@@ -379,6 +449,31 @@ export default function DocumentActionsPopover({
                   </span>
                 </li>
               </>
+            )}
+            {line.lineType === 'document' && (
+              <li
+                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                onClick={(event) =>
+                  onDocumentRelationshipsModalClick(event, {
+                    lineType: line.lineType,
+                    documentId: line.documentId,
+                    folder: line.folder,
+                  })
+                }
+              >
+                <span className={'flex items-baseline'}>
+                  <span className="mr-2 w-3.5 text-neutral-900">
+                    <Relationship />
+                  </span>
+                  <span>Document Relationships</span>
+                  <span
+                    className="ml-auto"
+                    style={{ width: '15px', height: '13px' }}
+                  >
+                    {ArrowRight()}
+                  </span>
+                </span>
+              </li>
             )}
             {!onInfoPage && !isSiteReadOnly && (
               <>

@@ -223,6 +223,23 @@ export default function NewApiKeyModal({
                           >
                             DELETE
                           </label>
+                          <input
+                            aria-label="Permissions"
+                            id="permissions-checkbox-govern"
+                            type="checkbox"
+                            value="GOVERN"
+                            className="relative inline-block px-2 py-2 border border-gray-600
+                                                    text-sm
+                                                    placeholder-gray-500 text-gray-900
+                                                    focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
+                            {...register('permissions', {})}
+                          />
+                          <label
+                            htmlFor="permissions-checkbox-govern"
+                            className="pl-2 pr-4 cursor-pointer"
+                          >
+                            GOVERN
+                          </label>
                         </div>
                       </div>
                       <div className="mx-4">

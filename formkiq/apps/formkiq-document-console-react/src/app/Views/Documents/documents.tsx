@@ -1,24 +1,19 @@
+import { Dialog } from '@headlessui/react';
 import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Tooltip } from 'react-tooltip';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
+import { PendingArchiveTab } from '../../Components/DocumentsAndFolders/CreateArchive/ArchiveTab';
+import { useDocumentActions } from '../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
-import DocumentReviewModal from '../../Components/DocumentsAndFolders/DocumentReviewModal/DocumentReviewModal';
-import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
-import DocumentWorkflowsModal from '../../Components/DocumentsAndFolders/DocumentWorkflowsModal/documentWorkflowsModal';
-import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
-import EditAttributesModal from '../../Components/DocumentsAndFolders/EditAttributesModal/editAttributesModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
-import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal';
-import MultiValuedAttributeModal from '../../Components/DocumentsAndFolders/MultivaluedAttributeModal/MultivaluedAttributeModal';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
-import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
 import AdvancedSearchTab from '../../Components/DocumentsAndFolders/Search/advancedSearchTab';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
 import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
-import ButtonPrimary from '../../Components/Generic/Buttons/ButtonPrimary';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
 import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
@@ -30,24 +25,21 @@ import {
   Download,
   Edit,
   FolderOutline,
+  Pencil,
+  Retry,
   Spinner,
   Tag,
   Trash,
   Undo,
   View,
 } from '../../Components/Icons/icons';
-import ShareModal from '../../Components/Share/share';
 import {
   AttributesState,
   fetchDocumentAttributes,
 } from '../../Store/reducers/attributes';
 import { AttributesDataState } from '../../Store/reducers/attributesData';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
-import {
-  ConfigState,
-  setCurrentActionEvent,
-  setPendingArchive,
-} from '../../Store/reducers/config';
+import { ConfigState, setPendingArchive } from '../../Store/reducers/config';
 import { setCurrentDocumentPath } from '../../Store/reducers/data';
 import {
   deleteDocument,
@@ -59,18 +51,20 @@ import {
   updateDocumentsList,
 } from '../../Store/reducers/documentsList';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
-import { fetchQueues, QueuesState } from '../../Store/reducers/queues';
+import { QueuesState } from '../../Store/reducers/queues';
 import {
   fetchUsers,
   UserManagementState,
 } from '../../Store/reducers/userManagement';
-import { fetchWorkflows, WorkflowsState } from '../../Store/reducers/workflows';
+import { WorkflowsState } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
 import {
+  InlineEditableContentTypes,
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
+  TextFileEditorEditableContentTypes,
+  TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
-import { TopLevelFolders } from '../../helpers/constants/folders';
 import { TagsForFilterAndDisplay } from '../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -78,15 +72,13 @@ import {
   getCurrentSiteInfo,
   getFileIcon,
   getUserSites,
+  transformRelationshipValueFromString,
 } from '../../helpers/services/toolService';
-import { Attribute } from '../../helpers/types/attributes';
+import { Attribute, RelationshipType } from '../../helpers/types/attributes';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
-import { Queue } from '../../helpers/types/queues';
-import { User } from '../../helpers/types/userManagement';
-import { WorkflowSummary } from '../../helpers/types/workflows';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
@@ -97,6 +89,8 @@ function Documents() {
   const navigate = useNavigate();
   const { user } = useAuthenticatedState();
   const {
+    documents,
+    folders,
     nextToken,
     loadingStatus,
     currentSearchPage,
@@ -120,6 +114,7 @@ function Documents() {
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
   const search = useLocation().search;
+  const searchParams = new URLSearchParams(search);
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
   const filterTag = new URLSearchParams(search).get('filterTag');
@@ -145,6 +140,30 @@ function Documents() {
     workspaceSites
   );
 
+  const {
+    onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
+    onEditAttributesModalClick,
+    onAttributeQuantityClick,
+    onDocumentRelationshipsModalClick,
+    onUploadClick,
+    onNewClick,
+    onFolderUploadClick,
+    isFolderUploadModalOpened,
+    folderUploadModalDocumentId,
+    onFolderUploadClose,
+    isNewModalOpened,
+    newModalValue,
+    isUploadModalOpened,
+    onUploadClose,
+    uploadModalDocumentId,
+    onNewClose,
+    onActionModalClick,
+    currentDocumentActions,
+    setCurrentDocumentActions,
+    updateDocumentActions,
+  } = useDocumentActions();
+
   useEffect(() => {
     if (siteRedirectUrl.length) {
       navigate(
@@ -161,11 +180,15 @@ function Documents() {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
+  const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
+    useState<boolean>(isSiteReadOnly);
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
-  const [isArchiveTabExpanded, setIsArchiveTabExpanded] = useState(false);
+  const [archiveTabStatus, setArchiveTabStatus] = useState<
+    'open' | 'closed' | 'minimized'
+  >('closed');
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
-  const [infoTagEditMode, setInfoTagEditMode] = useState(false);
+  const [infoDocumentAction, setInfoDocumentAction] = useState('');
   // NOTE: not fully implemented;
   // using the edit metadata modal for now, to be replaced with new system to indicate diff between tag, metadata, and versioned metadata
   // const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
@@ -176,81 +199,116 @@ function Documents() {
     any
   ] = useState([]);
   const [currentDocumentVersions, setCurrentDocumentVersions] = useState(null);
-  const [currentDocumentActions, setCurrentDocumentActions] = useState<any[]>(
-    []
-  );
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
-  const [isUploadModalOpened, setUploadModalOpened] = useState(false);
-  const [isFolderUploadModalOpened, setFolderUploadModalOpened] =
-    useState(false);
-  const [uploadModalDocumentId, setUploadModalDocumentId] = useState('');
-  const [folderUploadModalDocumentId, setFolderUploadModalDocumentId] =
-    useState('');
-  const [shareModalValue, setShareModalValue] = useState<ILine | null>(null);
-  const [isShareModalOpened, setShareModalOpened] = useState(false);
-  const [editAttributesModalValue, setEditAttributesModalValue] =
-    useState<ILine | null>(null);
-  const [isEditAttributesModalOpened, setEditAttributesModalOpened] =
-    useState(false);
-  const [documentVersionsModalValue, setDocumentVersionsModalValue] =
-    useState<ILine | null>(null);
-  const [isDocumentVersionsModalOpened, setDocumentVersionsModalOpened] =
-    useState(false);
-  const [documentWorkflowsModalValue, setDocumentWorkflowsModalValue] =
-    useState<ILine | null>(null);
-  const [isDocumentWorkflowsModalOpened, setDocumentWorkflowsModalOpened] =
-    useState(false);
-  const [eSignaturesModalValue, setESignaturesModalValue] =
-    useState<ILine | null>(null);
-  const [documentReviewModalValue, setDocumentReviewModalValue] =
-    useState<ILine | null>(null);
-  const [isDocumentReviewModalOpened, setDocumentReviewModalOpened] =
-    useState(false);
-  const [isESignaturesModalOpened, setESignaturesModalOpened] = useState(false);
-  const [newModalValue, setNewModalValue] = useState<ILine | null>(null);
-  const [isNewModalOpened, setNewModalOpened] = useState(false);
-  const [renameModalValue, setRenameModalValue] = useState<ILine | null>(null);
-  const [isRenameModalOpened, setRenameModalOpened] = useState(false);
-  const [
-    isMultivaluedAttributeModalOpened,
-    setMultivaluedAttributeModalOpened,
-  ] = useState(false);
-  const [multivaluedAttributeModalValue, setMultivaluedAttributeModalValue] =
-    useState<any[]>([]);
-  const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
-  const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
-  const [documentListOffsetTop, setDocumentListOffsetTop] = useState<number>(0);
   const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
     []
   );
+  const [dropUploadDocuments, setDropUploadDocuments] = useState<any>(null);
+  const [dropFolderPath, setDropFolderPath] = useState<any>(null);
+  const documentsPageWrapper = document.getElementById('documentsPageWrapper');
+  const closeDropZoneRef = useRef(null);
+  const [isDropZoneVisible, setIsDropZoneVisible] = useState(false);
+  const [selectedDocuments, setSelectedDocuments] = useState<IDocument[]>([]);
+
+  const [relationshipDocumentsMap, setRelationshipDocumentsMap] = useState<{
+    [key: string]: string;
+  }>({});
+  const [relationships, setRelationships] = useState<
+    {
+      relationship: RelationshipType;
+      documentId: string;
+    }[]
+  >([]);
+
+  function handleDragEnter(event: any) {
+    if (!event.dataTransfer?.types.includes('Files')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDropZoneVisible(true);
+  }
+
+  function handleDrop(event: any) {
+    if (!event.dataTransfer?.types.includes('Files')) return;
+    event.preventDefault();
+    if (event.dataTransfer.files.length === 0) return;
+    setIsDropZoneVisible(false);
+    const folder = event.target.closest('.folder-drop-wrapper');
+    if (folder) {
+      const folderPath = folder.getAttribute('data-folder-path');
+      setDropFolderPath(folderPath);
+    }
+    if (event.dataTransfer.files.length === 1) {
+      const file = event.target.closest('.file-drop-wrapper');
+      if (file) {
+        const documentPath = file.getAttribute('data-test-id').split('/').pop();
+        if (documentPath === event.dataTransfer.files[0].name) {
+          setDropUploadDocuments(event.dataTransfer.files);
+          onUploadClick(event, file.getAttribute('id'));
+          return;
+        }
+      }
+    }
+    setDropUploadDocuments(event.dataTransfer.files);
+    onUploadClick(event, '');
+  }
+
+  useEffect(() => {
+    const handleDragOver = (event: any) => {
+      if (!event.dataTransfer?.types.includes('Files')) return;
+      event.preventDefault();
+    };
+    documentsPageWrapper?.addEventListener('dragover', function (event) {
+      handleDragOver(event);
+    });
+
+    documentsPageWrapper?.addEventListener('drop', function (event) {
+      handleDrop(event);
+    });
+
+    return () => {
+      documentsPageWrapper?.removeEventListener('dragover', function (event) {
+        handleDragOver(event);
+      });
+      documentsPageWrapper?.removeEventListener('drop', function (event) {
+        handleDrop(event);
+      });
+    };
+  }, [documentsPageWrapper]);
+
+  function resetDropUploadDocuments() {
+    setDropUploadDocuments(null);
+    setDropFolderPath(null);
+  }
 
   const trackScrolling = useCallback(async () => {
-    const bottomRow = (
-      document.getElementById('documentsTable') as HTMLTableElement
-    ).rows[
-      (document.getElementById('documentsTable') as HTMLTableElement).rows
-        .length - 1
-    ].getBoundingClientRect().bottom;
-    const isBottom = (el: HTMLElement) => {
-      if (el) {
-        return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
-      }
-      return false;
-    };
-    const scrollpane = document.getElementById('documentsScrollpane');
+    // If we don't have a nextToken and we're not searching, or we're already loading, don't proceed
     if (
-      isBottom(scrollpane as HTMLElement) &&
+      (!nextToken && !searchWord) ||
+      loadingStatus !== RequestStatus.fulfilled
+    ) {
+      return;
+    }
+
+    const scrollpane = document.getElementById('documentsScrollpane');
+    if (!scrollpane) return;
+
+    const isBottom =
+      scrollpane.offsetHeight + scrollpane.scrollTop + 600 >
+      scrollpane.scrollHeight;
+    if (
+      isBottom &&
       nextToken &&
       loadingStatus === RequestStatus.fulfilled
     ) {
       dispatch(setDocumentLoadingStatusPending());
+
       if (nextToken) {
         await dispatch(
           fetchDocuments({
             siteId: currentSiteId,
-            formkiqVersion: formkiqVersion,
+            formkiqVersion,
             searchWord,
             searchFolder,
             subfolderUri,
@@ -258,32 +316,26 @@ function Documents() {
             filterTag,
             filterAttribute,
             nextToken,
+            page: currentSearchPage + 1,
           })
         );
-      } else {
-        if (!isLastSearchPageLoaded && searchWord) {
-          await dispatch(
-            fetchDocuments({
-              // for next page results
-              siteId: currentSiteId,
-              formkiqVersion: formkiqVersion,
-              searchWord,
-              searchFolder,
-              subfolderUri,
-              queueId,
-              filterTag,
-              filterAttribute,
-              page: currentSearchPage + 1,
-            })
-          );
-        }
+      } else if (!isLastSearchPageLoaded && searchWord) {
+        await dispatch(
+          fetchDocuments({
+            siteId: currentSiteId,
+            formkiqVersion,
+            searchWord,
+            searchFolder,
+            subfolderUri,
+            queueId,
+            filterTag,
+            filterAttribute,
+            page: currentSearchPage + 1,
+          })
+        );
       }
     }
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
-
-  useEffect(() => {
-    setDocumentListOffsetTop(isTagFilterExpanded ? 0 : 45);
-  }, [isTagFilterExpanded]);
 
   function onDocumentInfoClick() {
     if (infoDocumentId.length) {
@@ -292,7 +344,51 @@ function Documents() {
           setCurrentDocument(response);
           // TODO: set folder to selected document path?
           updateTags();
-          updateDocumentActions();
+          updateDocumentActions(infoDocumentId, currentSiteId);
+          // close history tab if deeplink file
+          if (
+            infoDocumentView === 'history' &&
+            response.deepLinkPath?.length > 0
+          ) {
+            setInfoDocumentView('info');
+          }
+          // CHECK FOR MODAL ACTION
+          if (infoDocumentAction.length) {
+            switch (infoDocumentAction) {
+              case 'attributes':
+                onEditAttributesModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                break;
+              case 'submitForReview':
+                /*
+                onSubmitForReviewModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                */
+                break;
+              case 'reviewDocument':
+                /*
+                onDocumentReviewModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                */
+                break;
+            }
+            setInfoDocumentAction('');
+          }
         }
       );
     }
@@ -307,6 +403,73 @@ function Documents() {
       })
     );
   }
+
+  const getDocumentNameFromDocuments = (documentId: string) => {
+    const doc = documents.find(
+      (document) => document.documentId === documentId
+    );
+    if (doc) return doc.path.substring(doc.path.lastIndexOf('/') + 1);
+    return null;
+  };
+
+  // update document relationships
+  useEffect(() => {
+    const relationshipsAttribute = documentAttributes.find(
+      (attribute) => attribute.key === 'Relationships'
+    );
+    if (!relationshipsAttribute) {
+      setRelationships([]);
+      return;
+    }
+    const newRelationships: {
+      relationship: RelationshipType;
+      documentId: string;
+    }[] = [];
+    if (relationshipsAttribute.stringValue) {
+      newRelationships.push(
+        transformRelationshipValueFromString(relationshipsAttribute.stringValue)
+      );
+    } else if (relationshipsAttribute.stringValues) {
+      newRelationships.push(
+        ...relationshipsAttribute.stringValues.map((val) =>
+          transformRelationshipValueFromString(val)
+        )
+      );
+    }
+
+    setRelationships(newRelationships);
+    for (const relationship of newRelationships) {
+      if (relationshipDocumentsMap[relationship.documentId]) return;
+      const documentName = getDocumentNameFromDocuments(
+        relationship.documentId
+      );
+      if (documentName) {
+        setRelationshipDocumentsMap((prev) => ({
+          ...prev,
+          [relationship.documentId]: documentName,
+        }));
+      } else {
+        DocumentsService.getDocumentById(
+          relationship.documentId,
+          currentSiteId
+        ).then((response: any) => {
+          if (response.status === 200) {
+            setRelationshipDocumentsMap((prev) => ({
+              ...prev,
+              [relationship.documentId]: response.path.substring(
+                response.path.lastIndexOf('/') + 1
+              ),
+            }));
+          } else {
+            setRelationshipDocumentsMap((prev) => ({
+              ...prev,
+              [relationship.documentId]: 'NOT_FOUND',
+            }));
+          }
+        });
+      }
+    }
+  }, [documentAttributes]);
 
   useEffect(() => {
     onDocumentInfoClick();
@@ -324,7 +487,7 @@ function Documents() {
       return;
     }
     const sortedDocumentAttributesAndTags = [
-      ...currentDocumentTags,
+      ...(currentDocumentTags || []),
       ...documentAttributes,
     ];
     sortedDocumentAttributesAndTags.sort((a, b) => a.key.localeCompare(b.key));
@@ -333,10 +496,22 @@ function Documents() {
 
   useEffect(() => {
     if (hash.indexOf('#id=') > -1) {
-      setInfoDocumentId(hash.substring(4));
-    } else if (hash.indexOf('#history_id') > -1) {
-      setInfoDocumentId(hash.substring(12));
-      setInfoDocumentView('history');
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const id = hashParams.get('id');
+      const action = hashParams.get('action');
+      if (id) {
+        setInfoDocumentId(id);
+      } else {
+        setInfoDocumentId(''); // Handle case where id might be null
+      }
+      if (action) {
+        setInfoDocumentAction(action);
+        if (action === 'history') {
+          setInfoDocumentView('history');
+        }
+      } else {
+        setInfoDocumentAction('');
+      }
     } else {
       setInfoDocumentId('');
     }
@@ -357,7 +532,8 @@ function Documents() {
               documentId: '',
               documentInstance: null,
               folderInstance: null,
-            }
+            },
+            subfolderUri
           );
           break;
         case 'folderUpload':
@@ -382,7 +558,8 @@ function Documents() {
               documentId: '',
               documentInstance: null,
               folderInstance: null,
-            }
+            },
+            subfolderUri
           );
           break;
         case 'folderUpload':
@@ -426,99 +603,35 @@ function Documents() {
     }
   };
 
-  const updateDocumentActions = () => {
-    if (infoDocumentId.length) {
-      DocumentsService.getDocumentActions(infoDocumentId, currentSiteId).then(
-        (response: any) => {
-          if (response.status === 200) {
-            const actions = [...response.actions];
-            let isWorkflowsUpToDate = true;
-            let isQueuesUpToDate = true;
-            const addWorkflowNames = () => {
-              actions.forEach((action: any) => {
-                if (action.workflowId) {
-                  const workflowName = workflows.find(
-                    (workflow: WorkflowSummary) =>
-                      workflow.workflowId === action.workflowId
-                  )?.name;
-                  if (!workflowName) {
-                    isWorkflowsUpToDate = false;
-                  } else {
-                    action.workflowName = workflowName;
-                  }
-                }
-              });
-            };
-            const addQueueNames = () => {
-              actions.forEach((action: any) => {
-                if (action.queueId) {
-                  const queueName = queues.find(
-                    (queue: Queue) => queue.queueId === action.queueId
-                  )?.name;
-                  if (!queueName) {
-                    isQueuesUpToDate = false;
-                  } else {
-                    action.queueName = queueName;
-                  }
-                }
-              });
-            };
-            const addUserEmails = () => {
-              actions.forEach((action: any) => {
-                if (action.userId) {
-                  const userEmail = users.find(
-                    (user: User) => user.username === action.userId
-                  )?.email;
-                  action.userEmail = userEmail;
-                }
-              });
-            };
-            addWorkflowNames();
-            addQueueNames();
-            if (user.isAdmin && users?.length) {
-              addUserEmails();
-            }
-
-            // re-fetch workflows and queues only if new IDs appeared
-            if (!isWorkflowsUpToDate || !isQueuesUpToDate) {
-              if (!isWorkflowsUpToDate) {
-                dispatch(
-                  fetchWorkflows({
-                    siteId: currentSiteId,
-                    limit: 100,
-                    page: 1,
-                    nextToken: null,
-                  })
-                );
-              }
-              if (!isQueuesUpToDate) {
-                dispatch(
-                  fetchQueues({
-                    siteId: currentSiteId,
-                    limit: 100,
-                    page: 1,
-                    nextToken: null,
-                  })
-                );
-              }
-              setTimeout(() => {
-                addWorkflowNames();
-                addQueueNames();
-                setCurrentDocumentActions(actions);
-              }, 500);
-            } else {
-              setCurrentDocumentActions(actions);
-            }
-          }
+  function retryFailedActions() {
+    DocumentsService.retryDocumentActions(currentSiteId, infoDocumentId).then(
+      (response: any) => {
+        if (response.status === 200) {
+          updateDocumentActions(infoDocumentId, currentSiteId);
+        } else if (response.status === 400) {
+          dispatch(
+            openDialog({
+              dialogTitle: response.errors[0].error,
+            })
+          );
+        } else {
+          dispatch(
+            openDialog({
+              dialogTitle: 'Something went wrong. Please try again later.',
+            })
+          );
         }
-      );
-    }
-  };
+      }
+    );
+  }
 
   // update document actions every 5 seconds
   useEffect(() => {
     if (infoDocumentId && infoDocumentView === 'actions') {
-      const interval = setInterval(updateDocumentActions, 5000);
+      const interval = setInterval(
+        () => updateDocumentActions(infoDocumentId, currentSiteId),
+        5000
+      );
       return () => clearInterval(interval);
     }
     return () => {};
@@ -543,8 +656,13 @@ function Documents() {
         }
       );
     }
+    if (recheckSiteInfo.siteId !== currentSiteId) {
+      dispatch(setPendingArchive([]));
+      setSelectedDocuments([]);
+    }
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
+    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
   useEffect(() => {
@@ -573,30 +691,81 @@ function Documents() {
     formkiqVersion,
   ]);
 
-  const onDeleteDocument = (file: IDocument, searchDocuments: any) => () => {
-    const deleteFunc = () => {
-      let isDocumentInfoPage = false;
-      if (infoDocumentId.length) {
-        isDocumentInfoPage = true;
-        setIsCurrentDocumentSoftDeleted(true);
-      }
+  useEffect(() => {
+    // unselect documents that are not in the expanded/open folders
+    if (selectedDocuments.length > 0) {
+      const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
+      const allDisplayedDocuments = [...documents, ...expandedFoldersDocuments];
+      const filteredDocuments = selectedDocuments.filter(
+        (document) =>
+          allDisplayedDocuments.findIndex(
+            (doc) => doc.documentId === document.documentId
+          ) !== -1
+      );
+      setSelectedDocuments(filteredDocuments);
+    }
+  }, [documents, folders]);
+
+  const deleteFunc = async (id: string, softDelete: boolean) => {
+    const res: any = await dispatch(
+      deleteDocument({
+        siteId: currentSiteId,
+        user,
+        documentId: id,
+        softDelete,
+      })
+    );
+    if (res.error) {
       dispatch(
-        deleteDocument({
-          siteId: currentSiteId,
-          user,
-          document: file,
-          documents: searchDocuments,
-          isDocumentInfoPage: isDocumentInfoPage,
+        openDialog({
+          dialogTitle: res.error.message,
         })
       );
-    };
+      return;
+    }
+    setSelectedDocuments((docs) =>
+      docs.filter((doc: any) => doc.documentId !== id)
+    );
+  };
+
+  const onDeleteDocument = (id: string, softDelete: boolean) => {
+    const dialogTitle = softDelete
+      ? 'Are you sure you want to delete this document?'
+      : 'Are you sure you want to delete this document permanently?';
     dispatch(
       openDialog({
-        callback: deleteFunc,
-        dialogTitle: 'Are you sure you want to delete this document?',
+        callback: () => deleteFunc(id, softDelete),
+        dialogTitle,
       })
     );
   };
+
+  const onDeleteSelectedDocuments = (softDelete: boolean) => {
+    function deleteMultipleDocuments(
+      documentIds: string[],
+      softDelete: boolean
+    ) {
+      documentIds.forEach((id: string) => {
+        deleteFunc(id, softDelete);
+      });
+    }
+
+    dispatch(
+      openDialog({
+        callback: () =>
+          deleteMultipleDocuments(
+            selectedDocuments.map((doc) => doc.documentId),
+            softDelete
+          ),
+        dialogTitle: `Are you sure you want to delete ${
+          selectedDocuments.length
+        } selected document${selectedDocuments.length === 1 ? '' : 's'}${
+          softDelete ? '' : ' permanently'
+        }?`,
+      })
+    );
+  };
+
   const deleteFolder = (folder: IFolder | IDocument) => () => {
     const deleteFunc = () => {
       dispatch(fetchDeleteFolder({ folder, siteId }));
@@ -608,31 +777,40 @@ function Documents() {
       })
     );
   };
-  const restoreDocument =
-    (file: IDocument, siteId: string, searchDocuments: any) => () => {
-      DocumentsService.deleteDocumentTag(
-        file.documentId,
-        siteId,
-        'sysDeletedBy'
-      ).then(() => {
-        let newDocs = null;
-        if (searchDocuments) {
-          newDocs = searchDocuments.filter((doc: any) => {
-            return doc.documentId !== file.documentId;
-          });
-        }
-        setIsCurrentDocumentSoftDeleted(false);
-        if (!infoDocumentId.length) {
-          dispatch(
-            updateDocumentsList({
-              documents: newDocs,
-              user: user,
-              isSystemDeletedByKey: true,
-            })
-          );
-        }
-      });
-    };
+  const restoreDocument = (documentId: string) => {
+    DocumentsService.restoreDocument(currentSiteId, documentId).then((res) => {
+      if (res.status !== 200) {
+        dispatch(
+          openDialog({
+            dialogTitle: 'Error restoring document. Please try again later.',
+          })
+        );
+        return;
+      }
+      let newDocs = null;
+      if (documents) {
+        newDocs = documents.filter((doc: any) => {
+          return doc.documentId !== documentId;
+        });
+      }
+      dispatch(
+        updateDocumentsList({
+          documents: newDocs,
+          user: user,
+        })
+      );
+      setSelectedDocuments((docs) =>
+        docs.filter((doc: IDocument) => doc.documentId !== documentId)
+      );
+    });
+  };
+
+  const onRestoreSelectedDocuments = async () => {
+    await selectedDocuments.forEach((doc: IDocument) => {
+      restoreDocument(doc.documentId);
+    });
+  };
+
   const onTagDelete = (tagKey: string) => {
     if (infoDocumentId.length) {
       const deleteFunc = () => {
@@ -656,72 +834,7 @@ function Documents() {
       );
     }
   };
-  const onShareClick = (event: any, value: ILine | null) => {
-    setShareModalValue(value);
-    setShareModalOpened(true);
-  };
-  const onShareClose = () => {
-    setShareModalOpened(false);
-  };
-  const getShareModalValue = () => {
-    return shareModalValue;
-  };
-  const onUploadClick = (event: any, documentId: string) => {
-    dispatch(setCurrentActionEvent(''));
-    setUploadModalOpened(true);
-    setUploadModalDocumentId(documentId);
-  };
-  const onUploadClose = () => {
-    setUploadModalOpened(false);
-  };
-  const onFolderUploadClick = (event: any) => {
-    dispatch(setCurrentActionEvent(''));
-    setFolderUploadModalOpened(true);
-    setFolderUploadModalDocumentId('');
-  };
-  const onFolderUploadClose = () => {
-    setFolderUploadModalOpened(false);
-  };
-  const onEditAttributesModalClick = (event: any, value: ILine | null) => {
-    setEditAttributesModalValue(value);
-    setEditAttributesModalOpened(true);
-  };
-  const onEditAttributesModalClose = () => {
-    setEditAttributesModalOpened(false);
-    updateTags();
-  };
-  const getEditAttributesModalValue = () => {
-    return editAttributesModalValue;
-  };
-  const onDocumentVersionsModalClick = (event: any, value: ILine | null) => {
-    setDocumentVersionsModalValue(value);
-    setDocumentVersionsModalOpened(true);
-  };
-  const onDocumentVersionsModalClose = () => {
-    setDocumentVersionsModalOpened(false);
-  };
-  const onDocumentWorkflowsModalClick = (event: any, value: ILine | null) => {
-    setDocumentWorkflowsModalValue(value);
-    setDocumentWorkflowsModalOpened(true);
-  };
-  const onDocumentWorkflowsModalClose = () => {
-    setDocumentWorkflowsModalOpened(false);
-  };
-  const onESignaturesModalClick = (event: any, value: ILine | null) => {
-    setESignaturesModalValue(value);
-    setESignaturesModalOpened(true);
-  };
-  const onESignaturesModalClose = () => {
-    setESignaturesModalValue(null);
-    setESignaturesModalOpened(false);
-  };
-  const onDocumentReviewModalClick = (event: any, value: ILine | null) => {
-    setDocumentReviewModalValue(value);
-    setDocumentReviewModalOpened(true);
-  };
-  const onDocumentReviewModalClose = () => {
-    setDocumentReviewModalOpened(false);
-  };
+
   const onDocumentDataChange = (event: any, value: ILine | null) => {
     dispatch(setDocuments({ documents: null }));
     dispatch(
@@ -737,51 +850,11 @@ function Documents() {
       })
     );
   };
-  const onNewClick = (event: any, value: ILine | null) => {
-    dispatch(setCurrentActionEvent(''));
-    if (TopLevelFolders.indexOf(subfolderUri) !== -1) {
-      // TODO: add redirect or messaging of location of new file, as it won't be in the TopLevelFolder
-      value = {
-        lineType: 'folder',
-        folder: '',
-        documentId: '',
-        documentInstance: null,
-        folderInstance: null,
-      };
-    }
-    setNewModalValue(value);
-    setNewModalOpened(true);
-  };
-  const onNewClose = () => {
-    setNewModalOpened(false);
-  };
-  const onRenameModalClick = (event: any, value: ILine | null) => {
-    setRenameModalValue(value);
-    setRenameModalOpened(true);
-  };
-  const onRenameModalClose = () => {
-    setRenameModalOpened(false);
-  };
-  const onAttributeQuantityClick = (item: any) => {
-    setMultivaluedAttributeModalOpened(true);
-    setMultivaluedAttributeModalValue(item);
-  };
-  const onMultiValuedAttributeModalClose = () => {
-    setMultivaluedAttributeModalOpened(false);
-    setMultivaluedAttributeModalValue([]);
-  };
 
-  const onMoveModalClick = (event: any, value: ILine | null) => {
-    setMoveModalValue(value);
-    setMoveModalOpened(true);
-  };
-  const onMoveModalClose = () => {
-    setMoveModalOpened(false);
-  };
-  const DownloadDocument = () => {
+  const downloadDocument = (documentId: string) => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentUrl(
-        infoDocumentId,
+        documentId,
         currentSiteId,
         '',
         false
@@ -797,6 +870,13 @@ function Documents() {
       navigate(`${currentDocumentsRootUri}/${infoDocumentId}/view`);
     }
   };
+
+  const editDocument = () => {
+    if (infoDocumentId.length) {
+      navigate(`${currentDocumentsRootUri}/${infoDocumentId}/edit`);
+    }
+  };
+
   const onFilterTag = (event: any, tag: string) => {
     if (filterTag === tag || filterAttribute === tag) {
       if (subfolderUri && subfolderUri.length) {
@@ -887,6 +967,38 @@ function Documents() {
         );
       }
     }
+  };
+
+  const expandAdvancedSearch = () => {
+    searchParams.set('advancedSearch', 'visible');
+    navigate(
+      {
+        pathname:
+          pathname +
+          '?' +
+          searchParams.toString() +
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}` : ''),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const minimizeAdvancedSearch = () => {
+    searchParams.set('advancedSearch', 'hidden');
+    navigate(
+      {
+        pathname:
+          pathname +
+          '?' +
+          searchParams.toString() +
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}` : ''),
+      },
+      {
+        replace: true,
+      }
+    );
   };
 
   const foldersPath = (uri: string) => {
@@ -1145,26 +1257,73 @@ function Documents() {
     );
   };
 
-  const ToggleArchiveTab = () => {
-    if (!isArchiveTabExpanded) {
-      setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
-    }
-    setIsArchiveTabExpanded(!isArchiveTabExpanded);
+  function getExpandedFoldersDocuments(folders: IFolder[]): IDocument[] {
+    return folders.reduce((acc: IDocument[], folder: IFolder) => {
+      if (folder.isExpanded) {
+        // Add document IDs from the current folder
+        const folderDocuments = folder.documents;
+        // Recursively get document IDs from subfolders
+        const subFolderDocuments = getExpandedFoldersDocuments(folder.folders);
+        return [...acc, ...folderDocuments, ...subFolderDocuments];
+      }
+      return acc;
+    }, []);
+  }
+
+  const openArchiveTab = () => {
+    const filteredDocuments = selectedDocuments.filter(
+      (document: IDocument) =>
+        !document.deepLinkPath || (document.deepLinkPath?.length ?? 0) === 0
+    );
+    dispatch(setPendingArchive(filteredDocuments));
+    setArchiveTabStatus('open');
   };
+  const closeArchiveTab = () => {
+    setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+    const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
+    const allDisplayedDocuments = [...documents, ...expandedFoldersDocuments];
+    const filteredDocuments = pendingArchive.filter(
+      (document) =>
+        allDisplayedDocuments.findIndex(
+          (doc) => doc.documentId === document.documentId
+        ) !== -1
+    );
+    dispatch(setPendingArchive([]));
+    setSelectedDocuments(filteredDocuments);
+    setArchiveTabStatus('closed');
+  };
+
+  const minimizeArchiveTab = () => {
+    setArchiveTabStatus('minimized');
+  };
+
+  const expandArchiveTab = () => {
+    setArchiveTabStatus('open');
+  };
+
   const deleteFromPendingArchive = (file: IDocument) => {
     dispatch(
       setPendingArchive(
         pendingArchive.filter((f) => f.documentId !== file.documentId)
       )
     );
+    setSelectedDocuments(
+      selectedDocuments.filter((f) => f.documentId !== file.documentId)
+    );
   };
   const addToPendingArchive = (file: IDocument) => {
     if (pendingArchive) {
-      if (pendingArchive.indexOf(file) === -1) {
+      if (
+        pendingArchive.findIndex(
+          (doc) => doc.documentId === file.documentId
+        ) === -1
+      ) {
         dispatch(setPendingArchive([...pendingArchive, file]));
+        setSelectedDocuments([...selectedDocuments, file]);
       }
     } else {
       dispatch(setPendingArchive([file]));
+      setSelectedDocuments([file]);
     }
   };
 
@@ -1175,201 +1334,20 @@ function Documents() {
     ERROR: 'ERROR',
   };
   const [archiveStatus, setArchiveStatus] = useState(ARCHIVE_STATUSES.INITIAL);
-  const [intervalId, setIntervalId] = useState<
-    string | number | NodeJS.Timeout | undefined
-  >(0);
-  const [archiveDownloadUrl, setArchiveDownloadUrl] = useState<
-    string | undefined
-  >(undefined);
-  const [isCompressButtonDisabled, setIsCompressButtonDisabled] =
-    useState(true);
 
-  const compressDocuments = () => {
-    setArchiveStatus(ARCHIVE_STATUSES.PENDING);
-    const documentIds: string[] = [];
-    pendingArchive.forEach((document) => {
-      documentIds.push(document.documentId);
-    });
-
-    DocumentsService.compressDocuments(documentIds, currentSiteId).then(
-      (response: any) => {
-        setArchiveStatus(ARCHIVE_STATUSES.PENDING);
-        if (response.status === 201) {
-          let counter = 0;
-          const downloadArchive = async () => {
-            try {
-              await fetch(response.downloadUrl).then((r) => {
-                if (r.ok) {
-                  setArchiveDownloadUrl(response.downloadUrl);
-                  setArchiveStatus(ARCHIVE_STATUSES.COMPLETE);
-                  dispatch(setPendingArchive([]));
-                  clearInterval(downloadInterval);
-                }
-              });
-              if (counter === 120) {
-                setArchiveStatus(ARCHIVE_STATUSES.ERROR);
-                clearInterval(downloadInterval);
-              } else {
-                counter += 1;
-              }
-            } catch (e) {
-              console.log(e, 'error');
-            }
-          };
-          const downloadInterval = setInterval(downloadArchive, 500);
-          setIntervalId(downloadInterval);
-          downloadArchive();
-        }
-      }
-    );
-  };
-  const ClearPendingArchive = () => {
-    setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
-    dispatch(setPendingArchive([]));
-    setIsArchiveTabExpanded(!isArchiveTabExpanded);
-  };
-
-  useEffect(() => {
-    if (
-      pendingArchive === undefined ||
-      pendingArchive.length === 0 ||
-      archiveStatus === ARCHIVE_STATUSES.COMPLETE ||
-      archiveStatus === ARCHIVE_STATUSES.PENDING
-    ) {
-      setIsCompressButtonDisabled(true);
-    } else {
-      setIsCompressButtonDisabled(false);
-    }
-
-    if (
-      archiveStatus === ARCHIVE_STATUSES.COMPLETE &&
-      pendingArchive.length > 0
-    ) {
-      setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
-    }
-  }, [pendingArchive, archiveStatus, isCompressButtonDisabled]);
-
-  const PendingArchiveTab = () => {
-    return (
-      <div className="w-full h-56 p-4 flex flex-col justify-between relative">
-        <div className="absolute flex w-full h-40 justify-center items-center font-bold text-5xl text-gray-100 mb-2">
-          Document Archive (ZIP)
-        </div>
-        <div className="h-full border-gray-400 border overflow-y-auto z-20">
-          {archiveStatus === ARCHIVE_STATUSES.INITIAL ? (
-            pendingArchive ? (
-              <div className="grid grid-cols-2 2xl:grid-cols-3">
-                {pendingArchive.map((file: IDocument) => (
-                  <div key={file.documentId} className="flex flex-row p-2">
-                    <button
-                      className="w-6 mr-2 text-gray-400 cursor-pointer hover:text-primary-500"
-                      onClick={() => deleteFromPendingArchive(file)}
-                    >
-                      <Close />
-                    </button>
-                    <Link
-                      to={`${currentDocumentsRootUri}/${file.documentId}/view`}
-                      className="cursor-pointer w-16 flex items-center justify-start"
-                    >
-                      <img
-                        src={getFileIcon(file.path, file.deepLinkPath)}
-                        className="w-8 inline-block"
-                        alt="icon"
-                      />
-                    </Link>
-                    <Link
-                      to={`${currentDocumentsRootUri}/${file.documentId}/view`}
-                      className="cursor-pointer pt-1.5 flex items-center"
-                      title={file.path.substring(
-                        file.path.lastIndexOf('/') + 1
-                      )}
-                    >
-                      <span>
-                        {file.path.substring(file.path.lastIndexOf('/') + 1)
-                          .length > 50 ? (
-                          <span className="tracking-tighter text-clip overflow-hidden">
-                            {file.path.substring(
-                              file.path.lastIndexOf('/') + 1,
-                              file.path.lastIndexOf('/') + 60
-                            )}
-                            {file.path.substring(file.path.lastIndexOf('/') + 1)
-                              .length > 60 && <span>...</span>}
-                          </span>
-                        ) : (
-                          <span>
-                            {file.path.substring(
-                              file.path.lastIndexOf('/') + 1
-                            )}
-                          </span>
-                        )}
-                      </span>
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-md text-gray-500 ml-2">
-                No files in archive
-              </div>
-            )
-          ) : archiveStatus === ARCHIVE_STATUSES.PENDING ? (
-            <div className="h-full flex flex-col justify-center">
-              <Spinner />
-              <div className="text-md text-gray-500 ml-2 text-center">
-                compressing...
-              </div>
-            </div>
-          ) : (
-            <>
-              {archiveStatus === ARCHIVE_STATUSES.ERROR ? (
-                <div className="h-full flex flex-col justify-center font-semibold text-center">
-                  <span className="text-red-600">Error: please try again.</span>
-                  <a
-                    href="JavaScript://"
-                    onClick={compressDocuments}
-                    className="block font-bold hover:underline"
-                  >
-                    retry
-                  </a>
-                </div>
-              ) : (
-                <div className="flex w-full pt-10 justify-center items-center">
-                  <ButtonPrimary type="button" style={{ padding: 0 }}>
-                    <a
-                      href={archiveDownloadUrl}
-                      className="w-full h-full block"
-                    >
-                      <div className="text-lg mx-4 text-center cursor-pointer">
-                        Download Archive
-                      </div>
-                    </a>
-                  </ButtonPrimary>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-        <div className="h-12 flex justify-end mt-2">
-          {!isCompressButtonDisabled && (
-            <ButtonPrimary onClick={compressDocuments} type="button">
-              <span>Compress</span>
-            </ButtonPrimary>
-          )}
-          {archiveStatus === ARCHIVE_STATUSES.COMPLETE && (
-            <ButtonGhost onClick={ClearPendingArchive} type="button">
-              <span>Done</span>
-            </ButtonGhost>
-          )}
-        </div>
-      </div>
-    );
-  };
+  // const clearPendingArchive = () => {
+  //   setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+  //   dispatch(setPendingArchive([]));
+  //   setIsArchiveTabExpanded(!isArchiveTabExpanded);
+  // };
 
   const viewDocumentVersion = (versionKey: string) => {
     if (infoDocumentId) {
       if (versionKey !== undefined) {
         navigate(
-          `${currentDocumentsRootUri}/${infoDocumentId}/view?versionKey=${versionKey}`
+          `${currentDocumentsRootUri}/${infoDocumentId}/view?versionKey=${encodeURIComponent(
+            versionKey
+          )}`
         );
       } else {
         navigate(`${currentDocumentsRootUri}/${infoDocumentId}/view`);
@@ -1377,66 +1355,79 @@ function Documents() {
     }
   };
 
+  const [publicationLinkCopyTooltipText, setPublicationLinkCopyTooltipText] =
+    useState('Copy Link');
+  const CopyPublicationLink = (documentId: string) => {
+    window.navigator.clipboard.writeText(`/publications/${documentId}`);
+    setPublicationLinkCopyTooltipText('Copied!');
+    setTimeout(() => {
+      setPublicationLinkCopyTooltipText('Copy Link');
+    }, 2000);
+  };
+
   return (
     <>
       <Helmet>
         <title>Documents</title>
       </Helmet>
-      <div className="h-[calc(100vh-3.68rem)] flex">
-        <div className="grow flex flex-col justify-stretch">
+      <div className="h-[calc(100vh-3.68rem)] flex ">
+        <div className="grow flex flex-col justify-stretch flex-1">
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
             <div className="flex items-center gap-4 pr-8 z-10">
-              {archiveStatus !== ARCHIVE_STATUSES.COMPLETE && (
-                <ButtonSecondary onClick={ToggleArchiveTab} type="button">
-                  {isArchiveTabExpanded ? (
-                    <>
-                      <span>Minimize Archive</span>
-                    </>
-                  ) : (
-                    <>
-                      {pendingArchive.length ? (
-                        <span>View Pending Archive</span>
-                      ) : (
-                        <span>Create Archive</span>
-                      )}
-                    </>
-                  )}
+              {archiveTabStatus === 'closed' && (
+                <ButtonSecondary onClick={openArchiveTab} type="button">
+                  Download Multiple Files (ZIP)
                 </ButtonSecondary>
               )}
-              {isArchiveTabExpanded &&
+              {archiveTabStatus === 'minimized' && (
+                <ButtonSecondary onClick={expandArchiveTab} type="button">
+                  View Pending File Download (ZIP)
+                </ButtonSecondary>
+              )}
+              {archiveTabStatus === 'open' && (
+                <ButtonSecondary onClick={minimizeArchiveTab}>
+                  Minimize Pending File Download (ZIP)
+                </ButtonSecondary>
+              )}
+
+              {/*// )}*/}
+              {archiveTabStatus === 'open' &&
                 archiveStatus === ARCHIVE_STATUSES.INITIAL && (
-                  <ButtonTertiary onClick={ClearPendingArchive} type="button">
-                    Cancel
+                  <ButtonTertiary onClick={closeArchiveTab} type="button">
+                    Cancel Pending File Download
                   </ButtonTertiary>
                 )}
               {!formkiqVersion.modules.includes('typesense') &&
                 !formkiqVersion.modules.includes('opensearch') &&
                 !advancedSearch && (
-                  <Link
-                    to="?advancedSearch=visible"
+                  <button
+                    type="button"
+                    onClick={expandAdvancedSearch}
                     className="cursor-pointer h-8"
                   >
                     <ButtonGhost type="button">Search Documents...</ButtonGhost>
-                  </Link>
+                  </button>
                 )}
               {!formkiqVersion.modules.includes('typesense') &&
                 !formkiqVersion.modules.includes('opensearch') &&
                 advancedSearch &&
                 (advancedSearch === 'hidden' ? (
-                  <Link
-                    to="?advancedSearch=visible"
+                  <button
+                    type="button"
+                    onClick={expandAdvancedSearch}
                     className="cursor-pointer h-8"
                   >
                     <ButtonGhost type="button">Expand Search Tab</ButtonGhost>
-                  </Link>
+                  </button>
                 ) : (
-                  <Link
-                    to="?advancedSearch=hidden"
+                  <button
+                    type="button"
+                    onClick={minimizeAdvancedSearch}
                     className="cursor-pointer h-8"
                   >
                     <ButtonGhost type="button">Minimize Search Tab</ButtonGhost>
-                  </Link>
+                  </button>
                 ))}
               <div
                 className={
@@ -1463,14 +1454,24 @@ function Documents() {
                 isTagFilterExpanded ? '- 6rem' : '- 3.68rem'
               }`,
             }}
+            id="documentsPageWrapper"
+            onDragEnter={handleDragEnter}
           >
-            <div className="flex-1 inline-block h-full">
+            <div className="flex-1 inline-block h-full flex flex-col">
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
-              {isArchiveTabExpanded && (
+              {archiveTabStatus === 'open' && (
                 <div className="pt-2 pr-8">
-                  <PendingArchiveTab />
+                  <PendingArchiveTab
+                    siteId={currentSiteId}
+                    documentsRootUri={currentDocumentsRootUri}
+                    archiveStatus={archiveStatus}
+                    setArchiveStatus={setArchiveStatus}
+                    closeArchiveTab={closeArchiveTab}
+                    deleteFromPendingArchive={deleteFromPendingArchive}
+                    setSelectedDocuments={setSelectedDocuments}
+                  />
                 </div>
               )}
               {advancedSearch && (
@@ -1479,46 +1480,72 @@ function Documents() {
                     siteId={currentSiteId}
                     formkiqVersion={formkiqVersion}
                     subfolderUri={subfolderUri}
+                    infoDocumentId={infoDocumentId}
                   />
                 </div>
               )}
               <DocumentsTable
-                onDeleteDocument={onDeleteDocument}
                 onRestoreDocument={restoreDocument}
-                onRenameModalClick={onRenameModalClick}
-                onMoveModalClick={onMoveModalClick}
-                onShareClick={onShareClick}
                 documentsScrollpaneRef={documentsScrollpaneRef}
                 documentsWrapperRef={documentsWrapperRef}
                 currentSiteId={currentSiteId}
                 currentDocumentsRootUri={currentDocumentsRootUri}
-                onESignaturesModalClick={onESignaturesModalClick}
                 onDocumentDataChange={onDocumentDataChange}
-                isSiteReadOnly={isSiteReadOnly}
-                onEditTagsAndMetadataModalClick={onEditAttributesModalClick}
+                isSiteReadOnly={isCurrentSiteReadonly}
                 filterTag={filterTag}
-                onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
-                onDocumentReviewModalClick={onDocumentReviewModalClick}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
-                isArchiveTabExpanded={isArchiveTabExpanded}
                 addToPendingArchive={addToPendingArchive}
                 deleteFromPendingArchive={deleteFromPendingArchive}
                 archiveStatus={archiveStatus}
                 infoDocumentId={infoDocumentId}
                 onDocumentInfoClick={onDocumentInfoClick}
+                selectedDocuments={selectedDocuments}
+                setSelectedDocuments={setSelectedDocuments}
+                onDeleteSelectedDocuments={onDeleteSelectedDocuments}
+                onRestoreSelectedDocuments={onRestoreSelectedDocuments}
+                openArchiveTab={openArchiveTab}
+                archiveTabStatus={archiveTabStatus}
+                getExpandedFoldersDocuments={getExpandedFoldersDocuments}
+                downloadDocument={downloadDocument}
               />
+              <Dialog
+                open={isDropZoneVisible}
+                onClose={() => setIsDropZoneVisible(false)}
+                initialFocus={closeDropZoneRef}
+                className="h-[calc(100vh-60px)] w-96 absolute right-0 top-[60px] z-10 bg-neutral-100 flex text-gray-400 border border-dashed border-4"
+              >
+                <Dialog.Panel>
+                  <button
+                    ref={closeDropZoneRef}
+                    className="absolute right-2 top-2 cursor-pointer h-6 w-6 text-gray-400 hover:text-gray-600 focus:outline-none "
+                    onClick={() => setIsDropZoneVisible(false)}
+                  >
+                    <Close />
+                  </button>
+                  <div
+                    className="h-full w-full flex justify-center items-center p-6"
+                    onDrop={handleDrop}
+                  >
+                    <h1 className="text-2xl font-bold text-center">
+                      Drop files here to upload to current folder <br />
+                      <span className="text-sm font-normal ">
+                        (or drop files onto specific folders)
+                      </span>
+                    </h1>
+                  </div>
+                </Dialog.Panel>
+              </Dialog>
             </div>
           </div>
         </div>
         {infoDocumentId.length ? (
-          <div className="h-[calc(100vh-3.68rem)] overflow-y-auto flex w-72 bg-white border-l border-neutral-300">
+          <div className="h-[calc(100vh-3.68rem)] overflow-y-auto flex w-[17rem] bg-white border-l border-neutral-300">
             <div className="flex-1 inline-block">
               {currentDocument ? (
-                <div className="flex flex-wrap justify-center">
+                <div className="flex flex-wrap justify-start">
                   <div className="w-full flex grow-0 pl-2 pt-3 justify-start">
-                    <div className="w-12">
+                    <div className="w-12 flex items-center">
                       <img
                         alt="File Icon"
                         src={getFileIcon(
@@ -1528,14 +1555,24 @@ function Documents() {
                         className="w-12 h-12"
                       />
                     </div>
-                    <div className="grow-0 w-44 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
-                      {(currentDocument as IDocument).path}
-                      {isCurrentDocumentSoftDeleted && (
-                        <small className="block text-red-500 uppercase">
-                          (deleted)
-                        </small>
-                      )}
+                    <div className="flex items-center">
+                      <h1 title={(currentDocument as IDocument).path} className="pl-2 w-40 text-base break-all leading-5 font-bold bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 bg-clip-text text-transparent">
+                        {(currentDocument as IDocument).path.substring(0, 30)}
+                        {(currentDocument as IDocument).path.length > 30 && <span>...</span>}
+                        {isCurrentDocumentSoftDeleted && (
+                          <small className="block text-red-500 uppercase">
+                            (deleted)
+                          </small>
+                        )}
+                        {(currentDocument as IDocument).contentType && (
+                          <small className="block text-gray-500 text-xs">
+                            {(currentDocument as IDocument).contentType}
+                          </small>
+                        )}
+                      </h1>
                     </div>
+
+
                     <div className="w-8 grow-0 flex justify-end">
                       <div
                         className="w-4 mt-0.5 h-4 cursor-pointer text-gray-400"
@@ -1548,7 +1585,7 @@ function Documents() {
                       </div>
                     </div>
                   </div>
-                  <div className="w-64 flex mt-4 mr-12 mb-2 border-b">
+                  <div className="w-64 flex mt-4 mr-2 mb-2 border-b">
                     <div
                       className="w-1/3 text-sm font-semibold cursor-pointer"
                       onClick={(event) => {
@@ -1575,35 +1612,37 @@ function Documents() {
                         />
                       </div>
                     </div>
-                    {formkiqVersion.type !== 'core' && (
-                      <div
-                        className="w-1/3 text-sm font-semibold cursor-pointer"
-                        onClick={(event) => {
-                          setInfoDocumentView('history');
-                        }}
-                      >
+                    {formkiqVersion.type !== 'core' &&
+                      (!(currentDocument as IDocument).deepLinkPath ||
+                        ((currentDocument as IDocument).deepLinkPath?.length ??
+                          0) === 0) && (
                         <div
-                          className={
-                            (infoDocumentView === 'history'
-                              ? 'text-primary-500 '
-                              : 'text-gray-400 ') + ' text-center'
-                          }
+                          className="w-1/3 text-sm font-semibold cursor-pointer"
+                          onClick={(event) => {
+                            setInfoDocumentView('history');
+                          }}
                         >
-                          History
-                        </div>
-                        <div className="flex justify-center">
-                          <hr
+                          <div
                             className={
                               (infoDocumentView === 'history'
-                                ? 'border-primary-500 '
-                                : 'border-transparent ') +
-                              ' w-1/2 rounded-xl border-b border'
+                                ? 'text-primary-500 '
+                                : 'text-gray-400 ') + ' text-center'
                             }
-                          />
+                          >
+                            History
+                          </div>
+                          <div className="flex justify-center">
+                            <hr
+                              className={
+                                (infoDocumentView === 'history'
+                                  ? 'border-primary-500 '
+                                  : 'border-transparent ') +
+                                ' w-1/2 rounded-xl border-b border'
+                              }
+                            />
+                          </div>
                         </div>
-                      </div>
-                    )}
-
+                      )}
                     <div
                       className="w-1/3 text-sm font-semibold cursor-pointer"
                       onClick={(event) => {
@@ -1630,11 +1669,23 @@ function Documents() {
                         />
                       </div>
                     </div>
+                    <div className="absolute"></div>
+                    <ButtonSecondary
+                      onClick={onDocumentInfoClick}
+                      type="button"
+                      style={{
+                        width: '36px',
+                      }}
+                    >
+                      <div className="flex justify-center">
+                        <span className="w-4 -m-2 p-0.5">{Retry()}</span>
+                      </div>
+                    </ButtonSecondary>
                   </div>
                   <div
                     className={
                       (infoDocumentView === 'info' ? 'block ' : 'hidden ') +
-                      ' w-64 mr-12'
+                      ' w-64 mr-2'
                     }
                   >
                     {currentDocument && (currentDocument as IDocument).path && (
@@ -1759,10 +1810,75 @@ function Documents() {
                             </dd>
                           </div>
                         )}
-                        <div className="w-68 flex mr-3 border-b"></div>
+                        <div className="w-64 flex mr-3 border-b"></div>
+                        <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
+                          Relationships
+                          {!isSiteReadOnly && (
+                            <div
+                              className="w-3/5 self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                              onClick={(event) =>
+                                onDocumentRelationshipsModalClick(event, {
+                                  lineType: 'document',
+                                  folder: subfolderUri,
+                                  documentId: (currentDocument as IDocument)
+                                    .documentId,
+                                  documentInstance:
+                                    currentDocument as IDocument,
+                                  folderInstance: null,
+                                })
+                              }
+                            >
+                              <>
+                                <span className="pt-0.5 whitespace-nowrap">
+                                  add/edit relationships
+                                </span>
+                                <div className="w-4">
+                                  <ChevronRight />
+                                </div>
+                              </>
+                            </div>
+                          )}
+                        </div>
+                        {relationships.length > 0 ? (
+                          <div>
+                            {relationships.map((relationship) => (
+                              <div>
+                                <h3 className="text-sm font-semibold text-neutral-900">
+                                  {relationship.relationship}:{' '}
+                                  {relationshipDocumentsMap[
+                                    relationship.documentId
+                                  ] &&
+                                  relationshipDocumentsMap[
+                                    relationship.documentId
+                                  ] !== 'NOT_FOUND' ? (
+                                    <Link
+                                      to={`${siteDocumentsRootUri}/${relationship.documentId}/view`}
+                                      className="underline hover:text-primary-500 break-words font-normal"
+                                    >
+                                      {
+                                        relationshipDocumentsMap[
+                                          relationship.documentId
+                                        ]
+                                      }
+                                    </Link>
+                                  ) : (
+                                    <span className="text-neutral-500">
+                                      {relationship.documentId}
+                                    </span>
+                                  )}
+                                </h3>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs">
+                            (no relationships have been added)
+                          </span>
+                        )}
+                        <div className="w-64 flex mr-3 border-b"></div>
                         <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
                           Attributes
-                          {!isSiteReadOnly && (
+                          {!isCurrentSiteReadonly && (
                             <div
                               className="w-3/5 flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
@@ -1911,8 +2027,55 @@ function Documents() {
                                     </dt>
                                     <dd className="text-sm">
                                       {/*Attributes*/}
-                                      {item?.stringValue && (
-                                        <span>{item.stringValue}</span>
+                                      {item?.key === 'Publication' ||
+                                      item?.key === 'Relationships' ? (
+                                        <>
+                                          {item?.stringValue && (
+                                            <div>
+                                              <span className="text-xs pr-2">
+                                                {item.stringValue}
+                                                <span className="mx-1"></span>
+                                                <CopyButton
+                                                  value={item.stringValue}
+                                                />
+                                              </span>
+                                              {item?.key === 'Publication' && (
+                                                <span className="block mt-1 text-xs">
+                                                  <Tooltip
+                                                    id={
+                                                      'publication-link-copy-tooltip'
+                                                    }
+                                                  />
+                                                  <ButtonTertiary
+                                                    className="px-2 py-0.5"
+                                                    data-tooltip-id={
+                                                      'publication-link-copy-tooltip'
+                                                    }
+                                                    data-tooltip-content={
+                                                      publicationLinkCopyTooltipText
+                                                    }
+                                                    onClick={() => {
+                                                      CopyPublicationLink(
+                                                        (
+                                                          currentDocument as IDocument
+                                                        ).documentId
+                                                      );
+                                                    }}
+                                                    type="button"
+                                                  >
+                                                    Copy Publication Link
+                                                  </ButtonTertiary>
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <>
+                                          {item?.stringValue && (
+                                            <span>{item.stringValue}</span>
+                                          )}
+                                        </>
                                       )}
                                       {item?.numberValue !== undefined && (
                                         <span>{item.numberValue}</span>
@@ -1932,14 +2095,31 @@ function Documents() {
                                         <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
                                           {item.stringValues.map(
                                             (val: any, index: number) => (
-                                              <span
-                                                key={`attr_string_${item.key}_${index}`}
-                                              >
-                                                {val}
-                                                {index <
-                                                  item.stringValues.length -
-                                                    1 && <hr />}
-                                              </span>
+                                              <>
+                                                {item?.key ===
+                                                'Relationships' ? (
+                                                  <span
+                                                    className="text-xs"
+                                                    key={`attr_string_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    <span className="mx-1"></span>
+                                                    <CopyButton value={val} />
+                                                    {index <
+                                                      item.stringValues.length -
+                                                        1 && <hr />}
+                                                  </span>
+                                                ) : (
+                                                  <span
+                                                    key={`attr_string_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    {index <
+                                                      item.stringValues.length -
+                                                        1 && <hr />}
+                                                  </span>
+                                                )}
+                                              </>
                                             )
                                           )}
                                         </div>
@@ -1991,50 +2171,120 @@ function Documents() {
                         </div>
                       </dl>
                     )}
-                    <div className="mt-4 w-full flex justify-center">
-                      <ButtonPrimaryGradient
-                        onClick={DownloadDocument}
-                        style={{
-                          height: '36px',
-                          width: '100%',
-                          margin: '0 16px',
-                        }}
-                      >
-                        <div className="w-full flex justify-center px-4 py-1">
-                          <span className="">Download</span>
-                          <span className="w-7 pl-1">{Download()}</span>
+                    {currentDocument &&
+                      (InlineViewableContentTypes.indexOf(
+                        (currentDocument as IDocument).contentType
+                      ) > -1 ||
+                        TextFileEditorViewableContentTypes.indexOf(
+                          (currentDocument as IDocument).contentType
+                        ) > -1 ||
+                        (formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
+                          OnlyOfficeContentTypes.indexOf(
+                            (currentDocument as IDocument).contentType
+                          ) > -1) ||
+                        ((currentDocument as IDocument).deepLinkPath !==
+                          undefined &&
+                          ((currentDocument as IDocument).deepLinkPath
+                            ?.length ?? 0) > 0)) && (
+                        <div className="mt-2 w-full flex justify-center">
+                          <ButtonPrimaryGradient
+                            onClick={viewDocument}
+                            type="button"
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                          >
+                            <div className="w-full flex justify-center px-4 py-1">
+                              <span className="">View Document</span>
+                              <span className="w-7 pl-1">{View()}</span>
+                            </div>
+                          </ButtonPrimaryGradient>
                         </div>
-                      </ButtonPrimaryGradient>
-                    </div>
-                    {formkiqVersion.type !== 'core' && (
-                      <div className="mt-2 flex justify-center">
-                        <ButtonSecondary
+                      )}
+                    {currentDocument &&
+                      (InlineEditableContentTypes.indexOf(
+                        (currentDocument as IDocument).contentType
+                      ) > -1 ||
+                        TextFileEditorEditableContentTypes.indexOf(
+                          (currentDocument as IDocument).contentType
+                        ) > -1) &&
+                      !isCurrentSiteReadonly && (
+                        <div className="mt-2 w-full flex justify-center">
+                          <ButtonPrimaryGradient
+                            onClick={editDocument}
+                            type="button"
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                          >
+                            <div className="w-full flex justify-center px-4 py-1">
+                              <span className="">Edit Document</span>
+                              <span className="w-7 pl-1">
+                                <Pencil />
+                              </span>
+                            </div>
+                          </ButtonPrimaryGradient>
+                        </div>
+                      )}
+
+                    {(!(currentDocument as IDocument).deepLinkPath ||
+                      ((currentDocument as IDocument).deepLinkPath?.length ??
+                        0) === 0) && (
+                      <div className="mt-2 w-full flex justify-center">
+                        <ButtonPrimaryGradient
+                          onClick={() => downloadDocument(infoDocumentId)}
                           style={{
                             height: '36px',
                             width: '100%',
                             margin: '0 16px',
                           }}
-                          onClick={(event: any) => {
-                            const documentLine: ILine = {
-                              lineType: 'document',
-                              folder: '',
-                              documentId: infoDocumentId,
-                              documentInstance: currentDocument,
-                              folderInstance: null,
-                            };
-                            onDocumentWorkflowsModalClick(event, documentLine);
-                          }}
                         >
-                          View
-                          {isSiteReadOnly ? (
-                            <span>&nbsp;</span>
-                          ) : (
-                            <span>&nbsp;/ Assign&nbsp;</span>
-                          )}
-                          Workflows
-                        </ButtonSecondary>
+                          <div className="w-full flex justify-center px-4 py-1">
+                            <span className="">Download</span>
+                            <span className="w-7 pl-1">{Download()}</span>
+                          </div>
+                        </ButtonPrimaryGradient>
                       </div>
                     )}
+                    {formkiqVersion.type !== 'core' &&
+                      (!(currentDocument as IDocument).deepLinkPath ||
+                        ((currentDocument as IDocument).deepLinkPath?.length ??
+                          0) === 0) && (
+                        <div className="mt-2 flex justify-center">
+                          <ButtonSecondary
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                            onClick={(event: any) => {
+                              const documentLine: ILine = {
+                                lineType: 'document',
+                                folder: '',
+                                documentId: infoDocumentId,
+                                documentInstance: currentDocument,
+                                folderInstance: null,
+                              };
+                              onDocumentWorkflowsModalClick(
+                                event,
+                                documentLine
+                              );
+                            }}
+                          >
+                            View
+                            {isCurrentSiteReadonly ? (
+                              <span>&nbsp;</span>
+                            ) : (
+                              <span>&nbsp;/ Assign&nbsp;</span>
+                            )}
+                            Workflows
+                          </ButtonSecondary>
+                        </div>
+                      )}
                   </div>
                   <div
                     className={
@@ -2087,6 +2337,7 @@ function Documents() {
                                     <div
                                       className="font-medium pt-1 ml-12 flex text-primary-500 cursor-pointer"
                                       onClick={(event) => {
+                                        console.log(version.versionKey);
                                         viewDocumentVersion(version.versionKey);
                                       }}
                                     >
@@ -2116,7 +2367,7 @@ function Documents() {
                           }}
                         >
                           View
-                          {isSiteReadOnly ? (
+                          {isCurrentSiteReadonly ? (
                             <span>&nbsp;</span>
                           ) : (
                             <span>&nbsp;/ Edit&nbsp;</span>
@@ -2134,10 +2385,48 @@ function Documents() {
                     }
                   >
                     <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
+                      {formkiqVersion.type !== 'core' &&
+                        (!(currentDocument as IDocument).deepLinkPath ||
+                          ((currentDocument as IDocument).deepLinkPath
+                            ?.length ?? 0) === 0) && (
+                          <ButtonSecondary
+                            className="text-sm h-9 w-full mb-2"
+                            onClick={(event: any) => {
+                              const documentLine: ILine = {
+                                lineType: 'document',
+                                folder: '',
+                                documentId: infoDocumentId,
+                                documentInstance: currentDocument,
+                                folderInstance: null,
+                              };
+                              onActionModalClick(event, documentLine);
+                            }}
+                          >
+                            Add Action
+                          </ButtonSecondary>
+                        )}
                       {currentDocumentActions.length === 0 && (
                         <div className="flex w-full justify-center italic text-smaller">
                           (no actions exist for this document)
                         </div>
+                      )}
+                      {currentDocumentActions.find(
+                        (action: any) =>
+                          action.status === 'FAILED' ||
+                          action.status === 'PENDING' ||
+                          action.status === 'FAILED_RETRY'
+                      ) && (
+                        <ButtonPrimaryGradient
+                          className="text-sm h-9 w-full mb-2"
+                          onClick={retryFailedActions}
+                        >
+                          <div className="flex gap-2 items-center justify-center">
+                            <span>Retry Failed Actions</span>
+                            <div className="w-5">
+                              <Retry />
+                            </div>
+                          </div>
+                        </ButtonPrimaryGradient>
                       )}
                       {currentDocumentActions.map((action: any, i: number) => (
                         <div key={i} className="flex flex-col pb-3">
@@ -2149,7 +2438,8 @@ function Documents() {
                               className={`font-bold text-xs ${
                                 action.status === 'COMPLETE'
                                   ? 'text-green-600'
-                                  : action.status === 'FAILED'
+                                  : action.status === 'FAILED' ||
+                                    action.status === 'FAILED_RETRY'
                                   ? 'text-red-600'
                                   : action.status === 'SKIPPED'
                                   ? 'text-neutral-600'
@@ -2268,7 +2558,7 @@ function Documents() {
                             </button>
                           )}
                         <ButtonPrimaryGradient
-                          onClick={DownloadDocument}
+                          onClick={() => downloadDocument(infoDocumentId)}
                           style={{ height: '36px', width: '100%' }}
                         >
                           <div className="w-full flex justify-center px-4 py-1">
@@ -2279,11 +2569,11 @@ function Documents() {
                         {isCurrentDocumentSoftDeleted ? (
                           <button
                             className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                            onClick={restoreDocument(
-                              currentDocument,
-                              currentSiteId,
-                              null
-                            )}
+                            onClick={() =>
+                              restoreDocument(
+                                (currentDocument as IDocument).documentId
+                              )
+                            }
                           >
                             <span className="">Restore</span>
                             <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
@@ -2295,10 +2585,12 @@ function Documents() {
                             {useSoftDelete && (
                               <button
                                 className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                                onClick={onDeleteDocument(
-                                  currentDocument,
-                                  null
-                                )}
+                                onClick={() =>
+                                  onDeleteDocument(
+                                    (currentDocument as IDocument).documentId,
+                                    useSoftDelete
+                                  )
+                                }
                               >
                                 <span className="">Delete</span>
                                 <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
@@ -2318,22 +2610,8 @@ function Documents() {
                               documentInstance: currentDocument as IDocument,
                             }}
                             siteId={currentSiteId}
-                            isSiteReadOnly={isSiteReadOnly}
+                            isSiteReadOnly={isCurrentSiteReadonly}
                             formkiqVersion={formkiqVersion}
-                            onDeleteClick={deleteFolder(currentDocument)}
-                            onShareClick={onShareClick}
-                            onEditTagsAndMetadataModalClick={
-                              onEditAttributesModalClick
-                            }
-                            onRenameModalClick={onRenameModalClick}
-                            onMoveModalClick={onMoveModalClick}
-                            onDocumentVersionsModalClick={
-                              onDocumentVersionsModalClick
-                            }
-                            onDocumentWorkflowsModalClick={
-                              onDocumentWorkflowsModalClick
-                            }
-                            onESignaturesModalClick={onESignaturesModalClick}
                             onInfoPage={true}
                             user={user}
                             useIndividualSharing={useIndividualSharing}
@@ -2354,44 +2632,6 @@ function Documents() {
           <></>
         )}
       </div>
-      <ShareModal
-        isOpened={isShareModalOpened}
-        onClose={onShareClose}
-        getValue={getShareModalValue}
-        value={shareModalValue}
-      />
-      <EditAttributesModal
-        isOpened={isEditAttributesModalOpened}
-        onClose={onEditAttributesModalClose}
-        siteId={currentSiteId}
-        getValue={getEditAttributesModalValue}
-        value={editAttributesModalValue}
-        onDocumentDataChange={onDocumentDataChange}
-      />
-      <DocumentVersionsModal
-        isOpened={isDocumentVersionsModalOpened}
-        onClose={onDocumentVersionsModalClose}
-        onUploadClick={onUploadClick}
-        isUploadModalOpened={isUploadModalOpened}
-        siteId={currentSiteId}
-        isSiteReadOnly={isSiteReadOnly}
-        documentsRootUri={currentDocumentsRootUri}
-        value={documentVersionsModalValue}
-      />
-      <DocumentWorkflowsModal
-        isOpened={isDocumentWorkflowsModalOpened}
-        onClose={onDocumentWorkflowsModalClose}
-        siteId={currentSiteId}
-        isSiteReadOnly={isSiteReadOnly}
-        documentsRootUri={currentDocumentsRootUri}
-        value={documentWorkflowsModalValue}
-      />
-      <ESignaturesModal
-        isOpened={isESignaturesModalOpened}
-        onClose={onESignaturesModalClose}
-        siteId={currentSiteId}
-        value={eSignaturesModalValue}
-      />
       <NewModal
         isOpened={isNewModalOpened}
         onClose={onNewClose}
@@ -2400,30 +2640,22 @@ function Documents() {
         value={newModalValue}
         onDocumentDataChange={onDocumentDataChange}
       />
-      <RenameModal
-        isOpened={isRenameModalOpened}
-        onClose={onRenameModalClose}
-        siteId={currentSiteId}
-        value={renameModalValue}
-        onDocumentDataChange={onDocumentDataChange}
-      />
-      <MoveModal
-        isOpened={isMoveModalOpened}
-        onClose={onMoveModalClose}
-        siteId={currentSiteId}
-        value={moveModalValue}
-        allTags={allTags}
-        onDocumentDataChange={onDocumentDataChange}
-      />
       <UploadModal
         isOpened={isUploadModalOpened}
         onClose={onUploadClose}
         siteId={currentSiteId}
         formkiqVersion={formkiqVersion}
-        folder={subfolderUri}
+        folder={dropFolderPath ? dropFolderPath : subfolderUri}
         documentId={uploadModalDocumentId}
         isFolderUpload={false}
         onDocumentDataChange={onDocumentDataChange}
+        dropUploadDocuments={dropUploadDocuments}
+        resetDropUploadDocuments={resetDropUploadDocuments}
+        folderPath={
+          dropFolderPath
+            ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
+            : pathname
+        }
       />
       <UploadModal
         isOpened={isFolderUploadModalOpened}
@@ -2434,17 +2666,11 @@ function Documents() {
         documentId={folderUploadModalDocumentId}
         isFolderUpload={true}
         onDocumentDataChange={onDocumentDataChange}
-      />
-      <DocumentReviewModal
-        isOpened={isDocumentReviewModalOpened}
-        onClose={onDocumentReviewModalClose}
-        siteId={currentSiteId}
-        value={documentReviewModalValue}
-      />
-      <MultiValuedAttributeModal
-        item={multivaluedAttributeModalValue}
-        isOpened={isMultivaluedAttributeModalOpened}
-        onClose={onMultiValuedAttributeModalClose}
+        folderPath={
+          dropFolderPath
+            ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
+            : pathname
+        }
       />
     </>
   );

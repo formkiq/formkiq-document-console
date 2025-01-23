@@ -5,10 +5,6 @@ import { NavLink, useLocation, useSearchParams } from 'react-router-dom';
 import { Mode } from 'vanilla-jsoneditor';
 import { Close, Save, Spinner } from '../../Components/Icons/icons';
 import SchemaMenu from '../../Components/Schemas/SchemaMenu';
-import EditSchemaDialog from '../../Components/Schemas/createSchemaDialog/EditSchemaDialog';
-import CompositeKeysTable from '../../Components/Schemas/tables/compositeKeysTable';
-import OptionalAttributesTable from '../../Components/Schemas/tables/optionalAttributesTable';
-import RequiredAttributesTable from '../../Components/Schemas/tables/requiredAttributesTable';
 import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
@@ -24,6 +20,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { Schema as SchemaType } from '../../helpers/types/schemas';
+import SchemaPage from '../../Components/Schemas/SchemaPage';
 
 function SiteSchema() {
   const { user } = useAuthenticatedState();
@@ -38,11 +35,13 @@ function SiteSchema() {
     hasWorkspaces,
     workspaceSites
   );
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   const [searchParams, setSearchParams] = useSearchParams();
-  const editor = searchParams.get('editor');
+  const editor = searchParams.get('jsonEditor');
+  const editing = searchParams.get('editing');
   const { siteSchema } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
+  const [isEditing, setIsEditing] = useState(editing === 'true');
 
   useEffect(() => {
     if (!siteId) {
@@ -135,9 +134,14 @@ function SiteSchema() {
     }
   };
   const closeEditor = () => {
-    searchParams.delete('editor');
+    searchParams.delete('jsonEditor');
+    searchParams.delete('editing');
     setSearchParams(searchParams);
   };
+
+  useEffect(() => {
+    setIsEditing(editing === 'true')
+  }, [editing])
 
   return (
     <>
@@ -166,7 +170,7 @@ function SiteSchema() {
                   </div>
                 </button>
                 <NavLink
-                  to={'/schemas'}
+                  to={pathname.substring(0, pathname.lastIndexOf('/'))}
                   className="h-6 text-neutral-900 hover:text-primary-500 "
                 >
                   Return to Schemas
@@ -195,43 +199,22 @@ function SiteSchema() {
         ) : (
           <div className="p-4">
             <SchemaMenu
-              schema={siteSchema}
-              updateSchema={updateSiteSchema}
-              openEditDialog={() => setIsEditDialogOpen(true)}
+              onEditClick={() => {
+                searchParams.set('editing', 'true');
+                setSearchParams(searchParams);
+              }}
+              isEditing={isEditing}
             />
-            <p className="text-neutral-900 text-md font-bold my-4">
-              Composite Keys
-            </p>
-            <CompositeKeysTable
-              compositeKeys={siteSchema.attributes.compositeKeys}
-            />
-
-            <p className="text-neutral-900 text-md font-bold my-4">
-              Required Attributes
-            </p>
-            <RequiredAttributesTable
-              attributes={siteSchema.attributes.required}
-            />
-
-            <p className="text-neutral-900 text-md font-bold my-4">
-              Optional Attributes
-            </p>
-            <OptionalAttributesTable
-              attributes={siteSchema.attributes.optional}
+            <SchemaPage
+              isEditing={isEditing}
+              siteId={siteId}
+              schemaType="site"
+              initialSchemaValue={siteSchema}
             />
           </div>
         )
       ) : (
         <Spinner />
-      )}
-      {siteSchema && (
-        <EditSchemaDialog
-          isOpen={isEditDialogOpen}
-          setIsOpen={setIsEditDialogOpen}
-          siteId={siteId}
-          schemaType="site"
-          initialSchemaValue={siteSchema}
-        />
       )}
     </>
   );

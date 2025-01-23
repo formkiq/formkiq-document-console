@@ -7,7 +7,7 @@ import {
 } from '../../Store/reducers/userManagement';
 import { RootState, useAppDispatch } from '../../Store/store';
 import { RequestStatus } from '../../helpers/types/queues';
-import { CheckedRadio, ChevronDown, UncheckedRadio } from '../Icons/icons';
+import { Checkmark, ChevronDown, UncheckedRadio } from '../Icons/icons';
 
 const GroupsSelect = ({
   siteId,
@@ -114,7 +114,7 @@ const GroupsSelect = ({
                   <label className="flex items-center justify-between gap-2 w-full">
                     <span className="block truncate">{group.name}</span>
                     <div className="w-4">
-                      {selected ? <CheckedRadio /> : <UncheckedRadio />}
+                      {selected ? <Checkmark /> : <UncheckedRadio />}
                     </div>
                   </label>
                 </div>

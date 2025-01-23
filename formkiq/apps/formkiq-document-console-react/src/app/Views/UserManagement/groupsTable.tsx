@@ -1,15 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Tooltip } from 'react-tooltip';
 import { Info } from '../../Components/Icons/icons';
 import GroupActionPopover from '../../Components/UserManagement/Popovers/GroupActionPopover';
-import { DocumentsService } from '../../helpers/services/documentsService';
-import { parseEmailInitials } from '../../helpers/services/toolService';
 import { Group } from '../../helpers/types/userManagement';
+import GroupMembers from './groupMembers';
 
 type GroupsTableProps = {
   groups: Group[];
   user: any;
+  groupsUsers: Record<string, any[]>;
   selectedGroupNames: string[];
   onDeleteClick: (groupName: any) => void;
   setSelectedGroupNames: (groupNames: string[]) => void;
@@ -19,12 +17,12 @@ type GroupsTableProps = {
 function GroupsTable({
   groups,
   user,
+  groupsUsers,
   selectedGroupNames,
   onDeleteClick,
   setSelectedGroupNames,
   onAddMembersClick,
 }: GroupsTableProps) {
-  const [groupsUsers, setGroupsUsers] = useState<any>({});
   function toggleSelectAll() {
     if (selectedGroupNames.length === groups.length) {
       unselectAllGroups();
@@ -51,25 +49,6 @@ function GroupsTable({
   function unselectAllGroups() {
     setSelectedGroupNames([]);
   }
-
-  async function getGroupUsers(groupName: string) {
-    DocumentsService.getGroupUsers(groupName, 20).then((response) => {
-      if (response.users && response.users.length > 0) {
-        setGroupsUsers((val: any) => ({
-          ...val,
-          [groupName]: response.users.sort((a: any, b: any) =>
-            a.email > b.email ? 1 : -1
-          ),
-        }));
-      }
-    });
-  }
-
-  useEffect(() => {
-    groups.forEach((group) => {
-      getGroupUsers(group.name);
-    });
-  }, [groups]);
 
   return (
     <table className="table-auto text-neutral-900 text-sm border-b border-neutral-300 w-full ">
@@ -162,110 +141,10 @@ function GroupsTable({
               </td>
 
               <td className="border-b border-neutral-300">
-                <div className="flex -space-x-2 overflow-hidden">
-                  {groupsUsers[item.name] && groupsUsers[item.name].length > 0 && (
-                    <>
-                      {groupsUsers[item.name][0] && (
-                        <div
-                          key={'user' + item.name + 0}
-                          className="h-8 w-8 rounded-full bg-cornflower-blue-500 text-center text-white font-bold flex items-center justify-center uppercase"
-                          data-tooltip-id={
-                            `groupUserTooltip-user-` + item.name + 0
-                          }
-                          data-tooltip-content={groupsUsers[item.name][0].email}
-                        >
-                          {parseEmailInitials(groupsUsers[item.name][0].email)}
-                          <Tooltip
-                            id={`groupUserTooltip-user-` + item.name + 0}
-                          />
-                        </div>
-                      )}
-                      {groupsUsers[item.name][1] && (
-                        <div
-                          key={'user' + item.name + 1}
-                          className="h-8 w-8 rounded-full bg-mountain-meadow-500 text-center text-white font-bold flex items-center justify-center uppercase"
-                          data-tooltip-id={
-                            `groupUserTooltip-user-` + item.name + 1
-                          }
-                          data-tooltip-content={groupsUsers[item.name][1].email}
-                        >
-                          {parseEmailInitials(groupsUsers[item.name][1].email)}
-                          <Tooltip
-                            id={`groupUserTooltip-user-` + item.name + 1}
-                          />
-                        </div>
-                      )}
-                      {groupsUsers[item.name][2] && (
-                        <div
-                          key={'user' + item.name + 2}
-                          className="h-8 w-8 rounded-full bg-flamingo-500 text-center text-white font-bold flex items-center justify-center uppercase"
-                          data-tooltip-id={
-                            `groupUserTooltip-user-` + item.name + 2
-                          }
-                          data-tooltip-content={groupsUsers[item.name][2].email}
-                        >
-                          {parseEmailInitials(groupsUsers[item.name][2].email)}
-                          <Tooltip
-                            id={`groupUserTooltip-user-` + item.name + 2}
-                          />
-                        </div>
-                      )}
-                      {groupsUsers[item.name][3] && (
-                        <div
-                          key={'user' + item.name + 3}
-                          className="h-8 w-8 rounded-full bg-turbo-600 text-center text-white font-bold flex items-center justify-center uppercase"
-                          data-tooltip-id={
-                            `groupUserTooltip-user-` + item.name + 3
-                          }
-                          data-tooltip-content={groupsUsers[item.name][3].email}
-                        >
-                          {parseEmailInitials(groupsUsers[item.name][3].email)}
-                          <Tooltip
-                            id={`groupUserTooltip-user-` + item.name + 3}
-                          />
-                        </div>
-                      )}
-                      {groupsUsers[item.name][4] &&
-                        groupsUsers[item.name].length <= 5 && (
-                          <div
-                            key={'user' + item.name + 4}
-                            className="h-8 w-8 rounded-full bg-ochre-500 text-center text-white font-bold flex items-center justify-center uppercase"
-                            data-tooltip-id={
-                              `groupUserTooltip-user-` + item.name + 4
-                            }
-                            data-tooltip-content={
-                              groupsUsers[item.name][4].email
-                            }
-                          >
-                            {parseEmailInitials(
-                              groupsUsers[item.name][4].email
-                            )}
-                            <Tooltip
-                              id={`groupUserTooltip-user-` + item.name + 4}
-                            />
-                          </div>
-                        )}
-                      {groupsUsers[item.name].length > 5 && (
-                        <div
-                          className="h-8 w-8 rounded-full bg-neutral-500 italic text-center text-white font-bold flex items-center justify-center"
-                          data-tooltip-id={
-                            `groupUserTooltip-user-` + item.name + `-more`
-                          }
-                          data-tooltip-content={
-                            groupsUsers[item.name].length -
-                            4 +
-                            ` additional users`
-                          }
-                        >
-                          + {groupsUsers[item.name].length - 4}
-                          <Tooltip
-                            id={`groupUserTooltip-user-` + item.name + `-more`}
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
+                <GroupMembers
+                  group={item}
+                  groupUsers={groupsUsers[item.name]}
+                />
               </td>
 
               <td className="border-b border-neutral-300">

@@ -94,7 +94,12 @@ export const setPendingArchive = createAsyncThunk(
     return data;
   }
 );
-
+export const setWorkflowFilterPreference = createAsyncThunk(
+  'config/setWorkflowFilterPreference',
+  async (data: 'active' | 'inactive' | 'all', thunkAPI) => {
+    return data;
+  }
+);
 const storage: LocalStorage = LocalStorage.Instance;
 
 export interface Config {
@@ -119,6 +124,7 @@ export interface Config {
   useAdvancedSearch: boolean;
   useSoftDelete: boolean;
   pendingArchive: IDocument[];
+  workflowFilterPreference: 'active' | 'inactive' | 'all';
 }
 
 export type TagColor = {
@@ -198,6 +204,7 @@ export const configInitialState = {
   useSoftDelete: true,
   showIntegrations: true,
   pendingArchive: [] as IDocument[],
+  workflowFilterPreference: "active",
 } as Config;
 
 const getInitialState = (): Config => {
@@ -269,6 +276,9 @@ export const configSlice = createSlice({
     });
     builder.addCase(setPendingArchive.fulfilled, (state: any, action) => {
       state.pendingArchive = action.payload;
+    });
+    builder.addCase(setWorkflowFilterPreference.fulfilled, (state: any, action) => {
+      state.workflowFilterPreference = action.payload;
     });
   },
 });

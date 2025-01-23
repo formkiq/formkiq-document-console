@@ -102,13 +102,14 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static deleteDocument(id: string, siteId = ''): Promise<any> {
+  public static deleteDocument(id: string, siteId = '', softDelete: null|string = null): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
     return this.getFormkiqClient().documentsApi.deleteDocument({
       documentId: id,
       siteId,
+      softDelete,
     });
   }
 
@@ -203,13 +204,15 @@ export class DocumentsService {
   }
 
   public static deleteDocumentVersion(
+    siteId: string,
     documentId: string,
     versionKey: string
   ): Promise<any> {
-    const apiClient = this.getFormkiqClient().apiClient;
-    const url = `${apiClient.host}/documents/${documentId}/versions/${versionKey}`;
-    const options = apiClient.buildOptions('DELETE');
-    return apiClient.fetchAndRespond(url, options);
+    return this.getFormkiqClient().documentsApi.deleteDocumentVersion({
+      siteId,
+      documentId,
+      versionKey,
+    });
   }
 
   @formkiqAPIHandler
@@ -464,44 +467,19 @@ export class DocumentsService {
   @formkiqAPIHandler
   public static async getDeletedDocuments(
     siteId = '',
-    tag: string | null = null,
     previous = null,
     next = null,
-    attribute: string | null = null,
-    allAttributes = [] as any[]
+    deleted: string | null = null
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
-    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
-      if (customIncludeTags.indexOf(primaryTag) === -1) {
-        customIncludeTags.push(primaryTag);
-      }
-    });
-    if (tag) {
-      if (customIncludeTags.indexOf(tag) === -1) {
-        customIncludeTags.push(tag);
-      }
-    }
-    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
-    const searchBody = {
-      query: {
-        tag: {
-          key: 'sysDeletedBy',
-        },
-        attribute: attribute ? { key: attribute } : null,
-      },
-      responseFields: {
-        tags: customIncludeTags,
-        attributes: attributesKeys,
-      },
-    };
-    return this.getFormkiqClient().searchApi.search({
-      searchParameters: searchBody,
+
+    return this.getFormkiqClient().documentsApi.getDocuments({
       siteId,
       previous,
       next,
+      deleted,
     });
   }
 
@@ -658,7 +636,8 @@ export class DocumentsService {
     page = 1,
     allTags = [] as any[],
     allAttributes = [] as any[],
-    searchAttributes: any = null
+    searchAttributes: any = null,
+    limit=20
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -697,6 +676,7 @@ export class DocumentsService {
       return this.getFormkiqClient().searchApi.search({
         searchParameters: searchBody,
         siteId,
+        limit
       });
     } else {
       const searchBody:any = {
@@ -717,8 +697,83 @@ export class DocumentsService {
       return this.getFormkiqClient().searchApi.searchFulltext({
         documentFulltextSearchBody: searchBody,
         siteId,
+        limit
       });
     }
+  }
+
+  @formkiqAPIHandler
+  public static async searchById(
+    siteId: string,
+    documentId: string,
+    allTags = [] as any[],
+    allAttributes = [] as any[]
+  ): Promise<any> {
+    if (!siteId || !siteId.length) {
+      siteId = this.determineSiteId();
+    }
+    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
+    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
+      if (customIncludeTags.indexOf(primaryTag) === -1) {
+        customIncludeTags.push(primaryTag);
+      }
+    });
+    allTags.forEach((allTag: any) => {
+      if (customIncludeTags.indexOf(allTag.value) === -1) {
+        customIncludeTags.push(allTag.value);
+      }
+    });
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
+    const searchBody = {
+      query: {
+        documentIds: [documentId],
+      },
+      responseFields: {
+        tags: customIncludeTags,
+        attributes: attributesKeys,
+      },
+    };
+    return this.getFormkiqClient().searchApi.search({
+      searchParameters: searchBody,
+      siteId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async searchByIds(
+    siteId: string,
+    documentIds: string[],
+    allTags = [] as any[],
+    allAttributes = [] as any[]
+  ): Promise<any> {
+    if (!siteId || !siteId.length) {
+      siteId = this.determineSiteId();
+    }
+    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
+    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
+      if (customIncludeTags.indexOf(primaryTag) === -1) {
+        customIncludeTags.push(primaryTag);
+      }
+    });
+    allTags.forEach((allTag: any) => {
+      if (customIncludeTags.indexOf(allTag.value) === -1) {
+        customIncludeTags.push(allTag.value);
+      }
+    });
+    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
+    const searchBody = {
+      query: {
+        documentIds: documentIds,
+      },
+      responseFields: {
+        tags: customIncludeTags,
+        attributes: attributesKeys,
+      },
+    };
+    return this.getFormkiqClient().searchApi.search({
+      searchParameters: searchBody,
+      siteId,
+    });
   }
 
   @formkiqAPIHandler
@@ -981,7 +1036,9 @@ export class DocumentsService {
   @formkiqAPIHandler
   public static async getDocumentActions(
     documentId: string,
-    siteId = ''
+    siteId = '',
+    limit = 20,
+    next = null
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -989,6 +1046,8 @@ export class DocumentsService {
     return this.getFormkiqClient().documentsApi.getDocumentActions({
       documentId,
       siteId,
+      limit,
+      next,
     });
   }
 
@@ -1025,6 +1084,20 @@ export class DocumentsService {
       documentId,
       addOrUpdateDocumentParameters: documentParams,
       siteId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async retryDocumentActions(
+    siteId = '',
+    documentId: string
+  ): Promise<any> {
+    if (!siteId || !siteId.length) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.retryDocumentActions({
+      siteId,
+      documentId,
     });
   }
 
@@ -1228,11 +1301,15 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getApiKeys(siteId: string): Promise<any> {
+  public static async getApiKeys(
+    siteId: string,
+    limit = 20,
+    next = null
+  ): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().sitesApi.getApiKeys({ siteId });
+    return this.getFormkiqClient().sitesApi.getApiKeys({ siteId, limit, next });
   }
 
   @formkiqAPIHandler
@@ -1262,11 +1339,19 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getWebhooks(siteId: string): Promise<any> {
+  public static async getWebhooks(
+    siteId: string,
+    limit = 20,
+    next = null
+  ): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().webhooksApi.getWebhooks({ siteId });
+    return this.getFormkiqClient().webhooksApi.getWebhooks({
+      siteId,
+      limit,
+      next,
+    });
   }
 
   @formkiqAPIHandler
@@ -1875,7 +1960,7 @@ export class DocumentsService {
     siteId: string,
     documentId: string,
     attributeKey: string,
-    setDocumentsAttributeValueParameters: string
+    setDocumentsAttributeValueParameters: any
   ): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
@@ -2190,4 +2275,138 @@ export class DocumentsService {
       next,
     });
   }
+
+  @formkiqAPIHandler
+  public static async restoreDocument(
+      siteId: string,
+      documentId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.restoreDocument({
+      siteId,
+      documentId,
+    });
+  }
+
+  @formkiqAPIHandler
+    public static async addMapping(
+        siteId: string,
+        addMappingParameters: any,
+    ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.addMapping({
+      siteId,
+      addMappingParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getMapping(
+      siteId: string,
+      mappingId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.getMapping({
+      siteId,
+      mappingId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async setMapping(
+      siteId: string,
+      mappingId: string,
+      setMappingParameters: any,
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.setMapping({
+      siteId,
+      mappingId,
+      setMappingParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+    public static async deleteMapping(
+        siteId: string,
+        mappingId: string,
+    ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.deleteMapping({
+      siteId,
+      mappingId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async addDocumentGenerate(
+      siteId: string,
+      documentId: string,
+      addDocumentGenerateParameters: any
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.addDocumentGenerate({
+      siteId,
+      documentId,
+      addDocumentGenerateParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async addSite(
+    addSiteParameters: any
+  ):  Promise<any> {
+    return this.getFormkiqClient().sitesApi.addSite({
+      addSiteParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async updateSite(
+      siteId: string,
+      updateSiteParameters: any
+  ):  Promise<any> {
+    return this.getFormkiqClient().sitesApi.updateSite({
+      siteId,
+      updateSiteParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getSiteGroups(
+      siteId: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.getSiteGroups({
+      siteId
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getSiteGroupPermissions(
+      siteId: string,
+      groupName: string,
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.getSiteGroupPermissions({
+      siteId,
+      groupName,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async setSiteGroupPermissions(
+      siteId: string,
+      groupName: string,
+      updateSiteGroupPermissions: any,
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.setSiteGroupPermissions({
+      siteId,
+      groupName,
+      updateSiteGroupPermissions,
+    });
+  }
+  @formkiqAPIHandler
+  public static async deleteSiteGroupPermissions(
+    siteId: string,
+    groupName: string,
+  ):  Promise<any> {
+    return this.getFormkiqClient().sitesApi.deleteSiteGroupPermissions({
+      siteId,
+      groupName,
+    });
+  }
+
 }

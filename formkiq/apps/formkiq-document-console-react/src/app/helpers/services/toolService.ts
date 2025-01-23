@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { RelationshipType } from '../types/attributes';
 import { IDocument } from './../types/document';
 import { IFolder } from './../types/folder';
 
@@ -372,6 +373,69 @@ export function getCurrentSiteInfo(
           )}`;
         }
       }
+    } else if (pathname.indexOf('/attributes') === 0) {
+      if (pathname.indexOf('/attributes/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(23).split('/')[0]; // 23 is the length of '/attributes/workspaces'
+        currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Attributes: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Attributes';
+          currentSiteInfo.siteDocumentsRootUri = '/attributes';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/attributes/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/mappings') === 0) {
+      if (pathname.indexOf('/mappings/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(21).split('/')[0]; // 21 is the length of '/mappings/workspaces'
+        currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Mappings: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Mappings';
+          currentSiteInfo.siteDocumentsRootUri = '/mappings';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/mappings/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/orchestrations/webhooks') === 0) {
+      if (pathname.indexOf('/orchestrations/webhooks/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(34).split('/')[0]; // 34 is the length of '/orchestrations/webhooks/workspaces'
+        currentSiteInfo.siteDocumentsRootName = `Inbound Webhooks: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Inbound Webhooks';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/orchestrations/webhooks/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
     } else {
       if (hasDefaultSite) {
         currentSiteInfo.siteId = 'default';
@@ -593,8 +657,7 @@ export function findParentForDocument(
 export function excludeDocumentsWithTagFromAll(
   parentObj: { folders: null | IFolder[]; documents: IDocument[] },
   tagKey: string,
-  tagValue: string,
-  isSystemDeletedByKey = false
+  tagValue: string
 ) {
   const res = { ...parentObj };
   const updateDocumentsList = (documents: IDocument[]): IDocument[] => {
@@ -603,14 +666,6 @@ export function excludeDocumentsWithTagFromAll(
       if (tagValue.length) {
         return (docs as any[]).filter((doc: any) => {
           return !isTagValueIncludes(doc.tags[tagKey], tagValue);
-        });
-      } else {
-        return (docs as any[]).filter((doc: any) => {
-          if (isSystemDeletedByKey) {
-            return (doc.tags as any)['sysDeletedBy'];
-          } else {
-            return !(doc.tags as any)['sysDeletedBy'];
-          }
         });
       }
     }
@@ -644,4 +699,26 @@ export function parseEmailInitials(email: string) {
   });
   initials = initials.substring(0, 3).toUpperCase();
   return initials;
+}
+
+export function transformRelationshipValueFromString(value: string) {
+  const [relationshipString, documentId] = value.split('#');
+  const relationship = relationshipString as RelationshipType;
+  return {
+    documentId,
+    relationship,
+  };
+}
+
+export function transformRelationshipValueToString(value: {
+  relationship: RelationshipType;
+  documentId: string;
+}) {
+  return `${value.relationship}#${value.documentId.trim()}`;
+}
+
+export function isUUIDv4orV5(value: string): boolean {
+  const uuidRegexV4V5 =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-(4|5)[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegexV4V5.test(value);
 }

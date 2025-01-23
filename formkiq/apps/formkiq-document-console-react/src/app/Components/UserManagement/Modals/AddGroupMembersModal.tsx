@@ -17,12 +17,14 @@ type AddGroupMembersModalPropsType = {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
   groupName: any;
+  getGroupUsers: (groupName: string) => Promise<void>;
 };
 
 function AddGroupMembersModal({
   isOpen,
   setIsOpen,
   groupName,
+  getGroupUsers,
 }: AddGroupMembersModalPropsType) {
   const usernameRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
@@ -38,15 +40,22 @@ function AddGroupMembersModal({
     setUsersToAdd([]);
   };
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (usersToAdd.length === 0) return;
-    for (const user of usersToAdd) {
-      const userData = { user: { username: user.username } };
-      dispatch(addUserToGroup({ groupName, user: userData }));
+
+    try {
+      const addUserPromises = usersToAdd.map((user) => {
+        const userData = { user: { username: user.username } };
+        return dispatch(addUserToGroup({ groupName, user: userData }));
+      });
+
+      await Promise.all(addUserPromises);
+      getGroupUsers(groupName);
+      closeModal();
+    } catch (error) {
+      console.error('Error adding users to group:', error);
     }
-    fetchUsers({});
-    closeModal();
   };
 
   function addUser() {

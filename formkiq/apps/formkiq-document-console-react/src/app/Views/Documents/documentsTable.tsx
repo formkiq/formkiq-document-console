@@ -1,10 +1,17 @@
-import { Ref, useEffect, useState } from 'react';
+import { Ref, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CustomDragLayer from '../../Components/DocumentsAndFolders/CustomDragLayer/customDragLayer';
 import DocumentListLine from '../../Components/DocumentsAndFolders/DocumentListLine/documentListLine';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import FolderListLine from '../../Components/DocumentsAndFolders/FolderListLine/FolderListLine';
-import { Spinner } from '../../Components/Icons/icons';
+import {
+  Close,
+  Download,
+  RestoreFile,
+  Spinner,
+  Trash,
+} from '../../Components/Icons/icons';
 import { ConfigState } from '../../Store/reducers/config';
 import { DocumentListState } from '../../Store/reducers/documentsList';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
@@ -17,78 +24,92 @@ import { EmptyDocumentsTable } from './EmptyDocumentsTable';
 type DocumentTableProps = {
   documentsWrapperRef: Ref<any>;
   documentsScrollpaneRef: Ref<any>;
-  onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void;
-  onRestoreDocument: (
-    file: IDocument,
-    siteId: string,
-    searchDocuments: any
-  ) => () => void;
+  onRestoreDocument: (documentId: string) => void;
   currentSiteId: string;
   currentDocumentsRootUri: string;
   isSiteReadOnly: boolean;
   onDocumentDataChange: (event: any, value: ILine | null) => void;
-  onESignaturesModalClick: (event: any, value: ILine | null) => void;
-  onShareClick: (event: any, value: ILine | null) => void;
-  onRenameModalClick: (event: any, value: ILine | null) => void;
-  onMoveModalClick: (event: any, value: ILine | null) => void;
-  onDocumentVersionsModalClick: (event: any, value: ILine | null) => void;
-  onDocumentWorkflowsModalClick: (event: any, value: ILine | null) => void;
-  onDocumentReviewModalClick: (event: any, value: ILine | null) => void;
-  onEditTagsAndMetadataModalClick: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
-  isArchiveTabExpanded: boolean;
   addToPendingArchive: (file: IDocument) => void;
   deleteFromPendingArchive: (file: IDocument) => void;
   archiveStatus: string;
   trackScrolling: () => void;
-  infoDocumentId:  string;
+  infoDocumentId: string;
   onDocumentInfoClick: () => void;
+  selectedDocuments: IDocument[];
+  setSelectedDocuments: (selectedDocuments: IDocument[]) => void;
+  onDeleteSelectedDocuments: (softDelete: boolean) => void;
+  onRestoreSelectedDocuments: () => void;
+  openArchiveTab: () => void;
+  archiveTabStatus: 'open' | 'closed' | 'minimized';
+  getExpandedFoldersDocuments: (folders: IFolder[]) => IDocument[];
+  downloadDocument: (documentId: string) => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
   const {
     documentsWrapperRef,
     documentsScrollpaneRef,
-    onDeleteDocument,
     onRestoreDocument,
-    onShareClick,
-    onRenameModalClick,
     currentSiteId,
     onDocumentDataChange,
-    onESignaturesModalClick,
     currentDocumentsRootUri,
     filterTag,
-    onDocumentVersionsModalClick,
-    onDocumentWorkflowsModalClick,
-    onDocumentReviewModalClick: onDocumentReviewModalClick,
-    onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
-    onMoveModalClick,
-    isArchiveTabExpanded,
     addToPendingArchive,
     deleteFromPendingArchive,
     archiveStatus,
     trackScrolling,
     infoDocumentId,
     onDocumentInfoClick,
+    selectedDocuments,
+    setSelectedDocuments,
+    onDeleteSelectedDocuments,
+    onRestoreSelectedDocuments,
+    openArchiveTab,
+    archiveTabStatus,
+    getExpandedFoldersDocuments,
+    downloadDocument,
   } = props;
 
-  const { formkiqVersion, useIndividualSharing } = useSelector(ConfigState);
-  const { documents, folders, loadingStatus } = useSelector(DocumentListState);
-
-  const [scrollPosition, setScrollPosition] = useState(0);
+  const { formkiqVersion, useIndividualSharing, useSoftDelete } =
+    useSelector(ConfigState);
+  const { documents, folders, loadingStatus, isLastSearchPageLoaded } =
+    useSelector(DocumentListState);
 
   const subfolderUri = useSubfolderUri();
   const queueId = useQueueId();
+  const navigate = useNavigate();
+  const pathname = decodeURI(useLocation().pathname);
+  const search = useLocation().search;
+  const scrollToDocumentLine = new URLSearchParams(search).get(
+    'scrollToDocumentLine'
+  );
 
-  // scroll "documentsScrollpane" to the latest position when documents state updates
   useEffect(() => {
-    const scrollPane = document.getElementById('documentsScrollpane');
-    if (scrollPane) {
-      scrollPane.scrollTo({ top: scrollPosition });
+    // load more items if bottom of a table is visible
+    if ((!documents || documents.length === 0) && (!folders || folders.length === 0)) return; // prevent execution if documents and folders are not loaded yet
+    trackScrolling();
+    // when user opens document folder after viewing document, scroll to list to display document line
+    if (!scrollToDocumentLine) return;
+    if (loadingStatus !== RequestStatus.fulfilled) return;
+    const documentIndex = documents.findIndex(
+      (doc) => doc.documentId === infoDocumentId
+    );
+    if (documentIndex === -1 && !isLastSearchPageLoaded) {
+      const scrollpane = document.getElementById('documentsScrollpane');
+      if (!scrollpane) return;
+      scrollpane.scrollTo({
+        top: scrollpane.scrollHeight,
+      });
+    } else if (documentIndex !== -1) {
+      const documentLine = document.getElementById(infoDocumentId);
+      if (!documentLine) return;
+      documentLine.scrollIntoView({ block: 'end' });
+      navigate(pathname + '#id=' + infoDocumentId);
     }
-  }, [documents, scrollPosition]);
+  }, [documents, folders]);
 
   if (
     documents.length === 0 &&
@@ -107,13 +128,59 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   const handleScroll = (event: any) => {
     const el = event.target;
     //track scroll when table reaches bottom
-    if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
+    if (el.offsetHeight + el.scrollTop + 600 > el.scrollHeight) {
       if (el.scrollTop > 0) {
-        setScrollPosition(el.scrollTop);
         trackScrolling();
       }
     }
   };
+
+  // checkboxes functions
+  function countVisibleDocuments(folders: IFolder[]): number {
+    return folders.reduce((count, folder) => {
+      if (folder.isExpanded) {
+        return (
+          count +
+          folder.documents.length +
+          countVisibleDocuments(folder.folders)
+        );
+      }
+      return count;
+    }, 0);
+  }
+  function getTotalVisibleDocuments(): number {
+    return documents.length + countVisibleDocuments(folders);
+  }
+  const totalVisibleDocuments = getTotalVisibleDocuments();
+
+  function toggleSelectAll() {
+    if (selectedDocuments.length === totalVisibleDocuments) {
+      unselectAllDocuments();
+    } else {
+      selectAllDocuments();
+    }
+  }
+  function selectAllDocuments() {
+    const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
+    setSelectedDocuments([...documents, ...expandedFoldersDocuments]);
+  }
+
+  function unselectAllDocuments() {
+    setSelectedDocuments([]);
+  }
+
+  function onDownloadClick() {
+    if (selectedDocuments.length === 1) {
+      if (
+        !selectedDocuments[0].deepLinkPath ||
+        !selectedDocuments[0].deepLinkPath.length
+      ) {
+        downloadDocument(selectedDocuments[0].documentId);
+        return;
+      }
+    }
+    openArchiveTab();
+  }
 
   return (
     <div
@@ -134,9 +201,86 @@ export const DocumentsTable = (props: DocumentTableProps) => {
             <tr>
               <th
                 scope="col"
-                className="px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
+                className="px-4 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
               >
-                Name
+                <div className="flex items-center">
+                  {archiveTabStatus === 'closed' && (
+                    <div className="inline-flex items-end">
+                      <input
+                        id="checkbox-all"
+                        type="checkbox"
+                        checked={
+                          selectedDocuments.length > 0 &&
+                          selectedDocuments.length === totalVisibleDocuments
+                        }
+                        onChange={toggleSelectAll}
+                        className="rounded-none w-4 h-4 bg-transparent border-2 border-neutral-900 focus:ring-grey-500 focus:ring-2 text-neutral-900 mr-2 cursor-pointer"
+                      />
+                      <label htmlFor="checkbox-all" className="sr-only">
+                        checkbox
+                      </label>
+                    </div>
+                  )}
+                  {subfolderUri !== 'deleted' &&
+                    (selectedDocuments.length > 0 &&
+                    archiveTabStatus === 'closed' ? (
+                      <div className="inline-flex items-end">
+                        <button
+                          onClick={onDownloadClick}
+                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group ml-3.5 mr-1"
+                          title="Create Archive"
+                        >
+                          <div className="relative z-10">
+                            <Download />
+                          </div>
+                          <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
+                        <button
+                          onClick={() =>
+                            onDeleteSelectedDocuments(useSoftDelete)
+                          }
+                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
+                          title="Delete Selected"
+                        >
+                          <div className="relative z-10">
+                            <Trash />
+                          </div>
+                          <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
+                      </div>
+                    ) : (
+                      'Name'
+                    ))}
+
+                  {subfolderUri === 'deleted' &&
+                    (selectedDocuments.length > 0 &&
+                    archiveTabStatus === 'closed' ? (
+                      <>
+                        <button
+                          onClick={onRestoreSelectedDocuments}
+                          className="w-8 h-8 p-1 relative text-neutral-700 hover:text-neutral-900 group ml-4"
+                          title="Restore Selected"
+                        >
+                          <div className="relative z-10">
+                            <RestoreFile />
+                          </div>
+                          <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
+                        <button
+                          onClick={() => onDeleteSelectedDocuments(false)}
+                          className="w-8 h-8 p-[6px] relative text-red-500 hover:text-red-700 group"
+                          title="Delete Permanently"
+                        >
+                          <div className="relative z-10">
+                            <Trash />
+                          </div>
+                          <div className="absolute inset-0 bg-red-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
+                      </>
+                    ) : (
+                      'Name'
+                    ))}
+                </div>
               </th>
               <th
                 scope="col"
@@ -189,38 +333,34 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 siteId={currentSiteId}
                 isSiteReadOnly={isSiteReadOnly}
                 documentsRootUri={currentDocumentsRootUri}
-                onShareClick={onShareClick}
                 searchDocuments={documents}
-                onDeleteClick={onDeleteDocument(file, documents)}
-                onRestoreClick={onRestoreDocument(
-                  file,
-                  currentSiteId,
-                  documents
-                )}
-                onEditTagsAndMetadataModalClick={
-                  onEditTagsAndMetadataModalClick
-                }
-                onRenameModalClick={onRenameModalClick}
-                onMoveModalClick={onMoveModalClick}
-                onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
-                onDocumentReviewModalClick={onDocumentReviewModalClick}
-                onESignaturesModalClick={onESignaturesModalClick}
+                onRestoreClick={() => onRestoreDocument(file.documentId)}
                 onDocumentDataChange={onDocumentDataChange}
                 filterTag={filterTag}
-                isArchiveTabExpanded={isArchiveTabExpanded}
                 archiveStatus={archiveStatus}
                 addToPendingArchive={addToPendingArchive}
                 deleteFromPendingArchive={deleteFromPendingArchive}
                 infoDocumentId={infoDocumentId}
                 onDocumentInfoClick={onDocumentInfoClick}
+                selectedDocuments={selectedDocuments}
+                setSelectedDocuments={setSelectedDocuments}
+                archiveTabStatus={archiveTabStatus}
+                downloadDocument={downloadDocument}
               />
             ))}
           </tbody>
         </table>
-        {(loadingStatus === RequestStatus.pending && documents.length > 0)&& (
+        {loadingStatus === RequestStatus.pending && documents.length > 0 && (
           <div className="absolute bottom-0 w-full flex justify-center">
             <Spinner />
+          </div>
+        )}
+        {loadingStatus === RequestStatus.rejected && documents.length > 0 && (
+          <div className="w-full flex justify-center items-center gap-2 py-2">
+            <div className="w-6 h-6 p-0.5 text-neutral-500 border-neutral-500 border rounded-full border-2 ">
+              <Close/>
+            </div>
+            <p className="text-neutral-500">Failed to load more documents.</p>
           </div>
         )}
         <FolderDropWrapper
@@ -244,26 +384,20 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
   const { folders } = useSelector(DocumentListState);
 
   const {
-    onDeleteDocument,
     onRestoreDocument,
-    onShareClick,
-    onRenameModalClick,
     currentSiteId,
     onDocumentDataChange,
-    onESignaturesModalClick,
     currentDocumentsRootUri,
     filterTag,
-    onDocumentVersionsModalClick,
-    onDocumentWorkflowsModalClick,
-    onDocumentReviewModalClick,
-    onEditTagsAndMetadataModalClick,
     isSiteReadOnly,
-    onMoveModalClick,
     deleteFolder,
-    isArchiveTabExpanded,
     addToPendingArchive,
     deleteFromPendingArchive,
     archiveStatus,
+    selectedDocuments,
+    setSelectedDocuments,
+    archiveTabStatus,
+    downloadDocument,
   } = props;
 
   return (
@@ -279,22 +413,16 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               isSiteReadOnly={isSiteReadOnly}
               onDeleteClick={deleteFolder}
               currentDocumentsRootUri={currentDocumentsRootUri}
-              onShareClick={onShareClick}
-              onEditTagsAndMetadataModalClick={onEditTagsAndMetadataModalClick}
-              onRenameModalClick={onRenameModalClick}
-              onMoveModalClick={onMoveModalClick}
-              onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-              onDocumentWorkflowsModalClick={onDocumentWorkflowsModalClick}
-              onDocumentReviewModalClick={onDocumentReviewModalClick}
-              onESignaturesModalClick={onESignaturesModalClick}
               onDocumentDataChange={onDocumentDataChange}
               onRestoreDocument={onRestoreDocument}
-              onDeleteDocument={onDeleteDocument}
               filterTag={filterTag}
-              isArchiveTabExpanded={isArchiveTabExpanded}
               archiveStatus={archiveStatus}
               addToPendingArchive={addToPendingArchive}
               deleteFromPendingArchive={deleteFromPendingArchive}
+              selectedDocuments={selectedDocuments}
+              setSelectedDocuments={setSelectedDocuments}
+              archiveTabStatus={archiveTabStatus}
+              downloadDocument={downloadDocument}
             />
           );
         })}

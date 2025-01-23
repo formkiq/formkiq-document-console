@@ -6,12 +6,17 @@ import TextFileEditor from '../../Components/DocumentsAndFolders/TextFileEditor/
 import { Spinner } from '../../Components/Icons/icons';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
-import { setCurrentDocumentPath } from '../../Store/reducers/data';
+import {
+  setCurrentDocument,
+  setCurrentDocumentPath,
+} from '../../Store/reducers/data';
 import { useAppDispatch } from '../../Store/store';
 import {
-  InlineViewableContentExtensions,
+  InlineEditableContentTypes,
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
+  TextFileEditorEditableContentTypes,
+  TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -67,6 +72,24 @@ export function DocumentView() {
   const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
     siteDocumentsRootName
   );
+  const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
+    useState<boolean>(true);
+
+  const [mode, setMode] = useState(getModeFromPath());
+  const isDocumentContentTypeEditable = (contentType: string) => {
+    return (
+      TextFileEditorEditableContentTypes.indexOf(contentType) > -1 ||
+      InlineEditableContentTypes.indexOf(contentType) > -1
+    );
+  };
+  function getModeFromPath() {
+    const mode = pathname.split('/').pop();
+    if (mode === 'view' || mode === 'edit') {
+      return mode;
+    } else {
+      return 'view';
+    }
+  }
 
   const customParse = (csvText: string): CSVRow[] => {
     const lines = csvText.split('\n').filter((line) => line.trim() !== '');
@@ -107,6 +130,47 @@ export function DocumentView() {
     return result;
   };
 
+  const handleTextContent = (content: string) => {
+    try {
+      // First try to decode base64 if it's base64 encoded
+      let decodedString;
+      try {
+        // Use TextDecoder to handle UTF-8 encoded base64 content
+        const decoded = atob(content);
+        const bytes = new Uint8Array(decoded.length);
+        for (let i = 0; i < decoded.length; i++) {
+          bytes[i] = decoded.charCodeAt(i);
+        }
+        decodedString = new TextDecoder('utf-8').decode(bytes);
+      } catch (e) {
+        // If not base64 or decoding fails, use the original content
+        decodedString = content;
+      }
+
+      // Try to decode HTML entities
+      const parser = new DOMParser();
+      let decodedContent =
+        parser.parseFromString(
+          `<!doctype html><body>${decodedString}`,
+          'text/html'
+        ).body.textContent || '';
+
+      // Remove BOM if present
+      decodedContent = decodedContent.replace(/^\uFEFF/, '');
+
+      // Handle specific character replacements
+      decodedContent = decodedContent
+        .replace(/Ã„/g, 'Ä')
+        .replace(/â€ž/g, '"')
+        .replace(/â€œ/g, '"');
+
+      return decodedContent;
+    } catch (error) {
+      console.error('Error processing text content:', error);
+      return content;
+    }
+  };
+
   useEffect(() => {
     if (id) {
       let ooConfig: any;
@@ -119,12 +183,16 @@ export function DocumentView() {
       DocumentsService.getDocumentById(id, currentSiteId).then(
         (response: IDocument) => {
           setDocument(response);
-          setDocumentExtension(
-            response.path
-              .substring(response.path.lastIndexOf('.') + 1)
-              .toLowerCase()
-          );
+          dispatch(setCurrentDocument(response));
           dispatch(setCurrentDocumentPath(response.path));
+          // redirect if file is not editable type
+          if (
+            !isDocumentContentTypeEditable(response.contentType) &&
+            mode === 'edit'
+          ) {
+            navigate(pathname.replace(/\/edit$/, '/view'));
+          }
+
           if (
             formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
             OnlyOfficeContentTypes.indexOf(
@@ -157,14 +225,43 @@ export function DocumentView() {
             if (versionKey && versionKey.length) {
               viewVersionKey = versionKey;
             }
-            DocumentsService.getDocumentUrl(
-              id,
-              currentSiteId,
-              viewVersionKey
-            ).then((urlResponse: any) => {
-              setDocumentContent(urlResponse.url);
-            });
-          } else if ((response as IDocument).deepLinkPath.length) {
+            // Check if it's a text file
+            const isTextFile = response.contentType.startsWith('text/');
+
+            if (isTextFile) {
+              DocumentsService.getDocumentContent(
+                currentSiteId,
+                id,
+                viewVersionKey,
+                true
+              ).then((contentResponse: any) => {
+                console.log('Raw text content:', contentResponse.content);
+
+                const processedContent = handleTextContent(
+                  contentResponse.content
+                );
+
+                // Create a Blob with UTF-8 encoding
+                const blob = new Blob([processedContent], {
+                  type: `${response.contentType};charset=utf-8`,
+                });
+                const url = URL.createObjectURL(blob);
+                setBlobUrl(url);
+                setDocumentContent(url);
+              });
+            } else {
+              DocumentsService.getDocumentUrl(
+                id,
+                currentSiteId,
+                viewVersionKey
+              ).then((urlResponse: any) => {
+                setDocumentContent(urlResponse.url);
+              });
+            }
+          } else if (
+            (response as IDocument).deepLinkPath &&
+            (response as IDocument).deepLinkPath.length
+          ) {
             setDocumentContent((response as IDocument).deepLinkPath);
           } else if ((response as IDocument).contentType === 'text/csv') {
             let viewVersionKey = '';
@@ -183,10 +280,8 @@ export function DocumentView() {
               }
             });
           } else if (
-            InlineViewableContentExtensions.indexOf(
-              response.path
-                .substring(response.path.lastIndexOf('.') + 1)
-                .toLowerCase()
+            TextFileEditorViewableContentTypes.indexOf(
+              (response as IDocument).contentType
             ) > -1
           ) {
             let viewVersionKey = '';
@@ -199,18 +294,9 @@ export function DocumentView() {
               viewVersionKey,
               true
             ).then((res: any) => {
-              fetch(res.contentUrl)
-                .then((response) => response.body)
-                .then((body: any) => {
-                  const reader = body.getReader();
-                  reader.read().then(({ value }: any) => {
-                    if (value) {
-                      setDocumentContent(new TextDecoder().decode(value));
-                    } else {
-                      setDocumentContent('');
-                    }
-                  });
-                });
+              if (res.content) {
+                setDocumentContent(res.content);
+              }
             });
           } else {
             let viewVersionKey = '';
@@ -274,8 +360,12 @@ export function DocumentView() {
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
-    // TODO: determine if readonly check required here
-    //setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly)
+    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
+    setMode(getModeFromPath());
+    // redirect if user doesn't have editing rights
+    if (recheckSiteInfo.isSiteReadOnly && getModeFromPath() === 'edit') {
+      navigate(pathname.replace(/\/edit$/, '/view'));
+    }
   }, [pathname]);
 
   const [document, setDocument]: [IDocument | null, any] = useState(null);
@@ -283,7 +373,17 @@ export function DocumentView() {
   const [documentContent, setDocumentContent]: [string | null, any] =
     useState('');
   const [documentCsvContent, setDocumentCsvContent] = useState<CSVRow[]>([]);
-  const [documentExtension, setDocumentExtension] = useState<string>('');
+
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  // Cleanup function for blob URLs
+  useEffect(() => {
+    return () => {
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [blobUrl]);
 
   const DocumentViewer = () => {
     //return (<></>)
@@ -294,7 +394,8 @@ export function DocumentView() {
           (InlineViewableContentTypes.indexOf(
             (document as IDocument).contentType
           ) > -1 ||
-            (document as IDocument).deepLinkPath.length > 0) && (
+            ((document as IDocument).deepLinkPath &&
+              (document as IDocument).deepLinkPath.length > 0)) && (
             <>
               {documentContent && (
                 <iframe
@@ -356,15 +457,24 @@ export function DocumentView() {
             </>
           )}
 
-        {/*Text File Editor (currently only for .md files) */}
+        {/*Text File Editor (currently only for 'text/markdown' files) */}
         {document &&
-          InlineViewableContentExtensions.indexOf(documentExtension) > -1 &&
+          TextFileEditorViewableContentTypes.indexOf(
+            (document as IDocument).contentType
+          ) > -1 &&
           documentContent !== undefined && (
             <TextFileEditor
               currentDocument={document}
               documentContent={documentContent}
-              extension={documentExtension}
+              contentType={(document as IDocument).contentType}
               siteId={currentSiteId}
+              readOnly={
+                isCurrentSiteReadonly ||
+                TextFileEditorEditableContentTypes.indexOf(
+                  (document as IDocument).contentType
+                ) === -1 ||
+                mode === 'view'
+              }
             />
           )}
       </div>

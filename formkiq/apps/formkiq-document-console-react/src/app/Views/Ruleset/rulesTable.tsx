@@ -68,8 +68,20 @@ function RulesTable({
                     {rule.conditions.must.length > 0 &&
                       rule.conditions.must.map((condition, index) => {
                         return (
-                          <div className=" truncate" key={'condition_' + index}>
-                            {condition.attribute} - <i>{condition.fieldName}</i>
+                          <div className="truncate" key={`condition_${index}`}>
+                            {condition.criterion}
+                            {condition.fieldName && (
+                              <>
+                                &nbsp;
+                                <i>{condition.fieldName}</i>
+                              </>
+                            )}
+                            {condition.attributeKey && (
+                              <>
+                                &nbsp;
+                                <i>{condition.attributeKey}</i>
+                              </>
+                            )}
                             &nbsp;
                             <b>{condition.operation}</b> "{condition.value}"
                           </div>

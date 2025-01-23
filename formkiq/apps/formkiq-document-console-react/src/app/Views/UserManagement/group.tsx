@@ -3,7 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { RequestStatus } from '../../helpers/types/document';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
-import { useAppDispatch } from '../../Store/store';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import {
   addUserToGroup,
@@ -16,13 +15,14 @@ import {
   setGroupUsersLoadingStatusPending,
   UserManagementState,
 } from '../../Store/reducers/userManagement';
+import { useAppDispatch } from '../../Store/store';
 
 import { useNavigate, useParams } from 'react-router-dom';
 import GroupInfoTab from '../../Components/UserManagement/InfoTabs/GroupInfoTab';
-import { useAuthenticatedState } from '../../Store/reducers/auth';
+import GroupMenu from '../../Components/UserManagement/Menus/GroupMenu';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { Group as GroupType, User } from '../../helpers/types/userManagement';
-import GroupMenu from '../../Components/UserManagement/Menus/GroupMenu';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
 import GroupUsersTable from './groupUsersTable';
 
 function Group() {
@@ -284,7 +284,7 @@ function Group() {
                   onDisableSelectedGroupUsers={onDisableSelectedGroupUsers}
                   onEnableSelectedGroupUsers={onEnableSelectedGroupUsers}
                   onResetPasswordSelectedGroupUsers={
-                      onResetPasswordSelectedGroupUsers
+                    onResetPasswordSelectedGroupUsers
                   }
                 />
               </div>
@@ -298,6 +298,7 @@ function Group() {
             user={user}
             group={group}
             users={groupUsers}
+            groupsUsers={groupUsers}
           />
         )}
       </div>

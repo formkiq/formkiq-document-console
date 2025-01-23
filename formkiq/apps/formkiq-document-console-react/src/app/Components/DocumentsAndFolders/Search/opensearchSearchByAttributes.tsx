@@ -1,24 +1,26 @@
-import {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {fetchDocuments} from '../../../Store/reducers/documentsList';
-import {openDialog as openNotificationDialog} from '../../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../../Store/store';
-import {Attribute} from '../../../helpers/types/attributes';
-import {Link, useLocation, useSearchParams} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { fetchDocuments } from '../../../Store/reducers/documentsList';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import { Attribute } from '../../../helpers/types/attributes';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
-import {ChevronDown, Close, Plus} from '../../Icons/icons';
-import SearchLine from "./searchLine";
-import {AttributesDataState} from "../../../Store/reducers/attributesData";
+import { ChevronDown, Close, Plus } from '../../Icons/icons';
+import SearchLine from './searchLine';
+import { AttributesDataState } from '../../../Store/reducers/attributesData';
 
 export default function OpenSearchByAttributes({
   siteId,
   formkiqVersion,
   subfolderUri,
+  minimizeAdvancedSearch,
+  closeAdvancedSearch,
 }: any) {
   const opensearchAttributeCriteria = [
     { key: 'eq', title: 'Equal to' },
@@ -32,8 +34,10 @@ export default function OpenSearchByAttributes({
   const filterTag = new URLSearchParams(search).get('filterTag');
   const filterAttribute = new URLSearchParams(search).get('filterAttribute');
 
-  const {allAttributes} = useSelector(AttributesDataState);
-  const [attributeKeys, setAttributeKeys] = useState<{ key: string; title: string }[]>([]);
+  const { allAttributes } = useSelector(AttributesDataState);
+  const [attributeKeys, setAttributeKeys] = useState<
+    { key: string; title: string }[]
+  >([]);
   const [selectedAttribute, setSelectedAttribute] = useState<Attribute | null>(
     null
   );
@@ -258,9 +262,7 @@ export default function OpenSearchByAttributes({
   }
 
   function onCloseTab() {
-    searchParams.delete('searchWord');
-    searchParams.delete('advancedSearch');
-    setSearchParams(searchParams);
+    closeAdvancedSearch();
     // re-fetch documents
     dispatch(
       fetchDocuments({
@@ -277,7 +279,7 @@ export default function OpenSearchByAttributes({
 
   return (
     <div className="w-full h-full">
-      <div className="h-full border-gray-400 border overflow-y-auto p-2">
+      <div className="h-full border-gray-400 border p-2">
         <SearchLine
           siteId={siteId}
           searchWord={searchWord}
@@ -287,7 +289,7 @@ export default function OpenSearchByAttributes({
         />
         {attributeKeys.length ? (
           <div className="h-8 gap-2 flex items-center">
-            <div className="h-8 flex items-center gap-2 w-full max-w-[350px]">
+            <div className="h-full flex items-center gap-2 w-full max-w-[350px]">
               <RadioCombobox
                 values={attributeKeys}
                 selectedValue={selectedAttributeKey}
@@ -451,13 +453,15 @@ export default function OpenSearchByAttributes({
         </div>
 
         {selectedAttributesQuery.length > 0 && (
-          <table className="border border-neutral-300 table-fixed text-sm text-left mt-2 bg-white">
-            <thead>
+          <div className="max-h-[35vh] overflow-y-auto w-fit">
+          <table
+            className=" border-separate border-spacing-0 border-x border-b border-neutral-300 table-fixed text-sm text-left mt-2 bg-white">
+            <thead className="sticky top-0 bg-white z-10">
               <tr>
-                <th className="w-52 px-2">Key</th>
-                <th className="w-32 px-2">Criteria</th>
-                <th className="w-96 px-2">Values</th>
-                <th className="w-8"></th>
+                <th className="w-52 px-2 border-b border-t border-neutral-300">Key</th>
+                <th className="w-32 px-2 border-b border-t border-neutral-300">Criteria</th>
+                <th className="w-96 px-2 border-b border-t border-t border-neutral-300">Values</th>
+                <th className="w-8 border-b border-t border-neutral-300"></th>
               </tr>
             </thead>
             <tbody>
@@ -516,19 +520,21 @@ export default function OpenSearchByAttributes({
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
       <div className="flex justify-end gap-2 mt-1">
-        <Link
-          to="?advancedSearch=hidden"
+        <button
+          type="button"
+          onClick={minimizeAdvancedSearch}
           className="text-sm flex gap-2 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap"
         >
           Minimize Search Tab
           <div className="w-4 h-4 -mt-1 rotate-180">
             <ChevronDown />
           </div>
-        </Link>
+        </button>
         <ButtonGhost type="button" onClick={onCloseTab}>
           Cancel
         </ButtonGhost>

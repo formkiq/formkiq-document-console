@@ -1,39 +1,35 @@
-import {useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
+import { useCallback, useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
 import ApiKeyList from '../../../Components/Integrations/ApiKeyList/ApiKeyList';
 import NewApiKeyModal from '../../../Components/Integrations/NewApiKey/newApiKey';
-import {AuthState} from '../../../Store/reducers/auth';
-import {openDialog} from '../../../Store/reducers/globalConfirmControls';
-import {useAppDispatch} from '../../../Store/store';
-import {DocumentsService} from '../../../helpers/services/documentsService';
-import {getCurrentSiteInfo, getUserSites} from "../../../helpers/services/toolService";
-import {useLocation, useNavigate} from "react-router-dom";
+import { AuthState } from '../../../Store/reducers/auth';
+import { openDialog } from '../../../Store/reducers/globalConfirmControls';
+import { useAppDispatch } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import {
+  getCurrentSiteInfo,
+  getUserSites,
+} from '../../../helpers/services/toolService';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Plus } from '../../../Components/Icons/icons';
+import {
+  ApiKeysState,
+  fetchApiKeys,
+  setApiKeysLoadingStatusPending,
+} from '../../../Store/reducers/apiKeys';
+import { RequestStatus } from '../../../helpers/types/apiKeys';
 
 export function ApiKeys() {
   const dispatch = useAppDispatch();
-  let userSite: any = null;
-  let defaultSite: any = null;
-  const workspaceSites: any[] = [];
-  const {user} = useSelector(AuthState);
-  if (user && user.sites) {
-    user.sites.forEach((site: any) => {
-      if (site.siteId === user.email) {
-        userSite = site;
-      } else if (site.siteId === 'default') {
-        defaultSite = site;
-      } else {
-        workspaceSites.push(site);
-      }
-    });
-  }
 
-  const {hasUserSite, hasDefaultSite, hasWorkspaces} = getUserSites(user);
+  const { user } = useSelector(AuthState);
+
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
+    getUserSites(user);
 
   const pathname = decodeURI(useLocation().pathname);
-  const {
-    siteId,
-  } = getCurrentSiteInfo(
+  const { siteId, isSiteReadOnly } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -43,28 +39,17 @@ export function ApiKeys() {
   );
 
   const navigate = useNavigate();
+  const {
+    apiKeys,
+    nextApiKeysToken,
+    apiKeysLoadingStatus,
+    currentApiKeysSearchPage,
+    isLastApiKeysSearchPageLoaded,
+  } = useSelector(ApiKeysState);
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
-  const [currentSite, setCurrentSite] = useState<any>(null)
+  const [isCurrentSiteReadOnly, setIsCurrentSiteReadonly] =
+    useState(isSiteReadOnly);
 
-  useEffect(() => {
-    if (currentSiteId) {
-      let site: any;
-      if (user?.email && currentSiteId === user.email) {
-        site = userSite
-      } else if (currentSiteId === 'default') {
-        site = defaultSite
-      } else {
-        site = workspaceSites.find(site => site.siteId === currentSiteId)
-      }
-      setCurrentSite(site);
-      if (!site) {
-        alert('No site configured for this user');
-        window.location.href = '/';
-      }
-    }
-  }, [currentSiteId])
-
-  const [currentSiteApiKeys, setCurrentSiteApiKeys] = useState<any>(null);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
 
@@ -101,33 +86,19 @@ export function ApiKeys() {
       );
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
+    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
   useEffect(() => {
     updateApiKeys();
   }, [user, currentSiteId]);
 
-  const setApiKeys = (apiKeys: [], siteId: string, readonly: boolean) => {
-    setCurrentSiteApiKeys(apiKeys as any);
-  };
-
-
   const updateApiKeys = () => {
-
-    let readonly = false;
-    if (currentSite && currentSite.permission && currentSite.permission === 'READ_ONLY') {
-      readonly = true;
-    }
-    DocumentsService.getApiKeys(currentSiteId).then(
-      (apiKeysResponse: any) => {
-        setApiKeys(apiKeysResponse.apiKeys, currentSiteId, readonly);
-      }
-    );
+    dispatch(fetchApiKeys({ siteId: currentSiteId, limit: 20, page: 1 }));
   };
 
   const deleteApiKey = (apiKey: string, siteId: string) => {
     const deleteFunc = async () => {
-      setCurrentSiteApiKeys(null);
       await DocumentsService.deleteApiKey(apiKey, siteId).then(
         (apiKeysResponse: any) => {
           updateApiKeys();
@@ -141,37 +112,72 @@ export function ApiKeys() {
       })
     );
   };
+  const trackScrolling = useCallback(async () => {
+    const isBottom = (el: HTMLElement) => {
+      if (el) {
+        return el.offsetHeight + el.scrollTop + 10 > el.scrollHeight;
+      }
+      return false;
+    };
 
+    const scrollpane = document.getElementById('apiKeysScrollPane');
+
+    if (
+      isBottom(scrollpane as HTMLElement) &&
+      nextApiKeysToken &&
+      apiKeysLoadingStatus === RequestStatus.fulfilled
+    ) {
+      dispatch(setApiKeysLoadingStatusPending());
+      if (nextApiKeysToken) {
+        await dispatch(
+          fetchApiKeys({
+            siteId: currentSiteId,
+            nextToken: nextApiKeysToken,
+            page: currentApiKeysSearchPage + 1,
+            limit: 20,
+          })
+        );
+      }
+    }
+  }, [nextApiKeysToken, apiKeysLoadingStatus, isLastApiKeysSearchPageLoaded]);
+
+  const handleScroll = (event: any) => {
+    const el = event.target;
+    // Track scroll when table reaches bottom
+    if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
+      if (el.scrollTop > 0) {
+        trackScrolling();
+      }
+    }
+  };
   return (
     <>
       <Helmet>
         <title>Api Keys</title>
       </Helmet>
+      <div className="text-xl font-bold p-4">API Keys (site: {siteId})</div>
       <div className="p-4 max-w-screen-lg font-semibold">
         FormKiQ allows for API authentication using API Keys
       </div>
-      <div className="p-4">
-        {currentSite && (
-          <>
-            <div
-              className="w-full flex self-start text-gray-600 hover:text-gray-500 justify-center lg:justify-start whitespace-nowrap px-2 py-2 cursor-pointer"
-            >
-              <div className="pl-1 uppercase text-base">
-                Api Keys
-                <span className="block normal-case">
-                  (Site ID: {currentSiteId})
-                </span>
-              </div>
-            </div>
-            <ApiKeyList
-              siteId={currentSiteId}
-              apiKeys={currentSiteApiKeys}
-              isSiteReadOnly={currentSite.readonly}
-              onDelete={deleteApiKey}
-              onNewClick={onNewClick}
-            ></ApiKeyList>
-          </>
-        )}
+      {!isCurrentSiteReadOnly && (
+        <div className="my-4 flex px-4">
+          <button
+            className="flex bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-md flex cursor-pointer focus:outline-none py-2 px-4"
+            data-test-id="create-api-key"
+            onClick={(event) => onNewClick(event, currentSiteId)}
+          >
+            <span>Create new</span>
+            <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
+          </button>
+        </div>
+      )}
+      <div className="relative overflow-hidden h-full" id="apiKeysWrapper">
+        <ApiKeyList
+          siteId={currentSiteId}
+          apiKeys={apiKeys}
+          onDelete={deleteApiKey}
+          handleScroll={handleScroll}
+        ></ApiKeyList>
       </div>
       <NewApiKeyModal
         isOpened={isNewModalOpened}

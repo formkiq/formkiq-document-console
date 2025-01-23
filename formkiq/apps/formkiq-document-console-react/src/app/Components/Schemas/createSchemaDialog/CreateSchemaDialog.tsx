@@ -36,9 +36,9 @@ function CreateSchemaDialog({
   >('generalInfo');
 
   const initialSchemaValue: Schema = {
-    name: '',
+    name: schemaType === 'classification' ? '' : 'Site Schema',
     attributes: {
-      allowAdditionalAttributes: false,
+      allowAdditionalAttributes: true,
     },
   };
   const [schema, setSchema] = useState(initialSchemaValue);
@@ -66,6 +66,7 @@ function CreateSchemaDialog({
   const [attributeKeys, setAttributeKeys] = useState<
     { key: string; title: string }[]
   >([]);
+
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
     const keys = allAttributes.map((item) => ({
@@ -78,6 +79,10 @@ function CreateSchemaDialog({
   useEffect(() => {
     dispatch(fetchAttributesData({ siteId, limit: 100 }));
   }, [siteId]);
+
+  useEffect(() => {
+    setSchema(initialSchemaValue);
+  },[schemaType])
 
   const schemaNameRef = useRef<HTMLInputElement>(null);
 
@@ -343,7 +348,7 @@ function CreateSchemaDialog({
           <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
             <div className="w-full max-w-xl bg-white p-6 rounded-md">
               <Dialog.Title className="text-2xl font-bold mb-4">
-                Create New Schema
+                 {schemaType === 'classification' ? 'Create New Schema':"Create New Site Schema"}
               </Dialog.Title>
               <form className="flex flex-col gap-4 mt-6" onSubmit={onSubmit}>
                 <div className="flex flex-row justify-start gap-2 text-sm font-bold">
@@ -409,18 +414,21 @@ function CreateSchemaDialog({
 
                 {selectedTab === 'generalInfo' && (
                   <>
-                    <input
-                      type="text"
-                      className="h-12 px-4 border border-neutral-300 text-sm rounded-md"
-                      placeholder="Add schema name"
-                      required
-                      value={schema.name}
-                      onChange={(e) =>
-                        setSchema({ ...schema, name: e.target.value })
-                      }
-                      ref={schemaNameRef}
-                      onKeyDown={(e) => preventDialogClose(e)}
-                    />
+                    {schemaType === 'classification' && (
+                      <input
+                        type="text"
+                        className="h-12 px-4 border border-neutral-300 text-sm rounded-md"
+                        placeholder="Add schema name"
+                        required
+                        value={schema.name}
+                        onChange={(e) =>
+                          setSchema({ ...schema, name: e.target.value })
+                        }
+                        ref={schemaNameRef}
+                        onKeyDown={(e) => preventDialogClose(e)}
+                      />
+                    )}
+
                     <div className="flex items-center">
                       <input
                         id="allowAdditionalAttributes"

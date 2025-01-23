@@ -7,8 +7,8 @@ import { useAppDispatch } from '../../../Store/store';
 import { InlineViewableContentTypes } from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
-import ButtonPrimaryGradient from "../../Generic/Buttons/ButtonPrimaryGradient";
-import ButtonTertiary from "../../Generic/Buttons/ButtonTertiary";
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
 import { Close, Upload } from '../../Icons/icons';
 
 export default function DocumentVersionsModal({
@@ -37,7 +37,7 @@ export default function DocumentVersionsModal({
   };
   const navigate = useNavigate();
 
-  const doneButtonRef = useRef() as React.MutableRefObject<HTMLButtonElement>;
+  const doneButtonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     updateVersions();
@@ -83,22 +83,15 @@ export default function DocumentVersionsModal({
     }
   };
   const viewDocumentVersion = (event: any, versionKey: string) => {
+    console.log('viewDocumentVersion', versionKey, value);
     if (value) {
       if (versionKey !== undefined) {
-        /*
-        window.open(
-          `${window.location.origin}${documentsRootUri}/${value.documentId}/view?versionKey=${versionKey}`
-        );
-        */
         navigate(
-          `${documentsRootUri}/${value.documentId}/view?versionKey=${versionKey}`
+          `${documentsRootUri}/${
+            value.documentId
+          }/view?versionKey=${encodeURIComponent(versionKey)}`
         );
       } else {
-        /*
-        window.open(
-          `${window.location.origin}${documentsRootUri}/${value.documentId}/view`
-        );
-        */
         navigate(`${documentsRootUri}/${value.documentId}/view`);
       }
     }
@@ -127,11 +120,16 @@ export default function DocumentVersionsModal({
       const deleteVersion = () => {
         if (value) {
           DocumentsService.deleteDocumentVersion(
+            siteId,
             value.documentId,
-            versionKey
-          ).catch((err) => {
-            console.error('Failed to delete document version: ', err);
-          });
+            encodeURIComponent(versionKey)
+          )
+            .catch((err) => {
+              console.error('Failed to delete document version: ', err);
+            })
+            .then(() => {
+              updateVersions();
+            });
         }
       };
 
@@ -206,15 +204,15 @@ export default function DocumentVersionsModal({
                     </div>
                     <div className="w-100">
                       {!isSiteReadOnly && (
-                          <ButtonTertiary
-                            onClick={(event:any) =>
+                        <ButtonTertiary
+                          onClick={(event: any) =>
                             onUploadClick(event, (value as any).documentId)
                           }
-                            className="flex font-semibold py-2"
+                          className="flex font-semibold py-2"
                         >
-                          <div className="mx-4">Upload New Version 1</div>
+                          <div className="mx-4">Upload New Version</div>
                           <div className="w-4 h-4 ml-2 mt-1">{Upload()}</div>
-                          </ButtonTertiary>
+                        </ButtonTertiary>
                       )}
                     </div>
                     <div
@@ -299,7 +297,7 @@ export default function DocumentVersionsModal({
                                     )}
                                     <ButtonTertiary
                                       className="flex items-center text-smaller font-semibold py-2 px-5 focus:outline-none"
-                                      onClick={(event:any) =>
+                                      onClick={(event: any) =>
                                         downloadDocumentVersion(
                                           event,
                                           version.versionKey
@@ -339,9 +337,11 @@ export default function DocumentVersionsModal({
                       </tbody>
                     </table>
                   </div>
-                  <div className="w-full flex justify-center mt-4">
+                  <div
+                    ref={doneButtonRef}
+                    className="w-full flex justify-center mt-4"
+                  >
                     <ButtonPrimaryGradient
-                      ref={doneButtonRef}
                       className="py-2"
                       onClick={closeDialog}
                     >

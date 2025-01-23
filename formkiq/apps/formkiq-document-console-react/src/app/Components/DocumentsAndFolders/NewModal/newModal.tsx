@@ -5,10 +5,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
-import {
-  DocumentsService,
-  IFileUploadData,
-} from '../../../helpers/services/documentsService';
+import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import {
   Close,
@@ -167,11 +164,21 @@ export default function NewModal({
               if (res.status === 201) {
                 closeDialog();
               } else {
-                dispatch(
-                  openDialog({
-                    dialogTitle: 'An error has occurred.',
-                  })
-                );
+                if (res.errors) {
+                  dispatch(
+                    openDialog({
+                      dialogTitle:
+                        'Error.' +
+                        res.errors.map((err: any) => err.error).join(', \n'),
+                    })
+                  );
+                } else {
+                  dispatch(
+                    openDialog({
+                      dialogTitle: 'An error has occurred.',
+                    })
+                  );
+                }
               }
             }
           );
@@ -180,25 +187,37 @@ export default function NewModal({
             nameValue += '.' + itemToCreate;
           }
           if (itemToCreate === 'md') {
-            // TODO: create new .md file, open it
-            const file = new File([' '], nameValue, {});
-            const uploadData: IFileUploadData[] = [
-              {
-                originalFile: file,
-                uploadedSize: 0,
-              },
-            ];
-            DocumentsService.uploadDocuments(
-              value.folder,
-              siteId,
-              formkiqVersion,
-              uploadData,
-              () => {}
-            ).then((res) => {
-              if (res.length > 0) {
-                navigate(pathname + '/' + res[0].documentId + '/view');
+            const documentParamaters = {
+              path: value.folder
+                ? `${value.folder}/${nameValue}`
+                : `${nameValue}`,
+              contentType: 'text/markdown',
+              content: ' ',
+            };
+            DocumentsService.addDocument(siteId, documentParamaters).then(
+              (res) => {
+                if (res.status === 201) {
+                  navigate(pathname + '/' + res.documentId + '/edit');
+                  closeDialog();
+                } else {
+                  if (res.errors) {
+                    dispatch(
+                      openDialog({
+                        dialogTitle:
+                          'Error.' +
+                          res.errors.map((err: any) => err.error).join(', \n'),
+                      })
+                    );
+                  } else {
+                    dispatch(
+                      openDialog({
+                        dialogTitle: 'An error has occurred.',
+                      })
+                    );
+                  }
+                }
               }
-            });
+            );
           } else {
             navigate(
               '/documents/new/' +
@@ -208,8 +227,8 @@ export default function NewModal({
                 '/' +
                 nameValue
             );
+            closeDialog();
           }
-          closeDialog();
         }
       } else {
         dispatch(
@@ -423,7 +442,7 @@ export default function NewModal({
                             : 'cursor-pointer hover:bg-gray-100'
                         } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
                         onClick={(event) =>
-                          (window.location.href = '/integrations/workflows')
+                          (window.location.href = '/orchestrations/workflows')
                         }
                       >
                         <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
@@ -441,7 +460,7 @@ export default function NewModal({
                           : 'cursor-pointer hover:bg-gray-100'
                       } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
                       onClick={(event) =>
-                        (window.location.href = '/integrations/webhooks')
+                        (window.location.href = '/orchestrations/webhooks')
                       }
                     >
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
@@ -473,14 +492,14 @@ export default function NewModal({
                       ref={newFormRef}
                       onSubmit={(event) => onNewFormSubmit(event, value)}
                     >
-                      <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
+                      <div className="flex flex-wrap items-start relative w-full">
                         {value && (
-                          <div className="w-full mr-12 text-sm font-semibold pb-2">
+                          <h4 className="w-full text-lg font-bold mb-2 px-2 py-1 bg-gray-100">
                             Location: /
                             {value.folder && value.folder.length && (
                               <span>{value.folder}/</span>
                             )}
-                          </div>
+                          </h4>
                         )}
                         <div
                           className={

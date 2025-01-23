@@ -68,7 +68,17 @@ const Group = React.lazy(() => import('../../Views/UserManagement/group'));
 const Users = React.lazy(() => import('../../Views/UserManagement/users'));
 
 const UserActivities = React.lazy(
-    () => import('../../Views/Account/userActivities')
+  () => import('../../Views/Account/userActivities')
+);
+
+const Attributes = React.lazy(
+  () => import('../../Views/Attributes/attributes')
+);
+
+const Mappings = React.lazy(() => import('../../Views/Mappings/mappings'));
+const Mapping = React.lazy(() => import('../../Views/Mappings/mapping'));
+const SitesManagement = React.lazy(
+  () => import('../../Views/Account/sitesManagement')
 );
 
 const RoutesMapper = () => {
@@ -96,6 +106,7 @@ const RoutesMapper = () => {
       <Route path="/documents/new/:extension" element={<DocumentNew />}></Route>
       <Route path="/documents/:id" element={<Documents />}></Route>
       <Route path="/documents/:id/view" element={<DocumentView />}></Route>
+      <Route path="/documents/:id/edit" element={<DocumentView />}></Route>
       <Route path="/documents" element={<Documents />}></Route>
       <Route path="/my-documents/folders/*" element={<Documents />}></Route>
       <Route
@@ -114,6 +125,7 @@ const RoutesMapper = () => {
       ></Route>
       <Route path="/my-documents/:id" element={<Documents />}></Route>
       <Route path="/my-documents/:id/view" element={<DocumentView />}></Route>
+      <Route path="/my-documents/:id/edit" element={<DocumentView />}></Route>
 
       <Route path="/team-documents" element={<Documents />}></Route>
       <Route path="/team-documents/folders/*" element={<Documents />}></Route>
@@ -132,6 +144,7 @@ const RoutesMapper = () => {
       ></Route>
       <Route path="/team-documents/:id" element={<Documents />}></Route>
       <Route path="/team-documents/:id/view" element={<DocumentView />}></Route>
+      <Route path="/team-documents/:id/edit" element={<DocumentView />}></Route>
       <Route path="/team-documents" element={<Documents />}></Route>
 
       <Route path="/workspaces/" element={<Documents />}></Route>
@@ -156,6 +169,10 @@ const RoutesMapper = () => {
       <Route path="/workspaces/:siteId/:id" element={<Documents />}></Route>
       <Route
         path="/workspaces/:siteId/:id/view"
+        element={<DocumentView />}
+      ></Route>
+      <Route
+        path="/workspaces/:siteId/:id/edit"
         element={<DocumentView />}
       ></Route>
 
@@ -204,12 +221,23 @@ const RoutesMapper = () => {
       ></Route>
       <Route path="/queues" element={<Queues />}></Route>
       <Route path="/queues/workspaces/:siteId" element={<Queues />}></Route>
-      <Route path="/integrations/api" element={<ApiExplorer />}></Route>
+      <Route path="/mappings" element={<Mappings />}></Route>
+      <Route path="/mappings/workspaces/:siteId" element={<Mappings />}></Route>
+      <Route path="/mappings/:mappingId" element={<Mapping />}></Route>
+      <Route
+        path="/mappings/workspaces/:siteId/:mappingId"
+        element={<Mapping />}
+      ></Route>
+      <Route path="/orchestrations/api" element={<ApiExplorer />}></Route>
       <Route
         path="/admin/api-keys/workspaces/:siteId"
         element={<ApiKeys />}
       ></Route>
-      <Route path="/integrations/webhooks" element={<Webhooks />}></Route>
+      <Route path="/orchestrations/webhooks" element={<Webhooks />}></Route>
+      <Route
+        path="/orchestrations/webhooks/workspaces/:siteId"
+        element={<Webhooks />}
+      ></Route>
       <Route path="/admin/settings" element={<AccountSettings />}></Route>
       <Route path="/admin/api-keys" element={<ApiKeys />}></Route>
       <Route path="/admin/groups" element={<Groups />}></Route>
@@ -225,7 +253,19 @@ const RoutesMapper = () => {
         element={<ObjectExamineTool />}
       ></Route>
       <Route path="/admin/user-activities" element={<UserActivities />}></Route>
-      <Route path="/admin/user-activities/workspaces/:siteId" element={<UserActivities />}></Route>
+      <Route
+        path="/admin/user-activities/workspaces/:siteId"
+        element={<UserActivities />}
+      ></Route>
+      <Route
+        path="/admin/sites-management"
+        element={<SitesManagement />}
+      ></Route>
+      <Route path="/attributes" element={<Attributes />}></Route>
+      <Route
+        path="/attributes/workspaces/:siteId"
+        element={<Attributes />}
+      ></Route>
       <Route path="*" element={<Page404 />}></Route>
     </Routes>
   );

@@ -4,8 +4,20 @@ import { matchPath } from 'react-router';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthState, logout } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
-import { DataCacheState } from '../../Store/reducers/data';
+import {
+  DataCacheState,
+  setCurrentDocument,
+  setCurrentDocumentPath,
+} from '../../Store/reducers/data';
+import {
+  fetchDocuments,
+  setDocuments,
+} from '../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../Store/store';
+import {
+  InlineEditableContentTypes,
+  TextFileEditorEditableContentTypes,
+} from '../../helpers/constants/contentTypes';
 import { TopLevelFolders } from '../../helpers/constants/folders';
 import {
   AdminPrefixes,
@@ -17,18 +29,28 @@ import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
+import { IDocument } from '../../helpers/types/document';
+import { ILine } from '../../helpers/types/line';
+import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
+import { useDocumentActions } from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
+import DocumentActionsModalContainer from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsModalContainer';
+import DocumentActionsPopover from '../DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
 import SearchInput from '../DocumentsAndFolders/Search/searchInput';
+import ButtonPrimary from '../Generic/Buttons/ButtonPrimary';
+import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 import {
   Admin,
   Api,
   ApiKey,
+  Attribute,
   Bell,
   ChevronDown,
   Documents,
   Examine,
   Group,
   HistoryIcon,
+  Mapping,
   Queue,
   Recent,
   Rules,
@@ -36,6 +58,7 @@ import {
   Settings,
   Share,
   ShareHand,
+  SitesManagement,
   Star,
   Trash,
   Users,
@@ -66,29 +89,45 @@ function Navbar() {
   const search = useLocation().search;
   const searchWord = new URLSearchParams(search).get('searchWord');
   const advancedSearch = new URLSearchParams(search).get('advancedSearch');
+  const searchFolder = new URLSearchParams(search).get('searchFolder');
+  const filterTag = new URLSearchParams(search).get('filterTag');
+  const filterAttribute = new URLSearchParams(search).get('filterAttribute');
+  const searchParams = new URLSearchParams(search);
+  const queueId = useQueueId();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(AuthState);
-  const { formkiqVersion, useNotifications, isSidebarExpanded } =
-    useSelector(ConfigState);
-  const { currentDocumentPath } = useSelector(DataCacheState);
+  const {
+    formkiqVersion,
+    useIndividualSharing,
+    useCollections,
+    useSoftDelete,
+    useNotifications,
+    isSidebarExpanded,
+  } = useSelector(ConfigState);
+  const { currentDocumentPath, currentDocument } = useSelector(DataCacheState);
 
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const { siteId, siteDocumentsRootUri, siteDocumentsRootName } =
-    getCurrentSiteInfo(
-      pathname,
-      user,
-      hasUserSite,
-      hasDefaultSite,
-      hasWorkspaces,
-      workspaceSites
-    );
-
+  const { hash } = useLocation();
+  const {
+    siteId,
+    siteDocumentsRootUri,
+    siteDocumentsRootName,
+    isSiteReadOnly,
+  } = getCurrentSiteInfo(
+    pathname,
+    user,
+    hasUserSite,
+    hasDefaultSite,
+    hasWorkspaces,
+    workspaceSites
+  );
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
+  const [infoDocumentId, setInfoDocumentId] = useState('');
 
   const subfolderUri = useSubfolderUri();
 
@@ -110,6 +149,8 @@ function Navbar() {
     React.useState(false);
 
   const location = useLocation();
+  const { onSubmitForReviewModalClick, onDocumentReviewModalClick } =
+    useDocumentActions();
 
   const locationPrefix = useMemo(() => {
     let locationPrefix = decodeURI(location.pathname);
@@ -229,7 +270,11 @@ function Navbar() {
     const pathWithoutSubfolder = location.pathname.split('/')[1];
     const pathWithSubfolder =
       location.pathname.split('/')[1] + '/' + location.pathname.split('/')[2];
-    const pathsWithSubfolder: string[] = ['admin/api-keys','admin/user-activities'];
+    const pathsWithSubfolder: string[] = [
+      'admin/api-keys',
+      'admin/user-activities',
+      'orchestrations/webhooks',
+    ];
 
     let newDocumentsRootUri;
 
@@ -270,6 +315,7 @@ function Navbar() {
   };
 
   const [hasDocumentVersions, setHasDocumentVersions] = useState(false);
+  const [hasInProgressWorkflow, setHasInProgressWorkflow] = useState(false);
 
   useEffect(() => {
     DocumentsService.getDocumentVersions(documentId, currentSiteId).then(
@@ -281,7 +327,142 @@ function Navbar() {
         }
       }
     );
+    if (documentId.length) {
+      DocumentsService.getWorkflowsInDocument(currentSiteId, documentId).then(
+        (response: any) => {
+          if (response.workflows?.length) {
+            const inProgressWorkflows = response.workflows.filter(
+              (workflow: any) => {
+                if (workflow.status === 'IN_PROGRESS') {
+                  return true;
+                } else {
+                  return false;
+                }
+              }
+            );
+            if (inProgressWorkflows.length > 0) {
+              setHasInProgressWorkflow(true);
+            } else {
+              setHasInProgressWorkflow(false);
+            }
+          } else {
+            setHasInProgressWorkflow(false);
+          }
+        }
+      );
+    } else {
+      setHasInProgressWorkflow(false);
+    }
   }, [documentId]);
+
+  const viewFolder = (event: any, action = '') => {
+    dispatch(setDocuments({ documents: [] }));
+    navigate(
+      {
+        pathname:
+          siteDocumentsRootUri +
+          '/folders/' +
+          currentDocumentPath.substring(
+            0,
+            currentDocumentPath.lastIndexOf('/')
+          ) +
+          '?scrollToDocumentLine=true' +
+          '#id=' +
+          documentId +
+          '&action=' +
+          action,
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const editDocument = () => {
+    navigate(
+      {
+        pathname: pathname.replace(/\/view$/, '/edit'),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const viewDocument = () => {
+    navigate(
+      {
+        pathname: pathname.replace(/\/edit$/, '/view'),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  useEffect(() => {
+    if (hash.indexOf('#id=') > -1) {
+      setInfoDocumentId(hash.substring(4));
+    } else if (hash.indexOf('#history_id') > -1) {
+      setInfoDocumentId(hash.substring(12));
+    } else {
+      setInfoDocumentId('');
+    }
+  }, [hash]);
+
+  const expandAdvancedSearch = () => {
+    searchParams.set('advancedSearch', 'visible');
+    navigate(
+      {
+        pathname:
+          pathname +
+          '?' +
+          searchParams.toString() +
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}` : ''),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const onDocumentDataChange = (event: any, value: ILine | null) => {
+    if (currentSection === 'DocumentsAndFolders') {
+      dispatch(setDocuments({ documents: null }));
+      dispatch(
+        fetchDocuments({
+          siteId: currentSiteId,
+          formkiqVersion,
+          searchWord,
+          searchFolder,
+          queueId,
+          subfolderUri,
+          filterTag,
+          filterAttribute,
+        })
+      );
+    }
+
+    if (!currentDocument) return;
+    DocumentsService.getDocumentById(
+      (currentDocument as IDocument).documentId,
+      currentSiteId
+    ).then((response: IDocument) => {
+      if (response) {
+        dispatch(setCurrentDocument(response));
+        dispatch(setCurrentDocumentPath(response.path));
+      } else {
+        navigate(
+          {
+            pathname: siteDocumentsRootUri,
+          },
+          {
+            replace: true,
+          }
+        );
+      }
+    });
+  };
 
   return (
     user && (
@@ -402,11 +583,13 @@ function Navbar() {
                     <>
                       {locationPrefix === '/workflows' ||
                       locationPrefix === '/queues' ||
-                      locationPrefix === '/integrations' ||
+                      locationPrefix === '/orchestrations' ||
                       locationPrefix === '/schemas' ||
                       locationPrefix === '/object-examine-tool' ||
                       locationPrefix === '/rulesets' ||
-                      locationPrefix === '/admin'? (
+                      locationPrefix === '/admin' ||
+                      locationPrefix === '/attributes' ||
+                      locationPrefix === '/mappings' ? (
                         <>
                           <div className="w-6 mr-1 text-primary-600">
                             {pathname.indexOf('/workflows') > -1 && (
@@ -435,12 +618,12 @@ function Navbar() {
                               </div>
                             )}
 
-                            {pathname.indexOf('/integrations/api') > -1 && (
+                            {pathname.indexOf('/orchestrations/api') > -1 && (
                               <div className="w-5">
                                 <Api />
                               </div>
                             )}
-                            {pathname.indexOf('/integrations/webhooks') >
+                            {pathname.indexOf('/orchestrations/webhooks') >
                               -1 && (
                               <div className="w-5">
                                 <Webhook />
@@ -457,7 +640,8 @@ function Navbar() {
                                 <ApiKey />
                               </div>
                             )}
-                            {pathname.indexOf('/admin/user-activities') > -1 && (
+                            {pathname.indexOf('/admin/user-activities') >
+                              -1 && (
                               <div className="w-5">
                                 <HistoryIcon />
                               </div>
@@ -465,6 +649,12 @@ function Navbar() {
                             {pathname.indexOf('/admin/access-control') > -1 && (
                               <div className="w-5">
                                 <Admin />
+                              </div>
+                            )}
+                            {pathname.indexOf('/admin/sites-management') >
+                              -1 && (
+                              <div className="w-5">
+                                <SitesManagement />
                               </div>
                             )}
                             {pathname.indexOf('/admin/groups') > -1 && (
@@ -477,6 +667,16 @@ function Navbar() {
                                 <Users />
                               </div>
                             )}
+                            {pathname.indexOf('/attributes') > -1 && (
+                              <div className="w-5">
+                                <Attribute />
+                              </div>
+                            )}
+                            {pathname.indexOf('/mappings') > -1 && (
+                              <div className="w-5">
+                                <Mapping />
+                              </div>
+                            )}
                           </div>
 
                           <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
@@ -486,13 +686,13 @@ function Navbar() {
                             {pathname.indexOf('/queues') > -1 && (
                               <span>Queues</span>
                             )}
-                            {pathname.indexOf('/integrations/api') > -1 && (
+                            {pathname.indexOf('/orchestrations/api') > -1 && (
                               <span>API Explorer</span>
                             )}
                             {pathname.indexOf('/object-examine-tool') > -1 && (
                               <span>Examine PDF</span>
                             )}
-                            {pathname.indexOf('/integrations/webhooks') >
+                            {pathname.indexOf('/orchestrations/webhooks') >
                               -1 && <span>Inbound Webhooks</span>}
                             {pathname.indexOf('/admin/settings') > -1 && (
                               <span>Settings</span>
@@ -500,11 +700,13 @@ function Navbar() {
                             {pathname.indexOf('/admin/api-keys') > -1 && (
                               <span>API Keys</span>
                             )}
-                            {pathname.indexOf('/admin/user-activities') > -1 && (
-                              <span>User Activities</span>
+                            {pathname.indexOf('/admin/user-activities') >
+                              -1 && <span>User Activities</span>}
+                            {pathname.indexOf('/admin/access-control') > -1 && (
+                              <span>Access Control (OPA)</span>
                             )}
-                            {pathname.indexOf('/admin/access-control') >
-                              -1 && <span>Access Control (OPA)</span>}
+                            {pathname.indexOf('/admin/sites-management') >
+                              -1 && <span>Sites Management</span>}
                             {pathname.indexOf('/schemas') > -1 && (
                               <span>Schemas</span>
                             )}
@@ -517,13 +719,23 @@ function Navbar() {
                             {pathname.indexOf('/rulesets') > -1 && (
                               <span>Rulesets</span>
                             )}
+                            {pathname.indexOf('/attributes') > -1 && (
+                              <span>Attributes</span>
+                            )}
+                            {pathname.indexOf('/mappings') > -1 && (
+                              <span>Mappings</span>
+                            )}
                           </div>
                           {(pathname.indexOf('/rulesets') > -1 ||
                             pathname.indexOf('/schemas') > -1 ||
                             pathname.indexOf('/workflows') > -1 ||
                             pathname.indexOf('/admin/api-keys') > -1 ||
                             pathname.indexOf('/admin/user-activities') > -1 ||
-                            pathname.indexOf('/queues') > -1) &&
+                            pathname.indexOf('/queues') > -1 ||
+                            pathname.indexOf('/attributes') > -1 ||
+                            pathname.indexOf('/mappings') > -1 ||
+                            pathname.indexOf('/orchestrations/webhooks') >
+                              -1) &&
                             ((hasUserSite && hasDefaultSite) ||
                               (hasUserSite && hasWorkspaces) ||
                               (hasDefaultSite && hasWorkspaces) ||
@@ -637,50 +849,152 @@ function Navbar() {
                               <span>
                                 <span className="px-2">|</span>
                                 {currentDocumentPath}
-                                <span className="pl-8">
-                                  <a
-                                    href={
-                                      siteDocumentsRootUri +
-                                      '/folders/' +
-                                      currentDocumentPath.substring(
-                                        0,
-                                        currentDocumentPath.lastIndexOf('/')
-                                      ) +
-                                      '#id=' +
-                                      documentId
-                                    }
-                                    className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                  >
-                                    view folder
-                                  </a>
-                                </span>
-                                <span className="pl-6">
-                                  <span
-                                    className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
-                                    onClick={DownloadDocument}
-                                  >
-                                    download
-                                  </span>
-                                </span>
-                                {hasDocumentVersions && (
-                                  <span className="pl-6">
-                                    <a
-                                      href={
-                                        siteDocumentsRootUri +
-                                        '/folders/' +
-                                        currentDocumentPath.substring(
-                                          0,
-                                          currentDocumentPath.lastIndexOf('/')
-                                        ) +
-                                        '#history_id=' +
-                                        documentId
+                                <span className="px-2"></span>
+                                {hasInProgressWorkflow ? (
+                                  <>
+                                    <ButtonPrimary
+                                      className={
+                                        'text-small font-bold mx-2 px-4 cursor-pointer whitespace-nowrap'
                                       }
-                                      className="text-sm text-gray-500 hover:text-primary-600 cursor-pointer whitespace-nowrap"
+                                      onClick={(event: any) =>
+                                        onDocumentReviewModalClick(event, {
+                                          lineType: 'document',
+                                          documentId: documentId,
+                                          folder: currentDocumentPath.substring(
+                                            0,
+                                            currentDocumentPath.lastIndexOf('/')
+                                          ),
+                                          documentInstance: currentDocument,
+                                        })
+                                      }
                                     >
-                                      view versions
-                                    </a>
-                                  </span>
+                                      Submit Document Review
+                                    </ButtonPrimary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) => viewFolder(e, '')}
+                                    >
+                                      View in Folder
+                                    </ButtonTertiary>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(e: any) => viewFolder(e, '')}
+                                    >
+                                      View in Folder
+                                    </ButtonTertiary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={DownloadDocument}
+                                    >
+                                      Download
+                                    </ButtonTertiary>
+                                    <ButtonTertiary
+                                      className={
+                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                      }
+                                      onClick={(event: any) =>
+                                        onSubmitForReviewModalClick(event, {
+                                          lineType: 'document',
+                                          documentId: documentId,
+                                          folder: currentDocumentPath.substring(
+                                            0,
+                                            currentDocumentPath.lastIndexOf('/')
+                                          ),
+                                          documentInstance: currentDocument,
+                                        })
+                                      }
+                                    >
+                                      Submit for Review
+                                    </ButtonTertiary>
+                                    {hasDocumentVersions && (
+                                      <ButtonTertiary
+                                        className={
+                                          'hidden text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                        }
+                                        onClick={(e: any) =>
+                                          viewFolder(e, 'history')
+                                        }
+                                      >
+                                        View Versions
+                                      </ButtonTertiary>
+                                    )}
+                                  </>
                                 )}
+
+                                {!isSiteReadOnly &&
+                                  currentDocument &&
+                                  (InlineEditableContentTypes.indexOf(
+                                    currentDocument.contentType
+                                  ) > -1 ||
+                                    TextFileEditorEditableContentTypes.indexOf(
+                                      currentDocument.contentType
+                                    ) > -1) && (
+                                    <>
+                                      {pathname.indexOf('/view') > -1 && (
+                                        <ButtonTertiary
+                                          className="text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap"
+                                          onClick={editDocument}
+                                        >
+                                          Edit Document
+                                        </ButtonTertiary>
+                                      )}
+                                      {pathname.indexOf('/edit') > -1 && (
+                                        <ButtonTertiary
+                                          className="text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap"
+                                          onClick={viewDocument}
+                                        >
+                                          View Document
+                                        </ButtonTertiary>
+                                      )}
+                                    </>
+                                  )}
+
+                                {documentId &&
+                                  currentDocumentPath?.length &&
+                                  currentDocument && (
+                                    <div className="w-5 h-5 text-neutral-900 inline-flex mx-2 pt-2 items-end">
+                                      <DocumentActionsPopover
+                                        value={{
+                                          lineType: 'document',
+                                          folder: currentDocument
+                                            ? (
+                                                currentDocument as IDocument
+                                              ).path
+                                                .split('/')
+                                                .slice(0, -1)
+                                                .join('/')
+                                            : '',
+                                          documentId: (
+                                            currentDocument as IDocument
+                                          ).documentId,
+                                          documentInstance: currentDocument,
+                                        }}
+                                        siteId={siteId}
+                                        isSiteReadOnly={isSiteReadOnly}
+                                        formkiqVersion={formkiqVersion}
+                                        useIndividualSharing={
+                                          useIndividualSharing
+                                        }
+                                        useCollections={useCollections}
+                                        useSoftDelete={useSoftDelete}
+                                        isDeeplinkPath={
+                                          (currentDocument as IDocument)
+                                            ?.deepLinkPath &&
+                                          (currentDocument as IDocument)
+                                            .deepLinkPath.length > 0
+                                        }
+                                      />
+                                    </div>
+                                  )}
                               </span>
                             ) : (
                               <span></span>
@@ -700,9 +1014,7 @@ function Navbar() {
               </div>
               {!documentId.length &&
                 currentSection === 'DocumentsAndFolders' &&
-                !advancedSearch &&
-                (formkiqVersion.modules.includes('typesense') ||
-                  formkiqVersion.modules.includes('opensearch')) && (
+                !advancedSearch && (
                   <div className="flex items-center gap-5 w-1/2">
                     <SearchInput
                       onChange={updateInputValue}
@@ -710,6 +1022,7 @@ function Navbar() {
                       siteId={currentSiteId}
                       documentsRootUri={currentDocumentsRootUri}
                       value={inputValue}
+                      expandAdvancedSearch={expandAdvancedSearch}
                     />
                   </div>
                 )}
@@ -717,13 +1030,13 @@ function Navbar() {
                 advancedSearch === 'hidden' &&
                 (formkiqVersion.modules.includes('typesense') ||
                   formkiqVersion.modules.includes('opensearch')) && (
-                  <Link
-                    to="?advancedSearch=visible"
+                  <button
+                    onClick={expandAdvancedSearch}
                     className="text-sm flex gap-2 h-4 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap"
                   >
                     Expand Search Tab
                     <ChevronDown />
-                  </Link>
+                  </button>
                 )}
             </div>
             <div className="w-1/4 flex justify-end mr-16">
@@ -759,15 +1072,6 @@ function Navbar() {
                           Sign out
                         </Link>
                       </li>
-                      {user.isAdmin && <li>
-                        <Link
-                          to="/admin/user-activities"
-                          data-test-id="user-activities"
-                          className="dropdown-item text-sm py-2 px-5 font-normal block w-full whitespace-nowrap bg-transparent text-gray-700 hover:bg-gray-100 transition"
-                        >
-                          User Activities
-                        </Link>
-                      </li>}
                     </ul>
                   )}
                 </div>
@@ -782,6 +1086,12 @@ function Navbar() {
             </div>
           </div>
         </div>
+        <DocumentActionsModalContainer
+          currentSiteId={currentSiteId}
+          isSiteReadOnly={isSiteReadOnly}
+          currentDocumentsRootUri={currentDocumentsRootUri}
+          onDocumentDataChange={onDocumentDataChange}
+        />
       </div>
     )
   );
