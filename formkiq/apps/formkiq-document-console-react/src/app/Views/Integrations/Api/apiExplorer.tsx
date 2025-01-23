@@ -328,41 +328,6 @@ export function ApiExplorer() {
                     </div>
                   </div>
                 </ApiSegment>
-                <ApiSegment title="Document Attributes">
-                  <div className="ml-2 flex flex-cols">
-                    <div className="w-4 border-l"></div>
-                    <div className="grow">
-                      <ApiItem
-                        apiItem={getDocumentAttributesApiItem}
-                        sites={sites}
-                      />
-                      <ApiItem
-                        apiItem={postDocumentAttributesApiItem}
-                        sites={sites}
-                      />
-                      <ApiItem
-                        apiItem={putDocumentAttributesApiItem}
-                        sites={sites}
-                      />
-                      <ApiItem
-                        apiItem={getDocumentAttributeApiItem}
-                        sites={sites}
-                      />
-                      <ApiItem
-                        apiItem={putDocumentAttributeApiItem}
-                        sites={sites}
-                      />
-                      <ApiItem
-                        apiItem={deleteDocumentAttributeApiItem}
-                        sites={sites}
-                      />
-                      <ApiItem
-                        apiItem={deleteDocumentAttributeValueApiItem}
-                        sites={sites}
-                      />
-                    </div>
-                  </div>
-                </ApiSegment>
                 <ApiSegment title="Document Compress">
                   <div className="ml-2 flex flex-cols">
                     <div className="w-4 border-l"></div>
