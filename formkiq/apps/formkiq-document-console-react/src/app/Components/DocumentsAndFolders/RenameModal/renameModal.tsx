@@ -77,9 +77,8 @@ export default function RenameModal({
     setFormActive(false);
     reset();
     setTimeout(() => {
-      onDocumentDataChange();
+      onDocumentDataChange(null, value);
     }, 1500);
-
     onClose();
   };
 
@@ -128,7 +127,7 @@ export default function RenameModal({
   };
   return (
     <Transition.Root show={isOpened} as={Fragment}>
-      <Dialog as="div" className="relative z-20" onClose={() => {}}>
+      <Dialog as="div" className="relative z-20" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -165,7 +164,7 @@ export default function RenameModal({
                     </div>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
-                      onClick={closeDialog}
+                      onClick={onClose}
                     >
                       <Close />
                     </div>
@@ -221,7 +220,7 @@ export default function RenameModal({
                           className="bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none mr-2"
                         />
                         <button
-                          onClick={closeDialog}
+                          onClick={onClose}
                           className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
                         >
                           Cancel

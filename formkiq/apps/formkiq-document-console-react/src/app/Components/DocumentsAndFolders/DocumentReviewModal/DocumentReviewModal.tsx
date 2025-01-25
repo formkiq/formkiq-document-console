@@ -151,7 +151,7 @@ export default function DocumentReviewModal({
         as="div"
         className="relative z-20"
         initialFocus={approveButtonRef}
-        onClose={onClose}
+        onClose={closeDialog}
       >
         <Transition.Child
           as={Fragment}

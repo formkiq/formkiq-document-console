@@ -157,6 +157,7 @@ const DocumentActionsModalContainer = ({
         onClose={onActionModalClose}
         value={actionModalValue}
         siteId={currentSiteId}
+        onDocumentDataChange={onDocumentDataChange}
       />
     </>
   );

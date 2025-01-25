@@ -17,7 +17,7 @@ function TagsTab({allTags, setAlltags, onTagEdit, value, siteId, onDocumentDataC
       ).then(() => {
         updateTags();
         setTimeout(() => {
-          onDocumentDataChange(value);
+          onDocumentDataChange(null, value);
         }, 500);
       });
     };

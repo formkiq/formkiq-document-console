@@ -89,7 +89,7 @@ export default function SubmitForReviewModal({
       intervalRef.current = null;
     }
     setTimeout(() => {
-      onDocumentDataChange();
+      onDocumentDataChange(null, value);
     }, 1500);
     onClose();
   }, [onDocumentDataChange, onClose]);
@@ -314,7 +314,7 @@ export default function SubmitForReviewModal({
 
   return (
     <Transition.Root show={isOpened} as={Fragment}>
-      <Dialog as="div" className="relative z-20" onClose={closeDialog}>
+      <Dialog as="div" className="relative z-20" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -352,7 +352,7 @@ export default function SubmitForReviewModal({
                     </div>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
-                      onClick={closeDialog}
+                      onClick={onClose}
                     >
                       <Close />
                     </div>
@@ -431,7 +431,7 @@ export default function SubmitForReviewModal({
                       </button>
                       <button
                         type="button"
-                        onClick={closeDialog}
+                        onClick={onClose}
                         className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
                       >
                         Cancel

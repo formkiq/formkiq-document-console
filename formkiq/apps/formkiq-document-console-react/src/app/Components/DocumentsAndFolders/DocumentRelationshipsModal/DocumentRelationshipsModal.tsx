@@ -17,7 +17,7 @@ import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
 import { RelationshipType } from '../../../helpers/types/attributes';
 import { useSelector } from 'react-redux';
 import { DocumentListState } from '../../../Store/reducers/documentsList';
-import {CopyButton} from "../../Generic/Buttons/CopyButton";
+import { CopyButton } from '../../Generic/Buttons/CopyButton';
 
 const RELATIONSHIP_TYPES: RelationshipType[] = [
   'PRIMARY',
@@ -357,7 +357,7 @@ export default function DocumentRelationshipsModal({
         as="div"
         className="relative z-20"
         initialFocus={approveButtonRef}
-        onClose={onClose}
+        onClose={closeDialog}
       >
         <Transition.Child
           as={Fragment}
@@ -518,13 +518,14 @@ export default function DocumentRelationshipsModal({
                                       relationshipDocumentsMap[
                                         relationship.documentId
                                       ] !== 'NOT_FOUND' && (
-                                        <p className="break-words font-normal  truncate"
-                                           title={
-                                               relationshipDocumentsMap[
-                                                   relationship.documentId
-                                                   ]
-                                           }
-                                      >
+                                        <p
+                                          className="break-words font-normal  truncate"
+                                          title={
+                                            relationshipDocumentsMap[
+                                              relationship.documentId
+                                            ]
+                                          }
+                                        >
                                           {
                                             relationshipDocumentsMap[
                                               relationship.documentId
@@ -532,11 +533,17 @@ export default function DocumentRelationshipsModal({
                                           }
                                         </p>
                                       )}
-                                    <p className="text-xs font-bold">ID:{" "}
-                                    <span className="text-neutral-500">
-                                      {relationship.documentId}
-                                    </span>{" "}<div className="inline-block relative"> <CopyButton value={relationship.documentId} /></div></p>
-
+                                    <p className="text-xs font-bold">
+                                      ID:{' '}
+                                      <span className="text-neutral-500">
+                                        {relationship.documentId}
+                                      </span>{' '}
+                                      <div className="inline-block relative">
+                                        <CopyButton
+                                          value={relationship.documentId}
+                                        />
+                                      </div>
+                                    </p>
                                   </div>
                                 )}
                               </td>

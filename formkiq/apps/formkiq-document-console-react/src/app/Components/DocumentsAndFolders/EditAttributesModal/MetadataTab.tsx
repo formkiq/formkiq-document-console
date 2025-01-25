@@ -45,7 +45,7 @@ function MetadataTab({ value, siteId, onDocumentDataChange }: any) {
           return;
         }
         setTimeout(() => {
-          onDocumentDataChange(value);
+          onDocumentDataChange(null, value);
           updateMetadata();
         }, 500);
       });
