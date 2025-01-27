@@ -45,14 +45,10 @@ export function SignIn() {
   const dispatch = useAppDispatch();
   const { search } = useLocation();
   const searchParams = search.replace('?', '').split('&') as any[];
-  let isDemo = false;
   let isSsoLogin = false;
   let ssoCode = '';
   searchParams.forEach((param: string) => {
-    if (param === 'demo=tryformkiq') {
-      isDemo = true;
-      return;
-    } else if (param.indexOf('code=') > -1) {
+    if (param.indexOf('code=') > -1) {
       isSsoLogin = true;
       ssoCode = param.split('=')[1];
       return;
@@ -320,14 +316,6 @@ export function SignIn() {
     window.location.href = url;
   };
 
-  if (isDemo) {
-    const signInData = {
-      email: 'demo@formkiq.com',
-      password: 'tryformkiq',
-    };
-    onSubmit(signInData);
-  }
-
   return (
     <>
       <Helmet>
@@ -371,7 +359,7 @@ export function SignIn() {
                 <span> Sign In using External Provider</span>
               )}
           </div>
-          {userAuthenticationType === 'cognito' && !isDemo ? (
+          {userAuthenticationType === 'cognito' ? (
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="md:w-1/3">
@@ -450,7 +438,7 @@ export function SignIn() {
             </form>
           ) : (
             <div className="w-full flex justify-center">
-              {customAuthorizerUrl.length && !isDemo && (
+              {customAuthorizerUrl.length && (
                 <button
                   className="w-48 flex bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                   onClick={(event) => {
@@ -460,7 +448,6 @@ export function SignIn() {
                   <span className="">Sign In</span>
                 </button>
               )}
-              {isDemo && <Spinner />}
             </div>
           )}
         </div>
