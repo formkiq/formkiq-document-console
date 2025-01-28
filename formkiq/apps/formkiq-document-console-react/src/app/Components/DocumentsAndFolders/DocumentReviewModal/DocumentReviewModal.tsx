@@ -7,6 +7,7 @@ import { ILine } from '../../../helpers/types/line';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import { CopyButton } from '../../Generic/Buttons/CopyButton';
 import { Checkmark, Close } from '../../Icons/icons';
+import ButtonTertiary from "../../Generic/Buttons/ButtonTertiary";
 
 interface Workflow {
   workflowId: string;
@@ -281,6 +282,9 @@ export default function DocumentReviewModal({
                         </div>
                         REJECT
                       </ButtonPrimary>
+                      <ButtonTertiary type="button" onClick={closeDialog}>
+                        CANCEL REVIEW
+                      </ButtonTertiary>
                     </div>
                   )}
                 </div>
