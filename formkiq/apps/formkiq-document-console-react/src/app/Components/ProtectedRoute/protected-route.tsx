@@ -23,7 +23,6 @@ const ProtectedRoute = (props: { children: any }) => {
     // if not public location
     const searchParams = search.replace('?', '').split('&') as any[];
     let isRegistrationConfirmation = false;
-    let isDemo = false;
 
     searchParams.forEach((param: string) => {
       if (
@@ -32,16 +31,11 @@ const ProtectedRoute = (props: { children: any }) => {
       ) {
         isRegistrationConfirmation = true;
         return;
-      } else if (param === 'demo=tryformkiq') {
-        isDemo = true;
-        return;
       }
     });
     if (isRegistrationConfirmation) {
       window.location.href = '/confirm-registration' + search;
       return;
-    } else if (isDemo) {
-      return <Navigate to="/sign-in?demo=tryformkiq" />;
     }
     if (!user) {
       if (ssoCode && !userStatus?.length && pathname !== '/sso-sign-in') {

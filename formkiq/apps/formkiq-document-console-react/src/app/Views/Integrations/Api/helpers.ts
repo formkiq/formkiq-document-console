@@ -1102,7 +1102,6 @@ export const deleteShareApiItem = {
   license: 'Pro|Enterprise',
 };
 
-postShareFolderApiItem;
 export const getVersionApiItem = {
   method: 'GET',
   path: '/version',
