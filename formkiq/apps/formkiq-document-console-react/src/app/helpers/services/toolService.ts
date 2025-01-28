@@ -1,94 +1,121 @@
 import moment from 'moment';
+import { RelationshipType } from '../types/attributes';
 import { IDocument } from './../types/document';
 import { IFolder } from './../types/folder';
 
-export function getFileIcon(filename: string) {
+export function getFileIcon(path: string, deepLinkPath: string) {
   let fileIcon = '';
-  if (filename) {
-    const extension = filename.split('.').pop();
-    switch (extension) {
-      case 'png':
-        fileIcon = '/assets/img/svg/icon-png.svg';
-        break;
-      case 'jpg':
-      case 'jpeg':
-        fileIcon = '/assets/img/svg/icon-jpg.svg';
-        break;
-      case 'gif':
-        fileIcon = '/assets/img/svg/icon-gif.svg';
-        break;
-      case 'svg':
-        fileIcon = '/assets/img/svg/icon-svg.svg';
-        break;
-      case 'webm':
-        fileIcon = '/assets/img/svg/icon-webm.svg';
-        break;
-      case 'webp':
-        fileIcon = '/assets/img/svg/icon-webp.svg';
-        break;
-      case 'csv':
-        fileIcon = '/assets/img/svg/icon-csv.svg';
-        break;
-      case 'json':
-        fileIcon = '/assets/img/svg/icon-json.svg';
-        break;
-      case 'doc':
-        fileIcon = '/assets/img/svg/icon-doc.svg';
-        break;
-      case 'docx':
-        fileIcon = '/assets/img/svg/icon-docx.svg';
-        break;
-      case 'pdf':
-        fileIcon = '/assets/img/svg/icon-pdf.svg';
-        break;
-      case 'xls':
-        fileIcon = '/assets/img/svg/icon-xls.svg';
-        break;
-      case 'xlsx':
-        fileIcon = '/assets/img/svg/icon-xlsx.svg';
-        break;
-      case 'ppt':
-        fileIcon = '/assets/img/svg/icon-ppt.svg';
-        break;
-      case 'pptx':
-        fileIcon = '/assets/img/svg/icon-pptx.svg';
-        break;
-      case 'rtf':
-        fileIcon = '/assets/img/svg/icon-rtf.svg';
-        break;
-      case 'txt':
-        fileIcon = '/assets/img/svg/icon-txt.svg';
-        break;
-      case 'html':
-      case 'htm':
-      case 'xhtml':
-      case 'whtml':
-        fileIcon = '/assets/img/svg/icon-html.svg';
-        break;
-      case 'ico':
-        fileIcon = '/assets/img/svg/icon-ico.svg';
-        break;
-      case 'mp3':
-        fileIcon = '/assets/img/svg/icon-mp3.svg';
-        break;
-      case 'ogg':
-        fileIcon = '/assets/img/svg/icon-ogg.svg';
-        break;
-      case 'wav':
-        fileIcon = '/assets/img/svg/icon-wav.svg';
-        break;
-      case 'eml':
-        fileIcon = '/assets/img/svg/icon-eml.svg';
-        break;
-      case 'dwg':
-        fileIcon = '/assets/img/svg/icon-dwg.svg';
-        break;
-      default:
-        fileIcon = '/assets/img/svg/icon-default.svg';
-        break;
+  if (deepLinkPath?.length > 0) {
+    if (deepLinkPath.indexOf('docs.google.com/document') > -1) {
+      fileIcon = '/assets/img/svg/icon-google-docs.svg';
+    } else if (deepLinkPath.indexOf('docs.google.com/spreadsheets') > -1) {
+      fileIcon = '/assets/img/svg/icon-google-sheets.svg';
+    } else if (deepLinkPath.indexOf('docs.google.com/presentation') > -1) {
+      fileIcon = '/assets/img/svg/icon-google-slides.svg';
+    } else if (deepLinkPath.indexOf('docs.google.com/forms') > -1) {
+      fileIcon = '/assets/img/svg/icon-google-forms.svg';
+    } else if (deepLinkPath.indexOf('https://forms.office.com') > -1) {
+      fileIcon = '/assets/img/svg/icon-microsoft-forms.svg';
+    } else if (deepLinkPath.indexOf('https://1drv.ms/') > -1) {
+      fileIcon = '/assets/img/svg/icon-microsoft-onedrive.svg';
+    } else {
+      fileIcon = '/assets/img/svg/icon-deeplink.svg';
     }
-  } else {
-    fileIcon = '/assets/img/svg/icon-default.svg';
+  }
+  if (!fileIcon.length) {
+    if (path) {
+      const extension = path.split('.').pop();
+      switch (extension) {
+        case 'png':
+          fileIcon = '/assets/img/svg/icon-png.svg';
+          break;
+        case 'jpg':
+        case 'jpeg':
+          fileIcon = '/assets/img/svg/icon-jpg.svg';
+          break;
+        case 'gif':
+          fileIcon = '/assets/img/svg/icon-gif.svg';
+          break;
+        case 'svg':
+          fileIcon = '/assets/img/svg/icon-svg.svg';
+          break;
+        case 'tif':
+        case 'tiff':
+          fileIcon = '/assets/img/svg/icon-tiff.svg';
+          break;
+        case 'webm':
+          fileIcon = '/assets/img/svg/icon-webm.svg';
+          break;
+        case 'webp':
+          fileIcon = '/assets/img/svg/icon-webp.svg';
+          break;
+        case 'csv':
+          fileIcon = '/assets/img/svg/icon-csv.svg';
+          break;
+        case 'json':
+          fileIcon = '/assets/img/svg/icon-json.svg';
+          break;
+        case 'doc':
+          fileIcon = '/assets/img/svg/icon-doc.svg';
+          break;
+        case 'docx':
+          fileIcon = '/assets/img/svg/icon-docx.svg';
+          break;
+        case 'pdf':
+          fileIcon = '/assets/img/svg/icon-pdf.svg';
+          break;
+        case 'xls':
+          fileIcon = '/assets/img/svg/icon-xls.svg';
+          break;
+        case 'xlsx':
+          fileIcon = '/assets/img/svg/icon-xlsx.svg';
+          break;
+        case 'ppt':
+          fileIcon = '/assets/img/svg/icon-ppt.svg';
+          break;
+        case 'pptx':
+          fileIcon = '/assets/img/svg/icon-pptx.svg';
+          break;
+        case 'rtf':
+          fileIcon = '/assets/img/svg/icon-rtf.svg';
+          break;
+        case 'txt':
+          fileIcon = '/assets/img/svg/icon-txt.svg';
+          break;
+        case 'html':
+        case 'htm':
+        case 'xhtml':
+        case 'whtml':
+          fileIcon = '/assets/img/svg/icon-html.svg';
+          break;
+        case 'ico':
+          fileIcon = '/assets/img/svg/icon-ico.svg';
+          break;
+        case 'mp3':
+          fileIcon = '/assets/img/svg/icon-mp3.svg';
+          break;
+        case 'ogg':
+          fileIcon = '/assets/img/svg/icon-ogg.svg';
+          break;
+        case 'wav':
+          fileIcon = '/assets/img/svg/icon-wav.svg';
+          break;
+        case 'eml':
+          fileIcon = '/assets/img/svg/icon-eml.svg';
+          break;
+        case 'md':
+          fileIcon = '/assets/img/svg/icon-md.svg';
+          break;
+        case 'dwg':
+          fileIcon = '/assets/img/svg/icon-dwg.svg';
+          break;
+        default:
+          fileIcon = '/assets/img/svg/icon-default.svg';
+          break;
+      }
+    } else {
+      fileIcon = '/assets/img/svg/icon-default.svg';
+    }
   }
   return fileIcon;
 }
@@ -96,16 +123,16 @@ export function getFileIcon(filename: string) {
 export interface IUserSiteInfo {
   hasUserSite: boolean;
   hasDefaultSite: boolean;
-  hasSharedFolders: boolean;
-  sharedFolderSites: any[];
+  hasWorkspaces: boolean;
+  workspaceSites: any[];
 }
 
 export function getUserSites(userToCheck: any): IUserSiteInfo {
   const userSiteInfo: IUserSiteInfo = {
     hasUserSite: false,
     hasDefaultSite: false,
-    hasSharedFolders: false,
-    sharedFolderSites: [] as any[],
+    hasWorkspaces: false,
+    workspaceSites: [] as any[],
   };
   if (userToCheck && userToCheck.sites) {
     userToCheck.sites.forEach((site: any) => {
@@ -114,8 +141,8 @@ export function getUserSites(userToCheck: any): IUserSiteInfo {
       } else if (site.siteId === 'default') {
         userSiteInfo.hasDefaultSite = true;
       } else {
-        userSiteInfo.hasSharedFolders = true;
-        userSiteInfo.sharedFolderSites.push(site);
+        userSiteInfo.hasWorkspaces = true;
+        userSiteInfo.workspaceSites.push(site);
       }
     });
   }
@@ -135,8 +162,8 @@ export function getCurrentSiteInfo(
   user: any,
   hasUserSite: boolean,
   hasDefaultSite: boolean,
-  hasSharedFolders: boolean,
-  sharedFolderSites: any[]
+  hasWorkspaces: boolean,
+  workspaceSites: any[]
 ): ICurrentSiteInfo {
   const currentSiteInfo = {
     siteId: '',
@@ -151,36 +178,35 @@ export function getCurrentSiteInfo(
     currentSiteInfo.siteDocumentsRootUri = '/my-documents';
     currentSiteInfo.siteDocumentsRootName = 'My Documents';
   } else if (!hasUserSite && pathname.indexOf('/my-documents') === 0) {
-    if (hasDefaultSite || !hasSharedFolders || !sharedFolderSites.length) {
+    if (hasDefaultSite || !hasWorkspaces || !workspaceSites.length) {
       currentSiteInfo.siteId = 'default';
       currentSiteInfo.siteRedirectUrl = '/documents';
       currentSiteInfo.siteDocumentsRootUri = '/documents';
       currentSiteInfo.siteDocumentsRootName = 'Documents';
-    } else if (hasSharedFolders) {
-      currentSiteInfo.siteId = sharedFolderSites[0].siteId;
-      currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
+    } else if (hasWorkspaces) {
+      currentSiteInfo.siteId = workspaceSites[0].siteId;
+      currentSiteInfo.siteRedirectUrl = `/workspaces/${workspaceSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
       if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId}`;
       } else {
-        currentSiteInfo.siteDocumentsRootName = `Folder: ${sharedFolderSites[0].siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Site Folder: ${workspaceSites[0].siteId}`;
       }
     }
   } else if (!hasUserSite && pathname.indexOf('/team-documents') === 0) {
-    if (hasDefaultSite || !hasSharedFolders || !sharedFolderSites.length) {
+    if (hasDefaultSite || !hasWorkspaces || !workspaceSites.length) {
       currentSiteInfo.siteId = 'default';
       currentSiteInfo.siteRedirectUrl = '/documents';
       currentSiteInfo.siteDocumentsRootUri = '/documents';
       currentSiteInfo.siteDocumentsRootName = 'Documents';
-    } else if (hasSharedFolders) {
-      currentSiteInfo.siteId = sharedFolderSites[0].siteId;
-      currentSiteInfo.siteRedirectUrl = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${sharedFolderSites[0].siteId}`;
-      if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
-      } else {
-        currentSiteInfo.siteDocumentsRootName = `Folder: ${sharedFolderSites[0].siteId}`;
-      }
+    } else if (hasWorkspaces) {
+      currentSiteInfo.siteId = workspaceSites[0].siteId;
+      currentSiteInfo.siteRedirectUrl = `/workspaces/${workspaceSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+        '_',
+        ' '
+      )}`;
     }
   }
   if (user && user.email) {
@@ -192,17 +218,17 @@ export function getCurrentSiteInfo(
       currentSiteInfo.siteId = 'default';
       currentSiteInfo.siteDocumentsRootUri = '/team-documents';
       currentSiteInfo.siteDocumentsRootName = 'Team Documents';
-    } else if (pathname.indexOf('/shared-folders') === 0) {
-      const pathAfterSharedFolders = pathname.substring(
+    } else if (pathname.indexOf('/workspaces') === 0) {
+      const pathAfterWorkspaces = pathname.substring(
         pathname.indexOf('/', 1) + 1
       );
-      if (pathAfterSharedFolders.indexOf('/') > -1) {
-        currentSiteInfo.siteId = pathAfterSharedFolders.substring(
+      if (pathAfterWorkspaces.indexOf('/') > -1) {
+        currentSiteInfo.siteId = pathAfterWorkspaces.substring(
           0,
-          pathAfterSharedFolders.indexOf('/')
+          pathAfterWorkspaces.indexOf('/')
         );
       } else {
-        currentSiteInfo.siteId = pathAfterSharedFolders;
+        currentSiteInfo.siteId = pathAfterWorkspaces;
       }
       if (!currentSiteInfo.siteId.length) {
         if (hasUserSite) {
@@ -222,23 +248,226 @@ export function getCurrentSiteInfo(
           currentSiteInfo.siteDocumentsRootName = 'Documents';
         }
       }
-      currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${currentSiteInfo.siteId}`;
-      if (hasDefaultSite || hasUserSite) {
-        currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${sharedFolderSites[0].siteId}`;
+      currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+      currentSiteInfo.siteDocumentsRootName = `Workspace: ${(
+        currentSiteInfo.siteId as any
+      ).replaceAll('_', ' ')}`;
+    } else if (pathname.indexOf('/rulesets') === 0) {
+      if (pathname.indexOf('/rulesets/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(21).split('/')[0]; // 21 is the length of '/rulesets/workspaces/'
+        currentSiteInfo.siteDocumentsRootName = `Workspace: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
       } else {
-        currentSiteInfo.siteDocumentsRootName = `Folder: ${sharedFolderSites[0].siteId}`;
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Rulesets';
+        } else if (hasUserSite) {
+          currentSiteInfo.siteId = user.email;
+          currentSiteInfo.siteRedirectUrl = '/my-rulesets';
+          currentSiteInfo.siteDocumentsRootName = 'My Rulesets';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/rulesets/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/schemas') === 0) {
+      if (pathname.indexOf('/schemas/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(20).split('/')[0]; // 20 is the length of '/schemas/workspaces/'
+        currentSiteInfo.siteDocumentsRootName = `Workspace: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Schemas';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/schemas/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/workflows') === 0) {
+      if (pathname.indexOf('/workflows/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(22).split('/')[0]; // 22 is the length of '/workflows/workspaces/'
+        currentSiteInfo.siteDocumentsRootName = `Workspace: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Workflows';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/workflows/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/queues') === 0) {
+      if (pathname.indexOf('/queues/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(19).split('/')[0]; // 19 is the length of '/queues/workspaces'
+        currentSiteInfo.siteDocumentsRootName = `Queue: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Queues';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/queues/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/admin/api-keys') === 0) {
+      if (pathname.indexOf('/admin/api-keys/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(27).split('/')[0]; // 27 is the length of '/admin/api-keys/workspaces'
+        currentSiteInfo.siteDocumentsRootName = `API Keys: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'API Keys';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/admin/api-keys/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/admin/user-activities') === 0) {
+      if (pathname.indexOf('/admin/user-activities/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(34).split('/')[0]; // 34 is the length of '/admin/user-activities/workspaces'
+        currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `User Activities: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'User Activities';
+          currentSiteInfo.siteDocumentsRootUri = '/documents';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/admin/user-activities/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/attributes') === 0) {
+      if (pathname.indexOf('/attributes/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(23).split('/')[0]; // 23 is the length of '/attributes/workspaces'
+        currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Attributes: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Attributes';
+          currentSiteInfo.siteDocumentsRootUri = '/attributes';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/attributes/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/mappings') === 0) {
+      if (pathname.indexOf('/mappings/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(21).split('/')[0]; // 21 is the length of '/mappings/workspaces'
+        currentSiteInfo.siteDocumentsRootUri = `/workspaces/${currentSiteInfo.siteId}`;
+        currentSiteInfo.siteDocumentsRootName = `Mappings: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Mappings';
+          currentSiteInfo.siteDocumentsRootUri = '/mappings';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteRedirectUrl = `/mappings/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else if (pathname.indexOf('/orchestrations/webhooks') === 0) {
+      if (pathname.indexOf('/orchestrations/webhooks/workspaces') === 0) {
+        currentSiteInfo.siteId = pathname.substring(34).split('/')[0]; // 34 is the length of '/orchestrations/webhooks/workspaces'
+        currentSiteInfo.siteDocumentsRootName = `Inbound Webhooks: ${(
+          currentSiteInfo.siteId as any
+        ).replaceAll('_', ' ')}`;
+      } else {
+        if (hasDefaultSite) {
+          currentSiteInfo.siteId = 'default';
+          currentSiteInfo.siteDocumentsRootName = 'Inbound Webhooks';
+        } else if (hasWorkspaces) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/orchestrations/webhooks/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${workspaceSites[0].siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
+        }
+      }
+    } else {
+      if (hasDefaultSite) {
+        currentSiteInfo.siteId = 'default';
+        currentSiteInfo.siteDocumentsRootUri = '/documents';
+        currentSiteInfo.siteDocumentsRootName = 'Documents';
+      } else if (hasUserSite) {
+        currentSiteInfo.siteId = user.email;
+        currentSiteInfo.siteRedirectUrl = '/my-documents';
+        currentSiteInfo.siteDocumentsRootUri = '/my-documents';
+        currentSiteInfo.siteDocumentsRootName = 'My Documents';
+      } else {
+        if (
+          !currentSiteInfo ||
+          !currentSiteInfo.siteId ||
+          !currentSiteInfo.siteId.length
+        ) {
+          currentSiteInfo.siteId = workspaceSites[0].siteId;
+          currentSiteInfo.siteRedirectUrl = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${workspaceSites[0].siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Site Folder: ${workspaceSites[0].siteId}`;
+        }
       }
     }
     if (currentSiteInfo.siteId === '' && user) {
       user.sites.forEach((site: any) => {
         currentSiteInfo.siteId = site.siteId;
         if (site.siteId !== 'default' && site.siteId !== user.email) {
-          currentSiteInfo.siteDocumentsRootUri = `/shared-folders/${site.siteId}`;
-          if (hasDefaultSite || hasUserSite) {
-            currentSiteInfo.siteDocumentsRootName = `Shared Folder: ${site.siteId}`;
-          } else {
-            currentSiteInfo.siteDocumentsRootName = `Folder: ${site.siteId}`;
-          }
+          currentSiteInfo.siteDocumentsRootUri = `/workspaces/${site.siteId}`;
+          currentSiteInfo.siteDocumentsRootName = `Workspace: ${site.siteId.replaceAll(
+            '_',
+            ' '
+          )}`;
         }
         return;
       });
@@ -428,8 +657,7 @@ export function findParentForDocument(
 export function excludeDocumentsWithTagFromAll(
   parentObj: { folders: null | IFolder[]; documents: IDocument[] },
   tagKey: string,
-  tagValue: string,
-  isSystemDeletedByKey = false
+  tagValue: string
 ) {
   const res = { ...parentObj };
   const updateDocumentsList = (documents: IDocument[]): IDocument[] => {
@@ -438,14 +666,6 @@ export function excludeDocumentsWithTagFromAll(
       if (tagValue.length) {
         return (docs as any[]).filter((doc: any) => {
           return !isTagValueIncludes(doc.tags[tagKey], tagValue);
-        });
-      } else {
-        return (docs as any[]).filter((doc: any) => {
-          if (isSystemDeletedByKey) {
-            return (doc.tags as any)['sysDeletedBy'];
-          } else {
-            return !(doc.tags as any)['sysDeletedBy'];
-          }
         });
       }
     }
@@ -465,4 +685,40 @@ export function excludeDocumentsWithTagFromAll(
     res.folders = foldersRes;
   }
   return res;
+}
+
+export function parseEmailInitials(email: string) {
+  if (!email?.length) {
+    return '';
+  }
+  const emailUsername = email.substring(0, email.indexOf('@'));
+  const emailParts = emailUsername.split('.');
+  let initials = '';
+  emailParts.forEach((part: string) => {
+    initials += part[0];
+  });
+  initials = initials.substring(0, 3).toUpperCase();
+  return initials;
+}
+
+export function transformRelationshipValueFromString(value: string) {
+  const [relationshipString, documentId] = value.split('#');
+  const relationship = relationshipString as RelationshipType;
+  return {
+    documentId,
+    relationship,
+  };
+}
+
+export function transformRelationshipValueToString(value: {
+  relationship: RelationshipType;
+  documentId: string;
+}) {
+  return `${value.relationship}#${value.documentId.trim()}`;
+}
+
+export function isUUIDv4orV5(value: string): boolean {
+  const uuidRegexV4V5 =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-(4|5)[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegexV4V5.test(value);
 }

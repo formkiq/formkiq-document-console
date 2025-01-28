@@ -1,59 +1,70 @@
+import { Dialog } from '@headlessui/react';
 import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import AddTag from '../../Components/DocumentsAndFolders/AddTag/addTag';
+import { Tooltip } from 'react-tooltip';
 import AllTagsPopover from '../../Components/DocumentsAndFolders/AllTagsPopover/allTagsPopover';
+import { PendingArchiveTab } from '../../Components/DocumentsAndFolders/CreateArchive/ArchiveTab';
+import { useDocumentActions } from '../../Components/DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../../Components/DocumentsAndFolders/DocumentActionsPopover/documentActionsPopover';
-import DocumentVersionsModal from '../../Components/DocumentsAndFolders/DocumentVersionsModal/documentVersionsModal';
-import ESignaturesModal from '../../Components/DocumentsAndFolders/ESignatures/eSignaturesModal';
-import EditTagsAndMetadataModal from '../../Components/DocumentsAndFolders/EditTagsAndMetadataModal/editTagsAndMetadataModal';
 import FolderDropWrapper from '../../Components/DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
-import MoveModal from '../../Components/DocumentsAndFolders/MoveModal/moveModal';
 import NewModal from '../../Components/DocumentsAndFolders/NewModal/newModal';
-import RenameModal from '../../Components/DocumentsAndFolders/RenameModal/renameModal';
+import AdvancedSearchTab from '../../Components/DocumentsAndFolders/Search/advancedSearchTab';
 import UploadModal from '../../Components/DocumentsAndFolders/UploadModal/uploadModal';
-import { CopyButton } from '../../Components/Generic/CopyButton';
+import ButtonGhost from '../../Components/Generic/Buttons/ButtonGhost';
+import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
+import ButtonSecondary from '../../Components/Generic/Buttons/ButtonSecondary';
+import ButtonTertiary from '../../Components/Generic/Buttons/ButtonTertiary';
+import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
+import QuantityButton from '../../Components/Generic/Buttons/QuantityButton';
 import {
-  ChevronLeft,
   ChevronRight,
   Close,
   Download,
   Edit,
   FolderOutline,
+  Pencil,
+  Retry,
   Spinner,
   Tag,
   Trash,
   Undo,
   View,
 } from '../../Components/Icons/icons';
-import ShareModal from '../../Components/Share/share';
+import {
+  AttributesState,
+  fetchDocumentAttributes,
+} from '../../Store/reducers/attributes';
+import { AttributesDataState } from '../../Store/reducers/attributesData';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
+import { ConfigState, setPendingArchive } from '../../Store/reducers/config';
+import { setCurrentDocumentPath } from '../../Store/reducers/data';
 import {
-  ConfigState,
-  setCurrentActionEvent,
-} from '../../Store/reducers/config';
-import {
-  DataCacheState,
-  setAllTags,
-  setCurrentDocumentPath,
-} from '../../Store/reducers/data';
-import {
-  DocumentListState,
   deleteDocument,
+  DocumentListState,
   fetchDeleteFolder,
   fetchDocuments,
+  setDocumentLoadingStatusPending,
   setDocuments,
   updateDocumentsList,
 } from '../../Store/reducers/documentsList';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
+import { QueuesState } from '../../Store/reducers/queues';
+import {
+  fetchUsers,
+  UserManagementState,
+} from '../../Store/reducers/userManagement';
+import { WorkflowsState } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
 import {
+  InlineEditableContentTypes,
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
+  TextFileEditorEditableContentTypes,
+  TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
-import { TopLevelFolders } from '../../helpers/constants/folders';
 import { TagsForFilterAndDisplay } from '../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -61,11 +72,14 @@ import {
   getCurrentSiteInfo,
   getFileIcon,
   getUserSites,
+  transformRelationshipValueFromString,
 } from '../../helpers/services/toolService';
+import { Attribute, RelationshipType } from '../../helpers/types/attributes';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
 
@@ -75,6 +89,8 @@ function Documents() {
   const navigate = useNavigate();
   const { user } = useAuthenticatedState();
   const {
+    documents,
+    folders,
     nextToken,
     loadingStatus,
     currentSearchPage,
@@ -88,19 +104,27 @@ function Documents() {
     useFileFilter,
     useCollections,
     useSoftDelete,
+    pendingArchive,
   } = useSelector(ConfigState);
-  const { allTags } = useSelector(DataCacheState);
-
+  const { workflows } = useSelector(WorkflowsState);
+  const { queues } = useSelector(QueuesState);
+  const { users } = useSelector(UserManagementState);
+  const { allTags, allAttributes } = useSelector(AttributesDataState);
+  const { documentAttributes } = useSelector(AttributesState);
   const subfolderUri = useSubfolderUri();
+  const queueId = useQueueId();
   const search = useLocation().search;
+  const searchParams = new URLSearchParams(search);
   const searchWord = new URLSearchParams(search).get('searchWord');
   const searchFolder = new URLSearchParams(search).get('searchFolder');
   const filterTag = new URLSearchParams(search).get('filterTag');
+  const filterAttribute = new URLSearchParams(search).get('filterAttribute');
   const actionEvent = new URLSearchParams(search).get('actionEvent');
+  const advancedSearch = new URLSearchParams(search).get('advancedSearch');
   const { hash } = useLocation();
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
-  const pathname = useLocation().pathname;
+  const pathname = decodeURI(useLocation().pathname);
   const {
     siteId,
     siteRedirectUrl,
@@ -112,9 +136,33 @@ function Documents() {
     user,
     hasUserSite,
     hasDefaultSite,
-    hasSharedFolders,
-    sharedFolderSites
+    hasWorkspaces,
+    workspaceSites
   );
+
+  const {
+    onDocumentVersionsModalClick,
+    onDocumentWorkflowsModalClick,
+    onEditAttributesModalClick,
+    onAttributeQuantityClick,
+    onDocumentRelationshipsModalClick,
+    onUploadClick,
+    onNewClick,
+    onFolderUploadClick,
+    isFolderUploadModalOpened,
+    folderUploadModalDocumentId,
+    onFolderUploadClose,
+    isNewModalOpened,
+    newModalValue,
+    isUploadModalOpened,
+    onUploadClose,
+    uploadModalDocumentId,
+    onNewClose,
+    onActionModalClick,
+    currentDocumentActions,
+    setCurrentDocumentActions,
+    updateDocumentActions,
+  } = useDocumentActions();
 
   useEffect(() => {
     if (siteRedirectUrl.length) {
@@ -132,13 +180,18 @@ function Documents() {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
+  const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
+    useState<boolean>(isSiteReadOnly);
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
+  const [archiveTabStatus, setArchiveTabStatus] = useState<
+    'open' | 'closed' | 'minimized'
+  >('closed');
   const [infoDocumentId, setInfoDocumentId] = useState('');
   const [infoDocumentView, setInfoDocumentView] = useState('info');
-  const [infoTagEditMode, setInfoTagEditMode] = useState(false);
+  const [infoDocumentAction, setInfoDocumentAction] = useState('');
   // NOTE: not fully implemented;
   // using the edit metadata modal for now, to be replaced with new system to indicate diff between tag, metadata, and versioned metadata
-  const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
+  // const [infoMetadataEditMode, setInfoMetadataEditMode] = useState(false);
   const [currentDocument, setCurrentDocument]: [IDocument | null, any] =
     useState(null);
   const [currentDocumentTags, setCurrentDocumentTags]: [
@@ -148,131 +201,317 @@ function Documents() {
   const [currentDocumentVersions, setCurrentDocumentVersions] = useState(null);
   const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
     useState(false);
-  const [isUploadModalOpened, setUploadModalOpened] = useState(false);
-  const [isFolderUploadModalOpened, setFolderUploadModalOpened] =
-    useState(false);
-  const [uploadModalDocumentId, setUploadModalDocumentId] = useState('');
-  const [folderUploadModalDocumentId, setFolderUploadModalDocumentId] =
-    useState('');
-  const [shareModalValue, setShareModalValue] = useState<ILine | null>(null);
-  const [isShareModalOpened, setShareModalOpened] = useState(false);
-  const [editTagsAndMetadataModalValue, setEditTagsAndMetadataModalValue] =
-    useState<ILine | null>(null);
-  const [isEditTagsAndMetadataModalOpened, setEditTagsAndMetadataModalOpened] =
-    useState(false);
-  const [documentVersionsModalValue, setDocumentVersionsModalValue] =
-    useState<ILine | null>(null);
-  const [isDocumentVersionsModalOpened, setDocumentVersionsModalOpened] =
-    useState(false);
-  const [eSignaturesModalValue, setESignaturesModalValue] =
-    useState<ILine | null>(null);
-  const [isESignaturesModalOpened, setESignaturesModalOpened] = useState(false);
-  const [newModalValue, setNewModalValue] = useState<ILine | null>(null);
-  const [isNewModalOpened, setNewModalOpened] = useState(false);
-  const [renameModalValue, setRenameModalValue] = useState<ILine | null>(null);
-  const [isRenameModalOpened, setRenameModalOpened] = useState(false);
-  const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
-  const [isMoveModalOpened, setMoveModalOpened] = useState(false);
   const dispatch = useAppDispatch();
-  const documentListOffsetTop = isTagFilterExpanded ? 170 : 140;
+  const [sortedAttributesAndTags, setSortedAttributesAndTags] = useState<any[]>(
+    []
+  );
+  const [dropUploadDocuments, setDropUploadDocuments] = useState<any>(null);
+  const [dropFolderPath, setDropFolderPath] = useState<any>(null);
+  const documentsPageWrapper = document.getElementById('documentsPageWrapper');
+  const closeDropZoneRef = useRef(null);
+  const [isDropZoneVisible, setIsDropZoneVisible] = useState(false);
+  const [selectedDocuments, setSelectedDocuments] = useState<IDocument[]>([]);
+
+  const [relationshipDocumentsMap, setRelationshipDocumentsMap] = useState<{
+    [key: string]: string;
+  }>({});
+  const [relationships, setRelationships] = useState<
+    {
+      relationship: RelationshipType;
+      documentId: string;
+    }[]
+  >([]);
+
+  function handleDragEnter(event: any) {
+    if (!event.dataTransfer?.types.includes('Files')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDropZoneVisible(true);
+  }
+
+  function handleDrop(event: any) {
+    if (!event.dataTransfer?.types.includes('Files')) return;
+    event.preventDefault();
+    if (event.dataTransfer.files.length === 0) return;
+    setIsDropZoneVisible(false);
+    const folder = event.target.closest('.folder-drop-wrapper');
+    if (folder) {
+      const folderPath = folder.getAttribute('data-folder-path');
+      setDropFolderPath(folderPath);
+    }
+    if (event.dataTransfer.files.length === 1) {
+      const file = event.target.closest('.file-drop-wrapper');
+      if (file) {
+        const documentPath = file.getAttribute('data-test-id').split('/').pop();
+        if (documentPath === event.dataTransfer.files[0].name) {
+          setDropUploadDocuments(event.dataTransfer.files);
+          onUploadClick(event, file.getAttribute('id'));
+          return;
+        }
+      }
+    }
+    setDropUploadDocuments(event.dataTransfer.files);
+    onUploadClick(event, '');
+  }
+
+  useEffect(() => {
+    const handleDragOver = (event: any) => {
+      if (!event.dataTransfer?.types.includes('Files')) return;
+      event.preventDefault();
+    };
+    documentsPageWrapper?.addEventListener('dragover', function (event) {
+      handleDragOver(event);
+    });
+
+    documentsPageWrapper?.addEventListener('drop', function (event) {
+      handleDrop(event);
+    });
+
+    return () => {
+      documentsPageWrapper?.removeEventListener('dragover', function (event) {
+        handleDragOver(event);
+      });
+      documentsPageWrapper?.removeEventListener('drop', function (event) {
+        handleDrop(event);
+      });
+    };
+  }, [documentsPageWrapper]);
+
+  function resetDropUploadDocuments() {
+    setDropUploadDocuments(null);
+    setDropFolderPath(null);
+  }
 
   const trackScrolling = useCallback(async () => {
-    const bottomRow = (
-      document.getElementById('documentsTable') as HTMLTableElement
-    ).rows[
-      (document.getElementById('documentsTable') as HTMLTableElement).rows
-        .length - 1
-    ].getBoundingClientRect().bottom;
-    const isBottom = (el: HTMLElement) => {
-      if (el) {
-        return (
-          el.scrollTop + el.offsetHeight >= bottomRow - documentListOffsetTop
-        );
-      }
-      return false;
-    };
-    const scrollpane = document.getElementById('documentsScrollpane');
+    // If we don't have a nextToken and we're not searching, or we're already loading, don't proceed
     if (
-      isBottom(scrollpane as HTMLElement) &&
+      (!nextToken && !searchWord) ||
+      loadingStatus !== RequestStatus.fulfilled
+    ) {
+      return;
+    }
+
+    const scrollpane = document.getElementById('documentsScrollpane');
+    if (!scrollpane) return;
+
+    const isBottom =
+      scrollpane.offsetHeight + scrollpane.scrollTop + 600 >
+      scrollpane.scrollHeight;
+    if (
+      isBottom &&
       nextToken &&
       loadingStatus === RequestStatus.fulfilled
     ) {
+      dispatch(setDocumentLoadingStatusPending());
+
       if (nextToken) {
         await dispatch(
           fetchDocuments({
             siteId: currentSiteId,
-            formkiqVersion: formkiqVersion,
+            formkiqVersion,
             searchWord,
             searchFolder,
             subfolderUri,
+            queueId,
             filterTag,
+            filterAttribute,
             nextToken,
+            page: currentSearchPage + 1,
           })
         );
-      } else {
-        if (!isLastSearchPageLoaded && searchWord) {
-          await dispatch(
-            fetchDocuments({
-              // for next page results
-              siteId: currentSiteId,
-              formkiqVersion: formkiqVersion,
-              searchWord,
-              searchFolder,
-              subfolderUri,
-              filterTag,
-              page: currentSearchPage + 1,
-            })
-          );
-        }
+      } else if (!isLastSearchPageLoaded && searchWord) {
+        await dispatch(
+          fetchDocuments({
+            siteId: currentSiteId,
+            formkiqVersion,
+            searchWord,
+            searchFolder,
+            subfolderUri,
+            queueId,
+            filterTag,
+            filterAttribute,
+            page: currentSearchPage + 1,
+          })
+        );
       }
     }
   }, [nextToken, loadingStatus, currentSearchPage, isLastSearchPageLoaded]);
 
-  useEffect(() => {
-    const resizeHandler = () => {
-      if (documentsWrapperRef.current) {
-        (documentsWrapperRef.current as HTMLDivElement).style.marginTop =
-          documentListOffsetTop + 'px';
-      }
-      if (documentsScrollpaneRef.current) {
-        (documentsScrollpaneRef.current as HTMLDivElement).addEventListener(
-          'scroll',
-          trackScrolling
-        );
-      }
-    };
-
-    window.addEventListener('resize', resizeHandler);
-
-    return () => {
-      window.removeEventListener('resize', resizeHandler);
-    };
-  }, [documentListOffsetTop]);
-
-  useEffect(() => {
-    DocumentsService.getAllTagKeys(currentSiteId).then((response: any) => {
-      const allTagData = {
-        allTags: response?.values,
-        tagsLastRefreshed: new Date(),
-        tagsSiteId: currentSiteId,
-      };
-      dispatch(setAllTags(allTagData));
-    });
+  function onDocumentInfoClick() {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentById(infoDocumentId, currentSiteId).then(
         (response: any) => {
           setCurrentDocument(response);
           // TODO: set folder to selected document path?
           updateTags();
+          updateDocumentActions(infoDocumentId, currentSiteId);
+          // close history tab if deeplink file
+          if (
+            infoDocumentView === 'history' &&
+            response.deepLinkPath?.length > 0
+          ) {
+            setInfoDocumentView('info');
+          }
+          // CHECK FOR MODAL ACTION
+          if (infoDocumentAction.length) {
+            switch (infoDocumentAction) {
+              case 'attributes':
+                onEditAttributesModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                break;
+              case 'submitForReview':
+                /*
+                onSubmitForReviewModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                */
+                break;
+              case 'reviewDocument':
+                /*
+                onDocumentReviewModalClick(null, {
+                  lineType: 'document',
+                  folder: subfolderUri,
+                  documentId: (response as IDocument).documentId,
+                  documentInstance: response as IDocument,
+                  folderInstance: null,
+                });
+                */
+                break;
+            }
+            setInfoDocumentAction('');
+          }
         }
       );
     }
     dispatch(setCurrentDocumentPath(''));
+    dispatch(
+      fetchDocumentAttributes({
+        siteId: currentSiteId,
+        documentId: infoDocumentId,
+        limit: 100,
+        page: 1,
+        nextToken: null,
+      })
+    );
+  }
+
+  const getDocumentNameFromDocuments = (documentId: string) => {
+    const doc = documents.find(
+      (document) => document.documentId === documentId
+    );
+    if (doc) return doc.path.substring(doc.path.lastIndexOf('/') + 1);
+    return null;
+  };
+
+  // update document relationships
+  useEffect(() => {
+    const relationshipsAttribute = documentAttributes.find(
+      (attribute) => attribute.key === 'Relationships'
+    );
+    if (!relationshipsAttribute) {
+      setRelationships([]);
+      return;
+    }
+    const newRelationships: {
+      relationship: RelationshipType;
+      documentId: string;
+    }[] = [];
+    if (relationshipsAttribute.stringValue) {
+      newRelationships.push(
+        transformRelationshipValueFromString(relationshipsAttribute.stringValue)
+      );
+    } else if (relationshipsAttribute.stringValues) {
+      newRelationships.push(
+        ...relationshipsAttribute.stringValues.map((val) =>
+          transformRelationshipValueFromString(val)
+        )
+      );
+    }
+
+    setRelationships(newRelationships);
+    for (const relationship of newRelationships) {
+      if (relationshipDocumentsMap[relationship.documentId]) return;
+      const documentName = getDocumentNameFromDocuments(
+        relationship.documentId
+      );
+      if (documentName) {
+        setRelationshipDocumentsMap((prev) => ({
+          ...prev,
+          [relationship.documentId]: documentName,
+        }));
+      } else {
+        DocumentsService.getDocumentById(
+          relationship.documentId,
+          currentSiteId
+        ).then((response: any) => {
+          if (response.status === 200) {
+            setRelationshipDocumentsMap((prev) => ({
+              ...prev,
+              [relationship.documentId]: response.path.substring(
+                response.path.lastIndexOf('/') + 1
+              ),
+            }));
+          } else {
+            setRelationshipDocumentsMap((prev) => ({
+              ...prev,
+              [relationship.documentId]: 'NOT_FOUND',
+            }));
+          }
+        });
+      }
+    }
+  }, [documentAttributes]);
+
+  useEffect(() => {
+    onDocumentInfoClick();
   }, [infoDocumentId]);
 
   useEffect(() => {
+    if (user.isAdmin) {
+      dispatch(fetchUsers({ limit: 100, page: 1 }));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (documentAttributes.length === 0 && currentDocumentTags) {
+      setSortedAttributesAndTags([]);
+      return;
+    }
+    const sortedDocumentAttributesAndTags = [
+      ...(currentDocumentTags || []),
+      ...documentAttributes,
+    ];
+    sortedDocumentAttributesAndTags.sort((a, b) => a.key.localeCompare(b.key));
+    setSortedAttributesAndTags(sortedDocumentAttributesAndTags);
+  }, [documentAttributes, currentDocumentTags]);
+
+  useEffect(() => {
     if (hash.indexOf('#id=') > -1) {
-      setInfoDocumentId(hash.substring(4));
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const id = hashParams.get('id');
+      const action = hashParams.get('action');
+      if (id) {
+        setInfoDocumentId(id);
+      } else {
+        setInfoDocumentId(''); // Handle case where id might be null
+      }
+      if (action) {
+        setInfoDocumentAction(action);
+        if (action === 'history') {
+          setInfoDocumentView('history');
+        }
+      } else {
+        setInfoDocumentAction('');
+      }
     } else {
       setInfoDocumentId('');
     }
@@ -293,7 +532,8 @@ function Documents() {
               documentId: '',
               documentInstance: null,
               folderInstance: null,
-            }
+            },
+            subfolderUri
           );
           break;
         case 'folderUpload':
@@ -318,7 +558,8 @@ function Documents() {
               documentId: '',
               documentInstance: null,
               folderInstance: null,
-            }
+            },
+            subfolderUri
           );
           break;
         case 'folderUpload':
@@ -362,14 +603,48 @@ function Documents() {
     }
   };
 
+  function retryFailedActions() {
+    DocumentsService.retryDocumentActions(currentSiteId, infoDocumentId).then(
+      (response: any) => {
+        if (response.status === 200) {
+          updateDocumentActions(infoDocumentId, currentSiteId);
+        } else if (response.status === 400) {
+          dispatch(
+            openDialog({
+              dialogTitle: response.errors[0].error,
+            })
+          );
+        } else {
+          dispatch(
+            openDialog({
+              dialogTitle: 'Something went wrong. Please try again later.',
+            })
+          );
+        }
+      }
+    );
+  }
+
+  // update document actions every 5 seconds
+  useEffect(() => {
+    if (infoDocumentId && infoDocumentView === 'actions') {
+      const interval = setInterval(
+        () => updateDocumentActions(infoDocumentId, currentSiteId),
+        5000
+      );
+      return () => clearInterval(interval);
+    }
+    return () => {};
+  }, [infoDocumentId, infoDocumentView, currentSiteId]);
+
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
       pathname,
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
     if (recheckSiteInfo.siteRedirectUrl.length) {
       navigate(
@@ -381,11 +656,17 @@ function Documents() {
         }
       );
     }
+    if (recheckSiteInfo.siteId !== currentSiteId) {
+      dispatch(setPendingArchive([]));
+      setSelectedDocuments([]);
+    }
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
+    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
   useEffect(() => {
+    dispatch(setDocumentLoadingStatusPending());
     dispatch(
       fetchDocuments({
         siteId: currentSiteId,
@@ -393,7 +674,9 @@ function Documents() {
         searchWord,
         searchFolder,
         subfolderUri,
+        queueId,
         filterTag,
+        filterAttribute,
       })
     );
   }, [
@@ -402,34 +685,87 @@ function Documents() {
     searchWord,
     searchFolder,
     subfolderUri,
+    queueId,
     filterTag,
+    filterAttribute,
     formkiqVersion,
   ]);
 
-  const onDeleteDocument = (file: IDocument, searchDocuments: any) => () => {
-    const deleteFunc = () => {
-      let isDocumentInfoPage = false;
-      if (infoDocumentId.length) {
-        isDocumentInfoPage = true;
-        setIsCurrentDocumentSoftDeleted(true);
-      }
+  useEffect(() => {
+    // unselect documents that are not in the expanded/open folders
+    if (selectedDocuments.length > 0) {
+      const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
+      const allDisplayedDocuments = [...documents, ...expandedFoldersDocuments];
+      const filteredDocuments = selectedDocuments.filter(
+        (document) =>
+          allDisplayedDocuments.findIndex(
+            (doc) => doc.documentId === document.documentId
+          ) !== -1
+      );
+      setSelectedDocuments(filteredDocuments);
+    }
+  }, [documents, folders]);
+
+  const deleteFunc = async (id: string, softDelete: boolean) => {
+    const res: any = await dispatch(
+      deleteDocument({
+        siteId: currentSiteId,
+        user,
+        documentId: id,
+        softDelete,
+      })
+    );
+    if (res.error) {
       dispatch(
-        deleteDocument({
-          siteId: currentSiteId,
-          user,
-          document: file,
-          documents: searchDocuments,
-          isDocumentInfoPage: isDocumentInfoPage,
+        openDialog({
+          dialogTitle: res.error.message,
         })
       );
-    };
+      return;
+    }
+    setSelectedDocuments((docs) =>
+      docs.filter((doc: any) => doc.documentId !== id)
+    );
+  };
+
+  const onDeleteDocument = (id: string, softDelete: boolean) => {
+    const dialogTitle = softDelete
+      ? 'Are you sure you want to delete this document?'
+      : 'Are you sure you want to delete this document permanently?';
     dispatch(
       openDialog({
-        callback: deleteFunc,
-        dialogTitle: 'Are you sure you want to delete this document?',
+        callback: () => deleteFunc(id, softDelete),
+        dialogTitle,
       })
     );
   };
+
+  const onDeleteSelectedDocuments = (softDelete: boolean) => {
+    function deleteMultipleDocuments(
+      documentIds: string[],
+      softDelete: boolean
+    ) {
+      documentIds.forEach((id: string) => {
+        deleteFunc(id, softDelete);
+      });
+    }
+
+    dispatch(
+      openDialog({
+        callback: () =>
+          deleteMultipleDocuments(
+            selectedDocuments.map((doc) => doc.documentId),
+            softDelete
+          ),
+        dialogTitle: `Are you sure you want to delete ${
+          selectedDocuments.length
+        } selected document${selectedDocuments.length === 1 ? '' : 's'}${
+          softDelete ? '' : ' permanently'
+        }?`,
+      })
+    );
+  };
+
   const deleteFolder = (folder: IFolder | IDocument) => () => {
     const deleteFunc = () => {
       dispatch(fetchDeleteFolder({ folder, siteId }));
@@ -441,31 +777,40 @@ function Documents() {
       })
     );
   };
-  const restoreDocument =
-    (file: IDocument, siteId: string, searchDocuments: any) => () => {
-      DocumentsService.deleteDocumentTag(
-        file.documentId,
-        siteId,
-        'sysDeletedBy'
-      ).then(() => {
-        let newDocs = null;
-        if (searchDocuments) {
-          newDocs = searchDocuments.filter((doc: any) => {
-            return doc.documentId !== file.documentId;
-          });
-        }
-        setIsCurrentDocumentSoftDeleted(false);
-        if (!infoDocumentId.length) {
-          dispatch(
-            updateDocumentsList({
-              documents: newDocs,
-              user: user,
-              isSystemDeletedByKey: true,
-            })
-          );
-        }
-      });
-    };
+  const restoreDocument = (documentId: string) => {
+    DocumentsService.restoreDocument(currentSiteId, documentId).then((res) => {
+      if (res.status !== 200) {
+        dispatch(
+          openDialog({
+            dialogTitle: 'Error restoring document. Please try again later.',
+          })
+        );
+        return;
+      }
+      let newDocs = null;
+      if (documents) {
+        newDocs = documents.filter((doc: any) => {
+          return doc.documentId !== documentId;
+        });
+      }
+      dispatch(
+        updateDocumentsList({
+          documents: newDocs,
+          user: user,
+        })
+      );
+      setSelectedDocuments((docs) =>
+        docs.filter((doc: IDocument) => doc.documentId !== documentId)
+      );
+    });
+  };
+
+  const onRestoreSelectedDocuments = async () => {
+    await selectedDocuments.forEach((doc: IDocument) => {
+      restoreDocument(doc.documentId);
+    });
+  };
+
   const onTagDelete = (tagKey: string) => {
     if (infoDocumentId.length) {
       const deleteFunc = () => {
@@ -478,7 +823,7 @@ function Documents() {
           updateTags();
         });
         setTimeout(() => {
-          onTagChange(null, null);
+          onDocumentDataChange(null, null);
         }, 500);
       };
       dispatch(
@@ -489,59 +834,8 @@ function Documents() {
       );
     }
   };
-  const onShareClick = (event: any, value: ILine | null) => {
-    setShareModalValue(value);
-    setShareModalOpened(true);
-  };
-  const onShareClose = () => {
-    setShareModalOpened(false);
-  };
-  const getShareModalValue = () => {
-    return shareModalValue;
-  };
-  const onUploadClick = (event: any, documentId: string) => {
-    dispatch(setCurrentActionEvent(''));
-    setUploadModalOpened(true);
-    setUploadModalDocumentId(documentId);
-  };
-  const onUploadClose = () => {
-    setUploadModalOpened(false);
-  };
-  const onFolderUploadClick = (event: any) => {
-    dispatch(setCurrentActionEvent(''));
-    setFolderUploadModalOpened(true);
-    setFolderUploadModalDocumentId('');
-  };
-  const onFolderUploadClose = () => {
-    setFolderUploadModalOpened(false);
-  };
-  const onEditTagsAndMetadataModalClick = (event: any, value: ILine | null) => {
-    setEditTagsAndMetadataModalValue(value);
-    setEditTagsAndMetadataModalOpened(true);
-  };
-  const onEditTagsAndMetadataModalClose = () => {
-    setEditTagsAndMetadataModalOpened(false);
-    updateTags();
-  };
-  const getEditTagsAndMetadataModalValue = () => {
-    return editTagsAndMetadataModalValue;
-  };
-  const onDocumentVersionsModalClick = (event: any, value: ILine | null) => {
-    setDocumentVersionsModalValue(value);
-    setDocumentVersionsModalOpened(true);
-  };
-  const onDocumentVersionsModalClose = () => {
-    setDocumentVersionsModalOpened(false);
-  };
-  const onESignaturesModalClick = (event: any, value: ILine | null) => {
-    setESignaturesModalValue(value);
-    setESignaturesModalOpened(true);
-  };
-  const onESignaturesModalClose = () => {
-    setESignaturesModalValue(null);
-    setESignaturesModalOpened(false);
-  };
-  const onTagChange = (event: any, value: ILine | null) => {
+
+  const onDocumentDataChange = (event: any, value: ILine | null) => {
     dispatch(setDocuments({ documents: null }));
     dispatch(
       fetchDocuments({
@@ -549,47 +843,18 @@ function Documents() {
         formkiqVersion,
         searchWord,
         searchFolder,
+        queueId,
         subfolderUri,
         filterTag,
+        filterAttribute,
       })
     );
   };
-  const onNewClick = (event: any, value: ILine | null) => {
-    dispatch(setCurrentActionEvent(''));
-    if (TopLevelFolders.indexOf(subfolderUri) !== -1) {
-      // TODO: add redirect or messaging of location of new file, as it won't be in the TopLevelFolder
-      value = {
-        lineType: 'folder',
-        folder: '',
-        documentId: '',
-        documentInstance: null,
-        folderInstance: null,
-      };
-    }
-    setNewModalValue(value);
-    setNewModalOpened(true);
-  };
-  const onNewClose = () => {
-    setNewModalOpened(false);
-  };
-  const onRenameModalClick = (event: any, value: ILine | null) => {
-    setRenameModalValue(value);
-    setRenameModalOpened(true);
-  };
-  const onRenameModalClose = () => {
-    setRenameModalOpened(false);
-  };
-  const onMoveModalClick = (event: any, value: ILine | null) => {
-    setMoveModalValue(value);
-    setMoveModalOpened(true);
-  };
-  const onMoveModalClose = () => {
-    setMoveModalOpened(false);
-  };
-  const DownloadDocument = () => {
+
+  const downloadDocument = (documentId: string) => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentUrl(
-        infoDocumentId,
+        documentId,
         currentSiteId,
         '',
         false
@@ -605,8 +870,15 @@ function Documents() {
       navigate(`${currentDocumentsRootUri}/${infoDocumentId}/view`);
     }
   };
+
+  const editDocument = () => {
+    if (infoDocumentId.length) {
+      navigate(`${currentDocumentsRootUri}/${infoDocumentId}/edit`);
+    }
+  };
+
   const onFilterTag = (event: any, tag: string) => {
-    if (filterTag === tag) {
+    if (filterTag === tag || filterAttribute === tag) {
       if (subfolderUri && subfolderUri.length) {
         navigate(
           {
@@ -651,21 +923,97 @@ function Documents() {
     }
   };
 
+  const onFilterAttribute = (event: any, attribute: string) => {
+    if (filterAttribute === attribute || filterTag === attribute) {
+      if (subfolderUri && subfolderUri.length) {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      } else {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      }
+    } else {
+      if (subfolderUri && subfolderUri.length) {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
+            search: `?filterAttribute=${attribute}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      } else {
+        navigate(
+          {
+            pathname: `${currentDocumentsRootUri}`,
+            search: `?filterAttribute=${attribute}`,
+          },
+          {
+            replace: true,
+          }
+        );
+      }
+    }
+  };
+
+  const expandAdvancedSearch = () => {
+    searchParams.set('advancedSearch', 'visible');
+    navigate(
+      {
+        pathname:
+          pathname +
+          '?' +
+          searchParams.toString() +
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}` : ''),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
+  const minimizeAdvancedSearch = () => {
+    searchParams.set('advancedSearch', 'hidden');
+    navigate(
+      {
+        pathname:
+          pathname +
+          '?' +
+          searchParams.toString() +
+          (infoDocumentId.length > 0 ? `#id=${infoDocumentId}` : ''),
+      },
+      {
+        replace: true,
+      }
+    );
+  };
+
   const foldersPath = (uri: string) => {
     if (uri) {
       const folderLevels = uri.split('/');
       if (folderLevels.length > 3) {
         const previousFolderLevel = uri.substring(0, uri.lastIndexOf('/'));
         return (
-          <span
-            className={'flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
-          >
+          <span className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}>
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
-                className="hover:text-coreOrange-600"
+                className="text-primary-500 hover:text-primary-600"
               >
-                {siteDocumentsRootName.replace('Shared Folder: ', '')}:
+                {siteDocumentsRootName.replace('Workspace: ', '')}:
               </Link>
             </span>
             <p className={'flex px-1'}> / </p>
@@ -700,7 +1048,7 @@ function Documents() {
               </Link>
             </FolderDropWrapper>
             <p className={'flex px-1'}> / </p>
-            <span className={'flex items-center mt-1 mr-1.5 w-5'}>
+            <span className={'flex items-center mt-1 mr-1.5 w-4'}>
               <FolderOutline />
             </span>
             <span>{folderLevels[folderLevels.length - 1]}</span>
@@ -708,15 +1056,13 @@ function Documents() {
         );
       } else {
         return (
-          <span
-            className={'flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
-          >
+          <span className={'flex pl-4 py-2 text-neutral-900 text-sm bg-white'}>
             <span className="pr-1">
               <Link
                 to={`${currentDocumentsRootUri}`}
-                className="hover:text-coreOrange-600"
+                className="text-primary-500 hover:text-primary-600 text-sm font-bold"
               >
-                {siteDocumentsRootName.replace('Shared Folder: ', '')}:
+                {siteDocumentsRootName.replace('Workspace: ', '')}:
               </Link>
             </span>
             {folderLevels.length > 1 && (
@@ -730,7 +1076,7 @@ function Documents() {
                 >
                   <Link
                     to={`${currentDocumentsRootUri}/folders/` + folderLevels[0]}
-                    className="hover:text-coreOrange-600"
+                    className="hover:text-primary-600"
                   >
                     {folderLevels[0]}
                   </Link>
@@ -753,7 +1099,7 @@ function Documents() {
                       '/' +
                       folderLevels[folderLevels.length - 2]
                     }
-                    className="hover:text-coreOrange-600"
+                    className="hover:text-primary-600"
                   >
                     {folderLevels[folderLevels.length - 2]}
                   </Link>
@@ -767,7 +1113,7 @@ function Documents() {
               targetSiteId={currentSiteId}
               className={'flex items-start'}
             >
-              <span className={'flex items-center mt-1 mr-1.5 w-5'}>
+              <span className={'flex items-center mt-1 mr-1.5 w-4'}>
                 <FolderOutline />
               </span>
               <span>{folderLevels[folderLevels.length - 1]}</span>
@@ -777,11 +1123,9 @@ function Documents() {
       }
     }
     return (
-      <span
-        className={'hidden flex pl-4 py-2 text-gray-500 bg-white text-gray-500'}
-      >
+      <span className={'hidden flex pl-4 py-2 text-gray-500 bg-white'}>
         <span className="pr-1">
-          {siteDocumentsRootName.replace('Shared Folder: ', '')}
+          {siteDocumentsRootName.replace('Workspace: ', '')}
         </span>
       </span>
     );
@@ -792,6 +1136,17 @@ function Documents() {
     let showAllTagsPopover = true;
     const minTagsToShowForFilter = 3;
     tagsToCheck = tagsToCheck.concat(TagsForFilterAndDisplay);
+
+    const keyOnlyAttributes = allAttributes.filter(
+      (attribute: Attribute) => attribute.dataType === 'KEY_ONLY'
+    );
+    const keyOnlyAttributesKeys: { value: string }[] = [];
+    if (keyOnlyAttributes.length > 0) {
+      keyOnlyAttributes.forEach((attribute: Attribute) => {
+        keyOnlyAttributesKeys.push({ value: attribute.key });
+      });
+    }
+
     if (
       filterTag &&
       filterTag.length &&
@@ -799,6 +1154,15 @@ function Documents() {
     ) {
       tagsToCheck.push(filterTag);
     }
+
+    if (
+      filterAttribute &&
+      filterAttribute.length &&
+      tagsToCheck.indexOf(filterAttribute) === -1
+    ) {
+      tagsToCheck.push(filterAttribute);
+    }
+
     if (tagsToCheck.length === 0) {
       const tagsToConsider = allTags.filter((tag: any) => {
         return (
@@ -807,6 +1171,7 @@ function Documents() {
           tag.value.indexOf('untagged') !== 0
         );
       });
+      tagsToConsider.unshift(...keyOnlyAttributesKeys);
       const numberOfTagsToAdd =
         tagsToConsider.length > minTagsToShowForFilter
           ? minTagsToShowForFilter
@@ -818,6 +1183,13 @@ function Documents() {
         tagsToCheck.push(tagsToConsider[i].value);
       }
     }
+
+    const onFilter = (event: any, value: string, index: number) => {
+      if (!keyOnlyAttributesKeys || keyOnlyAttributesKeys.length === 0)
+        onFilterTag(event, value);
+      if (index < keyOnlyAttributesKeys.length) onFilterAttribute(event, value);
+    };
+
     return (
       <div className="flex items-center justify-start">
         <div className="w-1/3 pl-4">
@@ -850,12 +1222,13 @@ function Documents() {
                     <li
                       key={i}
                       className={
-                        (filterTag === primaryTag
-                          ? 'bg-coreOrange-500 text-white'
+                        (filterTag === primaryTag ||
+                        filterAttribute === primaryTag
+                          ? 'bg-primary-500 text-white'
                           : `bg-${tagColor}-200 text-black`) +
                         ' text-xs p-1 px-2 mx-1 cursor-pointer'
                       }
-                      onClick={(event) => onFilterTag(event, primaryTag)}
+                      onClick={(event) => onFilter(event, primaryTag, i)}
                     >
                       {primaryTag}
                     </li>
@@ -867,7 +1240,10 @@ function Documents() {
                   siteId={currentSiteId}
                   tagColors={tagColors}
                   onFilterTag={onFilterTag}
+                  onFilterAttribute={onFilterAttribute}
                   filterTag={filterTag}
+                  filterAttribute={filterAttribute}
+                  allAttributes={allAttributes}
                 />
               )}
             </>
@@ -881,18 +1257,112 @@ function Documents() {
     );
   };
 
+  function getExpandedFoldersDocuments(folders: IFolder[]): IDocument[] {
+    return folders.reduce((acc: IDocument[], folder: IFolder) => {
+      if (folder.isExpanded) {
+        // Add document IDs from the current folder
+        const folderDocuments = folder.documents;
+        // Recursively get document IDs from subfolders
+        const subFolderDocuments = getExpandedFoldersDocuments(folder.folders);
+        return [...acc, ...folderDocuments, ...subFolderDocuments];
+      }
+      return acc;
+    }, []);
+  }
+
+  const openArchiveTab = () => {
+    const filteredDocuments = selectedDocuments.filter(
+      (document: IDocument) =>
+        !document.deepLinkPath || (document.deepLinkPath?.length ?? 0) === 0
+    );
+    dispatch(setPendingArchive(filteredDocuments));
+    setArchiveTabStatus('open');
+  };
+  const closeArchiveTab = () => {
+    setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+    const expandedFoldersDocuments = getExpandedFoldersDocuments(folders);
+    const allDisplayedDocuments = [...documents, ...expandedFoldersDocuments];
+    const filteredDocuments = pendingArchive.filter(
+      (document) =>
+        allDisplayedDocuments.findIndex(
+          (doc) => doc.documentId === document.documentId
+        ) !== -1
+    );
+    dispatch(setPendingArchive([]));
+    setSelectedDocuments(filteredDocuments);
+    setArchiveTabStatus('closed');
+  };
+
+  const minimizeArchiveTab = () => {
+    setArchiveTabStatus('minimized');
+  };
+
+  const expandArchiveTab = () => {
+    setArchiveTabStatus('open');
+  };
+
+  const deleteFromPendingArchive = (file: IDocument) => {
+    dispatch(
+      setPendingArchive(
+        pendingArchive.filter((f) => f.documentId !== file.documentId)
+      )
+    );
+    setSelectedDocuments(
+      selectedDocuments.filter((f) => f.documentId !== file.documentId)
+    );
+  };
+  const addToPendingArchive = (file: IDocument) => {
+    if (pendingArchive) {
+      if (
+        pendingArchive.findIndex(
+          (doc) => doc.documentId === file.documentId
+        ) === -1
+      ) {
+        dispatch(setPendingArchive([...pendingArchive, file]));
+        setSelectedDocuments([...selectedDocuments, file]);
+      }
+    } else {
+      dispatch(setPendingArchive([file]));
+      setSelectedDocuments([file]);
+    }
+  };
+
+  const ARCHIVE_STATUSES = {
+    INITIAL: 'INITIAL',
+    PENDING: 'PENDING',
+    COMPLETE: 'COMPLETE',
+    ERROR: 'ERROR',
+  };
+  const [archiveStatus, setArchiveStatus] = useState(ARCHIVE_STATUSES.INITIAL);
+
+  // const clearPendingArchive = () => {
+  //   setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
+  //   dispatch(setPendingArchive([]));
+  //   setIsArchiveTabExpanded(!isArchiveTabExpanded);
+  // };
+
   const viewDocumentVersion = (versionKey: string) => {
     if (infoDocumentId) {
       if (versionKey !== undefined) {
-        window.open(
-          `${window.location.origin}${currentDocumentsRootUri}/${infoDocumentId}/view?versionKey=${versionKey}`
+        navigate(
+          `${currentDocumentsRootUri}/${infoDocumentId}/view?versionKey=${encodeURIComponent(
+            versionKey
+          )}`
         );
       } else {
-        window.open(
-          `${window.location.origin}${currentDocumentsRootUri}/${infoDocumentId}/view`
-        );
+        navigate(`${currentDocumentsRootUri}/${infoDocumentId}/view`);
       }
     }
+  };
+
+  const [publicationLinkCopyTooltipText, setPublicationLinkCopyTooltipText] =
+    useState('Copy Link');
+  const CopyPublicationLink = (documentId: string) => {
+    window.navigator.clipboard.writeText(`/publications/${documentId}`);
+    setPublicationLinkCopyTooltipText('Copied!');
+    setTimeout(() => {
+      setPublicationLinkCopyTooltipText('Copy Link');
+    }, 2000);
   };
 
   return (
@@ -900,16 +1370,70 @@ function Documents() {
       <Helmet>
         <title>Documents</title>
       </Helmet>
-      <div className="h-[calc(100vh-3.68rem)] flex">
-        <div className="grow">
+      <div className="h-[calc(100vh-3.68rem)] flex ">
+        <div className="grow flex flex-col justify-stretch flex-1">
           <div className="flex mt-2 h-8">
             <div className="grow">{foldersPath(subfolderUri)}</div>
-            <div className="flex w-20 items-end">
+            <div className="flex items-center gap-4 pr-8 z-10">
+              {archiveTabStatus === 'closed' && (
+                <ButtonSecondary onClick={openArchiveTab} type="button">
+                  Download Multiple Files (ZIP)
+                </ButtonSecondary>
+              )}
+              {archiveTabStatus === 'minimized' && (
+                <ButtonSecondary onClick={expandArchiveTab} type="button">
+                  View Pending File Download (ZIP)
+                </ButtonSecondary>
+              )}
+              {archiveTabStatus === 'open' && (
+                <ButtonSecondary onClick={minimizeArchiveTab}>
+                  Minimize Pending File Download (ZIP)
+                </ButtonSecondary>
+              )}
+
+              {/*// )}*/}
+              {archiveTabStatus === 'open' &&
+                archiveStatus === ARCHIVE_STATUSES.INITIAL && (
+                  <ButtonTertiary onClick={closeArchiveTab} type="button">
+                    Cancel Pending File Download
+                  </ButtonTertiary>
+                )}
+              {!formkiqVersion.modules.includes('typesense') &&
+                !formkiqVersion.modules.includes('opensearch') &&
+                !advancedSearch && (
+                  <button
+                    type="button"
+                    onClick={expandAdvancedSearch}
+                    className="cursor-pointer h-8"
+                  >
+                    <ButtonGhost type="button">Search Documents...</ButtonGhost>
+                  </button>
+                )}
+              {!formkiqVersion.modules.includes('typesense') &&
+                !formkiqVersion.modules.includes('opensearch') &&
+                advancedSearch &&
+                (advancedSearch === 'hidden' ? (
+                  <button
+                    type="button"
+                    onClick={expandAdvancedSearch}
+                    className="cursor-pointer h-8"
+                  >
+                    <ButtonGhost type="button">Expand Search Tab</ButtonGhost>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={minimizeAdvancedSearch}
+                    className="cursor-pointer h-8"
+                  >
+                    <ButtonGhost type="button">Minimize Search Tab</ButtonGhost>
+                  </button>
+                ))}
               <div
                 className={
                   (isTagFilterExpanded
-                    ? 'text-coreOrange-500 '
-                    : 'text-gray-400 ') + ' w-5 cursor-pointer'
+                    ? 'text-primary-500 '
+                    : 'text-neutral-900 ') + ' w-5 cursor-pointer'
                 }
                 onClick={(event) => {
                   if (filterTag && filterTag.length) {
@@ -923,56 +1447,133 @@ function Documents() {
               </div>
             </div>
           </div>
-          <div className="flex flex-row h-full">
-            <div className="flex-1 inline-block h-full">
+          <div
+            className="flex flex-row "
+            style={{
+              height: `calc(100% ${
+                isTagFilterExpanded ? '- 6rem' : '- 3.68rem'
+              }`,
+            }}
+            id="documentsPageWrapper"
+            onDragEnter={handleDragEnter}
+          >
+            <div className="flex-1 inline-block h-full flex flex-col">
               {isTagFilterExpanded && (
                 <div className="pt-2 pr-8">{filtersAndTags()}</div>
               )}
+              {archiveTabStatus === 'open' && (
+                <div className="pt-2 pr-8">
+                  <PendingArchiveTab
+                    siteId={currentSiteId}
+                    documentsRootUri={currentDocumentsRootUri}
+                    archiveStatus={archiveStatus}
+                    setArchiveStatus={setArchiveStatus}
+                    closeArchiveTab={closeArchiveTab}
+                    deleteFromPendingArchive={deleteFromPendingArchive}
+                    setSelectedDocuments={setSelectedDocuments}
+                  />
+                </div>
+              )}
+              {advancedSearch && (
+                <div className="pt-2 pr-8">
+                  <AdvancedSearchTab
+                    siteId={currentSiteId}
+                    formkiqVersion={formkiqVersion}
+                    subfolderUri={subfolderUri}
+                    infoDocumentId={infoDocumentId}
+                  />
+                </div>
+              )}
               <DocumentsTable
-                onDeleteDocument={onDeleteDocument}
                 onRestoreDocument={restoreDocument}
-                onRenameModalClick={onRenameModalClick}
-                onMoveModalClick={onMoveModalClick}
-                onShareClick={onShareClick}
                 documentsScrollpaneRef={documentsScrollpaneRef}
                 documentsWrapperRef={documentsWrapperRef}
                 currentSiteId={currentSiteId}
                 currentDocumentsRootUri={currentDocumentsRootUri}
-                onESignaturesModalClick={onESignaturesModalClick}
-                onTagChange={onTagChange}
-                isSiteReadOnly={isSiteReadOnly}
-                onEditTagsAndMetadataModalClick={
-                  onEditTagsAndMetadataModalClick
-                }
+                onDocumentDataChange={onDocumentDataChange}
+                isSiteReadOnly={isCurrentSiteReadonly}
                 filterTag={filterTag}
-                onDocumentVersionsModalClick={onDocumentVersionsModalClick}
                 deleteFolder={deleteFolder}
+                trackScrolling={trackScrolling}
+                addToPendingArchive={addToPendingArchive}
+                deleteFromPendingArchive={deleteFromPendingArchive}
+                archiveStatus={archiveStatus}
+                infoDocumentId={infoDocumentId}
+                onDocumentInfoClick={onDocumentInfoClick}
+                selectedDocuments={selectedDocuments}
+                setSelectedDocuments={setSelectedDocuments}
+                onDeleteSelectedDocuments={onDeleteSelectedDocuments}
+                onRestoreSelectedDocuments={onRestoreSelectedDocuments}
+                openArchiveTab={openArchiveTab}
+                archiveTabStatus={archiveTabStatus}
+                getExpandedFoldersDocuments={getExpandedFoldersDocuments}
+                downloadDocument={downloadDocument}
               />
+              <Dialog
+                open={isDropZoneVisible}
+                onClose={() => setIsDropZoneVisible(false)}
+                initialFocus={closeDropZoneRef}
+                className="h-[calc(100vh-60px)] w-96 absolute right-0 top-[60px] z-10 bg-neutral-100 flex text-gray-400 border border-dashed border-4"
+              >
+                <Dialog.Panel>
+                  <button
+                    ref={closeDropZoneRef}
+                    className="absolute right-2 top-2 cursor-pointer h-6 w-6 text-gray-400 hover:text-gray-600 focus:outline-none "
+                    onClick={() => setIsDropZoneVisible(false)}
+                  >
+                    <Close />
+                  </button>
+                  <div
+                    className="h-full w-full flex justify-center items-center p-6"
+                    onDrop={handleDrop}
+                  >
+                    <h1 className="text-2xl font-bold text-center">
+                      Drop files here to upload to current folder <br />
+                      <span className="text-sm font-normal ">
+                        (or drop files onto specific folders)
+                      </span>
+                    </h1>
+                  </div>
+                </Dialog.Panel>
+              </Dialog>
             </div>
           </div>
         </div>
         {infoDocumentId.length ? (
-          <div className="h-[calc(100vh-3.68rem)] flex w-72 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 border-l border-gray-300">
+          <div className="h-[calc(100vh-3.68rem)] overflow-y-auto flex w-[17rem] bg-white border-l border-neutral-300">
             <div className="flex-1 inline-block">
               {currentDocument ? (
-                <div className="flex flex-wrap justify-center">
+                <div className="flex flex-wrap justify-start">
                   <div className="w-full flex grow-0 pl-2 pt-3 justify-start">
-                    <div className="w-12">
+                    <div className="w-12 flex items-center">
                       <img
                         alt="File Icon"
-                        src={getFileIcon((currentDocument as IDocument).path)}
+                        src={getFileIcon(
+                          (currentDocument as IDocument).path,
+                          (currentDocument as IDocument).deepLinkPath
+                        )}
                         className="w-12 h-12"
                       />
                     </div>
-                    <div className="grow-0 w-52 px-2 leading-5 font-bold text-base text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
-                      {(currentDocument as IDocument).path}
-                      {isCurrentDocumentSoftDeleted && (
-                        <small className="block text-red-500 uppercase">
-                          (deleted)
-                        </small>
-                      )}
+                    <div className="flex items-center">
+                      <h1 title={(currentDocument as IDocument).path} className="pl-2 w-40 text-base break-all leading-5 font-bold bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 bg-clip-text text-transparent">
+                        {(currentDocument as IDocument).path.substring(0, 30)}
+                        {(currentDocument as IDocument).path.length > 30 && <span>...</span>}
+                        {isCurrentDocumentSoftDeleted && (
+                          <small className="block text-red-500 uppercase">
+                            (deleted)
+                          </small>
+                        )}
+                        {(currentDocument as IDocument).contentType && (
+                          <small className="block text-gray-500 text-xs">
+                            {(currentDocument as IDocument).contentType}
+                          </small>
+                        )}
+                      </h1>
                     </div>
-                    <div className="w-8 grow-0 flex justify-start">
+
+
+                    <div className="w-8 grow-0 flex justify-end">
                       <div
                         className="w-4 mt-0.5 h-4 cursor-pointer text-gray-400"
                         onClick={(event) => {
@@ -984,7 +1585,7 @@ function Documents() {
                       </div>
                     </div>
                   </div>
-                  <div className="w-64 flex mt-4 mr-12 mb-2 border-b">
+                  <div className="w-64 flex mt-4 mr-2 mb-2 border-b">
                     <div
                       className="w-1/3 text-sm font-semibold cursor-pointer"
                       onClick={(event) => {
@@ -994,7 +1595,7 @@ function Documents() {
                       <div
                         className={
                           (infoDocumentView === 'info'
-                            ? 'text-coreOrange-500 '
+                            ? 'text-primary-500 '
                             : 'text-gray-400 ') + ' text-center'
                         }
                       >
@@ -1004,53 +1605,96 @@ function Documents() {
                         <hr
                           className={
                             (infoDocumentView === 'info'
-                              ? 'border-coreOrange-500 '
+                              ? 'border-primary-500 '
                               : 'border-transparent ') +
                             ' w-1/2 rounded-xl border-b border'
                           }
                         />
                       </div>
                     </div>
-                    {formkiqVersion.type !== 'core' && (
-                      <div
-                        className="w-1/3 text-sm font-semibold cursor-pointer"
-                        onClick={(event) => {
-                          setInfoDocumentView('history');
-                        }}
-                      >
+                    {formkiqVersion.type !== 'core' &&
+                      (!(currentDocument as IDocument).deepLinkPath ||
+                        ((currentDocument as IDocument).deepLinkPath?.length ??
+                          0) === 0) && (
                         <div
-                          className={
-                            (infoDocumentView === 'history'
-                              ? 'text-coreOrange-500 '
-                              : 'text-gray-400 ') + ' text-center'
-                          }
+                          className="w-1/3 text-sm font-semibold cursor-pointer"
+                          onClick={(event) => {
+                            setInfoDocumentView('history');
+                          }}
                         >
-                          History
-                        </div>
-                        <div className="flex justify-center">
-                          <hr
+                          <div
                             className={
                               (infoDocumentView === 'history'
-                                ? 'border-coreOrange-500 '
-                                : 'border-transparent ') +
-                              ' w-1/2 rounded-xl border-b border'
+                                ? 'text-primary-500 '
+                                : 'text-gray-400 ') + ' text-center'
                             }
-                          />
+                          >
+                            History
+                          </div>
+                          <div className="flex justify-center">
+                            <hr
+                              className={
+                                (infoDocumentView === 'history'
+                                  ? 'border-primary-500 '
+                                  : 'border-transparent ') +
+                                ' w-1/2 rounded-xl border-b border'
+                              }
+                            />
+                          </div>
                         </div>
+                      )}
+                    <div
+                      className="w-1/3 text-sm font-semibold cursor-pointer"
+                      onClick={(event) => {
+                        setInfoDocumentView('actions');
+                      }}
+                    >
+                      <div
+                        className={
+                          (infoDocumentView === 'actions'
+                            ? 'text-primary-500 '
+                            : 'text-gray-400 ') + ' text-center'
+                        }
+                      >
+                        Actions
                       </div>
-                    )}
+                      <div className="flex justify-center">
+                        <hr
+                          className={
+                            (infoDocumentView === 'actions'
+                              ? 'border-primary-500 '
+                              : 'border-transparent ') +
+                            ' w-1/2 rounded-xl border-b border'
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="absolute"></div>
+                    <ButtonSecondary
+                      onClick={onDocumentInfoClick}
+                      type="button"
+                      style={{
+                        width: '36px',
+                      }}
+                    >
+                      <div className="flex justify-center">
+                        <span className="w-4 -m-2 p-0.5">{Retry()}</span>
+                      </div>
+                    </ButtonSecondary>
                   </div>
                   <div
                     className={
                       (infoDocumentView === 'info' ? 'block ' : 'hidden ') +
-                      ' w-64 mr-12 overflow-y-auto h-[calc(100vh-3.68rem)]'
+                      ' w-64 mr-2'
                     }
                   >
                     {currentDocument && (currentDocument as IDocument).path && (
-                      <dl className="p-4 pr-6 pt-2 text-medsmall text-gray-600">
+                      <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">Location</dt>
-                          <dd className="font-semibold text-sm text-coreOrange-600 hover:text-coreOrange-400">
+                          <dt className="mb-1 text-smaller font-semibold">
+                            Location
+                          </dt>
+                          <dd className="text-sm text-primary-600 hover:text-primary-400">
                             {(currentDocument as IDocument).path.substring(
                               0,
                               (currentDocument as IDocument).path.lastIndexOf(
@@ -1072,7 +1716,7 @@ function Documents() {
                               >
                                 <span className="pr-1">
                                   {siteDocumentsRootName.replace(
-                                    'Shared Folder: ',
+                                    'Workspace: ',
                                     ''
                                   )}
                                   :
@@ -1094,7 +1738,7 @@ function Documents() {
                             ) : (
                               <Link to={siteDocumentsRootUri} className="flex">
                                 {siteDocumentsRootName.replace(
-                                  'Shared Folder: ',
+                                  'Workspace: ',
                                   ''
                                 )}
                                 <div className="w-4 pt-0.5">
@@ -1105,147 +1749,75 @@ function Documents() {
                           </dd>
                         </div>
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">Added by</dt>
-                          <dd className="font-semibold text-sm">
+                          <dt className="mb-1 text-smaller font-semibold">
+                            Added by
+                          </dt>
+                          <dd className="text-sm">
                             {(currentDocument as IDocument).userId}
                           </dd>
                         </div>
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">Date added</dt>
-                          <dd className="font-semibold text-sm">
+                          <dt className="mb-1 text-smaller font-semibold">
+                            Date added
+                          </dt>
+                          <dd className=" text-sm">
                             {formatDate(
                               (currentDocument as IDocument).insertedDate
                             )}
                           </dd>
                         </div>
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">Last modified</dt>
-                          <dd className="font-semibold text-sm">
+                          <dt className="mb-1 text-smaller font-semibold">
+                            Last modified
+                          </dt>
+                          <dd className="text-sm">
                             {formatDate(
                               (currentDocument as IDocument).lastModifiedDate
                             )}
                           </dd>
                         </div>
                         <div className="flex flex-col pb-3">
-                          <dt className="mb-1">
+                          <dt className="mb-1 text-smaller font-semibold">
                             ID{' '}
                             <CopyButton
                               value={(currentDocument as IDocument).documentId}
                             />
                           </dt>
-                          <dd className="font-semibold text-xxs tracking-tight">
+                          <dd className="text-sm tracking-tight">
                             {(currentDocument as IDocument).documentId}&nbsp;
                           </dd>
                         </div>
-                        <div className="w-68 flex mr-3 border-b"></div>
-                        <div className="flex flex-col pt-3">
-                          <dt className="mb-1 flex justify-between">
-                            <span className="text-sm font-semibold text-coreOrange-500">
-                              Tags
-                            </span>
-                            {!isSiteReadOnly && (
-                              <div
-                                className="w-3/5 flex font-semibold text-coreOrange-500 cursor-pointer"
-                                onClick={(event) =>
-                                  setInfoTagEditMode(!infoTagEditMode)
+                        {(currentDocument as IDocument).deepLinkPath && (
+                          <div className="flex flex-col pb-3">
+                            <dt className="mb-1 text-smaller font-semibold">
+                              DeepLinkPath{' '}
+                              <CopyButton
+                                value={
+                                  (currentDocument as IDocument).deepLinkPath
+                                }
+                              />
+                            </dt>
+                            <dd className="text-sm tracking-tight">
+                              <a
+                                className="underline h0ver:text-primary-500 break-words"
+                                href={
+                                  (currentDocument as IDocument).deepLinkPath
                                 }
                               >
-                                {infoTagEditMode ? (
-                                  <>
-                                    <div className="w-4 pt-0.5">
-                                      <ChevronLeft />
-                                    </div>
-                                    <span>cancel edit</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span>edit tags</span>
-                                    <div className="w-4 pt-0.5">
-                                      <ChevronRight />
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            )}
-                          </dt>
-                          <dd className="text-sm">
-                            {currentDocumentTags &&
-                              (currentDocumentTags as []).map(
-                                (tag: any, i: number) => {
-                                  let isKeyOnlyTag = false;
-                                  if (
-                                    (tag.value !== undefined &&
-                                      tag.value.length === 0) ||
-                                    (tag.values !== undefined &&
-                                      tag.values.length === 0)
-                                  ) {
-                                    isKeyOnlyTag = true;
-                                  }
-                                  let tagColor = 'gray';
-                                  if (tagColors) {
-                                    tagColors.forEach((color: any) => {
-                                      if (color.tagKeys.indexOf(tag.key) > -1) {
-                                        tagColor = color.colorUri;
-                                        return;
-                                      }
-                                    });
-                                  }
-                                  return (
-                                    <div key={i} className="inline">
-                                      {isKeyOnlyTag && (
-                                        <div className="pt-0.5 pr-1 flex items-center">
-                                          <div
-                                            className={`h-5.5 pl-2 rounded-l-md pr-1 bg-${tagColor}-200 flex items-center`}
-                                          >
-                                            {tag.key}
-                                            {infoTagEditMode && (
-                                              <button
-                                                className="pl-2 font-semibold hover:text-red-600"
-                                                onClick={(event) =>
-                                                  onTagDelete(tag.key)
-                                                }
-                                              >
-                                                x
-                                              </button>
-                                            )}
-                                          </div>
-                                          <div
-                                            className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                                          ></div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                }
-                              )}
-                          </dd>
-                        </div>
-                        {infoTagEditMode && (
-                          <div className="flex mt-2">
-                            <AddTag
-                              line={{
-                                lineType: 'document',
-                                folder: subfolderUri,
-                                documentId: (currentDocument as IDocument)
-                                  .documentId,
-                                documentInstance: currentDocument as IDocument,
-                                folderInstance: null,
-                              }}
-                              onTagChange={onTagChange}
-                              updateTags={updateTags}
-                              siteId={currentSiteId}
-                              tagColors={tagColors}
-                            />
+                                {(currentDocument as IDocument).deepLinkPath}
+                                &nbsp;
+                              </a>
+                            </dd>
                           </div>
                         )}
-                        <div className="w-68 flex mt-3 mr-3 border-b"></div>
-                        <div className="pt-3 flex justify-between text-sm font-semibold text-coreOrange-500">
-                          Metadata
+                        <div className="w-64 flex mr-3 border-b"></div>
+                        <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
+                          Relationships
                           {!isSiteReadOnly && (
                             <div
-                              className="w-3/5 flex text-medsmall font-semibold text-coreOrange-500 cursor-pointer"
+                              className="w-3/5 self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
-                                onEditTagsAndMetadataModalClick(event, {
+                                onDocumentRelationshipsModalClick(event, {
                                   lineType: 'document',
                                   folder: subfolderUri,
                                   documentId: (currentDocument as IDocument)
@@ -1256,73 +1828,463 @@ function Documents() {
                                 })
                               }
                             >
-                              {infoMetadataEditMode ? (
-                                <>
-                                  <div className="w-4 pt-0.5">
-                                    <ChevronLeft />
-                                  </div>
-                                  <span>cancel edit</span>
-                                </>
-                              ) : (
-                                <>
-                                  <span>add/edit metadata</span>
-                                  <div className="w-4 pt-0.5">
-                                    <ChevronRight />
-                                  </div>
-                                </>
-                              )}
+                              <>
+                                <span className="pt-0.5 whitespace-nowrap">
+                                  add/edit relationships
+                                </span>
+                                <div className="w-4">
+                                  <ChevronRight />
+                                </div>
+                              </>
                             </div>
                           )}
                         </div>
-                        {currentDocumentTags &&
-                          (currentDocumentTags as []).map(
-                            (tag: any, i: number) => {
-                              let isKeyOnlyTag = false;
-                              if (
-                                (tag.value !== undefined &&
-                                  tag.value.length === 0) ||
-                                (tag.values !== undefined &&
-                                  tag.values.length === 0)
-                              ) {
-                                isKeyOnlyTag = true;
+                        {relationships.length > 0 ? (
+                          <div>
+                            {relationships.map((relationship) => (
+                              <div>
+                                <h3 className="text-sm font-semibold text-neutral-900">
+                                  {relationship.relationship}:{' '}
+                                  {relationshipDocumentsMap[
+                                    relationship.documentId
+                                  ] &&
+                                  relationshipDocumentsMap[
+                                    relationship.documentId
+                                  ] !== 'NOT_FOUND' ? (
+                                    <Link
+                                      to={`${siteDocumentsRootUri}/${relationship.documentId}/view`}
+                                      className="underline hover:text-primary-500 break-words font-normal"
+                                    >
+                                      {
+                                        relationshipDocumentsMap[
+                                          relationship.documentId
+                                        ]
+                                      }
+                                    </Link>
+                                  ) : (
+                                    <span className="text-neutral-500">
+                                      {relationship.documentId}
+                                    </span>
+                                  )}
+                                </h3>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs">
+                            (no relationships have been added)
+                          </span>
+                        )}
+                        <div className="w-64 flex mr-3 border-b"></div>
+                        <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
+                          Attributes
+                          {!isCurrentSiteReadonly && (
+                            <div
+                              className="w-3/5 flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                              onClick={(event) =>
+                                onEditAttributesModalClick(event, {
+                                  lineType: 'document',
+                                  folder: subfolderUri,
+                                  documentId: (currentDocument as IDocument)
+                                    .documentId,
+                                  documentInstance:
+                                    currentDocument as IDocument,
+                                  folderInstance: null,
+                                })
                               }
-                              return (
-                                <div
-                                  key={i}
-                                  className={
-                                    (isKeyOnlyTag ? 'hidden' : 'inline') +
-                                    ' flex flex-col pt-3'
-                                  }
-                                >
-                                  <dt className="mb-1">{tag.key}</dt>
-                                  <dd className="font-semibold text-sm">
-                                    {tag.value && <span>{tag.value}</span>}
-                                    {tag.values !== undefined &&
-                                      tag.values.map(
-                                        (value: any, j: number) => {
-                                          return (
-                                            <span className="block">
-                                              {value}
-                                            </span>
-                                          );
-                                        }
-                                      )}
-                                  </dd>
+                            >
+                              <>
+                                <span className="pt-0.5">
+                                  add/edit attributes
+                                </span>
+                                <div className="w-4">
+                                  <ChevronRight />
                                 </div>
-                              );
-                            }
+                              </>
+                            </div>
                           )}
+                        </div>
+                        {sortedAttributesAndTags.length === 0 && (
+                          <span className="text-xs">
+                            (no attributes have been added)
+                          </span>
+                        )}
+                        {sortedAttributesAndTags.length > 0 &&
+                        sortedAttributesAndTags.filter((item: any, i) => {
+                          if (
+                            !item.stringValue &&
+                            !item.numberValue &&
+                            !item.booleanValue &&
+                            item.valueType !== 'BOOLEAN' &&
+                            !item.value &&
+                            !item.values &&
+                            !item.stringValues &&
+                            !item.numberValues
+                          ) {
+                            return true;
+                          }
+                          return false;
+                        }).length ? (
+                          <>
+                            <div className="mt-2 text-smaller font-semibold uppercase italic">
+                              Key-Only Attributes
+                            </div>
+                            <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 flex flex-wrap">
+                              {sortedAttributesAndTags.length > 0 &&
+                                sortedAttributesAndTags.map((item: any, i) => {
+                                  let tagColor = 'gray';
+                                  if (tagColors) {
+                                    tagColors.forEach((color: any) => {
+                                      if (
+                                        color.tagKeys.indexOf(item.key) > -1
+                                      ) {
+                                        tagColor = color.colorUri;
+                                        return;
+                                      }
+                                    });
+                                  }
+                                  return (
+                                    <div
+                                      key={`keyonly_attribute_${item.key}_${i}`}
+                                    >
+                                      {!item.stringValue &&
+                                        !item.numberValue &&
+                                        !item.booleanValue &&
+                                        item.valueType !== 'BOOLEAN' &&
+                                        !item.value &&
+                                        !item.values &&
+                                        !item.stringValues &&
+                                        !item.numberValues && (
+                                          <div className="pt-0.5 pr-1 flex">
+                                            <div
+                                              className={`h-5.5 pl-2 text-smaller rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
+                                            >
+                                              {item.key}
+                                            </div>
+                                            <div
+                                              className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                                            ></div>
+                                          </div>
+                                        )}
+                                    </div>
+                                  );
+                                })}
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                        <div>
+                          {sortedAttributesAndTags.length > 0 &&
+                            sortedAttributesAndTags.map((item: any, i) => (
+                              <span key={`attr_${item.key}_${i}`}>
+                                {!item.stringValue &&
+                                !item.numberValue &&
+                                !item.booleanValue &&
+                                item.valueType !== 'BOOLEAN' &&
+                                !item.value &&
+                                !item.values &&
+                                !item.stringValues &&
+                                !item.numberValues ? (
+                                  <></>
+                                ) : (
+                                  <div
+                                    key={`attribute_${item.key}_${i}`}
+                                    className="flex flex-col pt-3"
+                                  >
+                                    <dt className="mb-1 text-smaller font-semibold">
+                                      {item.key}
+                                      {item.values !== undefined && (
+                                        <QuantityButton
+                                          type="button"
+                                          onClick={() => {
+                                            onAttributeQuantityClick(item);
+                                          }}
+                                        >
+                                          {item.values.length}
+                                        </QuantityButton>
+                                      )}
+                                      {item.stringValues !== undefined && (
+                                        <QuantityButton
+                                          type="button"
+                                          onClick={() => {
+                                            onAttributeQuantityClick(item);
+                                          }}
+                                        >
+                                          {item.stringValues.length}
+                                        </QuantityButton>
+                                      )}
+                                      {item.numberValues !== undefined && (
+                                        <QuantityButton
+                                          type="button"
+                                          onClick={() => {
+                                            onAttributeQuantityClick(item);
+                                          }}
+                                        >
+                                          {item.numberValues.length}
+                                        </QuantityButton>
+                                      )}
+                                    </dt>
+                                    <dd className="text-sm">
+                                      {/*Attributes*/}
+                                      {item?.key === 'Publication' ||
+                                      item?.key === 'Relationships' ? (
+                                        <>
+                                          {item?.stringValue && (
+                                            <div>
+                                              <span className="text-xs pr-2">
+                                                {item.stringValue}
+                                                <span className="mx-1"></span>
+                                                <CopyButton
+                                                  value={item.stringValue}
+                                                />
+                                              </span>
+                                              {item?.key === 'Publication' && (
+                                                <span className="block mt-1 text-xs">
+                                                  <Tooltip
+                                                    id={
+                                                      'publication-link-copy-tooltip'
+                                                    }
+                                                  />
+                                                  <ButtonTertiary
+                                                    className="px-2 py-0.5"
+                                                    data-tooltip-id={
+                                                      'publication-link-copy-tooltip'
+                                                    }
+                                                    data-tooltip-content={
+                                                      publicationLinkCopyTooltipText
+                                                    }
+                                                    onClick={() => {
+                                                      CopyPublicationLink(
+                                                        (
+                                                          currentDocument as IDocument
+                                                        ).documentId
+                                                      );
+                                                    }}
+                                                    type="button"
+                                                  >
+                                                    Copy Publication Link
+                                                  </ButtonTertiary>
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <>
+                                          {item?.stringValue && (
+                                            <span>{item.stringValue}</span>
+                                          )}
+                                        </>
+                                      )}
+                                      {item?.numberValue !== undefined && (
+                                        <span>{item.numberValue}</span>
+                                      )}
+                                      {item?.booleanValue !== undefined ? (
+                                        <>
+                                          {item.booleanValue ? (
+                                            <span>TRUE</span>
+                                          ) : (
+                                            <span>FALSE</span>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <></>
+                                      )}
+                                      {item?.stringValues !== undefined && (
+                                        <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
+                                          {item.stringValues.map(
+                                            (val: any, index: number) => (
+                                              <>
+                                                {item?.key ===
+                                                'Relationships' ? (
+                                                  <span
+                                                    className="text-xs"
+                                                    key={`attr_string_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    <span className="mx-1"></span>
+                                                    <CopyButton value={val} />
+                                                    {index <
+                                                      item.stringValues.length -
+                                                        1 && <hr />}
+                                                  </span>
+                                                ) : (
+                                                  <span
+                                                    key={`attr_string_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    {index <
+                                                      item.stringValues.length -
+                                                        1 && <hr />}
+                                                  </span>
+                                                )}
+                                              </>
+                                            )
+                                          )}
+                                        </div>
+                                      )}
+                                      {item?.numberValues !== undefined && (
+                                        <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
+                                          {item.numberValues.map(
+                                            (val: any, index: number) => (
+                                              <span
+                                                key={`attr_number_${item.key}_${index}`}
+                                              >
+                                                {val}
+                                                {index <
+                                                  item.numberValues.length -
+                                                    1 && <hr />}
+                                              </span>
+                                            )
+                                          )}
+                                        </div>
+                                      )}
+                                      {/*Tags*/}
+                                      {item?.value !== undefined && (
+                                        <div className="-mr-2 p-1 text-sm font-normal max-h-24 overflow-auto">
+                                          {item.value}
+                                        </div>
+                                      )}
+                                      {item?.values !== undefined && (
+                                        <div className="-mr-2 rounded-lg border border-neutral-200 p-1 text-smaller font-normal max-h-24 overflow-auto">
+                                          {item.values.map(
+                                            (val: any, index: number) => (
+                                              <span
+                                                key={`tag_value_${item.key}_${index}`}
+                                              >
+                                                {val}
+                                                {index <
+                                                  item.values.length - 1 && (
+                                                  <hr className="my-0.5" />
+                                                )}
+                                              </span>
+                                            )
+                                          )}
+                                        </div>
+                                      )}
+                                    </dd>
+                                  </div>
+                                )}
+                              </span>
+                            ))}
+                        </div>
                       </dl>
                     )}
-                    <div className="mt-4 w-full flex justify-center">
-                      <button
-                        className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
-                        onClick={DownloadDocument}
-                      >
-                        <span className="">Download</span>
-                        <span className="w-7 pl-1 -mt-0.5">{Download()}</span>
-                      </button>
-                    </div>
+                    {currentDocument &&
+                      (InlineViewableContentTypes.indexOf(
+                        (currentDocument as IDocument).contentType
+                      ) > -1 ||
+                        TextFileEditorViewableContentTypes.indexOf(
+                          (currentDocument as IDocument).contentType
+                        ) > -1 ||
+                        (formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
+                          OnlyOfficeContentTypes.indexOf(
+                            (currentDocument as IDocument).contentType
+                          ) > -1) ||
+                        ((currentDocument as IDocument).deepLinkPath !==
+                          undefined &&
+                          ((currentDocument as IDocument).deepLinkPath
+                            ?.length ?? 0) > 0)) && (
+                        <div className="mt-2 w-full flex justify-center">
+                          <ButtonPrimaryGradient
+                            onClick={viewDocument}
+                            type="button"
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                          >
+                            <div className="w-full flex justify-center px-4 py-1">
+                              <span className="">View Document</span>
+                              <span className="w-7 pl-1">{View()}</span>
+                            </div>
+                          </ButtonPrimaryGradient>
+                        </div>
+                      )}
+                    {currentDocument &&
+                      (InlineEditableContentTypes.indexOf(
+                        (currentDocument as IDocument).contentType
+                      ) > -1 ||
+                        TextFileEditorEditableContentTypes.indexOf(
+                          (currentDocument as IDocument).contentType
+                        ) > -1) &&
+                      !isCurrentSiteReadonly && (
+                        <div className="mt-2 w-full flex justify-center">
+                          <ButtonPrimaryGradient
+                            onClick={editDocument}
+                            type="button"
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                          >
+                            <div className="w-full flex justify-center px-4 py-1">
+                              <span className="">Edit Document</span>
+                              <span className="w-7 pl-1">
+                                <Pencil />
+                              </span>
+                            </div>
+                          </ButtonPrimaryGradient>
+                        </div>
+                      )}
+
+                    {(!(currentDocument as IDocument).deepLinkPath ||
+                      ((currentDocument as IDocument).deepLinkPath?.length ??
+                        0) === 0) && (
+                      <div className="mt-2 w-full flex justify-center">
+                        <ButtonPrimaryGradient
+                          onClick={() => downloadDocument(infoDocumentId)}
+                          style={{
+                            height: '36px',
+                            width: '100%',
+                            margin: '0 16px',
+                          }}
+                        >
+                          <div className="w-full flex justify-center px-4 py-1">
+                            <span className="">Download</span>
+                            <span className="w-7 pl-1">{Download()}</span>
+                          </div>
+                        </ButtonPrimaryGradient>
+                      </div>
+                    )}
+                    {formkiqVersion.type !== 'core' &&
+                      (!(currentDocument as IDocument).deepLinkPath ||
+                        ((currentDocument as IDocument).deepLinkPath?.length ??
+                          0) === 0) && (
+                        <div className="mt-2 flex justify-center">
+                          <ButtonSecondary
+                            style={{
+                              height: '36px',
+                              width: '100%',
+                              margin: '0 16px',
+                            }}
+                            onClick={(event: any) => {
+                              const documentLine: ILine = {
+                                lineType: 'document',
+                                folder: '',
+                                documentId: infoDocumentId,
+                                documentInstance: currentDocument,
+                                folderInstance: null,
+                              };
+                              onDocumentWorkflowsModalClick(
+                                event,
+                                documentLine
+                              );
+                            }}
+                          >
+                            View
+                            {isCurrentSiteReadonly ? (
+                              <span>&nbsp;</span>
+                            ) : (
+                              <span>&nbsp;/ Assign&nbsp;</span>
+                            )}
+                            Workflows
+                          </ButtonSecondary>
+                        </div>
+                      )}
                   </div>
                   <div
                     className={
@@ -1341,7 +2303,7 @@ function Documents() {
                           <dd className="font-semibold text-sm">
                             Current version added
                             <div
-                              className="font-medium pt-1 ml-12 flex text-coreOrange-500 cursor-pointer"
+                              className="font-medium pt-1 ml-12 flex text-primary-500 cursor-pointer"
                               onClick={(event) => {
                                 viewDocumentVersion('');
                               }}
@@ -1373,8 +2335,9 @@ function Documents() {
                                       </span>
                                     )}
                                     <div
-                                      className="font-medium pt-1 ml-12 flex text-coreOrange-500 cursor-pointer"
+                                      className="font-medium pt-1 ml-12 flex text-primary-500 cursor-pointer"
                                       onClick={(event) => {
+                                        console.log(version.versionKey);
                                         viewDocumentVersion(version.versionKey);
                                       }}
                                     >
@@ -1390,9 +2353,9 @@ function Documents() {
                           )}
                       </dl>
                       <div className="mt-2 flex justify-center">
-                        <button
-                          className="bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
-                          onClick={(event) => {
+                        <ButtonPrimaryGradient
+                          style={{ height: '36px' }}
+                          onClick={(event: any) => {
                             const documentLine: ILine = {
                               lineType: 'document',
                               folder: '',
@@ -1404,16 +2367,168 @@ function Documents() {
                           }}
                         >
                           View
-                          {isSiteReadOnly ? (
+                          {isCurrentSiteReadonly ? (
                             <span>&nbsp;</span>
                           ) : (
                             <span>&nbsp;/ Edit&nbsp;</span>
                           )}
                           Versions
-                        </button>
+                        </ButtonPrimaryGradient>
                       </div>
                     </span>
                   </div>
+
+                  <div
+                    className={
+                      (infoDocumentView === 'actions' ? 'block ' : 'hidden ') +
+                      ' w-64 mr-12'
+                    }
+                  >
+                    <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
+                      {formkiqVersion.type !== 'core' &&
+                        (!(currentDocument as IDocument).deepLinkPath ||
+                          ((currentDocument as IDocument).deepLinkPath
+                            ?.length ?? 0) === 0) && (
+                          <ButtonSecondary
+                            className="text-sm h-9 w-full mb-2"
+                            onClick={(event: any) => {
+                              const documentLine: ILine = {
+                                lineType: 'document',
+                                folder: '',
+                                documentId: infoDocumentId,
+                                documentInstance: currentDocument,
+                                folderInstance: null,
+                              };
+                              onActionModalClick(event, documentLine);
+                            }}
+                          >
+                            Add Action
+                          </ButtonSecondary>
+                        )}
+                      {currentDocumentActions.length === 0 && (
+                        <div className="flex w-full justify-center italic text-smaller">
+                          (no actions exist for this document)
+                        </div>
+                      )}
+                      {currentDocumentActions.find(
+                        (action: any) =>
+                          action.status === 'FAILED' ||
+                          action.status === 'PENDING' ||
+                          action.status === 'FAILED_RETRY'
+                      ) && (
+                        <ButtonPrimaryGradient
+                          className="text-sm h-9 w-full mb-2"
+                          onClick={retryFailedActions}
+                        >
+                          <div className="flex gap-2 items-center justify-center">
+                            <span>Retry Failed Actions</span>
+                            <div className="w-5">
+                              <Retry />
+                            </div>
+                          </div>
+                        </ButtonPrimaryGradient>
+                      )}
+                      {currentDocumentActions.map((action: any, i: number) => (
+                        <div key={i} className="flex flex-col pb-3">
+                          <dt className="font-semibold text-sm">
+                            {action.type}
+                          </dt>
+                          <dd>
+                            <p
+                              className={`font-bold text-xs ${
+                                action.status === 'COMPLETE'
+                                  ? 'text-green-600'
+                                  : action.status === 'FAILED' ||
+                                    action.status === 'FAILED_RETRY'
+                                  ? 'text-red-600'
+                                  : action.status === 'SKIPPED'
+                                  ? 'text-neutral-600'
+                                  : 'text-yellow-600'
+                              }`}
+                            >
+                              {action.status.replace(/_/g, ' ')}
+                            </p>
+
+                            {action.message && (
+                              <p className="font-medium text-xs italic">
+                                {action.message}
+                              </p>
+                            )}
+                            {action.userId && (
+                              <p className="pl-2 text-sm text-neutral-600 font-medium">
+                                User:
+                                {action.userEmail ? (
+                                  <span className="pl-1">
+                                    {action.userEmail}
+                                  </span>
+                                ) : (
+                                  <span className="pl-1">
+                                    {action.userId.length <= 10 ? (
+                                      <>{action.userId}</>
+                                    ) : (
+                                      <span className="text-xs">
+                                        {action.userId}
+                                      </span>
+                                    )}
+                                  </span>
+                                )}
+                              </p>
+                            )}
+                            {action.queueId && (
+                              <Link
+                                to={`${siteDocumentsRootUri}/queues/${action.queueId}`}
+                                className="pl-2 text-sm text-neutral-600 text-neutral-600 font-medium "
+                              >
+                                Queue:{' '}
+                                <span className="text-primary-500 hover:text-primary-600">
+                                  {queues.find(
+                                    (queue: any) =>
+                                      queue.queueId === action.queueId
+                                  )?.name || action.queueId}
+                                </span>
+                              </Link>
+                            )}
+                            {action.workflowId && (
+                              <Link
+                                to={`${
+                                  siteDocumentsRootUri.includes('workspaces')
+                                    ? siteDocumentsRootUri
+                                    : ''
+                                }/workflows/designer?workflowId=${
+                                  action.workflowId
+                                }`}
+                                className="pl-2 text-sm text-neutral-600 font-medium inline-block"
+                              >
+                                Workflow:{' '}
+                                <span className="text-primary-500 hover:text-primary-600">
+                                  {workflows.find(
+                                    (workflow: any) =>
+                                      workflow.workflowId === action.workflowId
+                                  )?.name || action.workflowId}
+                                </span>
+                              </Link>
+                            )}
+                            {action.insertedDate && (
+                              <p className="pl-2 text-medsmall text-neutral-600 font-medium">
+                                Inserted: {formatDate(action.insertedDate)}
+                              </p>
+                            )}
+                            {action.startDate && (
+                              <p className="pl-2 text-medsmall text-neutral-600 font-medium">
+                                Start: {formatDate(action.startDate)}
+                              </p>
+                            )}
+                            {action.completedDate && (
+                              <p className="pl-2 text-medsmall text-neutral-600 font-medium">
+                                End: {formatDate(action.completedDate)}
+                              </p>
+                            )}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+
                   <div className="hidden overflow-x-auto relative">
                     <div className="-mr-[4.625rem] p-4 text-[0.8125rem] leading-6 text-slate-900">
                       <div className="flex gap-4 pb-10 border-t border-slate-400/20 justify-center items-center py-6">
@@ -1423,7 +2538,7 @@ function Documents() {
                             (currentDocument as IDocument).contentType
                           ) > -1 && (
                             <button
-                              className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                              className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
                               onClick={viewDocument}
                             >
                               <span className="">Edit</span>
@@ -1435,28 +2550,30 @@ function Documents() {
                             (currentDocument as IDocument).contentType
                           ) > -1 && (
                             <button
-                              className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                              className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
                               onClick={viewDocument}
                             >
                               <span className="">View</span>
                               <span className="pl-4 pt-0.5 w-9">{View()}</span>
                             </button>
                           )}
-                        <button
-                          className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md cursor-pointer"
-                          onClick={DownloadDocument}
+                        <ButtonPrimaryGradient
+                          onClick={() => downloadDocument(infoDocumentId)}
+                          style={{ height: '36px', width: '100%' }}
                         >
-                          <span className="">Download</span>
-                          <span className="w-7 pl-1">{Download()}</span>
-                        </button>
+                          <div className="w-full flex justify-center px-4 py-1">
+                            <span className="">Download</span>
+                            <span className="w-7 pl-1">{Download()}</span>
+                          </div>
+                        </ButtonPrimaryGradient>
                         {isCurrentDocumentSoftDeleted ? (
                           <button
-                            className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                            onClick={restoreDocument(
-                              currentDocument,
-                              currentSiteId,
-                              null
-                            )}
+                            className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                            onClick={() =>
+                              restoreDocument(
+                                (currentDocument as IDocument).documentId
+                              )
+                            }
                           >
                             <span className="">Restore</span>
                             <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
@@ -1467,11 +2584,13 @@ function Documents() {
                           <>
                             {useSoftDelete && (
                               <button
-                                className="w-38 flex bg-coreOrange-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                                onClick={onDeleteDocument(
-                                  currentDocument,
-                                  null
-                                )}
+                                className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
+                                onClick={() =>
+                                  onDeleteDocument(
+                                    (currentDocument as IDocument).documentId,
+                                    useSoftDelete
+                                  )
+                                }
                               >
                                 <span className="">Delete</span>
                                 <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
@@ -1491,19 +2610,8 @@ function Documents() {
                               documentInstance: currentDocument as IDocument,
                             }}
                             siteId={currentSiteId}
-                            isSiteReadOnly={isSiteReadOnly}
+                            isSiteReadOnly={isCurrentSiteReadonly}
                             formkiqVersion={formkiqVersion}
-                            onDeleteClick={deleteFolder(currentDocument)}
-                            onShareClick={onShareClick}
-                            onEditTagsAndMetadataModalClick={
-                              onEditTagsAndMetadataModalClick
-                            }
-                            onRenameModalClick={onRenameModalClick}
-                            onMoveModalClick={onMoveModalClick}
-                            onDocumentVersionsModalClick={
-                              onDocumentVersionsModalClick
-                            }
-                            onESignaturesModalClick={onESignaturesModalClick}
                             onInfoPage={true}
                             user={user}
                             useIndividualSharing={useIndividualSharing}
@@ -1524,64 +2632,30 @@ function Documents() {
           <></>
         )}
       </div>
-      <ShareModal
-        isOpened={isShareModalOpened}
-        onClose={onShareClose}
-        getValue={getShareModalValue}
-        value={shareModalValue}
-      />
-      <EditTagsAndMetadataModal
-        isOpened={isEditTagsAndMetadataModalOpened}
-        onClose={onEditTagsAndMetadataModalClose}
-        siteId={currentSiteId}
-        getValue={getEditTagsAndMetadataModalValue}
-        value={editTagsAndMetadataModalValue}
-        onTagChange={onTagChange}
-      />
-      <DocumentVersionsModal
-        isOpened={isDocumentVersionsModalOpened}
-        onClose={onDocumentVersionsModalClose}
-        onUploadClick={onUploadClick}
-        isUploadModalOpened={isUploadModalOpened}
-        siteId={currentSiteId}
-        isSiteReadOnly={isSiteReadOnly}
-        documentsRootUri={currentDocumentsRootUri}
-        value={documentVersionsModalValue}
-      />
-      <ESignaturesModal
-        isOpened={isESignaturesModalOpened}
-        onClose={onESignaturesModalClose}
-        siteId={currentSiteId}
-        value={eSignaturesModalValue}
-      />
       <NewModal
         isOpened={isNewModalOpened}
         onClose={onNewClose}
         siteId={currentSiteId}
         formkiqVersion={formkiqVersion}
         value={newModalValue}
-      />
-      <RenameModal
-        isOpened={isRenameModalOpened}
-        onClose={onRenameModalClose}
-        siteId={currentSiteId}
-        value={renameModalValue}
-      />
-      <MoveModal
-        isOpened={isMoveModalOpened}
-        onClose={onMoveModalClose}
-        siteId={currentSiteId}
-        value={moveModalValue}
-        allTags={allTags}
+        onDocumentDataChange={onDocumentDataChange}
       />
       <UploadModal
         isOpened={isUploadModalOpened}
         onClose={onUploadClose}
         siteId={currentSiteId}
         formkiqVersion={formkiqVersion}
-        folder={subfolderUri}
+        folder={dropFolderPath ? dropFolderPath : subfolderUri}
         documentId={uploadModalDocumentId}
         isFolderUpload={false}
+        onDocumentDataChange={onDocumentDataChange}
+        dropUploadDocuments={dropUploadDocuments}
+        resetDropUploadDocuments={resetDropUploadDocuments}
+        folderPath={
+          dropFolderPath
+            ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
+            : pathname
+        }
       />
       <UploadModal
         isOpened={isFolderUploadModalOpened}
@@ -1591,6 +2665,12 @@ function Documents() {
         folder={subfolderUri}
         documentId={folderUploadModalDocumentId}
         isFolderUpload={true}
+        onDocumentDataChange={onDocumentDataChange}
+        folderPath={
+          dropFolderPath
+            ? `${currentDocumentsRootUri}/folders/${dropFolderPath}`
+            : pathname
+        }
       />
     </>
   );

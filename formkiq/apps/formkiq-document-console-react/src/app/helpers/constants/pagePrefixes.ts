@@ -2,15 +2,16 @@ export const DocumentsAndFoldersPrefixes: string[] = [
   '/documents',
   '/my-documents',
   '/team-documents',
-  '/shared-folders'
-]
+  '/workspaces',
+];
 
 export const WorkflowsAndIntegrationsPrefixes: string[] = [
   '/workflows',
-  '/integrations'
-]
+  '/queues',
+  '/orchestrations',
+  '/rulesets',
+  '/schemas',
+  '/object-examine-tool',
+];
 
-export const AccountAndSettingsPrefixes: string[] = [
-  '/account',
-  '/settings'
-]
+export const AdminPrefixes: string[] = ['/admin'];

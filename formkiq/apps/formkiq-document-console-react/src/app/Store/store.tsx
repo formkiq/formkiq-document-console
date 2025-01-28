@@ -4,6 +4,8 @@ import thunkMiddleware from 'redux-thunk';
 import FormkiqClient from '../lib/formkiq-client-sdk-es6';
 import authMiddleware from './middleware/auth';
 import configMiddleware from './middleware/config';
+import attributesState from './reducers/attributes';
+import attributesDataState from './reducers/attributesData';
 import authState from './reducers/auth';
 import configState from './reducers/config';
 import dataCacheState from './reducers/data';
@@ -11,6 +13,15 @@ import documentListState from './reducers/documentsList';
 import globalConfirmControls from './reducers/globalConfirmControls';
 import globalNotificationControls from './reducers/globalNotificationControls';
 import globalProgressControls from './reducers/globalProgressControls';
+import queuesState from './reducers/queues';
+import rulesetsState from './reducers/rulesets';
+import schemasState from './reducers/schemas';
+import userManagementState from './reducers/userManagement';
+import workflowsState from './reducers/workflows';
+import userActivitiesState from './reducers/userActivities';
+import mappingsState from './reducers/mappings';
+import webhooksState from './reducers/webhooks';
+import apiKeysState from './reducers/apiKeys';
 
 export const store = configureStore({
   reducer: {
@@ -21,6 +32,17 @@ export const store = configureStore({
     globalConfirmControls,
     globalNotificationControls,
     globalProgressControls,
+    rulesetsState,
+    workflowsState,
+    schemasState,
+    queuesState,
+    attributesState,
+    userManagementState,
+    attributesDataState,
+    userActivitiesState,
+    mappingsState,
+    webhooksState,
+    apiKeysState,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -46,15 +68,19 @@ if (!formkiqClient.apiClient && user) {
   );
 }
 if (!formkiqClient.documentsApi?.apiClient?.cognitoClient?.idToken && user) {
-  formkiqClient.rebuildCognitoClient(
-    user?.email,
-    user?.idToken,
-    user?.accessToken,
-    user?.refreshToken,
-    user?.sites,
-    user?.defaultSiteId,
-    user?.currentSiteId
-  );
+  try {
+    formkiqClient.rebuildCognitoClient(
+      user?.email,
+      user?.idToken,
+      user?.accessToken,
+      user?.refreshToken,
+      user?.sites,
+      user?.defaultSiteId,
+      user?.currentSiteId
+    );
+  } catch (e: any) {
+    console.error('An error occurred building the cognito client.');
+  }
 }
 
 export type RootState = ReturnType<typeof store.getState>;

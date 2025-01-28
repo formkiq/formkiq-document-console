@@ -3,7 +3,7 @@ import { IDocument } from "../types/document"
 
 export enum storageKeys {
     auth = 'AUTH',
-    config = 'CONFIG'
+    config = 'CONFIG',
 }
 
 // Singleton class

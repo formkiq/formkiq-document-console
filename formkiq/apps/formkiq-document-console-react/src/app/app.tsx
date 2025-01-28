@@ -6,8 +6,10 @@ import {
   setAuthApi,
   setBrand,
   setClientId,
+  setCognitoSingleSignOnUrl,
   setCustomAuthorizerUrl,
   setDocumentApi,
+  setUseAuthApiForSignIn,
   setUserAuthenticationType,
   setUserPoolId,
 } from './Store/reducers/config';
@@ -39,8 +41,14 @@ export const App = () => {
       if (config.authApi) {
         dispatch(setAuthApi(config.authApi));
       }
+      if (config.useAuthApiForSignIn) {
+        dispatch(setUseAuthApiForSignIn(config.useAuthApiForSignIn));
+      }
       if (config.cognitoHostedUi) {
         dispatch(setCustomAuthorizerUrl(config.cognitoHostedUi));
+      }
+      if (config.cognitoSingleSignOnUrl) {
+        dispatch(setCognitoSingleSignOnUrl(config.cognitoSingleSignOnUrl));
       }
       if (config.brand) {
         dispatch(setBrand(config.brand));

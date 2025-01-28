@@ -1,7 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
@@ -11,8 +11,10 @@ import {
   Close,
   External,
   FolderSolid,
+  LinkIcon,
   Upload,
   Webhook,
+  Workflow,
 } from '../../Icons/icons';
 
 export default function NewModal({
@@ -21,12 +23,14 @@ export default function NewModal({
   siteId,
   formkiqVersion,
   value,
+  onDocumentDataChange,
 }: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
   formkiqVersion: any;
   value: ILine | null;
+  onDocumentDataChange: any;
 }) {
   const {
     register,
@@ -38,10 +42,20 @@ export default function NewModal({
   const newFormRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const pathname = decodeURI(useLocation().pathname);
   const [formActive, setFormActive] = useState(true);
   const [itemToCreate, setItemToCreate] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const itemsRequiringNameField = ['folder', 'docx', 'xlsx', 'pptx'];
+  const itemsRequiringNameField = [
+    'folder',
+    'docx',
+    'xlsx',
+    'pptx',
+    'md',
+    'deeplink',
+  ];
+  const itemsRequiringDeeplinkPathField = ['deeplink'];
 
   useEffect(() => {
     if (isOpened) {
@@ -49,11 +63,19 @@ export default function NewModal({
     }
   }, [isOpened]);
 
+  const removeActionEventParam = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete('actionEvent');
+    setSearchParams(params);
+  };
+
   const closeDialog = () => {
     setItemToCreate('');
     setFormActive(false);
     reset();
+    onDocumentDataChange();
     onClose();
+    removeActionEventParam();
   };
 
   const onNewFolderClick = (event: any, value: ILine | null) => {
@@ -72,6 +94,16 @@ export default function NewModal({
       }
     }
   };
+
+  const onNewDeeplinkDocumentClick = (event: any, value: ILine | null) => {
+    if (value) {
+      setItemToCreate('deeplink');
+      setTimeout(() => {
+        setFocus('name');
+      }, 50);
+    }
+  };
+
   const onNewDocumentClick = (event: any, extension: string) => {
     setItemToCreate(extension);
     setTimeout(() => {
@@ -83,6 +115,7 @@ export default function NewModal({
       if (itemToCreate.length) {
         const formData = new FormData(newFormRef.current);
         let nameValue: string | File | null = formData.get('name');
+        const deeplinkPath: string | File | null = formData.get('deeplinkPath');
         if (!nameValue || typeof nameValue === 'object' || !nameValue.length) {
           dispatch(
             openDialog({ dialogTitle: 'You must provide a name for the item' })
@@ -91,6 +124,26 @@ export default function NewModal({
           return;
         }
         // TODO: add file regex check
+        if (nameValue.indexOf('#') !== -1) {
+          nameValue = nameValue.replace(/#/g, '');
+        }
+
+        // check if adding deeplink document
+        if (itemToCreate === 'deeplink') {
+          if (
+            !deeplinkPath ||
+            typeof deeplinkPath === 'object' ||
+            !deeplinkPath.length
+          ) {
+            dispatch(
+              openDialog({
+                dialogTitle: 'You must provide a deeplink path for the item',
+              })
+            );
+            event.preventDefault();
+            return;
+          }
+        }
         // TODO: check if name exists in folder
         if (itemToCreate === 'folder') {
           DocumentsService.createFolder(value.folder, nameValue, siteId).then(
@@ -98,19 +151,84 @@ export default function NewModal({
               closeDialog();
             }
           );
+        } else if (itemToCreate === 'deeplink') {
+          const documentParamaters = {
+            path: value.folder
+              ? `${value.folder}/${nameValue}`
+              : `${nameValue}`,
+            contentType: 'text/html',
+            deepLinkPath: deeplinkPath,
+          };
+          DocumentsService.addDocument(siteId, documentParamaters).then(
+            (res) => {
+              if (res.status === 201) {
+                closeDialog();
+              } else {
+                if (res.errors) {
+                  dispatch(
+                    openDialog({
+                      dialogTitle:
+                        'Error.' +
+                        res.errors.map((err: any) => err.error).join(', \n'),
+                    })
+                  );
+                } else {
+                  dispatch(
+                    openDialog({
+                      dialogTitle: 'An error has occurred.',
+                    })
+                  );
+                }
+              }
+            }
+          );
         } else {
           if (nameValue.indexOf('.' + itemToCreate) === -1) {
             nameValue += '.' + itemToCreate;
           }
-          navigate(
-            '/documents/new/' +
-              itemToCreate +
-              '?path=' +
-              value.folder +
-              '/' +
-              nameValue
-          );
-          closeDialog();
+          if (itemToCreate === 'md') {
+            const documentParamaters = {
+              path: value.folder
+                ? `${value.folder}/${nameValue}`
+                : `${nameValue}`,
+              contentType: 'text/markdown',
+              content: ' ',
+            };
+            DocumentsService.addDocument(siteId, documentParamaters).then(
+              (res) => {
+                if (res.status === 201) {
+                  navigate(pathname + '/' + res.documentId + '/edit');
+                  closeDialog();
+                } else {
+                  if (res.errors) {
+                    dispatch(
+                      openDialog({
+                        dialogTitle:
+                          'Error.' +
+                          res.errors.map((err: any) => err.error).join(', \n'),
+                      })
+                    );
+                  } else {
+                    dispatch(
+                      openDialog({
+                        dialogTitle: 'An error has occurred.',
+                      })
+                    );
+                  }
+                }
+              }
+            );
+          } else {
+            navigate(
+              '/documents/new/' +
+                itemToCreate +
+                '?path=' +
+                value.folder +
+                '/' +
+                nameValue
+            );
+            closeDialog();
+          }
         }
       } else {
         dispatch(
@@ -197,7 +315,7 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <Upload />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Upload a New File
                       </div>
                     </div>
@@ -215,8 +333,25 @@ export default function NewModal({
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <Upload />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Upload a New Folder
+                      </div>
+                    </div>
+                    <div
+                      className={`${
+                        itemToCreate === 'deeplink-document'
+                          ? 'bg-gray-100 font-semibold border-gray-600'
+                          : 'cursor-pointer hover:bg-gray-100'
+                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                      onClick={(event) =>
+                        onNewDeeplinkDocumentClick(event, value)
+                      }
+                    >
+                      <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
+                        <LinkIcon />
+                      </div>
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
+                        Add a Deeplink Document
                       </div>
                     </div>
                     {formkiqVersion.modules?.indexOf('onlyoffice') > -1 && (
@@ -274,11 +409,49 @@ export default function NewModal({
                               alt="pptx icon"
                             />
                           </div>
-                          <div className="w-full tracking-tight text-sm text-center mb-2">
+                          <div className="w-full tracking-normal text-sm text-center mb-2">
                             MS PowerPoint Document
                           </div>
                         </div>
+                        <div
+                          className={`${
+                            itemToCreate === 'md'
+                              ? 'bg-gray-100 font-semibold border-gray-600'
+                              : 'cursor-pointer hover:bg-gray-100'
+                          } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                          onClick={(event) => onNewDocumentClick(event, 'md')}
+                        >
+                          <div className="w-full h-16 my-3 flex justify-center">
+                            <img
+                              src="/assets/img/svg/icon-md.svg"
+                              className="w-16"
+                              alt="md icon"
+                            />
+                          </div>
+                          <div className="w-full text-sm text-center mb-2">
+                            Markdown Document
+                          </div>
+                        </div>
                       </>
+                    )}
+                    {formkiqVersion.type !== 'core' && (
+                      <div
+                        className={`${
+                          itemToCreate === 'workflow'
+                            ? 'bg-gray-100 font-semibold border-gray-600'
+                            : 'cursor-pointer hover:bg-gray-100'
+                        } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                        onClick={(event) =>
+                          (window.location.href = '/orchestrations/workflows')
+                        }
+                      >
+                        <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
+                          <Workflow />
+                        </div>
+                        <div className="w-full tracking-normal text-sm text-center mb-2">
+                          Workflow
+                        </div>
+                      </div>
                     )}
                     <div
                       className={`${
@@ -287,13 +460,13 @@ export default function NewModal({
                           : 'cursor-pointer hover:bg-gray-100'
                       } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
                       onClick={(event) =>
-                        (window.location.href = '/integrations/webhooks')
+                        (window.location.href = '/orchestrations/webhooks')
                       }
                     >
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <Webhook />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Inbound Webhook (Receive Documents)
                       </div>
                     </div>
@@ -302,13 +475,13 @@ export default function NewModal({
                         itemToCreate === 'outbound-webhook'
                           ? 'bg-gray-100 font-semibold border-gray-600'
                           : 'cursor-pointer hover:bg-gray-100'
-                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2 hidden`}
                       onClick={(event) => (window.location.href = '/workflows')}
                     >
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <External />
                       </div>
-                      <div className="w-full tracking-tight text-sm text-center mb-2">
+                      <div className="w-full tracking-normal text-sm text-center mb-2">
                         Outbound Webhook (Workflow Action)
                       </div>
                     </div>
@@ -319,14 +492,14 @@ export default function NewModal({
                       ref={newFormRef}
                       onSubmit={(event) => onNewFormSubmit(event, value)}
                     >
-                      <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
+                      <div className="flex flex-wrap items-start relative w-full">
                         {value && (
-                          <div className="w-full mr-12 text-sm font-semibold pb-2">
+                          <h4 className="w-full text-lg font-bold mb-2 px-2 py-1 bg-gray-100">
                             Location: /
                             {value.folder && value.folder.length && (
                               <span>{value.folder}/</span>
                             )}
-                          </div>
+                          </h4>
                         )}
                         <div
                           className={
@@ -340,11 +513,38 @@ export default function NewModal({
                             type="text"
                             data-test-id="new-document-location-input"
                             className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600
-                                                    text-sm
+                                                    text-sm invalid:bg-red-200
                                                     placeholder-gray-500 text-gray-900 rounded-t-md
                                                     focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
                             placeholder="Name"
+                            pattern="[^#]*"
                             {...register('name', {
+                              required: true,
+                            })}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
+                        <div
+                          className={
+                            (itemsRequiringDeeplinkPathField.indexOf(
+                              itemToCreate
+                            ) > -1
+                              ? ''
+                              : 'hidden ') + ' w-full mr-12'
+                          }
+                        >
+                          <input
+                            aria-label="DeepLink Path"
+                            type="url"
+                            data-test-id="new-deeplink-path-input"
+                            className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600
+                                                    text-sm invalid:bg-red-200
+                                                    placeholder-gray-500 text-gray-900 rounded-t-md
+                                                    focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
+                            placeholder="DeepLink Path"
+                            pattern="https://.*"
+                            {...register('deeplinkPath', {
                               required: true,
                             })}
                           />
@@ -355,7 +555,7 @@ export default function NewModal({
                           data-test-id="new-document-modal-create"
                           type="submit"
                           value="Create"
-                          className="bg-coreOrange-500 hover:bg-coreOrange-600 text-white font-semibold py-2 px-4 rounded mr-2"
+                          className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded mr-2"
                         />
                         <button
                           onClick={closeDialog}

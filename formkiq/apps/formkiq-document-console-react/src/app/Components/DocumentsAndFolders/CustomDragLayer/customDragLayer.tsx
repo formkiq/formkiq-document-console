@@ -47,7 +47,7 @@ function CustomDragLayer() {
           >
             <span>
               <img
-                src={getFileIcon(item.path)}
+                src={getFileIcon(item.path, item.deepLinkPath)}
                 className="w-8 mr-2 inline-block"
                 alt="icon"
               />

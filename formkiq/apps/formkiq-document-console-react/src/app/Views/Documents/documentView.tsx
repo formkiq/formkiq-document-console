@@ -2,14 +2,21 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import TextFileEditor from '../../Components/DocumentsAndFolders/TextFileEditor/textFileEditor';
 import { Spinner } from '../../Components/Icons/icons';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
-import { setCurrentDocumentPath } from '../../Store/reducers/data';
+import {
+  setCurrentDocument,
+  setCurrentDocumentPath,
+} from '../../Store/reducers/data';
 import { useAppDispatch } from '../../Store/store';
 import {
+  InlineEditableContentTypes,
   InlineViewableContentTypes,
   OnlyOfficeContentTypes,
+  TextFileEditorEditableContentTypes,
+  TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
@@ -17,6 +24,10 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { IDocument } from '../../helpers/types/document';
+
+interface CSVRow {
+  [key: string]: string;
+}
 
 export function DocumentView() {
   const { id } = useParams();
@@ -29,9 +40,9 @@ export function DocumentView() {
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
-  const pathname = useLocation().pathname;
+  const pathname = decodeURI(useLocation().pathname);
   const {
     siteId,
     siteRedirectUrl,
@@ -42,8 +53,8 @@ export function DocumentView() {
     user,
     hasUserSite,
     hasDefaultSite,
-    hasSharedFolders,
-    sharedFolderSites
+    hasWorkspaces,
+    workspaceSites
   );
   if (siteRedirectUrl.length) {
     navigate(
@@ -61,6 +72,104 @@ export function DocumentView() {
   const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
     siteDocumentsRootName
   );
+  const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
+    useState<boolean>(true);
+
+  const [mode, setMode] = useState(getModeFromPath());
+  const isDocumentContentTypeEditable = (contentType: string) => {
+    return (
+      TextFileEditorEditableContentTypes.indexOf(contentType) > -1 ||
+      InlineEditableContentTypes.indexOf(contentType) > -1
+    );
+  };
+  function getModeFromPath() {
+    const mode = pathname.split('/').pop();
+    if (mode === 'view' || mode === 'edit') {
+      return mode;
+    } else {
+      return 'view';
+    }
+  }
+
+  const customParse = (csvText: string): CSVRow[] => {
+    const lines = csvText.split('\n').filter((line) => line.trim() !== '');
+    const headers = parseCSVLine(lines[0]);
+
+    return lines.slice(1).map((line) => {
+      const values = parseCSVLine(line);
+      const row: CSVRow = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index] || '';
+      });
+      return row;
+    });
+  };
+
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const handleTextContent = (content: string) => {
+    try {
+      // First try to decode base64 if it's base64 encoded
+      let decodedString;
+      try {
+        // Use TextDecoder to handle UTF-8 encoded base64 content
+        const decoded = atob(content);
+        const bytes = new Uint8Array(decoded.length);
+        for (let i = 0; i < decoded.length; i++) {
+          bytes[i] = decoded.charCodeAt(i);
+        }
+        decodedString = new TextDecoder('utf-8').decode(bytes);
+      } catch (e) {
+        // If not base64 or decoding fails, use the original content
+        decodedString = content;
+      }
+
+      // Try to decode HTML entities
+      const parser = new DOMParser();
+      let decodedContent =
+        parser.parseFromString(
+          `<!doctype html><body>${decodedString}`,
+          'text/html'
+        ).body.textContent || '';
+
+      // Remove BOM if present
+      decodedContent = decodedContent.replace(/^\uFEFF/, '');
+
+      // Handle specific character replacements
+      decodedContent = decodedContent
+        .replace(/Ã„/g, 'Ä')
+        .replace(/â€ž/g, '"')
+        .replace(/â€œ/g, '"');
+
+      return decodedContent;
+    } catch (error) {
+      console.error('Error processing text content:', error);
+      return content;
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -74,7 +183,16 @@ export function DocumentView() {
       DocumentsService.getDocumentById(id, currentSiteId).then(
         (response: IDocument) => {
           setDocument(response);
+          dispatch(setCurrentDocument(response));
           dispatch(setCurrentDocumentPath(response.path));
+          // redirect if file is not editable type
+          if (
+            !isDocumentContentTypeEditable(response.contentType) &&
+            mode === 'edit'
+          ) {
+            navigate(pathname.replace(/\/edit$/, '/view'));
+          }
+
           if (
             formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
             OnlyOfficeContentTypes.indexOf(
@@ -107,24 +225,113 @@ export function DocumentView() {
             if (versionKey && versionKey.length) {
               viewVersionKey = versionKey;
             }
+            // Check if it's a text file
+            const isTextFile = response.contentType.startsWith('text/');
+
+            if (isTextFile) {
+              DocumentsService.getDocumentContent(
+                currentSiteId,
+                id,
+                viewVersionKey,
+                true
+              ).then((contentResponse: any) => {
+                console.log('Raw text content:', contentResponse.content);
+
+                const processedContent = handleTextContent(
+                  contentResponse.content
+                );
+
+                // Create a Blob with UTF-8 encoding
+                const blob = new Blob([processedContent], {
+                  type: `${response.contentType};charset=utf-8`,
+                });
+                const url = URL.createObjectURL(blob);
+                setBlobUrl(url);
+                setDocumentContent(url);
+              });
+            } else {
+              DocumentsService.getDocumentUrl(
+                id,
+                currentSiteId,
+                viewVersionKey
+              ).then((urlResponse: any) => {
+                setDocumentContent(urlResponse.url);
+              });
+            }
+          } else if (
+            (response as IDocument).deepLinkPath &&
+            (response as IDocument).deepLinkPath.length
+          ) {
+            setDocumentContent((response as IDocument).deepLinkPath);
+          } else if ((response as IDocument).contentType === 'text/csv') {
+            let viewVersionKey = '';
+            if (versionKey && versionKey.length) {
+              viewVersionKey = versionKey;
+            }
+            DocumentsService.getDocumentContent(
+              currentSiteId,
+              id,
+              viewVersionKey
+            ).then((contentResponse: any) => {
+              try {
+                setDocumentCsvContent(customParse(contentResponse.content));
+              } catch (error: any) {
+                setDocumentCsvContent([]);
+              }
+            });
+          } else if (
+            TextFileEditorViewableContentTypes.indexOf(
+              (response as IDocument).contentType
+            ) > -1
+          ) {
+            let viewVersionKey = '';
+            if (versionKey && versionKey.length) {
+              viewVersionKey = versionKey;
+            }
+            DocumentsService.getDocumentContent(
+              currentSiteId,
+              id,
+              viewVersionKey,
+              true
+            ).then((res: any) => {
+              if (res.content) {
+                setDocumentContent(res.content);
+              }
+            });
+          } else {
+            let viewVersionKey = '';
+            if (versionKey && versionKey.length) {
+              viewVersionKey = versionKey;
+            }
             DocumentsService.getDocumentUrl(
               id,
               currentSiteId,
-              viewVersionKey
+              viewVersionKey,
+              false
             ).then((urlResponse: any) => {
-              setDocumentContent(urlResponse.url);
+              const a = window.document.createElement('a');
+              a.style.display = 'none';
+              a.href = urlResponse.url;
+              a.download = response.path.substring(
+                response.path.lastIndexOf('/') + 1
+              );
+              window.document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(urlResponse.url);
+              const url =
+                currentDocumentsRootUri +
+                '/folders/' +
+                (response as IDocument).path.substring(
+                  0,
+                  (response as IDocument).path.lastIndexOf('/')
+                ) +
+                '#id=' +
+                id;
+              setTimeout(() => {
+                navigate(url);
+              }, 200);
             });
-          } else {
-            const url =
-              currentDocumentsRootUri +
-              '/folders/' +
-              (response as IDocument).path.substring(
-                0,
-                (response as IDocument).path.lastIndexOf('/')
-              ) +
-              '#id=' +
-              id;
-            navigate(url);
           }
         }
       );
@@ -137,8 +344,8 @@ export function DocumentView() {
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
     if (recheckSiteInfo.siteRedirectUrl.length) {
       navigate(
@@ -153,23 +360,42 @@ export function DocumentView() {
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
-    // TODO: determine if readonly check required here
-    //setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly)
+    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
+    setMode(getModeFromPath());
+    // redirect if user doesn't have editing rights
+    if (recheckSiteInfo.isSiteReadOnly && getModeFromPath() === 'edit') {
+      navigate(pathname.replace(/\/edit$/, '/view'));
+    }
   }, [pathname]);
 
   const [document, setDocument]: [IDocument | null, any] = useState(null);
   const [ooConfig, setOOConfig]: [any | null, any] = useState(null);
   const [documentContent, setDocumentContent]: [string | null, any] =
     useState('');
+  const [documentCsvContent, setDocumentCsvContent] = useState<CSVRow[]>([]);
+
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  // Cleanup function for blob URLs
+  useEffect(() => {
+    return () => {
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [blobUrl]);
+
   const DocumentViewer = () => {
     //return (<></>)
     //return <DocViewer prefetchMethod="GET"  documents={documents} />
     return (
       <div className="w-full h-full">
         {document &&
-          InlineViewableContentTypes.indexOf(
+          (InlineViewableContentTypes.indexOf(
             (document as IDocument).contentType
-          ) > -1 && (
+          ) > -1 ||
+            ((document as IDocument).deepLinkPath &&
+              (document as IDocument).deepLinkPath.length > 0)) && (
             <>
               {documentContent && (
                 <iframe
@@ -179,6 +405,77 @@ export function DocumentView() {
                 />
               )}
             </>
+          )}
+
+        {/*CSV Viewer (currently only for text/csv files) */}
+        {document &&
+          (document as IDocument).contentType === 'text/csv' &&
+          documentCsvContent !== undefined && (
+            <>
+              {documentCsvContent.length > 0 && (
+                <div className="mt-5 h-[calc(100vh-120px)] overflow-auto shadow-md sm:rounded-lg">
+                  <div className="inline-block min-w-full align-middle">
+                    <div className="overflow-hidden">
+                      <table className="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-700">
+                        <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
+                          <tr>
+                            {Object.keys(documentCsvContent[0]).map(
+                              (header, index) => (
+                                <th
+                                  key={index}
+                                  scope="col"
+                                  className="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
+                                >
+                                  {header}
+                                </th>
+                              )
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                          {documentCsvContent.map((row, rowIndex) => (
+                            <tr
+                              key={rowIndex}
+                              className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              {Object.values(row).map((cell, cellIndex) => (
+                                <td
+                                  key={cellIndex}
+                                  className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                >
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+        {/*Text File Editor (currently only for 'text/markdown' files) */}
+        {document &&
+          TextFileEditorViewableContentTypes.indexOf(
+            (document as IDocument).contentType
+          ) > -1 &&
+          documentContent !== undefined && (
+            <TextFileEditor
+              currentDocument={document}
+              documentContent={documentContent}
+              contentType={(document as IDocument).contentType}
+              siteId={currentSiteId}
+              readOnly={
+                isCurrentSiteReadonly ||
+                TextFileEditorEditableContentTypes.indexOf(
+                  (document as IDocument).contentType
+                ) === -1 ||
+                mode === 'view'
+              }
+            />
           )}
       </div>
     );
@@ -192,15 +489,20 @@ export function DocumentView() {
       {document && (
         <div className="flex flex-col lg:flex-row">
           <div className="-mt-3 h-92/100h flex-1 bg-white inline-block">
-            {documentContent || ooConfig ? (
+            {documentContent !== undefined || ooConfig ? (
               <>
-                {documentContent && (
+                {documentContent !== undefined && (
                   <div className="w-full h-full">
                     <DocumentViewer />
                   </div>
                 )}
                 {ooConfig && (
-                  <div className="w-full h-full" id="onlyofficeContainer"></div>
+                  <div className="relative w-full h-full mt-3">
+                    <div
+                      className="w-full h-full"
+                      id="onlyofficeContainer"
+                    ></div>
+                  </div>
                 )}
               </>
             ) : (

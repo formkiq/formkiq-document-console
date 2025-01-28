@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { Mode } from 'vanilla-jsoneditor';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
 import { getFormInput } from '../../../helpers/services/toolService';
 import { ArrowBottom, ArrowRight } from '../../Icons/icons';
+import { JSONEditorReact } from '../../TextEditors/JsonEditor';
 
 function updateRequestsFromForm(
   state: any,
   setState: any,
   { apiItem, user, documentApi }: any,
-  formRef: any
+  formRef: any,
+  requestJsonContent: any,
+  setRequestJsonContent: any
 ) {
   let host = documentApi;
   if (host.substring(host.length - 1) === '/') {
@@ -17,6 +21,35 @@ function updateRequestsFromForm(
   }
   let path = apiItem.path;
   let postJson = '';
+
+  if (requestJsonContent.text) {
+    if (getFormInput(formRef, 'postJson') !== undefined) {
+      getFormInput(formRef, 'postJson').value = requestJsonContent.text;
+      setRequestJsonContent({ text: requestJsonContent.text });
+    }
+  } else if (requestJsonContent.json) {
+    if (getFormInput(formRef, 'postJson') !== undefined) {
+      getFormInput(formRef, 'postJson').value = JSON.stringify(
+        requestJsonContent.json
+      );
+      setRequestJsonContent({ json: requestJsonContent.json });
+    }
+  }
+
+  if (apiItem.requiresSite) {
+    if (
+      getFormInput(formRef, 'siteID')?.value &&
+      getFormInput(formRef, 'siteID')?.validity?.valid &&
+      getFormInput(formRef, 'siteID')?.value.length > 0
+    ) {
+      if (apiItem.path.indexOf(' SITE_ID ') > -1) {
+        path = path.replace(
+          ' SITE_ID ',
+          getFormInput(formRef, 'siteID')?.value
+        );
+      }
+    }
+  }
 
   if (apiItem.requiresDocumentID) {
     if (getFormInput(formRef, 'documentID')?.validity?.valid) {
@@ -47,11 +80,87 @@ function updateRequestsFromForm(
       );
     }
   }
+  if (apiItem.requiresShareKey) {
+    if (getFormInput(formRef, 'shareKey')?.validity?.valid) {
+      path = path.replace(
+        ' SHARE_KEY ',
+        getFormInput(formRef, 'shareKey')?.value
+      );
+    }
+  }
+  if (apiItem.requiresVersionKey) {
+    if (getFormInput(formRef, 'versionKey')?.validity?.valid) {
+      path = path.replace(
+        ' VERSION_KEY ',
+        getFormInput(formRef, 'versionKey')?.value
+      );
+    }
+  }
   if (apiItem.requiresWebhookID) {
     if (getFormInput(formRef, 'webhookID')?.validity?.valid) {
       path = path.replace(
         ' WEBHOOK_ID ',
         getFormInput(formRef, 'webhookID')?.value
+      );
+    }
+  }
+
+  if (apiItem.requiresRulesetID) {
+    if (getFormInput(formRef, 'rulesetID')?.validity?.valid) {
+      path = path.replace(
+        ' RULESET_ID ',
+        getFormInput(formRef, 'rulesetID')?.value
+      );
+    }
+  }
+
+  if (apiItem.requiresRuleID) {
+    if (getFormInput(formRef, 'ruleID')?.validity?.valid) {
+      path = path.replace(' RULE_ID ', getFormInput(formRef, 'ruleID')?.value);
+    }
+  }
+
+  if (apiItem.requiresWorkflowID) {
+    if (getFormInput(formRef, 'workflowID')?.validity?.valid) {
+      path = path.replace(
+        ' WORKFLOW_ID ',
+        getFormInput(formRef, 'workflowID')?.value
+      );
+    }
+  }
+
+  if (apiItem.requiresCaseID) {
+    if (getFormInput(formRef, 'caseID')?.validity?.valid) {
+      path = path.replace(
+        ' CASE_ID ',
+        getFormInput(formRef, 'caseID')?.value
+      );
+    }
+  }
+
+  if (apiItem.requiresTaskID) {
+    if (getFormInput(formRef, 'taskID')?.validity?.valid) {
+      path = path.replace(
+        ' TASK_ID ',
+        getFormInput(formRef, 'taskID')?.value
+      );
+    }
+  }
+
+  if (apiItem.requiresNigoID) {
+    if (getFormInput(formRef, 'nigoID')?.validity?.valid) {
+      path = path.replace(
+        ' NIGO_ID ',
+        getFormInput(formRef, 'nigoID')?.value
+      );
+    }
+  }
+
+  if (apiItem.requiresQueueId) {
+    if (getFormInput(formRef, 'queueId')?.validity?.valid) {
+      path = path.replace(
+        ' QUEUE_ID ',
+        getFormInput(formRef, 'queueId')?.value
       );
     }
   }
@@ -64,6 +173,74 @@ function updateRequestsFromForm(
       );
     }
   }
+
+  if (apiItem.requiresAttributeKey) {
+    if (getFormInput(formRef, 'attributeKey')?.validity?.valid) {
+      path = path.replace(
+        ' ATTRIBUTE_KEY ',
+        getFormInput(formRef, 'attributeKey')?.value
+      );
+    }
+  }
+
+  if (apiItem.requiresAttributeValue) {
+    if (getFormInput(formRef, 'attributeValue')?.validity?.valid) {
+      path = path.replace(
+        ' ATTRIBUTE_VALUE ',
+        getFormInput(formRef, 'attributeValue')?.value
+      );
+    }
+  }
+
+  if (apiItem.requiresGroupName) {
+    if (getFormInput(formRef, 'groupName')?.validity?.valid) {
+      path = path.replace(
+        ' GROUP_NAME ',
+        getFormInput(formRef, 'groupName')?.value
+      );
+    }
+  }
+  if (apiItem.requiresUsername) {
+    if (getFormInput(formRef, 'username')?.validity?.valid) {
+      path = path.replace(
+        ' USERNAME ',
+        getFormInput(formRef, 'username')?.value
+      );
+    }
+  }
+  if(apiItem.requiresUserOperation) {
+    if (getFormInput(formRef, 'userOperation')?.validity?.valid) {
+      path = path.replace(
+        ' USER_OPERATION ',
+        getFormInput(formRef, 'userOperation')?.value
+      );
+    }
+  }
+  if(apiItem.requiresClassificationID) {
+    if (getFormInput(formRef, 'classificationID')?.validity?.valid) {
+      path = path.replace(
+        ' CLASSIFICATION_ID ',
+        getFormInput(formRef, 'classificationID')?.value
+      );
+    }
+  }
+  if(apiItem.requiresMappingID) {
+    if (getFormInput(formRef, 'mappingID')?.validity?.valid) {
+      path = path.replace(
+        ' MAPPING_ID ',
+        getFormInput(formRef, 'mappingID')?.value
+      );
+    }
+  }
+  if(apiItem.requiresEnvelopeID) {
+    if (getFormInput(formRef, 'envelopeID')?.validity?.valid) {
+      path = path.replace(
+        ' ENVELOPE_ID ',
+        getFormInput(formRef, 'envelopeID')?.value
+      );
+    }
+  }
+
 
   let httpRequest = apiItem.method + ' ' + path;
   let curlRequest = '';
@@ -85,14 +262,35 @@ function updateRequestsFromForm(
       getFormInput(formRef, 'siteID')?.validity?.valid &&
       getFormInput(formRef, 'siteID')?.value.length > 0
     ) {
-      params.set('siteId', getFormInput(formRef, 'siteID')?.value);
+      if (apiItem.path.indexOf(' SITE_ID ') === -1) {
+        params.set('siteId', getFormInput(formRef, 'siteID')?.value);
+      }
     }
+    if (
+      getFormInput(formRef, 'shareKey')?.value &&
+      getFormInput(formRef, 'shareKey')?.validity?.valid &&
+      getFormInput(formRef, 'shareKey')?.value.length > 0
+    ) {
+      params.set('shareKey', getFormInput(formRef, 'shareKey')?.value);
+    }
+    // NOTE: we want this to be ignored for DELETE documents/{id}/versions/{versionKey}
     if (
       getFormInput(formRef, 'versionKey')?.value &&
       getFormInput(formRef, 'versionKey')?.validity?.valid &&
-      getFormInput(formRef, 'versionKey')?.value.length > 0
+      getFormInput(formRef, 'versionKey')?.value.length > 0 &&
+      apiItem.method !== 'DELETE'
     ) {
       params.set('versionKey', getFormInput(formRef, 'versionKey')?.value);
+    }
+    if (
+      getFormInput(formRef, 'indexKey')?.value &&
+      getFormInput(formRef, 'indexKey')?.validity?.valid &&
+      getFormInput(formRef, 'indexKey')?.value.length > 0
+    ) {
+      params.set(
+        'indexKey',
+        encodeURIComponent(getFormInput(formRef, 'indexKey')?.value)
+      );
     }
     if (
       getFormInput(formRef, 'duration')?.value &&
@@ -193,6 +391,13 @@ function updateRequestsFromForm(
       params.set('siteId', getFormInput(formRef, 'siteID')?.value);
     }
     if (
+      getFormInput(formRef, 'shareKey')?.value &&
+      getFormInput(formRef, 'shareKey')?.validity?.valid &&
+      getFormInput(formRef, 'shareKey')?.value.length > 0
+    ) {
+      params.set('shareKey', getFormInput(formRef, 'shareKey')?.value);
+    }
+    if (
       getFormInput(formRef, 'duration')?.value &&
       getFormInput(formRef, 'duration')?.validity?.valid &&
       getFormInput(formRef, 'duration')?.value.length > 0
@@ -220,6 +425,14 @@ function updateRequestsFromForm(
     ) {
       params.set('next', getFormInput(formRef, 'next')?.value);
     }
+
+    if (
+      getFormInput(formRef, 'webSocket')?.value &&
+      getFormInput(formRef, 'webSocket')?.validity?.valid
+    ) {
+      params.set('ws', getFormInput(formRef, 'webSocket')?.checked);
+    }
+
     if (getFormInput(formRef, 'postJson')?.validity?.valid) {
       postJson = getFormInput(formRef, 'postJson')?.value;
     } else if (apiItem.requiresIndexType) {
@@ -348,9 +561,9 @@ function updateRequestsFromForm(
   httpRequest += ' HTTP/1.1\nHost: ' + host.replace(/(^\w+:|^)\/\//, '');
   curlRequest += '-H ';
   if (apiItem.requiresAuthentication) {
-    httpRequest += '\r\nAuthorization: ' + user.idToken;
-    curlRequest += '"Authorization: ' + user.idToken + '" ';
-    fetchHeaders.Authorization = user.idToken;
+    httpRequest += '\r\nAuthorization: ' + user.accessToken;
+    curlRequest += '"Authorization: ' + user.accessToken + '" ';
+    fetchHeaders.Authorization = user.accessToken;
   }
   if (postJson.length > 0) {
     fetchBody = postJson;
@@ -389,13 +602,31 @@ function itemHeader(isOpened: boolean, setOpened: any, apiItem: any) {
         onClick={onHeaderClick}
         className={
           (isOpened
-            ? 'text-coreOrange-500 text-lg '
-            : 'text-gray-900 hover:text-coreOrange-500 text-base ') +
-          ' ml-2 tracking-tight leading-10 font-bold cursor-pointer'
+            ? 'text-primary-500 text-lg '
+            : 'text-gray-900 hover:text-primary-500 text-base ') +
+          ' ml-2 tracking-normal leading-10 font-bold cursor-pointer'
         }
       >
         <span>{apiItem.method} </span>
         <span>{apiItem.path}</span>
+        {apiItem.showDeprecationMessage && (
+          <span className="text-red-500">(deprecated)</span>
+        )}
+        {apiItem.license === 'Core' && (
+          <span className="mx-2 p-1 bg-primary-500 text-white uppercase text-xs">
+            {apiItem.license}
+          </span>
+        )}
+        {apiItem.license === 'Pro|Enterprise' && (
+          <>
+            <span className="ml-2 mr-1 p-1 bg-proTeal-500 text-white uppercase text-xs">
+              Pro
+            </span>
+            <span className="ml-1 mr-2 p-1 bg-enterpriseBlue-500 text-white uppercase text-xs">
+              Enterprise
+            </span>
+          </>
+        )}
         {!isOpened ? <ArrowRight /> : <ArrowBottom />}
       </h4>
     </div>
@@ -422,13 +653,68 @@ function updateFormValidity(state: any, setState: any, formRef: any) {
     isValidForm: res,
   });
 }
-function getApiItem(props: any, state: any, setState: any, formRef: any) {
+
+function getApiItem(
+  props: any,
+  state: any,
+  setState: any,
+  formRef: any,
+  requestJsonContent: any,
+  setRequestJsonContent: any,
+  requestEditorMode: any,
+  setRequestEditorMode: any,
+  responseEditorMode: any,
+  setResponseEditorMode: any
+) {
   const { apiItem, sites } = props;
   const onFormChange = (ev: any) => {
-    updateRequestsFromForm(state, setState, props, formRef);
+    updateRequestsFromForm(
+      state,
+      setState,
+      props,
+      formRef,
+      requestJsonContent,
+      setRequestJsonContent
+    );
   };
   const onTabClick = (tab: string) => () => {
     setState({ ...state, currentRequestTab: tab });
+  };
+
+  const handleJsonChange = (value: any) => {
+    if (value.text) {
+      if (getFormInput(formRef, 'postJson') !== undefined) {
+        getFormInput(formRef, 'postJson').value = value.text;
+        updateRequestsFromForm(
+          state,
+          setState,
+          props,
+          formRef,
+          value,
+          setRequestJsonContent
+        );
+      }
+    } else if (value.json) {
+      if (getFormInput(formRef, 'postJson') !== undefined) {
+        getFormInput(formRef, 'postJson').value = JSON.stringify(value.json);
+        updateRequestsFromForm(
+          state,
+          setState,
+          props,
+          formRef,
+          value,
+          setRequestJsonContent
+        );
+      }
+    }
+  };
+
+  const handleRequestEditorModeChange = (value: any) => {
+    setRequestEditorMode(value);
+  };
+
+  const handleResponseEditorModeChange = (value: any) => {
+    setResponseEditorMode(value);
   };
 
   const renderResponseStatusClasses = (responseStatus: number) => {
@@ -499,8 +785,19 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
   return (
     <div className="flex flex-col">
       {apiItem.description && apiItem.description.length && (
-        <div className="ml-2 w-2/3 font-bold text-lg text-coreOrange-500 mb-4">
+        <div className="ml-2 w-2/3 font-bold text-lg text-primary-500 mb-4">
           <h3>{apiItem.description}</h3>
+          {apiItem.showDeprecationMessage && (
+            <>
+              <h4 className="mt-2 text-base font-extrabold text-red-500">
+                {apiItem.deprecationMessage.length ? (
+                  <span>{apiItem.deprecationMessage}</span>
+                ) : (
+                  <span>Deprecated.</span>
+                )}
+              </h4>
+            </>
+          )}
         </div>
       )}
       <ul className="mt-4 md:grid md:grid-cols-2 md:col-gap-4 md:row-gap-4">
@@ -509,7 +806,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
             {apiItem.requiresSite && (
               <>
                 <div>
-                  <h6 className="w-full ml-4 my-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                  <h6 className="w-full ml-4 my-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     Site
                   </h6>
                 </div>
@@ -541,7 +838,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
             {apiItem.requiresAuthentication && (
               <>
                 <div>
-                  <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                  <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     Authentication
                   </h6>
                 </div>
@@ -565,9 +862,51 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
             )}
             {!apiItem.hasNoParams && (
               <div>
-                <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                <h6 className="w-full ml-4 mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                   Parameters
                 </h6>
+              </div>
+            )}
+            {apiItem.requiresShareKey && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Share Key
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Share Key"
+                    name="shareKey"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                        placeholder-gray-500 text-gray-900 rounded-t-md
+                        focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.allowsShareKey && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Share Key
+                    <small className="block">
+                      Provides access within the specified site via a share
+                    </small>
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Share Key"
+                    name="shareKey"
+                    type="text"
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                        placeholder-gray-500 text-gray-900 rounded-t-md
+                        focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
               </div>
             )}
             {apiItem.requiresDocumentID && (
@@ -612,17 +951,162 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
               </div>
             )}
 
-            {apiItem.requiresTagSchemaID && (
+            {apiItem.requiresWorkflowID && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    Tag Schema ID
+                    Workflow ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Workflow ID"
+                    name="workflowID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresCaseID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Case ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Case ID"
+                    name="caseID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresTaskID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Task ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Task ID"
+                    name="taskID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresNigoID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    NIGO ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="NIGO ID"
+                    name="nigoID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresQueueId && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Queue ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Queue ID"
+                    name="queueId"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresClassificationID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Classification ID
                   </label>
                 </div>
                 <div className="w-full md:w-3/4">
                   <input
                     aria-label="Tag Schema ID"
-                    name="tagSchemaID"
+                    name="classificationID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresMappingID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Mapping ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Mapping ID"
+                    name="mappingID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresEnvelopeID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Envelope ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Envelope ID"
+                    name="envelopeID"
                     type="text"
                     required
                     className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
@@ -695,6 +1179,25 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 </div>
               </div>
             )}
+            {apiItem.allowsIndexKey && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Index Key
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Index Key"
+                    name="indexKey"
+                    type="text"
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                        placeholder-gray-500 text-gray-900 rounded-t-md
+                        focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
 
             {apiItem.requiresVersionKey && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
@@ -738,18 +1241,24 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
             )}
 
             {apiItem.requiresPostJson && (
-              <div className="md:flex md:items-center mx-4 mb-4 relative">
-                <div className="w-full md:w-1/4">
-                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    JSON to POST
+              <div className="flex flex-wrap items-center justify-start ml-4 mb-4 relative">
+                <div className="w-full">
+                  <label className="block w-full mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
+                    JSON to POST/PATCH
                   </label>
                 </div>
-                <div className="w-full md:w-3/4">
+                <div className="w-full">
+                  <JSONEditorReact
+                    content={requestJsonContent}
+                    mode={requestEditorMode}
+                    onChange={handleJsonChange}
+                    onChangeMode={handleRequestEditorModeChange}
+                  />
                   <textarea
-                    aria-label="JSON to POST"
+                    aria-label="JSON to POST/PATCH"
                     name="postJson"
                     defaultValue={apiItem.defaultPostJsonValue}
-                    className="appearance-none font-mono rounded-md relative block w-full h-72 px-3 py-3 border border-gray-600
+                    className="hidden appearance-none font-mono rounded-md relative block w-full h-72 px-3 py-3 border border-gray-600
                         placeholder-gray-500 text-gray-900 rounded-t-md
                         focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
                   ></textarea>
@@ -1212,7 +1721,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
               </div>
             )}
 
-            {apiItem.hasPagingTokens && (
+            {(apiItem.hasPagingTokens || apiItem.hasOnlyNextPagingToken) && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
@@ -1258,12 +1767,194 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 </div>
               </div>
             )}
+
+            {apiItem.requiresObjectID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    OBJECT ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="OBJECT ID"
+                    name="objectID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresRulesetID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Ruleset ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Ruleset ID"
+                    name="rulesetID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+            placeholder-gray-500 text-gray-900 rounded-t-md
+            focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresRuleID && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Rule ID
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Rule ID"
+                    name="ruleID"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+            placeholder-gray-500 text-gray-900 rounded-t-md
+            focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresAttributeKey && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    ATTRIBUTE KEY
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="ATTRIBUTE KEY"
+                    name="attributeKey"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresAttributeValue && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    ATTRIBUTE VALUE
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="ATTRIBUTE VALUE"
+                    name="attributeValue"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresGroupName && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    GROUP NAME
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="GROUP NAME"
+                    name="groupName"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresUsername && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    USERNAME
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="USERNAME"
+                    name="username"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresUserOperation && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    USER OPERATION
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="USER OPERATION"
+                    name="userOperation"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresWS && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full">
+                  <label className="block text-gray-500 font-bold mb-1 md:mb-0 pr-4">
+                    Enable WebSocket real-time communication with the request
+                  </label>
+                </div>
+                <input
+                  aria-label="WEB SOCKET"
+                  name="webSocket"
+                  type="checkbox"
+                  className="appearance-none rounded-md relative block px-3 py-3 border border-gray-600
+                      placeholder-gray-500 text-gray-900 rounded-t-md
+                      focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                />
+              </div>
+            )}
           </form>
         </li>
         <li className="relative mt-10 sm:mt-2 md:mt-0">
           <div className="flex flex-rows w-full">
             <div className="grow-0">
-              <h6 className="ml-4 mr-4 mb-4 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+              <h6 className="ml-4 mr-4 mb-4 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                 Request
               </h6>
             </div>
@@ -1275,7 +1966,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 <li className="-mb-px mr-1">
                   <a
                     data-test-id="apiItem-HTTP"
-                    className={`inline-block cursor-pointer border-l border-t border-r rounded-t py-2 px-4 text-blue-dark font-semibold 
+                    className={`inline-block cursor-pointer border-l border-t border-r rounded-t py-2 px-4 text-blue-dark font-semibold
                       ${
                         state.currentRequestTab === 'http'
                           ? 'font-bold text-red-600 cursor-text'
@@ -1289,7 +1980,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 <li className="-mb-px mr-1">
                   <a
                     data-test-id="apiItem-cURL"
-                    className={`inline-block cursor-pointer border-l border-t border-r rounded-t py-2 px-4 text-blue-dark font-semibold 
+                    className={`inline-block cursor-pointer border-l border-t border-r rounded-t py-2 px-4 text-blue-dark font-semibold
                       ${
                         state.currentRequestTab === 'curl'
                           ? 'font-bold text-red-600 cursor-text'
@@ -1307,7 +1998,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 rows={8}
                 readOnly={true}
                 value={state.httpRequest}
-                className={`appearance-none rounded-md text-base relative block w-full px-3 py-3 border border-gray-600
+                className={`appearance-none rounded-md text-sm relative block w-full px-3 py-3 border border-gray-600
                       font-mono placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 ${
                         state.currentRequestTab === 'curl' ? 'hidden' : ''
@@ -1320,7 +2011,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                 rows={8}
                 readOnly={true}
                 value={state.curlRequest}
-                className={`appearance-none rounded-md text-base relative block w-full px-3 py-3 border border-gray-600
+                className={`appearance-none rounded-md text-sm relative block w-full px-3 py-3 border border-gray-600
                       font-mono placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 ${
                         state.currentRequestTab === 'http' ? 'hidden' : ''
@@ -1331,10 +2022,10 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
           <div className="ml-4">
             <button
               data-test-id="apiItem-fetch"
-              className={`px-2 md:px-4 font-semibold px-4 py-1 rounded-2xl
+              className={`px-2 md:px-4 font-semibold px-4 py-1 rounded-md
                   ${
                     state.isValidForm
-                      ? 'cursor-pointer bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white'
+                      ? 'cursor-pointer bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white'
                       : 'cursor-default bg-gray-200 text-gray-400'
                   }`}
               onClick={onFetchClick(state)}
@@ -1366,9 +2057,20 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
               )}
               {state.responseData && (
                 <div>
-                  <h6 className="mr-4 mt-4 mb-2 md:mb-4 text-base tracking-tight leading-10 font-bold text-gray-900 sm:leading-none">
+                  <h6 className="mr-4 mt-4 mb-2 md:mb-4 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
                     Response
                   </h6>
+                  <div className="h-72 mb-[-56px]">
+                    <JSONEditorReact
+                      content={{
+                        json: JSON.parse(state.responseData),
+                        text: undefined,
+                      }}
+                      mode={responseEditorMode}
+                      onChangeMode={handleResponseEditorModeChange}
+                      readOnly={true}
+                    />
+                  </div>
                   <textarea
                     aria-label="Response"
                     data-test-id="apiItem-response-data"
@@ -1376,7 +2078,7 @@ function getApiItem(props: any, state: any, setState: any, formRef: any) {
                     rows={8}
                     readOnly={true}
                     value={state.responseData}
-                    className={`appearance-none rounded-md text-small text-mono relative block w-full px-3 py-3 border border-gray-600
+                    className={`hidden appearance-none rounded-md text-small text-mono relative block w-full px-3 py-3 border border-gray-600
                         font-mono placeholder-gray-500 text-gray-900 rounded-t-md
                         focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10 ${
                           state.isErrorResponse ? 'bg-red-200' : ''
@@ -1406,13 +2108,40 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     isValidForm: false,
   });
   const formRef = useRef(null);
+  let formattedJson = '';
+  if (
+    props.apiItem.defaultPostJsonValue &&
+    props.apiItem.defaultPostJsonValue.length
+  ) {
+    let jsonObject;
+    try {
+      jsonObject = JSON.parse(props.apiItem.defaultPostJsonValue);
+    } catch (e: any) {
+      console.log('invalid JSON object');
+    }
+    if (jsonObject) {
+      formattedJson = JSON.stringify(jsonObject, null, 2);
+    } else {
+      formattedJson = props.apiItem.defaultPostJsonValue;
+    }
+  }
+
+  const [requestJsonContent, setRequestJsonContent] = useState({
+    text: formattedJson,
+    json: undefined,
+  });
+
+  const [requestEditorMode, setRequestEditorMode] = useState(Mode.text);
+  const [responseEditorMode, setResponseEditorMode] = useState(Mode.text);
   useEffect(() => {
     if (formRef?.current) {
       updateRequestsFromForm(
         state,
         setState,
         { ...props, user, documentApi },
-        formRef
+        formRef,
+        requestJsonContent,
+        setRequestJsonContent
       );
     }
   }, []);
@@ -1425,7 +2154,22 @@ export function ApiItem(props: { apiItem: any; sites: any[] }) {
     >
       {itemHeader(isOpened, setOpened, props.apiItem)}
       <div className={`${isOpened ? '' : 'hidden'} border-b mb-2`}>
-        {getApiItem({ documentApi, user, ...props }, state, setState, formRef)}
+        {getApiItem(
+          {
+            documentApi,
+            user,
+            ...props,
+          },
+          state,
+          setState,
+          formRef,
+          requestJsonContent,
+          setRequestJsonContent,
+          requestEditorMode,
+          setRequestEditorMode,
+          responseEditorMode,
+          setResponseEditorMode
+        )}
       </div>
     </div>
   );

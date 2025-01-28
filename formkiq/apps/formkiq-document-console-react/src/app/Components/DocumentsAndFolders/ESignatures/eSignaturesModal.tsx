@@ -15,8 +15,10 @@ import {
   SignatureTab,
   Spinner,
 } from '../../Icons/icons';
-import ESignatureConfigModal from './eSignatureConfigModal';
 import ESignatureRecipient from './eSignatureRecipient';
+import {useSelector} from "react-redux";
+import {AuthState} from "../../../Store/reducers/auth";
+import {Link, useNavigate} from "react-router-dom";
 
 export default function ESignaturesModal({
   isOpened,
@@ -29,6 +31,8 @@ export default function ESignaturesModal({
   siteId: string;
   value: ILine | null;
 }) {
+  const { user } = useSelector(AuthState);
+  const navigate = useNavigate();
   const [document, setDocument] = useState(null);
   const [recipientFormValues, setRecipientFormValues] = useState([
     { name: '', email: '', type: 'signer' },
@@ -43,18 +47,13 @@ export default function ESignaturesModal({
   } = useForm();
   const cancelButtonRef = useRef(null);
   const sendForESignatureFormRef = useRef(null);
-  const [isConfigModalOpened, setIsConfigModalOpened] = useState(false);
   const [isESignatureLoading, setIsESignatureLoading] = useState(false);
-  const onConfigModalClose = () => {
-    setIsConfigModalOpened(false);
-  };
   const [recipientsExpanded, setRecipientsExpanded] = useState(true);
+  const [isESignatureConfigured, setIsESignatureConfigured] = useState(false);
   const toggleRecipientsExpand = () => {
     setRecipientsExpanded(!recipientsExpanded);
   };
-  const toggleESignatureConfig = () => {
-    setIsConfigModalOpened(!isConfigModalOpened);
-  };
+
   const dispatch = useAppDispatch();
   const closeDialog = () => {
     reset();
@@ -70,15 +69,18 @@ export default function ESignaturesModal({
   useEffect(() => {
     if (value) {
       setIsESignatureLoading(true);
-      DocumentsService.getESignatureConfig(siteId).then((response) => {
-        if (!response.configured) {
-          setIsConfigModalOpened(true);
+      // DocumentsService.getESignatureConfig(siteId).then((response) => {
+      DocumentsService.getConfiguration(siteId).then((response: any) => {
+        if (!response.docusign) {
+          setIsESignatureLoading(false);
+          setIsESignatureConfigured(false);
         } else {
           DocumentsService.getDocumentById(
             (value as ILine).documentId,
             siteId
           ).then((response: any) => {
             setIsESignatureLoading(false);
+            setIsESignatureConfigured(true);
             let filename = response.path;
             if (filename.lastIndexOf('/') > -1) {
               filename = filename.substring(filename.lastIndexOf('/') + 1);
@@ -93,7 +95,7 @@ export default function ESignaturesModal({
         }
       });
     }
-  }, [value, isConfigModalOpened]);
+  }, [value]);
 
   const handleRecipientChange = (i: any, e: any) => {
     const newRecipientFormValues: any = [...recipientFormValues];
@@ -226,6 +228,11 @@ export default function ESignaturesModal({
     }
   };
 
+  function redirectToSettings() {
+    navigate('/admin/settings');
+    closeDialog();
+  }
+
   return (
     <>
       <Transition.Root show={isOpened} as={Fragment}>
@@ -262,7 +269,7 @@ export default function ESignaturesModal({
                   <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                     <div className="flex w-full items-center">
                       <div className="font-semibold grow text-lg inline-block pr-6">
-                        <span className="text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
                           Document eSignature
                         </span>
                         {document && (
@@ -279,6 +286,29 @@ export default function ESignaturesModal({
                       </div>
                     </div>
                     {isESignatureLoading && <Spinner />}
+                    {!isESignatureLoading && !isESignatureConfigured && (
+                      <>
+                        <h2 className="text-center text-base">
+                          ESignature is not configured.
+                        </h2>
+                        {user?.isAdmin ? (
+                          <h2 className="text-center text-base">
+                            Please configure it in the{' '}
+                            <button
+                              onClick={redirectToSettings}
+                              className="text-primary-500 hover:text-primary-600"
+                            >
+                              Settings{' '}
+                            </button>
+                            page
+                          </h2>
+                        ) : (
+                          <h2 className="text-center text-base">
+                            Please contact your administrator.
+                          </h2>
+                        )}
+                      </>
+                    )}
                     {document && !isFormProcessing && (
                       <div className="mt-6">
                         <form
@@ -382,7 +412,7 @@ export default function ESignaturesModal({
                             </button>
                             <button
                               type="submit"
-                              className="w-64 flex justify-center mr-2 bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
+                              className="w-64 flex justify-center mr-2 bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-8 rounded-2xl flex cursor-pointer focus:outline-none"
                             >
                               <span>Send for Signature</span>
                               <div className="w-4 h-4 ml-2 mt-1">
@@ -390,9 +420,8 @@ export default function ESignaturesModal({
                               </div>
                             </button>
                             <button
-                              type="button"
+                              onClick={redirectToSettings}
                               className="w-48 flex justify-center mr-2 bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
-                              onClick={toggleESignatureConfig}
                             >
                               <span>Reconfigure</span>
                               <div className="w-4 h-4 ml-2 mt-1">
@@ -433,12 +462,6 @@ export default function ESignaturesModal({
           </div>
         </Dialog>
       </Transition.Root>
-      <ESignatureConfigModal
-        isOpened={isConfigModalOpened}
-        onClose={onConfigModalClose}
-        closeOpener={closeDialog}
-        siteId={siteId}
-      />
     </>
   );
 }

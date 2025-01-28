@@ -9,7 +9,7 @@ test.beforeEach(async ({ LoginPage }) => {
 test('can navigate to the api explorer', async ({ page, ApiExplorer }) => {
   await ApiExplorer.openPage();
 
-  await page.waitForURL('/integrations/api');
+  await page.waitForURL('/orchestrations/api');
 });
 
 test('can fetch documents with default parameters', async ({
@@ -17,6 +17,7 @@ test('can fetch documents with default parameters', async ({
   ApiExplorer,
 }) => {
   await ApiExplorer.openPage();
+  await ApiExplorer.openDocuments();
 
   const apiItem = new ApiItem(page, 'GET/', 'documents');
 
@@ -34,6 +35,7 @@ test('can curl documents with default parameters', async ({
   ApiExplorer,
 }) => {
   await ApiExplorer.openPage();
+  await ApiExplorer.openDocuments();
 
   const apiItem = new ApiItem(page, 'GET/', 'documents');
   await apiItem.open();
@@ -54,6 +56,7 @@ test('can http post documents with default parameters', async ({
   ApiExplorer,
 }) => {
   await ApiExplorer.openPage();
+  await ApiExplorer.openDocuments();
 
   const apiItem = new ApiItem(page, 'POST/', 'documents');
 

@@ -1,54 +1,45 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
+import {IDocument} from "../../helpers/types/document";
 
 export interface DataCache {
-  tagsLastRefreshed: Date;
-  allTags: any[];
-  tagsSiteId: string;
   formkiqClient: any;
   currentDocumentPath: string;
+  currentDocument: IDocument|null;
 }
 
 const initialState = {
-  tagsLastRefreshed: new Date(),
-  allTags: [] as any,
-  tagsSiteId: 'default',
   formkiqClient: {},
   currentDocumentPath: '',
+  currentDocument: null
 } as DataCache;
 
 export const dataCacheSlice = createSlice({
   name: 'dataCache',
   initialState,
   reducers: {
-    setAllTags(state, action: any) {
-      const { tagsLastRefreshed, allTags, tagsSiteId } = action.payload;
-      const refreshed = tagsLastRefreshed;
-      const newSiteId = tagsSiteId;
-      const tags = [...allTags];
-      return {
-        ...state,
-        allTags: tags,
-        tagsLastRefreshed: refreshed,
-        tagsSiteId: newSiteId,
-      };
-    },
-    setFormkiqClient(state, action: PayloadAction<any>) {
+    setFormkiqClient: (state, action: PayloadAction<any>) => {
       return {
         ...state,
         formkiqClient: action.payload,
       };
     },
-    setCurrentDocumentPath(state, action: PayloadAction<string>) {
+    setCurrentDocumentPath: (state, action: PayloadAction<string>) => {
       return {
         ...state,
         currentDocumentPath: action.payload,
       };
     },
+    setCurrentDocument: (state, action: PayloadAction<IDocument|null>) => {
+      return {
+        ...state,
+        currentDocument: action.payload,
+      };
+    }
   },
 });
 
-export const { setAllTags, setFormkiqClient, setCurrentDocumentPath } =
+export const { setFormkiqClient, setCurrentDocumentPath, setCurrentDocument } =
   dataCacheSlice.actions;
 
 export const DataCacheState = (state: RootState) => state.dataCacheState;

@@ -3,13 +3,17 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
-import { toggleExpandFolder } from '../../../Store/reducers/documentsList';
+import {
+  DocumentListState,
+  toggleExpandFolder,
+} from '../../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../../Store/store';
 import { formatDate } from '../../../helpers/services/toolService';
-import { IDocument } from '../../../helpers/types/document';
+import { IDocument, RequestStatus } from '../../../helpers/types/document';
 import { IFolder } from '../../../helpers/types/folder';
 import { ILine } from '../../../helpers/types/line';
 import { ArrowBottom, ArrowRight, Share, Star, Trash } from '../../Icons/icons';
+import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentListLine from '../DocumentListLine/documentListLine';
 import FolderDropWrapper from '../FolderDropWrapper/folderDropWrapper';
@@ -20,21 +24,17 @@ interface IProps {
   currentSiteId: string;
   isSiteReadOnly: boolean;
   onDeleteClick: (folder: IFolder) => () => void;
-  onRestoreDocument: (
-    file: IDocument,
-    siteId: string,
-    searchDocuments: any
-  ) => () => void;
-  onDeleteDocument: (file: IDocument, searchDocuments: any) => () => void;
+  onRestoreDocument: (documentId: string) => void;
   currentDocumentsRootUri: string;
-  onShareClick: (event: any, value: ILine | null) => void;
-  onEditTagsAndMetadataModalClick: any;
-  onRenameModalClick: any;
-  onMoveModalClick: any;
-  onDocumentVersionsModalClick: any;
-  onESignaturesModalClick: any;
-  onTagChange: any;
+  onDocumentDataChange: any;
   filterTag: string | null;
+  addToPendingArchive?: (file: IDocument) => void;
+  deleteFromPendingArchive?: (file: IDocument) => void;
+  archiveStatus?: string;
+  selectedDocuments: IDocument[];
+  setSelectedDocuments: (documents: IDocument[]) => void;
+  archiveTabStatus: 'open' | 'closed' | 'minimized';
+  downloadDocument: (documentId: string) => void;
 }
 
 function FolderListLine({
@@ -44,17 +44,19 @@ function FolderListLine({
   isSiteReadOnly,
   onDeleteClick,
   currentDocumentsRootUri,
-  onShareClick,
-  onEditTagsAndMetadataModalClick,
-  onRenameModalClick,
-  onMoveModalClick,
-  onDocumentVersionsModalClick,
-  onESignaturesModalClick,
   onRestoreDocument,
-  onDeleteDocument,
-  onTagChange,
+  onDocumentDataChange,
   filterTag,
+  addToPendingArchive,
+  deleteFromPendingArchive,
+  archiveStatus,
+  selectedDocuments,
+  setSelectedDocuments,
+  archiveTabStatus,
+  downloadDocument,
 }: IProps) {
+  const { loadingStatus } = useSelector(DocumentListState);
+
   let folderPath = folderInstance.path;
   if (folderInstance.path.indexOf('/') === -1) {
     folderPath =
@@ -68,10 +70,11 @@ function FolderListLine({
     useCollections,
     useSoftDelete,
   } = useSelector(ConfigState);
+  const { onShareClick } = useDocumentActions();
 
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1);
   const trElem = React.forwardRef((props: any, ref) => (
-    <tr {...props} ref={ref}>
+    <tr {...props} ref={ref} data-folder-path={folderPath}>
       {props.childs}
     </tr>
   ));
@@ -112,20 +115,16 @@ function FolderListLine({
                       isSiteReadOnly={isSiteReadOnly}
                       onDeleteClick={onDeleteClick}
                       currentDocumentsRootUri={currentDocumentsRootUri}
-                      onShareClick={onShareClick}
-                      onEditTagsAndMetadataModalClick={
-                        onEditTagsAndMetadataModalClick
-                      }
-                      onRenameModalClick={onRenameModalClick}
-                      onMoveModalClick={onMoveModalClick}
-                      onDocumentVersionsModalClick={
-                        onDocumentVersionsModalClick
-                      }
-                      onESignaturesModalClick={onESignaturesModalClick}
                       onRestoreDocument={onRestoreDocument}
-                      onDeleteDocument={onDeleteDocument}
-                      onTagChange={onTagChange}
+                      onDocumentDataChange={onDocumentDataChange}
                       filterTag={filterTag}
+                      archiveStatus={archiveStatus}
+                      addToPendingArchive={addToPendingArchive}
+                      deleteFromPendingArchive={deleteFromPendingArchive}
+                      selectedDocuments={selectedDocuments}
+                      setSelectedDocuments={setSelectedDocuments}
+                      archiveTabStatus={archiveTabStatus}
+                      downloadDocument={downloadDocument}
                     />
                   );
                 })}
@@ -140,27 +139,25 @@ function FolderListLine({
                   siteId={currentSiteId}
                   isSiteReadOnly={isSiteReadOnly}
                   documentsRootUri={currentDocumentsRootUri}
-                  onShareClick={onShareClick}
                   searchDocuments={folderInstance.documents}
-                  onDeleteClick={onDeleteDocument(file, null)}
-                  onRestoreClick={onRestoreDocument(file, currentSiteId, null)}
-                  onEditTagsAndMetadataModalClick={
-                    onEditTagsAndMetadataModalClick
-                  }
-                  onRenameModalClick={onRenameModalClick}
-                  onMoveModalClick={onMoveModalClick}
-                  onDocumentVersionsModalClick={onDocumentVersionsModalClick}
-                  onESignaturesModalClick={onESignaturesModalClick}
-                  onTagChange={onTagChange}
+                  onRestoreClick={onRestoreDocument}
+                  onDocumentDataChange={onDocumentDataChange}
                   filterTag={filterTag}
                   leftOffset={4}
+                  archiveStatus={archiveStatus}
+                  addToPendingArchive={addToPendingArchive}
+                  deleteFromPendingArchive={deleteFromPendingArchive}
+                  selectedDocuments={selectedDocuments}
+                  setSelectedDocuments={setSelectedDocuments}
+                  archiveTabStatus={archiveTabStatus}
+                  downloadDocument={downloadDocument}
                 />
               );
             })}
             {folderInstance.documents.length === 25 && (
               <tr>
                 <td colSpan={6} className="text-sm">
-                  <div className="-mx-1 pl-12 font-semibold py-2 hover:text-coreOrange-500">
+                  <div className="-mx-1 pl-12 font-semibold py-2 hover:text-primary-500">
                     <a
                       href={`${currentDocumentsRootUri}/folders/${subfolderPath}`}
                     >
@@ -177,7 +174,7 @@ function FolderListLine({
           <tr>
             <td
               colSpan={6}
-              className="border-coreOrange-50 text-sm italic p-1 pl-12 mb-2"
+              className="border-primary-50 text-sm italic p-1 pl-12 mb-2"
             >
               No subfolders or files have been found in this folder
             </td>
@@ -198,14 +195,14 @@ function FolderListLine({
       >
         <tbody>
           <FolderDropWrapper
-            className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-tight"
+            className="nodark:bg-gray-800 nodark:border-gray-700 text-sm tracking-normal folder-drop-wrapper"
             wrapper={trElem}
             folder={folderPath}
             sourceSiteId={currentSiteId}
             targetSiteId={currentSiteId}
           >
             <td
-              className="pt-1 text-gray-800 block lg:table-cell relative lg:static"
+              className="pt-1 text-neutral-900 block lg:table-cell relative lg:static"
               data-test-id={`folder-${folderPath}`}
             >
               <div className="-ml-0.5 flex">
@@ -227,7 +224,11 @@ function FolderListLine({
                 </div>
                 <div className="flex grow w-full justify-start">
                   <Link
-                    to={`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={
+                      loadingStatus === RequestStatus.pending
+                        ? '#'
+                        : `${currentDocumentsRootUri}/folders/${folderPath}`
+                    }
                     className="w-16 pl-1 pt-1.5 cursor-pointer"
                   >
                     <svg
@@ -244,31 +245,35 @@ function FolderListLine({
                     </svg>
                   </Link>
                   <Link
-                    to={`${currentDocumentsRootUri}/folders/${folderPath}`}
+                    to={
+                      loadingStatus === RequestStatus.pending
+                        ? '#'
+                        : `${currentDocumentsRootUri}/folders/${folderPath}`
+                    }
                     className="cursor-pointer grow p-1"
                   >
                     {folderName}
                   </Link>
-                  <div className="hidden w-5 text-gray-400 mr-4 cursor-pointer px-2 box-content">
+                  <div className="hidden w-5 text-neutral-900 mr-4 cursor-pointer px-2 box-content">
                     <Star />
                   </div>
                 </div>
               </div>
             </td>
-            <td className="w-38 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
+            <td className="w-38 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static">
               {formatDate(folderInstance.lastModifiedDate)}
             </td>
-            <td className="w-24 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static"></td>
+            <td className="w-24 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static"></td>
             {useIndividualSharing && (
-              <td className="w-24 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
+              <td className="w-24 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static">
                 Shared
               </td>
             )}
-            <td className="w-28 p-2 pt-3 text-gray-800 block lg:table-cell relative lg:static">
+            <td className="w-28 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static">
               <div className="flex w-full">
                 {useIndividualSharing && (
                   <div
-                    className="w-6 h-auto text-gray-400 mr-2 cursor-pointer hover:text-coreOrange-500"
+                    className="w-6 h-auto text-neutral-900 mr-2 cursor-pointer hover:text-primary-500"
                     onClick={(event) =>
                       onShareClick(event, {
                         lineType: 'folder',
@@ -285,28 +290,18 @@ function FolderListLine({
                 {!isSiteReadOnly && (
                   <>
                     <div
-                      className="w-3 h-auto text-gray-400 mr-3 cursor-pointer hover:text-coreOrange-500"
+                      className="w-4 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
                       onClick={onDeleteClick(folderInstance)}
                     >
                       <Trash />
                     </div>
-                    <div className="w-5 pt-0.5 h-auto text-gray-400">
+                    <div className="w-5 pt-0.5 h-auto text-neutral-900">
                       <DocumentActionsPopover
                         value={{ lineType: 'folder', folder: folderPath }}
                         siteId={currentSiteId}
                         isSiteReadOnly={isSiteReadOnly}
                         formkiqVersion={formkiqVersion}
                         onDeleteClick={onDeleteClick(folderInstance)}
-                        onShareClick={onShareClick}
-                        onEditTagsAndMetadataModalClick={
-                          onEditTagsAndMetadataModalClick
-                        }
-                        onRenameModalClick={onRenameModalClick}
-                        onMoveModalClick={onMoveModalClick}
-                        onDocumentVersionsModalClick={
-                          onDocumentVersionsModalClick
-                        }
-                        onESignaturesModalClick={onESignaturesModalClick}
                         user={user}
                         useIndividualSharing={useIndividualSharing}
                         useCollections={useCollections}
@@ -322,7 +317,7 @@ function FolderListLine({
           {!folderInstance.isExpanded && (
             <tr>
               <td colSpan={6} className="p-0 m-0">
-                <div className="w-full border-t h-0 -m-b"></div>
+                <div className="w-full border-t h-0 -m-b border-neutral-300"></div>
               </td>
             </tr>
           )}

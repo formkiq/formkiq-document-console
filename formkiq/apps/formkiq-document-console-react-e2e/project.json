@@ -1,4 +1,5 @@
 {
+  "name": "formkiq-document-console-react-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/formkiq-document-console-react-e2e/src",
   "projectType": "application",
@@ -7,7 +8,13 @@
       "executor": "@mands/nx-playwright:playwright-executor",
       "options": {
         "e2eFolder": "apps/formkiq-document-console-react-e2e",
+        "devServerTarget": "formkiq-document-console-react:serve",
         "packageRunner": "pnpm"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "formkiq-document-console-react:serve:production"
+        }
       }
     },
     "ts-check": {
@@ -15,13 +22,13 @@
       "options": {
         "commands": [
           {
-            "command": "tsc --build --force apps/formkiq-document-console-react-e2e/tsconfig.json"
+            "command": "tsc --build --force --verbose apps/formkiq-document-console-react-e2e/tsconfig.json"
           }
         ]
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [

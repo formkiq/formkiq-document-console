@@ -5,16 +5,17 @@ import { AuthState } from '../../Store/reducers/auth';
 import {
   ConfigState,
   setCurrentActionEvent,
-  setIsSharedFoldersExpanded,
   setIsSidebarExpanded,
+  setIsWorkspacesExpanded,
 } from '../../Store/reducers/config';
 import { DocumentListState } from '../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../Store/store';
 import {
-  AccountAndSettingsPrefixes,
+  AdminPrefixes,
   DocumentsAndFoldersPrefixes,
   WorkflowsAndIntegrationsPrefixes,
 } from '../../helpers/constants/pagePrefixes';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
@@ -22,27 +23,39 @@ import {
 import { IFolder } from '../../helpers/types/folder';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
+import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
+import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
 import {
+  AccessControl,
   Api,
   ApiKey,
   ArrowBottom,
   ArrowRight,
+  Attribute,
   ChevronLeft,
   ChevronRight,
-  ComingSoon,
   Documents,
+  Examine,
   FolderOutline,
+  Group,
+  HistoryIcon,
+  Mapping,
   Plus,
+  Queue,
+  Rules,
+  Schema,
   Settings,
   ShareHand,
+  SitesManagement,
   Star,
   Trash,
   Upload,
-  UserIcon,
+  Users,
   Webhook,
   Workflow,
+  Workspace,
 } from '../Icons/icons';
-import SharedFoldersModal from './sharedFoldersModal';
+import WorkspacesModal from './workspacesModal';
 
 export function Sidebar() {
   const dispatch = useAppDispatch();
@@ -51,22 +64,22 @@ export function Sidebar() {
   const { folders } = useSelector(DocumentListState);
   const {
     formkiqVersion,
-    useAccountAndSettings,
     useSoftDelete,
     isSidebarExpanded,
-    isSharedFoldersExpanded,
+    isWorkspacesExpanded,
+    userAuthenticationType,
   } = useSelector(ConfigState);
 
-  const { hasUserSite, hasDefaultSite, hasSharedFolders, sharedFolderSites } =
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
-  const pathname = useLocation().pathname;
+  const pathname = decodeURI(useLocation().pathname);
   const { siteId, siteDocumentsRootUri, isSiteReadOnly } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
     hasDefaultSite,
-    hasSharedFolders,
-    sharedFolderSites
+    hasWorkspaces,
+    workspaceSites
   );
 
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
@@ -76,41 +89,50 @@ export function Sidebar() {
     useState(siteDocumentsRootUri);
   const [sidebarExpanded, setSidebarExpanded] = useState(isSidebarExpanded);
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
-  let expandSharedFoldersInitially = isSharedFoldersExpanded;
+  let expandWorkspacesInitially = isWorkspacesExpanded;
   if (
-    currentDocumentsRootUri.indexOf('/shared-folders') === 0 ||
-    (!hasUserSite && !hasDefaultSite && hasSharedFolders)
+    currentDocumentsRootUri.indexOf('/workspaces') === 0 ||
+    (!hasUserSite && !hasDefaultSite && hasWorkspaces)
   ) {
-    expandSharedFoldersInitially = true;
+    expandWorkspacesInitially = true;
   }
-  const [sharedFoldersExpanded, setSharedFoldersExpanded] = useState(
-    expandSharedFoldersInitially
+  const [workspacesExpanded, setWorkspacesExpanded] = useState(
+    expandWorkspacesInitially
   );
-  const [integrationsExpanded, setIntegrationsExpanded] = useState(false);
-  const [settingsExpanded, setSettingsExpanded] = useState(false);
-  const [isSharedFoldersModalOpened, setSharedFoldersModalOpened] =
+  const [userSiteDocumentQueuesExpanded, setUserSiteDocumentQueuesExpanded] =
     useState(false);
+  const [
+    defaultSiteDocumentQueuesExpanded,
+    setDefaultSiteDocumentQueuesExpanded,
+  ] = useState(false);
+  const [otherSiteDocumentQueuesExpanded, setOtherSiteDocumentQueuesExpanded] =
+    useState(false);
+  const [orchestrationsExpanded, setIntegrationsExpanded] = useState(false);
+  const [adminExpanded, setAdminExpanded] = useState(false);
+  const [isWorkspacesModalOpened, setWorkspacesModalOpened] = useState(false);
 
-  const locationPrefix = window.location.pathname.substring(
-    0,
-    window.location.pathname.indexOf('/', 1)
+  const path = decodeURI(window.location.pathname);
+  const firstSlashIndex = path.indexOf('/', 1);
+  const locationPrefix =
+    firstSlashIndex > 0 ? path.substring(0, firstSlashIndex) : path;
+
+  const [defaultSiteDocumentQueues, setDefaultSiteDocumentQueues] = useState(
+    []
   );
+  const [userSiteDocumentQueues, setUserSiteDocumentQueues] = useState([]);
+  const [otherSiteDocumentQueues, setOtherSiteDocumentQueues] = useState([]);
 
   const subfolderUri = useSubfolderUri();
 
   useEffect(() => {
+    setOtherSiteDocumentQueuesExpanded(false);
+    // TODO: determine if we should expand queues by default for "other" sites
     if (DocumentsAndFoldersPrefixes.indexOf(locationPrefix) > -1) {
       setDocumentsExpanded(true);
-      setIntegrationsExpanded(false);
-      setSettingsExpanded(false);
     } else if (WorkflowsAndIntegrationsPrefixes.indexOf(locationPrefix) > -1) {
-      setDocumentsExpanded(false);
       setIntegrationsExpanded(true);
-      setSettingsExpanded(false);
-    } else if (AccountAndSettingsPrefixes.indexOf(locationPrefix) > -1) {
-      setDocumentsExpanded(false);
-      setIntegrationsExpanded(false);
-      setSettingsExpanded(true);
+    } else if (AdminPrefixes.indexOf(locationPrefix) > -1) {
+      setAdminExpanded(true);
     }
   }, [locationPrefix]);
 
@@ -120,17 +142,62 @@ export function Sidebar() {
       user,
       hasUserSite,
       hasDefaultSite,
-      hasSharedFolders,
-      sharedFolderSites
+      hasWorkspaces,
+      workspaceSites
     );
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    if (recheckSiteInfo.siteDocumentsRootUri.indexOf('shared-folders') > 0) {
-      if (!hasUserSite && !hasDefaultSite && hasSharedFolders) {
-        setSpecialFoldersRootUri('/documents');
-      }
+    if (pathname.indexOf('/workspaces') > -1) {
+      setSpecialFoldersRootUri('/workspaces/' + recheckSiteInfo.siteId);
+    } else {
+      setSpecialFoldersRootUri('/documents');
     }
   }, [pathname]);
+
+  useEffect(() => {
+    if (hasDefaultSite && defaultSiteDocumentQueuesExpanded) {
+      DocumentsService.getQueues('default').then((queuesResponse: any) => {
+        if (queuesResponse.queues) {
+          setDefaultSiteDocumentQueues(queuesResponse.queues);
+        } else {
+          setDefaultSiteDocumentQueues([]);
+        }
+      });
+    }
+  }, [defaultSiteDocumentQueuesExpanded]);
+
+  useEffect(() => {
+    if (hasUserSite && userSiteDocumentQueuesExpanded) {
+      DocumentsService.getQueues(user?.email as string).then(
+        (queuesResponse: any) => {
+          if (queuesResponse.queues) {
+            setUserSiteDocumentQueues(queuesResponse.queues);
+          } else {
+            setUserSiteDocumentQueues([]);
+          }
+        }
+      );
+    }
+  }, [userSiteDocumentQueuesExpanded]);
+
+  useEffect(() => {
+    if (
+      hasWorkspaces &&
+      currentSiteId !== 'default' &&
+      currentSiteId !== user?.email &&
+      otherSiteDocumentQueuesExpanded
+    ) {
+      DocumentsService.getQueues(currentSiteId).then((queuesResponse: any) => {
+        if (queuesResponse.queues) {
+          setOtherSiteDocumentQueues(queuesResponse.queues);
+        } else {
+          setOtherSiteDocumentQueues([]);
+        }
+      });
+    } else {
+      setOtherSiteDocumentQueues([]);
+    }
+  }, [otherSiteDocumentQueuesExpanded]);
 
   const toggleSidebarExpand = () => {
     dispatch(setIsSidebarExpanded(!sidebarExpanded));
@@ -139,24 +206,69 @@ export function Sidebar() {
   const toggleDocumentsExpand = () => {
     setDocumentsExpanded(!documentsExpanded);
   };
-  const toggleSharedFoldersExpand = () => {
-    if (!sharedFoldersExpanded) {
+  const toggleWorkspacesExpand = () => {
+    if (!workspacesExpanded) {
       setDocumentsExpanded(true);
     }
-    dispatch(setIsSharedFoldersExpanded(!sharedFoldersExpanded));
-    setSharedFoldersExpanded(!sharedFoldersExpanded);
+    dispatch(setIsWorkspacesExpanded(!workspacesExpanded));
+    setWorkspacesExpanded(!workspacesExpanded);
   };
-  const toggleIntegrationsExpand = () => {
-    setIntegrationsExpanded(!integrationsExpanded);
+  const toggleDefaultSiteDocumentQueuesExpand = () => {
+    if (!defaultSiteDocumentQueuesExpanded) {
+      setDefaultSiteDocumentQueuesExpanded(true);
+    }
+    setDefaultSiteDocumentQueuesExpanded(!defaultSiteDocumentQueuesExpanded);
   };
-  const toggleSettingsExpand = () => {
-    setSettingsExpanded(!settingsExpanded);
+  const toggleUserSiteDocumentQueuesExpand = () => {
+    if (!userSiteDocumentQueuesExpanded) {
+      setUserSiteDocumentQueuesExpanded(true);
+    }
+    setUserSiteDocumentQueuesExpanded(!userSiteDocumentQueuesExpanded);
   };
-  const onSharedFoldersClick = (event: any) => {
-    setSharedFoldersModalOpened(true);
+  const toggleOtherSiteDocumentQueuesExpand = () => {
+    if (!otherSiteDocumentQueuesExpanded) {
+      setOtherSiteDocumentQueuesExpanded(true);
+    }
+    setOtherSiteDocumentQueuesExpanded(!otherSiteDocumentQueuesExpanded);
   };
-  const onSharedFoldersModalClose = () => {
-    setSharedFoldersModalOpened(false);
+  const toggleOrchestrationsExpand = () => {
+    setIntegrationsExpanded(!orchestrationsExpanded);
+  };
+  const toggleAdminExpand = () => {
+    setAdminExpanded(!adminExpanded);
+  };
+  const onWorkspacesClick = (event: any) => {
+    setWorkspacesModalOpened(true);
+  };
+  const onWorkspacesModalClose = () => {
+    setWorkspacesModalOpened(false);
+  };
+
+  const handleAction = (action: string) => {
+    const nonDocumentPaths = [
+      '/workflows',
+      '/orchestrations',
+      '/queues',
+      '/rulesets',
+      '/object-examine-tool',
+      '/schemas',
+      '/mappings',
+      '/admin/settings',
+      '/admin/groups',
+      '/admin/users',
+      '/admin/access-control',
+    ];
+    const documentViewPathRegex =
+      /^\/(?:documents|my-documents|team-documents|workspaces\/[^/]+)\/[^/]+\/(?:view|edit)$/;
+    const isNonDocumentPath = nonDocumentPaths.some(
+      (path) => pathname.indexOf(path) > -1
+    );
+    const isDocumentViewPath = documentViewPathRegex.test(pathname);
+    if (isNonDocumentPath || isDocumentViewPath) {
+      window.location.href = `${currentDocumentsRootUri}?actionEvent=${action}`;
+    } else {
+      dispatch(setCurrentActionEvent(action));
+    }
   };
 
   const QuickFolderList = (
@@ -166,7 +278,7 @@ export function Sidebar() {
   ) => {
     let folderBreadcrumbUrl = `${currentDocumentsRootUri}/folders`;
     let initialPaddingLeft = 8;
-    if (currentDocumentsRootUri.indexOf('shared-folders') > 0) {
+    if (currentDocumentsRootUri.indexOf('workspaces') > 0) {
       initialPaddingLeft = 10;
     }
     if (
@@ -179,7 +291,7 @@ export function Sidebar() {
         <>
           <span className="hidden pl-6 pl-8 pl-10 pl-12 pl-14 pl-16 pl-18 pl-20 pl-22 pl-24 pl-26"></span>
           {currentSiteId === folderSiteId && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-neutral-900">
               {folderLevels.length ? (
                 <>
                   {folderLevels.map((folderSnippet: string, i: number) => {
@@ -190,8 +302,8 @@ export function Sidebar() {
                         key={i}
                         className={
                           (i === folderLevels.length - 1
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
+                            ? 'text-primary-600 bg-neutral-200 '
+                            : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
                           ' p-1 pl-' +
                           paddingLeft +
                           ' flex justify-start'
@@ -222,677 +334,594 @@ export function Sidebar() {
     }
   };
 
+  const NavigationItem = ({
+    to,
+    icon,
+    title,
+    testId = '',
+    level = 0,
+  }: {
+    to: string;
+    icon: any;
+    title: string;
+    testId?: string;
+    level?: number;
+  }) => {
+    return (
+      <li
+        className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap"
+        style={{ paddingLeft: isSidebarExpanded ? `${level * 16}px` : '0px' }}
+      >
+        <NavLink
+          to={to}
+          className={({ isActive }) =>
+            (isActive
+              ? 'text-primary-600 bg-neutral-200 '
+              : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+            ' w-full text-sm font-bold flex '
+          }
+          data-test-id={testId}
+          end
+        >
+          <div className="w-full text-sm font-bold flex items-center pl-5 py-2">
+            <div className="w-4 flex items-center mr-2">{icon}</div>
+            {isSidebarExpanded && <div>{title}</div>}
+          </div>
+        </NavLink>
+      </li>
+    );
+  };
+  const DocumentsNavigationItem = ({
+    to,
+    icon,
+    title,
+    testId = '',
+    folder = '',
+    targetSiteId = '',
+    level = 0,
+  }: {
+    to: string;
+    icon: any;
+    title: string;
+    testId?: string;
+    folder?: string;
+    targetSiteId?: string;
+    level?: number;
+  }) => {
+    return (
+      <li
+        className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap"
+        style={{ paddingLeft: isSidebarExpanded ? `${level * 16}px` : '0px' }}
+      >
+        <NavLink
+          to={to}
+          data-test-id={testId}
+          end
+          className={({ isActive }) =>
+            (isActive
+              ? 'text-primary-600 bg-neutral-200 '
+              : 'text-neutral-900 bg-neutral-100 hover:text-primary-500 ') +
+            ' w-full text-sm font-bold flex'
+          }
+        >
+          <FolderDropWrapper
+            folder={folder}
+            sourceSiteId={currentSiteId}
+            targetSiteId={targetSiteId}
+            className="w-full text-sm font-bold flex pl-5 py-2"
+          >
+            <div className="w-4 flex items-center mr-2">{icon}</div>
+            {isSidebarExpanded && <div>{title}</div>}
+          </FolderDropWrapper>
+        </NavLink>
+      </li>
+    );
+  };
+
+  const ExpandableSection = (props: any) => {
+    const { isExpanded, toggleExpand, title, testId, level = 0 } = props;
+    return isSidebarExpanded ? (
+      <li
+        className="w-full flex self-start text-neutral-900 hover:text-primary-500 justify-start whitespace-nowrap px-2 pt-4 pb-2 cursor-pointer"
+        onClick={toggleExpand}
+        data-test-id={testId}
+        style={{
+          paddingLeft: isSidebarExpanded
+            ? `${level === 0 ? 10 : level * 16}px`
+            : '0px',
+        }}
+      >
+        <div className="flex justify-end mt-2 mr-1">
+          {isExpanded ? <ArrowBottom /> : <ArrowRight />}
+        </div>
+        <div className="uppercase font-bold text-sm">{title}</div>
+      </li>
+    ) : (
+      <></>
+    );
+  };
+
   const SidebarItems = () => {
     return (
-      <div>
-        {isSidebarExpanded ? (
-          <>
-            <li
-              className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
-              onClick={toggleDocumentsExpand}
-              data-test-id="expand-documents"
-            >
-              <div className="flex justify-end mt-2 mr-1">
-                {documentsExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="uppercase font-semibold text-xs">
-                Documents & Folders
-              </div>
-            </li>
-            {documentsExpanded && (
-              <>
-                {hasUserSite && (
-                  <>
-                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                      <NavLink
-                        to="/my-documents"
-                        data-test-id="nav-my-documents"
-                        end
-                        className={({ isActive }) =>
-                          (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
-                          ' w-full text-sm font-medium flex'
-                        }
-                      >
-                        <FolderDropWrapper
-                          folder={''}
-                          sourceSiteId={currentSiteId}
-                          targetSiteId={user?.email || ''}
-                          className={
-                            'w-full text-sm font-medium flex pl-5 py-2'
-                          }
-                        >
-                          <div className="w-4 flex items-center mr-2">
+      <div className="tracking-normal pb-16">
+        <>
+          <ExpandableSection
+            isExpanded={documentsExpanded}
+            toggleExpand={toggleDocumentsExpand}
+            title="Documents & Folders"
+            testId="expand-documents"
+          />
+          {(documentsExpanded || !isSidebarExpanded) && (
+            <>
+              {hasUserSite && (
+                <>
+                  <DocumentsNavigationItem
+                    to="/my-documents"
+                    icon={<Documents />}
+                    title="My Documents"
+                    testId="nav-my-documents"
+                    targetSiteId={user?.email || ''}
+                    folder={''}
+                  />
+                  {QuickFolderList(
+                    user?.email || '',
+                    currentSiteId === user?.email && subfolderUri.length
+                      ? subfolderUri.split('/')
+                      : [],
+                    folders
+                  )}
+                  {currentSiteId === user?.email && (
+                    <>
+                      <ExpandableSection
+                        isExpanded={userSiteDocumentQueuesExpanded}
+                        toggleExpand={toggleUserSiteDocumentQueuesExpand}
+                        title="Queues"
+                        testId="expand-queues"
+                        level={1}
+                      />
+                      {userSiteDocumentQueuesExpanded &&
+                        isSidebarExpanded &&
+                        userSiteDocumentQueues.map((queue: any, i: number) => {
+                          return (
+                            <span key={i}>
+                              <NavigationItem
+                                to={`/my-documents/queues/${queue.queueId}`}
+                                icon={<Queue />}
+                                title={
+                                  queue.name.length > 20
+                                    ? `${queue.name.substring(0, 20)}...`
+                                    : queue.name
+                                }
+                                testId="nav-queue"
+                                level={1}
+                              />
+                            </span>
+                          );
+                        })}
+                      {userSiteDocumentQueuesExpanded &&
+                        isSidebarExpanded &&
+                        !userSiteDocumentQueues.length && (
+                          <div className="text-xs pl-8">(no queues found)</div>
+                        )}
+                      {userSiteDocumentQueuesExpanded && isSidebarExpanded && (
+                        <div className="mb-2"></div>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+              {hasDefaultSite && (
+                <>
+                  <DocumentsNavigationItem
+                    to={hasUserSite ? '/team-documents' : '/documents'}
+                    icon={
+                      hasUserSite ? (
+                        <>
+                          <div className="-mt-0.5">
                             <Documents />
                           </div>
-                          <div>My Documents</div>
-                        </FolderDropWrapper>
-                      </NavLink>
-                    </li>
-                    {QuickFolderList(
-                      user?.email || '',
-                      currentSiteId === user?.email && subfolderUri.length
-                        ? subfolderUri.split('/')
-                        : [],
-                      folders
-                    )}
-                  </>
-                )}
-                {hasDefaultSite && (
-                  <>
-                    <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                      <NavLink
-                        to={hasUserSite ? '/team-documents' : '/documents'}
-                        data-test-id="nav-team-documents"
-                        end
-                        className={({ isActive }) =>
-                          (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
-                          ' w-full text-sm font-medium flex'
-                        }
-                      >
-                        <FolderDropWrapper
-                          folder={''}
-                          sourceSiteId={currentSiteId}
-                          targetSiteId={'default'}
-                          className={
-                            'w-full text-sm font-medium flex pl-5 py-2 '
-                          }
-                        >
-                          {hasUserSite ? (
-                            <div className="w-4 flex flex-wrap items-center mr-2">
-                              <div className="-mt-0.5">
-                                <Documents />
-                              </div>
-                              <div className="-mt-2.5 -ml-0.5">
-                                <ShareHand />
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="w-4 flex items-center mr-2">
-                              <Documents />
-                            </div>
-                          )}
-                          <div>
-                            {hasUserSite ? (
-                              <span>Team Documents</span>
-                            ) : (
-                              <span>Documents</span>
-                            )}
+                          <div className="-mt-2.5 -ml-0.5">
+                            <ShareHand />
                           </div>
-                        </FolderDropWrapper>
-                      </NavLink>
-                    </li>
-                    {QuickFolderList(
+                        </>
+                      ) : (
+                        <Documents />
+                      )
+                    }
+                    title={hasUserSite ? 'Team Documents' : 'Documents'}
+                    testId="nav-team-documents"
+                    targetSiteId={'default'}
+                    folder={''}
+                  />
+                  {isSidebarExpanded &&
+                    QuickFolderList(
                       'default',
                       currentSiteId === 'default' && subfolderUri.length
                         ? subfolderUri.split('/')
                         : [],
                       folders
                     )}
-                  </>
-                )}
-                {hasSharedFolders && (
-                  <>
-                    {(hasUserSite || hasDefaultSite) && (
-                      <li
-                        className="w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
-                        onClick={toggleSharedFoldersExpand}
-                      >
-                        <div className="flex justify-end mt-2 mr-1">
-                          {sharedFoldersExpanded ? (
-                            <ArrowBottom />
-                          ) : (
-                            <ArrowRight />
-                          )}
-                        </div>
-                        <div className="pl-1 uppercase text-xs">
-                          Shared Folders
-                        </div>
-                      </li>
-                    )}
-                    {(sharedFoldersExpanded ||
-                      (!hasUserSite && !hasDefaultSite)) &&
-                      sharedFolderSites.map((site: any, i: number) => {
-                        return (
-                          <span key={i}>
-                            <li className="pl-3 w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                              <NavLink
-                                to={'/shared-folders/' + site.siteId}
-                                end
-                                className={({ isActive }) =>
-                                  (isActive
-                                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                                    : 'text-gray-500 bg-white ') +
-                                  ' w-full text-sm font-medium flex'
-                                }
-                              >
-                                <FolderDropWrapper
-                                  folder={''}
-                                  sourceSiteId={currentSiteId}
-                                  targetSiteId={site.siteId}
-                                  className={
-                                    'w-full text-sm font-medium flex pl-5 py-2 '
+                  {currentSiteId === 'default' && (
+                    <>
+                      <ExpandableSection
+                        isExpanded={defaultSiteDocumentQueuesExpanded}
+                        toggleExpand={toggleDefaultSiteDocumentQueuesExpand}
+                        title="Queues"
+                        testId="expand-queues"
+                        level={1}
+                      />
+                      {defaultSiteDocumentQueuesExpanded &&
+                        isSidebarExpanded &&
+                        defaultSiteDocumentQueues.map(
+                          (queue: any, i: number) => {
+                            return (
+                              <span key={i}>
+                                <NavigationItem
+                                  to={
+                                    (hasUserSite
+                                      ? '/team-documents'
+                                      : '/documents') +
+                                    '/queues/' +
+                                    queue.queueId
                                   }
-                                >
-                                  <div className="w-5 flex flex-wrap items-center mr-2">
-                                    <div className="w-4">
-                                      <FolderOutline />
-                                    </div>
-                                    <div className="-mt-3 -ml-0.5">
-                                      <ShareHand />
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <span>{site.siteId.replace('_', ' ')}</span>
-                                  </div>
-                                </FolderDropWrapper>
-                              </NavLink>
-                            </li>
-                            {QuickFolderList(
-                              site.siteId,
-                              currentSiteId === site.siteId &&
-                                subfolderUri.length
-                                ? subfolderUri.split('/')
-                                : [],
-                              folders
-                            )}
-                          </span>
-                        );
-                      })}
-                  </>
-                )}
-                {!isSiteReadOnly && (
-                  <>
-                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                      <NavLink
-                        data-test-id="nav-favorites"
-                        to={`${specialFoldersRootUri}/folders/favorites`}
-                        className={({ isActive }) =>
-                          (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
-                          ' w-full text-sm font-medium flex '
-                        }
-                      >
-                        <div
-                          className={
-                            'w-full text-sm font-medium flex pl-5 py-2 '
+                                  icon={<Queue />}
+                                  title={
+                                    queue.name.length > 20
+                                      ? `${queue.name.substring(0, 20)}...`
+                                      : queue.name
+                                  }
+                                  testId="nav-queue"
+                                  level={1}
+                                />
+                              </span>
+                            );
                           }
-                        >
-                          <div className="w-4 flex items-center mr-2">
-                            <Star />
+                        )}
+                      {defaultSiteDocumentQueuesExpanded &&
+                        isSidebarExpanded &&
+                        !defaultSiteDocumentQueues.length && (
+                          <div className="text-xs pl-8 mb-2">
+                            (no queues found)
                           </div>
-                          <div>Favorites</div>
-                        </div>
-                      </NavLink>
-                    </li>
-                    {useSoftDelete && (
-                      <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                        <NavLink
-                          data-test-id="nav-trash"
-                          to={`${specialFoldersRootUri}/folders/deleted`}
-                          className={({ isActive }) =>
-                            (isActive
-                              ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                              : 'text-gray-500 bg-white ') +
-                            ' w-full text-sm font-medium flex '
-                          }
-                        >
+                        )}
+                    </>
+                  )}
+                </>
+              )}
+              {hasWorkspaces && (
+                <>
+                  {(hasUserSite || hasDefaultSite) && (
+                    <ExpandableSection
+                      isExpanded={workspacesExpanded}
+                      toggleExpand={toggleWorkspacesExpand}
+                      title="Workspaces"
+                      testId="expand-workspaces"
+                      level={1}
+                    />
+                  )}
+                  {isSidebarExpanded ? (
+                    (workspacesExpanded || (!hasUserSite && !hasDefaultSite)) &&
+                    workspaceSites.map((site: any, i: number) => {
+                      return (
+                        <span key={i}>
+                          <DocumentsNavigationItem
+                            to={'/workspaces/' + site.siteId}
+                            icon={<Workspace />}
+                            title={site.siteId.replaceAll('_', ' ')}
+                            testId="nav-workspace"
+                            targetSiteId={site.siteId}
+                            folder={''}
+                            level={1}
+                          />
+                          {QuickFolderList(
+                            site.siteId,
+                            currentSiteId === site.siteId && subfolderUri.length
+                              ? subfolderUri.split('/')
+                              : [],
+                            folders
+                          )}
+                          {currentSiteId === site.siteId && (
+                            <>
+                              <ExpandableSection
+                                isExpanded={otherSiteDocumentQueuesExpanded}
+                                toggleExpand={
+                                  toggleOtherSiteDocumentQueuesExpand
+                                }
+                                title="Queues"
+                                testId="expand-queues"
+                                level={2}
+                              />
+                              {otherSiteDocumentQueuesExpanded &&
+                                otherSiteDocumentQueues.map(
+                                  (queue: any, i: number) => {
+                                    return (
+                                      <span key={i}>
+                                        <NavigationItem
+                                          to={
+                                            '/workspaces/' +
+                                            currentSiteId +
+                                            '/queues/' +
+                                            queue.queueId
+                                          }
+                                          icon={<Queue />}
+                                          title={
+                                            queue.name.length > 20
+                                              ? `${queue.name.substring(
+                                                  0,
+                                                  20
+                                                )}...`
+                                              : queue.name
+                                          }
+                                          testId="nav-queue"
+                                          level={2}
+                                        />
+                                      </span>
+                                    );
+                                  }
+                                )}
+                              {otherSiteDocumentQueuesExpanded &&
+                                !otherSiteDocumentQueues.length && (
+                                  <div className="text-xs pl-10 mb-2">
+                                    (no queues found)
+                                  </div>
+                                )}
+                            </>
+                          )}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    <>
+                      {hasWorkspaces && (
+                        <div className="w-full text-sm font-bold flex pl-5 py-3 bg-neutral-100">
                           <div
-                            className={
-                              'w-full text-sm font-medium flex pl-5 py-2 '
-                            }
+                            className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
+                            onClick={onWorkspacesClick}
                           >
-                            <div className="w-4 h-4 flex items-center mr-2">
-                              <Trash />
-                            </div>
-                            <div>Trash</div>
+                            <Workspace />
                           </div>
-                        </NavLink>
-                      </li>
-                    )}
-                  </>
-                )}
-                <div className="flex w-full">
-                  <div className="w-full mt-2 border-b"></div>
-                </div>
-              </>
-            )}
-            <li
-              className="mt-2 w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
-              data-test-id="expand-integrations"
-              onClick={toggleIntegrationsExpand}
-            >
-              <div className="flex justify-end mt-2 mr-1">
-                {integrationsExpanded ? <ArrowBottom /> : <ArrowRight />}
-              </div>
-              <div className="uppercase font-semibold text-xs mb-2">
-                Integrations
-              </div>
-            </li>
-            {integrationsExpanded && (
-              <>
-                <li className="hidden w-full flex mt-4 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/workflows"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
-                    }
-                  >
-                    <div
-                      className={
-                        'w-full text-sm font-medium flex items-center pl-5 '
-                      }
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <Workflow />
-                      </div>
-                      <div>Workflows</div>
-                      <div className="flex ml-2 grow justify-start">
-                        <div className="w-10">
-                          <ComingSoon />
                         </div>
-                      </div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/integrations/api"
-                    data-test-id="nav-api-explorer"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
-                    }
-                  >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <Api />
-                      </div>
-                      <div>API Explorer</div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/integrations/apiKeys"
-                    data-test-id="nav-api-keys"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
-                    }
-                  >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2'}
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <ApiKey />
-                      </div>
-                      <div>API Keys</div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/integrations/webhooks"
-                    data-test-id="nav-webhooks"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
-                    }
-                  >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-2 '}
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <Webhook />
-                      </div>
-                      <div>Inbound Webhooks</div>
-                    </div>
-                  </NavLink>
-                </li>
-                <div className="flex w-full">
-                  <div className="w-full mt-4 border-b"></div>
-                </div>
-              </>
-            )}
-            {useAccountAndSettings && (
-              <>
-                <li
-                  className="mt-4 w-full flex self-start text-gray-600 hover:text-gray-700 justify-center lg:justify-start whitespace-nowrap px-4 pt-4 pb-2 cursor-pointer"
-                  onClick={toggleSettingsExpand}
-                >
-                  <div className="flex justify-end mt-2 mr-1">
-                    {settingsExpanded ? <ArrowBottom /> : <ArrowRight />}
-                  </div>
-                  <div className="uppercase font-semibold  text-xs">
-                    Account & Settings
-                  </div>
-                </li>
-                {settingsExpanded && (
-                  <>
-                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                      <NavLink
-                        to="/account"
-                        className={({ isActive }) =>
-                          (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
-                          ' w-full text-sm font-medium flex '
-                        }
-                      >
-                        <div
-                          className={'w-full text-sm font-medium flex pl-5 '}
-                        >
-                          <div className="w-4 flex items-center mr-2">
-                            <UserIcon />
-                          </div>
-                          <div>Account</div>
-                        </div>
-                      </NavLink>
-                    </li>
-                    <li className="w-full flex mt-2 self-start justify-center lg:justify-start whitespace-nowrap">
-                      <NavLink
-                        to="/settings"
-                        className={({ isActive }) =>
-                          (isActive
-                            ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                            : 'text-gray-500 bg-white ') +
-                          ' w-full text-sm font-medium flex '
-                        }
-                      >
-                        <div
-                          className={'w-full text-sm font-medium flex pl-5 '}
-                        >
-                          <div className="w-4 flex items-center mr-2">
-                            <Settings />
-                          </div>
-                          <div>Settings</div>
-                        </div>
-                      </NavLink>
-                    </li>
-                  </>
-                )}
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            {hasUserSite && (
-              <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                <NavLink
-                  to="/my-documents"
-                  end
-                  className={({ isActive }) =>
-                    (isActive
-                      ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                      : 'text-gray-500 bg-white ') +
-                    ' w-full text-sm font-medium flex '
-                  }
-                >
-                  <FolderDropWrapper
-                    folder={''}
-                    sourceSiteId={currentSiteId}
-                    targetSiteId={user?.email || ''}
-                    className={'w-full text-sm font-medium flex pl-5 py-4 '}
-                  >
-                    <div className="w-4 flex items-center mr-2">
-                      <Documents />
-                    </div>
-                  </FolderDropWrapper>
-                </NavLink>
-              </li>
-            )}
-            {hasDefaultSite && (
-              <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                <NavLink
-                  to={hasUserSite ? '/team-documents' : '/documents'}
-                  end
-                  className={({ isActive }) =>
-                    (isActive
-                      ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                      : 'text-gray-500 bg-white ') +
-                    ' w-full text-sm font-medium flex '
-                  }
-                >
-                  <FolderDropWrapper
-                    folder={''}
-                    sourceSiteId={currentSiteId}
-                    targetSiteId={'default'}
-                    className={'w-full text-sm font-medium flex pl-5 py-3 '}
-                  >
-                    {hasUserSite ? (
-                      <div className="w-4 flex flex-wrap items-center mr-2">
-                        <div className="-mt-0.5">
-                          <Documents />
-                        </div>
-                        <div className="-mt-2.5 -ml-0.5">
-                          <ShareHand />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="w-4 flex items-center mr-2">
-                        <Documents />
-                      </div>
-                    )}
-                  </FolderDropWrapper>
-                </NavLink>
-              </li>
-            )}
-            {hasSharedFolders && (
-              <div className="w-full text-sm font-medium flex pl-5 py-3 bg-white mb-4">
-                <div
-                  className="w-4 flex flex-wrap items-center mr-2 cursor-pointer"
-                  onClick={onSharedFoldersClick}
-                >
-                  <div className="w-3.5 text-gray-700">
-                    <FolderOutline />
-                  </div>
-                  <div className="-mt-2.5 -ml-0.5">
-                    <ShareHand />
-                  </div>
-                </div>
-              </div>
-            )}
-            {!isSiteReadOnly && (
-              <>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+              {!isSiteReadOnly && (
+                <>
+                  <NavigationItem
                     to={`${specialFoldersRootUri}/folders/favorites`}
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
-                    }
-                  >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-4 '}
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <Star />
-                      </div>
-                    </div>
-                  </NavLink>
-                </li>
-                {useSoftDelete && (
-                  <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                    <NavLink
+                    icon={<Star />}
+                    title="Favorites"
+                    testId="nav-favorites"
+                    level={0}
+                  />
+
+                  {useSoftDelete && (
+                    <NavigationItem
                       to={`${specialFoldersRootUri}/folders/deleted`}
-                      className={({ isActive }) =>
-                        (isActive
-                          ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                          : 'text-gray-500 bg-white ') +
-                        ' w-full text-sm font-medium flex '
-                      }
-                    >
-                      <div
-                        className={'w-full text-sm font-medium flex pl-5 py-4 '}
-                      >
-                        <div className="w-4 h-4 flex items-center mr-2">
-                          <Trash />
-                        </div>
-                      </div>
-                    </NavLink>
-                  </li>
-                )}
-              </>
-            )}
-            <div className="flex w-full">
-              <div className="w-full mt-2 mx-2 border-b"></div>
-            </div>
-            <li className="hidden w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to="/workflows"
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                    : 'text-gray-500 bg-white ') +
-                  ' w-full text-sm font-medium flex '
+                      icon={<Trash />}
+                      title="Trash"
+                      testId="nav-trash"
+                      level={0}
+                    />
+                  )}
+                </>
+              )}
+              <div className="flex w-full">
+                <div className="w-full mt-2 border-b border-neutral-300"></div>
+              </div>
+            </>
+          )}
+          <ExpandableSection
+            isExpanded={orchestrationsExpanded}
+            toggleExpand={toggleOrchestrationsExpand}
+            title="Orchestration"
+            testId="expand-orchestrations"
+          />
+          {(orchestrationsExpanded || !isSidebarExpanded) && (
+            <>
+              <NavigationItem
+                to={
+                  '/attributes' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
                 }
-              >
-                <div
-                  className={
-                    'w-full text-sm font-medium flex items-center pl-5 py-4 '
+                icon={<Attribute />}
+                title="Attributes"
+                testId="nav-attributes"
+              />
+              <NavigationItem
+                to={
+                  '/schemas' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
+                }
+                icon={<Schema />}
+                title="Schemas"
+                testId="nav-schemas"
+              />
+              {formkiqVersion.type !== 'core' && (
+                <NavigationItem
+                  to={
+                    '/workflows' +
+                    (pathname.indexOf('workspaces') > 0
+                      ? '/workspaces/' + currentSiteId
+                      : '')
                   }
-                >
-                  <div className="w-4 flex items-center mr-2">
-                    <Workflow />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to="/integrations/api"
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                    : 'text-gray-500 bg-white ') +
-                  ' w-full text-sm font-medium flex '
+                  icon={<Workflow />}
+                  title="Workflows"
+                  testId="nav-workflows"
+                />
+              )}
+              {formkiqVersion.type !== 'core' && (
+                <NavigationItem
+                  to={
+                    '/queues' +
+                    (pathname.indexOf('workspaces') > 0
+                      ? '/workspaces/' + currentSiteId
+                      : '')
+                  }
+                  icon={<Queue />}
+                  title="Queues"
+                  testId="nav-queues"
+                />
+              )}
+              {formkiqVersion.type !== 'core' && (
+                <NavigationItem
+                  to={
+                    '/rulesets' +
+                    (pathname.indexOf('workspaces') > 0
+                      ? '/workspaces/' + currentSiteId
+                      : '')
+                  }
+                  icon={<Rules />}
+                  title="Rulesets"
+                  testId="nav-rulesets"
+                />
+              )}
+              {formkiqVersion.type !== 'core' && (
+                <NavigationItem
+                  to="/mappings"
+                  icon={<Mapping />}
+                  title="Mappings"
+                  testId="nav-mappings"
+                />
+              )}
+              <NavigationItem
+                to={
+                  '/orchestrations/webhooks' +
+                  (pathname.indexOf('workspaces') > 0
+                    ? '/workspaces/' + currentSiteId
+                    : '')
                 }
-              >
-                <div className={'w-full text-sm font-medium flex pl-5 py-4 '}>
-                  <div className="w-4 flex items-center mr-2">
-                    <Api />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-              <NavLink
-                to="/integrations/webhooks"
-                className={({ isActive }) =>
-                  (isActive
-                    ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                    : 'text-gray-500 bg-white ') +
-                  ' w-full text-sm font-medium flex '
-                }
-              >
-                <div className={'w-full text-sm font-medium flex pl-5 py-4 '}>
-                  <div className="w-4 flex items-center mr-2">
-                    <Webhook />
-                  </div>
-                </div>
-              </NavLink>
-            </li>
-            {useAccountAndSettings && (
-              <>
-                <div className="flex w-full">
-                  <div className="w-full mt-2 mx-2 border-b"></div>
-                </div>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/account"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
+                icon={<Webhook />}
+                title="Webhooks"
+                testId="nav-webhooks"
+              />
+              <NavigationItem
+                to="/orchestrations/api"
+                icon={<Api />}
+                title="API Explorer"
+                testId="nav-api-explorer"
+              />
+              <NavigationItem
+                to="/object-examine-tool"
+                icon={<Examine />}
+                title="Object Examine Tool"
+                testId="nav-object-examine"
+              />
+              <div className="flex w-full">
+                <div className="w-full mt-4 border-b border-neutral-300"></div>
+              </div>
+            </>
+          )}
+          {user?.isAdmin && (
+            <>
+              <ExpandableSection
+                title="Administration"
+                expanded={adminExpanded}
+                toggleExpand={toggleAdminExpand}
+                testId="nav-admin"
+              />
+
+              {(adminExpanded || !isSidebarExpanded) && (
+                <>
+                  <NavigationItem
+                    to="/admin/settings"
+                    icon={<Settings />}
+                    title="Settings"
+                    testId="nav-settings"
+                  />
+                  <NavigationItem
+                    to={
+                      '/admin/api-keys' +
+                      (pathname.indexOf('workspaces') > 0
+                        ? '/workspaces/' + currentSiteId
+                        : '')
                     }
-                  >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-4 '}
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <UserIcon />
-                      </div>
-                    </div>
-                  </NavLink>
-                </li>
-                <li className="w-full flex self-start justify-center lg:justify-start whitespace-nowrap">
-                  <NavLink
-                    to="/settings"
-                    className={({ isActive }) =>
-                      (isActive
-                        ? 'text-coreOrange-600 bg-gradient-to-l from-gray-50 via-stone-50 to-gray-100 '
-                        : 'text-gray-500 bg-white ') +
-                      ' w-full text-sm font-medium flex '
-                    }
-                  >
-                    <div
-                      className={'w-full text-sm font-medium flex pl-5 py-4 '}
-                    >
-                      <div className="w-4 flex items-center mr-2">
-                        <Settings />
-                      </div>
-                    </div>
-                  </NavLink>
-                </li>
-              </>
-            )}
-          </>
-        )}
+                    icon={<ApiKey />}
+                    title="API Keys"
+                    testId="nav-api-keys"
+                  />
+                  {((formkiqVersion.modules.includes(
+                    'site_permissions_defined'
+                  ) &&
+                    user.sites.length === 0) ||
+                    user.isAdmin) && (
+                    <NavigationItem
+                      to="/admin/sites-management"
+                      icon={<SitesManagement />}
+                      title="Sites Management"
+                      testId="nav-sites-management"
+                    />
+                  )}
+                  {userAuthenticationType === 'cognito' && (
+                    <>
+                      <NavigationItem
+                        to="/admin/groups"
+                        icon={<Group />}
+                        title="Groups"
+                        testId="nav-groups"
+                      />
+                      <NavigationItem
+                        to="/admin/users"
+                        icon={<Users />}
+                        title="Users"
+                        testId="nav-users"
+                      />
+                    </>
+                  )}
+                  {formkiqVersion.modules.includes('opa') && (
+                    <NavigationItem
+                      to="/admin/access-control"
+                      icon={<AccessControl />}
+                      title="Access Control"
+                      testId="nav-access-control"
+                    />
+                  )}
+                  <NavigationItem
+                    to="/admin/user-activities"
+                    icon={<HistoryIcon />}
+                    title="User Activities"
+                    testId="nav-user-activities"
+                  />
+                </>
+              )}
+            </>
+          )}
+        </>
       </div>
     );
   };
 
   return (
-    <div className={(sidebarExpanded ? 'w-64' : 'w-14') + ' h-screen relative'}>
-      <div
-        className={
-          (sidebarExpanded ? 'w-64' : 'w-14') +
-          ' border-r fixed flex h-full flex-wrap items-start justify-start overflow-y-scroll'
-        }
-      >
+    <div
+      className={
+        (sidebarExpanded ? 'w-64' : 'w-14') +
+        ' relative bg-neutral-100 h-screen overflow-y-auto'
+      }
+    >
+      <div className="pb-20">
         <div
           className={
             (sidebarExpanded ? 'w-64' : 'w-10') +
-            ' flex fixed z-30 justify-between mt-2.5'
+            ' flex fixed z-30 justify-between h-logo'
           }
         >
           <Link to="/">
             {sidebarExpanded ? (
               <>
-                <picture>
-                  <source
-                    srcSet="/assets/img/png/formkiq-wordmark.webp"
-                    type="image/webp"
-                  />
-                  <source
-                    srcSet="/assets/img/png/formkiq-wordmark.png"
-                    type="image/png"
-                  />
-                  <img
-                    src="/assets/img/png/formkiq-wordmark.png"
-                    className="ml-6 mt-2 w-28 mb-2.5"
-                    alt="FormKiQ"
-                  />
-                </picture>
+                <div className="w-logo h-logo flex justify-center items-center">
+                  <picture>
+                    <source
+                      srcSet="/assets/img/png/brand-logo.png"
+                      type="image/png"
+                    />
+                    <img src="/assets/img/png/brand-logo.png" />
+                  </picture>
+                </div>
               </>
             ) : (
               <></>
@@ -900,8 +929,10 @@ export function Sidebar() {
           </Link>
           <div
             className={
-              (sidebarExpanded ? 'justify-end mr-2 ' : 'justify-end mr-2') +
-              ' text-gray-600 hover:text-coreOrange-500 flex mt-2 cursor-pointer '
+              (sidebarExpanded
+                ? 'justify-end -ml-2 pr-2 '
+                : 'justify-end -mr-4 pr-4 ') +
+              ' text-neutral-900 hover:text-primary-500 flex mt-2 cursor-pointer border-r border-neutral-300 '
             }
             onClick={toggleSidebarExpand}
           >
@@ -913,30 +944,34 @@ export function Sidebar() {
         <div
           className={
             (sidebarExpanded ? 'w-62' : 'w-12') +
-            ' flex flex-wrap fixed bg-white '
+            ' flex flex-wrap fixed bg-neutral-100 '
           }
         ></div>
+      </div>
+      <div
+        className={
+          (sidebarExpanded ? 'w-64' : 'w-14') +
+          ' -pt-2 border-r border-neutral-300 fixed flex h-full flex-wrap items-start justify-start overflow-y-auto bg-neutral-100'
+        }
+      >
         {user && (
           <>
-            <nav className="grow mt-16">
+            <nav className="grow mb-8 pt-4">
               {!isSiteReadOnly && (
-                <div className="flex flex-wrap w-full justify-center mb-4">
-                  <button
+                <div className="flex flex-wrap w-full justify-center mb-4 pl-0.5">
+                  <ButtonPrimaryGradient
                     className={
-                      (isSidebarExpanded ? ' mr-1 ' : 'mb-1 ') +
-                      ' bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer'
+                      (isSidebarExpanded
+                        ? ' mr-1 rounded-md'
+                        : 'mb-1 rounded-full') +
+                      ' flex justify-center items-center w-full'
                     }
-                    onClick={(event) => {
-                      // TODO: create more consistent check on site location
-                      if (
-                        pathname.indexOf('/workflows') > -1 ||
-                        pathname.indexOf('/integrations') > -1
-                      ) {
-                        window.location.href = `${currentDocumentsRootUri}?actionEvent=new`;
-                      } else {
-                        dispatch(setCurrentActionEvent('new'));
-                      }
+                    style={{
+                      height: isSidebarExpanded ? '32px' : '28px',
+                      width: isSidebarExpanded ? '100%' : '28px',
+                      padding: isSidebarExpanded ? '16px' : '0px',
                     }}
+                    onClick={() => handleAction('new')}
                   >
                     {isSidebarExpanded && (
                       <span data-test-id="new-document">New</span>
@@ -949,21 +984,21 @@ export function Sidebar() {
                     >
                       {Plus()}
                     </div>
-                  </button>
-                  <button
-                    className="bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-sm font-semibold py-2 px-4 rounded-2xl flex cursor-pointer"
-                    data-test-id="upload-document"
-                    onClick={(event) => {
-                      // TODO: create more consistent check on site location
-                      if (
-                        pathname.indexOf('/workflows') > -1 ||
-                        pathname.indexOf('/integrations') > -1
-                      ) {
-                        window.location.href = `${currentDocumentsRootUri}?actionEvent=upload`;
-                      } else {
-                        dispatch(setCurrentActionEvent('upload'));
-                      }
+                  </ButtonPrimaryGradient>
+                  <ButtonTertiary
+                    className={
+                      (isSidebarExpanded
+                        ? ' mr-1 rounded-md'
+                        : 'mb-1 rounded-full') +
+                      ' flex justify-center items-center w-full'
+                    }
+                    style={{
+                      height: isSidebarExpanded ? '32px' : '28px',
+                      width: isSidebarExpanded ? '100%' : '28px',
+                      padding: isSidebarExpanded ? '16px' : '0px',
                     }}
+                    data-test-id="upload-document"
+                    onClick={() => handleAction('upload')}
                   >
                     {isSidebarExpanded && <span>Upload</span>}
                     <div
@@ -974,7 +1009,7 @@ export function Sidebar() {
                     >
                       {Upload()}
                     </div>
-                  </button>
+                  </ButtonTertiary>
                 </div>
               )}
               <ul className="flex lg:flex-col gap-1">
@@ -982,17 +1017,38 @@ export function Sidebar() {
               </ul>
             </nav>
             {formkiqVersion && formkiqVersion.type && isSidebarExpanded && (
-              <div className="text-xxs absolute bottom-0 w-full flex justify-center items-end -mt-1 mb-4">
-                {formkiqVersion.type.toUpperCase()} v{formkiqVersion.version}
-              </div>
+              <>
+                <div className="group text-xs fixed left-0 bottom-0 flex justify-start items-end pl-4 mb-2">
+                  FormKiQ
+                  {formkiqVersion.type === 'enterprise' ? (
+                    <span>&nbsp;Enterprise&nbsp;</span>
+                  ) : (
+                    <span>&nbsp;</span>
+                  )}
+                  v{formkiqVersion.version}
+                  <div className="absolute invisible group-hover:visible bottom-full w-56 mb-2 p-2 bg-neutral-100 border">
+                    {formkiqVersion.modules &&
+                      formkiqVersion.modules.length && (
+                        <h3 className="font-semibold mb-1">Modules:</h3>
+                      )}
+                    {formkiqVersion.modules.map((module: string, i: number) => {
+                      return (
+                        <div key={i} className="bg-white p-1">
+                          {module.toUpperCase()}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
             )}
           </>
         )}
       </div>
-      <SharedFoldersModal
-        isOpened={isSharedFoldersModalOpened}
-        onClose={onSharedFoldersModalClose}
-        sharedFolderSites={sharedFolderSites}
+      <WorkspacesModal
+        isOpened={isWorkspacesModalOpened}
+        onClose={onWorkspacesModalClose}
+        workspaceSites={workspaceSites}
       />
     </div>
   );

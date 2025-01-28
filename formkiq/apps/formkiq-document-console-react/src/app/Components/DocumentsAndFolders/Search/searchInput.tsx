@@ -1,11 +1,15 @@
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { AttributesDataState } from '../../../Store/reducers/attributesData';
 import { ConfigState } from '../../../Store/reducers/config';
-import { DataCacheState } from '../../../Store/reducers/data';
 import { DocumentsService } from '../../../helpers/services/documentsService';
-import { formatDate, getFileIcon } from '../../../helpers/services/toolService';
+import {
+  formatDate,
+  getFileIcon,
+  isUUIDv4orV5,
+} from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
 import { FolderSolid, MoreActions, Search, Spinner } from '../../Icons/icons';
 import AdvancedSearchModal from './advancedSearchModal';
@@ -32,46 +36,88 @@ export default function SearchInput({
   siteId,
   documentsRootUri,
   value,
+  expandAdvancedSearch,
 }: any) {
+  const search = useLocation().search;
+  const advancedSearch = new URLSearchParams(search).get('advancedSearch');
   const [expanded, setExpanded] = useState(false);
   const [documents, setDocuments] = useState(null);
   const [isAdvancedSearchModalOpened, setAdvancedSearchModalOpened] =
     useState(false);
+  const [isSearchAvailable, setIsSearchAvailable] = useState<boolean>(true);
   const navigate = useNavigate();
 
   const { formkiqVersion, useAdvancedSearch } = useSelector(ConfigState);
-  const { allTags } = useSelector(DataCacheState);
+  const { allTags, allAttributes } = useSelector(AttributesDataState);
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, setExpanded);
+
+  function handleSearchResponse(response: any) {
+    if (response?.documents) {
+      const temp: any = [];
+      response.documents?.forEach((el: IDocument) => {
+        if (el.documentId) {
+          el.insertedDate = moment(el.insertedDate).format('YYYY-MM-DD HH:mm');
+          el.lastModifiedDate = moment(el.lastModifiedDate).format(
+            'YYYY-MM-DD HH:mm'
+          );
+          temp.push(el);
+        }
+      });
+      setDocuments(temp);
+      setIsSearchAvailable(true);
+    } else if (response.status === 200) { // if search is available but no documents found
+      setIsSearchAvailable(true);
+      setDocuments([] as any);
+    } else {
+      setIsSearchAvailable(false); // if search is not available
+    }
+  }
 
   useEffect(() => {
     if (value) {
       // TODO: allow search across all sites and/or specify site
       // TODO: verify version modules and determine search function to use (DynamoDB, Typesense, OpenSearch)
-      DocumentsService.searchDocuments(
-        siteId,
-        formkiqVersion,
-        null,
-        value,
-        1,
-        allTags
-      ).then((response: any) => {
-        if (response?.documents) {
-          const temp: any = [];
-          response.documents?.forEach((el: IDocument) => {
-            if (el.documentId) {
-              el.insertedDate = moment(el.insertedDate).format(
-                'YYYY-MM-DD HH:mm'
-              );
-              el.lastModifiedDate = moment(el.lastModifiedDate).format(
-                'YYYY-MM-DD HH:mm'
-              );
-              temp.push(el);
-            }
+      const cleanedValue = value.replace(/\s+/g, ' ').trim();
+      if (isUUIDv4orV5(cleanedValue)) {
+        DocumentsService.searchById(
+          siteId,
+          cleanedValue,
+          allTags,
+          allAttributes
+        ).then((response: any) => {
+          handleSearchResponse(response);
+        });
+      } else if (cleanedValue.split(' ').every(isUUIDv4orV5)) {
+        const uniqueValues: string[] = Array.from(
+          new Set(cleanedValue.split(' '))
+        );
+        DocumentsService.searchByIds(
+          siteId,
+          uniqueValues,
+          allTags,
+          allAttributes
+        ).then((response: any) => {
+          handleSearchResponse(response);
+        });
+      } else {
+        if (
+          formkiqVersion.modules.includes('typesense') ||
+          formkiqVersion.modules.includes('opensearch')
+        ) {
+          DocumentsService.searchDocuments(
+            siteId,
+            formkiqVersion,
+            null,
+            value,
+            1,
+            allTags,
+            allAttributes
+          ).then((response: any) => {
+            handleSearchResponse(response);
           });
-          setDocuments(temp);
         }
-      });
+      }
     }
   }, [value, siteId]);
 
@@ -102,6 +148,12 @@ export default function SearchInput({
           </div>
         );
       }
+    } else if (!isSearchAvailable) {
+      return (
+        <div className="text-center text-gray-500">
+          Search Currently Unavailable
+        </div>
+      );
     } else {
       return <Spinner />;
     }
@@ -124,7 +176,7 @@ export default function SearchInput({
           <div className={'fex flex-col'}>
             <div className="inline-block w-8 mr-2 align-text-bottom">
               <img
-                src={getFileIcon(file.path)}
+                src={getFileIcon(file.path, file.deepLinkPath)}
                 className="w-8 mr-2 inline-block"
                 alt="icon"
               />
@@ -178,7 +230,7 @@ export default function SearchInput({
       <div className="flex items-center">
         <div
           _ngcontent-wxp-c51=""
-          className="grow md:flex md:items-center rounded-md mt-2 mb-4 mt-2.5 relative bg-gray-100 "
+          className="grow md:flex md:items-center rounded-md mt-2 mb-4 mt-2.5 relative bg-neutral-100 "
         >
           <div className="w-4 ml-2">
             <Search></Search>
@@ -190,22 +242,27 @@ export default function SearchInput({
             value={value}
             aria-label="text"
             type="text"
-            placeholder="Search"
-            className="block w-full appearance-none bg-transparent py-2 pl-4 pr-12 text-base text-slate-900 placeholder:text-slate-600 focus:outline-none sm:text-sm sm:leading-6"
+            placeholder={
+              formkiqVersion.modules.includes('typesense') ||
+              formkiqVersion.modules.includes('opensearch')
+                ? 'Search'
+                : 'Document ID'
+            }
+            className="block w-full appearance-none bg-transparent py-2 pl-4 pr-12 text-base text-neutral-900 placeholder:text-neutral-600 focus:outline-none sm:text-sm sm:leading-6 border-none focus:outline-none focus:ring-0"
           />
         </div>
-        <div className="grow-0 ml-2 -mt-1">
-          {useAdvancedSearch && (
+        {!advancedSearch && (
+          <div className="grow-0 ml-2 -mt-1">
             <button
-              className="bg-gray-100 border hover:bg-gray-200 text-smaller text-gray-600 font-semibold pt-2 pb-1.5 px-2 rounded"
-              onClick={(event) => onAdvancedSearchModalClick(event)}
+              className="bg-neutral-100 border hover:bg-neutral-200 text-smaller text-neutral-600 font-semibold pt-2 pb-1.5 px-2 rounded"
+              onClick={expandAdvancedSearch}
             >
               <div className="w-4">
                 <MoreActions />
               </div>
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
       {expanded && (
         <div className="w-full absolute -mt-2 z-30 bg-white border shadow-xl">
@@ -217,25 +274,25 @@ export default function SearchInput({
             {useAdvancedSearch && (
               <>
                 <li
-                  className="flex items-center p-4 hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center p-4 hover:bg-neutral-100 cursor-pointer"
                   onClick={SearchForFoldersOnly}
                 >
                   <span className={'mr-2'}>
                     <Search></Search>
                   </span>
-                  <span className="whitespace-nowrap text-base text-slate-900">
+                  <span className="whitespace-nowrap text-base text-neutral-900">
                     {' '}
                     Search folders for {value}
                   </span>
                 </li>
                 <li
-                  className="flex items-center p-4 hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center p-4 hover:bg-neutral-100 cursor-pointer"
                   onClick={SearchForFilesOnly}
                 >
                   <span className={'mr-2'}>
                     <Search></Search>
                   </span>
-                  <span className="whitespace-nowrap text-base text-slate-900">
+                  <span className="whitespace-nowrap text-base text-neutral-900">
                     {' '}
                     Search files for {value}
                   </span>
@@ -244,14 +301,16 @@ export default function SearchInput({
             )}
             <DocumentsPreview />
           </ul>
-          <div className="px-4 py-2">
-            <button
-              className="w-full bg-coreOrange-500 hover:bg-coreOrange-700 text-white font-bold py-2 px-4 rounded flex justify-center"
-              onClick={SearchForFilesAndFolders}
-            >
-              See all results
-            </button>
-          </div>
+          {isSearchAvailable && (
+            <div className="px-4 py-2">
+              <button
+                className="w-full bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded flex justify-center"
+                onClick={SearchForFilesAndFolders}
+              >
+                See all results
+              </button>
+            </div>
+          )}
           <div className="hidden mb-2 flex justify-center">
             <div className="pt-0.5">
               <input id="searchCurrentFolderOnly" type="checkbox" />

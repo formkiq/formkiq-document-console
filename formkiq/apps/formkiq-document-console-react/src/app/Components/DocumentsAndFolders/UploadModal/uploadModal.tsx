@@ -9,16 +9,19 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
-import { OcrContentTypes } from '../../../helpers/constants/contentTypes';
 import {
   DocumentUploadedInfo,
   DocumentsService,
   IFileUploadData,
 } from '../../../helpers/services/documentsService';
 import { formatDate } from '../../../helpers/services/toolService';
-import { Checkmark, Spinner } from '../../Icons/icons';
+import { Close } from '../../Icons/icons';
 
 const foldersWithNoUpload = ['favorites', 'shared', 'deleted'];
+const fileTypesMap = {
+  // add here more filetypes if syncfusion does not recognize them
+  md: 'text/markdown',
+};
 
 const uploadProcessLine = (fileData: IFileUploadData, i: number) => {
   return (
@@ -29,7 +32,7 @@ const uploadProcessLine = (fileData: IFileUploadData, i: number) => {
       <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400">
         <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
           <div
-            className="bg-coreOrange-600 h-2.5 rounded-full"
+            className="bg-primary-600 h-2.5 rounded-full"
             style={{
               width: `${Math.round(
                 (fileData.uploadedSize / fileData.originalFile.size) * 100
@@ -81,6 +84,10 @@ export default function UploadModal({
   folder,
   documentId,
   isFolderUpload,
+  onDocumentDataChange,
+  dropUploadDocuments,
+  resetDropUploadDocuments,
+  folderPath,
 }: {
   isOpened: boolean;
   onClose: any;
@@ -89,15 +96,21 @@ export default function UploadModal({
   folder: string;
   documentId: string;
   isFolderUpload: boolean;
+  onDocumentDataChange: any;
+  dropUploadDocuments?: any;
+  resetDropUploadDocuments?: any;
+  folderPath: string;
 }) {
   const dispatch = useAppDispatch();
   const cancelButtonRef = useRef(null);
   const uploaderRef = useRef<UploaderComponent>(null);
   const [uploadedDocs, setUploaded] = useState([]);
+  const [notUploadedDocs, setNotUploadedDocs] = useState<string[]>([]);
   const [uploadProcessDocs, setUploadProcess]: [
     uploadProcessDocs: IFileUploadData[],
     setUploadProcess: any
   ] = useState([]);
+  const [isAiScanEnabled, setIsAiScanEnabled] = useState(false);
   const [uploadData, setUploadData]: [
     uploadData: { event: any; fileData: IFileUploadData | null },
     setUploadData: any
@@ -110,6 +123,25 @@ export default function UploadModal({
   if (documentId.length) {
     allowMultipleFiles = false;
   }
+
+  useEffect(() => {
+    if (!dropUploadDocuments) return;
+    setTimeout(() => {
+      const uploader = document.getElementById('uploader') as HTMLInputElement;
+      if (!uploader) return;
+      uploader.files = dropUploadDocuments;
+      uploader.dispatchEvent(new Event('change'));
+    }, 0);
+  }, [dropUploadDocuments]);
+
+  useEffect(() => {
+    const siteId = DocumentsService.determineSiteId();
+    DocumentsService.getConfiguration(siteId).then((response) => {
+      if (response.chatGptApiKey) {
+        setIsAiScanEnabled(true);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (uploadData.event) {
@@ -146,7 +178,9 @@ export default function UploadModal({
   };
 
   const closeDialog = () => {
+    if (resetDropUploadDocuments) resetDropUploadDocuments();
     setUploaded([]);
+    setNotUploadedDocs([]);
     onClose();
   };
 
@@ -159,13 +193,62 @@ export default function UploadModal({
       // console.log(event.loaded + ' / ' + event.total);
     };
   };
+
+  interface UploadResponse {
+    status: number;
+    file: { name: string };
+    errors?: { error: string }[];
+  }
+
+  function handleFileUploadErrors(
+    responses: UploadResponse[],
+    dispatch: (action: any) => void
+  ) {
+    const notUploadedFilesErrors: {
+      fileName: string;
+      errorMessage: string;
+    }[] = responses
+      .filter((response) => response.status !== 200)
+      .map((response) => ({
+        fileName: response.file.name,
+        errorMessage: response.errors
+          ? response.errors.map((err) => err.error).join(', ')
+          : '',
+      }));
+
+    if (notUploadedFilesErrors.length > 0) {
+      const errorMessages = notUploadedFilesErrors.map(
+        (error) =>
+          `${error.fileName}  ${
+            error.errorMessage !== '' && ': ' + error.errorMessage
+          }`
+      );
+      dispatch(
+        openDialog({
+          dialogTitle: `Error uploading files: \n ${errorMessages.join('\n')}`,
+        })
+      );
+    }
+    return notUploadedFilesErrors;
+  }
+
   const uploadFiles = () => {
     if (uploaderRef.current) {
       const filesData: IFileUploadData[] = uploaderRef.current
         .getFilesData()
         .map((e: any) => {
+          let newFile = e.rawFile;
+          // manually update file types that are not recognized by syncfusion uploader
+          const fileExtension = e.rawFile.name.split('.').pop();
+          const mimeType =
+            fileTypesMap[fileExtension as keyof typeof fileTypesMap];
+          if (mimeType) {
+            newFile = new File([e.rawFile], e.rawFile.name, {
+              type: mimeType,
+            });
+          }
           const obj: IFileUploadData = {
-            originalFile: e.rawFile,
+            originalFile: newFile,
             uploadedSize: 0,
           };
           return obj;
@@ -182,12 +265,21 @@ export default function UploadModal({
           filesData,
           onprogress
         ).then((res) => {
-          const ids = res.map((item) => {
-            return item.documentId;
-          });
+          const ids = res
+            .filter((item) => {
+              return item.status === 200;
+            })
+            .map((item) => {
+              return item.documentId;
+            });
+          const notUploadedFilesErrors: {
+            fileName: string;
+            errorMessage: string;
+          }[] = handleFileUploadErrors(res, dispatch);
           DocumentsService.getDocumentsById(ids, siteId).then(
             (uploaded: []) => {
               setUploadProcess([]);
+              // NOTE: 'fulltext' has been replaced with 'opensearch' and 'typesense', but this should not trigger for now
               if (formkiqVersion.modules?.indexOf('fulltext') > -1) {
                 const actions = [{ type: 'fulltext' }];
                 uploaded.forEach((doc: any) => {
@@ -199,6 +291,8 @@ export default function UploadModal({
                 });
               }
               setUploaded([...uploadedDocs, ...uploaded]);
+              setNotUploadedDocs(notUploadedFilesErrors.map((f) => f.fileName));
+              onDocumentDataChange();
             }
           );
         });
@@ -210,9 +304,17 @@ export default function UploadModal({
           filesData,
           onprogress
         ).then((res) => {
-          const ids = res.map((item) => {
-            return item.documentId;
-          });
+          const ids = res
+            .filter((item) => {
+              return item.status === 200;
+            })
+            .map((item) => {
+              return item.documentId;
+            });
+          const notUploadedFilesErrors: {
+            fileName: string;
+            errorMessage: string;
+          }[] = handleFileUploadErrors(res, dispatch);
           DocumentsService.getDocumentsById(ids, siteId).then(
             (uploaded: []) => {
               setUploadProcess([]);
@@ -247,8 +349,8 @@ export default function UploadModal({
               const actionCheckboxTypesense = document.getElementById(
                 'actionCheckboxTypesense'
               );
-              const actionCheckboxFulltext = document.getElementById(
-                'actionCheckboxFulltext'
+              const actionCheckboxOpensearch = document.getElementById(
+                'actionCheckboxOpensearch'
               );
               const actionCheckboxDocumentTypeTag = document.getElementById(
                 'actionCheckboxDocumentTypeTag'
@@ -273,8 +375,8 @@ export default function UploadModal({
               if (
                 (actionCheckboxTypesense &&
                   (actionCheckboxTypesense as HTMLInputElement).checked) ||
-                (actionCheckboxFulltext &&
-                  (actionCheckboxFulltext as HTMLInputElement).checked)
+                (actionCheckboxOpensearch &&
+                  (actionCheckboxOpensearch as HTMLInputElement).checked)
               ) {
                 actions.push({
                   type: 'fulltext',
@@ -308,6 +410,8 @@ export default function UploadModal({
               });
 
               setUploaded([...uploadedDocs, ...uploaded]);
+              setNotUploadedDocs(notUploadedFilesErrors.map((f) => f.fileName));
+              onDocumentDataChange();
             }
           );
         });
@@ -374,7 +478,7 @@ export default function UploadModal({
     return (
       <tr key={i}>
         <td
-          className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400"
+          className="border-b border-slate-100 nodark:border-slate-700 p-4 pl-8 text-slate-500 nodark:text-slate-400 break-words"
           data-test-id={`uploaded-files-${i}`}
         >
           {file.path}
@@ -384,37 +488,6 @@ export default function UploadModal({
         </td>
         <td className="border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400">
           {formatDate(file.insertedDate)}
-        </td>
-        <td className="hidden border-b border-slate-100 nodark:border-slate-700 p-4 pr-8 text-slate-500 nodark:text-slate-400 text-center">
-          {formkiqVersion.modules?.indexOf('ocr') > -1 &&
-            formkiqVersion.modules?.indexOf('fulltext') > -1 &&
-            OcrContentTypes.indexOf(file.contentType) > -1 && (
-              <>
-                {file.processingOcrWorkflow && <Spinner />}
-                {file.submittedOcrWorkflow && (
-                  <div className="w-full flex">
-                    Fulltext:
-                    <span className="w-5 pl-1 text-green-500">
-                      <Checkmark />
-                    </span>
-                  </div>
-                )}
-                {!file.processingOcrWorkflow && !file.submittedOcrWorkflow && (
-                  <button
-                    type="button"
-                    className="mt-3 inline-flex flex-wrap w-full justify-center rounded-md border border-gray-300 bg-coreOrange-500 px-3 py-1 text-base font-semibold text-white shadow-sm hover:bg-coreOrange-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                    onClick={(event) => {
-                      addToOcr(event, file);
-                    }}
-                  >
-                    Submit for OCR Processing
-                    <small className="block text-xs">
-                      (used in fulltext search)
-                    </small>
-                  </button>
-                )}
-              </>
-            )}
         </td>
       </tr>
     );
@@ -455,8 +528,20 @@ export default function UploadModal({
                 data-test-id="upload-document-modal"
                 className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-screen-xl"
               >
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <div className="flex-1 bg-white p-5 inline-block w-full">
+                <div
+                  className={
+                    `px-4 pt-5 pb-4 sm:p-6 sm:pb-4 ` +
+                    (documentId.length ? 'bg-neutral-300' : 'bg-white')
+                  }
+                >
+                  <div
+                    className={
+                      'flex-1 bg-white border-2 rounded-md p-5 inline-block w-full ' +
+                      (documentId.length
+                        ? 'border-neutral-500'
+                        : 'border-neutral-300')
+                    }
+                  >
                     <div className="font-bold text-lg inline-block pr-6">
                       {documentId.length ? (
                         <span>Upload New Version</span>
@@ -492,9 +577,13 @@ export default function UploadModal({
                         selected={onFilesSelected}
                         multiple={allowMultipleFiles}
                         directoryUpload={isFolderUpload}
+                        maxFileSize={5e9}
                       />
                     </div>
                     <div className="flex flex-wrap">
+                      <h4 className="w-full text-lg font-bold mb-2 px-2 py-1 bg-gray-100">
+                        Location: {folderPath}
+                      </h4>
                       <h4 className="w-full font-semibold">
                         Run the following actions, when available:
                       </h4>
@@ -513,67 +602,69 @@ export default function UploadModal({
                             </label>
                           </div>
                         )}
-                        {formkiqVersion.modules?.indexOf('ocr') > -1 && (
-                          <div className="px-4">
-                            <input id="actionCheckboxOcr" type="checkbox" />
-                            <label
-                              htmlFor="actionCheckboxOcr"
-                              className="pl-2 font-semibold cursor-pointer"
-                            >
-                              Retrieve and Store Content Using OCR
-                            </label>
-                          </div>
-                        )}
-                        {formkiqVersion.modules?.indexOf('typesense') > -1 && (
-                          <div className="px-4">
-                            <input
-                              id="actionCheckboxTypesense"
-                              type="checkbox"
-                            />
-                            <label
-                              htmlFor="actionCheckboxTypesense"
-                              className="pl-2 font-semibold cursor-pointer"
-                            >
-                              Add Content to Fulltext Search
-                            </label>
-                          </div>
-                        )}
-                        {formkiqVersion.modules?.indexOf('fulltext') > -1 && (
-                          <div className="px-4">
-                            <input
-                              id="actionCheckboxFulltext"
-                              type="checkbox"
-                            />
-                            <label
-                              htmlFor="actionCheckboxFulltext"
-                              className="pl-2 font-semibold cursor-pointer"
-                            >
-                              Add Content to Fulltext Search
-                            </label>
-                          </div>
-                        )}
                         <div className="px-4">
-                          <input
-                            id="actionCheckboxDocumentTypeTag"
-                            type="checkbox"
-                          />
+                          <input id="actionCheckboxOcr" type="checkbox" />
                           <label
-                            htmlFor="actionCheckboxDocumentTypeTag"
+                            htmlFor="actionCheckboxOcr"
                             className="pl-2 font-semibold cursor-pointer"
                           >
-                            Use Content to Determine Document Type
-                            <span className="text-xs block">
-                              (requires OpenAI API Key)
-                            </span>
+                            Retrieve and Store Content Using OCR
                           </label>
                         </div>
+                        {formkiqVersion.modules?.indexOf('typesense') > -1 &&
+                          formkiqVersion.modules?.indexOf('opensearch') ===
+                            -1 && (
+                            <div className="px-4">
+                              <input
+                                id="actionCheckboxTypesense"
+                                type="checkbox"
+                              />
+                              <label
+                                htmlFor="actionCheckboxTypesense"
+                                className="pl-2 font-semibold cursor-pointer"
+                              >
+                                Add Content to Fulltext Search
+                              </label>
+                            </div>
+                          )}
+                        {formkiqVersion.modules?.indexOf('opensearch') > -1 && (
+                          <div className="px-4">
+                            <input
+                              id="actionCheckboxOpensearch"
+                              type="checkbox"
+                            />
+                            <label
+                              htmlFor="actionCheckboxOpensearch"
+                              className="pl-2 font-semibold cursor-pointer"
+                            >
+                              Add Content to Fulltext Search
+                            </label>
+                          </div>
+                        )}
+                        {isAiScanEnabled && (
+                          <div className="px-4">
+                            <input
+                              id="actionCheckboxDocumentTypeTag"
+                              type="checkbox"
+                            />
+                            <label
+                              htmlFor="actionCheckboxDocumentTypeTag"
+                              className="pl-2 font-semibold cursor-pointer"
+                            >
+                              Use Content to Determine Document Type
+                              <span className="text-xs block">
+                                (requires OpenAI API Key)
+                              </span>
+                            </label>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div>
                       <button
                         type="button"
                         data-test-id="upload"
-                        className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-coreOrange-500 px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-coreOrange-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                        className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-primary-500 px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                         onClick={uploadFiles}
                       >
                         Upload
@@ -619,42 +710,85 @@ export default function UploadModal({
                     <div className="flex justify-between mr-8"></div>
                     <div>{uploadProcessTable(uploadProcessDocs)}</div>
                     {uploadedDocs.length > 0 && (
-                      <div className="relative rounded-xl overflow-auto max-h-64 overflow-y-scroll">
+                      <div className="relative rounded-xl">
                         <div className="shadow-sm overflow-hidden my-8">
                           <div className="font-bold text-lg inline-block pr-6 pb-6">
                             Uploaded files:
                           </div>
-                          <table className="border-collapse table-fixed w-full text-sm">
-                            <thead>
-                              <tr>
-                                <th
-                                  className="border-b nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left"
-                                  data-test-id="uploaded-filename"
-                                >
-                                  Filename
-                                </th>
-                                <th className="border-b nodark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
-                                  Uploaded by
-                                </th>
-                                <th className="border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
-                                  Date added
-                                </th>
-                                <th className="hidden border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
-                                  Workflow(s)
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white nodark:bg-slate-800">
-                              {uploadedDocs.map((file, i) => {
-                                return uploadedFileLine(file, i);
-                              })}
-                            </tbody>
-                          </table>
+                          <div className=" max-h-56 overflow-y-auto">
+                            <table className="border-separate border-spacing-0 table-fixed w-full text-sm border-none">
+                              <thead className="sticky top-0 bg-white">
+                                <tr>
+                                  <th
+                                    className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left"
+                                    data-test-id="uploaded-filename"
+                                  >
+                                    Filename
+                                  </th>
+                                  <th className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                    Uploaded by
+                                  </th>
+                                  <th className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                    Date added
+                                  </th>
+                                  <th className="hidden border-b nodark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 nodark:text-slate-200 text-left">
+                                    Workflow(s)
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white nodark:bg-slate-800">
+                                {uploadedDocs.map((file, i) => {
+                                  return uploadedFileLine(file, i);
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {notUploadedDocs.length > 0 && (
+                      <div className="relative rounded-xl">
+                        <div className="shadow-sm overflow-hidden my-8">
+                          <div className="font-bold text-lg inline-block pr-6 pb-6">
+                            Files not uploaded:
+                          </div>
+                          <div className=" max-h-56 overflow-y-auto">
+                            <table className="border-separate border-spacing-0 table-fixed w-full text-sm border-none">
+                              <thead className="sticky top-0 bg-white">
+                                <tr>
+                                  <th
+                                    className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 text-left"
+                                    data-test-id="uploaded-filename"
+                                  >
+                                    Filename
+                                  </th>
+                                  <th className="border-b border-t border-white nodark:border-slate-600 font-medium p-4 pl-8 pt-0 pb-3 text-slate-400 text-left"></th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white nodark:bg-slate-800">
+                                {notUploadedDocs.map((fileName, i) => {
+                                  return (
+                                    <tr key={i + fileName}>
+                                      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 text-slate-500">
+                                        {fileName}
+                                      </td>
+                                      <td className="border-b border-slate-100 nodark:border-slate-700 p-4 text-red-500 flex gap-2">
+                                        <div className="w-5 h-5 mr-2 ">
+                                          <Close />
+                                        </div>
+                                        Error: File upload failed.
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       </div>
                     )}
                   </div>
-                  <div className="flex justify-between mr-8">
+                  <div className="flex pt-4 justify-between mr-8">
                     <div></div>
                     <button
                       type="button"

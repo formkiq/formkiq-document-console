@@ -31,7 +31,8 @@ cat > /usr/share/nginx/html/assets/config.json <<EOF
   "userAuthentication": "cognito",
   "authApi": "$COGNITO_API_URL",
   "cognitoHostedUi": "",
-  "cognitoEndpointOverride":""
+  "cognitoEndpointOverride":"",
+  "useAuthApiForSignIn":true
 }
 EOF
 

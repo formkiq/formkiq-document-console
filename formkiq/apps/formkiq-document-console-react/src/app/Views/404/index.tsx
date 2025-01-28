@@ -12,7 +12,7 @@ const Page404 = () => {
           <div className="font-bold text-lg text-center mb-8">404</div>
           <div className="font-bold text-lg text-center mb-8">
             <NavLink to="/documents">
-              <button className="bg-coreOrange-500 hover:bg-coreOrange-700 text-white font-bold py-2 px-4 rounded">
+              <button className="bg-primary-500 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded">
                 Home
               </button>
             </NavLink>

@@ -13,6 +13,7 @@ export type User = {
   sites: [];
   defaultSiteId: string;
   currentSiteId: string;
+  isAdmin: boolean;
 };
 
 export type Section = {

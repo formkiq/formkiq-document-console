@@ -2,6 +2,7 @@ export interface IDocument {
   checksum: string;
   contentLength: number;
   contentType: string;
+  deepLinkPath: string;
   documentId: string;
   insertedDate: string;
   lastModifiedDate: string;

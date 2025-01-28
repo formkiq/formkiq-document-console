@@ -1,59 +1,178 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { setAllTags } from '../../Store/reducers/data';
+import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   addOrCreateTagValue,
-  excludeDocumentsWithTagFromAll,
   findFolderAndParent,
   findParentForDocument,
   isTagValueIncludes,
+  isUUIDv4orV5,
   removeTagOrTagValue,
 } from '../../helpers/services/toolService';
+import {
+  getAllAttributes,
+  getAllTags,
+  setAllAttributes,
+  setAllTags,
+} from '../../helpers/tools/useCacheStorage';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
 import { RootState } from '../store';
-import { DocumentsService } from './../../helpers/services/documentsService';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { setAllAttributesData, setAllTagsData } from './attributesData';
 import { User } from './auth';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
+let callCounter = 0;
 export const fetchDocuments = createAsyncThunk(
   'documentsList/fetchDocuments',
   async (data: any, thunkAPI) => {
+    const currentCallId = ++callCounter;
     const {
       siteId,
       formkiqVersion,
       searchWord,
       searchFolder,
       subfolderUri,
+      queueId,
       filterTag,
+      filterAttribute,
       nextToken,
       page,
+      searchAttributes,
     } = data;
     const user = (thunkAPI.getState() as any)?.authState.user;
     const tagParam = filterTag ? filterTag.split(':')[0] : null;
-    const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
+    const attributeParam = filterAttribute ? filterAttribute : null;
+    const allAttributesState = (thunkAPI.getState() as any)?.attributesDataState
+      .allAttributes;
+    const allTagsState = (thunkAPI.getState() as any)?.attributesDataState
+      .allTags;
+    const attributesLastRefreshed = (thunkAPI.getState() as any)
+      ?.attributesDataState.attributesLastRefreshed;
+    const attributesSiteId = (thunkAPI.getState() as any)?.attributesDataState
+      .attributesSiteId;
+    let allAttributes = allAttributesState;
+    let allTags = allTagsState;
     const dateDiff =
-      new Date().getTime() - dataCache.tagsLastRefreshed.getTime();
-    if (dateDiff / 1000 > 30 || dataCache.tagsSiteId !== siteId) {
+      new Date().getTime() - new Date(attributesLastRefreshed).getTime();
+
+    async function loadTagsAndAttributes() {
       await DocumentsService.getAllTagKeys(siteId).then((response: any) => {
         const allTagData = {
           allTags: response?.values,
           tagsLastRefreshed: new Date(),
           tagsSiteId: siteId,
         };
-        thunkAPI.dispatch(setAllTags(allTagData));
+        allTags = response?.values;
+        setAllTags(allTagData);
+        thunkAPI.dispatch(setAllTagsData(allTagData));
+      });
+      await DocumentsService.getAttributes(siteId).then((response: any) => {
+        const allAttributesData = {
+          allAttributes: response?.attributes,
+          attributesLastRefreshed: new Date(),
+          attributesSiteId: siteId,
+        };
+        allAttributes = response?.attributes;
+        setAllAttributes(allAttributesData);
+        thunkAPI.dispatch(setAllAttributesData(allAttributesData));
       });
     }
-    if (searchWord) {
-      if (searchFolder && searchFolder.length) {
+
+    // check if data in state is valid
+    if (dateDiff / 1000 > 30 || attributesSiteId !== siteId) {
+      const allAttributesCache = await getAllAttributes();
+      const allTagsCache = await getAllTags();
+      // check if data in cache is valid
+      if (allAttributesCache && allTagsCache) {
+        const dateDiff =
+          new Date().getTime() -
+          new Date(allAttributesCache.attributesLastRefreshed).getTime();
+        const isCachedDataValid =
+          dateDiff / 1000 < 30 &&
+          allAttributesCache.attributesSiteId === siteId;
+        if (isCachedDataValid) {
+          // use data from cache and update state
+          allAttributes = allAttributesCache.allAttributes;
+          allTags = allTagsCache.allTags;
+          thunkAPI.dispatch(setAllAttributesData(allAttributesCache));
+          thunkAPI.dispatch(setAllTagsData(allTagsCache));
+        } else {
+          // load the data and save it in cache and in state
+          await loadTagsAndAttributes();
+        }
+      } else {
+        // load the data and save it in cache and in state
+        await loadTagsAndAttributes();
+      }
+    }
+    if (searchWord || searchAttributes) {
+      const cleanedSearchWord = searchWord
+        ? searchWord.replace(/\s+/g, ' ').trim()
+        : '';
+      if (isUUIDv4orV5(cleanedSearchWord)) {
+        // UUID detected, use document ID search
+        DocumentsService.searchById(
+          siteId,
+          searchWord.trim(),
+          allTags,
+          allAttributes
+        ).then((response: any) => {
+          if (response && response.status === 200) {
+            if (currentCallId !== callCounter) return;
+            const data = {
+              siteId,
+              documents: response.documents,
+              user,
+              page,
+              isLoadingMore: false,
+              isLastSearchPageLoaded: response.documents?.length === 0,
+              next: response.next,
+            };
+            thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
+          }
+        });
+      } else if (cleanedSearchWord.split(' ').every(isUUIDv4orV5)) {
+        const uniqueDocumentIds: string[] = Array.from(
+          new Set(cleanedSearchWord.split(' '))
+        );
+        DocumentsService.searchByIds(
+          siteId,
+          uniqueDocumentIds,
+          allTags,
+          allAttributes
+        ).then((response: any) => {
+          if (response && response.status === 200) {
+            if (currentCallId !== callCounter) return;
+            const data = {
+              siteId,
+              documents: response.documents,
+              user,
+              page,
+              isLoadingMore: false,
+              isLastSearchPageLoaded: response.documents?.length === 0,
+              next: response.next,
+            };
+            thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
+          }
+        });
+      } else if (searchFolder && searchFolder.length) {
+        // TODO: see if now implemented on backend
         // NOTE: not yet implemented on backend
         DocumentsService.searchDocumentsInFolder(
           siteId,
           tagParam,
           searchWord,
           searchFolder,
-          page
+          page,
+          allAttributes,
+          searchAttributes
         ).then((response: any) => {
-          if (response) {
+          if (response && response.status === 200) {
+            if (currentCallId !== callCounter) return; // After the async operation completes,this check ensures that only the result from the most recent call is used to update the state.
             const data = {
               siteId,
               documents: response.documents,
@@ -61,6 +180,7 @@ export const fetchDocuments = createAsyncThunk(
               page,
               isLoadingMore: false,
               isLastSearchPageLoaded: false,
+              next: response.next,
             };
             if (page > 1) {
               data.isLoadingMore = true;
@@ -69,20 +189,24 @@ export const fetchDocuments = createAsyncThunk(
               data.isLastSearchPageLoaded = true;
             }
             thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
           }
         });
       } else {
-        const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
         DocumentsService.searchDocuments(
           siteId,
           formkiqVersion,
           tagParam,
           searchWord,
           page,
-          dataCache.allTags
+          allTags,
+          allAttributes,
+          searchAttributes
         ).then((response: any) => {
-          if (response) {
-            const temp: any = response.documents.filter(
+          if (response && response.status === 200) {
+            if (currentCallId !== callCounter) return;
+            const temp: any = response.documents?.filter(
               (document: IDocument) => {
                 return document.path;
               }
@@ -94,6 +218,7 @@ export const fetchDocuments = createAsyncThunk(
               page,
               isLoadingMore: false,
               isLastSearchPageLoaded: false,
+              next: response.next,
             };
             if (page > 1) {
               data.isLoadingMore = true;
@@ -102,19 +227,63 @@ export const fetchDocuments = createAsyncThunk(
               data.isLastSearchPageLoaded = true;
             }
             thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
           }
         });
       }
     } else {
-      if (subfolderUri) {
+      if (queueId && queueId.length) {
+        DocumentsService.getDocumentsInQueue(
+          queueId,
+          siteId,
+          null,
+          nextToken,
+          20
+        ).then((response: any) => {
+          // putting workflow under document object, for top-level object consistency with other search results
+          if (response && response.status === 200) {
+            if (currentCallId !== callCounter) return;
+            const mappedDocuments: any = [];
+            response.documents.map((val: any) => {
+              if (val.document) {
+                if (val.workflow) {
+                  val.document.workflow = val.workflow;
+                }
+                mappedDocuments.push(val.document);
+              }
+            });
+            const data = {
+              siteId,
+              documents: mappedDocuments,
+              user: user,
+              next: response.next,
+              isLoadingMore: false,
+              isLastSearchPageLoaded: false,
+            };
+            if (nextToken) {
+              data.isLoadingMore = true;
+            }
+            if (response.documents?.length === 0) {
+              data.isLastSearchPageLoaded = true;
+            }
+            thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
+          }
+        });
+      } else if (subfolderUri) {
         if (subfolderUri === 'shared') {
           DocumentsService.getDocumentsSharedWithMe(
             siteId,
             tagParam,
             null,
-            nextToken
+            nextToken,
+            attributeParam,
+            allAttributes
           ).then((response: any) => {
-            if (response) {
+            if (response && response.status === 200) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -132,6 +301,8 @@ export const fetchDocuments = createAsyncThunk(
                 data.isLastSearchPageLoaded = true;
               }
               thunkAPI.dispatch(setDocuments(data));
+            } else {
+              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
             }
           });
         } else if (subfolderUri === 'favorites') {
@@ -139,9 +310,12 @@ export const fetchDocuments = createAsyncThunk(
             siteId,
             tagParam,
             null,
-            nextToken
+            nextToken,
+            attributeParam,
+            allAttributes
           ).then((response: any) => {
-            if (response) {
+            if (response && response.status === 200) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -159,16 +333,19 @@ export const fetchDocuments = createAsyncThunk(
                 data.isLastSearchPageLoaded = true;
               }
               thunkAPI.dispatch(setDocuments(data));
+            } else {
+              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
             }
           });
         } else if (subfolderUri === 'deleted') {
           DocumentsService.getDeletedDocuments(
             siteId,
-            tagParam,
             null,
-            nextToken
+            nextToken,
+            'true'
           ).then((response: any) => {
-            if (response) {
+            if (response && response.status === 200) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -186,6 +363,8 @@ export const fetchDocuments = createAsyncThunk(
                 data.isLastSearchPageLoaded = true;
               }
               thunkAPI.dispatch(setDocuments(data));
+            } else {
+              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
             }
           });
         } else if (subfolderUri === 'all') {
@@ -193,9 +372,12 @@ export const fetchDocuments = createAsyncThunk(
             siteId,
             tagParam,
             null,
-            nextToken
+            nextToken,
+            attributeParam,
+            allAttributes
           ).then((response: any) => {
-            if (response) {
+            if (response && response.status === 200) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -213,10 +395,11 @@ export const fetchDocuments = createAsyncThunk(
                 data.isLastSearchPageLoaded = true;
               }
               thunkAPI.dispatch(setDocuments(data));
+            } else {
+              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
             }
           });
         } else {
-          const dataCache = (thunkAPI.getState() as RootState).dataCacheState;
           DocumentsService.getDocumentsInFolder(
             subfolderUri,
             siteId,
@@ -224,9 +407,12 @@ export const fetchDocuments = createAsyncThunk(
             null,
             nextToken,
             20,
-            dataCache.allTags
+            allTags,
+            attributeParam,
+            allAttributes
           ).then((response: any) => {
-            if (response) {
+            if (response && response.status === 200) {
+              if (currentCallId !== callCounter) return;
               const data = {
                 siteId,
                 documents: response.documents,
@@ -236,6 +422,7 @@ export const fetchDocuments = createAsyncThunk(
                 next: response.next,
                 isLoadingMore: false,
                 isLastSearchPageLoaded: false,
+                page,
               };
               if (nextToken) {
                 data.isLoadingMore = true;
@@ -244,11 +431,12 @@ export const fetchDocuments = createAsyncThunk(
                 data.isLastSearchPageLoaded = true;
               }
               thunkAPI.dispatch(setDocuments(data));
+            } else {
+              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
             }
           });
         }
       } else {
-        const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
         DocumentsService.getDocumentsInFolder(
           '',
           siteId,
@@ -256,9 +444,12 @@ export const fetchDocuments = createAsyncThunk(
           null,
           nextToken,
           20,
-          dataCache.allTags
+          allTags,
+          attributeParam,
+          allAttributes
         ).then((response: any) => {
-          if (response) {
+          if (response && response.status === 200) {
+            if (currentCallId !== callCounter) return;
             const data = {
               siteId,
               documents: response.documents,
@@ -267,11 +458,15 @@ export const fetchDocuments = createAsyncThunk(
               tag: filterTag,
               next: response.next,
               isLoadingMore: false,
+              attribute: filterAttribute,
+              page,
             };
             if (nextToken) {
               data.isLoadingMore = true;
             }
             thunkAPI.dispatch(setDocuments(data));
+          } else {
+            thunkAPI.dispatch(setDocumentLoadingStatusRejected());
           }
         });
       }
@@ -292,20 +487,68 @@ export const toggleExpandFolder = createAsyncThunk(
       siteId: string;
       user: User;
     } = data;
+    const allAttributesState = (thunkAPI.getState() as any)?.attributesDataState
+      .allAttributes;
+    const allTagsState = (thunkAPI.getState() as any)?.attributesDataState
+      .allTags;
+    const attributesLastRefreshed = (thunkAPI.getState() as any)
+      ?.attributesDataState.attributesLastRefreshed;
+    const attributesSiteId = (thunkAPI.getState() as any)?.attributesDataState
+      .attributesSiteId;
+    let allAttributes = allAttributesState;
+    let allTags = allTagsState;
 
-    const dataCache = (thunkAPI.getState() as any)?.dataCacheState;
-    const dateDiff =
-      new Date().getTime() - dataCache.tagsLastRefreshed.getTime();
-    if (dateDiff / 1000 > 30 || dataCache.tagsSiteId !== siteId) {
-      // console.log('fetching all tags for refresh - EXPAND')
+    // check if attributes state is valid
+    async function loadTagsAndAttributes() {
       await DocumentsService.getAllTagKeys(siteId).then((response: any) => {
         const allTagData = {
           allTags: response?.values,
           tagsLastRefreshed: new Date(),
           tagsSiteId: siteId,
         };
-        thunkAPI.dispatch(setAllTags(allTagData));
+        allTags = response?.values;
+        setAllTags(allTagData);
+        thunkAPI.dispatch(setAllTagsData(allTagData));
       });
+
+      await DocumentsService.getAttributes(siteId).then((response: any) => {
+        const allAttributesData = {
+          allAttributes: response?.attributes,
+          attributesLastRefreshed: new Date(),
+          attributesSiteId: siteId,
+        };
+        allAttributes = response?.attributes;
+        setAllAttributes(allAttributesData);
+        thunkAPI.dispatch(setAllAttributesData(allAttributesData));
+      });
+    }
+
+    const dateDiff =
+      new Date().getTime() - new Date(attributesLastRefreshed).getTime();
+    if (dateDiff / 1000 > 30 || attributesSiteId !== siteId) {
+      const allAttributesCache = await getAllAttributes();
+      const allTagsCache = await getAllTags();
+      if (allAttributesCache && allTagsCache) {
+        // check if data in cache is valid
+        const dateDiff =
+          new Date().getTime() -
+          new Date(allAttributesCache.attributesLastRefreshed).getTime();
+        const isCachedDataValid =
+          dateDiff / 1000 < 30 &&
+          allAttributesCache.attributesSiteId === siteId;
+        if (isCachedDataValid) {
+          // use data from cache and update state
+          allAttributes = allAttributesCache.allAttributes;
+          allTags = allTagsCache.allTags;
+          thunkAPI.dispatch(setAllAttributesData(allAttributesCache));
+          thunkAPI.dispatch(setAllTagsData(allTagsCache));
+        } else {
+          // console.log('fetching all tags for refresh - EXPAND')
+          await loadTagsAndAttributes();
+        }
+      } else {
+        await loadTagsAndAttributes();
+      }
     }
     const folderPath = subfolderUri;
     if (folder.isExpanded) {
@@ -327,7 +570,9 @@ export const toggleExpandFolder = createAsyncThunk(
           null,
           null,
           25,
-          dataCache.allTags
+          allTags,
+          null,
+          allAttributes
         ).then((response: any) => {
           if (response) {
             let insertedDate = '';
@@ -346,9 +591,9 @@ export const toggleExpandFolder = createAsyncThunk(
                 val.path = folderPath + '/' + val.path;
                 return val;
               });
-            const childDocs = response.documents
-              .filter((val: any) => val.folder !== true)
-              .filter((val: IDocument) => !(val.tags as any)['sysDeletedBy']);
+            const childDocs = response.documents.filter(
+              (val: any) => val.folder !== true
+            );
             const newValue: IFolder = {
               ...folder,
               siteId: siteId,
@@ -406,55 +651,56 @@ export const deleteDocument = createAsyncThunk(
     const {
       siteId,
       user,
-      document,
-      documents,
-      isDocumentInfoPage,
+      documentId,
+      softDelete,
     }: {
       siteId: string;
       user: User;
-      document: IDocument;
-      documents: any;
-      isDocumentInfoPage: boolean;
+      documentId: string;
+      softDelete: boolean;
     } = data;
-    DocumentsService.addTag(document.documentId, siteId, {
-      key: 'sysDeletedBy',
-      value: user.email,
-    }).then(() => {
-      if (documents) {
-        thunkAPI.dispatch(
-          addDocumentTag({
-            doc: document,
-            tagKey: 'sysDeletedBy',
-            valueToAdd: user.email,
-          })
-        );
-        const newDocs = documents.filter((doc: any) => {
-          return doc.documentId !== document.documentId;
-        });
-        thunkAPI.dispatch(
-          updateDocumentsList({
-            documents: newDocs,
-            user: user,
-            isSystemDeletedByKey: false,
-          })
-        );
-      } else {
-        if (!isDocumentInfoPage) {
-          if (document.path.indexOf('/') > -1) {
-            const folderPath = document.path.substring(
-              0,
-              document.path.lastIndexOf('/')
-            );
-            thunkAPI.dispatch(
-              retrieveAndRefreshFolder({
-                folderPath: folderPath,
-                document: document,
-                documentAction: 'remove',
-              })
-            );
-          }
-        }
+    await DocumentsService.deleteDocument(
+      documentId,
+      siteId,
+      softDelete.toString()
+    ).then((res) => {
+      if (res.status !== 200) {
+        const errors = res?.errors;
+        throw new Error(errors ? errors[0].error : 'Error deleting document.');
       }
+      const infoDocumentId = window.location.hash.match(/id=(.*)/);
+      if (
+        infoDocumentId &&
+        infoDocumentId.length > 0 &&
+        documentId === infoDocumentId[1]
+      ) {
+        // close info tab if viewing deleted document
+        window.location.hash = '';
+      }
+      // remove file from document list
+      const state = thunkAPI.getState() as any;
+      const { documents, folders } = state?.documentListState || {};
+      const newDocs = documents.filter((doc: any) => {
+        return doc.documentId !== documentId;
+      });
+      const newFolders = [...folders].map((folder: any) => {
+        return {
+          ...folder,
+          documents: folder.documents
+            ? folder.documents.filter(
+                (doc: any) => doc.documentId !== documentId
+              )
+            : [],
+        };
+      });
+      thunkAPI.dispatch(
+        updateDocumentsList({
+          documents: newDocs,
+          folders: newFolders,
+          user: user,
+          isSystemDeletedByKey: false,
+        })
+      );
     });
   }
 );
@@ -471,7 +717,19 @@ export const documentsListSlice = createSlice({
   name: 'documentsList',
   initialState: defaultState,
   reducers: {
-    setDocuments: (state, action: any) => {
+    setDocumentLoadingStatusPending: (state) => {
+      return {
+        ...state,
+        loadingStatus: RequestStatus.pending,
+      };
+    },
+    setDocumentLoadingStatusRejected: (state) => {
+      return {
+        ...state,
+        loadingStatus: RequestStatus.rejected,
+      };
+    },
+    setDocuments: (state, action: PayloadAction<any>) => {
       if (action.payload) {
         const {
           siteId,
@@ -479,16 +737,17 @@ export const documentsListSlice = createSlice({
           folder,
           tag,
           isLoadingMore = false,
+          attribute,
+          next,
+          page = 1,
         } = action.payload;
 
-        let { next, page = 1, isLastSearchPageLoaded = false } = action.payload;
+        let { isLastSearchPageLoaded = false } = action.payload;
 
-        if (page > 1) {
-          next = null;
-        }
         if (next) {
-          page = 1;
           isLastSearchPageLoaded = false;
+        } else {
+          isLastSearchPageLoaded = true;
         }
 
         if (documents) {
@@ -528,33 +787,19 @@ export const documentsListSlice = createSlice({
               if (tag.indexOf(':') === -1) {
                 type ObjectKey = keyof typeof doc.tags;
                 const tagProperty = tag as ObjectKey;
-                if (doc.tags[tagProperty] !== undefined) {
-                  return (
-                    !(doc.tags as any)['sysDeletedBy'] ||
-                    (doc.tags as any)['sysDeletedBy'] !== undefined
-                  );
-                } else {
-                  return false;
-                }
+                return doc.tags[tagProperty] !== undefined;
               } else {
                 type ObjectKey = keyof typeof doc.tags;
                 const tagProperty = tag.split(':')[0] as ObjectKey;
                 const tagValues = tag.split(':')[1].split('|');
                 if (doc.tags[tagProperty] !== undefined) {
-                  if (
-                    !(doc.tags as any)['sysDeletedBy'] ||
-                    (doc.tags as any)['sysDeletedBy'] !== undefined
-                  ) {
-                    return isTagValueIncludes(doc.tags[tagProperty], tagValues);
-                  } else {
-                    return false;
-                  }
+                  return isTagValueIncludes(doc.tags[tagProperty], tagValues);
                 } else {
                   return false;
                 }
               }
             } else {
-              return !(doc.tags as any)['sysDeletedBy'];
+              return true;
             }
           });
           if (isLoadingMore && state.documents) {
@@ -609,25 +854,20 @@ export const documentsListSlice = createSlice({
       }
       return {
         ...state,
-        documents: null,
+        documents: [] as any[],
+        folders: [] as any[],
+        nextToken: null,
       };
     },
     updateDocumentsList: (state, action) => {
       if (action.payload && state.documents) {
-        const { documents, isSystemDeletedByKey } = action.payload;
+        const { documents, folders } = action.payload;
         const temp = {
-          folders: state.folders,
+          folders: folders ? folders : state.folders,
           documents: documents,
-          isSystemDeletedByKey: isSystemDeletedByKey,
         };
-        const res = excludeDocumentsWithTagFromAll(
-          temp as any,
-          'sysDeletedBy',
-          '',
-          isSystemDeletedByKey
-        );
-        state.folders = res.folders as any;
-        state.documents = res.documents as any;
+        state.folders = temp.folders as any;
+        state.documents = temp.documents as any;
       }
       return state as any;
     },
@@ -985,15 +1225,15 @@ export const documentsListSlice = createSlice({
     builder.addCase(fetchDocuments.pending, (state) => {
       return {
         ...state,
-        documents: [],
-        folders: [],
-        loadingStatus: RequestStatus.pending,
+        nextLoadingStatus: RequestStatus.pending,
       };
     });
   },
 });
 
 export const {
+  setDocumentLoadingStatusPending,
+  setDocumentLoadingStatusRejected,
   setDocuments,
   addDocumentTag,
   removeDocumentTag,

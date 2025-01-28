@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
@@ -31,6 +31,12 @@ export function ConfirmRegistration() {
   const { user } = useSelector(AuthState);
   const { documentApi, userPoolId, clientId } = useSelector(ConfigState);
 
+  useEffect(() => {
+    if (!session || session === '0') {
+      navigate('/reset-password');
+    }
+  }, []);
+
   const onSubmit = async (data: any) => {
     let newformkiqClient = formkiqClient;
     if (!newformkiqClient.apiClient) {
@@ -58,12 +64,20 @@ export function ConfirmRegistration() {
           );
           navigate('/sign-in');
         } else {
-          dispatch(
-            openDialog({
-              dialogTitle:
-                'An error has occurred. Please try again in a few minutes.',
-            })
-          );
+          if (response.message) {
+            dispatch(
+              openDialog({
+                dialogTitle: response.message,
+              })
+            );
+          } else {
+            dispatch(
+              openDialog({
+                dialogTitle:
+                  'An unexpected error has occurred. Please try again in a few minutes.',
+              })
+            );
+          }
           return;
         }
       });
@@ -146,7 +160,7 @@ export function ConfirmRegistration() {
                 type="submit"
                 value="Set Password"
                 className="px-8 cursor-pointer py-3 mx-1 border border-transparent text-base leading-6 font-medium rounded-md shadow
-                  text-white bg-coreOrange-600 hover:bg-coreOrange-500 focus:outline-none focus:shadow-outline
+                  text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:shadow-outline
                   transition duration-150 ease-in-out md:py-4 md:text-lg md:px-10"
               />
             </div>

@@ -1,11 +1,14 @@
 import { Dialog, Transition } from '@headlessui/react';
 import moment from 'moment';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { InlineViewableContentTypes } from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
 import { Close, Upload } from '../../Icons/icons';
 
 export default function DocumentVersionsModal({
@@ -32,8 +35,9 @@ export default function DocumentVersionsModal({
   const closeDialog = () => {
     onClose();
   };
+  const navigate = useNavigate();
 
-  const doneButtonRef = useRef() as React.MutableRefObject<HTMLButtonElement>;
+  const doneButtonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     updateVersions();
@@ -79,17 +83,16 @@ export default function DocumentVersionsModal({
     }
   };
   const viewDocumentVersion = (event: any, versionKey: string) => {
+    console.log('viewDocumentVersion', versionKey, value);
     if (value) {
       if (versionKey !== undefined) {
-        window.open(
-          `${window.location.origin}${documentsRootUri}/${value.documentId}/view?versionKey=${versionKey}`
+        navigate(
+          `${documentsRootUri}/${
+            value.documentId
+          }/view?versionKey=${encodeURIComponent(versionKey)}`
         );
-        // navigate(`/documents/${value.documentId}/view?versionKey=${versionKey}`)
       } else {
-        window.open(
-          `${window.location.origin}${documentsRootUri}/${value.documentId}/view`
-        );
-        // navigate(`/documents/${value.documentId}/view`)
+        navigate(`${documentsRootUri}/${value.documentId}/view`);
       }
     }
   };
@@ -117,11 +120,16 @@ export default function DocumentVersionsModal({
       const deleteVersion = () => {
         if (value) {
           DocumentsService.deleteDocumentVersion(
+            siteId,
             value.documentId,
-            versionKey
-          ).catch((err) => {
-            console.error('Failed to delete document version: ', err);
-          });
+            encodeURIComponent(versionKey)
+          )
+            .catch((err) => {
+              console.error('Failed to delete document version: ', err);
+            })
+            .then(() => {
+              updateVersions();
+            });
         }
       };
 
@@ -190,26 +198,27 @@ export default function DocumentVersionsModal({
               <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-4/5">
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="flex w-full items-center">
-                    <div className="font-semibold grow text-lg text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 inline-block pr-6">
+                    <div className="font-semibold grow text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 inline-block pr-6">
                       Document Versions
                       <span className="block"></span>
                     </div>
                     <div className="w-100">
                       {!isSiteReadOnly && (
-                        <button
-                          onClick={(event) =>
+                        <ButtonTertiary
+                          onClick={(event: any) =>
                             onUploadClick(event, (value as any).documentId)
                           }
-                          className="w-64 flex bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-sm text-gray-900 font-semibold py-2 px-4 rounded-2xl flex cursor-pointer focus:outline-none"
+                          className="flex font-semibold py-2"
                         >
                           <div className="mx-4">Upload New Version</div>
                           <div className="w-4 h-4 ml-2 mt-1">{Upload()}</div>
-                        </button>
+                        </ButtonTertiary>
                       )}
                     </div>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
                       onClick={closeDialog}
+                      title="Close"
                     >
                       <Close />
                     </div>
@@ -218,22 +227,22 @@ export default function DocumentVersionsModal({
                     <table className="border-collapse table-auto w-full text-sm">
                       <thead>
                         <tr>
-                          <th className="w-20 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="w-20 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Version
                           </th>
-                          <th className="w-48 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="w-48 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Path
                           </th>
-                          <th className="w-32 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="w-32 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Created
                           </th>
-                          <th className="w-32 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="w-32 border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Last modified
                           </th>
-                          <th className="w-64 border-b font-medium p-2 pr-4 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="w-64 border-b font-medium p-2 pr-4 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Content Type
                           </th>
-                          <th className="border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-coreOrange-500 via-red-500 to-coreOrange-600 text-left">
+                          <th className="border-b font-medium p-2 pt-0 pb-3 text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 text-left">
                             Actions
                           </th>
                         </tr>
@@ -286,9 +295,9 @@ export default function DocumentVersionsModal({
                                         View
                                       </button>
                                     )}
-                                    <button
-                                      className="flex items-center bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-smaller font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
-                                      onClick={(event) =>
+                                    <ButtonTertiary
+                                      className="flex items-center text-smaller font-semibold py-2 px-5 focus:outline-none"
+                                      onClick={(event: any) =>
                                         downloadDocumentVersion(
                                           event,
                                           version.versionKey
@@ -296,10 +305,10 @@ export default function DocumentVersionsModal({
                                       }
                                     >
                                       Download
-                                    </button>
+                                    </ButtonTertiary>
                                     {version.versionKey && (
                                       <button
-                                        className="flex items-center bg-gradient-to-l py-2 px-5 hover:bg-gray-100 cursor-pointer text-red-500 text-gray-900 text-smaller font-semibold py-2 rounded-2xl flex focus:outline-none"
+                                        className="flex items-center bg-gradient-to-l py-2 px-5 hover:bg-gray-100 cursor-pointer text-red-500 text-gray-900 text-smaller font-semibold py-2 rounded-md flex focus:outline-none"
                                         onClick={() => {
                                           openDeleteDialog(version.versionKey);
                                         }}
@@ -309,7 +318,7 @@ export default function DocumentVersionsModal({
                                     )}
                                     {version.version && !isSiteReadOnly && (
                                       <button
-                                        className="flex items-center bg-gradient-to-l from-yellow-200 via-amber-200 to-yellow-300 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 text-gray-900 text-smaller font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                                        className="flex items-center bg-gradient-to-l from-yellow-200 via-amber-200 to-yellow-300 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 text-gray-900 text-smaller font-semibold py-2 px-5 rounded-md flex cursor-pointer focus:outline-none"
                                         onClick={(event) =>
                                           revertDocumentVersion(
                                             event,
@@ -328,14 +337,16 @@ export default function DocumentVersionsModal({
                       </tbody>
                     </table>
                   </div>
-                  <div className="w-full flex justify-center mt-4">
-                    <button
-                      ref={doneButtonRef}
-                      className="flex items-center bg-gradient-to-l from-coreOrange-400 via-red-400 to-coreOrange-500 hover:from-coreOrange-500 hover:via-red-500 hover:to-coreOrange-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                  <div
+                    ref={doneButtonRef}
+                    className="w-full flex justify-center mt-4"
+                  >
+                    <ButtonPrimaryGradient
+                      className="py-2"
                       onClick={closeDialog}
                     >
                       Done
-                    </button>
+                    </ButtonPrimaryGradient>
                   </div>
                 </div>
               </Dialog.Panel>
