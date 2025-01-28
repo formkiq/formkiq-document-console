@@ -1,8 +1,0 @@
-{
-  "$schema": "./node_modules/nx/schemas/workspace-schema.json",
-  "version": 2,
-  "projects": {
-    "formkiq-document-console-react": "apps/formkiq-document-console-react",
-    "formkiq-document-console-react-e2e": "apps/formkiq-document-console-react-e2e"
-  }
-}

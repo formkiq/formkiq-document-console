@@ -168,7 +168,9 @@ function AddAttributesTab({
                     <div
                       key={'allowed_' + i}
                       onClick={(e) => {
-                        defaultValues ? toggleAddToDefault(e, key) : () => {};
+                        if (defaultValues) {
+                          toggleAddToDefault(e, key);
+                        }
                       }}
                       title={
                         defaultValues
