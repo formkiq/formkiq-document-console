@@ -12,6 +12,8 @@ import CreateSiteModal from '../../Components/SitesManagement/CreateSiteModal';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import { login, useAuthenticatedState } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
+import { Spinner } from '../../Components/Icons/icons';
+import { Link } from 'react-router-dom';
 
 function SitesManagement() {
   const { user } = useAuthenticatedState();
@@ -22,9 +24,12 @@ function SitesManagement() {
   const [editingSiteId, setEditingSiteId] = useState<string | null>(null);
   const [sites, setSites] = useState<any[]>([]);
   const [isCreateSiteModalOpen, setIsCreateSiteModalOpen] = useState(false);
+  const [isSitesLoading, setIsSitesLoading] = useState(true);
 
   function updateUserSites() {
+    setIsSitesLoading(true);
     DocumentsService.getSites().then((res) => {
+      setIsSitesLoading(false);
       if (res.status === 200) {
         setSites(res.sites);
         dispatch(login({ ...user, sites: res.sites }));
@@ -33,8 +38,10 @@ function SitesManagement() {
   }
 
   useEffect(() => {
+    if (formkiqVersion.modules.includes('site_permissions_automatic')) return;
     dispatch(fetchGroups({ limit: 60 }));
     DocumentsService.getSites().then((res) => {
+      setIsSitesLoading(false);
       if (res.status === 200) {
         setSites(res.sites);
       }
@@ -50,38 +57,63 @@ function SitesManagement() {
       <div className="flex flex-row">
         <div className="flex-1 inline-block h-full">
           <div className="flex flex-col w-full h-full px-6 mt-6">
-            <div className="flex flex-row justify-between items-center h-10">
-              <h1 className="text-xl font-bold">Sites Management</h1>
-              {((formkiqVersion.modules.includes('site_permissions_defined') &&
-                user.sites.length === 0) ||
-                user.isAdmin) && (
-                <ButtonPrimaryGradient
-                  onClick={() => setIsCreateSiteModalOpen(true)}
-                >
-                  + New Site
-                </ButtonPrimaryGradient>
-              )}
-            </div>
-            {user.isAdmin && (
-              <ul className="flex flex-col gap-4 mt-4">
-                {sites.length > 0 ? (
-                  sites.map((site) => (
-                    <SiteListItem
-                      key={site.siteId}
-                      site={site}
-                      isEditing={editingSiteId === site.siteId}
-                      onEditToggle={setEditingSiteId}
-                      groups={groups}
-                      onSitesChange={updateUserSites}
-                      formkiqVersion={formkiqVersion}
-                    />
-                  ))
-                ) : (
-                  <h3 className="text-center">
-                    There are no sites created yet.
-                  </h3>
+            {formkiqVersion.modules.includes('site_permissions_automatic') ? (
+              <>
+                <p className="text-center">
+                  Your sites/workspaces are configured to use Cognito Groups,
+                  rather than defined sites.
+                </p>
+                <p className="text-center">
+                  Managing sites and access is done via {" "}
+                  <Link
+                    to="/admin/groups"
+                    className="text-primary-500 underline hover:text-primary-700"
+                  >
+                    FormKiQ Groups
+                  </Link>
+                  .
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-row justify-between items-center h-10">
+                  <h1 className="text-xl font-bold">Sites Management</h1>
+                  {((formkiqVersion.modules.includes(
+                    'site_permissions_defined'
+                  ) &&
+                    user.sites.length === 0) ||
+                    user.isAdmin) && (
+                    <ButtonPrimaryGradient
+                      onClick={() => setIsCreateSiteModalOpen(true)}
+                    >
+                      + New Site
+                    </ButtonPrimaryGradient>
+                  )}
+                </div>
+                {user.isAdmin && (
+                  <ul className="flex flex-col gap-4 mt-4">
+                    {sites.length > 0 ? (
+                      sites.map((site) => (
+                        <SiteListItem
+                          key={site.siteId}
+                          site={site}
+                          isEditing={editingSiteId === site.siteId}
+                          onEditToggle={setEditingSiteId}
+                          groups={groups}
+                          onSitesChange={updateUserSites}
+                          formkiqVersion={formkiqVersion}
+                        />
+                      ))
+                    ) : isSitesLoading ? (
+                      <Spinner />
+                    ) : (
+                      <h3 className="text-center">
+                        There are no sites created yet.
+                      </h3>
+                    )}
+                  </ul>
                 )}
-              </ul>
+              </>
             )}
           </div>
         </div>
