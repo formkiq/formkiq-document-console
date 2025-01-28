@@ -48,3 +48,5 @@ core.*
 **/test-results
 **/playwright-report
 **/playwright/.cache
+
+.nx/workspace-data/*
