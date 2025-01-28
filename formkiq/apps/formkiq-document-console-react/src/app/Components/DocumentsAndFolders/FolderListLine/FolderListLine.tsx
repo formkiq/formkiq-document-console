@@ -35,6 +35,8 @@ interface IProps {
   setSelectedDocuments: (documents: IDocument[]) => void;
   archiveTabStatus: 'open' | 'closed' | 'minimized';
   downloadDocument: (documentId: string) => void;
+  infoDocumentId: string;
+  onInfoClick: () => void;
 }
 
 function FolderListLine({
@@ -54,6 +56,8 @@ function FolderListLine({
   setSelectedDocuments,
   archiveTabStatus,
   downloadDocument,
+  infoDocumentId,
+  onInfoClick,
 }: IProps) {
   const { loadingStatus } = useSelector(DocumentListState);
 
@@ -125,6 +129,8 @@ function FolderListLine({
                       setSelectedDocuments={setSelectedDocuments}
                       archiveTabStatus={archiveTabStatus}
                       downloadDocument={downloadDocument}
+                      infoDocumentId={infoDocumentId}
+                      onInfoClick={onInfoClick}
                     />
                   );
                 })}
@@ -151,6 +157,8 @@ function FolderListLine({
                   setSelectedDocuments={setSelectedDocuments}
                   archiveTabStatus={archiveTabStatus}
                   downloadDocument={downloadDocument}
+                  infoDocumentId={infoDocumentId}
+                  onDocumentInfoClick={onInfoClick}
                 />
               );
             })}
