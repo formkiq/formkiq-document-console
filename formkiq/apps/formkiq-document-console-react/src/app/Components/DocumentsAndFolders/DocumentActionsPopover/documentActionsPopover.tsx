@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ESignatureContentTypes } from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
@@ -10,6 +10,7 @@ import {
   Copy,
   Download,
   History,
+  Info,
   MoreActions,
   Move,
   Relationship,
@@ -23,6 +24,7 @@ import {
   Workflow,
 } from '../../Icons/icons';
 import { useDocumentActions } from './DocumentActionsContext';
+import { Tooltip } from 'react-tooltip';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
@@ -52,6 +54,8 @@ export default function DocumentActionsPopover({
   useSoftDelete,
   isDeeplinkPath,
   setSelectedDocuments,
+  infoDocumentId,
+  onInfoClick,
 }: any) {
   const {
     onShareClick,
@@ -68,6 +72,7 @@ export default function DocumentActionsPopover({
     onActionModalClick,
   } = useDocumentActions();
   const line: ILine = value;
+  const searchParams = new URLSearchParams(location.search);
   const [visible, setVisibility] = useState(false);
   const [referenceRef, setReferenceRef] = useState(null);
   const [popperRef, setPopperRef] = useState(null);
@@ -93,6 +98,11 @@ export default function DocumentActionsPopover({
   };
 
   function handleDropdownClick(event: any) {
+    setVisibility(!visible);
+  }
+
+  function handleInfoClick(event: any) {
+    onInfoClick(event);
     setVisibility(!visible);
   }
 
@@ -153,6 +163,39 @@ export default function DocumentActionsPopover({
                   <span>Share</span>
                 </span>
               </li>
+            )}
+            {line.lineType === 'document' && !isSiteReadOnly && (
+              <>
+                {line.documentId === infoDocumentId && (
+                  <Tooltip id={line.documentId} />
+                )}
+                <Link
+                  to={`${location.pathname}?${searchParams.toString()}#id=${
+                    line.documentId
+                  }`}
+                  onClick={handleInfoClick}
+                >
+                  <li
+                    data-tooltip-id={line.documentId}
+                    data-tooltip-content="Document details are already open"
+                    className={`py-1 px-2 ${
+                      line.documentId !== infoDocumentId
+                        ? 'hover:bg-gray-100 cursor-pointer'
+                        : 'opacity-50 cursor-not-allowed'
+                    } text-neutral-900`}
+                  >
+                    <span className="flex items-center">
+                      <span
+                        className="mr-2 "
+                        style={{ width: '15px', height: '15px' }}
+                      >
+                        <Info />
+                      </span>
+                      <span>View Details</span>
+                    </span>
+                  </li>
+                </Link>
+              </>
             )}
             {line.lineType === 'document' && !isSiteReadOnly && (
               <li className="py-1 px-2 hover:bg-gray-100 cursor-pointer">
@@ -336,31 +379,32 @@ export default function DocumentActionsPopover({
                 </li>
               )}
 
-            {line.lineType === 'document' && pathname.indexOf('/queues') > -1 && (
-              <li
-                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
-                onClick={(event) =>
-                  onDocumentReviewModalClick(event, {
-                    lineType: line.lineType,
-                    documentId: line.documentId,
-                    folder: line.folder,
-                  })
-                }
-              >
-                <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-3.5 text-neutral-900">
-                    <Checkmark />
+            {line.lineType === 'document' &&
+              pathname.indexOf('/queues') > -1 && (
+                <li
+                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(event) =>
+                    onDocumentReviewModalClick(event, {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      folder: line.folder,
+                    })
+                  }
+                >
+                  <span className={'flex items-baseline'}>
+                    <span className="mr-2 w-3.5 text-neutral-900">
+                      <Checkmark />
+                    </span>
+                    <span>Review</span>
+                    <span
+                      className="ml-auto"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {ArrowRight()}
+                    </span>
                   </span>
-                  <span>Review</span>
-                  <span
-                    className="ml-auto"
-                    style={{ width: '15px', height: '13px' }}
-                  >
-                    {ArrowRight()}
-                  </span>
-                </span>
-              </li>
-            )}
+                </li>
+              )}
 
             {line.lineType === 'document' && !isSiteReadOnly && (
               <div className="w-4/5 my-2 mx-6 border-b"></div>

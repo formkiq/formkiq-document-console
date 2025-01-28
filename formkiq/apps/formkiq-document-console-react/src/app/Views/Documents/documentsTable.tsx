@@ -398,6 +398,8 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     setSelectedDocuments,
     archiveTabStatus,
     downloadDocument,
+    infoDocumentId,
+    onDocumentInfoClick,
   } = props;
 
   return (
@@ -423,6 +425,8 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               setSelectedDocuments={setSelectedDocuments}
               archiveTabStatus={archiveTabStatus}
               downloadDocument={downloadDocument}
+              infoDocumentId={infoDocumentId}
+              onInfoClick={onDocumentInfoClick}
             />
           );
         })}

@@ -676,6 +676,8 @@ function DocumentListLine({
                       file?.deepLinkPath && file.deepLinkPath.length > 0
                     }
                     setSelectedDocuments={setSelectedDocuments}
+                    infoDocumentId={infoDocumentId}
+                    onInfoClick={onInfoClick}
                   />
                 </div>
               </>
