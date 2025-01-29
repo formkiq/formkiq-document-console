@@ -103,6 +103,10 @@ interface DocumentActionsContextType {
   currentDocumentActions: any[];
   setCurrentDocumentActions: (actions: any[]) => void;
   updateDocumentActions: (infoDocumentId: string, currentSiteId: string) => void;
+  onDocumentClassificationsModalClick: (event: any, value: any) => void;
+  onDocumentClassificationsModalClose: () => void;
+  documentClassificationsModalValue: ILine | null;
+  documentClassificationsModalOpened: boolean;
 }
 
 const DocumentActionsContext = createContext<
@@ -177,6 +181,9 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   );
   const [isActionModalOpened, setIsActionModalOpened] = useState(false);
   const [currentDocumentActions, setCurrentDocumentActions] = useState<any[]>([]);
+
+  const [documentClassificationsModalValue, setDocumentClassificationsModalValue] = useState<ILine | null>(null);
+  const [documentClassificationsModalOpened, setDocumentClassificationsModalOpened] = useState(false);
 
   const dispatch = useAppDispatch();
   const { user } = useSelector(AuthState);
@@ -513,6 +520,14 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  const onDocumentClassificationsModalClick = (event: any, value: ILine | null) => {
+    setDocumentClassificationsModalValue(value);
+    setDocumentClassificationsModalOpened(true);
+  }
+  const onDocumentClassificationsModalClose = () => {
+    setDocumentClassificationsModalOpened(false);
+  }
+
   const value = {
     shareModalValue,
     shareModalOpened,
@@ -584,6 +599,10 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     currentDocumentActions,
     setCurrentDocumentActions,
     updateDocumentActions,
+    onDocumentClassificationsModalClick,
+    onDocumentClassificationsModalClose,
+    documentClassificationsModalValue,
+    documentClassificationsModalOpened,
   };
 
   return (

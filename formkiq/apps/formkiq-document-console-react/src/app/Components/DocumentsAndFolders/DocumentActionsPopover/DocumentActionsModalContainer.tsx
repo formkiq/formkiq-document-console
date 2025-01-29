@@ -14,6 +14,7 @@ import SubmitForReviewModal from '../SubmitForReviewModal/submitForReviewModal';
 import { useDocumentActions } from './DocumentActionsContext';
 import DocumentRelationshipsModal from "../DocumentRelationshipsModal/DocumentRelationshipsModal";
 import ActionModal from "../ActionModal/actionModal";
+import DocumentClassificationsModal from "../DocumentClassificationsModal/DocumentClassificationsModal";
 
 const DocumentActionsModalContainer = ({
   currentSiteId,
@@ -67,6 +68,9 @@ const DocumentActionsModalContainer = ({
     onActionModalClose,
     actionModalValue,
     isActionModalOpened,
+    onDocumentClassificationsModalClose,
+    documentClassificationsModalValue,
+    documentClassificationsModalOpened,
   } = useDocumentActions();
   const { allTags } = useSelector(AttributesDataState);
 
@@ -145,6 +149,13 @@ const DocumentActionsModalContainer = ({
         onClose={onDocumentRelationshipsModalClose}
         siteId={currentSiteId}
         value={documentRelationshipsModalValue}
+        onDocumentDataChange={onDocumentDataChange}
+      />
+      <DocumentClassificationsModal
+        isOpened={documentClassificationsModalOpened}
+        onClose={onDocumentClassificationsModalClose}
+        siteId={currentSiteId}
+        value={documentClassificationsModalValue}
         onDocumentDataChange={onDocumentDataChange}
       />
       <MultiValuedAttributeModal
