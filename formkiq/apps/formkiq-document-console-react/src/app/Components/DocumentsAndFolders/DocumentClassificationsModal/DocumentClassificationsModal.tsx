@@ -14,6 +14,7 @@ import {
   SchemasState,
 } from '../../../Store/reducers/schemas';
 import { useSelector } from 'react-redux';
+import { CopyButton } from '../../Generic/Buttons/CopyButton';
 
 export default function DocumentClassificationsModal({
   isOpened,
@@ -28,6 +29,8 @@ export default function DocumentClassificationsModal({
   value: ILine | null;
   onDocumentDataChange: any;
 }) {
+  const approveButtonRef = useRef<HTMLButtonElement>(null);
+
   const dispatch = useAppDispatch();
   const { classifications } = useSelector(SchemasState);
 
@@ -37,9 +40,11 @@ export default function DocumentClassificationsModal({
   const [classificationsMap, setClassificationsMap] = useState<{
     [key: string]: string;
   }>({});
+  const [selectedClassification, setSelectedClassification] =
+    useState<string>('');
   // update schemas when different siteId selected
   useEffect(() => {
-    if(!value) return;
+    if (!value) return;
     dispatch(fetchClassifications({ siteId, page: 1, limit: 20 }));
   }, [value]);
 
@@ -47,10 +52,9 @@ export default function DocumentClassificationsModal({
     console.log('classifications', classifications);
   }, [classifications]);
 
-  const closeDialog = () => {
-    // Reset the state
-
-    // Close the dialog
+  const closeDialog = (e: any) => {
+    console.log('closeDialog', e);
+    setDocumentClassifications([]);
     onClose();
   };
 
@@ -92,11 +96,10 @@ export default function DocumentClassificationsModal({
           }
           DocumentsService.getClassification(siteId, classificationId).then(
             (response) => {
-              console.log('response', response)
               if (response.status === 200) {
                 setClassificationsMap((prev) => ({
                   ...prev,
-                  [classificationId]: response.value.name,
+                  [classificationId]: response.classification.name,
                 }));
               } else {
                 setClassificationsMap((prev) => ({
@@ -107,37 +110,104 @@ export default function DocumentClassificationsModal({
             }
           );
         }
+      } else {
+        setDocumentClassifications([]);
       }
     });
   };
 
   function selectClassification(e: any) {
-    const classificationId = e.target.value;
-    if (!classificationId) return;
-    if (!value?.documentId) return;
-    DocumentsService.addDocumentAttributes(siteId, 'false', value?.documentId, {
-      attributes: [{ classificationId }],
-    }).then((response) => {
-      if (response.status === 201) {
-        getDocumentClassifications();
-        onDocumentDataChange();
-      } else {
-        dispatch(
-          openNotificationDialog({
-            dialogTitle: 'Failed to add classification',
-          })
-        );
-      }
-    });
+    setSelectedClassification(e.target.value);
   }
 
   useEffect(() => {
     getDocumentClassifications();
   }, [value]);
 
+  function onDeleteClick() {
+    function deleteClassificationAttribute() {
+      if (!value?.documentId) return;
+      DocumentsService.deleteDocumentAttribute(
+        siteId,
+        value.documentId,
+        'Classification'
+      ).then((response) => {
+        if (response.status === 200) {
+          // Update the local state immediately
+          setDocumentClassifications([]);
+          setClassificationsMap({});
+
+          // Trigger parent updates
+          onDocumentDataChange();
+
+          // Optionally refresh the classifications
+          getDocumentClassifications();
+        } else {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Failed to remove classification',
+            })
+          );
+        }
+      });
+    }
+
+    dispatch(
+      openConfirmationDialog({
+        dialogTitle: 'Are you sure you want to remove this classification?',
+        callback: deleteClassificationAttribute,
+      })
+    );
+  }
+
+  function saveChanges() {
+    if (!value?.documentId) return;
+    if (documentClassifications.length === 0) {
+      DocumentsService.addDocumentAttributes(
+        siteId,
+        'false',
+        value?.documentId,
+        {
+          attributes: [{ classificationId: selectedClassification }],
+        }
+      ).then((response) => {
+        if (response.status === 201) {
+          getDocumentClassifications();
+          onDocumentDataChange();
+        } else {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Failed to add classification',
+            })
+          );
+        }
+      });
+    } else {
+      DocumentsService.setDocumentAttributes(siteId, value?.documentId, {
+        attributes: [{ classificationId: selectedClassification }],
+      }).then((response) => {
+        if (response.status === 201) {
+          getDocumentClassifications();
+          onDocumentDataChange();
+        } else {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Failed to update classification',
+            })
+          );
+        }
+      });
+    }
+  }
+
   return (
     <Transition.Root show={isOpened} as={Fragment}>
-      <Dialog as="div" className="relative z-20" onClose={onClose}>
+      <Dialog
+        as="div"
+        className="relative z-20"
+        onClose={closeDialog}
+        initialFocus={approveButtonRef}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -209,67 +279,42 @@ export default function DocumentClassificationsModal({
                             key={index}
                             className="flex justify-between items-center bg-gray-100 p-2 rounded-lg mb-2"
                           >
-                            <div className="flex items-center gap-2">
-                              <div className="w-5 h-5 text-gray-400">
-                                <Pencil />
-                              </div>
-                              <div className="font-semibold text-gray-500">
+                            <div>
+                              <h3 className="font-semibold text-neutral-700">
                                 {classificationsMap[classificationId] ||
                                   'Loading...'}
-                              </div>
+                              </h3>
+                              <p className="text-neutral-500 text-xs">
+                                {classificationId}
+                                <span className="pl-2">
+                                  <CopyButton value={classificationId} />
+                                </span>
+                              </p>
                             </div>
-                            <div
-                              className="w-5 h-5 text-gray-400 cursor-pointer"
-                              onClick={() => {
-                                openConfirmationDialog({
-                                  title: 'Remove Classification',
-                                  message:
-                                    'Are you sure you want to remove this classification?',
-                                  onConfirm: () => {
-                                    DocumentsService.deleteDocumentAttribute(
-                                      siteId,
-                                      value.documentId,
-                                      'classificationId'
-                                    ).then((response) => {
-                                      if (response.status === 204) {
-                                        dispatch(
-                                          openNotificationDialog({
-                                            message:
-                                              'Classification removed successfully',
-                                            type: 'success',
-                                          })
-                                        );
-                                        getDocumentClassifications();
-                                        onDocumentDataChange();
-                                      } else {
-                                        dispatch(
-                                          openNotificationDialog({
-                                            message:
-                                              'Failed to remove classification',
-                                            type: 'error',
-                                          })
-                                        );
-                                      }
-                                    });
-                                  },
-                                });
-                              }}
+                            <button
+                              title="Delete Classification"
+                              className="w-5 h-5 text-gray-500 cursor-pointer hover:text-red-500 transition duration-100"
+                              onClick={onDeleteClick}
                             >
                               <Trash />
-                            </div>
+                            </button>
                           </div>
                         )
                       )}
                     </div>
                   ) : (
                     <div className="w-full mt-4 text-center text-gray-400">
-                      No classifications found
+                      No classifications assigned
                     </div>
                   )}
 
                   <div className="w-full flex justify-end h-8 gap-2">
+                    <ButtonPrimaryGradient onClick={saveChanges} type="button">
+                      SAVE CHANGES
+                    </ButtonPrimaryGradient>
+
                     <ButtonGhost type="button" onClick={closeDialog}>
-                      CLOSE
+                      CANCEL
                     </ButtonGhost>
                   </div>
                 </div>
