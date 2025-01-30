@@ -1,21 +1,21 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { openDialog } from '../../../Store/reducers/globalNotificationControls';
-import { openDialog as openConfirmationDialog } from '../../../Store/reducers/globalConfirmControls';
-import { useAppDispatch } from '../../../Store/store';
-import { DocumentsService } from '../../../helpers/services/documentsService';
-import { ILine } from '../../../helpers/types/line';
-import { Close, Pencil, Trash } from '../../Icons/icons';
-import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
-import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
-import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
 import { useSelector } from 'react-redux';
-import { CopyButton } from '../../Generic/Buttons/CopyButton';
+import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
+import { openDialog as openConfirmationDialog } from '../../../Store/reducers/globalConfirmControls';
+import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import {
   fetchClassifications,
   SchemasState,
 } from '../../../Store/reducers/schemas';
+import { useAppDispatch } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { ILine } from '../../../helpers/types/line';
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import { CopyButton } from '../../Generic/Buttons/CopyButton';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
+import { Close, Pencil, Trash } from '../../Icons/icons';
 
 interface Classification {
   classificationId: string;
@@ -161,6 +161,14 @@ export default function DocumentClassificationsModal({
           })
         );
       }
+      return;
+    }
+    if (!classificationId.length) {
+      dispatch(
+        openDialog({
+          dialogTitle: 'No Classification Schema Selected',
+        })
+      );
       return;
     }
     if (documentClassifications.length === 0) {
@@ -375,10 +383,10 @@ export default function DocumentClassificationsModal({
                         )}
                         selectedValue={classificationId}
                         setSelectedValue={setClassificationId}
-                        placeholderText="Select Classification"
+                        placeholderText="Select Classification Schema"
                       />
                       <ButtonPrimaryGradient onClick={addClassification}>
-                        +ADD
+                        {documentClassifications?.length ? 'SWITCH' : '+ADD'}
                       </ButtonPrimaryGradient>
                     </div>
                   </div>

@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
-import {Json, Pencil} from '../../Components/Icons/icons';
+import { Json, Pencil } from '../../Components/Icons/icons';
 import CreateSchemaDialog from '../../Components/Schemas/createSchemaDialog/CreateSchemaDialog';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
@@ -128,7 +128,7 @@ function Schemas() {
   return (
     <>
       <Helmet>
-        <title>Schemas</title>
+        <title>Schemas / Classifications</title>
       </Helmet>
       <div
         className="flex flex-col "
@@ -136,7 +136,15 @@ function Schemas() {
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-        <h3 className="text-lg p-4 font-bold">Site Schema: {siteId}</h3>
+        <p className="px-4 py-2">
+          Schemas can be set at both the Site / Workspace level, making them
+          mandatory for all documents within the site, or they can be assigned
+          to specific documents as Classification Schemas.
+        </p>
+
+        <h3 className="text-lg p-4 font-bold">
+          Site / Workspace Schema: {siteId}
+        </h3>
 
         <table className="w-full border-collapse text-sm table-fixed ">
           <thead className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
@@ -169,11 +177,8 @@ function Schemas() {
                         to={`${pathname}/site-schema?editing=true`}
                         className="h-6"
                       >
-                        <button
-                          className="w-6 h-auto"
-                          title="Edit"
-                        >
-                          <Pencil/>
+                        <button className="w-6 h-auto" title="Edit">
+                          <Pencil />
                         </button>
                       </NavLink>
                       <NavLink
@@ -195,7 +200,7 @@ function Schemas() {
             ) : (
               <tr>
                 <td colSpan={2} className="text-center p-2">
-                  No site schema has been added yet.{' '}
+                  No site / workspace schema has been added yet.{' '}
                   <button
                     className="underline text-primary-500 hover:text-primary-600"
                     onClick={() => {
@@ -203,7 +208,7 @@ function Schemas() {
                       setNewSchemaType('site');
                     }}
                   >
-                    Add new site schema.
+                    Add new site / workspace schema.
                   </button>
                 </td>
               </tr>

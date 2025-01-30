@@ -708,7 +708,7 @@ function Navbar() {
                             {pathname.indexOf('/admin/sites-management') >
                               -1 && <span>Sites Management</span>}
                             {pathname.indexOf('/schemas') > -1 && (
-                              <span>Schemas</span>
+                              <span>Schemas / Classifications</span>
                             )}
                             {pathname.indexOf('/admin/groups') > -1 && (
                               <span>Groups</span>
@@ -767,22 +767,23 @@ function Navbar() {
                                       Documents (default)
                                     </option>
                                   )}
-                                  {hasWorkspaces && workspaceSites.length > 0 && (
-                                    <>
-                                      {workspaceSites.map(
-                                        (workspaceSite, i: number) => {
-                                          return (
-                                            <option
-                                              key={i}
-                                              value={workspaceSite.siteId}
-                                            >
-                                              {workspaceSite.siteId}
-                                            </option>
-                                          );
-                                        }
-                                      )}
-                                    </>
-                                  )}
+                                  {hasWorkspaces &&
+                                    workspaceSites.length > 0 && (
+                                      <>
+                                        {workspaceSites.map(
+                                          (workspaceSite, i: number) => {
+                                            return (
+                                              <option
+                                                key={i}
+                                                value={workspaceSite.siteId}
+                                              >
+                                                {workspaceSite.siteId}
+                                              </option>
+                                            );
+                                          }
+                                        )}
+                                      </>
+                                    )}
                                 </select>
                               </div>
                             )}

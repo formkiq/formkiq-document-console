@@ -739,7 +739,7 @@ export function Sidebar() {
                     : '')
                 }
                 icon={<Schema />}
-                title="Schemas"
+                title="Schemas / Classifications"
                 testId="nav-schemas"
               />
               {formkiqVersion.type !== 'core' && (
