@@ -17,24 +17,26 @@ import { DocumentsService } from '../../../helpers/services/documentsService';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import { ActionSelector } from './ActionSelector';
-import {useDocumentActions} from "../DocumentActionsPopover/DocumentActionsContext";
+import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
 
 export default function ActionModal({
   isOpened,
   onClose,
   siteId,
   value,
+  onDocumentDataChange,
 }: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
   value: ILine | null;
+  onDocumentDataChange: (event: any, value: ILine | null) => void;
 }) {
   const dispatch = useAppDispatch();
   const closeDialog = () => {
     onClose();
   };
-const { updateDocumentActions } = useDocumentActions();
+  const { updateDocumentActions } = useDocumentActions();
   const [newAction, setNewAction] = useState<any>(null);
 
   const onChange = (value: any, key: any) => {
@@ -46,7 +48,6 @@ const { updateDocumentActions } = useDocumentActions();
       },
     }));
   };
-
   const onAddAction = () => {
     if (!newAction) {
       dispatch(
@@ -63,6 +64,9 @@ const { updateDocumentActions } = useDocumentActions();
       if (res.status === 200) {
         setNewAction(null);
         updateDocumentActions(value!.documentId, siteId);
+        setTimeout(() => {
+          onDocumentDataChange(null, value);
+        }, 1500);
         onClose();
       } else {
         if (res?.errors) {

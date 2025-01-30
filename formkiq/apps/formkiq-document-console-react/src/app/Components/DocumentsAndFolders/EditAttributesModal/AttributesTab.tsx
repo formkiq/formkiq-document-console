@@ -80,7 +80,7 @@ function AttributesTab({onDocumentDataChange, siteId, value, getValue}: any) {
       DocumentsService.deleteDocumentAttribute(siteId, value?.documentId, key).then(() => {
         dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}));
         setTimeout(() => {
-          onDocumentDataChange(value);
+          onDocumentDataChange(null, value);
         }, 500);
       });
     };
@@ -108,7 +108,7 @@ function AttributesTab({onDocumentDataChange, siteId, value, getValue}: any) {
       }
       dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}));
       setTimeout(() => {
-        onDocumentDataChange(value);
+        onDocumentDataChange(null, value);
       }, 500);
     });
 

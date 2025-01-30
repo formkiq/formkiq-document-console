@@ -96,7 +96,7 @@ function AddAttributeForm({
                 })
               );
             } else {
-              onDocumentDataChange(value);
+              onDocumentDataChange(null, value);
               dispatch(
                 fetchDocumentAttributes({
                   siteId,
@@ -109,7 +109,7 @@ function AddAttributeForm({
         }, 500);
       } else {
         setTimeout(() => {
-          onDocumentDataChange(value);
+          onDocumentDataChange(null, value);
           setSelectedAttributeKey(data.key);
         }, 500);
       }

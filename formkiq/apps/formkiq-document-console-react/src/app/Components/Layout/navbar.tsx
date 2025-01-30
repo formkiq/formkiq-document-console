@@ -429,6 +429,19 @@ function Navbar() {
   const onDocumentDataChange = (event: any, value: ILine | null) => {
     if (currentSection === 'DocumentsAndFolders') {
       dispatch(setDocuments({ documents: null }));
+      const documentPath = value?.documentInstance?.path || value?.folder;
+      if (documentPath!==undefined) {
+        const folderPath = documentPath
+          .replace(/^\/|\/$/g, '')
+          .substring(0, documentPath.lastIndexOf('/') - 1);
+        navigate(
+          currentDocumentsRootUri +
+            (folderPath ? '/folders/' + folderPath : '/') +
+            '?scrollToDocumentLine=true' +
+            '#id=' +
+            value?.documentId
+        );
+      }
       dispatch(
         fetchDocuments({
           siteId: currentSiteId,

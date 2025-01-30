@@ -70,7 +70,7 @@ export default function EditAttributesModal({
       }
       updateTags();
       setTimeout(() => {
-        onDocumentDataChange(value);
+        onDocumentDataChange(null, value);
       }, 500);
     });
   };

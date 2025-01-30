@@ -235,7 +235,7 @@ function AddDocumentAttributeForm({
     ).then((res) => {
       if (res.status === 201) {
         setTimeout(() => {
-          onDocumentDataChange(value);
+          onDocumentDataChange(null, value);
           dispatch(
             fetchDocumentAttributes({
               siteId,
