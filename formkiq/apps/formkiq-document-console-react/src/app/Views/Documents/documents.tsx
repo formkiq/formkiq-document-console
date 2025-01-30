@@ -146,6 +146,7 @@ function Documents() {
     onEditAttributesModalClick,
     onAttributeQuantityClick,
     onDocumentRelationshipsModalClick,
+    onDocumentClassificationsModalClick,
     onUploadClick,
     onNewClick,
     onFolderUploadClick,
@@ -222,6 +223,11 @@ function Documents() {
     }[]
   >([]);
 
+  const [classifications, setClassifications] = useState<any[]>([]);
+  const [classificationsMap, setClassificationsMap] = useState<{
+    [key: string]: string;
+  }>({}); // classificationId: classificationName
+
   function handleDragEnter(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
     event.preventDefault();
@@ -297,11 +303,7 @@ function Documents() {
     const isBottom =
       scrollpane.offsetHeight + scrollpane.scrollTop + 600 >
       scrollpane.scrollHeight;
-    if (
-      isBottom &&
-      nextToken &&
-      loadingStatus === RequestStatus.fulfilled
-    ) {
+    if (isBottom && nextToken && loadingStatus === RequestStatus.fulfilled) {
       dispatch(setDocumentLoadingStatusPending());
 
       if (nextToken) {
@@ -468,6 +470,43 @@ function Documents() {
           }
         });
       }
+    }
+  }, [documentAttributes]);
+
+  // update document classifications
+  useEffect(() => {
+    const classificationsAttribute = documentAttributes.find(
+      (attribute) => attribute.key === 'Classification'
+    );
+    if (!classificationsAttribute) {
+      setClassifications([]);
+      return;
+    }
+    const newClassifications: any[] = [];
+    if (classificationsAttribute.stringValue) {
+      newClassifications.push(classificationsAttribute.stringValue);
+    } else if (classificationsAttribute.stringValues) {
+      newClassifications.push(...classificationsAttribute.stringValues);
+    }
+
+    setClassifications(newClassifications);
+    for (const classification of newClassifications) {
+      if (classificationsMap[classification]) return;
+      DocumentsService.getClassification(currentSiteId, classification).then(
+        (response: any) => {
+          if (response.status === 200) {
+            setClassificationsMap((prev) => ({
+              ...prev,
+              [classification]: response.classification.name,
+            }));
+          } else {
+            setClassificationsMap((prev) => ({
+              ...prev,
+              [classification]: 'NOT_FOUND',
+            }));
+          }
+        }
+      );
     }
   }, [documentAttributes]);
 
@@ -1556,9 +1595,14 @@ function Documents() {
                       />
                     </div>
                     <div className="flex items-center">
-                      <h1 title={(currentDocument as IDocument).path} className="pl-2 w-40 text-base break-all leading-5 font-bold bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 bg-clip-text text-transparent">
+                      <h1
+                        title={(currentDocument as IDocument).path}
+                        className="pl-2 w-40 text-base break-all leading-5 font-bold bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 bg-clip-text text-transparent"
+                      >
                         {(currentDocument as IDocument).path.substring(0, 30)}
-                        {(currentDocument as IDocument).path.length > 30 && <span>...</span>}
+                        {(currentDocument as IDocument).path.length > 30 && (
+                          <span>...</span>
+                        )}
                         {isCurrentDocumentSoftDeleted && (
                           <small className="block text-red-500 uppercase">
                             (deleted)
@@ -1571,7 +1615,6 @@ function Documents() {
                         )}
                       </h1>
                     </div>
-
 
                     <div className="w-8 grow-0 flex justify-end">
                       <div
@@ -1815,7 +1858,7 @@ function Documents() {
                           Relationships
                           {!isSiteReadOnly && (
                             <div
-                              className="w-3/5 self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                              className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
                                 onDocumentRelationshipsModalClick(event, {
                                   lineType: 'document',
@@ -1875,12 +1918,75 @@ function Documents() {
                             (no relationships have been added)
                           </span>
                         )}
+
                         <div className="w-64 flex mr-3 border-b"></div>
-                        <div className="pt-3 flex justify-between text-sm font-semibold text-primary-500">
+                        <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
+                          Classifications
+                          {!isSiteReadOnly && (
+                            <div
+                              className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                              onClick={(event) =>
+                                onDocumentClassificationsModalClick(event, {
+                                  lineType: 'document',
+                                  folder: subfolderUri,
+                                  documentId: (currentDocument as IDocument)
+                                    .documentId,
+                                  documentInstance:
+                                    currentDocument as IDocument,
+                                  folderInstance: null,
+                                })
+                              }
+                            >
+                              <>
+                                <span className="pt-0.5 whitespace-nowrap">
+                                  add/edit classifications
+                                </span>
+                                <div className="w-4">
+                                  <ChevronRight />
+                                </div>
+                              </>
+                            </div>
+                          )}
+                        </div>
+                        {classifications.length > 0 ? (
+                          <div>
+                            {classifications.map((classification) => (
+                              <div>
+                                <h3 className="text-sm font-semibold text-neutral-900">
+                                  {classificationsMap[classification] &&
+                                  classificationsMap[classification] !==
+                                    'NOT_FOUND' ? (
+                                    <Link
+                                      to={`${
+                                        siteDocumentsRootUri.includes('workspaces')
+                                          ? siteDocumentsRootUri
+                                          : ''
+                                      }/schemas/${classification}`}
+                                      className="underline hover:text-primary-500 break-words font-normal"
+                                    >
+                                      {classificationsMap[classification]}
+                                    </Link>
+                                  ) : (
+                                    <span className="text-neutral-500">
+                                      {classification}
+                                    </span>
+                                  )}
+                                </h3>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs">
+                            (no classifications have been added)
+                          </span>
+                        )}
+
+                        <div className="w-64 flex mr-3 border-b"></div>
+                        <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
                           Attributes
                           {!isCurrentSiteReadonly && (
                             <div
-                              className="w-3/5 flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                              className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
                                 onEditAttributesModalClick(event, {
                                   lineType: 'document',
@@ -1894,7 +2000,7 @@ function Documents() {
                               }
                             >
                               <>
-                                <span className="pt-0.5">
+                                <span className="pt-0.5 whitespace-nowrap">
                                   add/edit attributes
                                 </span>
                                 <div className="w-4">
@@ -1926,10 +2032,10 @@ function Documents() {
                           return false;
                         }).length ? (
                           <>
-                            <div className="mt-2 text-smaller font-semibold uppercase italic">
+                            <div className="text-smaller font-semibold uppercase italic">
                               Key-Only Attributes
                             </div>
-                            <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 flex flex-wrap">
+                            <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 mb-3 flex flex-wrap">
                               {sortedAttributesAndTags.length > 0 &&
                                 sortedAttributesAndTags.map((item: any, i) => {
                                   let tagColor = 'gray';
@@ -1990,7 +2096,7 @@ function Documents() {
                                 ) : (
                                   <div
                                     key={`attribute_${item.key}_${i}`}
-                                    className="flex flex-col pt-3"
+                                    className="flex flex-col"
                                   >
                                     <dt className="mb-1 text-smaller font-semibold">
                                       {item.key}
@@ -2028,7 +2134,8 @@ function Documents() {
                                     <dd className="text-sm">
                                       {/*Attributes*/}
                                       {item?.key === 'Publication' ||
-                                      item?.key === 'Relationships' ? (
+                                      item?.key === 'Relationships' ||
+                                      item?.key === 'Classification'  ? (
                                         <>
                                           {item?.stringValue && (
                                             <div>
