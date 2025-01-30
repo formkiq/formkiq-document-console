@@ -350,7 +350,7 @@ export default function DocumentClassificationsModal({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform text-left transition-all w-full lg:w-4/5">
+              <Dialog.Panel className="relative transform text-left transition-all w-full lg:w-4/5 max-w-3xl">
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 inline-block pr-6">
