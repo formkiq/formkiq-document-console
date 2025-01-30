@@ -18,7 +18,8 @@ import ButtonSecondary from '../Generic/Buttons/ButtonSecondary';
 import RadioCombobox from '../Generic/Listboxes/RadioCombobox';
 import { Close } from '../Icons/icons';
 import AddAttributesTab from './createSchemaDialog/addAttributesTab';
-import {useSearchParams} from "react-router-dom";
+import { useSearchParams } from 'react-router-dom';
+import { CopyButton } from '../Generic/Buttons/CopyButton';
 
 type SchemaPagePropsType = {
   isEditing: boolean;
@@ -350,24 +351,35 @@ function SchemaPage({
   return (
     <>
       <form className="flex flex-col gap-4 mt-6" onSubmit={onSubmit}>
-        {isEditing && schemaType === 'classification' ? (
-          <input
-            type="text"
-            className="h-12 px-4 border border-neutral-300 text-sm rounded-md xl:w-[550px]"
-            placeholder="Add schema name"
-            required
-            value={schema.name}
-            onChange={(e) => setSchema({ ...schema, name: e.target.value })}
-            ref={schemaNameRef}
-            onKeyDown={(e) => preventDialogClose(e)}
-          />
-        ) : (
-          <h2 className="text-xl font-bold">
-            {schemaType === 'classification'
-              ? schema.name
-              : `Site Schema: ${siteId}`}
-          </h2>
-        )}
+        <div className="flex flex-col">
+          {isEditing && schemaType === 'classification' ? (
+            <input
+              type="text"
+              className="h-12 px-4 border border-neutral-300 text-sm rounded-md xl:w-[550px]"
+              placeholder="Add schema name"
+              required
+              value={schema.name}
+              onChange={(e) => setSchema({ ...schema, name: e.target.value })}
+              ref={schemaNameRef}
+              onKeyDown={(e) => preventDialogClose(e)}
+            />
+          ) : (
+            <h2 className="text-xl font-bold">
+              {schemaType === 'classification'
+                ? schema.name
+                : `Site Schema: ${siteId}`}
+            </h2>
+          )}
+          {classificationId && (
+            <span className="block text-xs font-semibold">
+              ID: <span className=" text-neutral-500">{classificationId}</span>
+              <span className="pl-2">
+                <CopyButton value={classificationId} />
+              </span>
+            </span>
+          )}
+        </div>
+
         {isEditing ? (
           <div className="flex items-center">
             <input
