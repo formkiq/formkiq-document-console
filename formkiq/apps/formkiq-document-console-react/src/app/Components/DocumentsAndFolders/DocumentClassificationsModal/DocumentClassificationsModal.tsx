@@ -163,35 +163,45 @@ export default function DocumentClassificationsModal({
       }
       return;
     }
+    if (documentClassifications.length === 0) {
+      const response = await DocumentsService.addDocumentAttributes(
+        siteId,
+        'false',
+        value.documentId,
+        { attributes: [{ classificationId }] }
+      );
 
-    const response = await DocumentsService.addDocumentAttributes(
-      siteId,
-      'false',
-      value.documentId,
-      { attributes: [{ classificationId }] }
-    );
-
-    if (response.status === 201) {
-      await getDocumentClassifications();
-      if (value.documentId === infoDocumentId) {
+      if (response.status === 201) {
+        await getDocumentClassifications();
+        if (value.documentId === infoDocumentId) {
+          dispatch(
+            fetchDocumentAttributes({
+              siteId,
+              documentId: value.documentId,
+              limit: 100,
+              page: 1,
+              nextToken: null,
+            })
+          );
+        }
+        setClassificationId('');
+      } else {
         dispatch(
-          fetchDocumentAttributes({
-            siteId,
-            documentId: value.documentId,
-            limit: 100,
-            page: 1,
-            nextToken: null,
+          openDialog({
+            dialogTitle:
+              response?.errors[0].error || 'Error adding classification',
           })
         );
       }
-      setClassificationId('');
     } else {
-      dispatch(
-        openDialog({
-          dialogTitle:
-            response?.errors[0].error || 'Error adding classification',
-        })
-      );
+      const newClassifications = [
+        ...documentClassifications,
+        { classificationId },
+      ];
+      const success = await onSave(newClassifications);
+      if (success) {
+        setClassificationId('');
+      }
     }
   }
 
