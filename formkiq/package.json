@@ -65,7 +65,7 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "@headlessui/react": "^1.7.2",
+    "@headlessui/react": "^2.2.0",
     "@mands/nx-playwright": "^0.4.0",
     "@nx/cypress": "20.3.2",
     "@nx/js": "20.3.2",
