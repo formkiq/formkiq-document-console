@@ -82,7 +82,7 @@ function CreateSchemaDialog({
 
   useEffect(() => {
     setSchema(initialSchemaValue);
-  },[schemaType])
+  }, [schemaType]);
 
   const schemaNameRef = useRef<HTMLInputElement>(null);
 
@@ -348,7 +348,9 @@ function CreateSchemaDialog({
           <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
             <div className="w-full max-w-xl bg-white p-6 rounded-md">
               <Dialog.Title className="text-2xl font-bold mb-4">
-                 {schemaType === 'classification' ? 'Create New Schema':"Create New Site Schema"}
+                {schemaType === 'classification'
+                  ? 'Create New Schema'
+                  : 'Create New Site / Workspace Schema'}
               </Dialog.Title>
               <form className="flex flex-col gap-4 mt-6" onSubmit={onSubmit}>
                 <div className="flex flex-row justify-start gap-2 text-sm font-bold">

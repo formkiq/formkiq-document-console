@@ -684,7 +684,7 @@ export function ApiExplorer() {
               </div>
             </div>
           </ApiSegment>
-          <ApiSegment title="Schemas">
+          <ApiSegment title="Schemas / Classifications">
             <div className="ml-2 mb-4 flex flex-cols">
               <div className="w-4 border-l"></div>
               <div className="grow">

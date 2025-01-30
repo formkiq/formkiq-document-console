@@ -5,6 +5,7 @@ import { NavLink, useLocation, useSearchParams } from 'react-router-dom';
 import { Mode } from 'vanilla-jsoneditor';
 import { Close, Save, Spinner } from '../../Components/Icons/icons';
 import SchemaMenu from '../../Components/Schemas/SchemaMenu';
+import SchemaPage from '../../Components/Schemas/SchemaPage';
 import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
@@ -20,7 +21,6 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { Schema as SchemaType } from '../../helpers/types/schemas';
-import SchemaPage from '../../Components/Schemas/SchemaPage';
 
 function SiteSchema() {
   const { user } = useAuthenticatedState();
@@ -140,8 +140,8 @@ function SiteSchema() {
   };
 
   useEffect(() => {
-    setIsEditing(editing === 'true')
-  }, [editing])
+    setIsEditing(editing === 'true');
+  }, [editing]);
 
   return (
     <>
@@ -173,7 +173,7 @@ function SiteSchema() {
                   to={pathname.substring(0, pathname.lastIndexOf('/'))}
                   className="h-6 text-neutral-900 hover:text-primary-500 "
                 >
-                  Return to Schemas
+                  Return to Schemas / Classifications
                 </NavLink>
               </div>
 

@@ -15,6 +15,7 @@ import {
   Move,
   Relationship,
   Rename,
+  Schema,
   Settings,
   Share,
   Signature,
@@ -70,6 +71,7 @@ export default function DocumentActionsPopover({
     onMoveModalClick,
     onDocumentRelationshipsModalClick,
     onActionModalClick,
+    onDocumentClassificationsModalClick,
   } = useDocumentActions();
   const line: ILine = value;
   const searchParams = new URLSearchParams(location.search);
@@ -510,6 +512,34 @@ export default function DocumentActionsPopover({
                     <Relationship />
                   </span>
                   <span>Document Relationships</span>
+                  <span
+                    className="ml-auto"
+                    style={{ width: '15px', height: '13px' }}
+                  >
+                    {ArrowRight()}
+                  </span>
+                </span>
+              </li>
+            )}
+            {line.lineType === 'document' && (
+              <li
+                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                onClick={(event) =>
+                  onDocumentClassificationsModalClick(event, {
+                    lineType: line.lineType,
+                    documentId: line.documentId,
+                    folder: line.folder,
+                  })
+                }
+              >
+                <span className={'flex items-baseline'}>
+                  <span
+                    className="mr-2"
+                    style={{ width: '15px', height: '13px' }}
+                  >
+                    <Schema/>
+                  </span>
+                  <span>Classifications</span>
                   <span
                     className="ml-auto"
                     style={{ width: '15px', height: '13px' }}
