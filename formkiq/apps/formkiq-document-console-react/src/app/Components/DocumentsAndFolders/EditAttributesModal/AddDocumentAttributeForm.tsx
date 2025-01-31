@@ -115,7 +115,7 @@ function AddDocumentAttributeForm({
       );
       return;
     }
-    setValue('numberValue', 0);
+    setValue('numberValue', undefined);
     setNumberValues([...numberValues, numberValue]);
   };
   const handleRemoveNumberValue = (index: number) => {
@@ -131,79 +131,78 @@ function AddDocumentAttributeForm({
     setNumberValues([]);
     reset();
   };
+
   const onAddAttributeSubmit = async (data: any) => {
     if (!selectedAttribute) return;
     let documentAttributes = {};
-    if (
-      data.stringValue &&
-      stringValues.length === 0 &&
-      selectedAttribute.dataType === 'STRING'
-    ) {
-      documentAttributes = {
-        attributes: [
-          {
-            key: selectedAttributeKey,
-            stringValue: data.stringValue,
-          },
-        ],
-      };
-    }
-    if (stringValues.length > 0 && selectedAttribute.dataType === 'STRING') {
-      if (stringValues.length === 1) {
-        documentAttributes = {
-          attributes: [
-            {
-              key: selectedAttributeKey,
-              stringValue: stringValues[0],
-            },
-          ],
-        };
+
+    if (selectedAttribute.dataType === 'STRING') {
+      if (stringValues.length === 0) {
+        if (data.stringValue && data.stringValue !== '') {
+          documentAttributes = {
+            attributes: [
+              {
+                key: selectedAttributeKey,
+                stringValue: data.stringValue,
+              },
+            ],
+          };
+        }
       } else {
-        documentAttributes = {
-          attributes: [
-            {
-              key: selectedAttributeKey,
-              stringValues: stringValues,
-            },
-          ],
-        };
+        if (data.stringValue && data.stringValue !== '') {
+          documentAttributes = {
+            attributes: [
+              {
+                key: selectedAttributeKey,
+                stringValues: [...stringValues, data.stringValue],
+              },
+            ],
+          };
+        } else {
+          documentAttributes = {
+            attributes: [
+              {
+                key: selectedAttributeKey,
+                stringValues: stringValues,
+              },
+            ],
+          };
+        }
       }
     }
 
-    if (
-      data.numberValue !== undefined &&
-      numberValues.length === 0 &&
-      selectedAttribute.dataType === 'NUMBER'
-    ) {
-      documentAttributes = {
-        attributes: [
-          {
-            key: selectedAttributeKey,
-            numberValue: data.numberValue,
-          },
-        ],
-      };
-    }
-
-    if (numberValues.length > 0 && selectedAttribute.dataType === 'NUMBER') {
-      if (numberValues.length === 1) {
-        documentAttributes = {
-          attributes: [
-            {
-              key: selectedAttributeKey,
-              numberValue: Number(numberValues[0]),
-            },
-          ],
-        };
+    if (selectedAttribute.dataType === 'NUMBER') {
+      if (numberValues.length === 0) {
+        if (data.numberValue !== undefined) {
+          documentAttributes = {
+            attributes: [
+              {
+                key: selectedAttributeKey,
+                numberValue: data.numberValue,
+              },
+            ],
+          };
+        }
       } else {
-        documentAttributes = {
-          attributes: [
-            {
-              key: selectedAttributeKey,
-              numberValues: numberValues,
-            },
-          ],
-        };
+        if (data.numberValue !== undefined) {
+          documentAttributes = {
+            attributes: [
+              {
+                key: selectedAttributeKey,
+                numberValues: [...numberValues, Number(data.numberValue)],
+              },
+            ],
+          };
+        } else {
+          documentAttributes = {
+            attributes: [
+              {
+                key: selectedAttributeKey,
+                numberValues: numberValues,
+              },
+            ],
+          };
+        }
       }
     }
 
