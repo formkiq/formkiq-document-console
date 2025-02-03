@@ -455,7 +455,7 @@ export default function DocumentClassificationsModal({
                                             }
                                           </p>
                                         )}
-                                      <p className="text-xs font-bold">
+                                      <div className="text-xs font-bold">
                                         ID:{' '}
                                         <span className="text-neutral-500">
                                           {classification.classificationId}
@@ -467,7 +467,7 @@ export default function DocumentClassificationsModal({
                                             }
                                           />
                                         </div>
-                                      </p>
+                                      </div>
                                     </div>
                                   )}
                                 </td>

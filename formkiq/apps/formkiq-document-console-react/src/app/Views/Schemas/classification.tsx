@@ -28,6 +28,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { Schema as SchemaType } from '../../helpers/types/schemas';
+import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
 
 function Classification() {
   const { user } = useAuthenticatedState();
@@ -232,6 +233,18 @@ function Classification() {
                 </button>
               </div>
             </div>
+            <h2 className="text-xl font-bold px-4 mt-4">
+              {classificationSchema.name}
+            </h2>
+            {classificationId && (
+              <span className="block text-xs font-semibold px-4 mb-2">
+                ID:{' '}
+                <span className=" text-neutral-500">{classificationId}</span>
+                <span className="pl-2">
+                  <CopyButton value={classificationId} />
+                </span>
+              </span>
+            )}
 
             <div className=" inline-block h-full">
               <JSONEditorReact

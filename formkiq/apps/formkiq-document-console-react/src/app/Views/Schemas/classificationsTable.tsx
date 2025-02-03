@@ -2,6 +2,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Json, Pencil, Trash } from '../../Components/Icons/icons';
 import { formatDate } from '../../helpers/services/toolService';
 import { Classification } from '../../helpers/types/schemas';
+import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
 
 type TagSchemaTableProps = {
   classifications: Classification[];
@@ -44,6 +45,12 @@ function ClassificationsTable({
                     >
                       {classification.name}
                     </Link>
+                    <span className="block text-xs">
+                      {classification.classificationId}
+                      <span className="pl-2">
+                        <CopyButton value={classification.classificationId} />
+                      </span>
+                    </span>
                   </td>
 
                   <td className="border-b p-4 ">
