@@ -42,6 +42,7 @@ export default function MoveModal({
 
   useEffect(() => {
     if (isOpened) {
+      setLoading(true);
       if (value) {
         // NOTE: there is an arbitrary limit of 50 folders per level, assuming folders are being returned before files
         setFolders(initialFolders);
@@ -55,7 +56,6 @@ export default function MoveModal({
 
   const closeDialog = () => {
     onClose();
-    setLoading(true);
   };
 
   const getSubfolders = async (folderUri = '', indexKey = '') => {
