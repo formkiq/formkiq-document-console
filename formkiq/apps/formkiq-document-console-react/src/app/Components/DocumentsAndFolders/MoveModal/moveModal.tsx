@@ -1,9 +1,12 @@
-import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useState } from 'react';
-import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+import { Dialog, Transition } from '@headlessui/react';
+
 import { useAppDispatch } from '../../../Store/store';
-import { DocumentsService } from '../../../helpers/services/documentsService';
+import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+
 import { ILine } from '../../../helpers/types/line';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+
 import {
   ArrowBottom,
   ArrowRight,
@@ -31,9 +34,11 @@ export default function MoveModal({
   const initialFolders = {
     root: [] as any[],
   };
+
   const [folders, setFolders] = useState(initialFolders);
   const [expandedFolders, setExpandedFolders] = useState([] as any[]);
   const [selectedFolderIndexKey, setSelectedFolderIndexKey] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (isOpened) {
@@ -43,14 +48,16 @@ export default function MoveModal({
         // TODO: expand to current path of selected document/folder?
         setExpandedFolders([] as any[]);
         setSelectedFolderIndexKey('');
-        getSubfolders();
+        getSubfolders().finally(() => setLoading(false));
       }
     }
   }, [isOpened]);
 
   const closeDialog = () => {
     onClose();
+    setLoading(true);
   };
+
   const getSubfolders = async (folderUri = '', indexKey = '') => {
     await DocumentsService.getDocumentsInFolder(
       folderUri,
@@ -77,6 +84,7 @@ export default function MoveModal({
       }
     });
   };
+
   const toggleFolderExpand = (
     event: any,
     folderUri: string,
@@ -92,6 +100,7 @@ export default function MoveModal({
       exf.splice(exf.indexOf(indexKey), 1);
     }
   };
+
   const folderLine = (folder: any, index: number, folderUri = '') => {
     if (folderUri === '') {
       folderUri = folder.path;
@@ -153,6 +162,7 @@ export default function MoveModal({
       </div>
     );
   };
+
   const toggleSelectedFolder = (event: any, folderUri: string) => {
     if (selectedFolderIndexKey === folderUri) {
       setSelectedFolderIndexKey('');
@@ -160,6 +170,7 @@ export default function MoveModal({
       setSelectedFolderIndexKey(folderUri);
     }
   };
+
   const executeMove = (event: any) => {
     if (value && selectedFolderIndexKey.length) {
       let newFolderIndexKey = selectedFolderIndexKey;
@@ -206,6 +217,7 @@ export default function MoveModal({
       }
     }
   };
+
   return (
     <Transition.Root show={isOpened} as={Fragment}>
       <Dialog as="div" className="relative z-20" onClose={() => {}}>
@@ -233,7 +245,7 @@ export default function MoveModal({
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-1/2 h-1/2">
-                <div className="bg-white p-4 rounded-lg bg-white shadow-xl border h-full">
+                <div className="bg-white p-4 rounded-lg shadow-xl border h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
                       Move
@@ -273,7 +285,11 @@ export default function MoveModal({
                       </div>
                       <div>(Root)</div>
                     </div>
-                    {folders['root'].length > 0 ? (
+                    {loading ? (
+                      <div className="w-full flex justify-center">
+                        <Spinner />
+                      </div>
+                    ) : folders['root'].length > 0 ? (
                       <>
                         {folders['root'].map((folder: any, i: number) => {
                           return folderLine(folder, i);
@@ -304,8 +320,8 @@ export default function MoveModal({
                         </div>
                       </>
                     ) : (
-                      <div className="w-full flex justify-center">
-                        <Spinner />
+                      <div className="w-full flex justify-center text-gray-500">
+                        No destination folders found.
                       </div>
                     )}
                   </div>
