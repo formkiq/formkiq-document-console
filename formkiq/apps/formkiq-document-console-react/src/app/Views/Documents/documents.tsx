@@ -25,6 +25,7 @@ import {
   Download,
   Edit,
   FolderOutline,
+  HistoryIcon,
   Pencil,
   Retry,
   Spinner,
@@ -2171,6 +2172,25 @@ function Documents() {
                         </div>
                       </dl>
                     )}
+
+                    <div className="w-64 flex mr-3 border-b"></div>
+                    <Link
+                      to={
+                        `/admin/user-activities` +
+                        (currentDocumentsRootUri.includes('workspaces')
+                          ? currentDocumentsRootUri
+                          : '') +
+                        `/` +
+                        (currentDocument as IDocument).documentId
+                      }
+                      className="flex items-center p-4  hover:text-primary-500 justify-center"
+                    >
+                      <div className="w-5 h-5 mr-1 text-primary-500">
+                        <HistoryIcon />
+                      </div>
+                      User Activities
+                    </Link>
+                    <div className="w-64 flex mr-3 border-b"></div>
                     {currentDocument &&
                       (InlineViewableContentTypes.indexOf(
                         (currentDocument as IDocument).contentType

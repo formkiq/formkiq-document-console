@@ -9,6 +9,7 @@ type UserActivitiesTableProps = {
   userActivities: UserActivity[];
   siteId: string;
   documentsRootUri: string;
+  documentId?: string;
 };
 
 // Separate ActivityRow component to handle individual show/hide state
@@ -17,11 +18,13 @@ const ActivityRow = ({
   documents,
   users,
   documentsRootUri,
+  documentId,
 }: {
   activity: UserActivity;
   documents: { [key: string]: any };
   users: { [key: string]: any };
   documentsRootUri: string;
+  documentId?: string;
 }) => {
   const [showDetails, setShowDetails] = useState(false);
 
@@ -78,6 +81,16 @@ const ActivityRow = ({
         </td>
         <td className="p-4">{formatDate(activity.insertedDate)}</td>
         <td className="p-4 font-bold">{activity.type}</td>
+        {activity.document?.documentId && !documentId && (
+          <td className="p-4">
+            <Link
+              to={`${activity.document.documentId}`}
+              className="text-primary-500 hover:text-primary-600"
+            >
+              View Activities
+            </Link>
+          </td>
+        )}
       </tr>
 
       {/* Show/Hide Details Row */}
@@ -86,7 +99,7 @@ const ActivityRow = ({
           className="cursor-pointer hover:bg-neutral-100 transition-colors duration-150"
           onClick={() => setShowDetails(!showDetails)}
         >
-          <td colSpan={4} className="p-2">
+          <td colSpan={documentId ? 4 : 5} className="p-2">
             <div className="flex flex-wrap items-center mx-8 p-2 bg-neutral-50">
               <span className="font-semibold text-primary-500 hover:text-primary-600 flex gap-2 items-center">
                 {showDetails ? (
@@ -122,6 +135,7 @@ function UserActivitiesTable({
   userActivities,
   siteId,
   documentsRootUri,
+  documentId,
 }: UserActivitiesTableProps) {
   const [documents, setDocuments] = useState<{ [key: string]: any }>({});
   const [users, setUsers] = useState<{ [key: string]: any }>({});
@@ -208,6 +222,11 @@ function UserActivitiesTable({
           <th className="w-1/8 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
             Activity
           </th>
+          {!documentId && (
+            <th className="w-1/8 border-b border-t p-4 pl-8 py-3 bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600">
+              Actions
+            </th>
+          )}
         </tr>
       </thead>
       <tbody className="bg-white">
@@ -219,6 +238,7 @@ function UserActivitiesTable({
               documents={documents}
               users={users}
               documentsRootUri={documentsRootUri}
+              documentId={documentId}
             />
           ))
         ) : (
