@@ -1,9 +1,9 @@
-import {useEffect, useRef, useState} from 'react';
-import {usePopper} from 'react-popper';
-import {TagsForFilterAndDisplay} from '../../../helpers/constants/primaryTags';
-import {DocumentsService} from '../../../helpers/services/documentsService';
-import {Attribute} from '../../../helpers/types/attributes';
-import {Close} from '../../Icons/icons';
+import { useEffect, useRef, useState } from 'react';
+import { usePopper } from 'react-popper';
+import { TagsForFilterAndDisplay } from '../../../helpers/constants/primaryTags';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { Attribute } from '../../../helpers/types/attributes';
+import { Close } from '../../Icons/icons';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
@@ -22,14 +22,14 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
 }
 
 export default function AllTagsPopover({
-                                         allAttributes,
-                                         siteId,
-                                         tagColors,
-                                         onFilterTag,
-                                         onFilterAttribute,
-                                         filterTag,
-                                         filterAttribute,
-                                       }: any) {
+  allAttributes,
+  siteId,
+  tagColors,
+  onFilterTag,
+  onFilterAttribute,
+  filterTag,
+  filterAttribute,
+}: any) {
   const [visible, setVisibility] = useState(false);
   const [allTagKeys, setAllTagKeys] = useState(null);
   const [allAttributesKeys, setAllAttributesKeys] = useState(null);
@@ -39,7 +39,7 @@ export default function AllTagsPopover({
 
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, setVisibility);
-  const {styles, attributes} = usePopper(referenceRef, popperRef, {
+  const { styles, attributes } = usePopper(referenceRef, popperRef, {
     placement: 'bottom-start',
     modifiers: [
       {
@@ -68,21 +68,23 @@ export default function AllTagsPopover({
   const updateTags = () => {
     setAllTagKeys(null);
     DocumentsService.getAllTagKeys(siteId).then((data) => {
-      const tagKeys = (
-        data?.values.filter((value: any) => {
-          return (
-            TagsForFilterAndDisplay.indexOf(value.value) === -1 &&
-            systemTags.indexOf(value.value) === -1
-          );
-        })
-      );
+      const tagKeys = data?.values.filter((value: any) => {
+        return (
+          TagsForFilterAndDisplay.indexOf(value.value) === -1 &&
+          systemTags.indexOf(value.value) === -1
+        );
+      });
       setAllTagKeys(tagKeys);
     });
   };
 
   const updateAttributes = () => {
-    const keyOnlyAttributes = allAttributes.filter((attribute: Attribute) => attribute.dataType === 'KEY_ONLY');
-    const keyOnlyTagKeys = keyOnlyAttributes.map((attribute: Attribute) => ({value: attribute.key}));
+    const keyOnlyAttributes = allAttributes.filter(
+      (attribute: Attribute) => attribute.dataType === 'KEY_ONLY'
+    );
+    const keyOnlyTagKeys = keyOnlyAttributes.map((attribute: Attribute) => ({
+      value: attribute.key,
+    }));
     setAllAttributesKeys(keyOnlyTagKeys);
   };
 
@@ -104,38 +106,39 @@ export default function AllTagsPopover({
         >
           <div className="flex">
             <ul className="flex flex-wrap grow mt-1 justify-center">
-
               {allAttributesKeys && (allAttributesKeys as []).length && (
                 <>
                   {allAttributesKeys &&
-                    (allAttributesKeys as any).map((attribute: any, i: number) => {
-                      let tagColor = 'gray';
-                      if (tagColors) {
-                        tagColors.forEach((color: any) => {
-                          if (color.tagKeys.indexOf(attribute.value) > -1) {
-                            tagColor = color.colorUri;
-                            return;
-                          }
-                        });
+                    (allAttributesKeys as any).map(
+                      (attribute: any, i: number) => {
+                        let tagColor = 'gray';
+                        if (tagColors) {
+                          tagColors.forEach((color: any) => {
+                            if (color.tagKeys.indexOf(attribute.value) > -1) {
+                              tagColor = color.colorUri;
+                              return;
+                            }
+                          });
+                        }
+                        return (
+                          <li
+                            key={i}
+                            className={
+                              (filterAttribute === attribute.value
+                                ? 'bg-primary-500 text-white'
+                                : `bg-${tagColor}-200 text-black`) +
+                              ' text-xs p-1 px-2 mx-1 mb-0.5 cursor-pointer'
+                            }
+                            onClick={(event) => {
+                              onFilterAttribute(event, attribute.value);
+                              setVisibility(false);
+                            }}
+                          >
+                            {attribute.value}
+                          </li>
+                        );
                       }
-                      return (
-                        <li
-                          key={i}
-                          className={
-                            (filterAttribute === attribute.value
-                              ? 'bg-primary-500 text-white'
-                              : `bg-${tagColor}-200 text-black`) +
-                            ' text-xs p-1 px-2 mx-1 mb-0.5 cursor-pointer'
-                          }
-                          onClick={(event) => {
-                            onFilterAttribute(event, attribute.value);
-                            handleDropdownClick(event);
-                          }}
-                        >
-                          {attribute.value}
-                        </li>
-                      );
-                    })}
+                    )}
                 </>
               )}
               {allTagKeys && (allTagKeys as []).length && (
@@ -162,7 +165,7 @@ export default function AllTagsPopover({
                           }
                           onClick={(event) => {
                             onFilterTag(event, tagKey.value);
-                            handleDropdownClick(event);
+                            setVisibility(false);
                           }}
                         >
                           {tagKey.value}
@@ -173,11 +176,13 @@ export default function AllTagsPopover({
               )}
             </ul>
 
-            {((!allTagKeys || (allTagKeys as []).length === 0) && (!allAttributesKeys || (allAttributesKeys as []).length === 0)) && (
-              <div className="flex flex-wrap grow mt-1 pt-1 justify-center text-xs font-semibold">
-                no attributes found
-              </div>
-            )}
+            {(!allTagKeys || (allTagKeys as []).length === 0) &&
+              (!allAttributesKeys ||
+                (allAttributesKeys as []).length === 0) && (
+                <div className="flex flex-wrap grow mt-1 pt-1 justify-center text-xs font-semibold">
+                  no attributes found
+                </div>
+              )}
             <div className="w-5 pt-2 ml-2">
               <div
                 className="w-4 h-4 mr-2 cursor-pointer text-gray-400"
