@@ -918,36 +918,33 @@ function Documents() {
   };
 
   const onFilterTag = (event: any, tag: string) => {
-    if (filterTag === tag || filterAttribute === tag) {
+    // If the tag filter is already active, clear it.
+    if (filterTag === tag) {
+      // Clear the filter (do not include filterAttribute)
       if (subfolderUri && subfolderUri.length) {
         navigate(
           {
             pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
           },
-          {
-            replace: true,
-          }
+          { replace: true }
         );
       } else {
         navigate(
           {
             pathname: `${currentDocumentsRootUri}`,
           },
-          {
-            replace: true,
-          }
+          { replace: true }
         );
       }
     } else {
+      // Apply tag filter and clear attribute filter.
       if (subfolderUri && subfolderUri.length) {
         navigate(
           {
             pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
             search: `?filterTag=${tag}`,
           },
-          {
-            replace: true,
-          }
+          { replace: true }
         );
       } else {
         navigate(
@@ -955,45 +952,40 @@ function Documents() {
             pathname: `${currentDocumentsRootUri}`,
             search: `?filterTag=${tag}`,
           },
-          {
-            replace: true,
-          }
+          { replace: true }
         );
       }
     }
   };
 
   const onFilterAttribute = (event: any, attribute: string) => {
-    if (filterAttribute === attribute || filterTag === attribute) {
+    // If the attribute filter is already active, clear it.
+    if (filterAttribute === attribute) {
+      // Clear the filter (do not include filterTag)
       if (subfolderUri && subfolderUri.length) {
         navigate(
           {
             pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
           },
-          {
-            replace: true,
-          }
+          { replace: true }
         );
       } else {
         navigate(
           {
             pathname: `${currentDocumentsRootUri}`,
           },
-          {
-            replace: true,
-          }
+          { replace: true }
         );
       }
     } else {
+      // Apply attribute filter and clear tag filter.
       if (subfolderUri && subfolderUri.length) {
         navigate(
           {
             pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
             search: `?filterAttribute=${attribute}`,
           },
-          {
-            replace: true,
-          }
+          { replace: true }
         );
       } else {
         navigate(
@@ -1001,9 +993,7 @@ function Documents() {
             pathname: `${currentDocumentsRootUri}`,
             search: `?filterAttribute=${attribute}`,
           },
-          {
-            replace: true,
-          }
+          { replace: true }
         );
       }
     }
@@ -1224,10 +1214,16 @@ function Documents() {
       }
     }
 
-    const onFilter = (event: any, value: string, index: number) => {
-      if (!keyOnlyAttributesKeys || keyOnlyAttributesKeys.length === 0)
+    const onFilter = (event: any, value: string) => {
+      const isKeyOnlyAttribute = keyOnlyAttributesKeys.some(
+        (item) => item.value === value
+      );
+
+      if (isKeyOnlyAttribute) {
+        onFilterAttribute(event, value);
+      } else {
         onFilterTag(event, value);
-      if (index < keyOnlyAttributesKeys.length) onFilterAttribute(event, value);
+      }
     };
 
     return (
@@ -1268,13 +1264,14 @@ function Documents() {
                           : `bg-${tagColor}-200 text-black`) +
                         ' text-xs p-1 px-2 mx-1 cursor-pointer'
                       }
-                      onClick={(event) => onFilter(event, primaryTag, i)}
+                      onClick={(event) => onFilter(event, primaryTag)}
                     >
                       {primaryTag}
                     </li>
                   );
                 })}
               </ul>
+
               {showAllTagsPopover && (
                 <AllTagsPopover
                   siteId={currentSiteId}
@@ -1476,11 +1473,31 @@ function Documents() {
                     : 'text-neutral-900 ') + ' w-5 cursor-pointer'
                 }
                 onClick={(event) => {
-                  if (filterTag && filterTag.length) {
-                    setIsTagFilterExpanded(true);
-                  } else {
-                    setIsTagFilterExpanded(!isTagFilterExpanded);
+                  // If either filter is active, clear both by navigating with an empty search string.
+                  if (
+                    (filterTag && filterTag.length) ||
+                    (filterAttribute && filterAttribute.length)
+                  ) {
+                    if (subfolderUri && subfolderUri.length) {
+                      navigate(
+                        {
+                          pathname: `${currentDocumentsRootUri}/folders/${subfolderUri}`,
+                          search: '', // clear any query parameters
+                        },
+                        { replace: true }
+                      );
+                    } else {
+                      navigate(
+                        {
+                          pathname: `${currentDocumentsRootUri}`,
+                          search: '', // clear any query parameters
+                        },
+                        { replace: true }
+                      );
+                    }
                   }
+                  // Toggle the expanded state
+                  setIsTagFilterExpanded(!isTagFilterExpanded);
                 }}
               >
                 <Tag />

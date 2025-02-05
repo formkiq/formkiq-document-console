@@ -247,18 +247,7 @@ function DocumentListLine({
           <div className="flex w-full justify-start">
             {archiveTabStatus === 'closed' && (
               <div className="flex items-center justify-center">
-                {folder !== 'deleted' &&
-                folder !== 'shared' &&
-                folder !== 'recent' &&
-                folder !== 'favorites' ? (
-                  <div
-                    className={
-                      lineSubfolderLevel === pageSubfolderLevel ? 'w-5 ' : 'w-1'
-                    }
-                  ></div>
-                ) : (
-                  <div className="w-5"></div>
-                )}
+                <div className="w-5"></div>
                 <input
                   id="checkbox-all"
                   type="checkbox"
@@ -324,18 +313,7 @@ function DocumentListLine({
                   </div>
                 </div>
               ))}
-            {folder !== 'deleted' &&
-            folder !== 'shared' &&
-            folder !== 'recent' &&
-            folder !== 'favorites' ? (
-              <div
-                className={
-                  lineSubfolderLevel === pageSubfolderLevel ? 'w-5 ' : 'w-1'
-                }
-              ></div>
-            ) : (
-              <div className="w-5"></div>
-            )}
+            <div className="w-5"></div>
             {folder === 'deleted' ? (
               <span className="w-16 flex items-center justify-start">
                 <img
