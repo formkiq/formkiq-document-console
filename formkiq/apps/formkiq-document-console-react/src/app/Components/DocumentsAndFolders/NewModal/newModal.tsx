@@ -539,11 +539,11 @@ export default function NewModal({
                             type="url"
                             data-test-id="new-deeplink-path-input"
                             className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600
-                                                    text-sm invalid:bg-red-200
-                                                    placeholder-gray-500 text-gray-900 rounded-t-md
-                                                    focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
+             text-sm invalid:bg-red-200
+             placeholder-gray-500 text-gray-900 rounded-t-md
+             focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
                             placeholder="DeepLink Path"
-                            pattern="https://.*"
+                            pattern="^(https?:\/\/|s3:\/\/).*$"
                             {...register('deeplinkPath', {
                               required: true,
                             })}
