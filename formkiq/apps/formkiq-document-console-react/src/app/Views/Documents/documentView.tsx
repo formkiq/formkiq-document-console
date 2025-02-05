@@ -29,6 +29,30 @@ interface CSVRow {
   [key: string]: string;
 }
 
+/**
+ * Helper function to extract the filename from the URL’s
+ * response-content-disposition parameter.
+ */
+function extractFilenameFromUrl(url: string): string | null {
+  try {
+    const urlObj = new URL(url);
+    const disposition = urlObj.searchParams.get('response-content-disposition');
+    if (disposition) {
+      // Example: "inline; filename*=UTF-8''formkiq-advanced-wordmark-transparent.png"
+      const matches = disposition.match(
+        /filename\*?=['"]?(?:UTF-8'')?([^;'" ]+)/i
+      );
+      if (matches && matches[1]) {
+        return decodeURIComponent(matches[1]);
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Failed to parse URL:', error);
+    return null;
+  }
+}
+
 export function DocumentView() {
   const { id } = useParams();
   const versionKey = new URLSearchParams(useLocation().search).get(
@@ -61,9 +85,7 @@ export function DocumentView() {
       {
         pathname: `${siteRedirectUrl}/${id}/view`,
       },
-      {
-        replace: true,
-      }
+      { replace: true }
     );
   }
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
@@ -76,25 +98,18 @@ export function DocumentView() {
     useState<boolean>(true);
 
   const [mode, setMode] = useState(getModeFromPath());
-  const isDocumentContentTypeEditable = (contentType: string) => {
-    return (
-      TextFileEditorEditableContentTypes.indexOf(contentType) > -1 ||
-      InlineEditableContentTypes.indexOf(contentType) > -1
-    );
-  };
+  const isDocumentContentTypeEditable = (contentType: string) =>
+    TextFileEditorEditableContentTypes.indexOf(contentType) > -1 ||
+    InlineEditableContentTypes.indexOf(contentType) > -1;
+
   function getModeFromPath() {
     const mode = pathname.split('/').pop();
-    if (mode === 'view' || mode === 'edit') {
-      return mode;
-    } else {
-      return 'view';
-    }
+    return mode === 'view' || mode === 'edit' ? mode : 'view';
   }
 
   const customParse = (csvText: string): CSVRow[] => {
     const lines = csvText.split('\n').filter((line) => line.trim() !== '');
     const headers = parseCSVLine(lines[0]);
-
     return lines.slice(1).map((line) => {
       const values = parseCSVLine(line);
       const row: CSVRow = {};
@@ -109,7 +124,6 @@ export function DocumentView() {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
-
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
       if (char === '"') {
@@ -132,10 +146,8 @@ export function DocumentView() {
 
   const handleTextContent = (content: string) => {
     try {
-      // First try to decode base64 if it's base64 encoded
       let decodedString;
       try {
-        // Use TextDecoder to handle UTF-8 encoded base64 content
         const decoded = atob(content);
         const bytes = new Uint8Array(decoded.length);
         for (let i = 0; i < decoded.length; i++) {
@@ -143,27 +155,19 @@ export function DocumentView() {
         }
         decodedString = new TextDecoder('utf-8').decode(bytes);
       } catch (e) {
-        // If not base64 or decoding fails, use the original content
         decodedString = content;
       }
-
-      // Try to decode HTML entities
       const parser = new DOMParser();
       let decodedContent =
         parser.parseFromString(
           `<!doctype html><body>${decodedString}`,
           'text/html'
         ).body.textContent || '';
-
-      // Remove BOM if present
       decodedContent = decodedContent.replace(/^\uFEFF/, '');
-
-      // Handle specific character replacements
       decodedContent = decodedContent
         .replace(/Ã„/g, 'Ä')
         .replace(/â€ž/g, '"')
         .replace(/â€œ/g, '"');
-
       return decodedContent;
     } catch (error) {
       console.error('Error processing text content:', error);
@@ -182,7 +186,7 @@ export function DocumentView() {
       };
       DocumentsService.getDocumentById(id, currentSiteId).then(
         (response: IDocument) => {
-          setDocument(response);
+          setViewDocument(response);
           dispatch(setCurrentDocument(response));
           dispatch(setCurrentDocumentPath(response.path));
           // redirect if file is not editable type
@@ -192,19 +196,14 @@ export function DocumentView() {
           ) {
             navigate(pathname.replace(/\/edit$/, '/view'));
           }
-
           if (
             formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
-            OnlyOfficeContentTypes.indexOf(
-              (response as IDocument).contentType
-            ) > -1
+            OnlyOfficeContentTypes.indexOf(response.contentType) > -1
           ) {
             DocumentsService.editDocumentWithOnlyoffice(id, currentSiteId).then(
               (onlyofficeResponse: any) => {
                 setOOConfig(onlyofficeResponse.config);
-                // console.log(onlyofficeResponse.config);
                 ooConfig = onlyofficeResponse.config;
-                // setOOConfig(onlyofficeResponse.config)
                 const script = window.document.createElement('script');
                 (script as HTMLScriptElement).type = 'application/javascript';
                 (script as HTMLScriptElement).id = 'ooScript';
@@ -217,17 +216,12 @@ export function DocumentView() {
               }
             );
           } else if (
-            InlineViewableContentTypes.indexOf(
-              (response as IDocument).contentType
-            ) > -1
+            InlineViewableContentTypes.indexOf(response.contentType) > -1
           ) {
-            let viewVersionKey = '';
-            if (versionKey && versionKey.length) {
-              viewVersionKey = versionKey;
-            }
+            let viewVersionKey =
+              versionKey && versionKey.length ? versionKey : '';
             // Check if it's a text file
             const isTextFile = response.contentType.startsWith('text/');
-
             if (isTextFile) {
               DocumentsService.getDocumentContent(
                 currentSiteId,
@@ -235,13 +229,9 @@ export function DocumentView() {
                 viewVersionKey,
                 true
               ).then((contentResponse: any) => {
-                console.log('Raw text content:', contentResponse.content);
-
                 const processedContent = handleTextContent(
                   contentResponse.content
                 );
-
-                // Create a Blob with UTF-8 encoding
                 const blob = new Blob([processedContent], {
                   type: `${response.contentType};charset=utf-8`,
                 });
@@ -258,16 +248,52 @@ export function DocumentView() {
                 setDocumentContent(urlResponse.url);
               });
             }
-          } else if (
-            (response as IDocument).deepLinkPath &&
-            (response as IDocument).deepLinkPath.length
-          ) {
-            setDocumentContent((response as IDocument).deepLinkPath);
-          } else if ((response as IDocument).contentType === 'text/csv') {
-            let viewVersionKey = '';
-            if (versionKey && versionKey.length) {
-              viewVersionKey = versionKey;
+          } else if (response.deepLinkPath && response.deepLinkPath.length) {
+            const deepLinkPath = response.deepLinkPath;
+            if (deepLinkPath.startsWith('s3://')) {
+              let viewVersionKey =
+                versionKey && versionKey.length ? versionKey : '';
+              DocumentsService.getDocumentUrl(
+                id,
+                currentSiteId,
+                viewVersionKey,
+                true
+              )
+                .then((urlResponse: any) => {
+                  const url = urlResponse.url;
+                  // If contentType is missing or not an image, try to extract filename from URL
+                  if (
+                    !response.contentType ||
+                    !response.contentType.startsWith('image/')
+                  ) {
+                    const filename = extractFilenameFromUrl(url);
+                    if (filename) {
+                      const imageMatch = filename.match(
+                        /\.(png|jpe?g|gif|bmp)$/i
+                      );
+                      if (imageMatch) {
+                        setViewDocument({
+                          ...response,
+                          contentType: `image/${
+                            imageMatch[1].toLowerCase() === 'jpg'
+                              ? 'jpeg'
+                              : imageMatch[1].toLowerCase()
+                          }`,
+                        });
+                      }
+                    }
+                  }
+                  setDocumentContent(url);
+                })
+                .catch((error: any) => {
+                  console.error('Error retrieving S3 document URL:', error);
+                });
+            } else {
+              setDocumentContent(deepLinkPath);
             }
+          } else if (response.contentType === 'text/csv') {
+            let viewVersionKey =
+              versionKey && versionKey.length ? versionKey : '';
             DocumentsService.getDocumentContent(
               currentSiteId,
               id,
@@ -280,14 +306,11 @@ export function DocumentView() {
               }
             });
           } else if (
-            TextFileEditorViewableContentTypes.indexOf(
-              (response as IDocument).contentType
-            ) > -1
+            TextFileEditorViewableContentTypes.indexOf(response.contentType) >
+            -1
           ) {
-            let viewVersionKey = '';
-            if (versionKey && versionKey.length) {
-              viewVersionKey = versionKey;
-            }
+            let viewVersionKey =
+              versionKey && versionKey.length ? versionKey : '';
             DocumentsService.getDocumentContent(
               currentSiteId,
               id,
@@ -299,10 +322,8 @@ export function DocumentView() {
               }
             });
           } else {
-            let viewVersionKey = '';
-            if (versionKey && versionKey.length) {
-              viewVersionKey = versionKey;
-            }
+            let viewVersionKey =
+              versionKey && versionKey.length ? versionKey : '';
             DocumentsService.getDocumentUrl(
               id,
               currentSiteId,
@@ -322,10 +343,7 @@ export function DocumentView() {
               const url =
                 currentDocumentsRootUri +
                 '/folders/' +
-                (response as IDocument).path.substring(
-                  0,
-                  (response as IDocument).path.lastIndexOf('/')
-                ) +
+                response.path.substring(0, response.path.lastIndexOf('/')) +
                 '#id=' +
                 id;
               setTimeout(() => {
@@ -352,9 +370,7 @@ export function DocumentView() {
         {
           pathname: `${siteRedirectUrl}/${id}/view`,
         },
-        {
-          replace: true,
-        }
+        { replace: true }
       );
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
@@ -362,21 +378,18 @@ export function DocumentView() {
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
     setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
     setMode(getModeFromPath());
-    // redirect if user doesn't have editing rights
     if (recheckSiteInfo.isSiteReadOnly && getModeFromPath() === 'edit') {
       navigate(pathname.replace(/\/edit$/, '/view'));
     }
   }, [pathname]);
 
-  const [document, setDocument]: [IDocument | null, any] = useState(null);
-  const [ooConfig, setOOConfig]: [any | null, any] = useState(null);
-  const [documentContent, setDocumentContent]: [string | null, any] =
-    useState('');
+  const [viewDocument, setViewDocument] = useState<IDocument | null>(null);
+  const [ooConfig, setOOConfig] = useState<any | null>(null);
+  const [documentContent, setDocumentContent] = useState<string | null>('');
   const [documentCsvContent, setDocumentCsvContent] = useState<CSVRow[]>([]);
-
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
-  // Cleanup function for blob URLs
+  // Cleanup for blob URLs
   useEffect(() => {
     return () => {
       if (blobUrl) {
@@ -386,92 +399,94 @@ export function DocumentView() {
   }, [blobUrl]);
 
   const DocumentViewer = () => {
-    //return (<></>)
-    //return <DocViewer prefetchMethod="GET"  documents={documents} />
+    // As a fallback, also check the URL extension.
+    const isImageFromUrl =
+      documentContent && /\.(png|jpe?g|gif|bmp)(\?|$)/i.test(documentContent);
     return (
       <div className="w-full h-full">
-        {document &&
-          (InlineViewableContentTypes.indexOf(
-            (document as IDocument).contentType
-          ) > -1 ||
-            ((document as IDocument).deepLinkPath &&
-              (document as IDocument).deepLinkPath.length > 0)) && (
+        {viewDocument &&
+          (InlineViewableContentTypes.indexOf(viewDocument.contentType) > -1 ||
+            (viewDocument.deepLinkPath &&
+              viewDocument.deepLinkPath.length > 0)) && (
             <>
-              {documentContent && (
+              {documentContent &&
+              (viewDocument.contentType?.startsWith('image/') ||
+                isImageFromUrl) ? (
+                <img
+                  src={documentContent}
+                  alt="Document"
+                  className="mt-4 w-auto h-auto max-w-[95%] mx-auto object-contain"
+                />
+              ) : (
                 <iframe
                   title="Document Viewer"
                   className="mt-4 w-full h-full"
-                  src={documentContent}
+                  src={documentContent || undefined}
                 />
               )}
             </>
           )}
 
-        {/*CSV Viewer (currently only for text/csv files) */}
-        {document &&
-          (document as IDocument).contentType === 'text/csv' &&
+        {/* CSV Viewer */}
+        {viewDocument &&
+          viewDocument.contentType === 'text/csv' &&
           documentCsvContent !== undefined && (
-            <>
-              {documentCsvContent.length > 0 && (
-                <div className="mt-5 h-[calc(100vh-120px)] overflow-auto shadow-md sm:rounded-lg">
-                  <div className="inline-block min-w-full align-middle">
-                    <div className="overflow-hidden">
-                      <table className="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-700">
-                        <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
-                          <tr>
-                            {Object.keys(documentCsvContent[0]).map(
-                              (header, index) => (
-                                <th
-                                  key={index}
-                                  scope="col"
-                                  className="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
-                                >
-                                  {header}
-                                </th>
-                              )
-                            )}
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                          {documentCsvContent.map((row, rowIndex) => (
-                            <tr
-                              key={rowIndex}
-                              className="hover:bg-gray-100 dark:hover:bg-gray-700"
+            <div className="mt-5 h-[calc(100vh-120px)] overflow-auto shadow-md sm:rounded-lg">
+              <div className="inline-block min-w-full align-middle">
+                <div className="overflow-hidden">
+                  <table className="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-700">
+                    <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
+                      <tr>
+                        {Object.keys(documentCsvContent[0]).map(
+                          (header, index) => (
+                            <th
+                              key={index}
+                              scope="col"
+                              className="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
                             >
-                              {Object.values(row).map((cell, cellIndex) => (
-                                <td
-                                  key={cellIndex}
-                                  className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                                >
-                                  {cell}
-                                </td>
-                              ))}
-                            </tr>
+                              {header}
+                            </th>
+                          )
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                      {documentCsvContent.map((row, rowIndex) => (
+                        <tr
+                          key={rowIndex}
+                          className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          {Object.values(row).map((cell, cellIndex) => (
+                            <td
+                              key={cellIndex}
+                              className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                            >
+                              {cell}
+                            </td>
                           ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              )}
-            </>
+              </div>
+            </div>
           )}
 
-        {/*Text File Editor (currently only for 'text/markdown' files) */}
-        {document &&
-          TextFileEditorViewableContentTypes.indexOf(
-            (document as IDocument).contentType
-          ) > -1 &&
+        {/* Text File Editor */}
+        {viewDocument &&
+          TextFileEditorViewableContentTypes.indexOf(viewDocument.contentType) >
+            -1 &&
           documentContent !== undefined && (
             <TextFileEditor
-              currentDocument={document}
+              currentDocument={viewDocument}
               documentContent={documentContent}
-              contentType={(document as IDocument).contentType}
+              contentType={viewDocument.contentType}
               siteId={currentSiteId}
               readOnly={
                 isCurrentSiteReadonly ||
                 TextFileEditorEditableContentTypes.indexOf(
-                  (document as IDocument).contentType
+                  viewDocument.contentType
                 ) === -1 ||
                 mode === 'view'
               }
@@ -486,7 +501,7 @@ export function DocumentView() {
       <Helmet>
         <title>Document</title>
       </Helmet>
-      {document && (
+      {viewDocument && (
         <div className="flex flex-col lg:flex-row">
           <div className="-mt-3 h-92/100h flex-1 bg-white inline-block">
             {documentContent !== undefined || ooConfig ? (
