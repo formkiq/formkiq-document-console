@@ -1,27 +1,30 @@
-import {useCallback, useEffect, useState} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {useSelector} from 'react-redux';
-import {useLocation} from 'react-router-dom';
-import {useAuthenticatedState} from '../../Store/reducers/auth';
-import {useAppDispatch} from '../../Store/store';
+import { useCallback, useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
+import UserActivitiesTable from '../../Components/UserActivities/userActivitiesTable';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
-import {RequestStatus} from '../../helpers/types/document';
+import { RequestStatus } from '../../helpers/types/document';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
 import {
   fetchUserActivities,
   setUserActivitiesLoadingStatusPending,
-  UserActivitiesState
-} from "../../Store/reducers/userActivities";
-import UserActivitiesTable from "../../Components/UserActivities/userActivitiesTable";
+  UserActivitiesState,
+} from '../../Store/reducers/userActivities';
+import { useAppDispatch } from '../../Store/store';
 
 function UserActivities() {
-  const {user} = useAuthenticatedState();
-  const {hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites} =
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuthenticatedState();
+  const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const {siteId} = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -30,15 +33,14 @@ function UserActivities() {
     workspaceSites
   );
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
-  const [siteDocumentsRootUri, setSiteDocumentsRootUri] = useState<string>("")
+  const [siteDocumentsRootUri, setSiteDocumentsRootUri] = useState<string>('');
   const {
     userActivities,
     nextUserActivitiesToken,
     isLastUserActivitiesSearchPageLoaded,
     currentUserActivitiesSearchPage,
-    userActivitiesLoadingStatus
-  } =
-    useSelector(UserActivitiesState);
+    userActivitiesLoadingStatus,
+  } = useSelector(UserActivitiesState);
 
   const dispatch = useAppDispatch();
 
@@ -58,8 +60,15 @@ function UserActivities() {
 
   // update User Activities when different siteId selected
   useEffect(() => {
-    dispatch(fetchUserActivities({siteId: currentSiteId, page: 1, limit: 20}))
-  }, [currentSiteId]);
+    dispatch(
+      fetchUserActivities({
+        siteId: currentSiteId,
+        page: 1,
+        limit: 20,
+        documentId: id,
+      })
+    );
+  }, [currentSiteId, id]);
 
   // load more schemas when table reaches bottom
   const trackScrolling = useCallback(async () => {
@@ -84,11 +93,17 @@ function UserActivities() {
             siteId: currentSiteId,
             nextUserActivitiesToken,
             page: currentUserActivitiesSearchPage + 1,
+            documentId: id,
           })
         );
       }
     }
-  }, [nextUserActivitiesToken, userActivitiesLoadingStatus, isLastUserActivitiesSearchPageLoaded]);
+  }, [
+    nextUserActivitiesToken,
+    userActivitiesLoadingStatus,
+    isLastUserActivitiesSearchPageLoaded,
+    id,
+  ]);
 
   const handleScroll = (event: any) => {
     const el = event.target;
@@ -100,20 +115,42 @@ function UserActivities() {
     }
   };
 
-
   return (
     <>
       <Helmet>
         <title>User Activities</title>
       </Helmet>
       <div
-        className="flex flex-col "
+        className="flex flex-col"
         style={{
           height: `calc(100vh - 3.68rem)`,
         }}
       >
+        {id && (
+          <div className="flex flex-col items-start justify-start w-full p-4 border-b border-neutral-300">
+            <h3 className="text-md font-bold text-neutral-900 z-20">
+              Document ID: <span className="text-neutral-500">{id}</span>{' '}
+              <CopyButton value={id} />
+            </h3>
+            <button
+              onClick={() =>
+                navigate('/admin/user-activities', { replace: true })
+              }
+              className="text-primary-500 text-sm underline"
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+              }}
+            >
+              back to full user activities list
+            </button>
+          </div>
+        )}
+
         <div
-          className="flex-1 inline-block overflow-y-scroll overflow-x-auto h-full mt-2"
+          className="flex-1 inline-block overflow-y-scroll overflow-x-auto h-full"
           id="userActivitiesScrollPane"
           onScroll={handleScroll}
         >
@@ -121,6 +158,7 @@ function UserActivities() {
             userActivities={userActivities}
             siteId={currentSiteId}
             documentsRootUri={siteDocumentsRootUri}
+            documentId={id}
           />
         </div>
       </div>

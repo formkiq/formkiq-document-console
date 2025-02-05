@@ -1,8 +1,11 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {DocumentsService} from '../../helpers/services/documentsService';
-import {RootState} from '../store';
-import {openDialog as openNotificationDialog} from './globalNotificationControls';
-import {UserActivity, RequestStatus} from "../../helpers/types/userActivities";
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { RootState } from '../store';
+import { openDialog as openNotificationDialog } from './globalNotificationControls';
+import {
+  UserActivity,
+  RequestStatus,
+} from '../../helpers/types/userActivities';
 
 interface userActivitiesState {
   userActivities: UserActivity[];
@@ -11,7 +14,6 @@ interface userActivitiesState {
   currentUserActivitiesSearchPage: number;
   isLastUserActivitiesSearchPageLoaded: boolean;
   isLoadingMore: boolean;
-
 }
 
 const defaultState: userActivitiesState = {
@@ -26,41 +28,52 @@ const defaultState: userActivitiesState = {
 export const fetchUserActivities = createAsyncThunk(
   'userActivities/fetchUserActivities',
   async (data: any, thunkAPI) => {
-    const {nextToken, limit, page, siteId, userId} = data;
-    await DocumentsService.getUserActivities(siteId, userId, limit, nextToken).then((response) => {
-      if (response.status === 200) {
-        const data = {
-          userActivities: response.userActivities,
-          isLoadingMore: false,
-          isLastSearchPageLoaded: false,
-          next: response.next,
-          page,
-        };
-        if (page > 1) {
-          data.isLoadingMore = true;
-        }
-        if (response.documents?.length === 0) {
-          data.isLastSearchPageLoaded = true;
-        }
-        thunkAPI.dispatch(setUserActivities(data));
-      } else {
-        thunkAPI.dispatch(
-          openNotificationDialog({
-            dialogTitle: 'Error fetching user activities',
-          })
-        );
+    const { nextToken, limit, page, siteId, userId, documentId } = data;
+    const response = documentId
+      ? await DocumentsService.getDocumentUserActivities(
+        siteId,
+        limit,
+        nextToken,
+        documentId
+      )
+      : await DocumentsService.getUserActivities(
+        siteId,
+        userId,
+        limit,
+        nextToken
+      );
+
+    if (response.status === 200) {
+      const data = {
+        userActivities: response.userActivities,
+        isLoadingMore: false,
+        isLastSearchPageLoaded: false,
+        next: response.next,
+        page,
+      };
+      if (page > 1) {
+        data.isLoadingMore = true;
       }
-    });
+      if (response.documents?.length === 0) {
+        data.isLastSearchPageLoaded = true;
+      }
+      thunkAPI.dispatch(setUserActivities(data));
+    } else {
+      thunkAPI.dispatch(
+        openNotificationDialog({
+          dialogTitle: 'Error fetching user activities',
+        })
+      );
+    }
   }
 );
-
 
 export const userActivitiesSlice = createSlice({
   name: 'userActivities',
   initialState: defaultState,
   reducers: {
     setUserActivities: (state, action) => {
-      const {userActivities, isLoadingMore, next} = action.payload;
+      const { userActivities, isLoadingMore, next } = action.payload;
       const isLastSearchPageLoaded = !next;
       if (userActivities) {
         if (isLoadingMore) {
@@ -86,14 +99,12 @@ export const userActivitiesSlice = createSlice({
         ...state,
         groupsLoadingStatus: RequestStatus.pending,
       };
-    }
+    },
   },
 });
 
-export const {
-  setUserActivities,
-  setUserActivitiesLoadingStatusPending,
-} = userActivitiesSlice.actions;
+export const { setUserActivities, setUserActivitiesLoadingStatusPending } =
+  userActivitiesSlice.actions;
 
 export const UserActivitiesState = (state: RootState) =>
   state.userActivitiesState;

@@ -258,6 +258,11 @@ const RoutesMapper = () => {
         element={<UserActivities />}
       ></Route>
       <Route
+        path="/admin/user-activities/workspaces/:siteId/:id"
+        element={<UserActivities />}
+      ></Route>
+      <Route path="/admin/user-activities/:id" element={<UserActivities />}></Route>
+      <Route
         path="/admin/sites-management"
         element={<SitesManagement />}
       ></Route>
