@@ -1,24 +1,25 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
-import { useLocation, useParams } from 'react-router-dom';
-import { useAuthenticatedState } from '../../Store/reducers/auth';
-import { useAppDispatch } from '../../Store/store';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
+import UserActivitiesTable from '../../Components/UserActivities/userActivitiesTable';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
+import { useAuthenticatedState } from '../../Store/reducers/auth';
 import {
   fetchUserActivities,
   setUserActivitiesLoadingStatusPending,
   UserActivitiesState,
 } from '../../Store/reducers/userActivities';
-import UserActivitiesTable from '../../Components/UserActivities/userActivitiesTable';
-import {CopyButton} from "../../Components/Generic/Buttons/CopyButton";
+import { useAppDispatch } from '../../Store/store';
 
 function UserActivities() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuthenticatedState();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
@@ -60,7 +61,12 @@ function UserActivities() {
   // update User Activities when different siteId selected
   useEffect(() => {
     dispatch(
-      fetchUserActivities({ siteId: currentSiteId, page: 1, limit: 20, documentId: id})
+      fetchUserActivities({
+        siteId: currentSiteId,
+        page: 1,
+        limit: 20,
+        documentId: id,
+      })
     );
   }, [currentSiteId, id]);
 
@@ -87,7 +93,7 @@ function UserActivities() {
             siteId: currentSiteId,
             nextUserActivitiesToken,
             page: currentUserActivitiesSearchPage + 1,
-            documentId: id
+            documentId: id,
           })
         );
       }
@@ -109,26 +115,37 @@ function UserActivities() {
     }
   };
 
-
   return (
     <>
       <Helmet>
         <title>User Activities</title>
       </Helmet>
       <div
-        className="flex flex-col "
+        className="flex flex-col"
         style={{
           height: `calc(100vh - 3.68rem)`,
         }}
       >
-
         {id && (
           <div className="flex flex-col items-start justify-start w-full p-4 border-b border-neutral-300">
             <h3 className="text-md font-bold text-neutral-900 z-20">
-              Document ID: <span className="text-neutral-500" >{id}</span> <CopyButton
-              value={id}
-            />
+              Document ID: <span className="text-neutral-500">{id}</span>{' '}
+              <CopyButton value={id} />
             </h3>
+            <button
+              onClick={() =>
+                navigate('/admin/user-activities', { replace: true })
+              }
+              className="text-primary-500 text-sm underline"
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+              }}
+            >
+              back to full user activities list
+            </button>
           </div>
         )}
 

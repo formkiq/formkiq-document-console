@@ -87,7 +87,7 @@ const ActivityRow = ({
               to={`${activity.document.documentId}`}
               className="text-primary-500 hover:text-primary-600"
             >
-              View Activities
+              View All Activities for this Document
             </Link>
           </td>
         )}
