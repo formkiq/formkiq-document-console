@@ -1,27 +1,26 @@
-import {useRef, useState} from 'react';
-import {useForm} from 'react-hook-form';
-import {openDialog as openNotificationDialog} from '../../Store/reducers/globalNotificationControls';
-import {useAppDispatch} from '../../Store/store';
-import {DocumentsService} from '../../helpers/services/documentsService';
-import {
-  Attribute,
-  AttributeDataType,
-} from '../../helpers/types/attributes';
+import { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../Store/store';
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { Attribute, AttributeDataType } from '../../helpers/types/attributes';
 import ButtonGhost from '../Generic/Buttons/ButtonGhost';
-import ButtonTertiary from '../Generic/Buttons/ButtonTertiary';
+import ButtonPrimary from '../Generic/Buttons/ButtonPrimary';
 import RadioListbox from '../Generic/Listboxes/RadioListbox';
 
 function EditAttributeForm({
-                             updateAllAttributes,
-                             siteId,
-                             attribute,
-                             onClose,
-                           }: any) {
-  const [selectedAttributeDataType, setSelectedAttributeDataType] = useState<AttributeDataType | ''>(attribute?.dataType);
+  updateAllAttributes,
+  siteId,
+  attribute,
+  onClose,
+}: any) {
+  const [selectedAttributeDataType, setSelectedAttributeDataType] = useState<
+    AttributeDataType | ''
+  >(attribute?.dataType);
 
   const {
     register,
-    formState: {errors},
+    formState: { errors },
     handleSubmit,
     reset,
   } = useForm();
@@ -38,40 +37,63 @@ function EditAttributeForm({
       return;
     }
 
+    // Validate WATERMARK: ensure at least one watermark field is provided.
+    if (selectedAttributeDataType === 'WATERMARK') {
+      if (!data.watermarkText && !data.imageDocumentId) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle:
+              'Either watermark text or image document ID must be provided.',
+          })
+        );
+        return;
+      }
+    }
+
+    // Build the updated attribute object, including watermark values if applicable.
     const newAttribute: { attribute: Attribute } = {
       attribute: {
         key: data?.key,
         dataType: selectedAttributeDataType,
         type: 'STANDARD',
+        ...(selectedAttributeDataType === 'WATERMARK' && {
+          watermark: {
+            text: data.watermarkText || '',
+            imageDocumentId: data.imageDocumentId || '',
+          },
+        }),
       },
     };
 
-    if (attribute?.key === data?.key) { // key has not been updated
-      // delete old attribute
-      DocumentsService.deleteAttribute(siteId, attribute.key).then((response) => {
-        if (response.status !== 200) {
-          dispatch(
-            openNotificationDialog({
-              dialogTitle: response.errors[0].error,
-            })
-          );
-        } else {
-          // add new attribute
-          DocumentsService.addAttribute(siteId, newAttribute).then((response) => {
-            if (response.status !== 200) {
-              dispatch(
-                openNotificationDialog({
-                  dialogTitle: response.errors[0].error,
-                })
-              );
-            } else {
-              updateAllAttributes();
-            }
-          });
+    // If the key is unchanged, delete the old attribute then add the updated version.
+    if (attribute?.key === data?.key) {
+      DocumentsService.deleteAttribute(siteId, attribute.key).then(
+        (response) => {
+          if (response.status !== 200) {
+            dispatch(
+              openNotificationDialog({
+                dialogTitle: response.errors[0].error,
+              })
+            );
+          } else {
+            DocumentsService.addAttribute(siteId, newAttribute).then(
+              (response) => {
+                if (response.status !== 200) {
+                  dispatch(
+                    openNotificationDialog({
+                      dialogTitle: response.errors[0].error,
+                    })
+                  );
+                } else {
+                  updateAllAttributes();
+                }
+              }
+            );
+          }
         }
-      });
+      );
     } else {
-      // add new attribute
+      // If the key has been updated, add the new attribute then delete the old one.
       DocumentsService.addAttribute(siteId, newAttribute).then((response) => {
         if (response.status !== 200) {
           dispatch(
@@ -80,18 +102,19 @@ function EditAttributeForm({
             })
           );
         } else {
-          // delete old attribute
-          DocumentsService.deleteAttribute(siteId, attribute.key).then((response) => {
-            if (response.status !== 200) {
-              dispatch(
-                openNotificationDialog({
-                  dialogTitle: response.errors[0].error,
-                })
-              );
-            } else {
-              updateAllAttributes();
+          DocumentsService.deleteAttribute(siteId, attribute.key).then(
+            (response) => {
+              if (response.status !== 200) {
+                dispatch(
+                  openNotificationDialog({
+                    dialogTitle: response.errors[0].error,
+                  })
+                );
+              } else {
+                updateAllAttributes();
+              }
             }
-          });
+          );
         }
       });
     }
@@ -100,25 +123,30 @@ function EditAttributeForm({
     onClose();
   };
 
-  const attributeTypes = ['STRING', 'NUMBER', 'BOOLEAN', 'KEY_ONLY'];
+  const attributeTypes = [
+    'STRING',
+    'NUMBER',
+    'BOOLEAN',
+    'KEY_ONLY',
+    'WATERMARK',
+  ];
 
   return (
-    <>
-      <div
-        className="mt-2 ml-2 pt-1 flex flex-wrap justify-center items-center w-full bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 rounded-md">
-        <div className="flex w-full p-2 pl-4 font-semibold">New Attribute Value</div>
-        <form
-          onSubmit={handleSubmit(onUpdateAttributeSubmit)}
-          className="w-full"
-          ref={addTagFormRef}
-        >
-          <div className="flex items-start px-2 mb-4 relative w-full h-8">
+    <div className="mt-2 ml-2 pt-1 flex flex-col justify-center items-center w-full bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 rounded-md">
+      <div className="flex w-full p-2 pl-4 font-semibold">Edit Attribute</div>
+      <form
+        onSubmit={handleSubmit(onUpdateAttributeSubmit)}
+        className="w-full"
+        ref={addTagFormRef}
+      >
+        <div className="flex flex-col px-2 mb-4 relative w-full">
+          <div className="flex items-center gap-2">
             <div className="mr-2 h-8 w-1/2">
               <input
                 type="text"
                 className="h-8 px-4 border border-neutral-300 w-full text-sm rounded-md"
                 defaultValue={attribute?.key}
-                {...register('key', {required: true})}
+                {...register('key', { required: true })}
                 placeholder="Key"
               />
             </div>
@@ -132,16 +160,38 @@ function EditAttributeForm({
                 placeholderText="Data Type"
               />
             </div>
-
-            <ButtonTertiary type="submit" title="Update" className="mr-2">
-              Update
-            </ButtonTertiary>
-
-            <ButtonGhost type="button" onClick={onClose}> Cancel </ButtonGhost>
           </div>
-        </form>
-      </div>
-    </>
+
+          {selectedAttributeDataType === 'WATERMARK' && (
+            <div className="flex flex-col gap-2 mt-2">
+              <input
+                type="text"
+                className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                {...register('watermarkText')}
+                defaultValue={attribute?.watermark?.text}
+                placeholder="Watermark Text"
+              />
+              <input
+                type="text"
+                className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                {...register('imageDocumentId')}
+                defaultValue={attribute?.watermark?.imageDocumentId}
+                placeholder="Image Document ID"
+              />
+            </div>
+          )}
+
+          <div className="flex items-center mt-2">
+            <ButtonPrimary type="submit" title="Update" className="mr-2">
+              Update
+            </ButtonPrimary>
+            <ButtonGhost type="button" onClick={onClose}>
+              Cancel
+            </ButtonGhost>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
 

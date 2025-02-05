@@ -4,8 +4,14 @@ export enum RequestStatus {
   rejected = 'rejected',
 }
 
-export type AttributeDataType = "STRING"| "NUMBER"|"BOOLEAN"| "KEY_ONLY"| "COMPOSITE_STRING";
-export type AttributeType = "STANDARD"|"OPA";
+export type AttributeDataType =
+  | 'STRING'
+  | 'NUMBER'
+  | 'BOOLEAN'
+  | 'KEY_ONLY'
+  | 'COMPOSITE_STRING'
+  | 'WATERMARK';
+export type AttributeType = 'STANDARD' | 'OPA';
 
 export type Attribute = {
   key: string;
@@ -16,14 +22,14 @@ export type Attribute = {
 
 export type DocumentAttribute = {
   key: string;
-  stringValue?: string,
-  stringValues?:string[],
-  numberValue?: number,
-  numberValues?: number[],
-  booleanValue?: boolean,
-  insertedDate?: string,
-  valueType?: string,
-  userId?: string,
+  stringValue?: string;
+  stringValues?: string[];
+  numberValue?: number;
+  numberValues?: number[];
+  booleanValue?: boolean;
+  insertedDate?: string;
+  valueType?: string;
+  userId?: string;
 };
 
 export type OpaAttributeType = {

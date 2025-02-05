@@ -1958,7 +1958,9 @@ function Documents() {
                                     'NOT_FOUND' ? (
                                     <Link
                                       to={`${
-                                        siteDocumentsRootUri.includes('workspaces')
+                                        siteDocumentsRootUri.includes(
+                                          'workspaces'
+                                        )
                                           ? siteDocumentsRootUri
                                           : ''
                                       }/schemas/${classification}`}
@@ -2021,6 +2023,7 @@ function Documents() {
                             !item.stringValue &&
                             !item.numberValue &&
                             !item.booleanValue &&
+                            item.valueType !== 'WATERMARK' &&
                             item.valueType !== 'BOOLEAN' &&
                             !item.value &&
                             !item.values &&
@@ -2056,6 +2059,7 @@ function Documents() {
                                       {!item.stringValue &&
                                         !item.numberValue &&
                                         !item.booleanValue &&
+                                        item.valueType !== 'WATERMARK' &&
                                         item.valueType !== 'BOOLEAN' &&
                                         !item.value &&
                                         !item.values &&
@@ -2087,6 +2091,7 @@ function Documents() {
                                 {!item.stringValue &&
                                 !item.numberValue &&
                                 !item.booleanValue &&
+                                item.valueType !== 'WATERMARK' &&
                                 item.valueType !== 'BOOLEAN' &&
                                 !item.value &&
                                 !item.values &&
@@ -2135,7 +2140,7 @@ function Documents() {
                                       {/*Attributes*/}
                                       {item?.key === 'Publication' ||
                                       item?.key === 'Relationships' ||
-                                      item?.key === 'Classification'  ? (
+                                      item?.key === 'Classification' ? (
                                         <>
                                           {item?.stringValue && (
                                             <div>

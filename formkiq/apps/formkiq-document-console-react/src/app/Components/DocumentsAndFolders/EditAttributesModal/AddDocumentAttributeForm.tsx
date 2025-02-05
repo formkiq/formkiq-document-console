@@ -17,7 +17,6 @@ import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import { Close, Plus } from '../../Icons/icons';
 import AddAttributeForm from './AddAttributeForm';
-import { getAllAttributes } from '../../../helpers/tools/useCacheStorage';
 
 function AddDocumentAttributeForm({
   onDocumentDataChange,
@@ -217,6 +216,15 @@ function AddDocumentAttributeForm({
       };
     }
     if (selectedAttribute?.dataType === 'KEY_ONLY') {
+      documentAttributes = {
+        attributes: [
+          {
+            key: selectedAttributeKey,
+          },
+        ],
+      };
+    }
+    if (selectedAttribute?.dataType === 'WATERMARK') {
       documentAttributes = {
         attributes: [
           {

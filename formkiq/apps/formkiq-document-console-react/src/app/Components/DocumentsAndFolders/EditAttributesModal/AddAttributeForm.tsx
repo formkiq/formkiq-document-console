@@ -10,7 +10,7 @@ import {
   AttributeDataType,
 } from '../../../helpers/types/attributes';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
-import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
+import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
 
 function AddAttributeForm({
@@ -44,11 +44,31 @@ function AddAttributeForm({
       return;
     }
 
+    // For WATERMARK, ensure that at least one field is provided.
+    if (selectedAttributeDataType === 'WATERMARK') {
+      if (!data.watermarkText && !data.imageDocumentId) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle:
+              'Either watermark text or image document ID must be provided.',
+          })
+        );
+        return;
+      }
+    }
+
+    // Build the new attribute, conditionally including the watermark object.
     const newAttribute: { attribute: Attribute } = {
       attribute: {
         key: data.key,
         dataType: selectedAttributeDataType,
         type: 'STANDARD',
+        ...(selectedAttributeDataType === 'WATERMARK' && {
+          watermark: {
+            text: data.watermarkText || '',
+            imageDocumentId: data.imageDocumentId || '',
+          },
+        }),
       },
     };
 
@@ -74,7 +94,10 @@ function AddAttributeForm({
         }
       });
 
-      if (selectedAttributeDataType === 'KEY_ONLY' && isAddingDocumentAttribute) {
+      if (
+        selectedAttributeDataType === 'KEY_ONLY' &&
+        isAddingDocumentAttribute
+      ) {
         setTimeout(() => {
           const documentAttributes = {
             attributes: [
@@ -118,7 +141,13 @@ function AddAttributeForm({
     onClose();
   };
 
-  const attributeTypes = ['STRING', 'NUMBER', 'BOOLEAN', 'KEY_ONLY'];
+  const attributeTypes = [
+    'STRING',
+    'NUMBER',
+    'BOOLEAN',
+    'KEY_ONLY',
+    'WATERMARK',
+  ];
 
   return (
     <>
@@ -129,31 +158,54 @@ function AddAttributeForm({
           className="w-full"
           ref={addTagFormRef}
         >
-          <div className="flex items-start px-2 mb-4 relative w-full h-8">
-            <div className="mr-2 h-8 w-1/2">
-              <input
-                type="text"
-                className="h-8 px-4 border border-neutral-300 w-full text-sm rounded-md"
-                {...register('key', { required: true })}
-                placeholder="Key"
-              />
+          <div className="flex flex-col px-2 mb-4 relative w-full">
+            <div className="flex items-center gap-2">
+              <div className="mr-2 h-8 w-1/2">
+                <input
+                  type="text"
+                  className="h-8 px-4 border border-neutral-300 w-full text-sm rounded-md"
+                  {...register('key', { required: true })}
+                  placeholder="Key"
+                />
+              </div>
+
+              <div className="mr-2 h-8 w-52">
+                <RadioListbox
+                  values={attributeTypes}
+                  titles={attributeTypes}
+                  selectedValue={selectedAttributeDataType}
+                  setSelectedValue={setSelectedAttributeDataType}
+                  placeholderText="Data Type"
+                />
+              </div>
             </div>
 
-            <div className="mr-2 h-8 w-52">
-              <RadioListbox
-                values={attributeTypes}
-                titles={attributeTypes}
-                selectedValue={selectedAttributeDataType}
-                setSelectedValue={setSelectedAttributeDataType}
-                placeholderText="Data Type"
-              />
+            {/* Conditionally render watermark fields */}
+            {selectedAttributeDataType === 'WATERMARK' && (
+              <div className="flex flex-col gap-2 mt-2">
+                <input
+                  type="text"
+                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                  {...register('watermarkText')}
+                  placeholder="Watermark Text"
+                />
+                <input
+                  type="text"
+                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                  {...register('imageDocumentId')}
+                  placeholder="Image Document ID"
+                />
+              </div>
+            )}
+
+            <div className="flex items-center mt-2">
+              <ButtonPrimary type="submit" title="Create" className="mr-2">
+                Create
+              </ButtonPrimary>
+              <ButtonGhost type="button" onClick={onClose}>
+                Cancel
+              </ButtonGhost>
             </div>
-
-            <ButtonTertiary type="submit" title="Create" className="mr-2">
-              Create
-            </ButtonTertiary>
-
-            <ButtonGhost type="button" onClick={onClose}> Cancel </ButtonGhost>
           </div>
         </form>
       </div>
