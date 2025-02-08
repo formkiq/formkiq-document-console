@@ -111,14 +111,22 @@ function DocumentListLine({
   const [{ opacity, isDragging }, drag, preview] = useDrag(
     () => ({
       type: 'file',
-      item: file,
+      item: () => {
+        if (
+          selectedDocuments.find((doc) => doc.documentId === file.documentId) &&
+          selectedDocuments.length > 1
+        ) {
+          return selectedDocuments;
+        }
+        return file;
+      },
       collect: (monitor) => ({
         opacity: monitor.isDragging() ? 0.4 : 1,
         isDragging: monitor.isDragging(),
       }),
       canDrag: !isSiteReadOnly,
     }),
-    [file]
+    [file, selectedDocuments]
   );
   useEffect(() => {
     preview(getEmptyImage());

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { useSelector } from 'react-redux';
 import { matchPath } from 'react-router-dom';
@@ -47,98 +47,127 @@ function FolderDropWrapper(props: folderDropProps) {
   ));
   const { children, wrapper = defaultElem } = props;
   const MainElem = wrapper;
-  let defaultCallback = (doc: IDocument, monitor: any) => {
-    if (props.sourceSiteId !== props.targetSiteId) {
-      dispatch(
-        openDialog({
-          dialogTitle:
-            'Files cannot be moved between top-level folders at this time.',
-        })
-      );
-      return;
-    }
-    if (documents && props.targetSiteId) {
-      if (props.folder.indexOf('FK-collections') > -1) {
-        // TODO: add collection drag and drop functionality
-      } else {
-        const filename = doc.path.substring(doc.path.lastIndexOf('/') + 1);
-        const newPath =
-          (props.folder.length ? props.folder + '/' : '') + filename;
-        if (doc.path !== newPath) {
-          DocumentsService.setDocumentFolder(
-            props.folder,
-            doc.path,
-            props.targetSiteId
-          ).then((res: any) => {
-            if (res.status === 200) {
-              const originalFolderPath = doc.path
-                .replace('/' + filename, '')
-                .replace(filename, '');
-              if (originalFolderPath !== currentFolder) {
-                dispatch(
-                  retrieveAndRefreshFolder({
-                    folderPath: originalFolderPath,
-                    document: doc,
-                    documentAction: 'remove',
-                  })
+  const defaultCallback = useCallback(
+    (docs: IDocument | IDocument[], monitor: any) => {
+      if (props.sourceSiteId !== props.targetSiteId) {
+        dispatch(
+          openDialog({
+            dialogTitle:
+              'Files cannot be moved between top-level folders at this time.',
+          })
+        );
+        return;
+      }
+      if (documents && props.targetSiteId) {
+        if (props.folder.indexOf('FK-collections') > -1) {
+          // TODO: add collection drag and drop functionality
+        } else {
+          const docsToMove = Array.isArray(docs) ? docs : [docs];
+          const validDocsToMove = docsToMove.filter(
+            (document): document is IDocument =>
+              document !== undefined && document.path !== undefined
+          );
+
+          if (!validDocsToMove.length) {
+            return;
+          }
+
+          Promise.all(
+            validDocsToMove.map((document: IDocument) => {
+              const filename = document.path.substring(
+                document.path.lastIndexOf('/') + 1
+              );
+              const newPath =
+                (props.folder.length ? props.folder + '/' : '') + filename;
+
+              if (document.path !== newPath) {
+                return DocumentsService.setDocumentFolder(
+                  props.folder,
+                  document.path,
+                  props.targetSiteId
+                ).then((res: any) => ({ res, document, newPath }));
+              }
+              return Promise.resolve({
+                res: { status: 304 },
+                document,
+                newPath,
+              });
+            })
+          ).then((results) => {
+            const successfulMoves = results.filter(
+              ({ res }) => res.status === 200
+            );
+
+            if (successfulMoves.length) {
+              // Update documents list once for all moved documents
+              const newDocs = [...(documents as any[])].filter(
+                (doc) =>
+                  !successfulMoves.some(
+                    (move) => move.document.documentId === doc.documentId
+                  )
+              );
+
+              dispatch(
+                updateDocumentsList({
+                  documents: newDocs,
+                })
+              );
+
+              // Handle folder updates for each moved document
+              successfulMoves.forEach(({ document, newPath }) => {
+                const filename = document.path.substring(
+                  document.path.lastIndexOf('/') + 1
                 );
-              } else {
-                const newArr = [...(documents as any[])];
-                if (newArr) {
-                  const index = documents?.indexOf(doc);
-                  if (index > -1) {
-                    newArr.splice(index, 1);
-                    dispatch(
-                      updateDocumentsList({
-                        documents: newArr,
-                        user,
-                        isSystemDeletedByKey: false,
-                      })
-                    );
-                  }
+                const originalFolderPath = document.path
+                  .replace('/' + filename, '')
+                  .replace(filename, '');
+
+                if (originalFolderPath !== currentFolder) {
+                  dispatch(
+                    retrieveAndRefreshFolder({
+                      folderPath: originalFolderPath,
+                      document: document,
+                      documentAction: 'remove',
+                    })
+                  );
                 }
-              }
-              const updatedDoc = { ...doc, path: newPath };
-              if (props.folder !== currentFolder) {
-                dispatch(
-                  retrieveAndRefreshFolder({
-                    folderPath: props.folder,
-                    document: updatedDoc,
-                    documentAction: 'add',
-                  })
-                );
-              } else {
-                const newArr = [...(documents as any[])];
-                newArr.push(updatedDoc);
-                dispatch(
-                  updateDocumentsList({
-                    documents: newArr.sort((a: any, b: any) =>
-                      a.path > b.path ? 1 : -1
-                    ),
-                    user,
-                    isSystemDeletedByKey: false,
-                  })
-                );
-              }
-            } else {
+
+                const updatedDoc = { ...document, path: newPath };
+                if (props.folder !== currentFolder) {
+                  dispatch(
+                    retrieveAndRefreshFolder({
+                      folderPath: props.folder,
+                      document: updatedDoc,
+                      documentAction: 'add',
+                    })
+                  );
+                }
+              });
+            }
+
+            if (
+              results.some(
+                ({ res }) => res.status !== 200 && res.status !== 304
+              )
+            ) {
               dispatch(
                 openDialog({
                   dialogTitle:
-                    'Moving this file did not succeed. Please try again in a few minutes.',
+                    'Moving one or more files did not succeed. Please try again in a few minutes.',
                 })
               );
             }
           });
         }
       }
-    }
-  };
-  if (props.dropcallback) {
-    defaultCallback = props.dropcallback;
-  }
+    },
+    [documents]
+  );
+
+  const finalCallback = props.dropcallback || defaultCallback;
   const [{ isOver }, drop] = useDrop({
     accept: 'file',
-    drop: defaultCallback,
+    drop: finalCallback,
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
