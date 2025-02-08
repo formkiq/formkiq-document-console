@@ -83,6 +83,7 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 function Documents() {
   const documentsWrapperRef = useRef(null);
@@ -228,6 +229,8 @@ function Documents() {
   const [classificationsMap, setClassificationsMap] = useState<{
     [key: string]: string;
   }>({}); // classificationId: classificationName
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   function handleDragEnter(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
@@ -1542,6 +1545,8 @@ function Documents() {
                 </div>
               )}
               <DocumentsTable
+                user={user}
+                siteId={siteId}
                 onRestoreDocument={restoreDocument}
                 documentsScrollpaneRef={documentsScrollpaneRef}
                 documentsWrapperRef={documentsWrapperRef}
@@ -1874,7 +1879,7 @@ function Documents() {
                         <div className="w-64 flex mr-3 border-b"></div>
                         <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
                           Relationships
-                          {!isSiteReadOnly && (
+                          {!isSiteReadOnly && !isReadOnlyUser && (
                             <div
                               className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
@@ -2400,6 +2405,7 @@ function Documents() {
                       </div>
                     )}
                     {formkiqVersion.type !== 'core' &&
+                      !isReadOnlyUser &&
                       (!(currentDocument as IDocument).deepLinkPath ||
                         ((currentDocument as IDocument).deepLinkPath?.length ??
                           0) === 0) && (
@@ -2535,6 +2541,7 @@ function Documents() {
                   >
                     <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
                       {formkiqVersion.type !== 'core' &&
+                        !isReadOnlyUser &&
                         (!(currentDocument as IDocument).deepLinkPath ||
                           ((currentDocument as IDocument).deepLinkPath
                             ?.length ?? 0) === 0) && (

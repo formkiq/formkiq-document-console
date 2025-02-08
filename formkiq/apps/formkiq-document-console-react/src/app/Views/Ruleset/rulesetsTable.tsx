@@ -2,8 +2,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Edit, Rules, Trash } from '../../Components/Icons/icons';
 import { formatDate } from '../../helpers/services/toolService';
 import { Ruleset } from '../../helpers/types/rulesets';
+import { User } from '../../Store/reducers/auth';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 type RulesetsTableProps = {
+  user: User | null;
+  siteId: string;
   rulesets: Ruleset[];
   onRulesetDelete: (rulesetId: string) => void;
   showRulesetEditTab: (rulesetId: string) => void;
@@ -13,8 +17,13 @@ function RulesetsTable({
   rulesets,
   onRulesetDelete,
   showRulesetEditTab,
+  user,
+  siteId,
 }: RulesetsTableProps) {
   const pathname = decodeURI(useLocation().pathname);
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
+
   return (
     <table
       className="w-full border-collapse text-sm table-fixed "
@@ -49,7 +58,7 @@ function RulesetsTable({
               return (
                 <tr
                   key={ruleset.rulesetId}
-                  className="text-neutral-900 border-neutral-300 hover:bg-neutral-100 hover:font-medium"
+                  className="text-neutral-900 border-neutral-300 hover:bg-neutral-100"
                 >
                   <td className="border-b max-w-52 border-neutral-300 p-4 pl-8 truncate">
                     <div className="flex grow w-full justify-start">
@@ -74,26 +83,30 @@ function RulesetsTable({
                     {ruleset.status}
                   </td>
 
-                  <td className="border-b border-neutral-300 p-4 pr-8 ">
-                    <div className="flex items-center">
-                      <button
-                        onClick={() => showRulesetEditTab(ruleset.rulesetId)}
-                        className="w-4 h-auto text-neutral-900  mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
-                      >
-                        <Edit />
-                      </button>
+                  <td className="border-b border-neutral-300 px-2.5">
+                    <div className="flex items-center gap-2">
+                      {!isReadOnlyUser && (
+                        <button
+                          onClick={() => showRulesetEditTab(ruleset.rulesetId)}
+                          className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
+                        >
+                          <Edit />
+                        </button>
+                      )}
                       <Link
                         to={`${pathname}/${ruleset.rulesetId}`}
-                        className="cursor-pointer w-6 h-auto mr-2"
+                        className="cursor-pointer w-6 h-auto"
                       >
                         <Rules />
                       </Link>
-                      <button
-                        onClick={() => onRulesetDelete(ruleset.rulesetId)}
-                        className="w-4 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500 my-[3px]"
-                      >
-                        <Trash />
-                      </button>
+                      {!isReadOnlyUser && (
+                        <button
+                          onClick={() => onRulesetDelete(ruleset.rulesetId)}
+                          className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
+                        >
+                          <Trash />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

@@ -1,9 +1,13 @@
 import { useLocation } from 'react-router-dom';
 import { Edit, Json, Trash } from '../../Components/Icons/icons';
 import { Rule } from '../../helpers/types/rulesets';
+import { User } from '../../Store/reducers/auth';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 type RulesTableProps = {
   rules: Rule[];
+  user: User | null;
+  siteId: string;
   onRuleDelete: (ruleId: string) => void;
   showRuleEditTab: (rulesetId: string) => void;
   setNewRuleValue: (newValue: { rule: Rule }) => void;
@@ -14,8 +18,12 @@ function RulesTable({
   onRuleDelete,
   showRuleEditTab,
   setNewRuleValue,
+  user,
+  siteId,
 }: RulesTableProps) {
   const { pathname } = useLocation();
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   const editRule = (rule: Rule) => {
     showRuleEditTab(rule.ruleId);
@@ -90,30 +98,32 @@ function RulesTable({
                   </td>
 
                   <td className="border-b border-neutral-300 p-4 pr-8 ">
-                    <div className="flex items-center">
-                      <button
-                        onClick={() => editRule(rule)}
-                        className="w-4 h-auto mr-3 hover:text-primary-500 my-[3px]"
-                      >
-                        <Edit />
-                        <span className="sr-only">Edit</span>
-                      </button>
+                    {!isReadOnlyUser && (
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => editRule(rule)}
+                          className="w-4 h-auto mr-3 hover:text-primary-500 my-[3px]"
+                        >
+                          <Edit />
+                          <span className="sr-only">Edit</span>
+                        </button>
 
-                      <a
-                        href={pathname + '/rule/' + rule.ruleId}
-                        className="w-5 h-auto font-bold mr-3 cursor-pointer hover:text-primary-500 my-[3px] whitespace-nowrap"
-                      >
-                        <Json />
-                      </a>
+                        <a
+                          href={pathname + '/rule/' + rule.ruleId}
+                          className="w-5 h-auto font-bold mr-3 cursor-pointer hover:text-primary-500 my-[3px] whitespace-nowrap"
+                        >
+                          <Json />
+                        </a>
 
-                      <button
-                        onClick={() => onRuleDelete(rule.ruleId)}
-                        className="w-4 h-auto mr-3 hover:text-primary-500 my-[3px]"
-                      >
-                        <Trash />
-                        <span className="sr-only">Delete</span>
-                      </button>
-                    </div>
+                        <button
+                          onClick={() => onRuleDelete(rule.ruleId)}
+                          className="w-4 h-auto mr-3 hover:text-primary-500 my-[3px]"
+                        >
+                          <Trash />
+                          <span className="sr-only">Delete</span>
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               );

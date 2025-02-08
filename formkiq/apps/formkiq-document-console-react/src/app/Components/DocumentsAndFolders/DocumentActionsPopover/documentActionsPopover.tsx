@@ -26,6 +26,7 @@ import {
 } from '../../Icons/icons';
 import { useDocumentActions } from './DocumentActionsContext';
 import { Tooltip } from 'react-tooltip';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
@@ -45,6 +46,7 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
 }
 
 export default function DocumentActionsPopover({
+  user,
   value,
   siteId,
   isSiteReadOnly,
@@ -93,6 +95,8 @@ export default function DocumentActionsPopover({
       },
     ],
   });
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   const clickDelete = () => {
     setVisibility(false);
@@ -299,7 +303,8 @@ export default function DocumentActionsPopover({
               )}
             {formkiqVersion.type !== 'core' &&
               line.lineType === 'document' &&
-              !isDeeplinkPath && (
+              !isDeeplinkPath &&
+              !isReadOnlyUser && (
                 <li
                   className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(event) =>
@@ -327,7 +332,8 @@ export default function DocumentActionsPopover({
 
             {formkiqVersion.type !== 'core' &&
               line.lineType === 'document' &&
-              !isDeeplinkPath && (
+              !isDeeplinkPath &&
+              !isReadOnlyUser && (
                 <li
                   className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(event) =>
@@ -354,7 +360,8 @@ export default function DocumentActionsPopover({
               )}
 
             {line.lineType === 'document' &&
-              pathname.indexOf('/queues') === -1 && (
+              pathname.indexOf('/queues') === -1 &&
+              !isReadOnlyUser && (
                 <li
                   className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(event) =>
@@ -496,7 +503,7 @@ export default function DocumentActionsPopover({
                 </li>
               </>
             )}
-            {line.lineType === 'document' && (
+            {line.lineType === 'document' && !isReadOnlyUser && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
@@ -537,7 +544,7 @@ export default function DocumentActionsPopover({
                     className="mr-2"
                     style={{ width: '15px', height: '13px' }}
                   >
-                    <Schema/>
+                    <Schema />
                   </span>
                   <span>Classifications</span>
                   <span

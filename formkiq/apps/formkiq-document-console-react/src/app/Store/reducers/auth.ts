@@ -5,12 +5,19 @@ import { RootState } from '../store';
 
 const storage: LocalStorage = LocalStorage.Instance;
 
+export type Site = {
+  permissions: string[];
+  status: string;
+  siteId: string;
+  title: string;
+};
+
 export type User = {
   email: string;
   idToken: string;
   accessToken: string;
   refreshToken: string;
-  sites: [];
+  sites: Site[];
   defaultSiteId: string;
   currentSiteId: string;
   isAdmin: boolean;

@@ -1,19 +1,28 @@
 import { Edit, Trash } from '../../Components/Icons/icons';
 import { Mapping } from '../../helpers/types/mappings';
 import { Link, useLocation } from 'react-router-dom';
+import { User } from '../../Store/reducers/auth';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 type MappingTableProps = {
+  user: User | null;
+  siteId: string;
   mappings: Mapping[];
   onMappingDelete: (mappingId: string) => void;
   showMappingEditTab: (mapping: Mapping) => void;
 };
 
 function MappingsTable({
+  user,
+  siteId,
   mappings,
   onMappingDelete,
   showMappingEditTab,
 }: MappingTableProps) {
   const pathname = decodeURI(useLocation().pathname);
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
+
   return (
     <table className="w-full border-collapse text-sm table-fixed ">
       <thead className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
@@ -52,24 +61,25 @@ function MappingsTable({
                   </td>
 
                   <td className="border-b p-4">
-                    <p style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                       title={mapping.description}
+                    <p
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                      title={mapping.description}
                     >
                       {mapping.description}
-                      </p>
+                    </p>
                   </td>
                   <td className="border-b p-4 ">
                     <div className="flex flex-wrap gap-2">
-                    {mapping.attributes
-                      .map((attr) => (
-                        <div key={attr.attributeKey}
-                             className="inline-block bg-neutral-100 rounded-full px-2 py-1 text-xs font-semibold"
+                      {mapping.attributes.map((attr) => (
+                        <div
+                          key={attr.attributeKey}
+                          className="inline-block bg-neutral-100 rounded-full px-2 py-1 text-xs font-semibold"
                         >
                           {attr.attributeKey}
                         </div>
@@ -78,23 +88,27 @@ function MappingsTable({
                   </td>
 
                   <td className="border-b p-4 pr-8">
-                    <div className="flex items-center justify-end gap-2 mr-3">
-                      <button
-                        title="Edit"
-                        className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
-                        onClick={() => showMappingEditTab(mapping)}
-                      >
-                        <Edit />
-                      </button>
+                    {!isReadOnlyUser && (
+                      <div className="flex items-center justify-end gap-2 mr-3">
+                        <button
+                          title="Edit"
+                          className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
+                          onClick={() => showMappingEditTab(mapping)}
+                        >
+                          <Edit />
+                        </button>
 
-                      <button
-                        title="Delete"
-                        onClick={() => onMappingDelete(mapping.mappingId as string)}
-                        className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
-                      >
-                        <Trash />
-                      </button>
-                    </div>
+                        <button
+                          title="Delete"
+                          onClick={() =>
+                            onMappingDelete(mapping.mappingId as string)
+                          }
+                          className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
+                        >
+                          <Trash />
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               );

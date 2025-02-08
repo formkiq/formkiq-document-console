@@ -22,12 +22,6 @@ import {
   setQueuesLoadingStatusPending,
 } from '../../Store/reducers/queues';
 
-type QueueItem = {
-  siteId: string;
-  readonly: boolean;
-  queues: [] | null;
-};
-
 export function Queues() {
   const dispatch = useAppDispatch();
   const { user } = useSelector(AuthState);
@@ -205,6 +199,7 @@ export function Queues() {
           )}
           <div className="relative overflow-hidden h-full">
             <QueueList
+              user={user}
               siteId={currentSiteId}
               handleScroll={handleScroll}
               queues={queues as []}

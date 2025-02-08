@@ -26,6 +26,7 @@ import {
 import { RequestStatus } from '../../helpers/types/document';
 import { Rule } from '../../helpers/types/rulesets';
 import RulesTable from './rulesTable';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 function Ruleset() {
   const { user } = useAuthenticatedState();
@@ -53,6 +54,8 @@ function Ruleset() {
     currentSearchPage,
   } = useSelector(RulesetsState);
   const dispatch = useAppDispatch();
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   useEffect(() => {
     dispatch(fetchRuleset({ rulesetId: id, siteId: currentSiteId }));
@@ -222,12 +225,14 @@ function Ruleset() {
           </span>
         </div>
         <div className="w-full p-2 flex">
-          <ButtonPrimaryGradient
-            onClick={() => setIsRuleEditTabVisible(true)}
-            style={{ height: '36px' }}
-          >
-            + Create New Rule
-          </ButtonPrimaryGradient>
+          {!isReadOnlyUser && (
+            <ButtonPrimaryGradient
+              onClick={() => setIsRuleEditTabVisible(true)}
+              style={{ height: '36px' }}
+            >
+              + Create New Rule
+            </ButtonPrimaryGradient>
+          )}
         </div>
         {isRuleEditTabVisible && (
           <RuleEditingTab
@@ -245,6 +250,8 @@ function Ruleset() {
         >
           <RulesTable
             rules={rules}
+            user={user}
+            siteId={siteId}
             onRuleDelete={onRuleDelete}
             showRuleEditTab={showRuleEditTab}
             setNewRuleValue={setNewRuleValue}

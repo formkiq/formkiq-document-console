@@ -396,6 +396,7 @@ export function Workflows() {
               showTooltipId={showTooltipId}
               handleDownloadClick={handleDownloadClick}
               isSiteReadOnly={isSiteReadOnly}
+              user={user}
             ></WorkflowList>
           </div>
         </div>

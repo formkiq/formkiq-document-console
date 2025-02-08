@@ -38,6 +38,7 @@ import {
 import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 
 function DocumentListLine({
   file,
@@ -103,6 +104,8 @@ function DocumentListLine({
     onSubmitForReviewModalClick,
     onDocumentReviewModalClick,
   } = useDocumentActions();
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   const restoreDocument = () => {
     onRestoreClick();
@@ -499,37 +502,39 @@ function DocumentListLine({
               )}
             </div>
             {folder !== 'deleted' &&
-              (location.pathname.indexOf('/queues') === -1 ? (
-                <button
-                  title="Submit for review"
-                  className="w-5 pt-0.5 text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
-                  onClick={(event) =>
-                    onSubmitForReviewModalClick(event, {
-                      lineType: 'document',
-                      documentId: file.documentId,
-                      folder: folder,
-                      documentInstance: file,
-                    })
-                  }
-                >
-                  <Checkmark />
-                </button>
-              ) : (
-                <button
-                  title="Review"
-                  className="w-5 pt-0.5 text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
-                  onClick={(event) =>
-                    onDocumentReviewModalClick(event, {
-                      lineType: 'document',
-                      documentId: file.documentId,
-                      folder: folder,
-                      documentInstance: file,
-                    })
-                  }
-                >
-                  <Checkmark />
-                </button>
-              ))}
+              (location.pathname.indexOf('/queues') === -1
+                ? !isReadOnlyUser && (
+                    <button
+                      title="Submit for review"
+                      className="w-5 pt-0.5 text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
+                      onClick={(event) =>
+                        onSubmitForReviewModalClick(event, {
+                          lineType: 'document',
+                          documentId: file.documentId,
+                          folder: folder,
+                          documentInstance: file,
+                        })
+                      }
+                    >
+                      <Checkmark />
+                    </button>
+                  )
+                : !isReadOnlyUser && (
+                    <button
+                      title="Review"
+                      className="w-5 pt-0.5 text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
+                      onClick={(event) =>
+                        onDocumentReviewModalClick(event, {
+                          lineType: 'document',
+                          documentId: file.documentId,
+                          folder: folder,
+                          documentInstance: file,
+                        })
+                      }
+                    >
+                      <Checkmark />
+                    </button>
+                  ))}
             {folder !== 'deleted' && (
               <Link
                 to={`${location.pathname}?${searchParams.toString()}#id=${
@@ -638,6 +643,7 @@ function DocumentListLine({
                 )}
                 <div className="w-5 pt-0.5 h-auto text-neutral-900 cursor-pointer">
                   <DocumentActionsPopover
+                    user={user}
                     value={{
                       lineType: 'document',
                       folder: folder,

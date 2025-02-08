@@ -1,9 +1,11 @@
-import { CopyButton } from '../../../Components/Generic/Buttons/CopyButton';
+import { CopyButton } from '../../Generic/Buttons/CopyButton';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { Edit, View } from '../../Icons/icons';
 import WorkflowsActionsPopover from './workflowActionsPopover';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
+import { User } from '../../../Store/reducers/auth';
 
 type Props = {
   siteId: string;
@@ -15,11 +17,11 @@ type Props = {
   showTooltipId: string;
   handleDownloadClick: (workflowId: string, siteId: string) => void;
   isSiteReadOnly: boolean;
+  user: User | null;
 };
 
 export function WorkflowList({
   siteId,
-  isSiteReadOnly,
   workflows,
   onDelete,
   handleScroll,
@@ -27,8 +29,11 @@ export function WorkflowList({
   handleCopyToClipBoard,
   showTooltipId,
   handleDownloadClick,
+  user,
 }: Props) {
   const dispatch = useAppDispatch();
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   const onDeleteClick = (workflowId: string, siteId: string) => () => {
     onDelete(workflowId, siteId);
@@ -134,7 +139,7 @@ export function WorkflowList({
                         {workflow.inUse ? <span>Yes</span> : <span>No</span>}
                       </td>
                       <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pr-8 text-neutral-900 nodark:text-slate-400">
-                        <div className="flex items-center">
+                        <div className="flex items-center relative">
                           <a
                             href={
                               siteId === 'default'
@@ -149,6 +154,11 @@ export function WorkflowList({
                                   <View />
                                   <span className="sr-only">View</span>
                                 </>
+                              ) : isReadOnlyUser ? (
+                                <>
+                                  <View />
+                                  <span className="sr-only">View</span>
+                                </>
                               ) : (
                                 <>
                                   <Edit />
@@ -158,6 +168,7 @@ export function WorkflowList({
                             </div>
                           </a>
                           <WorkflowsActionsPopover
+                            user={user}
                             workflow={workflow}
                             siteId={siteId}
                             handleDuplicateClick={handleDuplicateClick}

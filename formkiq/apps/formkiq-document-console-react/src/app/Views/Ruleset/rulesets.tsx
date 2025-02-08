@@ -23,6 +23,7 @@ import {
 import { RequestStatus } from '../../helpers/types/document';
 import { Ruleset } from '../../helpers/types/rulesets';
 import RulesetsTable from './rulesetsTable';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 function Rulesets() {
   const { user } = useAuthenticatedState();
@@ -58,6 +59,8 @@ function Rulesets() {
   const [newRulesetValue, setNewRulesetValue] = useState<{ ruleset: Ruleset }>(
     initialRulesetValue as { ruleset: Ruleset }
   );
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   // update siteId
   useEffect(() => {
@@ -209,12 +212,14 @@ function Rulesets() {
             </p>
           </div>
           <div className="flex gap-2 p-2">
-            <ButtonPrimaryGradient
-              onClick={() => setIsRulesetEditTabVisible(true)}
-              style={{ height: '36px' }}
-            >
-              + Create New Ruleset
-            </ButtonPrimaryGradient>
+            {!isReadOnlyUser && (
+              <ButtonPrimaryGradient
+                onClick={() => setIsRulesetEditTabVisible(true)}
+                style={{ height: '36px' }}
+              >
+                + Create New Ruleset
+              </ButtonPrimaryGradient>
+            )}
           </div>
         </div>
 
@@ -233,6 +238,8 @@ function Rulesets() {
           onScroll={handleScroll}
         >
           <RulesetsTable
+            user={user}
+            siteId={siteId}
             rulesets={rulesets}
             onRulesetDelete={onRulesetDelete}
             showRulesetEditTab={showRulesetEditTab}

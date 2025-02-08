@@ -20,8 +20,12 @@ import { ILine } from '../../helpers/types/line';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { EmptyDocumentsTable } from './EmptyDocumentsTable';
+import { User } from '../../Store/reducers/auth';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 type DocumentTableProps = {
+  user: User | null;
+  siteId: string;
   documentsWrapperRef: Ref<any>;
   documentsScrollpaneRef: Ref<any>;
   onRestoreDocument: (documentId: string) => void;
@@ -49,6 +53,8 @@ type DocumentTableProps = {
 
 export const DocumentsTable = (props: DocumentTableProps) => {
   const {
+    user,
+    siteId,
     documentsWrapperRef,
     documentsScrollpaneRef,
     onRestoreDocument,
@@ -87,9 +93,15 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     'scrollToDocumentLine'
   );
 
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
+
   useEffect(() => {
     // load more items if bottom of a table is visible
-    if ((!documents || documents.length === 0) && (!folders || folders.length === 0)) return; // prevent execution if documents and folders are not loaded yet
+    if (
+      (!documents || documents.length === 0) &&
+      (!folders || folders.length === 0)
+    )
+      return; // prevent execution if documents and folders are not loaded yet
     trackScrolling();
     // when user opens document folder after viewing document, scroll to list to display document line
     if (!scrollToDocumentLine) return;
@@ -235,18 +247,20 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                           </div>
                           <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
                         </button>
-                        <button
-                          onClick={() =>
-                            onDeleteSelectedDocuments(useSoftDelete)
-                          }
-                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
-                          title="Delete Selected"
-                        >
-                          <div className="relative z-10">
-                            <Trash />
-                          </div>
-                          <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
-                        </button>
+                        {!isReadOnlyUser && (
+                          <button
+                            onClick={() =>
+                              onDeleteSelectedDocuments(useSoftDelete)
+                            }
+                            className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
+                            title="Delete Selected"
+                          >
+                            <div className="relative z-10">
+                              <Trash />
+                            </div>
+                            <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                          </button>
+                        )}
                       </div>
                     ) : (
                       'Name'
@@ -266,16 +280,18 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                           </div>
                           <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
                         </button>
-                        <button
-                          onClick={() => onDeleteSelectedDocuments(false)}
-                          className="w-8 h-8 p-[6px] relative text-red-500 hover:text-red-700 group"
-                          title="Delete Permanently"
-                        >
-                          <div className="relative z-10">
-                            <Trash />
-                          </div>
-                          <div className="absolute inset-0 bg-red-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
-                        </button>
+                        {
+                          <button
+                            onClick={() => onDeleteSelectedDocuments(false)}
+                            className="w-8 h-8 p-[6px] relative text-red-500 hover:text-red-700 group"
+                            title="Delete Permanently"
+                          >
+                            <div className="relative z-10">
+                              <Trash />
+                            </div>
+                            <div className="absolute inset-0 bg-red-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                          </button>
+                        }
                       </>
                     ) : (
                       'Name'
@@ -357,8 +373,8 @@ export const DocumentsTable = (props: DocumentTableProps) => {
         )}
         {loadingStatus === RequestStatus.rejected && documents.length > 0 && (
           <div className="w-full flex justify-center items-center gap-2 py-2">
-            <div className="w-6 h-6 p-0.5 text-neutral-500 border-neutral-500 border rounded-full border-2 ">
-              <Close/>
+            <div className="w-6 h-6 p-0.5 text-neutral-500 border-neutral-500 rounded-full border-2 ">
+              <Close />
             </div>
             <p className="text-neutral-500">Failed to load more documents.</p>
           </div>

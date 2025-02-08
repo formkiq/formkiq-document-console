@@ -22,6 +22,7 @@ import { Mapping } from '../../helpers/types/mappings';
 import CreateMappingDialog from '../../Components/Mappings/Dialogs/MappingDialog/CreateMappingDialog';
 import EditMappingDialog from '../../Components/Mappings/Dialogs/MappingDialog/EditMappingDialog';
 import MappingsTable from './mappingsTable';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 function Mappings() {
   const { user } = useAuthenticatedState();
@@ -49,6 +50,8 @@ function Mappings() {
   const [isMappingEditTabVisible, setIsMappingEditTabVisible] = useState(false);
   const [editingMapping, setEditingMapping] = useState<Mapping | null>(null);
   const [isMappingAddTabVisible, setIsMappingAddTabVisible] = useState(false);
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   // update siteId
   useEffect(() => {
@@ -151,12 +154,14 @@ function Mappings() {
             </p>
           </div>
           <div className="flex gap-2 p-2">
-            <ButtonPrimaryGradient
-              onClick={() => setIsMappingAddTabVisible(true)}
-              style={{ height: '36px' }}
-            >
-              + Create New Mapping
-            </ButtonPrimaryGradient>
+            {!isReadOnlyUser && (
+              <ButtonPrimaryGradient
+                onClick={() => setIsMappingAddTabVisible(true)}
+                style={{ height: '36px' }}
+              >
+                + Create New Mapping
+              </ButtonPrimaryGradient>
+            )}
           </div>
         </div>
         <div
@@ -165,6 +170,8 @@ function Mappings() {
           onScroll={handleScroll}
         >
           <MappingsTable
+            user={user}
+            siteId={siteId}
             mappings={mappings}
             onMappingDelete={onMappingDelete}
             showMappingEditTab={showMappingEditTab}
