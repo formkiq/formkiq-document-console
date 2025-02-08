@@ -8,6 +8,7 @@ import FolderListLine from '../../Components/DocumentsAndFolders/FolderListLine/
 import {
   Close,
   Download,
+  Move,
   RestoreFile,
   Spinner,
   Trash,
@@ -45,6 +46,7 @@ type DocumentTableProps = {
   archiveTabStatus: 'open' | 'closed' | 'minimized';
   getExpandedFoldersDocuments: (folders: IFolder[]) => IDocument[];
   downloadDocument: (documentId: string) => void;
+  onMoveSelectedDocuments: () => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -71,6 +73,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     archiveTabStatus,
     getExpandedFoldersDocuments,
     downloadDocument,
+    onMoveSelectedDocuments,
   } = props;
 
   const { formkiqVersion, useIndividualSharing, useSoftDelete } =
@@ -89,7 +92,11 @@ export const DocumentsTable = (props: DocumentTableProps) => {
 
   useEffect(() => {
     // load more items if bottom of a table is visible
-    if ((!documents || documents.length === 0) && (!folders || folders.length === 0)) return; // prevent execution if documents and folders are not loaded yet
+    if (
+      (!documents || documents.length === 0) &&
+      (!folders || folders.length === 0)
+    )
+      return; // prevent execution if documents and folders are not loaded yet
     trackScrolling();
     // when user opens document folder after viewing document, scroll to list to display document line
     if (!scrollToDocumentLine) return;
@@ -239,11 +246,21 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                           onClick={() =>
                             onDeleteSelectedDocuments(useSoftDelete)
                           }
-                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
+                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group mr-1"
                           title="Delete Selected"
                         >
                           <div className="relative z-10">
                             <Trash />
+                          </div>
+                          <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
+                        <button
+                          onClick={() => onMoveSelectedDocuments()}
+                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group mr-1"
+                          title="Move Selected"
+                        >
+                          <div className="relative z-10 scale-125">
+                            <Move />
                           </div>
                           <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
                         </button>
@@ -358,7 +375,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
         {loadingStatus === RequestStatus.rejected && documents.length > 0 && (
           <div className="w-full flex justify-center items-center gap-2 py-2">
             <div className="w-6 h-6 p-0.5 text-neutral-500 border-neutral-500 border rounded-full border-2 ">
-              <Close/>
+              <Close />
             </div>
             <p className="text-neutral-500">Failed to load more documents.</p>
           </div>
