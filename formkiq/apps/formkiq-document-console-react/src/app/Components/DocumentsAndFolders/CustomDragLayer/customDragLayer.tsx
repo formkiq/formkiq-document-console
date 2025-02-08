@@ -53,11 +53,13 @@ function CustomDragLayer() {
               />
             </span>
             <span>{item.path}</span>
-            <span>
-              <div className="w-5 text-gray-400 mx-4">
-                {isFavorited ? StarFilled() : Star()}
-              </div>
-            </span>
+            {item?.path && (
+              <span>
+                <div className="w-5 text-gray-400 mx-4">
+                  {isFavorited ? StarFilled() : Star()}
+                </div>
+              </span>
+            )}
           </div>
         );
       default:

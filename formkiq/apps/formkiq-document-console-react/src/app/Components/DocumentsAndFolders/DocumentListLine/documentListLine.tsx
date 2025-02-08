@@ -121,7 +121,13 @@ function DocumentListLine({
         return file;
       },
       collect: (monitor) => ({
-        opacity: monitor.isDragging() ? 0.4 : 1,
+        opacity: monitor.isDragging()
+          ? !selectedDocuments.find(
+              (doc) => doc.documentId === file.documentId
+            ) || selectedDocuments.length === 1
+            ? 0.4
+            : 1
+          : 1,
         isDragging: monitor.isDragging(),
       }),
       canDrag: !isSiteReadOnly,
@@ -247,7 +253,14 @@ function DocumentListLine({
         ref={drag}
         style={{
           opacity,
-          visibility: isDragging ? 'hidden' : 'inherit',
+          visibility:
+            isDragging &&
+            (!selectedDocuments.find(
+              (doc) => doc.documentId === file.documentId
+            ) ||
+              selectedDocuments.length === 1)
+              ? 'hidden'
+              : 'inherit',
           scrollMarginBottom: '160px',
         }}
       >
