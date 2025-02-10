@@ -218,7 +218,7 @@ export function DocumentView() {
           } else if (
             InlineViewableContentTypes.indexOf(response.contentType) > -1
           ) {
-            let viewVersionKey =
+            const viewVersionKey =
               versionKey && versionKey.length ? versionKey : '';
             // Check if it's a text file
             const isTextFile = response.contentType.startsWith('text/');
@@ -251,7 +251,7 @@ export function DocumentView() {
           } else if (response.deepLinkPath && response.deepLinkPath.length) {
             const deepLinkPath = response.deepLinkPath;
             if (deepLinkPath.startsWith('s3://')) {
-              let viewVersionKey =
+              const viewVersionKey =
                 versionKey && versionKey.length ? versionKey : '';
               DocumentsService.getDocumentUrl(
                 id,
@@ -292,7 +292,7 @@ export function DocumentView() {
               setDocumentContent(deepLinkPath);
             }
           } else if (response.contentType === 'text/csv') {
-            let viewVersionKey =
+            const viewVersionKey =
               versionKey && versionKey.length ? versionKey : '';
             DocumentsService.getDocumentContent(
               currentSiteId,
@@ -309,7 +309,7 @@ export function DocumentView() {
             TextFileEditorViewableContentTypes.indexOf(response.contentType) >
             -1
           ) {
-            let viewVersionKey =
+            const viewVersionKey =
               versionKey && versionKey.length ? versionKey : '';
             DocumentsService.getDocumentContent(
               currentSiteId,
@@ -322,7 +322,7 @@ export function DocumentView() {
               }
             });
           } else {
-            let viewVersionKey =
+            const viewVersionKey =
               versionKey && versionKey.length ? versionKey : '';
             DocumentsService.getDocumentUrl(
               id,
