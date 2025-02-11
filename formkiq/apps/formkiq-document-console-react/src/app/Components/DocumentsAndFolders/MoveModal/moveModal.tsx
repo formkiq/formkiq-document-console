@@ -1,11 +1,11 @@
-import { Fragment, useEffect, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { Fragment, useEffect, useState } from 'react';
 
-import { useAppDispatch } from '../../../Store/store';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
 
-import { ILine } from '../../../helpers/types/line';
 import { DocumentsService } from '../../../helpers/services/documentsService';
+import { ILine } from '../../../helpers/types/line';
 
 import {
   ArrowBottom,
@@ -19,14 +19,14 @@ export default function MoveModal({
   isOpened,
   onClose,
   siteId,
-  value,
+  values,
   allTags,
   onDocumentDataChange,
 }: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
-  value: ILine | null;
+  values: ILine[] ;
   allTags: any;
   onDocumentDataChange: any;
 }) {
@@ -43,10 +43,8 @@ export default function MoveModal({
   useEffect(() => {
     if (isOpened) {
       setLoading(true);
-      if (value) {
-        // NOTE: there is an arbitrary limit of 50 folders per level, assuming folders are being returned before files
+      if (values.length) {
         setFolders(initialFolders);
-        // TODO: expand to current path of selected document/folder?
         setExpandedFolders([] as any[]);
         setSelectedFolderIndexKey('');
         getSubfolders().finally(() => setLoading(false));
@@ -172,49 +170,67 @@ export default function MoveModal({
   };
 
   const executeMove = (event: any) => {
-    if (value && selectedFolderIndexKey.length) {
+    if (values.length && selectedFolderIndexKey.length) {
       let newFolderIndexKey = selectedFolderIndexKey;
       if (selectedFolderIndexKey === '/root/') {
         newFolderIndexKey = '';
       }
-      let path;
-      let pathOnly = '';
-      if (value.lineType === 'folder') {
-        path = value.folder;
-      } else {
-        path = (value.documentInstance as any).path;
-      }
-      if (path.indexOf('/') > -1) {
-        pathOnly = path.substring(0, path.lastIndexOf('/'));
-      }
-      if (pathOnly === newFolderIndexKey) {
+
+      // Check if any selected items are in the target folder
+      const hasItemsInTargetFolder = values.some((value) => {
+        let path;
+        let pathOnly = '';
+        if (value.lineType === 'folder') {
+          path = value.folder;
+        } else {
+          path = (value.documentInstance as any).path;
+        }
+        if (path.indexOf('/') > -1) {
+          pathOnly = path.substring(0, path.lastIndexOf('/'));
+        }
+        return pathOnly === newFolderIndexKey;
+      });
+
+      if (hasItemsInTargetFolder) {
         dispatch(
           openDialog({
             dialogTitle:
-              'You must select a new folder, not the current one that contains this item.',
+              'One or more items are already in the selected folder. Please choose a different destination.',
           })
         );
-      } else {
-        DocumentsService.setDocumentFolder(
-          newFolderIndexKey,
-          path,
-          siteId
-        ).then((res: any) => {
-          if (res.status === 400) {
-            dispatch(
-              openDialog({
-                dialogTitle:
-                  'An error has occurred. Please try again in a few minutes.',
-              })
-            );
-          }
-          // TODO: add flash message ?
-          setTimeout(() => {
-            onDocumentDataChange();
-          }, 1500);
-          closeDialog();
-        });
+        return;
       }
+
+      // Move all selected items
+      Promise.all(
+        values.map((value) => {
+          let path;
+          if (value.lineType === 'folder') {
+            path = value.folder;
+          } else {
+            path = (value.documentInstance as any).path;
+          }
+          return DocumentsService.setDocumentFolder(
+            newFolderIndexKey,
+            path,
+            siteId
+          );
+        })
+      ).then((results) => {
+        const hasErrors = results.some((res) => res.status === 400);
+        if (hasErrors) {
+          dispatch(
+            openDialog({
+              dialogTitle:
+                'An error occurred while moving some items. Please try again.',
+            })
+          );
+        }
+        setTimeout(() => {
+          onDocumentDataChange();
+        }, 1500);
+        closeDialog();
+      });
     }
   };
 
@@ -248,20 +264,8 @@ export default function MoveModal({
                 <div className="bg-white p-4 rounded-lg shadow-xl border h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg inline-block text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 pr-6">
-                      Move
-                      {value && value.lineType === 'folder' ? (
-                        <>
-                          <span> Folder: </span>
-                          {value && value.folder && <span>{value.folder}</span>}
-                        </>
-                      ) : (
-                        <>
-                          <span> Document: </span>
-                          {value && value.documentInstance && (
-                            <span>{value.documentInstance.path}</span>
-                          )}
-                        </>
-                      )}
+                      Move {values.length}{' '}
+                      {values.length === 1 ? 'item' : 'items'}
                     </div>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
@@ -305,11 +309,6 @@ export default function MoveModal({
                             onClick={(event) => executeMove(event)}
                           >
                             Move
-                            {value && value.lineType === 'folder' ? (
-                              <span> Folder</span>
-                            ) : (
-                              <span> Document</span>
-                            )}
                           </button>
                           <button
                             onClick={closeDialog}

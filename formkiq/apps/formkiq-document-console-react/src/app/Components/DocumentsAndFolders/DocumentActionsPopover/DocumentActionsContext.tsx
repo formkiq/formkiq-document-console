@@ -2,28 +2,31 @@ import moment from 'moment/moment';
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { TopLevelFolders } from '../../../helpers/constants/folders';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { IDocumentTag } from '../../../helpers/types/documentTag';
 import { ILine } from '../../../helpers/types/line';
+import { Queue } from '../../../helpers/types/queues';
+import { User } from '../../../helpers/types/userManagement';
+import { WorkflowSummary } from '../../../helpers/types/workflows';
 import { AuthState } from '../../../Store/reducers/auth';
+import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { deleteDocument } from '../../../Store/reducers/documentsList';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
+import { fetchQueues, QueuesState } from '../../../Store/reducers/queues';
+import { UserManagementState } from '../../../Store/reducers/userManagement';
+import {
+  fetchWorkflows,
+  WorkflowsState,
+} from '../../../Store/reducers/workflows';
 import { useAppDispatch } from '../../../Store/store';
-import {setCurrentActionEvent} from "../../../Store/reducers/config";
-import {TopLevelFolders} from "../../../helpers/constants/folders";
-import {WorkflowSummary} from "../../../helpers/types/workflows";
-import {Queue} from "../../../helpers/types/queues";
-import {User} from "../../../helpers/types/userManagement";
-import {fetchWorkflows, WorkflowsState} from "../../../Store/reducers/workflows";
-import {fetchQueues, QueuesState} from "../../../Store/reducers/queues";
-import {UserManagementState} from "../../../Store/reducers/userManagement";
 
 interface DocumentActionsContextType {
   shareModalValue: ILine | null;
   shareModalOpened: boolean;
-  isUploadModalOpened:  boolean;
+  isUploadModalOpened: boolean;
   uploadModalDocumentId: string;
-  isFolderUploadModalOpened:  boolean;
+  isFolderUploadModalOpened: boolean;
   folderUploadModalDocumentId: string;
   editAttributesModalValue: ILine | null;
   editAttributesModalOpened: boolean;
@@ -80,7 +83,7 @@ interface DocumentActionsContextType {
   renameModalValue: ILine | null;
   onRenameModalClose: () => void;
   moveModalOpened: boolean;
-  moveModalValue: ILine | null;
+  moveModalValue: ILine[];
   onMoveModalClose: () => void;
   getShareModalValue: () => any;
   getEditAttributesModalValue: () => any;
@@ -99,10 +102,13 @@ interface DocumentActionsContextType {
   onNewClick: (event: any, value: ILine | null, subfolderUri: string) => void;
   isNewModalOpened: boolean;
   newModalValue: ILine | null;
-  onNewClose:  () => void;
+  onNewClose: () => void;
   currentDocumentActions: any[];
   setCurrentDocumentActions: (actions: any[]) => void;
-  updateDocumentActions: (infoDocumentId: string, currentSiteId: string) => void;
+  updateDocumentActions: (
+    infoDocumentId: string,
+    currentSiteId: string
+  ) => void;
   onDocumentClassificationsModalClick: (event: any, value: any) => void;
   onDocumentClassificationsModalClose: () => void;
   documentClassificationsModalValue: ILine | null;
@@ -141,15 +147,17 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     useState<ILine | null>(null);
   const [documentReviewModalOpened, setDocumentReviewModalOpened] =
     useState(false);
-  const [moveModalValue, setMoveModalValue] = useState<ILine | null>(null);
+  const [moveModalValue, setMoveModalValue] = useState<ILine[]>([]);
   const [moveModalOpened, setMoveModalOpened] = useState(false);
   const [renameModalValue, setRenameModalValue] = useState<ILine | null>(null);
   const [renameModalOpened, setRenameModalOpened] = useState(false);
 
   const [documentRelationshipsModalValue, setDocumentRelationshipsModalValue] =
     useState<ILine | null>(null);
-  const [documentRelationshipsModalOpened, setDocumentRelationshipsModalOpened] =
-    useState(false);
+  const [
+    documentRelationshipsModalOpened,
+    setDocumentRelationshipsModalOpened,
+  ] = useState(false);
 
   const [
     isMultivaluedAttributeModalOpened,
@@ -176,14 +184,20 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   const [newModalValue, setNewModalValue] = useState<ILine | null>(null);
   const [isNewModalOpened, setNewModalOpened] = useState(false);
 
-  const [actionModalValue, setActionModalValue] = useState<ILine | null>(
-      null
-  );
+  const [actionModalValue, setActionModalValue] = useState<ILine | null>(null);
   const [isActionModalOpened, setIsActionModalOpened] = useState(false);
-  const [currentDocumentActions, setCurrentDocumentActions] = useState<any[]>([]);
+  const [currentDocumentActions, setCurrentDocumentActions] = useState<any[]>(
+    []
+  );
 
-  const [documentClassificationsModalValue, setDocumentClassificationsModalValue] = useState<ILine | null>(null);
-  const [documentClassificationsModalOpened, setDocumentClassificationsModalOpened] = useState(false);
+  const [
+    documentClassificationsModalValue,
+    setDocumentClassificationsModalValue,
+  ] = useState<ILine | null>(null);
+  const [
+    documentClassificationsModalOpened,
+    setDocumentClassificationsModalOpened,
+  ] = useState(false);
 
   const dispatch = useAppDispatch();
   const { user } = useSelector(AuthState);
@@ -225,7 +239,11 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     setNewModalOpened(false);
   };
 
-  const onNewClick = (event: any, value: ILine | null, subfolderUri: string) => {
+  const onNewClick = (
+    event: any,
+    value: ILine | null,
+    subfolderUri: string
+  ) => {
     dispatch(setCurrentActionEvent(''));
     if (TopLevelFolders.indexOf(subfolderUri) !== -1) {
       // TODO: add redirect or messaging of location of new file, as it won't be in the TopLevelFolder
@@ -299,7 +317,10 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     setDocumentReviewModalOpened(false);
   };
 
-  const onDocumentRelationshipsModalClick = (event: any, value: ILine | null) => {
+  const onDocumentRelationshipsModalClick = (
+    event: any,
+    value: ILine | null
+  ) => {
     setDocumentRelationshipsModalValue(value);
     setDocumentRelationshipsModalOpened(true);
   };
@@ -308,7 +329,7 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     setDocumentRelationshipsModalOpened(false);
   };
 
-  const onMoveModalClick = (event: any, value: ILine | null) => {
+  const onMoveModalClick = (event: any, value: ILine[]) => {
     setMoveModalValue(value);
     setMoveModalOpened(true);
   };
@@ -400,7 +421,9 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
       return;
     }
     if (setSelectedDocuments) {
-      setSelectedDocuments((docs) => docs.filter((doc: any) => doc.documentId !== id));
+      setSelectedDocuments((docs) =>
+        docs.filter((doc: any) => doc.documentId !== id)
+      );
     } else {
       const folderLocation = pathname.split('/').slice(0, -1).join('/');
       navigate(folderLocation);
@@ -431,7 +454,10 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     return editAttributesModalValue;
   };
 
-  const updateDocumentActions = (infoDocumentId: string, currentSiteId: string) => {
+  const updateDocumentActions = (
+    infoDocumentId: string,
+    currentSiteId: string
+  ) => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentActions(infoDocumentId, currentSiteId).then(
         (response: any) => {
@@ -520,13 +546,16 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  const onDocumentClassificationsModalClick = (event: any, value: ILine | null) => {
+  const onDocumentClassificationsModalClick = (
+    event: any,
+    value: ILine | null
+  ) => {
     setDocumentClassificationsModalValue(value);
     setDocumentClassificationsModalOpened(true);
-  }
+  };
   const onDocumentClassificationsModalClose = () => {
     setDocumentClassificationsModalOpened(false);
-  }
+  };
 
   const value = {
     shareModalValue,
