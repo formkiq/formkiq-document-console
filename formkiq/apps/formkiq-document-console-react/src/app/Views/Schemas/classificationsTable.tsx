@@ -3,17 +3,26 @@ import { Json, Pencil, Trash } from '../../Components/Icons/icons';
 import { formatDate } from '../../helpers/services/toolService';
 import { Classification } from '../../helpers/types/schemas';
 import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
+import { User } from '../../Store/reducers/auth';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 type TagSchemaTableProps = {
   classifications: Classification[];
   onClassificationDelete: (classificationId: string) => void;
+  user: User;
+  siteId: string;
 };
 
 function ClassificationsTable({
   classifications,
   onClassificationDelete,
+  user,
+  siteId,
 }: TagSchemaTableProps) {
   const pathname = decodeURI(useLocation().pathname);
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
+
   return (
     <table className="w-full border-collapse text-sm table-fixed ">
       <thead className="w-full sticky top-0 bg-neutral-100 z-10 pt-2 border-b border-t text-transparent font-bold text-left border-neutral-300">
@@ -58,41 +67,43 @@ function ClassificationsTable({
                   </td>
 
                   <td className="border-b border-neutral-300 p-4 pr-8">
-                    <div className="flex items-center justify-end gap-2 mr-3">
-                      <NavLink
-                        title="Open in editor"
-                        to={`${pathname}/${classification.classificationId}?editing=true`}
-                        className="h-6"
-                      >
-                        <button className="w-6 h-auto" title="Edit">
-                          <Pencil />
-                        </button>
-                      </NavLink>
-                      <NavLink
-                        title="Open in editor"
-                        to={`${pathname}/${classification.classificationId}?editing=true&jsonEditor=true`}
-                        className="h-6"
-                      >
-                        <button
-                          className="w-6 h-auto"
-                          title="Open in JSON Editor"
+                    {!isReadOnlyUser && (
+                      <div className="flex items-center justify-end gap-2 mr-3">
+                        <NavLink
+                          title="Open in editor"
+                          to={`${pathname}/${classification.classificationId}?editing=true`}
+                          className="h-6"
                         >
-                          <Json />
-                        </button>
-                      </NavLink>
+                          <button className="w-6 h-auto" title="Edit">
+                            <Pencil />
+                          </button>
+                        </NavLink>
+                        <NavLink
+                          title="Open in editor"
+                          to={`${pathname}/${classification.classificationId}?editing=true&jsonEditor=true`}
+                          className="h-6"
+                        >
+                          <button
+                            className="w-6 h-auto"
+                            title="Open in JSON Editor"
+                          >
+                            <Json />
+                          </button>
+                        </NavLink>
 
-                      <button
-                        title="Delete"
-                        onClick={() =>
-                          onClassificationDelete(
-                            classification.classificationId
-                          )
-                        }
-                        className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
-                      >
-                        <Trash />
-                      </button>
-                    </div>
+                        <button
+                          title="Delete"
+                          onClick={() =>
+                            onClassificationDelete(
+                              classification.classificationId
+                            )
+                          }
+                          className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
+                        >
+                          <Trash />
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               );

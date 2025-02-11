@@ -21,6 +21,7 @@ import {
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
 import ClassificationsTable from './classificationsTable';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 function Schemas() {
   const { user } = useAuthenticatedState();
@@ -49,6 +50,8 @@ function Schemas() {
   const [newSchemaType, setNewSchemaType] = useState<'site' | 'classification'>(
     'site'
   );
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   // update siteId
   useEffect(() => {
@@ -171,29 +174,31 @@ function Schemas() {
                   </td>
 
                   <td className="border-b border-neutral-300 p-4 pr-8">
-                    <div className="flex items-center justify-end gap-2 mr-3">
-                      <NavLink
-                        title="Open in editor"
-                        to={`${pathname}/site-schema?editing=true`}
-                        className="h-6"
-                      >
-                        <button className="w-6 h-auto" title="Edit">
-                          <Pencil />
-                        </button>
-                      </NavLink>
-                      <NavLink
-                        title="Open in editor"
-                        to={`${pathname}/site-schema?jsonEditor=true&editing=true`}
-                        className="h-6"
-                      >
-                        <button
-                          className="w-6 h-auto"
-                          title="Open in JSON Editor"
+                    {!isReadOnlyUser && (
+                      <div className="flex items-center justify-end gap-2 mr-3">
+                        <NavLink
+                          title="Open in editor"
+                          to={`${pathname}/site-schema?editing=true`}
+                          className="h-6"
                         >
-                          <Json />
-                        </button>
-                      </NavLink>
-                    </div>
+                          <button className="w-6 h-auto" title="Edit">
+                            <Pencil />
+                          </button>
+                        </NavLink>
+                        <NavLink
+                          title="Open in editor"
+                          to={`${pathname}/site-schema?jsonEditor=true&editing=true`}
+                          className="h-6"
+                        >
+                          <button
+                            className="w-6 h-auto"
+                            title="Open in JSON Editor"
+                          >
+                            <Json />
+                          </button>
+                        </NavLink>
+                      </div>
+                    )}
                   </td>
                 </tr>
               </>
@@ -201,15 +206,17 @@ function Schemas() {
               <tr>
                 <td colSpan={2} className="text-center p-2">
                   No site / workspace schema has been added yet.{' '}
-                  <button
-                    className="underline text-primary-500 hover:text-primary-600"
-                    onClick={() => {
-                      setIsCreateDialogOpen(true);
-                      setNewSchemaType('site');
-                    }}
-                  >
-                    Add new site / workspace schema.
-                  </button>
+                  {!isReadOnlyUser && (
+                    <button
+                      className="underline text-primary-500 hover:text-primary-600"
+                      onClick={() => {
+                        setIsCreateDialogOpen(true);
+                        setNewSchemaType('site');
+                      }}
+                    >
+                      Add new site / workspace schema.
+                    </button>
+                  )}
                 </td>
               </tr>
             )}
@@ -221,15 +228,17 @@ function Schemas() {
           <h3 className="text-lg font-bold">
             Classification Schemas (site: {siteId})
           </h3>
-          <ButtonPrimaryGradient
-            onClick={() => {
-              setIsCreateDialogOpen(true);
-              setNewSchemaType('classification');
-            }}
-            className="h-10"
-          >
-            + New Classification Schema
-          </ButtonPrimaryGradient>
+          {!isReadOnlyUser && (
+            <ButtonPrimaryGradient
+              onClick={() => {
+                setIsCreateDialogOpen(true);
+                setNewSchemaType('classification');
+              }}
+              className="h-10"
+            >
+              + New Classification Schema
+            </ButtonPrimaryGradient>
+          )}
         </div>
         {/*<div className="text-base p-4 font-semibold">*/}
         {/*  NOTE: Schemas are currently not editable; if a schema is not yet in*/}
@@ -247,15 +256,19 @@ function Schemas() {
           <ClassificationsTable
             classifications={classifications}
             onClassificationDelete={onClassificationDelete}
+            user={user}
+            siteId={siteId}
           />
         </div>
       </div>
-      <CreateSchemaDialog
-        isOpen={isCreateDialogOpen}
-        setIsOpen={setIsCreateDialogOpen}
-        siteId={currentSiteId}
-        schemaType={newSchemaType}
-      />
+      {!isReadOnlyUser && (
+        <CreateSchemaDialog
+          isOpen={isCreateDialogOpen}
+          setIsOpen={setIsCreateDialogOpen}
+          siteId={currentSiteId}
+          schemaType={newSchemaType}
+        />
+      )}
     </>
   );
 }

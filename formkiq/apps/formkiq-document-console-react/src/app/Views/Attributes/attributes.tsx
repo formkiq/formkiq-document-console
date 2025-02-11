@@ -11,6 +11,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { getAllAttributes } from '../../helpers/tools/useCacheStorage';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import {
   AttributesDataState,
   fetchAttributesData,
@@ -49,6 +50,8 @@ export function Attributes() {
   const [isEditAttributeDialogOpen, setIsEditAttributeDialogOpen] =
     useState(false);
   const [attributeToEdit, setAttributeToEdit] = useState<any>(null);
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -197,15 +200,17 @@ export function Attributes() {
                 available for use by documents
               </p>
             </div>
-            <div className="flex gap-2 p-2">
-              <ButtonPrimaryGradient
-                type="button"
-                className="h-9"
-                onClick={onCreateAttribute}
-              >
-                Create Attribute
-              </ButtonPrimaryGradient>
-            </div>
+            {!isReadOnlyUser && (
+              <div className="flex gap-2 p-2">
+                <ButtonPrimaryGradient
+                  type="button"
+                  className="h-9"
+                  onClick={onCreateAttribute}
+                >
+                  Create Attribute
+                </ButtonPrimaryGradient>
+              </div>
+            )}
           </div>
           <div className="relative overflow-hidden h-full">
             <AttributesList
@@ -214,6 +219,7 @@ export function Attributes() {
               onAttributeInView={onAttributeInView}
               isAttributesInUse={isAttributesInUse}
               onEdit={onEditAttribute}
+              isReadOnlyUser={isReadOnlyUser}
             />
           </div>
         </div>

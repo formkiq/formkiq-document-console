@@ -1,9 +1,11 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import { CopyButton } from '../../Generic/Buttons/CopyButton';
 import { Close } from '../../Icons/icons';
 
@@ -11,17 +13,18 @@ export default function DocumentWorkflowsModal({
   isOpened,
   onClose,
   siteId,
-  isSiteReadOnly,
   documentsRootUri,
   value,
 }: {
   isOpened: boolean;
   onClose: any;
   siteId: string;
-  isSiteReadOnly: boolean;
   documentsRootUri: string;
   value: ILine | null;
 }) {
+  const { user } = useAuthenticatedState();
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
+
   const [workflows, setWorkflows] = useState(null);
   const [documentWorkflows, setDocumentWorkflows] = useState(null);
   const dispatch = useAppDispatch();
@@ -183,43 +186,48 @@ export default function DocumentWorkflowsModal({
                           )}
                       </tbody>
                     </table>
-                    <div className="my-4 border-t border-b pt-4 flex justify-center">
-                      {workflows && (workflows as []).length === 0 && (
-                        <div>No workflows are available to this document.</div>
-                      )}
-                      {workflows && (
-                        <>
-                          <div className="font-bold pt-1 pr-2">
-                            Trigger Workflow:
-                          </div>
+                    {!isReadOnlyUser && (
+                      <div className="my-4 border-t border-b pt-4 flex justify-center">
+                        {workflows && (workflows as []).length === 0 && (
                           <div>
-                            <select id="workflowToTriggerSelect">
-                              {workflows &&
-                                (workflows as []).map(
-                                  (workflow: any, i: number) => {
-                                    return (
-                                      <option
-                                        key={i}
-                                        value={workflow.workflowId}
-                                      >
-                                        {workflow.name} (#{workflow.workflowId})
-                                      </option>
-                                    );
-                                  }
-                                )}
-                            </select>
+                            No workflows are available to this document.
                           </div>
-                          <div className="pl-2">
-                            <button
-                              className="flex items-center bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
-                              onClick={triggerWorkflow}
-                            >
-                              Go
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                        )}
+                        {workflows && (
+                          <>
+                            <div className="font-bold pt-1 pr-2">
+                              Trigger Workflow:
+                            </div>
+                            <div>
+                              <select id="workflowToTriggerSelect">
+                                {workflows &&
+                                  (workflows as []).map(
+                                    (workflow: any, i: number) => {
+                                      return (
+                                        <option
+                                          key={i}
+                                          value={workflow.workflowId}
+                                        >
+                                          {workflow.name} (#
+                                          {workflow.workflowId})
+                                        </option>
+                                      );
+                                    }
+                                  )}
+                              </select>
+                            </div>
+                            <div className="pl-2">
+                              <button
+                                className="flex items-center bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-base font-semibold py-2 px-5 rounded-2xl flex cursor-pointer focus:outline-none"
+                                onClick={triggerWorkflow}
+                              >
+                                Go
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="w-full flex justify-center mt-4">
                     <button

@@ -80,6 +80,7 @@ import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IDocumentTag } from '../../helpers/types/documentTag';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { DocumentsTable } from './documentsTable';
@@ -131,7 +132,6 @@ function Documents() {
     siteRedirectUrl,
     siteDocumentsRootUri,
     siteDocumentsRootName,
-    isSiteReadOnly,
   } = getCurrentSiteInfo(
     pathname,
     user,
@@ -183,8 +183,6 @@ function Documents() {
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
-  const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
-    useState<boolean>(isSiteReadOnly);
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false);
   const [archiveTabStatus, setArchiveTabStatus] = useState<
     'open' | 'closed' | 'minimized'
@@ -229,6 +227,8 @@ function Documents() {
   const [classificationsMap, setClassificationsMap] = useState<{
     [key: string]: string;
   }>({}); // classificationId: classificationName
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   function handleDragEnter(event: any) {
     if (!event.dataTransfer?.types.includes('Files')) return;
@@ -703,7 +703,6 @@ function Documents() {
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
-    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
   useEffect(() => {
@@ -1556,13 +1555,14 @@ function Documents() {
                 </div>
               )}
               <DocumentsTable
+                user={user}
+                siteId={siteId}
                 onRestoreDocument={restoreDocument}
                 documentsScrollpaneRef={documentsScrollpaneRef}
                 documentsWrapperRef={documentsWrapperRef}
                 currentSiteId={currentSiteId}
                 currentDocumentsRootUri={currentDocumentsRootUri}
                 onDocumentDataChange={onDocumentDataChange}
-                isSiteReadOnly={isCurrentSiteReadonly}
                 filterTag={filterTag}
                 deleteFolder={deleteFolder}
                 trackScrolling={trackScrolling}
@@ -1889,7 +1889,7 @@ function Documents() {
                         <div className="w-64 flex mr-3 border-b"></div>
                         <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
                           Relationships
-                          {!isSiteReadOnly && (
+                          {!isReadOnlyUser && (
                             <div
                               className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
@@ -1955,7 +1955,7 @@ function Documents() {
                         <div className="w-64 flex mr-3 border-b"></div>
                         <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
                           Classifications
-                          {!isSiteReadOnly && (
+                          {!isReadOnlyUser && (
                             <div
                               className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
                               onClick={(event) =>
@@ -2019,31 +2019,32 @@ function Documents() {
                         <div className="w-64 flex mr-3 border-b"></div>
                         <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
                           Attributes
-                          {!isCurrentSiteReadonly && (
-                            <div
-                              className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
-                              onClick={(event) =>
-                                onEditAttributesModalClick(event, {
-                                  lineType: 'document',
-                                  folder: subfolderUri,
-                                  documentId: (currentDocument as IDocument)
-                                    .documentId,
-                                  documentInstance:
-                                    currentDocument as IDocument,
-                                  folderInstance: null,
-                                })
-                              }
-                            >
-                              <>
-                                <span className="pt-0.5 whitespace-nowrap">
-                                  add/edit attributes
-                                </span>
-                                <div className="w-4">
-                                  <ChevronRight />
-                                </div>
-                              </>
-                            </div>
-                          )}
+                          <div
+                            className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                            onClick={(event) =>
+                              onEditAttributesModalClick(event, {
+                                lineType: 'document',
+                                folder: subfolderUri,
+                                documentId: (currentDocument as IDocument)
+                                  .documentId,
+                                documentInstance: currentDocument as IDocument,
+                                folderInstance: null,
+                              })
+                            }
+                          >
+                            <>
+                              <span className="pt-0.5 whitespace-nowrap">
+                                {isReadOnlyUser ? (
+                                  <span>all attributes and metadata</span>
+                                ) : (
+                                  <span>add/edit attributes</span>
+                                )}
+                              </span>
+                              <div className="w-4">
+                                <ChevronRight />
+                              </div>
+                            </>
+                          </div>
                         </div>
                         {sortedAttributesAndTags.length === 0 && (
                           <span className="text-xs">
@@ -2374,7 +2375,7 @@ function Documents() {
                         TextFileEditorEditableContentTypes.indexOf(
                           (currentDocument as IDocument).contentType
                         ) > -1) &&
-                      !isCurrentSiteReadonly && (
+                      !!isReadOnlyUser && (
                         <div className="mt-2 w-full flex justify-center">
                           <ButtonPrimaryGradient
                             onClick={editDocument}
@@ -2415,6 +2416,7 @@ function Documents() {
                       </div>
                     )}
                     {formkiqVersion.type !== 'core' &&
+                      !isReadOnlyUser &&
                       (!(currentDocument as IDocument).deepLinkPath ||
                         ((currentDocument as IDocument).deepLinkPath?.length ??
                           0) === 0) && (
@@ -2440,7 +2442,7 @@ function Documents() {
                             }}
                           >
                             View
-                            {isCurrentSiteReadonly ? (
+                            {!isReadOnlyUser ? (
                               <span>&nbsp;</span>
                             ) : (
                               <span>&nbsp;/ Assign&nbsp;</span>
@@ -2531,7 +2533,7 @@ function Documents() {
                           }}
                         >
                           View
-                          {isCurrentSiteReadonly ? (
+                          {!isReadOnlyUser ? (
                             <span>&nbsp;</span>
                           ) : (
                             <span>&nbsp;/ Edit&nbsp;</span>
@@ -2550,6 +2552,7 @@ function Documents() {
                   >
                     <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
                       {formkiqVersion.type !== 'core' &&
+                        !isReadOnlyUser &&
                         (!(currentDocument as IDocument).deepLinkPath ||
                           ((currentDocument as IDocument).deepLinkPath
                             ?.length ?? 0) === 0) && (
@@ -2774,7 +2777,6 @@ function Documents() {
                               documentInstance: currentDocument as IDocument,
                             }}
                             siteId={currentSiteId}
-                            isSiteReadOnly={isCurrentSiteReadonly}
                             formkiqVersion={formkiqVersion}
                             onInfoPage={true}
                             user={user}

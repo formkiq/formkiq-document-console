@@ -11,11 +11,13 @@ function AttributesList({
   handleScroll,
   deleteDocumentAttribute,
   editAttribute,
+  isReadOnlyUser,
 }: {
   attributes: DocumentAttribute[];
   handleScroll: (event: any) => void;
   deleteDocumentAttribute: (key: string) => void;
   editAttribute: (key: string, newValue: any) => void;
+  isReadOnlyUser: boolean;
 }) {
   const dispatch = useAppDispatch();
   const [editAttributeKey, setEditAttributeKey] = useState<string | null>(null);
@@ -355,7 +357,7 @@ function AttributesList({
                               );
                               return (
                                 <div key={'stringValue' + index}>
-                                  {editedItem ? (
+                                  {!isReadOnlyUser && editedItem ? (
                                     <div className="flex flex-row items-center justify-start flex-wrap gap-2 rounded-md bg-neutral-100 px-2 py-1.5">
                                       <input
                                         type="text"
@@ -382,22 +384,26 @@ function AttributesList({
                                   ) : (
                                     <div className="cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border">
                                       <span className="truncate">{value}</span>
-                                      <button
-                                        title="Remove Value"
-                                        type="button"
-                                        className="w-4 h-4 min-w-4 text-neutral-900"
-                                        onClick={() => onValueEdit(value)}
-                                      >
-                                        <Pencil />
-                                      </button>
-                                      <button
-                                        title="Remove Value"
-                                        type="button"
-                                        className="w-4 h-4 min-w-4 text-neutral-900"
-                                        onClick={() => deleteValue(value)}
-                                      >
-                                        <Close />
-                                      </button>
+                                      {!isReadOnlyUser && (
+                                        <>
+                                          <button
+                                            title="Remove Value"
+                                            type="button"
+                                            className="w-4 h-4 min-w-4 text-neutral-900"
+                                            onClick={() => onValueEdit(value)}
+                                          >
+                                            <Pencil />
+                                          </button>
+                                          <button
+                                            title="Remove Value"
+                                            type="button"
+                                            className="w-4 h-4 min-w-4 text-neutral-900"
+                                            onClick={() => deleteValue(value)}
+                                          >
+                                            <Close />
+                                          </button>
+                                        </>
+                                      )}
                                     </div>
                                   )}
                                 </div>
@@ -553,39 +559,45 @@ function AttributesList({
                     )}
                   </td>
                   <td className="p-4 text-end w-52">
-                    {editAttributeKey === attribute.key ? (
+                    {!isReadOnlyUser && (
                       <>
-                        {' '}
-                        <ButtonPrimaryGradient
-                          onClick={() => {
-                            saveEditAttribute(attribute);
-                          }}
-                        >
-                          Save
-                        </ButtonPrimaryGradient>
-                        <ButtonGhost className="ml-2" onClick={reset}>
-                          Cancel
-                        </ButtonGhost>
-                      </>
-                    ) : (
-                      <>
-                        {attribute.valueType !== 'KEY_ONLY' &&
-                          attribute.valueType !== 'WATERMARK' && (
+                        {editAttributeKey === attribute.key ? (
+                          <>
+                            {' '}
+                            <ButtonPrimaryGradient
+                              onClick={() => {
+                                saveEditAttribute(attribute);
+                              }}
+                            >
+                              Save
+                            </ButtonPrimaryGradient>
+                            <ButtonGhost className="ml-2" onClick={reset}>
+                              Cancel
+                            </ButtonGhost>
+                          </>
+                        ) : (
+                          <>
+                            {attribute.valueType !== 'KEY_ONLY' &&
+                              attribute.valueType !== 'WATERMARK' && (
+                                <button
+                                  className="w-4 h-4 hover:text-primary-500 mr-2"
+                                  type="button"
+                                  onClick={() => handleEditAttribute(attribute)}
+                                >
+                                  <Pencil />
+                                </button>
+                              )}
                             <button
                               className="w-4 h-4 hover:text-primary-500 mr-2"
                               type="button"
-                              onClick={() => handleEditAttribute(attribute)}
+                              onClick={() =>
+                                deleteDocumentAttribute(attribute.key)
+                              }
                             >
-                              <Pencil />
+                              <Trash />
                             </button>
-                          )}
-                        <button
-                          className="w-4 h-4 hover:text-primary-500 mr-2"
-                          type="button"
-                          onClick={() => deleteDocumentAttribute(attribute.key)}
-                        >
-                          <Trash />
-                        </button>
+                          </>
+                        )}
                       </>
                     )}
                   </td>

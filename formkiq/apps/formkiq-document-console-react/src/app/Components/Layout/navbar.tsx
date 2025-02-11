@@ -31,6 +31,7 @@ import {
 } from '../../helpers/services/toolService';
 import { IDocument } from '../../helpers/types/document';
 import { ILine } from '../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { useDocumentActions } from '../DocumentsAndFolders/DocumentActionsPopover/DocumentActionsContext';
@@ -111,25 +112,23 @@ function Navbar() {
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
   const { hash } = useLocation();
-  const {
-    siteId,
-    siteDocumentsRootUri,
-    siteDocumentsRootName,
-    isSiteReadOnly,
-  } = getCurrentSiteInfo(
-    pathname,
-    user,
-    hasUserSite,
-    hasDefaultSite,
-    hasWorkspaces,
-    workspaceSites
-  );
+  const { siteId, siteDocumentsRootUri, siteDocumentsRootName } =
+    getCurrentSiteInfo(
+      pathname,
+      user,
+      hasUserSite,
+      hasDefaultSite,
+      hasWorkspaces,
+      workspaceSites
+    );
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
   const [infoDocumentId, setInfoDocumentId] = useState('');
 
   const subfolderUri = useSubfolderUri();
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -430,7 +429,7 @@ function Navbar() {
     if (currentSection === 'DocumentsAndFolders') {
       dispatch(setDocuments({ documents: null }));
       const documentPath = value?.documentInstance?.path || value?.folder;
-      if (documentPath!==undefined) {
+      if (documentPath !== undefined) {
         const folderPath = documentPath
           .replace(/^\/|\/$/g, '')
           .substring(0, documentPath.lastIndexOf('/') - 1);
@@ -911,24 +910,29 @@ function Navbar() {
                                     >
                                       Download
                                     </ButtonTertiary>
-                                    <ButtonTertiary
-                                      className={
-                                        'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
-                                      }
-                                      onClick={(event: any) =>
-                                        onSubmitForReviewModalClick(event, {
-                                          lineType: 'document',
-                                          documentId: documentId,
-                                          folder: currentDocumentPath.substring(
-                                            0,
-                                            currentDocumentPath.lastIndexOf('/')
-                                          ),
-                                          documentInstance: currentDocument,
-                                        })
-                                      }
-                                    >
-                                      Submit for Review
-                                    </ButtonTertiary>
+                                    {!isReadOnlyUser && (
+                                      <ButtonTertiary
+                                        className={
+                                          'text-smaller font-semibold mx-2 px-2 cursor-pointer whitespace-nowrap'
+                                        }
+                                        onClick={(event: any) =>
+                                          onSubmitForReviewModalClick(event, {
+                                            lineType: 'document',
+                                            documentId: documentId,
+                                            folder:
+                                              currentDocumentPath.substring(
+                                                0,
+                                                currentDocumentPath.lastIndexOf(
+                                                  '/'
+                                                )
+                                              ),
+                                            documentInstance: currentDocument,
+                                          })
+                                        }
+                                      >
+                                        Submit for Review
+                                      </ButtonTertiary>
+                                    )}
                                     {hasDocumentVersions && (
                                       <ButtonTertiary
                                         className={
@@ -944,7 +948,7 @@ function Navbar() {
                                   </>
                                 )}
 
-                                {!isSiteReadOnly &&
+                                {!isReadOnlyUser &&
                                   currentDocument &&
                                   (InlineEditableContentTypes.indexOf(
                                     currentDocument.contentType
@@ -977,6 +981,7 @@ function Navbar() {
                                   currentDocument && (
                                     <div className="w-5 h-5 text-neutral-900 inline-flex mx-2 pt-2 items-end">
                                       <DocumentActionsPopover
+                                        user={user}
                                         value={{
                                           lineType: 'document',
                                           folder: currentDocument
@@ -992,8 +997,7 @@ function Navbar() {
                                           ).documentId,
                                           documentInstance: currentDocument,
                                         }}
-                                        siteId={siteId}
-                                        isSiteReadOnly={isSiteReadOnly}
+                                        siteId={currentSiteId}
                                         formkiqVersion={formkiqVersion}
                                         useIndividualSharing={
                                           useIndividualSharing
@@ -1102,7 +1106,6 @@ function Navbar() {
         </div>
         <DocumentActionsModalContainer
           currentSiteId={currentSiteId}
-          isSiteReadOnly={isSiteReadOnly}
           currentDocumentsRootUri={currentDocumentsRootUri}
           onDocumentDataChange={onDocumentDataChange}
         />

@@ -1,5 +1,7 @@
-import { Trash } from '../../Icons/icons';
 import { Webhook } from '../../../helpers/types/webhooks';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
+import { Trash } from '../../Icons/icons';
 
 type Props = {
   siteId: string;
@@ -17,6 +19,9 @@ export function WebhookList({
   const onDeleteClick = (webhookId: string, siteId: string) => () => {
     onDelete(webhookId, siteId);
   };
+
+  const { user } = useAuthenticatedState();
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   return (
     <div
@@ -50,14 +55,16 @@ export function WebhookList({
                     <td className="border-b p-4 pl-8">{webhook.name}</td>
                     <td className="border-b p-4 ">{webhook.url}</td>
                     <td className="border-b p-4 pr-8 ">
-                      <button
-                        onClick={onDeleteClick(webhook.webhookId, siteId)}
-                        data-test-id="delete-webhook"
-                        className="w-4 h-auto  mr-3 hover:text-primary-500 my-[3px]"
-                      >
-                        <Trash />
-                        <span className="sr-only">Delete</span>
-                      </button>
+                      {!isReadOnlyUser && (
+                        <button
+                          onClick={onDeleteClick(webhook.webhookId, siteId)}
+                          data-test-id="delete-webhook"
+                          className="w-4 h-auto  mr-3 hover:text-primary-500 my-[3px]"
+                        >
+                          <Trash />
+                          <span className="sr-only">Delete</span>
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );

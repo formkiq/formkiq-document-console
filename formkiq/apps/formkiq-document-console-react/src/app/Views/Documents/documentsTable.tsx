@@ -13,22 +13,25 @@ import {
   Spinner,
   Trash,
 } from '../../Components/Icons/icons';
+import { User } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
 import { DocumentListState } from '../../Store/reducers/documentsList';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { EmptyDocumentsTable } from './EmptyDocumentsTable';
 
 type DocumentTableProps = {
+  user: User | null;
+  siteId: string;
   documentsWrapperRef: Ref<any>;
   documentsScrollpaneRef: Ref<any>;
   onRestoreDocument: (documentId: string) => void;
   currentSiteId: string;
   currentDocumentsRootUri: string;
-  isSiteReadOnly: boolean;
   onDocumentDataChange: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
@@ -51,6 +54,8 @@ type DocumentTableProps = {
 
 export const DocumentsTable = (props: DocumentTableProps) => {
   const {
+    user,
+    siteId,
     documentsWrapperRef,
     documentsScrollpaneRef,
     onRestoreDocument,
@@ -58,7 +63,6 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onDocumentDataChange,
     currentDocumentsRootUri,
     filterTag,
-    isSiteReadOnly,
     addToPendingArchive,
     deleteFromPendingArchive,
     archiveStatus,
@@ -89,6 +93,8 @@ export const DocumentsTable = (props: DocumentTableProps) => {
   const scrollToDocumentLine = new URLSearchParams(search).get(
     'scrollToDocumentLine'
   );
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   useEffect(() => {
     // load more items if bottom of a table is visible
@@ -246,7 +252,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                           onClick={() =>
                             onDeleteSelectedDocuments(useSoftDelete)
                           }
-                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group mr-1"
+                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
                           title="Delete Selected"
                         >
                           <div className="relative z-10">
@@ -283,16 +289,18 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                           </div>
                           <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
                         </button>
-                        <button
-                          onClick={() => onDeleteSelectedDocuments(false)}
-                          className="w-8 h-8 p-[6px] relative text-red-500 hover:text-red-700 group"
-                          title="Delete Permanently"
-                        >
-                          <div className="relative z-10">
-                            <Trash />
-                          </div>
-                          <div className="absolute inset-0 bg-red-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
-                        </button>
+                        {
+                          <button
+                            onClick={() => onDeleteSelectedDocuments(false)}
+                            className="w-8 h-8 p-[6px] relative text-red-500 hover:text-red-700 group"
+                            title="Delete Permanently"
+                          >
+                            <div className="relative z-10">
+                              <Trash />
+                            </div>
+                            <div className="absolute inset-0 bg-red-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                          </button>
+                        }
                       </>
                     ) : (
                       'Name'
@@ -348,7 +356,6 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 file={file}
                 folder={subfolderUri}
                 siteId={currentSiteId}
-                isSiteReadOnly={isSiteReadOnly}
                 documentsRootUri={currentDocumentsRootUri}
                 searchDocuments={documents}
                 onRestoreClick={() => onRestoreDocument(file.documentId)}
@@ -406,7 +413,6 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     onDocumentDataChange,
     currentDocumentsRootUri,
     filterTag,
-    isSiteReadOnly,
     deleteFolder,
     addToPendingArchive,
     deleteFromPendingArchive,
@@ -429,7 +435,6 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               folderInstance={folder}
               key={j}
               currentSiteId={currentSiteId}
-              isSiteReadOnly={isSiteReadOnly}
               onDeleteClick={deleteFolder}
               currentDocumentsRootUri={currentDocumentsRootUri}
               onDocumentDataChange={onDocumentDataChange}

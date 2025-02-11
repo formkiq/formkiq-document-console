@@ -2,11 +2,13 @@ import { Dialog, Transition } from '@headlessui/react';
 import moment from 'moment';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { InlineViewableContentTypes } from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
 import { Close, Upload } from '../../Icons/icons';
@@ -17,7 +19,6 @@ export default function DocumentVersionsModal({
   onUploadClick,
   isUploadModalOpened,
   siteId,
-  isSiteReadOnly,
   documentsRootUri,
   value,
 }: {
@@ -26,7 +27,6 @@ export default function DocumentVersionsModal({
   onUploadClick: any;
   isUploadModalOpened: boolean;
   siteId: string;
-  isSiteReadOnly: boolean;
   documentsRootUri: string;
   value: ILine | null;
 }) {
@@ -37,14 +37,18 @@ export default function DocumentVersionsModal({
   };
   const navigate = useNavigate();
 
+  const { user } = useAuthenticatedState();
+
   const doneButtonRef = useRef<HTMLDivElement>(null);
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   useEffect(() => {
     updateVersions();
   }, [value]);
 
   useEffect(() => {
-    if (isUploadModalOpened === false) {
+    if (!isUploadModalOpened) {
       setTimeout(() => {
         updateVersions();
       }, 500);
@@ -196,14 +200,14 @@ export default function DocumentVersionsModal({
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-4/5">
-                <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
+                <div className="p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 inline-block pr-6">
                       Document Versions
                       <span className="block"></span>
                     </div>
                     <div className="w-100">
-                      {!isSiteReadOnly && (
+                      {!isReadOnlyUser && !isReadOnlyUser && (
                         <ButtonTertiary
                           onClick={(event: any) =>
                             onUploadClick(event, (value as any).documentId)
@@ -284,7 +288,7 @@ export default function DocumentVersionsModal({
                                       version.contentType
                                     ) > -1 && (
                                       <button
-                                        className="flex items-center bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-smaller font-semibold py-2 px-7 rounded-2xl flex cursor-pointer focus:outline-none"
+                                        className="flex items-center bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 hover:from-gray-300 hover:via-stone-300 hover:to-gray-400 text-gray-900 text-smaller font-semibold py-2 px-7 rounded-2xl cursor-pointer focus:outline-none"
                                         onClick={(event) =>
                                           viewDocumentVersion(
                                             event,
@@ -308,7 +312,7 @@ export default function DocumentVersionsModal({
                                     </ButtonTertiary>
                                     {version.versionKey && (
                                       <button
-                                        className="flex items-center bg-gradient-to-l py-2 px-5 hover:bg-gray-100 cursor-pointer text-red-500 text-gray-900 text-smaller font-semibold py-2 rounded-md flex focus:outline-none"
+                                        className="items-center bg-gradient-to-l py-2 px-5 hover:bg-gray-100 cursor-pointer text-gray-900 text-smaller font-semibold rounded-md flex focus:outline-none"
                                         onClick={() => {
                                           openDeleteDialog(version.versionKey);
                                         }}
@@ -316,9 +320,9 @@ export default function DocumentVersionsModal({
                                         Delete
                                       </button>
                                     )}
-                                    {version.version && !isSiteReadOnly && (
+                                    {version.version && !isReadOnlyUser && (
                                       <button
-                                        className="flex items-center bg-gradient-to-l from-yellow-200 via-amber-200 to-yellow-300 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 text-gray-900 text-smaller font-semibold py-2 px-5 rounded-md flex cursor-pointer focus:outline-none"
+                                        className="items-center bg-gradient-to-l from-yellow-200 via-amber-200 to-yellow-300 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 text-gray-900 text-smaller font-semibold py-2 px-5 rounded-md flex cursor-pointer focus:outline-none"
                                         onClick={(event) =>
                                           revertDocumentVersion(
                                             event,

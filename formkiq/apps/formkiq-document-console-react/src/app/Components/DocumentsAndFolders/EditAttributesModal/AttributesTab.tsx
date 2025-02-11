@@ -1,33 +1,42 @@
-import AddDocumentAttributeForm from "./AddDocumentAttributeForm";
-import AttributesList from "./AttributesList";
-import {useCallback, useEffect} from "react";
-import {RequestStatus} from "../../../helpers/types/document";
+import { useCallback, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { RequestStatus } from '../../../helpers/types/document';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import {
   AttributesState,
   fetchDocumentAttributes,
-  setDocumentAttributesLoadingStatusPending
-} from "../../../Store/reducers/attributes";
-import {useSelector} from "react-redux";
-import {useAppDispatch} from "../../../Store/store";
-import {DocumentsService} from "../../../helpers/services/documentsService";
-import {openDialog} from "../../../Store/reducers/globalConfirmControls";
-import {openDialog as openNotificationDialog} from "../../../Store/reducers/globalNotificationControls";
+  setDocumentAttributesLoadingStatusPending,
+} from '../../../Store/reducers/attributes';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
+import { openDialog } from '../../../Store/reducers/globalConfirmControls';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import AddDocumentAttributeForm from './AddDocumentAttributeForm';
+import AttributesList from './AttributesList';
 
-function AttributesTab({onDocumentDataChange, siteId, value, getValue}: any) {
+function AttributesTab({ onDocumentDataChange, siteId, value, getValue }: any) {
   const dispatch = useAppDispatch();
+  const { user } = useAuthenticatedState();
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
   const {
     documentAttributes,
     documentAttributesNextToken,
     documentAttributesLoadingStatus,
     documentAttributesCurrentSearchPage,
-    documentAttributesIsLastSearchPageLoaded
-  } = useSelector(AttributesState)
+    documentAttributesIsLastSearchPageLoaded,
+  } = useSelector(AttributesState);
 
   useEffect(() => {
     if (!value?.documentId || !siteId) {
       return;
     }
-    dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}));
+    dispatch(
+      fetchDocumentAttributes({
+        siteId,
+        documentId: value?.documentId as string,
+      })
+    );
   }, [value]);
 
   // load more documentAttributes when table reaches bottom
@@ -54,12 +63,16 @@ function AttributesTab({onDocumentDataChange, siteId, value, getValue}: any) {
             nextToken: documentAttributesNextToken,
             page: documentAttributesCurrentSearchPage + 1,
             documentId: value?.documentId as string,
-            limit: 100
+            limit: 100,
           })
         );
       }
     }
-  }, [documentAttributesNextToken, documentAttributesLoadingStatus, documentAttributesIsLastSearchPageLoaded]);
+  }, [
+    documentAttributesNextToken,
+    documentAttributesLoadingStatus,
+    documentAttributesIsLastSearchPageLoaded,
+  ]);
 
   const handleScroll = (event: any) => {
     const el = event.target;
@@ -77,8 +90,17 @@ function AttributesTab({onDocumentDataChange, siteId, value, getValue}: any) {
     }
 
     const deleteAttribute = () => {
-      DocumentsService.deleteDocumentAttribute(siteId, value?.documentId, key).then(() => {
-        dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}));
+      DocumentsService.deleteDocumentAttribute(
+        siteId,
+        value?.documentId,
+        key
+      ).then(() => {
+        dispatch(
+          fetchDocumentAttributes({
+            siteId,
+            documentId: value?.documentId as string,
+          })
+        );
         setTimeout(() => {
           onDocumentDataChange(null, value);
         }, 500);
@@ -88,16 +110,24 @@ function AttributesTab({onDocumentDataChange, siteId, value, getValue}: any) {
     dispatch(
       openDialog({
         callback: deleteAttribute,
-        dialogTitle: "Are you sure you want to delete attribute '" + key + "' from the document?",
+        dialogTitle:
+          "Are you sure you want to delete attribute '" +
+          key +
+          "' from the document?",
       })
     );
-  }
+  };
 
-  function editAttribute(attributeKey: string, newAttributeValue: any, ) {
+  function editAttribute(attributeKey: string, newAttributeValue: any) {
     if (!attributeKey || !newAttributeValue) return;
     if (!value?.documentId) return;
 
-    DocumentsService.setDocumentAttributeValue(siteId, value?.documentId, attributeKey, newAttributeValue).then((res) => {
+    DocumentsService.setDocumentAttributeValue(
+      siteId,
+      value?.documentId,
+      attributeKey,
+      newAttributeValue
+    ).then((res) => {
       if (res.status !== 200) {
         dispatch(
           openNotificationDialog({
@@ -106,29 +136,36 @@ function AttributesTab({onDocumentDataChange, siteId, value, getValue}: any) {
         );
         return;
       }
-      dispatch(fetchDocumentAttributes({siteId, documentId: value?.documentId as string}));
+      dispatch(
+        fetchDocumentAttributes({
+          siteId,
+          documentId: value?.documentId as string,
+        })
+      );
       setTimeout(() => {
         onDocumentDataChange(null, value);
       }, 500);
     });
-
   }
-
 
   return (
     <div className="mt-4">
-      <AddDocumentAttributeForm
-        onDocumentDataChange={onDocumentDataChange}
-        siteId={siteId}
-        value={value}
-        getValue={getValue}
-      />
+      {!isReadOnlyUser && (
+        <AddDocumentAttributeForm
+          onDocumentDataChange={onDocumentDataChange}
+          siteId={siteId}
+          value={value}
+          getValue={getValue}
+        />
+      )}
 
       <div className="w-full mt-4 mx-2">
-        <AttributesList attributes={documentAttributes}
-                        handleScroll={handleScroll}
-                        deleteDocumentAttribute={deleteDocumentAttribute}
-                        editAttribute={editAttribute}
+        <AttributesList
+          attributes={documentAttributes}
+          handleScroll={handleScroll}
+          deleteDocumentAttribute={deleteDocumentAttribute}
+          editAttribute={editAttribute}
+          isReadOnlyUser={isReadOnlyUser}
         />
       </div>
     </div>

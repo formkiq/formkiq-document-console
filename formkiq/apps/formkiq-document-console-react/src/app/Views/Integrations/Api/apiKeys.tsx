@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Plus } from '../../../Components/Icons/icons';
 import ApiKeyList from '../../../Components/Integrations/ApiKeyList/ApiKeyList';
 import NewApiKeyModal from '../../../Components/Integrations/NewApiKey/newApiKey';
+import {
+  ApiKeysState,
+  fetchApiKeys,
+  setApiKeysLoadingStatusPending,
+} from '../../../Store/reducers/apiKeys';
 import { AuthState } from '../../../Store/reducers/auth';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
@@ -11,14 +18,8 @@ import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../../helpers/services/toolService';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus } from '../../../Components/Icons/icons';
-import {
-  ApiKeysState,
-  fetchApiKeys,
-  setApiKeysLoadingStatusPending,
-} from '../../../Store/reducers/apiKeys';
 import { RequestStatus } from '../../../helpers/types/apiKeys';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 
 export function ApiKeys() {
   const dispatch = useAppDispatch();
@@ -29,7 +30,7 @@ export function ApiKeys() {
     getUserSites(user);
 
   const pathname = decodeURI(useLocation().pathname);
-  const { siteId, isSiteReadOnly } = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -47,11 +48,10 @@ export function ApiKeys() {
     isLastApiKeysSearchPageLoaded,
   } = useSelector(ApiKeysState);
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
-  const [isCurrentSiteReadOnly, setIsCurrentSiteReadonly] =
-    useState(isSiteReadOnly);
 
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
@@ -86,7 +86,6 @@ export function ApiKeys() {
       );
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
-    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
   useEffect(() => {
@@ -159,7 +158,7 @@ export function ApiKeys() {
       <div className="p-4 max-w-screen-lg font-semibold">
         FormKiQ allows for API authentication using API Keys
       </div>
-      {!isCurrentSiteReadOnly && (
+      {!isReadOnlyUser && (
         <div className="my-4 flex px-4">
           <button
             className="flex bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-md flex cursor-pointer focus:outline-none py-2 px-4"

@@ -1,10 +1,17 @@
-import EditTagsList from "./editTagsList";
-import {DocumentsService} from "../../../helpers/services/documentsService";
-import {openDialog} from "../../../Store/reducers/globalConfirmControls";
-import {useAppDispatch} from "../../../Store/store";
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { openDialog } from '../../../Store/reducers/globalConfirmControls';
+import { useAppDispatch } from '../../../Store/store';
+import EditTagsList from './editTagsList';
 
-function TagsTab({allTags, setAlltags, onTagEdit, value, siteId, onDocumentDataChange, updateTags}: any) {
-
+function TagsTab({
+  allTags,
+  setAlltags,
+  onTagEdit,
+  value,
+  siteId,
+  onDocumentDataChange,
+  updateTags,
+}: any) {
   const dispatch = useAppDispatch();
 
   const onTagDelete = (tagKey: string) => {
@@ -37,6 +44,7 @@ function TagsTab({allTags, setAlltags, onTagEdit, value, siteId, onDocumentDataC
             tags={allTags}
             onEdit={onTagEdit}
             onDelete={onTagDelete}
+            siteId={siteId}
           />
         </div>
       </div>

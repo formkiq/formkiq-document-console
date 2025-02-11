@@ -12,6 +12,7 @@ import { formatDate } from '../../../helpers/services/toolService';
 import { IDocument, RequestStatus } from '../../../helpers/types/document';
 import { IFolder } from '../../../helpers/types/folder';
 import { ILine } from '../../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import { ArrowBottom, ArrowRight, Share, Star, Trash } from '../../Icons/icons';
 import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
@@ -22,7 +23,6 @@ interface IProps {
   subfolder: string;
   folderInstance: IFolder;
   currentSiteId: string;
-  isSiteReadOnly: boolean;
   onDeleteClick: (folder: IFolder) => () => void;
   onRestoreDocument: (documentId: string) => void;
   currentDocumentsRootUri: string;
@@ -43,7 +43,6 @@ function FolderListLine({
   subfolder,
   folderInstance,
   currentSiteId,
-  isSiteReadOnly,
   onDeleteClick,
   currentDocumentsRootUri,
   onRestoreDocument,
@@ -85,6 +84,8 @@ function FolderListLine({
   const tableLeftMargin = 'ml-4';
   const dispatch = useAppDispatch();
 
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId: currentSiteId });
+
   const onExpandFolderClick =
     (folderPath: string, value: ILine | null) => () => {
       if (value) {
@@ -116,7 +117,6 @@ function FolderListLine({
                       folderInstance={folder}
                       key={j}
                       currentSiteId={currentSiteId}
-                      isSiteReadOnly={isSiteReadOnly}
                       onDeleteClick={onDeleteClick}
                       currentDocumentsRootUri={currentDocumentsRootUri}
                       onRestoreDocument={onRestoreDocument}
@@ -143,7 +143,6 @@ function FolderListLine({
                   file={file}
                   folder={subfolder}
                   siteId={currentSiteId}
-                  isSiteReadOnly={isSiteReadOnly}
                   documentsRootUri={currentDocumentsRootUri}
                   searchDocuments={folderInstance.documents}
                   onRestoreClick={onRestoreDocument}
@@ -295,7 +294,7 @@ function FolderListLine({
                     <Share />
                   </div>
                 )}
-                {!isSiteReadOnly && (
+                {!isReadOnlyUser && (
                   <>
                     <div
                       className="w-4 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
@@ -307,7 +306,6 @@ function FolderListLine({
                       <DocumentActionsPopover
                         value={{ lineType: 'folder', folder: folderPath }}
                         siteId={currentSiteId}
-                        isSiteReadOnly={isSiteReadOnly}
                         formkiqVersion={formkiqVersion}
                         onDeleteClick={onDeleteClick(folderInstance)}
                         user={user}

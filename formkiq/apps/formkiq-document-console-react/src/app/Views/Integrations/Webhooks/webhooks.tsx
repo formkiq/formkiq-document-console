@@ -1,24 +1,25 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Plus } from '../../../Components/Icons/icons';
 import NewWebhookModal from '../../../Components/Integrations/NewWebhook/newWebhook';
 import WebhookList from '../../../Components/Integrations/WebhookList/WebhookList';
 import { AuthState } from '../../../Store/reducers/auth';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
+import {
+  fetchWebhooks,
+  setWebhooksLoadingStatusPending,
+  WebhooksState,
+} from '../../../Store/reducers/webhooks';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../../helpers/services/toolService';
-import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  fetchWebhooks,
-  setWebhooksLoadingStatusPending,
-  WebhooksState,
-} from '../../../Store/reducers/webhooks';
 import { RequestStatus } from '../../../helpers/types/document';
-import { Plus } from '../../../Components/Icons/icons';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 
 export function Webhooks() {
   const dispatch = useAppDispatch();
@@ -26,7 +27,7 @@ export function Webhooks() {
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const { siteId, isSiteReadOnly } = getCurrentSiteInfo(
+  const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -35,6 +36,7 @@ export function Webhooks() {
     workspaceSites
   );
   const navigate = useNavigate();
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
   const {
     webhooks,
     nextWebhooksToken,
@@ -45,8 +47,6 @@ export function Webhooks() {
   const [isNewModalOpened, setNewModalOpened] = useState(false);
   const [newModalSiteId, setNewModalSiteId] = useState('default');
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
-  const [isCurrentSiteReadOnly, setIsCurrentSiteReadonly] =
-    useState(isSiteReadOnly);
 
   useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
@@ -68,7 +68,6 @@ export function Webhooks() {
       );
     }
     setCurrentSiteId(recheckSiteInfo.siteId);
-    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
   }, [pathname]);
 
   const onNewClick = (event: any, siteId: string) => {
@@ -156,14 +155,12 @@ export function Webhooks() {
       <Helmet>
         <title>Webhooks</title>
       </Helmet>
-      <div className="text-xl font-bold p-4">
-        Webhooks (site: {siteId})
-      </div>
+      <div className="text-xl font-bold p-4">Webhooks (site: {siteId})</div>
       <div className="p-4 max-w-screen-lg font-semibold">
         By posting an HTML web form or any other data to a webhook URL, FormKiQ
         will process that data and add it as a new document.
       </div>
-      {!isCurrentSiteReadOnly && (
+      {!isReadOnlyUser && (
         <div className="my-4 flex px-4">
           <button
             className="flex bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-md flex cursor-pointer focus:outline-none py-2 px-4"

@@ -1,7 +1,7 @@
-import React, {useRef} from 'react';
-import {Dialog, Transition} from '@headlessui/react';
-import ButtonPrimaryGradient from "../Buttons/ButtonPrimaryGradient";
-import ButtonGhost from "../Buttons/ButtonGhost";
+import React, { useRef } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import ButtonPrimaryGradient from '../Buttons/ButtonPrimaryGradient';
+import ButtonGhost from '../Buttons/ButtonGhost';
 
 interface DuplicateDialogProps {
   isOpen: boolean;
@@ -11,11 +11,11 @@ interface DuplicateDialogProps {
 }
 
 const DuplicateDialog: React.FC<DuplicateDialogProps> = ({
-                                                           isOpen,
-                                                           onClose,
-                                                           onDuplicate,
-                                                           initialName = '',
-                                                         }) => {
+  isOpen,
+  onClose,
+  onDuplicate,
+  initialName = '',
+}) => {
   const newNameRef = useRef<HTMLInputElement>(null);
 
   const handleDuplicate = () => {
@@ -42,8 +42,7 @@ const DuplicateDialog: React.FC<DuplicateDialogProps> = ({
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 scale-95"
         >
-          <Dialog.Panel
-            className="fixed transform transition-all w-full max-w-sm p-5 mx-auto rounded-md shadow-lg bg-white">
+          <Dialog.Panel className="fixed transform transition-all w-full max-w-sm p-5 mx-auto rounded-md shadow-lg bg-white">
             <Dialog.Title className="font-bold text-lg text-neutral-900">
               Duplicate
             </Dialog.Title>
@@ -65,14 +64,14 @@ const DuplicateDialog: React.FC<DuplicateDialogProps> = ({
             <div className="flex justify-end mt-4 gap-2">
               <ButtonGhost
                 type="button"
-                style={{height: '40px'}}
+                style={{ height: '40px' }}
                 onClick={onClose}
               >
                 Cancel
               </ButtonGhost>
               <ButtonPrimaryGradient
                 type="button"
-                style={{height: '40px'}}
+                style={{ height: '40px' }}
                 onClick={handleDuplicate}
               >
                 Duplicate

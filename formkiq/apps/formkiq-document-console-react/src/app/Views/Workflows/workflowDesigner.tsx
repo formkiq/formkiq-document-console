@@ -42,6 +42,7 @@ import {
 import { NodeType } from '../../helpers/types/workflows';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { useNavigationGuard } from '../../hooks/navigation-guard.hook';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
@@ -73,6 +74,8 @@ export function WorkflowDesigner() {
     name: workflow.name,
     description: workflow.description,
   });
+
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   // Pass a condition that determines when to show the guard
   useNavigationGuard(workflowChangesState === WorkflowChangesState.UNSAVED);
@@ -314,17 +317,19 @@ export function WorkflowDesigner() {
               />
             </div>
           ) : (
-            <div className="flex items-center">
-              <h1 className="text-2xl font-medium">{workflow.name}</h1>
-              {!workflow.inUse && (
-                <button
-                  className="w-5 h-5 ml-2 hover:text-primary-500"
-                  onClick={() => setEditWorkflowInfo(true)}
-                >
-                  <Edit />
-                </button>
-              )}
-            </div>
+            !isReadOnlyUser && (
+              <div className="flex items-center">
+                <h1 className="text-2xl font-medium">{workflow.name}</h1>
+                {!workflow.inUse && (
+                  <button
+                    className="w-5 h-5 ml-2 hover:text-primary-500"
+                    onClick={() => setEditWorkflowInfo(true)}
+                  >
+                    <Edit />
+                  </button>
+                )}
+              </div>
+            )
           )}
           {editWorkflowInfo ? (
             <input
@@ -378,7 +383,7 @@ export function WorkflowDesigner() {
             </div>
           )}
         </div>
-        {editWorkflowInfo && (
+        {editWorkflowInfo && !isReadOnlyUser && (
           <ButtonPrimary
             onClick={changeWorkflowInfo}
             style={{ height: '32px' }}
@@ -387,7 +392,7 @@ export function WorkflowDesigner() {
             Save
           </ButtonPrimary>
         )}
-        {!workflow.inUse && (
+        {!workflow.inUse && !isReadOnlyUser && (
           <button
             className="h-6 w-6 hover:text-primary-500 "
             onClick={onDeleteWorkflow}
@@ -420,7 +425,7 @@ export function WorkflowDesigner() {
           draggable={!workflow.inUse}
         >
           <Background variant={BackgroundVariant.Dots} />
-          {!workflow.inUse && (
+          {!workflow.inUse && !isReadOnlyUser && (
             <Panel position="top-right">
               <ButtonSecondary onClick={addStep} className="m-2">
                 + Add New Step

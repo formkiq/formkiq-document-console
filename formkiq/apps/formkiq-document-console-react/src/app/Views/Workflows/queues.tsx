@@ -15,18 +15,13 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import {
   deleteQueue,
   fetchQueues,
   QueuesState,
   setQueuesLoadingStatusPending,
 } from '../../Store/reducers/queues';
-
-type QueueItem = {
-  siteId: string;
-  readonly: boolean;
-  queues: [] | null;
-};
 
 export function Queues() {
   const dispatch = useAppDispatch();
@@ -35,7 +30,7 @@ export function Queues() {
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const { siteId, siteDocumentsRootUri, isSiteReadOnly } = getCurrentSiteInfo(
+  const { siteId, siteDocumentsRootUri } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -44,6 +39,7 @@ export function Queues() {
     workspaceSites
   );
   const navigate = useNavigate();
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
   const {
     queues,
     queuesLoadingStatus,
@@ -190,7 +186,7 @@ export function Queues() {
               document.
             </p>
           </div>
-          {!isSiteReadOnly && (
+          {!isReadOnlyUser && (
             <div className="mb-4 flex px-4">
               <ButtonPrimaryGradient
                 data-test-id="create-queue"
@@ -205,6 +201,7 @@ export function Queues() {
           )}
           <div className="relative overflow-hidden h-full">
             <QueueList
+              user={user}
               siteId={currentSiteId}
               handleScroll={handleScroll}
               queues={queues as []}
