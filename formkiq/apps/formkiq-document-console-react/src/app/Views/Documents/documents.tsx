@@ -164,6 +164,7 @@ function Documents() {
     currentDocumentActions,
     setCurrentDocumentActions,
     updateDocumentActions,
+    onMoveModalClick,
   } = useDocumentActions();
 
   useEffect(() => {
@@ -890,6 +891,19 @@ function Documents() {
     );
   };
 
+  const onMoveSelectedDocuments = () => {
+    // open a dialog with a list of folders to move the documents to
+    // use the moveModal.tsx component to move the documents to the selected folder
+
+    const moveModalValue = selectedDocuments.map((doc) => ({
+      lineType: 'document',
+      documentId: doc.documentId,
+      documentInstance: doc,
+      folder: doc.path.substring(0, doc.path.lastIndexOf('/')), // get the folder path
+    }));
+    onMoveModalClick(null, moveModalValue);
+  };
+
   const downloadDocument = (documentId: string) => {
     if (infoDocumentId.length) {
       DocumentsService.getDocumentUrl(
@@ -1565,6 +1579,7 @@ function Documents() {
                 archiveTabStatus={archiveTabStatus}
                 getExpandedFoldersDocuments={getExpandedFoldersDocuments}
                 downloadDocument={downloadDocument}
+                onMoveSelectedDocuments={onMoveSelectedDocuments}
               />
               <Dialog
                 open={isDropZoneVisible}

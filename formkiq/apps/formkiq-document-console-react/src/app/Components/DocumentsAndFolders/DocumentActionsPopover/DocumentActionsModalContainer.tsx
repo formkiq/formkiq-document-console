@@ -121,7 +121,7 @@ const DocumentActionsModalContainer = ({
         isOpened={moveModalOpened}
         onClose={onMoveModalClose}
         siteId={currentSiteId}
-        value={moveModalValue}
+        values={moveModalValue}
         allTags={allTags}
         onDocumentDataChange={onDocumentDataChange}
       />

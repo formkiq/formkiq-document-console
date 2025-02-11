@@ -8,6 +8,7 @@ import FolderListLine from '../../Components/DocumentsAndFolders/FolderListLine/
 import {
   Close,
   Download,
+  Move,
   RestoreFile,
   Spinner,
   Trash,
@@ -48,6 +49,7 @@ type DocumentTableProps = {
   archiveTabStatus: 'open' | 'closed' | 'minimized';
   getExpandedFoldersDocuments: (folders: IFolder[]) => IDocument[];
   downloadDocument: (documentId: string) => void;
+  onMoveSelectedDocuments: () => void;
 };
 
 export const DocumentsTable = (props: DocumentTableProps) => {
@@ -75,6 +77,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     archiveTabStatus,
     getExpandedFoldersDocuments,
     downloadDocument,
+    onMoveSelectedDocuments,
   } = props;
 
   const { formkiqVersion, useIndividualSharing, useSoftDelete } =
@@ -245,20 +248,28 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                           </div>
                           <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
                         </button>
-                        {!isReadOnlyUser && (
-                          <button
-                            onClick={() =>
-                              onDeleteSelectedDocuments(useSoftDelete)
-                            }
-                            className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
-                            title="Delete Selected"
-                          >
-                            <div className="relative z-10">
-                              <Trash />
-                            </div>
-                            <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
-                          </button>
-                        )}
+                        <button
+                          onClick={() =>
+                            onDeleteSelectedDocuments(useSoftDelete)
+                          }
+                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group"
+                          title="Delete Selected"
+                        >
+                          <div className="relative z-10">
+                            <Trash />
+                          </div>
+                          <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
+                        <button
+                          onClick={() => onMoveSelectedDocuments()}
+                          className="w-8 h-8 p-2 relative text-neutral-700 hover:text-neutral-900 group mr-1"
+                          title="Move Selected"
+                        >
+                          <div className="relative z-10 scale-125">
+                            <Move />
+                          </div>
+                          <div className="absolute inset-0 bg-neutral-200 rounded-full transition-all ease-out scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"></div>
+                        </button>
                       </div>
                     ) : (
                       'Name'
@@ -370,7 +381,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
         )}
         {loadingStatus === RequestStatus.rejected && documents.length > 0 && (
           <div className="w-full flex justify-center items-center gap-2 py-2">
-            <div className="w-6 h-6 p-0.5 text-neutral-500 border-neutral-500 rounded-full border-2 ">
+            <div className="w-6 h-6 p-0.5 text-neutral-500 border-neutral-500 border rounded-full border-2 ">
               <Close />
             </div>
             <p className="text-neutral-500">Failed to load more documents.</p>
