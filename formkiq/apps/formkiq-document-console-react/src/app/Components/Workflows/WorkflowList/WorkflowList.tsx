@@ -1,11 +1,11 @@
-import { CopyButton } from '../../Generic/Buttons/CopyButton';
-import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
-import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
-import { Edit, View } from '../../Icons/icons';
-import WorkflowsActionsPopover from './workflowActionsPopover';
 import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import { User } from '../../../Store/reducers/auth';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import { CopyButton } from '../../Generic/Buttons/CopyButton';
+import { Edit, View } from '../../Icons/icons';
+import WorkflowsActionsPopover from './workflowActionsPopover';
 
 type Props = {
   siteId: string;
@@ -16,7 +16,6 @@ type Props = {
   handleCopyToClipBoard: (workflowId: string, siteId: string) => void;
   showTooltipId: string;
   handleDownloadClick: (workflowId: string, siteId: string) => void;
-  isSiteReadOnly: boolean;
   user: User | null;
 };
 

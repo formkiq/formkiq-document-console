@@ -12,16 +12,16 @@ import {
   Spinner,
   Trash,
 } from '../../Components/Icons/icons';
+import { User } from '../../Store/reducers/auth';
 import { ConfigState } from '../../Store/reducers/config';
 import { DocumentListState } from '../../Store/reducers/documentsList';
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
 import { ILine } from '../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import { useQueueId } from '../../hooks/queue-id.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import { EmptyDocumentsTable } from './EmptyDocumentsTable';
-import { User } from '../../Store/reducers/auth';
-import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 type DocumentTableProps = {
   user: User | null;
@@ -31,7 +31,6 @@ type DocumentTableProps = {
   onRestoreDocument: (documentId: string) => void;
   currentSiteId: string;
   currentDocumentsRootUri: string;
-  isSiteReadOnly: boolean;
   onDocumentDataChange: (event: any, value: ILine | null) => void;
   filterTag: string | null;
   deleteFolder: (folder: IFolder | IDocument) => () => void;
@@ -62,7 +61,6 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onDocumentDataChange,
     currentDocumentsRootUri,
     filterTag,
-    isSiteReadOnly,
     addToPendingArchive,
     deleteFromPendingArchive,
     archiveStatus,
@@ -347,7 +345,6 @@ export const DocumentsTable = (props: DocumentTableProps) => {
                 file={file}
                 folder={subfolderUri}
                 siteId={currentSiteId}
-                isSiteReadOnly={isSiteReadOnly}
                 documentsRootUri={currentDocumentsRootUri}
                 searchDocuments={documents}
                 onRestoreClick={() => onRestoreDocument(file.documentId)}
@@ -405,7 +402,6 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
     onDocumentDataChange,
     currentDocumentsRootUri,
     filterTag,
-    isSiteReadOnly,
     deleteFolder,
     addToPendingArchive,
     deleteFromPendingArchive,
@@ -428,7 +424,6 @@ const FolderDocumentsTable = (props: DocumentTableProps) => {
               folderInstance={folder}
               key={j}
               currentSiteId={currentSiteId}
-              isSiteReadOnly={isSiteReadOnly}
               onDeleteClick={deleteFolder}
               currentDocumentsRootUri={currentDocumentsRootUri}
               onDocumentDataChange={onDocumentDataChange}

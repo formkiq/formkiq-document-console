@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
 import { Link, useLocation } from 'react-router-dom';
+import { Tooltip } from 'react-tooltip';
 import { ESignatureContentTypes } from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import {
   ArrowRight,
   Checkmark,
@@ -25,8 +27,6 @@ import {
   Workflow,
 } from '../../Icons/icons';
 import { useDocumentActions } from './DocumentActionsContext';
-import { Tooltip } from 'react-tooltip';
-import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 
 function useOutsideAlerter(ref: any, setExpanded: any) {
   useEffect(() => {
@@ -49,7 +49,6 @@ export default function DocumentActionsPopover({
   user,
   value,
   siteId,
-  isSiteReadOnly,
   formkiqVersion,
   onInfoPage,
   useIndividualSharing,
@@ -170,7 +169,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {line.lineType === 'document' && !isSiteReadOnly && (
+            {line.lineType === 'document' && (
               <>
                 {line.documentId === infoDocumentId && (
                   <Tooltip id={line.documentId} />
@@ -203,7 +202,7 @@ export default function DocumentActionsPopover({
                 </Link>
               </>
             )}
-            {line.lineType === 'document' && !isSiteReadOnly && (
+            {line.lineType === 'document' && !isReadOnlyUser && (
               <li className="py-1 px-2 hover:bg-gray-100 cursor-pointer">
                 <span className={'flex items-baseline'}>
                   <span className="mr-2 w-4 text-neutral-900">{Star()}</span>
@@ -227,7 +226,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {line.lineType === 'document' && !isSiteReadOnly && (
+            {line.lineType === 'document' && !isReadOnlyUser && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
@@ -256,7 +255,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {line.lineType === 'document' && !isSiteReadOnly && (
+            {line.lineType === 'document' && !isReadOnlyUser && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
@@ -303,8 +302,7 @@ export default function DocumentActionsPopover({
               )}
             {formkiqVersion.type !== 'core' &&
               line.lineType === 'document' &&
-              !isDeeplinkPath &&
-              !isReadOnlyUser && (
+              !isDeeplinkPath && (
                 <li
                   className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(event) =>
@@ -389,7 +387,8 @@ export default function DocumentActionsPopover({
               )}
 
             {line.lineType === 'document' &&
-              pathname.indexOf('/queues') > -1 && (
+              pathname.indexOf('/queues') > -1 &&
+              !isReadOnlyUser && (
                 <li
                   className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(event) =>
@@ -415,11 +414,11 @@ export default function DocumentActionsPopover({
                 </li>
               )}
 
-            {line.lineType === 'document' && !isSiteReadOnly && (
+            {line.lineType === 'document' && !isReadOnlyUser && (
               <div className="w-4/5 my-2 mx-6 border-b"></div>
             )}
             {line.lineType === 'document' &&
-              !isSiteReadOnly &&
+              !isReadOnlyUser &&
               line.documentInstance &&
               formkiqVersion.modules?.indexOf('esignature') > -1 &&
               ESignatureContentTypes.indexOf(
@@ -454,7 +453,7 @@ export default function DocumentActionsPopover({
                   </li>
                 </>
               )}
-            {line.lineType === 'document' && !isSiteReadOnly && (
+            {line.lineType === 'document' && !isReadOnlyUser && (
               <>
                 {useCollections && (
                   <li className="py-1 px-2 hover:bg-gray-100 cursor-pointer">
@@ -503,7 +502,7 @@ export default function DocumentActionsPopover({
                 </li>
               </>
             )}
-            {line.lineType === 'document' && !isReadOnlyUser && (
+            {line.lineType === 'document' && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
@@ -556,7 +555,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {!onInfoPage && !isSiteReadOnly && (
+            {!onInfoPage && !isReadOnlyUser && (
               <>
                 {line.lineType === 'document' && (
                   <div className="w-4/5 my-2 mx-6 border-b"></div>

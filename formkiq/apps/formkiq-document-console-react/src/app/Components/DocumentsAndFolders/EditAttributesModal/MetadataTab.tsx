@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { formatBytes } from '../../../helpers/services/toolService';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import { Pencil } from '../../Icons/icons';
 
 function MetadataTab({ value, siteId, onDocumentDataChange }: any) {
   const dispatch = useAppDispatch();
+  const { user } = useAuthenticatedState();
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
   const [metadata, setMetadata] = useState<any>(null);
 
   const updateMetadata = () => {
@@ -18,7 +22,7 @@ function MetadataTab({ value, siteId, onDocumentDataChange }: any) {
           path: res?.path as string,
           deepLinkPath: res?.deepLinkPath as string,
           contentType: res?.contentType as string,
-          filesize: res?.contentLength as number,
+          contentLength: res?.contentLength as number,
         };
         setMetadata(newMetadata);
       }
@@ -85,7 +89,7 @@ function MetadataTab({ value, siteId, onDocumentDataChange }: any) {
               <td className="p-4 text-start">{metadata?.path}</td>
             </tr>
             <tr className="border-t border-neutral-300">
-              <td className="p-4 text-start font-bold">DeepLinkPath:</td>
+              <td className="p-4 text-start font-bold">Deep Link Path:</td>
               <td className="p-4 text-start">
                 {' '}
                 {isEditingDeeplinkPath ? (
@@ -113,17 +117,19 @@ function MetadataTab({ value, siteId, onDocumentDataChange }: any) {
                       </p>
                     ) : (
                       <div className="text-neutral-500 font-normal">
-                        No deeplink found
+                        No deep link path found
                       </div>
                     )}
                     <div>
-                      <button
-                        type="button"
-                        className="h-4 min-w-4 mt-1 w-4 grow"
-                        onClick={startEditingDeeplinkPath}
-                      >
-                        <Pencil />
-                      </button>
+                      {!isReadOnlyUser && (
+                        <button
+                          type="button"
+                          className="h-4 min-w-4 mt-1 w-4 grow"
+                          onClick={startEditingDeeplinkPath}
+                        >
+                          <Pencil />
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -131,13 +137,13 @@ function MetadataTab({ value, siteId, onDocumentDataChange }: any) {
             </tr>
             <tr>
               <td colSpan={2} className="pl-4 text-sm italic">
-                NOTE: deeplinks override any existing file object; you can
-                restore access to any existing file object by deleting the
-                deeplink
+                NOTE: deep links override any existing file object within
+                FormKiQ; you can restore access to any existing file object by
+                deleting the deep link
               </td>
             </tr>
             <tr className="border-t border-neutral-300">
-              <td className="p-4 text-start font-bold">ContentType:</td>
+              <td className="p-4 text-start font-bold">Content Type:</td>
               <td className="p-4 text-start">{metadata?.contentType}</td>
             </tr>
             <tr className="border-t border-neutral-300">

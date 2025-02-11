@@ -11,6 +11,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { getAllAttributes } from '../../helpers/tools/useCacheStorage';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import {
   AttributesDataState,
   fetchAttributesData,
@@ -21,7 +22,6 @@ import { openDialog as openConfirmationDialog } from '../../Store/reducers/globa
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
 import AttributesList from './AttributesList';
-import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 export function Attributes() {
   const dispatch = useAppDispatch();
@@ -219,6 +219,7 @@ export function Attributes() {
               onAttributeInView={onAttributeInView}
               isAttributesInUse={isAttributesInUse}
               onEdit={onEditAttribute}
+              isReadOnlyUser={isReadOnlyUser}
             />
           </div>
         </div>

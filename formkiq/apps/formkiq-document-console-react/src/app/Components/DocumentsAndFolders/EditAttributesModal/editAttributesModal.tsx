@@ -1,13 +1,13 @@
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogTitle, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
+import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
 import { Close } from '../../Icons/icons';
 import AttributesTab from './AttributesTab';
 import MetadataTab from './MetadataTab';
 import TagsTab from './TagsTab';
-import {useAppDispatch} from "../../../Store/store";
-import {openDialog as openNotificationDialog} from "../../../Store/reducers/globalNotificationControls";
 
 export default function EditAttributesModal({
   isOpened,
@@ -24,7 +24,7 @@ export default function EditAttributesModal({
   value: ILine | null;
   onDocumentDataChange: any;
 }) {
-  const dispatch = useAppDispatch()
+  const dispatch = useAppDispatch();
   const [allTags, setAlltags] = useState(null);
   const [selectedTab, setSelectedTab] = useState<
     'attributes' | 'metadata' | 'tags'
@@ -63,10 +63,12 @@ export default function EditAttributesModal({
       newValue,
       siteId
     ).then((res) => {
-      if(res.status!==200){
-        dispatch(openNotificationDialog({
-          dialogTitle: res.errors[0].error
-        }))
+      if (res.status !== 200) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: res.errors[0].error,
+          })
+        );
       }
       updateTags();
       setTimeout(() => {
@@ -109,9 +111,9 @@ export default function EditAttributesModal({
               <Dialog.Panel className="relative transform overflow-hidden text-left transition-all w-full lg:w-1/2">
                 <div className="bg-white p-4 rounded-lg bg-white shadow-xl border w-full h-full">
                   <div className="w-full flex justify-between items-center">
-                    <Dialog.Title className="text-2xl font-bold mb-4 mx-2">
+                    <DialogTitle className="text-2xl font-bold mb-4 mx-2">
                       Document Attributes and Metadata
-                    </Dialog.Title>
+                    </DialogTitle>
                     <div
                       className="w-5 h-5 mr-2 cursor-pointer text-gray-400"
                       onClick={closeDialog}

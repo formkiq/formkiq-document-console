@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { setTagColors } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { DocumentAttribute } from '../../../helpers/types/attributes';
 import { ILine } from '../../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import { Close, Spinner, Tag } from '../../Icons/icons';
 import AddTag from '../AddTag/addTag';
 import TagColorPickerPopover from './tagColorPickerPopover';
@@ -30,11 +32,12 @@ export default function DocumentTagsPopover({
   onChange,
   onKeyDown,
   siteId,
-  isSiteReadOnly,
   value,
   tagColors,
   onDocumentDataChange,
 }: any) {
+  const { user } = useAuthenticatedState();
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
   const line: ILine = value;
   const [visible, setVisibility] = useState(false);
   const [allTags, setAllTags] = useState(null);
@@ -81,7 +84,7 @@ export default function DocumentTagsPopover({
           ...replacementTagColors[previousColorIndex].tagKeys,
         ];
         previousColorTagKeys.splice(previousTagKeyIndex, 1);
-        if(colorUri !== 'default'){
+        if (colorUri !== 'default') {
           const newColorTagKeys = [
             ...replacementTagColors[newColorIndex].tagKeys,
           ];
@@ -102,7 +105,7 @@ export default function DocumentTagsPopover({
         }
       }
     } else {
-      if(colorUri === 'default') return
+      if (colorUri === 'default') return;
       const newColorTagKeys = [...replacementTagColors[newColorIndex].tagKeys];
       newColorTagKeys.push(tagKey);
       replacementTagColors[newColorIndex] = {
@@ -242,7 +245,7 @@ export default function DocumentTagsPopover({
         >
           <div className="mb-2 flex items-center">
             <h2 className="grow text-base font-semibold">Tags</h2>
-            {!isSiteReadOnly && (
+            {!isReadOnlyUser && allTags && (allTags as []).length > 0 && (
               <button
                 className="bg-white border text-xs p-1 px-2 mx-1 mt-1 cursor-pointer hover:bg-gray-100"
                 onClick={toggleTagColorEdit}
@@ -288,7 +291,7 @@ export default function DocumentTagsPopover({
                           />
                         )}
                         <span className="p-2">{key}</span>
-                        {!isSiteReadOnly && (
+                        {!isReadOnlyUser && (
                           <button
                             className="pl-1 font-semibold hover:text-red-600"
                             onClick={() => onDocumentAttributeDelete(key)}
@@ -307,6 +310,9 @@ export default function DocumentTagsPopover({
                 );
               })}
 
+            {isReadOnlyUser && allTags && (allTags as []).length === 0 && (
+              <span className="text-xs">(no tags found)</span>
+            )}
             {allTags &&
               (allTags as []).map((tag: any, i: number) => {
                 let isKeyOnlyTag = false;
@@ -340,7 +346,7 @@ export default function DocumentTagsPopover({
                             />
                           )}
                           <span className="p-2">{tag.key}</span>
-                          {!isSiteReadOnly && (
+                          {!isReadOnlyUser && (
                             <button
                               className="pl-1 font-semibold hover:text-red-600"
                               onClick={(event) => onTagDelete(tag.key)}
@@ -360,7 +366,7 @@ export default function DocumentTagsPopover({
                 );
               })}
           </div>
-          {!isLoading && !isSiteReadOnly && (
+          {!isLoading && !isReadOnlyUser && (
             <div className="mt-4 flex justify-center items-center w-full">
               <AddTag
                 line={line}

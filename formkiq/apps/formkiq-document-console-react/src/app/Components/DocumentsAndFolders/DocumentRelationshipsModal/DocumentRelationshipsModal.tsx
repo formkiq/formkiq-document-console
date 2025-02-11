@@ -1,23 +1,25 @@
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition, TransitionChild } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useSelector } from 'react-redux';
+import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
+import { DocumentListState } from '../../../Store/reducers/documentsList';
 import { openDialog as openConfirmationDialog } from '../../../Store/reducers/globalConfirmControls';
+import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
-import { ILine } from '../../../helpers/types/line';
-import { Close, Pencil, Trash } from '../../Icons/icons';
-import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
-import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
-import RadioListbox from '../../Generic/Listboxes/RadioListbox';
 import {
   transformRelationshipValueFromString,
   transformRelationshipValueToString,
 } from '../../../helpers/services/toolService';
-import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
 import { RelationshipType } from '../../../helpers/types/attributes';
-import { useSelector } from 'react-redux';
-import { DocumentListState } from '../../../Store/reducers/documentsList';
+import { ILine } from '../../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import { CopyButton } from '../../Generic/Buttons/CopyButton';
+import RadioListbox from '../../Generic/Listboxes/RadioListbox';
+import { Close, Pencil, Trash } from '../../Icons/icons';
 
 const RELATIONSHIP_TYPES: RelationshipType[] = [
   'PRIMARY',
@@ -42,6 +44,8 @@ export default function DocumentRelationshipsModal({
   onDocumentDataChange: any;
 }) {
   const dispatch = useAppDispatch();
+  const { user } = useAuthenticatedState();
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
   const approveButtonRef = useRef<HTMLButtonElement>(null);
   const [relationshipType, setRelationshipType] = useState<RelationshipType>(
     RELATIONSHIP_TYPES[0]
@@ -352,14 +356,14 @@ export default function DocumentRelationshipsModal({
   }
 
   return (
-    <Transition.Root show={isOpened} as={Fragment}>
+    <Transition show={isOpened} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-20"
         initialFocus={approveButtonRef}
         onClose={closeDialog}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -369,11 +373,11 @@ export default function DocumentRelationshipsModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-50 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-20 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -398,51 +402,53 @@ export default function DocumentRelationshipsModal({
                     </div>
                   </div>
 
-                  <div className="flex gap-2 my-4 px-4 flex-col xl:w-1/2 ">
-                    <div className="flex gap-2 ">
-                      <div className="w-1/2 ">
-                        <h3 className="text-sm font-semibold text-gray-500">
-                          Relationship
-                        </h3>
-                        <div className=" h-8">
-                          <RadioListbox
-                            values={RELATIONSHIP_TYPES}
-                            titles={RELATIONSHIP_TYPES}
-                            selectedValue={relationshipType}
-                            setSelectedValue={setRelationshipType}
-                          />
+                  {!isReadOnlyUser && (
+                    <div className="flex gap-2 my-4 px-4 flex-col xl:w-1/2 ">
+                      <div className="flex gap-2 ">
+                        <div className="w-1/2 ">
+                          <h3 className="text-sm font-semibold text-gray-500">
+                            Relationship
+                          </h3>
+                          <div className=" h-8">
+                            <RadioListbox
+                              values={RELATIONSHIP_TYPES}
+                              titles={RELATIONSHIP_TYPES}
+                              selectedValue={relationshipType}
+                              setSelectedValue={setRelationshipType}
+                            />
+                          </div>
+                        </div>
+                        <div className="w-1/2">
+                          <h3 className="text-sm font-semibold text-gray-500">
+                            Inverse Relationship{' '}
+                            <span className="text-xs text-gray-400">
+                              (optional)
+                            </span>
+                          </h3>
+                          <div className=" h-8">
+                            <RadioListbox
+                              values={['', ...RELATIONSHIP_TYPES]}
+                              titles={['NONE', ...RELATIONSHIP_TYPES]}
+                              selectedValue={inverseRelationshipType}
+                              setSelectedValue={setInverseRelationshipType}
+                            />
+                          </div>
                         </div>
                       </div>
-                      <div className="w-1/2">
-                        <h3 className="text-sm font-semibold text-gray-500">
-                          Inverse Relationship{' '}
-                          <span className="text-xs text-gray-400">
-                            (optional)
-                          </span>
-                        </h3>
-                        <div className=" h-8">
-                          <RadioListbox
-                            values={['', ...RELATIONSHIP_TYPES]}
-                            titles={['NONE', ...RELATIONSHIP_TYPES]}
-                            selectedValue={inverseRelationshipType}
-                            setSelectedValue={setInverseRelationshipType}
-                          />
-                        </div>
+                      <div className="flex gap-2 w-full h-8">
+                        <input
+                          type="text"
+                          className="w-full h-8 px-2 border border-gray-300 rounded-md"
+                          placeholder="Document ID"
+                          value={documentId}
+                          onChange={(e) => setDocumentId(e.target.value)}
+                        />
+                        <ButtonPrimaryGradient onClick={addRelationship}>
+                          +ADD
+                        </ButtonPrimaryGradient>
                       </div>
                     </div>
-                    <div className="flex gap-2 w-full h-8">
-                      <input
-                        type="text"
-                        className="w-full h-8 px-2 border border-gray-300 rounded-md"
-                        placeholder="Document ID"
-                        value={documentId}
-                        onChange={(e) => setDocumentId(e.target.value)}
-                      />
-                      <ButtonPrimaryGradient onClick={addRelationship}>
-                        +ADD
-                      </ButtonPrimaryGradient>
-                    </div>
-                  </div>
+                  )}
 
                   {documentRelationships.length > 0 ? (
                     <div className="overflow-y-auto overflow-x-visible max-h-64 h-64 px-4 my-4">
@@ -594,7 +600,7 @@ export default function DocumentRelationshipsModal({
                     <div className="text-center mt-4 px-4">
                       <div role="status">
                         <div className="overflow-x-auto relative h-64">
-                          No document attributes found
+                          No document relationships found
                         </div>
                       </div>
                     </div>
@@ -607,10 +613,10 @@ export default function DocumentRelationshipsModal({
                   </div>
                 </div>
               </Dialog.Panel>
-            </Transition.Child>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

@@ -21,6 +21,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { IFolder } from '../../helpers/types/folder';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import { useSubfolderUri } from '../../hooks/subfolder-uri.hook';
 import FolderDropWrapper from '../DocumentsAndFolders/FolderDropWrapper/folderDropWrapper';
 import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
@@ -73,7 +74,7 @@ export function Sidebar() {
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
   const pathname = decodeURI(useLocation().pathname);
-  const { siteId, siteDocumentsRootUri, isSiteReadOnly } = getCurrentSiteInfo(
+  const { siteId, siteDocumentsRootUri } = getCurrentSiteInfo(
     pathname,
     user,
     hasUserSite,
@@ -442,6 +443,8 @@ export function Sidebar() {
   };
 
   const SidebarItems = () => {
+    const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
+
     return (
       <div className="tracking-normal pb-16">
         <>
@@ -686,7 +689,7 @@ export function Sidebar() {
                   )}
                 </>
               )}
-              {!isSiteReadOnly && (
+              {!isReadOnlyUser && (
                 <>
                   <NavigationItem
                     to={`${specialFoldersRootUri}/folders/favorites`}
@@ -896,6 +899,8 @@ export function Sidebar() {
     );
   };
 
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
+
   return (
     <div
       className={
@@ -957,7 +962,7 @@ export function Sidebar() {
         {user && (
           <>
             <nav className="grow mb-8 pt-4">
-              {!isSiteReadOnly && (
+              {!isReadOnlyUser && (
                 <div className="flex flex-wrap w-full justify-center mb-4 pl-0.5">
                   <ButtonPrimaryGradient
                     className={

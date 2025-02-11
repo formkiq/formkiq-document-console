@@ -2,16 +2,16 @@ import { Dialog, Transition } from '@headlessui/react';
 import moment from 'moment';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { useAppDispatch } from '../../../Store/store';
 import { InlineViewableContentTypes } from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
 import { Close, Upload } from '../../Icons/icons';
-import { useAuthenticatedState } from '../../../Store/reducers/auth';
-import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 
 export default function DocumentVersionsModal({
   isOpened,
@@ -19,7 +19,6 @@ export default function DocumentVersionsModal({
   onUploadClick,
   isUploadModalOpened,
   siteId,
-  isSiteReadOnly,
   documentsRootUri,
   value,
 }: {
@@ -28,7 +27,6 @@ export default function DocumentVersionsModal({
   onUploadClick: any;
   isUploadModalOpened: boolean;
   siteId: string;
-  isSiteReadOnly: boolean;
   documentsRootUri: string;
   value: ILine | null;
 }) {
@@ -209,7 +207,7 @@ export default function DocumentVersionsModal({
                       <span className="block"></span>
                     </div>
                     <div className="w-100">
-                      {!isSiteReadOnly && !isReadOnlyUser && (
+                      {!isReadOnlyUser && !isReadOnlyUser && (
                         <ButtonTertiary
                           onClick={(event: any) =>
                             onUploadClick(event, (value as any).documentId)
@@ -322,7 +320,7 @@ export default function DocumentVersionsModal({
                                         Delete
                                       </button>
                                     )}
-                                    {version.version && !isSiteReadOnly && (
+                                    {version.version && !isReadOnlyUser && (
                                       <button
                                         className="items-center bg-gradient-to-l from-yellow-200 via-amber-200 to-yellow-300 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 text-gray-900 text-smaller font-semibold py-2 px-5 rounded-md flex cursor-pointer focus:outline-none"
                                         onClick={(event) =>

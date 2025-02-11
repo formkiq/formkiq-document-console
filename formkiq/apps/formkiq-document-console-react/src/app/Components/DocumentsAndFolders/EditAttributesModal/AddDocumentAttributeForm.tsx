@@ -9,10 +9,12 @@ import {
   AttributesDataState,
   fetchAttributesData,
 } from '../../../Store/reducers/attributesData';
+import { AuthState } from '../../../Store/reducers/auth';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { Attribute } from '../../../helpers/types/attributes';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import { Close, Plus } from '../../Icons/icons';
@@ -24,10 +26,12 @@ function AddDocumentAttributeForm({
   value,
   getValue,
 }: any) {
+  const { user } = useSelector(AuthState);
   const { allAttributes } = useSelector(AttributesDataState);
   const { documentAttributes } = useSelector(AttributesState);
   const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
   const [attributeKeys, setAttributeKeys] = useState<
     { key: string; title: string }[]
   >([]);
@@ -417,7 +421,7 @@ function AddDocumentAttributeForm({
         </form>
       </div>
       <div className="flex w-full">
-        {!isAddAttributeFormOpen && (
+        {!isAddAttributeFormOpen && !isReadOnlyUser && (
           <button
             onClick={() => {
               setIsAddAttributeFormOpen(true);

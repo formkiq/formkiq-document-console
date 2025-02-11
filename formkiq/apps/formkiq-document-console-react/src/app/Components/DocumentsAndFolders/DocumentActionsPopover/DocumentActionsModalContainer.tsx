@@ -2,6 +2,9 @@ import { useSelector } from 'react-redux';
 import { ILine } from '../../../helpers/types/line';
 import { AttributesDataState } from '../../../Store/reducers/attributesData';
 import ShareModal from '../../Share/share';
+import ActionModal from '../ActionModal/actionModal';
+import DocumentClassificationsModal from '../DocumentClassificationsModal/DocumentClassificationsModal';
+import DocumentRelationshipsModal from '../DocumentRelationshipsModal/DocumentRelationshipsModal';
 import DocumentReviewModal from '../DocumentReviewModal/DocumentReviewModal';
 import DocumentVersionsModal from '../DocumentVersionsModal/documentVersionsModal';
 import DocumentWorkflowsModal from '../DocumentWorkflowsModal/documentWorkflowsModal';
@@ -12,18 +15,13 @@ import MultiValuedAttributeModal from '../MultivaluedAttributeModal/MultivaluedA
 import RenameModal from '../RenameModal/renameModal';
 import SubmitForReviewModal from '../SubmitForReviewModal/submitForReviewModal';
 import { useDocumentActions } from './DocumentActionsContext';
-import DocumentRelationshipsModal from "../DocumentRelationshipsModal/DocumentRelationshipsModal";
-import ActionModal from "../ActionModal/actionModal";
-import DocumentClassificationsModal from "../DocumentClassificationsModal/DocumentClassificationsModal";
 
 const DocumentActionsModalContainer = ({
   currentSiteId,
-  isSiteReadOnly,
   currentDocumentsRootUri,
   onDocumentDataChange,
 }: {
   currentSiteId: string;
-  isSiteReadOnly: boolean;
   currentDocumentsRootUri: string;
   onDocumentDataChange: (event: any, value: ILine | null) => void;
 }) => {
@@ -96,7 +94,6 @@ const DocumentActionsModalContainer = ({
         onUploadClick={onUploadClick}
         isUploadModalOpened={isUploadModalOpened}
         siteId={currentSiteId}
-        isSiteReadOnly={isSiteReadOnly}
         documentsRootUri={currentDocumentsRootUri}
         value={documentVersionsModalValue}
       />
@@ -104,7 +101,6 @@ const DocumentActionsModalContainer = ({
         isOpened={documentWorkflowsModalOpened}
         onClose={onDocumentWorkflowsModalClose}
         siteId={currentSiteId}
-        isSiteReadOnly={isSiteReadOnly}
         documentsRootUri={currentDocumentsRootUri}
         value={documentWorkflowsModalValue}
       />

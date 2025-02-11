@@ -22,6 +22,7 @@ import {
   isTagValueIncludes,
 } from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import {
   Checkmark,
@@ -38,13 +39,11 @@ import {
 import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentTagsPopover from '../DocumentTagsPopover/documentTagsPopover';
-import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 
 function DocumentListLine({
   file,
   folder,
   siteId,
-  isSiteReadOnly,
   documentsRootUri,
   onRestoreClick,
   onDocumentDataChange,
@@ -62,7 +61,6 @@ function DocumentListLine({
   file: any;
   folder: any;
   siteId: string;
-  isSiteReadOnly: boolean;
   documentsRootUri: string;
   searchDocuments: any;
   onRestoreClick: any;
@@ -119,7 +117,7 @@ function DocumentListLine({
         opacity: monitor.isDragging() ? 0.4 : 1,
         isDragging: monitor.isDragging(),
       }),
-      canDrag: !isSiteReadOnly,
+      canDrag: !isReadOnlyUser,
     }),
     [file]
   );
@@ -429,7 +427,7 @@ function DocumentListLine({
                     ) > -1 ||
                       InlineEditableContentTypes.indexOf(file.contentType) >
                         -1) &&
-                      !isSiteReadOnly && (
+                      !isReadOnlyUser && (
                         <Link
                           title="Edit Document"
                           to={`${documentsRootUri}/${file.documentId}/edit`}
@@ -493,7 +491,6 @@ function DocumentListLine({
                         }}
                         onDocumentDataChange={onDocumentDataChange}
                         siteId={siteId}
-                        isSiteReadOnly={isSiteReadOnly}
                         tagColors={tagColors}
                       />
                     </div>
@@ -546,7 +543,7 @@ function DocumentListLine({
                 <Info />
               </Link>
             )}
-            {folder !== 'deleted' && !isSiteReadOnly && (
+            {folder !== 'deleted' && !isReadOnlyUser && (
               <div
                 onClick={toggleFavorite}
                 className="w-5 text-neutral-900  mr-4 cursor-pointer px-2 box-content hover:text-primary-500"
@@ -614,7 +611,7 @@ function DocumentListLine({
                     <Share />
                   </div>
                 )}
-                {(!file?.deepLinkPath || file.deepLinkPath.length === 0) && (
+                {!file?.deepLinkPath || file.deepLinkPath.length === 0 ? (
                   <button
                     title="Download"
                     onClick={() => downloadDocument(file.documentId)}
@@ -622,8 +619,10 @@ function DocumentListLine({
                   >
                     <Download />
                   </button>
+                ) : (
+                  <span className="w-7"></span>
                 )}
-                {!isSiteReadOnly && (
+                {!isReadOnlyUser && (
                   <>
                     <div
                       className="w-4 pt-0.5 h-auto text-neutral-900 mr-3 cursor-pointer hover:text-primary-500"
@@ -651,7 +650,6 @@ function DocumentListLine({
                       documentInstance: file,
                     }}
                     siteId={siteId}
-                    isSiteReadOnly={isSiteReadOnly}
                     formkiqVersion={formkiqVersion}
                     useIndividualSharing={useIndividualSharing}
                     useCollections={useCollections}

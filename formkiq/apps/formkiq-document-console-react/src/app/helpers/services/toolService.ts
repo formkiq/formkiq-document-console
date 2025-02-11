@@ -154,7 +154,6 @@ export interface ICurrentSiteInfo {
   siteRedirectUrl: string;
   siteDocumentsRootUri: string;
   siteDocumentsRootName: string;
-  isSiteReadOnly: boolean;
 }
 
 export function getCurrentSiteInfo(
@@ -170,7 +169,6 @@ export function getCurrentSiteInfo(
     siteRedirectUrl: '',
     siteDocumentsRootUri: '/documents',
     siteDocumentsRootName: 'Documents',
-    isSiteReadOnly: false,
   };
   if (hasUserSite && pathname.indexOf('/documents') === 0) {
     currentSiteInfo.siteId = user.email;
@@ -472,16 +470,6 @@ export function getCurrentSiteInfo(
         return;
       });
     }
-    user.sites.forEach((site: any) => {
-      if (site.siteId === currentSiteInfo.siteId) {
-        if (site.permission && site.permission === 'READ_ONLY') {
-          currentSiteInfo.isSiteReadOnly = true;
-        } else {
-          currentSiteInfo.isSiteReadOnly = false;
-        }
-        return;
-      }
-    });
   }
   return currentSiteInfo;
 }

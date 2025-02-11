@@ -1,7 +1,11 @@
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition, TransitionChild } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { ILine } from '../../../helpers/types/line';
+import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
 import { fetchDocumentAttributes } from '../../../Store/reducers/attributes';
+import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../../Store/reducers/globalConfirmControls';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import {
@@ -9,8 +13,6 @@ import {
   SchemasState,
 } from '../../../Store/reducers/schemas';
 import { useAppDispatch } from '../../../Store/store';
-import { DocumentsService } from '../../../helpers/services/documentsService';
-import { ILine } from '../../../helpers/types/line';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import { CopyButton } from '../../Generic/Buttons/CopyButton';
@@ -39,6 +41,8 @@ export default function DocumentClassificationsModal({
 }) {
   const dispatch = useAppDispatch();
   const { classifications } = useSelector(SchemasState);
+  const { user } = useAuthenticatedState();
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   const approveButtonRef = useRef<HTMLButtonElement>(null);
   const [classificationId, setClassificationId] = useState('');
@@ -328,14 +332,14 @@ export default function DocumentClassificationsModal({
   }
 
   return (
-    <Transition.Root show={isOpened} as={Fragment}>
+    <Transition show={isOpened} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-20"
         initialFocus={approveButtonRef}
         onClose={onClose}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -345,11 +349,11 @@ export default function DocumentClassificationsModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-50 transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 z-20 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -372,24 +376,26 @@ export default function DocumentClassificationsModal({
                     </div>
                   </div>
 
-                  <div className="flex gap-2 my-4 px-4 flex-col xl:w-1/2">
-                    <div className="flex gap-2 w-full h-8">
-                      <RadioListbox
-                        values={classifications.map(
-                          (classification) => classification.classificationId
-                        )}
-                        titles={classifications.map(
-                          (classification) => classification.name
-                        )}
-                        selectedValue={classificationId}
-                        setSelectedValue={setClassificationId}
-                        placeholderText="Select Classification Schema"
-                      />
-                      <ButtonPrimaryGradient onClick={addClassification}>
-                        {documentClassifications?.length ? 'SWITCH' : '+ADD'}
-                      </ButtonPrimaryGradient>
+                  {!isReadOnlyUser && (
+                    <div className="flex gap-2 my-4 px-4 flex-col xl:w-1/2">
+                      <div className="flex gap-2 w-full h-8">
+                        <RadioListbox
+                          values={classifications.map(
+                            (classification) => classification.classificationId
+                          )}
+                          titles={classifications.map(
+                            (classification) => classification.name
+                          )}
+                          selectedValue={classificationId}
+                          setSelectedValue={setClassificationId}
+                          placeholderText="Select Classification Schema"
+                        />
+                        <ButtonPrimaryGradient onClick={addClassification}>
+                          {documentClassifications?.length ? 'SWITCH' : '+ADD'}
+                        </ButtonPrimaryGradient>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {documentClassifications.length > 0 ? (
                     <div className="overflow-y-auto overflow-x-visible max-h-64 h-64 px-4 my-4">
@@ -472,42 +478,46 @@ export default function DocumentClassificationsModal({
                                   )}
                                 </td>
                                 <td className="p-4 text-end w-52">
-                                  {classification.isEdit ? (
+                                  {!isReadOnlyUser && (
                                     <>
-                                      <ButtonPrimaryGradient
-                                        onClick={() =>
-                                          saveEditedClassification(index)
-                                        }
-                                      >
-                                        Save
-                                      </ButtonPrimaryGradient>
-                                      <ButtonGhost
-                                        className="ml-2"
-                                        onClick={resetClassifications}
-                                      >
-                                        Cancel
-                                      </ButtonGhost>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <button
-                                        className="w-4 h-4 hover:text-primary-500 mr-2"
-                                        type="button"
-                                        onClick={() =>
-                                          handleEditClassification(index)
-                                        }
-                                      >
-                                        <Pencil />
-                                      </button>
-                                      <button
-                                        className="w-4 h-4 hover:text-primary-500 mr-2"
-                                        type="button"
-                                        onClick={() =>
-                                          deleteClassification(index)
-                                        }
-                                      >
-                                        <Trash />
-                                      </button>
+                                      {classification.isEdit ? (
+                                        <>
+                                          <ButtonPrimaryGradient
+                                            onClick={() =>
+                                              saveEditedClassification(index)
+                                            }
+                                          >
+                                            Save
+                                          </ButtonPrimaryGradient>
+                                          <ButtonGhost
+                                            className="ml-2"
+                                            onClick={resetClassifications}
+                                          >
+                                            Cancel
+                                          </ButtonGhost>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <button
+                                            className="w-4 h-4 hover:text-primary-500 mr-2"
+                                            type="button"
+                                            onClick={() =>
+                                              handleEditClassification(index)
+                                            }
+                                          >
+                                            <Pencil />
+                                          </button>
+                                          <button
+                                            className="w-4 h-4 hover:text-primary-500 mr-2"
+                                            type="button"
+                                            onClick={() =>
+                                              deleteClassification(index)
+                                            }
+                                          >
+                                            <Trash />
+                                          </button>
+                                        </>
+                                      )}
                                     </>
                                   )}
                                 </td>
@@ -534,10 +544,10 @@ export default function DocumentClassificationsModal({
                   </div>
                 </div>
               </Dialog.Panel>
-            </Transition.Child>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

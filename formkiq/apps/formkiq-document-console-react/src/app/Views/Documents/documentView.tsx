@@ -24,6 +24,7 @@ import {
   getUserSites,
 } from '../../helpers/services/toolService';
 import { IDocument } from '../../helpers/types/document';
+import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 
 interface CSVRow {
   [key: string]: string;
@@ -89,6 +90,7 @@ export function DocumentView() {
     );
   }
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
+  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
     useState(siteDocumentsRootUri);
   const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
@@ -376,9 +378,8 @@ export function DocumentView() {
     setCurrentSiteId(recheckSiteInfo.siteId);
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
-    setIsCurrentSiteReadonly(recheckSiteInfo.isSiteReadOnly);
     setMode(getModeFromPath());
-    if (recheckSiteInfo.isSiteReadOnly && getModeFromPath() === 'edit') {
+    if (!isReadOnlyUser && getModeFromPath() === 'edit') {
       navigate(pathname.replace(/\/edit$/, '/view'));
     }
   }, [pathname]);
