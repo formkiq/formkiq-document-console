@@ -1,4 +1,4 @@
-export const OnlyOfficeContentTypes: string[] = [
+export const MsOfficeContentTypes: string[] = [
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
@@ -15,7 +15,7 @@ export const OnlyOfficeContentTypes: string[] = [
   'application/vnd.oasis.opendocument.presentation',
 ];
 
-export const OnlyOfficeNewFileExtensions: string[] = ['docx', 'xlsx', 'pptx'];
+export const MsOfficeNewFileExtensions: string[] = [];
 
 export const InlineViewableContentTypes: string[] = [
   'application/json',

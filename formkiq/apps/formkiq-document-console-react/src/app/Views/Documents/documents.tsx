@@ -23,7 +23,6 @@ import {
   ChevronRight,
   Close,
   Download,
-  Edit,
   FolderOutline,
   HistoryIcon,
   Pencil,
@@ -62,7 +61,7 @@ import { useAppDispatch } from '../../Store/store';
 import {
   InlineEditableContentTypes,
   InlineViewableContentTypes,
-  OnlyOfficeContentTypes,
+  MsOfficeContentTypes,
   TextFileEditorEditableContentTypes,
   TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
@@ -2343,10 +2342,9 @@ function Documents() {
                         TextFileEditorViewableContentTypes.indexOf(
                           (currentDocument as IDocument).contentType
                         ) > -1 ||
-                        (formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
-                          OnlyOfficeContentTypes.indexOf(
-                            (currentDocument as IDocument).contentType
-                          ) > -1) ||
+                        MsOfficeContentTypes.indexOf(
+                          (currentDocument as IDocument).contentType
+                        ) > -1 ||
                         ((currentDocument as IDocument).deepLinkPath !==
                           undefined &&
                           ((currentDocument as IDocument).deepLinkPath
@@ -2699,19 +2697,6 @@ function Documents() {
                   <div className="hidden overflow-x-auto relative">
                     <div className="-mr-[4.625rem] p-4 text-[0.8125rem] leading-6 text-slate-900">
                       <div className="flex gap-4 pb-10 border-t border-slate-400/20 justify-center items-center py-6">
-                        {document &&
-                          formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
-                          OnlyOfficeContentTypes.indexOf(
-                            (currentDocument as IDocument).contentType
-                          ) > -1 && (
-                            <button
-                              className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                              onClick={viewDocument}
-                            >
-                              <span className="">Edit</span>
-                              <span className="pl-4 pt-1 w-8">{Edit()}</span>
-                            </button>
-                          )}
                         {document &&
                           InlineViewableContentTypes.indexOf(
                             (currentDocument as IDocument).contentType

@@ -14,7 +14,7 @@ import { useAppDispatch } from '../../Store/store';
 import {
   InlineEditableContentTypes,
   InlineViewableContentTypes,
-  OnlyOfficeContentTypes,
+  MsOfficeContentTypes,
   TextFileEditorEditableContentTypes,
   TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
@@ -181,13 +181,6 @@ export function DocumentView() {
 
   useEffect(() => {
     if (id) {
-      let ooConfig: any;
-      const handleScript = (e: any) => {
-        if (e.type === 'load') {
-          const script = window.document.querySelector(`script[id="ooScript"]`);
-          (window as any).DocsAPI.DocEditor('onlyofficeContainer', ooConfig);
-        }
-      };
       DocumentsService.getDocumentById(id, currentSiteId).then(
         (response: IDocument) => {
           setViewDocument(response);
@@ -201,28 +194,13 @@ export function DocumentView() {
             navigate(pathname.replace(/\/edit$/, '/view'));
           }
 
-          if (OnlyOfficeContentTypes.indexOf(response.contentType) > -1) {
+          if (MsOfficeContentTypes.indexOf(response.contentType) > -1) {
             DocumentsService.getDocumentUrl(id, siteId, '', false).then(
               (urlResponse: any) => {
                 setDocumentContent(urlResponse.url);
                 setOfficeDoc(true);
               }
             );
-            // DocumentsService.editDocumentWithOnlyoffice(id, currentSiteId).then(
-            //   (onlyofficeResponse: any) => {
-            //     setOOConfig(onlyofficeResponse.config);
-            //     ooConfig = onlyofficeResponse.config;
-            //     const script = window.document.createElement('script');
-            //     (script as HTMLScriptElement).type = 'application/javascript';
-            //     (script as HTMLScriptElement).id = 'ooScript';
-            //     (script as HTMLScriptElement).src =
-            //       onlyofficeResponse.onlyOfficeUrl +
-            //       '/web-apps/apps/api/documents/api.js';
-            //     (script as HTMLScriptElement).async = false;
-            //     window.document.body.appendChild(script);
-            //     script.addEventListener('load', handleScript);
-            //   }
-            // );
           } else if (
             InlineViewableContentTypes.indexOf(response.contentType) > -1
           ) {
@@ -362,7 +340,6 @@ export function DocumentView() {
   }, [pathname]);
 
   const [viewDocument, setViewDocument] = useState<IDocument | null>(null);
-  const [ooConfig, setOOConfig] = useState<any | null>(null);
   const [documentContent, setDocumentContent] = useState<string | null>('');
   const [documentCsvContent, setDocumentCsvContent] = useState<CSVRow[]>([]);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
@@ -490,7 +467,7 @@ export function DocumentView() {
       {viewDocument && (
         <div className="flex flex-col lg:flex-row">
           <div className="h-92/100h flex-1 bg-white inline-block">
-            {documentContent !== undefined || ooConfig ? (
+            {documentContent !== undefined ? (
               <>
                 {documentContent && officeDoc ? (
                   <div className="relative w-full h-full">
@@ -510,14 +487,6 @@ export function DocumentView() {
                 ) : (
                   <div className="w-full h-full">
                     <DocumentViewer />
-                  </div>
-                )}
-                {ooConfig && (
-                  <div className="relative w-full h-full mt-3">
-                    <div
-                      className="w-full h-full"
-                      id="onlyofficeContainer"
-                    ></div>
                   </div>
                 )}
               </>
