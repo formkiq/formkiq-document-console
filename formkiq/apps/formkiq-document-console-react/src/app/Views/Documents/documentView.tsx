@@ -98,6 +98,8 @@ export function DocumentView() {
   );
   const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
     useState<boolean>(true);
+  const [officeDoc, setOfficeDoc] = useState(false);
+  const [iframeLoading, setIframeLoading] = useState(true);
 
   const [mode, setMode] = useState(getModeFromPath());
   const isDocumentContentTypeEditable = (contentType: string) =>
@@ -198,25 +200,29 @@ export function DocumentView() {
           ) {
             navigate(pathname.replace(/\/edit$/, '/view'));
           }
-          if (
-            formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
-            OnlyOfficeContentTypes.indexOf(response.contentType) > -1
-          ) {
-            DocumentsService.editDocumentWithOnlyoffice(id, currentSiteId).then(
-              (onlyofficeResponse: any) => {
-                setOOConfig(onlyofficeResponse.config);
-                ooConfig = onlyofficeResponse.config;
-                const script = window.document.createElement('script');
-                (script as HTMLScriptElement).type = 'application/javascript';
-                (script as HTMLScriptElement).id = 'ooScript';
-                (script as HTMLScriptElement).src =
-                  onlyofficeResponse.onlyOfficeUrl +
-                  '/web-apps/apps/api/documents/api.js';
-                (script as HTMLScriptElement).async = false;
-                window.document.body.appendChild(script);
-                script.addEventListener('load', handleScript);
+
+          if (OnlyOfficeContentTypes.indexOf(response.contentType) > -1) {
+            DocumentsService.getDocumentUrl(id, siteId, '', false).then(
+              (urlResponse: any) => {
+                setDocumentContent(urlResponse.url);
+                setOfficeDoc(true);
               }
             );
+            // DocumentsService.editDocumentWithOnlyoffice(id, currentSiteId).then(
+            //   (onlyofficeResponse: any) => {
+            //     setOOConfig(onlyofficeResponse.config);
+            //     ooConfig = onlyofficeResponse.config;
+            //     const script = window.document.createElement('script');
+            //     (script as HTMLScriptElement).type = 'application/javascript';
+            //     (script as HTMLScriptElement).id = 'ooScript';
+            //     (script as HTMLScriptElement).src =
+            //       onlyofficeResponse.onlyOfficeUrl +
+            //       '/web-apps/apps/api/documents/api.js';
+            //     (script as HTMLScriptElement).async = false;
+            //     window.document.body.appendChild(script);
+            //     script.addEventListener('load', handleScript);
+            //   }
+            // );
           } else if (
             InlineViewableContentTypes.indexOf(response.contentType) > -1
           ) {
@@ -323,35 +329,6 @@ export function DocumentView() {
                 setDocumentContent(res.content);
               }
             });
-          } else {
-            const viewVersionKey =
-              versionKey && versionKey.length ? versionKey : '';
-            DocumentsService.getDocumentUrl(
-              id,
-              currentSiteId,
-              viewVersionKey,
-              false
-            ).then((urlResponse: any) => {
-              const a = window.document.createElement('a');
-              a.style.display = 'none';
-              a.href = urlResponse.url;
-              a.download = response.path.substring(
-                response.path.lastIndexOf('/') + 1
-              );
-              window.document.body.appendChild(a);
-              a.click();
-              a.remove();
-              window.URL.revokeObjectURL(urlResponse.url);
-              const url =
-                currentDocumentsRootUri +
-                '/folders/' +
-                response.path.substring(0, response.path.lastIndexOf('/')) +
-                '#id=' +
-                id;
-              setTimeout(() => {
-                navigate(url);
-              }, 200);
-            });
           }
         }
       );
@@ -389,6 +366,12 @@ export function DocumentView() {
   const [documentContent, setDocumentContent] = useState<string | null>('');
   const [documentCsvContent, setDocumentCsvContent] = useState<CSVRow[]>([]);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  const getViewerUrl = (url: string) => {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(
+      url
+    )}&embedded=true&ui=1`;
+  };
 
   // Cleanup for blob URLs
   useEffect(() => {
@@ -502,12 +485,28 @@ export function DocumentView() {
       <Helmet>
         <title>Document</title>
       </Helmet>
+
       {viewDocument && (
         <div className="flex flex-col lg:flex-row">
-          <div className="-mt-3 h-92/100h flex-1 bg-white inline-block">
+          <div className="h-92/100h flex-1 bg-white inline-block">
             {documentContent !== undefined || ooConfig ? (
               <>
-                {documentContent !== undefined && (
+                {documentContent && officeDoc ? (
+                  <div className="relative w-full h-full">
+                    {iframeLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white">
+                        <Spinner />
+                      </div>
+                    )}
+                    <iframe
+                      title="Document Viewer"
+                      className="w-full h-full"
+                      style={{ backgroundColor: 'white' }}
+                      src={getViewerUrl(documentContent)}
+                      onLoad={() => setIframeLoading(false)}
+                    />
+                  </div>
+                ) : (
                   <div className="w-full h-full">
                     <DocumentViewer />
                   </div>
