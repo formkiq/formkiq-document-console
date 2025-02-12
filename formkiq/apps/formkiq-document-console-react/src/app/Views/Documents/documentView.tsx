@@ -414,7 +414,8 @@ export function DocumentView() {
         {/* CSV Viewer */}
         {viewDocument &&
           viewDocument.contentType === 'text/csv' &&
-          documentCsvContent !== undefined && (
+          documentCsvContent !== undefined &&
+          documentCsvContent[0] && (
             <div className="mt-5 h-[calc(100vh-120px)] overflow-auto shadow-md sm:rounded-lg">
               <div className="inline-block min-w-full align-middle">
                 <div className="overflow-hidden">
