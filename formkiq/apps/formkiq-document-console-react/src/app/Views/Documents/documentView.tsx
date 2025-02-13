@@ -98,6 +98,7 @@ export function DocumentView() {
   );
   const [officeDoc, setOfficeDoc] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
+  const [downloadOnly, setDownloadOnly] = useState(false);
 
   const [mode, setMode] = useState(getModeFromPath());
   const isDocumentContentTypeEditable = (contentType: string) =>
@@ -403,6 +404,7 @@ export function DocumentView() {
         return;
       }
 
+      // ONLY S3 PROTOCOL DEEP LINKS
       try {
         const urlResponse = await DocumentsService.getDocumentUrl(
           id ?? '',
@@ -412,7 +414,7 @@ export function DocumentView() {
         );
 
         // If we don't have a content type, try to detect it
-        if (!document.contentType) {
+        if (!document.contentType || document.contentType === 'text/html') {
           // First try to get it from the URL's content-disposition
           const filename = extractFilenameFromUrl(urlResponse.url);
           if (filename) {
@@ -447,21 +449,26 @@ export function DocumentView() {
                 setBlobUrl(blobUrl);
                 setDocumentContent(blobUrl);
                 return;
+              } else if (
+                MsOfficeContentTypes.indexOf(contentType) > -1 ||
+                contentType === 'application/pdf'
+              ) {
+                setOfficeDoc(true);
+              } else if (document.contentType.startsWith('text/')) {
+                // Handle text files that already have a content type
+                const response = await fetch(urlResponse.url);
+                const text = await response.text();
+                const processedContent = handleTextContent(text);
+                const blob = new Blob([processedContent], {
+                  type: `${document.contentType};charset=utf-8`,
+                });
+                const blobUrl = URL.createObjectURL(blob);
+                setBlobUrl(blobUrl);
+                setDocumentContent(blobUrl);
+                return;
               }
             }
           }
-        } else if (document.contentType.startsWith('text/')) {
-          // Handle text files that already have a content type
-          const response = await fetch(urlResponse.url);
-          const text = await response.text();
-          const processedContent = handleTextContent(text);
-          const blob = new Blob([processedContent], {
-            type: `${document.contentType};charset=utf-8`,
-          });
-          const blobUrl = URL.createObjectURL(blob);
-          setBlobUrl(blobUrl);
-          setDocumentContent(blobUrl);
-          return;
         }
 
         setDocumentContent(urlResponse.url);
@@ -484,88 +491,130 @@ export function DocumentView() {
     const isImageFromUrl =
       documentContent && /\.(png|jpe?g|gif|bmp)(\?|$)/i.test(documentContent);
 
+    if (viewDocument?.contentType) {
+      if (
+        viewDocument.contentType === 'text/csv' &&
+        viewDocument.deepLinkPath &&
+        viewDocument.deepLinkPath.length > 0
+      ) {
+        setOfficeDoc(true);
+      }
+    }
+
     return (
-      <div className="w-full h-full">
-        {viewDocument &&
-          (InlineViewableContentTypes.indexOf(viewDocument.contentType) > -1 ||
-            (viewDocument.deepLinkPath &&
-              viewDocument.deepLinkPath.length > 0)) && (
-            <>
-              {documentContent &&
-              (viewDocument.contentType?.startsWith('image/') ||
-                isImageFromUrl) ? (
-                <img
-                  src={documentContent}
-                  alt="Document"
-                  className="mt-4 w-auto h-auto max-w-[95%] mx-auto object-contain"
-                />
-              ) : officeDoc ? (
-                <div className="relative w-full h-full">
-                  {iframeLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white">
-                      <Spinner />
-                    </div>
-                  )}
-                  <iframe
-                    title="Document Viewer"
-                    className="w-full h-full"
-                    style={{ backgroundColor: 'white' }}
-                    src={getViewerUrl(documentContent || '')}
-                    onLoad={() => setIframeLoading(false)}
+      <>
+        {console.log(viewDocument?.contentType)}
+        <div className="w-full h-full">
+          {viewDocument &&
+            (InlineViewableContentTypes.indexOf(viewDocument.contentType) >
+              -1 ||
+              (viewDocument.deepLinkPath &&
+                viewDocument.deepLinkPath.length > 0)) && (
+              <>
+                {documentContent &&
+                (viewDocument.contentType?.startsWith('image/') ||
+                  isImageFromUrl) ? (
+                  <img
+                    src={documentContent}
+                    alt="Document"
+                    className="mt-4 w-auto h-auto max-w-[95%] mx-auto object-contain"
                   />
+                ) : officeDoc ? (
+                  <div className="relative w-full h-full">
+                    {iframeLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white">
+                        <Spinner />
+                      </div>
+                    )}
+                    <iframe
+                      title="Document Viewer"
+                      className="w-full h-full"
+                      style={{ backgroundColor: 'white' }}
+                      src={getViewerUrl(documentContent || '')}
+                      onLoad={() => setIframeLoading(false)}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <iframe
+                      title="Document Viewer"
+                      className="mt-4 w-full h-full"
+                      src={documentContent || undefined}
+                    />
+                  </>
+                )}
+              </>
+            )}
+
+          <>
+            {/* CSV Viewer - unchanged */}
+            {viewDocument &&
+              viewDocument.contentType === 'text/csv' &&
+              documentCsvContent !== undefined &&
+              documentCsvContent[0] && (
+                <div className="mt-5 h-[calc(100vh-120px)] overflow-auto shadow-md sm:rounded-lg">
+                  <div className="inline-block min-w-full align-middle">
+                    <div className="overflow-hidden">
+                      <table className="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-700">
+                        <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
+                          <tr>
+                            {Object.keys(documentCsvContent[0]).map(
+                              (header, index) => (
+                                <th
+                                  key={index}
+                                  scope="col"
+                                  className="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
+                                >
+                                  {header}
+                                </th>
+                              )
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                          {documentCsvContent.map((row, rowIndex) => (
+                            <tr
+                              key={rowIndex}
+                              className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              {Object.values(row).map((cell, cellIndex) => (
+                                <td
+                                  key={cellIndex}
+                                  className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                >
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <iframe
-                  title="Document Viewer"
-                  className="mt-4 w-full h-full"
-                  src={documentContent || undefined}
+              )}
+
+            {/* Text File Editor */}
+            {viewDocument &&
+              TextFileEditorViewableContentTypes.indexOf(
+                viewDocument.contentType
+              ) > -1 &&
+              documentContent !== undefined && (
+                <TextFileEditor
+                  currentDocument={viewDocument}
+                  documentContent={documentContent}
+                  contentType={viewDocument.contentType}
+                  siteId={currentSiteId}
+                  readOnly={
+                    TextFileEditorEditableContentTypes.indexOf(
+                      viewDocument.contentType
+                    ) === -1 || mode === 'view'
+                  }
                 />
               )}
-            </>
-          )}
-
-        <>
-          {/* CSV Viewer - unchanged */}
-          {viewDocument &&
-            viewDocument.contentType === 'text/csv' &&
-            documentCsvContent !== undefined &&
-            documentCsvContent[0] && (
-              <div className="mt-5 h-[calc(100vh-120px)] overflow-auto shadow-md sm:rounded-lg">
-                {/* ... existing CSV viewer code ... */}
-              </div>
-            )}
-
-          {/* Text File Editor */}
-          {console.log('TextFileEditor conditions:', {
-            hasDocument: !!viewDocument,
-            contentType: viewDocument?.contentType,
-            isViewable: viewDocument
-              ? TextFileEditorViewableContentTypes.indexOf(
-                  viewDocument.contentType
-                ) > -1
-              : false,
-            hasContent: documentContent !== undefined,
-            documentContent,
-          })}
-          {viewDocument &&
-            TextFileEditorViewableContentTypes.indexOf(
-              viewDocument.contentType
-            ) > -1 &&
-            documentContent !== undefined && (
-              <TextFileEditor
-                currentDocument={viewDocument}
-                documentContent={documentContent}
-                contentType={viewDocument.contentType}
-                siteId={currentSiteId}
-                readOnly={
-                  TextFileEditorEditableContentTypes.indexOf(
-                    viewDocument.contentType
-                  ) === -1 || mode === 'view'
-                }
-              />
-            )}
-        </>
-      </div>
+          </>
+        </div>
+      </>
     );
   };
 
