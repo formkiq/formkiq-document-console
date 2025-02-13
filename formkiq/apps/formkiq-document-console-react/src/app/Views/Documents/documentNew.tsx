@@ -3,8 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Spinner } from '../../Components/Icons/icons';
 import { useAuthenticatedState } from '../../Store/reducers/auth';
-import { OnlyOfficeNewFileExtensions } from '../../helpers/constants/contentTypes';
-import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
@@ -51,40 +49,6 @@ export function DocumentNew() {
   );
 
   useEffect(() => {
-    if (extension) {
-      let ooConfig: any;
-      const handleScript = (e: any) => {
-        if (e.type === 'load') {
-          const script = window.document.querySelector(`script[id="ooScript"]`);
-          (window as any).DocsAPI.DocEditor('onlyofficeContainer', ooConfig);
-        }
-      };
-
-      if (OnlyOfficeNewFileExtensions.indexOf(extension) > -1) {
-        DocumentsService.createDocumentWithOnlyoffice(
-          extension,
-          path as string,
-          currentSiteId
-        ).then((onlyofficeResponse: any) => {
-          setOOConfig(onlyofficeResponse.config);
-          ooConfig = onlyofficeResponse.config;
-          // setOOConfig(onlyofficeResponse.config)
-          const script = window.document.createElement('script');
-          (script as HTMLScriptElement).type = 'application/javascript';
-          (script as HTMLScriptElement).id = 'ooScript';
-          (script as HTMLScriptElement).src =
-            onlyofficeResponse.onlyOfficeUrl +
-            '/web-apps/apps/api/documents/api.js';
-          (script as HTMLScriptElement).async = false;
-          window.document.body.appendChild(script);
-          script.addEventListener('load', handleScript);
-        });
-      }
-      // TODO: add other new file editors?
-    }
-  }, [extension]);
-
-  useEffect(() => {
     const recheckSiteInfo = getCurrentSiteInfo(
       pathname,
       user,
@@ -117,11 +81,7 @@ export function DocumentNew() {
       {document && (
         <div className="flex flex-col lg:flex-row">
           <div className="-mt-3 h-92/100h flex-1 bg-white inline-block">
-            {ooConfig ? (
-              <div className="w-full h-full" id="onlyofficeContainer"></div>
-            ) : (
-              <Spinner />
-            )}
+            <Spinner />
           </div>
         </div>
       )}

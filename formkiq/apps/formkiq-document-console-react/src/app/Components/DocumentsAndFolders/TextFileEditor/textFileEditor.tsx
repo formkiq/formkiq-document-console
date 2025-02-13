@@ -1,12 +1,15 @@
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+import { useEffect, useRef, useState } from 'react';
+import {
+  DocumentsService,
+  IFileUploadData,
+} from '../../../helpers/services/documentsService';
+import { openDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import MarkdownEditor from '../../TextEditors/MarkdownEditor';
-import {DocumentsService, IFileUploadData} from '../../../helpers/services/documentsService';
-import {marked} from 'marked';
-import {useEffect, useState} from "react";
-import "./markdown/markdown.css"
-import {useAppDispatch} from "../../../Store/store";
-import {openDialog} from "../../../Store/reducers/globalNotificationControls";
-import DOMPurify from 'dompurify';
+import './markdown/markdown.css';
 
 function TextFileEditor({
   currentDocument,
@@ -16,49 +19,55 @@ function TextFileEditor({
   readOnly = true,
 }: any) {
   const dispatch = useAppDispatch();
-  const [text, setText] = useState<string>('');
-  const [html, setHtml] = useState<any>(null);
-  let timeoutId: any;
-  const onTextChange = (value: string) => {
-    setText(value);
-    const reloadPreview = (value: string) => {
+  const [editorValue, setEditorValue] = useState(documentContent || '');
+  const [html, setHtml] = useState<string>('');
+  const previewTimeoutRef = useRef<NodeJS.Timeout>();
+
+  useEffect(() => {
+    if (documentContent) {
+      setEditorValue(documentContent);
       if (contentType === 'text/markdown') {
-        const parsedHtml = marked.parse(value);
+        const parsedHtml = marked.parse(documentContent);
         const sanitizedHtml = DOMPurify.sanitize(parsedHtml as string, {
           USE_PROFILES: { html: true },
         });
         setHtml(sanitizedHtml);
       }
-    };
-    // wait 0.5 second after user finishes typing before refreshing the preview to avoid preview flickering
-    if (timeoutId) {
-      clearTimeout(timeoutId);
     }
-    timeoutId = setTimeout(() => {
-      reloadPreview(value);
-    }, 500);
+  }, [documentContent, contentType]);
 
-    return () => clearTimeout(timeoutId);
+  const onTextChange = (value: string) => {
+    setEditorValue(value);
+
+    if (contentType === 'text/markdown') {
+      if (previewTimeoutRef.current) {
+        clearTimeout(previewTimeoutRef.current);
+      }
+
+      previewTimeoutRef.current = setTimeout(() => {
+        const parsedHtml = marked.parse(value);
+        const sanitizedHtml = DOMPurify.sanitize(parsedHtml as string, {
+          USE_PROFILES: { html: true },
+        });
+        setHtml(sanitizedHtml);
+      }, 500);
+    }
   };
 
-  useEffect(() => {
-    onTextChange(documentContent);
-  }, []);
-
   const onSaveChanges = () => {
-    // convert text to file
     const encoder = new TextEncoder();
-    const newText = encoder.encode(text);
+    const newText = encoder.encode(editorValue);
     const file = new File([newText], currentDocument.path, {
       type: currentDocument.contentType,
     });
-    // upload new document version
+
     const uploadData: IFileUploadData[] = [
       {
         originalFile: file,
         uploadedSize: 0,
       },
     ];
+
     DocumentsService.uploadNewDocumentVersions(
       currentDocument.documentId,
       siteId,
@@ -81,6 +90,7 @@ function TextFileEditor({
       }
     });
   };
+
   return (
     <div className="w-full h-full mt-3">
       {!readOnly && (
@@ -90,7 +100,7 @@ function TextFileEditor({
           </ButtonPrimary>
         </div>
       )}
-      {contentType === 'text/markdown' && (
+      {contentType === 'text/markdown' ? (
         <div
           className="w-full max-w-full flex"
           style={{ height: 'calc(100% - 56px)', maxWidth: '100%' }}
@@ -101,21 +111,37 @@ function TextFileEditor({
               style={{ maxWidth: '50vw' }}
             >
               <MarkdownEditor
-                content={documentContent}
+                content={editorValue}
                 onChange={onTextChange}
-                readOnly={readOnly}
+                readOnly={false}
               />
             </div>
           )}
           <div
-            className="w-1/2 max-h-full overflow-auto "
-            style={{ maxWidth: '50vw' }}
+            className={`${
+              !readOnly ? 'w-1/2' : 'w-full'
+            } max-h-full overflow-auto`}
+            style={{ maxWidth: !readOnly ? '50vw' : '100%' }}
           >
             <div
               className="max-w-full max-h-full use-markdown"
               dangerouslySetInnerHTML={{ __html: html }}
-            ></div>
+            />
           </div>
+        </div>
+      ) : (
+        <div className="w-full h-full" style={{ height: 'calc(100% - 56px)' }}>
+          {!readOnly ? (
+            <MarkdownEditor
+              content={editorValue}
+              onChange={onTextChange}
+              readOnly={false}
+            />
+          ) : (
+            <div className="w-full h-full overflow-auto p-4 whitespace-pre-wrap">
+              {editorValue}
+            </div>
+          )}
         </div>
       )}
     </div>

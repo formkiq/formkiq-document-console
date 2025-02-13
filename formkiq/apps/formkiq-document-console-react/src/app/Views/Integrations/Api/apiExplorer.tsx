@@ -144,9 +144,6 @@ import {
   postGroupUserApiItem,
   postMappingApiItem,
   postNigoApiItem,
-  postOnlyofficeEditApiItem,
-  postOnlyofficeNewApiItem,
-  postOnlyofficeSaveApiItem,
   postPrivateWebhooksApiItem,
   postPublicWebhooksApiItem,
   postQueuesApiItem,
@@ -635,16 +632,6 @@ export function ApiExplorer() {
                 <ApiItem apiItem={getMappingApiItem} sites={sites} />
                 <ApiItem apiItem={putMappingApiItem} sites={sites} />
                 <ApiItem apiItem={deleteMappingApiItem} sites={sites} />
-              </div>
-            </div>
-          </ApiSegment>
-          <ApiSegment title="Onlyoffice">
-            <div className="ml-2 mb-4 flex flex-cols">
-              <div className="w-4 border-l"></div>
-              <div className="grow">
-                <ApiItem apiItem={postOnlyofficeEditApiItem} sites={sites} />
-                <ApiItem apiItem={postOnlyofficeNewApiItem} sites={sites} />
-                <ApiItem apiItem={postOnlyofficeSaveApiItem} sites={sites} />
               </div>
             </div>
           </ApiSegment>

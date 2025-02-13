@@ -835,7 +835,7 @@ function Navbar() {
                               </div>
                             )}
                           </div>
-                          <div className="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
+                          <div className="font-bold flex items-center text-lg text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 ">
                             {pathname.indexOf('documents/queues/') > 0 ? (
                               <>
                                 {pathname.indexOf(
@@ -856,12 +856,14 @@ function Navbar() {
                                   ) === -1 && <span>Queue</span>}
                               </>
                             ) : (
-                              <>{siteDocumentsRootName}</>
+                              <span>{siteDocumentsRootName}</span>
                             )}
                             {documentId && currentDocumentPath?.length ? (
-                              <span>
+                              <div className="flex items-center justify-center">
                                 <span className="px-2">|</span>
-                                {currentDocumentPath}
+                                <span className="truncate block max-w-52">
+                                  {currentDocumentPath}
+                                </span>
                                 <span className="px-2"></span>
                                 {hasInProgressWorkflow ? (
                                   <>
@@ -979,7 +981,7 @@ function Navbar() {
                                 {documentId &&
                                   currentDocumentPath?.length &&
                                   currentDocument && (
-                                    <div className="w-5 h-5 text-neutral-900 inline-flex mx-2 pt-2 items-end">
+                                    <div className="text-neutral-900 inline-flex mx-2 pt-2 items-end">
                                       <DocumentActionsPopover
                                         user={user}
                                         value={{
@@ -1013,7 +1015,7 @@ function Navbar() {
                                       />
                                     </div>
                                   )}
-                              </span>
+                              </div>
                             ) : (
                               <span></span>
                             )}

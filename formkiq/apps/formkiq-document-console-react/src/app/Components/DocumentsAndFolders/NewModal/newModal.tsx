@@ -354,86 +354,27 @@ export default function NewModal({
                         Add a Deeplink Document
                       </div>
                     </div>
-                    {formkiqVersion.modules?.indexOf('onlyoffice') > -1 && (
-                      <>
-                        <div
-                          className={`${
-                            itemToCreate === 'docx'
-                              ? 'bg-gray-100 font-semibold border-gray-600'
-                              : 'cursor-pointer hover:bg-gray-100'
-                          } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
-                          onClick={(event) => onNewDocumentClick(event, 'docx')}
-                        >
-                          <div className="w-full h-16 my-3 flex justify-center">
-                            <img
-                              src="/assets/img/svg/icon-docx.svg"
-                              className="w-16"
-                              alt="docx icon"
-                            />
-                          </div>
-                          <div className="w-full text-sm text-center mb-2">
-                            MS Word Document
-                          </div>
-                        </div>
-                        <div
-                          className={`${
-                            itemToCreate === 'xlsx'
-                              ? 'bg-gray-100 font-semibold border-gray-600'
-                              : 'cursor-pointer hover:bg-gray-100'
-                          } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
-                          onClick={(event) => onNewDocumentClick(event, 'xlsx')}
-                        >
-                          <div className="w-full h-16 my-3 flex justify-center">
-                            <img
-                              src="/assets/img/svg/icon-xlsx.svg"
-                              className="w-16"
-                              alt="xlsx icon"
-                            />
-                          </div>
-                          <div className="w-full text-sm text-center mb-2">
-                            MS Excel Document
-                          </div>
-                        </div>
-                        <div
-                          className={`${
-                            itemToCreate === 'pptx'
-                              ? 'bg-gray-100 font-semibold border-gray-600'
-                              : 'cursor-pointer hover:bg-gray-100'
-                          } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
-                          onClick={(event) => onNewDocumentClick(event, 'pptx')}
-                        >
-                          <div className="w-full h-16 my-3 flex justify-center">
-                            <img
-                              src="/assets/img/svg/icon-pptx.svg"
-                              className="w-16"
-                              alt="pptx icon"
-                            />
-                          </div>
-                          <div className="w-full tracking-normal text-sm text-center mb-2">
-                            MS PowerPoint Document
-                          </div>
-                        </div>
-                        <div
-                          className={`${
-                            itemToCreate === 'md'
-                              ? 'bg-gray-100 font-semibold border-gray-600'
-                              : 'cursor-pointer hover:bg-gray-100'
-                          } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
-                          onClick={(event) => onNewDocumentClick(event, 'md')}
-                        >
-                          <div className="w-full h-16 my-3 flex justify-center">
-                            <img
-                              src="/assets/img/svg/icon-md.svg"
-                              className="w-16"
-                              alt="md icon"
-                            />
-                          </div>
-                          <div className="w-full text-sm text-center mb-2">
-                            Markdown Document
-                          </div>
-                        </div>
-                      </>
-                    )}
+
+                    <div
+                      className={`${
+                        itemToCreate === 'md'
+                          ? 'bg-gray-100 font-semibold border-gray-600'
+                          : 'cursor-pointer hover:bg-gray-100'
+                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                      onClick={(event) => onNewDocumentClick(event, 'md')}
+                    >
+                      <div className="w-full h-16 my-3 flex justify-center">
+                        <img
+                          src="/assets/img/svg/icon-md.svg"
+                          className="w-16"
+                          alt="md icon"
+                        />
+                      </div>
+                      <div className="w-full text-sm text-center mb-2">
+                        Markdown Document
+                      </div>
+                    </div>
+
                     {formkiqVersion.type !== 'core' && (
                       <div
                         className={`${

@@ -39,17 +39,10 @@ export const EmptyDocumentsTable = ({
                   <h3 className="text-lg mb-4">
                     No documents or folders found
                   </h3>
-                  {formkiqVersion.modules?.indexOf('onlyoffice') > -1 ? (
-                    <p>
-                      You can create folders and documents or upload existing
-                      documents using the buttons above.
-                    </p>
-                  ) : (
-                    <p>
-                      You can create folders or upload existing documents using
-                      the buttons above.
-                    </p>
-                  )}
+                  <p>
+                    You can create and upload folders and documents using the
+                    buttons on the sidebar.
+                  </p>
                 </div>
               )}
             </>

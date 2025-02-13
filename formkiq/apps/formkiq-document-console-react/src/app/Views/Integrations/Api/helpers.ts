@@ -2206,43 +2206,6 @@ export const deleteSiteGroupPermissionsApiItem = {
   license: 'Core',
 };
 
-export const postOnlyofficeEditApiItem = {
-  method: 'POST',
-  path: '/onlyoffice/ DOCUMENT_ID /edit',
-  description: 'Provide ONLYOFFICE integration for editing documents',
-  username: 'Cognito User',
-  requiresAuthentication: true,
-  requiresDocumentID: true,
-  requiresSite: true,
-  requiresPostJson: true,
-  defaultPostJsonValue: '"string"',
-  license: 'Core',
-};
-
-export const postOnlyofficeNewApiItem = {
-  method: 'POST',
-  path: '/onlyoffice/new',
-  description:
-    'Provide ONLYOFFICE integration for the creation of new documents',
-  username: 'Cognito User',
-  requiresAuthentication: true,
-  requiresSite: true,
-  requiresPostJson: true,
-  defaultPostJsonValue: '{"extension": "DOCX"}',
-  license: 'Core',
-};
-
-export const postOnlyofficeSaveApiItem = {
-  method: 'POST',
-  path: '/onlyoffice/ DOCUMENT_ID /save',
-  description: 'Save an update document for ONLYOFFICE integration',
-  username: 'Cognito User',
-  requiresAuthentication: true,
-  requiresDocumentID: true,
-  requiresSite: true,
-  license: 'Core',
-};
-
 export const postEsignatureDocusignEnvelopeApiItem = {
   method: 'POST',
   path: '/esignature/docusign/ DOCUMENT_ID /envelopes',

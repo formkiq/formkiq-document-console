@@ -230,12 +230,14 @@ export default function DocumentActionsPopover({
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
-                  onMoveModalClick(event, [{
-                    lineType: line.lineType,
-                    documentId: line.documentId,
-                    documentInstance: line.documentInstance,
-                    folder: line.folder,
-                  }])
+                  onMoveModalClick(event, [
+                    {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      documentInstance: line.documentInstance,
+                      folder: line.folder,
+                    },
+                  ])
                 }
               >
                 <span className={'flex items-baseline'}>

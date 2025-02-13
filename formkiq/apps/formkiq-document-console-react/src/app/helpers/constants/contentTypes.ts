@@ -1,4 +1,4 @@
-export const OnlyOfficeContentTypes: string[] = [
+export const MsOfficeContentTypes: string[] = [
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
@@ -15,7 +15,7 @@ export const OnlyOfficeContentTypes: string[] = [
   'application/vnd.oasis.opendocument.presentation',
 ];
 
-export const OnlyOfficeNewFileExtensions: string[] = ['docx', 'xlsx', 'pptx'];
+export const MsOfficeNewFileExtensions: string[] = [];
 
 export const InlineViewableContentTypes: string[] = [
   'application/json',
@@ -31,7 +31,6 @@ export const InlineViewableContentTypes: string[] = [
   'image/svg+xml',
   'image/vnd.microsoft.icon',
   'image/webp',
-  'text/plain',
   'video/mp4',
   'video/ogg',
   'video/webm',
@@ -62,5 +61,11 @@ export const ESignatureContentTypes: string[] = [
   'application/vnd.oasis.opendocument.spreadsheet',
 ];
 
-export const TextFileEditorViewableContentTypes: string[] = ['text/markdown'];
-export const TextFileEditorEditableContentTypes: string[] = ['text/markdown'];
+export const TextFileEditorViewableContentTypes: string[] = [
+  'text/plain',
+  'text/markdown',
+];
+export const TextFileEditorEditableContentTypes: string[] = [
+  'text/plain',
+  'text/markdown',
+];

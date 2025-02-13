@@ -14,7 +14,7 @@ import { useAppDispatch } from '../../Store/store';
 import {
   InlineEditableContentTypes,
   InlineViewableContentTypes,
-  OnlyOfficeContentTypes,
+  MsOfficeContentTypes,
   TextFileEditorEditableContentTypes,
   TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
@@ -96,8 +96,9 @@ export function DocumentView() {
   const [currentDocumentsRootName, setCurrentDocumentsRootName] = useState(
     siteDocumentsRootName
   );
-  const [isCurrentSiteReadonly, setIsCurrentSiteReadonly] =
-    useState<boolean>(true);
+  const [officeDoc, setOfficeDoc] = useState(false);
+  const [iframeLoading, setIframeLoading] = useState(true);
+  const [downloadOnly, setDownloadOnly] = useState(false);
 
   const [mode, setMode] = useState(getModeFromPath());
   const isDocumentContentTypeEditable = (contentType: string) =>
@@ -179,13 +180,6 @@ export function DocumentView() {
 
   useEffect(() => {
     if (id) {
-      let ooConfig: any;
-      const handleScript = (e: any) => {
-        if (e.type === 'load') {
-          const script = window.document.querySelector(`script[id="ooScript"]`);
-          (window as any).DocsAPI.DocEditor('onlyofficeContainer', ooConfig);
-        }
-      };
       DocumentsService.getDocumentById(id, currentSiteId).then(
         (response: IDocument) => {
           setViewDocument(response);
@@ -198,23 +192,12 @@ export function DocumentView() {
           ) {
             navigate(pathname.replace(/\/edit$/, '/view'));
           }
-          if (
-            formkiqVersion.modules?.indexOf('onlyoffice') > -1 &&
-            OnlyOfficeContentTypes.indexOf(response.contentType) > -1
-          ) {
-            DocumentsService.editDocumentWithOnlyoffice(id, currentSiteId).then(
-              (onlyofficeResponse: any) => {
-                setOOConfig(onlyofficeResponse.config);
-                ooConfig = onlyofficeResponse.config;
-                const script = window.document.createElement('script');
-                (script as HTMLScriptElement).type = 'application/javascript';
-                (script as HTMLScriptElement).id = 'ooScript';
-                (script as HTMLScriptElement).src =
-                  onlyofficeResponse.onlyOfficeUrl +
-                  '/web-apps/apps/api/documents/api.js';
-                (script as HTMLScriptElement).async = false;
-                window.document.body.appendChild(script);
-                script.addEventListener('load', handleScript);
+
+          if (MsOfficeContentTypes.indexOf(response.contentType) > -1) {
+            DocumentsService.getDocumentUrl(id, siteId, '', false).then(
+              (urlResponse: any) => {
+                setDocumentContent(urlResponse.url);
+                setOfficeDoc(true);
               }
             );
           } else if (
@@ -227,7 +210,7 @@ export function DocumentView() {
             if (isTextFile) {
               DocumentsService.getDocumentContent(
                 currentSiteId,
-                id,
+                id ?? '',
                 viewVersionKey,
                 true
               ).then((contentResponse: any) => {
@@ -318,39 +301,19 @@ export function DocumentView() {
               id,
               viewVersionKey,
               true
-            ).then((res: any) => {
+            ).then(async (res: any) => {
               if (res.content) {
                 setDocumentContent(res.content);
+              } else if (res.contentUrl) {
+                try {
+                  const urlResponse = await fetch(res.contentUrl);
+                  const text = await urlResponse.text();
+                  const processedContent = handleTextContent(text);
+                  setDocumentContent(processedContent);
+                } catch (error) {
+                  console.error('Error fetching text content from URL:', error);
+                }
               }
-            });
-          } else {
-            const viewVersionKey =
-              versionKey && versionKey.length ? versionKey : '';
-            DocumentsService.getDocumentUrl(
-              id,
-              currentSiteId,
-              viewVersionKey,
-              false
-            ).then((urlResponse: any) => {
-              const a = window.document.createElement('a');
-              a.style.display = 'none';
-              a.href = urlResponse.url;
-              a.download = response.path.substring(
-                response.path.lastIndexOf('/') + 1
-              );
-              window.document.body.appendChild(a);
-              a.click();
-              a.remove();
-              window.URL.revokeObjectURL(urlResponse.url);
-              const url =
-                currentDocumentsRootUri +
-                '/folders/' +
-                response.path.substring(0, response.path.lastIndexOf('/')) +
-                '#id=' +
-                id;
-              setTimeout(() => {
-                navigate(url);
-              }, 200);
             });
           }
         }
@@ -379,16 +342,21 @@ export function DocumentView() {
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
     setCurrentDocumentsRootName(recheckSiteInfo.siteDocumentsRootName);
     setMode(getModeFromPath());
-    if (!isReadOnlyUser && getModeFromPath() === 'edit') {
+    if (isReadOnlyUser && getModeFromPath() === 'edit') {
       navigate(pathname.replace(/\/edit$/, '/view'));
     }
   }, [pathname]);
 
   const [viewDocument, setViewDocument] = useState<IDocument | null>(null);
-  const [ooConfig, setOOConfig] = useState<any | null>(null);
   const [documentContent, setDocumentContent] = useState<string | null>('');
   const [documentCsvContent, setDocumentCsvContent] = useState<CSVRow[]>([]);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  const getViewerUrl = (url: string) => {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(
+      url
+    )}&embedded=true&ui=1`;
+  };
 
   // Cleanup for blob URLs
   useEffect(() => {
@@ -400,100 +368,253 @@ export function DocumentView() {
   }, [blobUrl]);
 
   const DocumentViewer = () => {
-    // As a fallback, also check the URL extension.
+    // S3 Content Type mapping within the component
+    const S3_CONTENT_TYPES = {
+      pdf: 'application/pdf',
+      doc: 'application/msword',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      xls: 'application/vnd.ms-excel',
+      xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ppt: 'application/vnd.ms-powerpoint',
+      pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      gif: 'image/gif',
+      bmp: 'image/bmp',
+      svg: 'image/svg+xml',
+      txt: 'text/plain',
+      csv: 'text/csv',
+      md: 'text/markdown',
+      json: 'application/json',
+    };
+
+    // Helper to get content type from filename
+    const getContentTypeFromFilename = (filename: string) => {
+      const extension = filename.split('.').pop()?.toLowerCase() || '';
+      return (
+        S3_CONTENT_TYPES[extension as keyof typeof S3_CONTENT_TYPES] ||
+        'application/octet-stream'
+      );
+    };
+
+    // Handle S3 document content type detection
+    const handleS3Document = async (document: IDocument) => {
+      if (!document.deepLinkPath?.startsWith('s3://')) {
+        return;
+      }
+
+      // ONLY S3 PROTOCOL DEEP LINKS
+      try {
+        const urlResponse = await DocumentsService.getDocumentUrl(
+          id ?? '',
+          currentSiteId,
+          versionKey || '',
+          true
+        );
+
+        // If we don't have a content type, try to detect it
+        if (!document.contentType || document.contentType === 'text/html') {
+          // First try to get it from the URL's content-disposition
+          const filename = extractFilenameFromUrl(urlResponse.url);
+          if (filename) {
+            const imageMatch = filename.match(/\.(png|jpe?g|gif|bmp)$/i);
+            if (imageMatch) {
+              setViewDocument({
+                ...document,
+                contentType: `image/${
+                  imageMatch[1].toLowerCase() === 'jpg'
+                    ? 'jpeg'
+                    : imageMatch[1].toLowerCase()
+                }`,
+              });
+            } else {
+              // If not an image, try to get content type from S3 path
+              const s3Filename = document.deepLinkPath.split('/').pop() || '';
+              const contentType = getContentTypeFromFilename(s3Filename);
+              setViewDocument({
+                ...document,
+                contentType,
+              });
+
+              // Special handling for text files from S3
+              if (contentType.startsWith('text/')) {
+                const response = await fetch(urlResponse.url);
+                const text = await response.text();
+                const processedContent = handleTextContent(text);
+                const blob = new Blob([processedContent], {
+                  type: `${contentType};charset=utf-8`,
+                });
+                const blobUrl = URL.createObjectURL(blob);
+                setBlobUrl(blobUrl);
+                setDocumentContent(blobUrl);
+                return;
+              } else if (
+                MsOfficeContentTypes.indexOf(contentType) > -1 ||
+                contentType === 'application/pdf'
+              ) {
+                setOfficeDoc(true);
+              } else if (document.contentType.startsWith('text/')) {
+                // Handle text files that already have a content type
+                const response = await fetch(urlResponse.url);
+                const text = await response.text();
+                const processedContent = handleTextContent(text);
+                const blob = new Blob([processedContent], {
+                  type: `${document.contentType};charset=utf-8`,
+                });
+                const blobUrl = URL.createObjectURL(blob);
+                setBlobUrl(blobUrl);
+                setDocumentContent(blobUrl);
+                return;
+              }
+            }
+          }
+        }
+
+        setDocumentContent(urlResponse.url);
+      } catch (error) {
+        console.error('Error retrieving S3 document URL:', error);
+      }
+    };
+
+    useEffect(() => {
+      if (viewDocument?.deepLinkPath) {
+        if (viewDocument.deepLinkPath.startsWith('s3://')) {
+          handleS3Document(viewDocument);
+        } else {
+          setDocumentContent(viewDocument.deepLinkPath);
+        }
+      }
+    }, [viewDocument?.deepLinkPath]);
+
+    // As a fallback, check the URL extension for images
     const isImageFromUrl =
       documentContent && /\.(png|jpe?g|gif|bmp)(\?|$)/i.test(documentContent);
+
+    if (viewDocument?.contentType) {
+      if (
+        viewDocument.contentType === 'text/csv' &&
+        viewDocument.deepLinkPath &&
+        viewDocument.deepLinkPath.length > 0
+      ) {
+        setOfficeDoc(true);
+      }
+    }
+
     return (
-      <div className="w-full h-full">
-        {viewDocument &&
-          (InlineViewableContentTypes.indexOf(viewDocument.contentType) > -1 ||
-            (viewDocument.deepLinkPath &&
-              viewDocument.deepLinkPath.length > 0)) && (
-            <>
-              {documentContent &&
-              (viewDocument.contentType?.startsWith('image/') ||
-                isImageFromUrl) ? (
-                <img
-                  src={documentContent}
-                  alt="Document"
-                  className="mt-4 w-auto h-auto max-w-[95%] mx-auto object-contain"
-                />
-              ) : (
-                <iframe
-                  title="Document Viewer"
-                  className="mt-4 w-full h-full"
-                  src={documentContent || undefined}
+      <>
+        {console.log(viewDocument?.contentType)}
+        <div className="w-full h-full">
+          {viewDocument &&
+            (InlineViewableContentTypes.indexOf(viewDocument.contentType) >
+              -1 ||
+              (viewDocument.deepLinkPath &&
+                viewDocument.deepLinkPath.length > 0)) && (
+              <>
+                {documentContent &&
+                (viewDocument.contentType?.startsWith('image/') ||
+                  isImageFromUrl) ? (
+                  <img
+                    src={documentContent}
+                    alt="Document"
+                    className="mt-4 w-auto h-auto max-w-[95%] mx-auto object-contain"
+                  />
+                ) : officeDoc ? (
+                  <div className="relative w-full h-full">
+                    {iframeLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white">
+                        <Spinner />
+                      </div>
+                    )}
+                    <iframe
+                      title="Document Viewer"
+                      className="w-full h-full"
+                      style={{ backgroundColor: 'white' }}
+                      src={getViewerUrl(documentContent || '')}
+                      onLoad={() => setIframeLoading(false)}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <iframe
+                      title="Document Viewer"
+                      className="mt-4 w-full h-full"
+                      src={documentContent || undefined}
+                    />
+                  </>
+                )}
+              </>
+            )}
+
+          <>
+            {/* CSV Viewer - unchanged */}
+            {viewDocument &&
+              viewDocument.contentType === 'text/csv' &&
+              documentCsvContent !== undefined &&
+              documentCsvContent[0] && (
+                <div className="mt-5 h-[calc(100vh-120px)] overflow-auto shadow-md sm:rounded-lg">
+                  <div className="inline-block min-w-full align-middle">
+                    <div className="overflow-hidden">
+                      <table className="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-700">
+                        <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
+                          <tr>
+                            {Object.keys(documentCsvContent[0]).map(
+                              (header, index) => (
+                                <th
+                                  key={index}
+                                  scope="col"
+                                  className="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
+                                >
+                                  {header}
+                                </th>
+                              )
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                          {documentCsvContent.map((row, rowIndex) => (
+                            <tr
+                              key={rowIndex}
+                              className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              {Object.values(row).map((cell, cellIndex) => (
+                                <td
+                                  key={cellIndex}
+                                  className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                >
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            {/* Text File Editor */}
+            {viewDocument &&
+              TextFileEditorViewableContentTypes.indexOf(
+                viewDocument.contentType
+              ) > -1 &&
+              documentContent !== undefined && (
+                <TextFileEditor
+                  currentDocument={viewDocument}
+                  documentContent={documentContent}
+                  contentType={viewDocument.contentType}
+                  siteId={currentSiteId}
+                  readOnly={
+                    TextFileEditorEditableContentTypes.indexOf(
+                      viewDocument.contentType
+                    ) === -1 || mode === 'view'
+                  }
                 />
               )}
-            </>
-          )}
-
-        {/* CSV Viewer */}
-        {viewDocument &&
-          viewDocument.contentType === 'text/csv' &&
-          documentCsvContent !== undefined && (
-            <div className="mt-5 h-[calc(100vh-120px)] overflow-auto shadow-md sm:rounded-lg">
-              <div className="inline-block min-w-full align-middle">
-                <div className="overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-700">
-                    <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
-                      <tr>
-                        {Object.keys(documentCsvContent[0]).map(
-                          (header, index) => (
-                            <th
-                              key={index}
-                              scope="col"
-                              className="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
-                            >
-                              {header}
-                            </th>
-                          )
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                      {documentCsvContent.map((row, rowIndex) => (
-                        <tr
-                          key={rowIndex}
-                          className="hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          {Object.values(row).map((cell, cellIndex) => (
-                            <td
-                              key={cellIndex}
-                              className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                            >
-                              {cell}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-        {/* Text File Editor */}
-        {viewDocument &&
-          TextFileEditorViewableContentTypes.indexOf(viewDocument.contentType) >
-            -1 &&
-          documentContent !== undefined && (
-            <TextFileEditor
-              currentDocument={viewDocument}
-              documentContent={documentContent}
-              contentType={viewDocument.contentType}
-              siteId={currentSiteId}
-              readOnly={
-                isCurrentSiteReadonly ||
-                TextFileEditorEditableContentTypes.indexOf(
-                  viewDocument.contentType
-                ) === -1 ||
-                mode === 'view'
-              }
-            />
-          )}
-      </div>
+          </>
+        </div>
+      </>
     );
   };
 
@@ -502,22 +623,30 @@ export function DocumentView() {
       <Helmet>
         <title>Document</title>
       </Helmet>
+
       {viewDocument && (
         <div className="flex flex-col lg:flex-row">
-          <div className="-mt-3 h-92/100h flex-1 bg-white inline-block">
-            {documentContent !== undefined || ooConfig ? (
+          <div className="h-92/100h flex-1 bg-white inline-block">
+            {documentContent !== undefined ? (
               <>
-                {documentContent !== undefined && (
+                {documentContent && officeDoc ? (
+                  <div className="relative w-full h-full">
+                    {iframeLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white">
+                        <Spinner />
+                      </div>
+                    )}
+                    <iframe
+                      title="Document Viewer"
+                      className="w-full h-full"
+                      style={{ backgroundColor: 'white' }}
+                      src={getViewerUrl(documentContent)}
+                      onLoad={() => setIframeLoading(false)}
+                    />
+                  </div>
+                ) : (
                   <div className="w-full h-full">
                     <DocumentViewer />
-                  </div>
-                )}
-                {ooConfig && (
-                  <div className="relative w-full h-full mt-3">
-                    <div
-                      className="w-full h-full"
-                      id="onlyofficeContainer"
-                    ></div>
                   </div>
                 )}
               </>

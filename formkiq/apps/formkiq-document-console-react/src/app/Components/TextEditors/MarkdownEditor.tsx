@@ -10,48 +10,43 @@ function MarkdownEditor({
 }: {
   content: string;
   onChange: (text: string) => void;
-  readOnly?: boolean|"nocursor";
+  readOnly?: boolean | 'nocursor';
 }) {
   const editorRef = useRef<HTMLTextAreaElement | null>(null);
+  const cmInstanceRef = useRef<CodeMirror.EditorFromTextArea | null>(null);
+  const initialContentRef = useRef(content);
 
   useEffect(() => {
-    let editor: CodeMirror.EditorFromTextArea | null = null;
-    if (editorRef.current) {
-      // Initialize CodeMirror
+    if (!editorRef.current || cmInstanceRef.current) return;
 
-      editor = CodeMirror.fromTextArea(editorRef.current, {
-        mode: 'markdown',
-        theme: 'base16-light',
-        lineNumbers: true,
-        readOnly: readOnly,
-        lineWrapping: true,
-      });
+    const cm = CodeMirror.fromTextArea(editorRef.current, {
+      mode: 'markdown',
+      theme: 'base16-light',
+      lineNumbers: true,
+      readOnly: readOnly,
+      lineWrapping: true,
+      value: initialContentRef.current,
+    });
 
-      editor.setSize('100%', '150%');
-      // Set initial Rego code
-      editor.setValue(content);
+    cm.setSize('100%', '150%');
 
-      // Add event listener for changes
-      editor.on('change', (instance) => {
-        // Handle Rego code changes
-        const updatedRegoCode = instance.getValue();
-        onChange(updatedRegoCode);
-      });
-    }
+    // Only set up the change handler once
+    cm.on('change', (instance) => {
+      const value = instance.getValue();
+      onChange(value);
+    });
 
-    // Cleanup CodeMirror instance when component is unmounted
+    cmInstanceRef.current = cm;
+
     return () => {
-      if (editor && editor.toTextArea) {
-        editor.toTextArea(); // Convert back to a textarea to remove CodeMirror instance
+      if (cmInstanceRef.current) {
+        cmInstanceRef.current.toTextArea();
+        cmInstanceRef.current = null;
       }
     };
-  }, [content]); // Add content as a dependency
+  }, [readOnly]); // Only recreate if readOnly changes
 
-  return (
-    <div>
-      <textarea id="CMEditor" ref={editorRef} className="" />
-    </div>
-  );
+  return <textarea ref={editorRef} defaultValue={initialContentRef.current} />;
 }
 
 export default MarkdownEditor;
