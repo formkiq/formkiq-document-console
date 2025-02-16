@@ -1,18 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
-import {
-  NavLink,
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom';
+import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Mode } from 'vanilla-jsoneditor';
+
 import { Close, Save, Spinner, Trash } from '../../Components/Icons/icons';
 import SchemaMenu from '../../Components/Schemas/SchemaMenu';
 import SchemaPage from '../../Components/Schemas/SchemaPage';
 import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
+import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
+
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
@@ -22,19 +19,25 @@ import {
   setClassificationSchema,
 } from '../../Store/reducers/schemas';
 import { useAppDispatch } from '../../Store/store';
+
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
 import { Schema as SchemaType } from '../../helpers/types/schemas';
-import { CopyButton } from '../../Components/Generic/Buttons/CopyButton';
+import { useJsonEditor } from '../../hooks/json-editor.hook';
 
 function Classification() {
+  const pathname = decodeURI(useLocation().pathname);
+
+  const { classificationId } = useParams();
+
+  const navigate = useNavigate();
+
   const { user } = useAuthenticatedState();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
-  const pathname = decodeURI(useLocation().pathname);
   const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
@@ -43,14 +46,18 @@ function Classification() {
     hasWorkspaces,
     workspaceSites
   );
-  const { classificationId } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const editor = searchParams.get('jsonEditor');
-  const editing = searchParams.get('editing');
   const { classificationSchema } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(editing === 'true');
+
+  const {
+    setContent,
+    content,
+    handleChange,
+    editor,
+    closeEditor,
+    isEditing,
+    schemaMenuEditClick,
+  } = useJsonEditor({ classificationSchema });
 
   useEffect(() => {
     if (!classificationId) {
@@ -58,12 +65,6 @@ function Classification() {
     }
     dispatch(fetchClassificationSchema({ siteId, classificationId }));
   }, []);
-
-  // JSON editor
-  const [content, setContent] = useState({
-    text: undefined,
-    json: classificationSchema,
-  });
 
   useEffect(() => {
     setContent({
@@ -164,23 +165,6 @@ function Classification() {
     );
   };
 
-  const handleChange = (value: any) => {
-    if (value.json) {
-      setContent(value);
-    } else if (value.text) {
-      setContent(value);
-    }
-  };
-  const closeEditor = () => {
-    searchParams.delete('jsonEditor');
-    searchParams.delete('editing');
-    setSearchParams(searchParams);
-  };
-
-  useEffect(() => {
-    setIsEditing(editing === 'true');
-  }, [editing]);
-
   return (
     <>
       <Helmet>
@@ -258,10 +242,7 @@ function Classification() {
           <div className="p-4 ">
             <SchemaMenu
               deleteSchema={onDeleteClick}
-              onEditClick={() => {
-                searchParams.set('editing', 'true');
-                setSearchParams(searchParams);
-              }}
+              onEditClick={schemaMenuEditClick}
               isEditing={isEditing}
             />
             <SchemaPage
