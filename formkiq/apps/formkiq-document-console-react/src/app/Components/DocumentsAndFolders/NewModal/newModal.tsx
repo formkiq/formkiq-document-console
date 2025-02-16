@@ -2,11 +2,14 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+
 import { setCurrentActionEvent } from '../../../Store/reducers/config';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
+
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
+
 import {
   Close,
   External,
@@ -32,13 +35,7 @@ export default function NewModal({
   value: ILine | null;
   onDocumentDataChange: any;
 }) {
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-    reset,
-    setFocus,
-  } = useForm();
+  const { register, reset, setFocus } = useForm();
   const newFormRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -147,7 +144,7 @@ export default function NewModal({
         // TODO: check if name exists in folder
         if (itemToCreate === 'folder') {
           DocumentsService.createFolder(value.folder, nameValue, siteId).then(
-            (data) => {
+            () => {
               closeDialog();
             }
           );
@@ -187,18 +184,22 @@ export default function NewModal({
             nameValue += '.' + itemToCreate;
           }
           if (itemToCreate === 'md') {
-            const documentParamaters = {
+            const documentParameters = {
               path: value.folder
                 ? `${value.folder}/${nameValue}`
                 : `${nameValue}`,
               contentType: 'text/markdown',
               content: ' ',
             };
-            DocumentsService.addDocument(siteId, documentParamaters).then(
+            DocumentsService.addDocument(siteId, documentParameters).then(
               (res) => {
                 if (res.status === 201) {
                   navigate(pathname + '/' + res.documentId + '/edit');
-                  closeDialog();
+                  setItemToCreate('');
+                  setFormActive(false);
+                  reset();
+                  onDocumentDataChange();
+                  onClose();
                 } else {
                   if (res.errors) {
                     dispatch(
@@ -271,7 +272,7 @@ export default function NewModal({
                 className="relative transform overflow-hidden text-left transition-all w-full lg:w-1/2 h-1/2"
                 data-test-id="new-document-modal"
               >
-                <div className="bg-white p-4 rounded-lg bg-white shadow-xl border h-full">
+                <div className="p-4 rounded-lg bg-white shadow-xl border h-full">
                   <div className="flex w-full items-center">
                     <div className="font-semibold grow text-lg inline-block pr-6">
                       Create New
@@ -307,7 +308,7 @@ export default function NewModal({
                           ? 'bg-gray-100 font-semibold border-gray-600'
                           : 'cursor-pointer hover:bg-gray-100'
                       } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
-                      onClick={(event) => {
+                      onClick={() => {
                         closeDialog();
                         dispatch(setCurrentActionEvent('upload'));
                       }}
@@ -325,7 +326,7 @@ export default function NewModal({
                           ? 'bg-gray-100 font-semibold border-gray-600'
                           : 'cursor-pointer hover:bg-gray-100'
                       } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
-                      onClick={(event) => {
+                      onClick={() => {
                         closeDialog();
                         dispatch(setCurrentActionEvent('folderUpload'));
                       }}
@@ -365,7 +366,7 @@ export default function NewModal({
                     >
                       <div className="w-full h-16 my-3 flex justify-center">
                         <img
-                          src="/assets/img/svg/icon-md.svg"
+                          src="assets/img/svg/icon-md.svg"
                           className="w-16"
                           alt="md icon"
                         />
@@ -382,7 +383,7 @@ export default function NewModal({
                             ? 'bg-gray-100 font-semibold border-gray-600'
                             : 'cursor-pointer hover:bg-gray-100'
                         } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
-                        onClick={(event) =>
+                        onClick={() =>
                           (window.location.href = '/orchestrations/workflows')
                         }
                       >
@@ -400,7 +401,7 @@ export default function NewModal({
                           ? 'bg-gray-100 font-semibold border-gray-600'
                           : 'cursor-pointer hover:bg-gray-100'
                       } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
-                      onClick={(event) =>
+                      onClick={() =>
                         (window.location.href = '/orchestrations/webhooks')
                       }
                     >
@@ -416,8 +417,8 @@ export default function NewModal({
                         itemToCreate === 'outbound-webhook'
                           ? 'bg-gray-100 font-semibold border-gray-600'
                           : 'cursor-pointer hover:bg-gray-100'
-                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2 hidden`}
-                      onClick={(event) => (window.location.href = '/workflows')}
+                      } mx-1 w-48 border-2 rounded-md flex flex-wrap justify-center p-2`}
+                      onClick={() => (window.location.href = '/workflows')}
                     >
                       <div className="w-full h-12 text-gray-600 my-5 flex justify-center">
                         <External />
