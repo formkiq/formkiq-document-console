@@ -3,11 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { Schema } from '../helpers/types/schemas';
 
-export const useJsonEditor = ({
-  classificationSchema,
-}: {
-  classificationSchema: Schema | null;
-}) => {
+export const useJsonEditor = ({ schema }: { schema: Schema | null }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const editor = searchParams.get('jsonEditor');
@@ -16,7 +12,7 @@ export const useJsonEditor = ({
   // JSON editor
   const [content, setContent] = useState({
     text: undefined,
-    json: classificationSchema,
+    json: schema,
   });
 
   const [isEditing, setIsEditing] = useState(editing === 'true');

@@ -27,6 +27,10 @@ import {
 } from '../../helpers/services/toolService';
 import { Schema as SchemaType } from '../../helpers/types/schemas';
 import { useJsonEditor } from '../../hooks/json-editor.hook';
+import {
+  isValidJSON,
+  isValidString,
+} from '../../helpers/utils/json-editor-validators';
 
 function Classification() {
   const pathname = decodeURI(useLocation().pathname);
@@ -57,7 +61,7 @@ function Classification() {
     closeEditor,
     isEditing,
     schemaMenuEditClick,
-  } = useJsonEditor({ classificationSchema });
+  } = useJsonEditor({ schema: classificationSchema });
 
   useEffect(() => {
     if (!classificationId) {
@@ -72,24 +76,6 @@ function Classification() {
       json: classificationSchema,
     });
   }, [classificationSchema]);
-
-  const isValidString = (text: string) => {
-    try {
-      JSON.parse(text);
-    } catch (e) {
-      return false;
-    }
-    return true;
-  };
-
-  const isValidJSON = (json: any) => {
-    try {
-      JSON.stringify(json);
-    } catch (e) {
-      return false;
-    }
-    return true;
-  };
 
   const updateClassification = (schema: SchemaType) => {
     if (!classificationId) return;

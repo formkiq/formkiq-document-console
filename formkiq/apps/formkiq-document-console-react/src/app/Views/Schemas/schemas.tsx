@@ -2,9 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
 import { Json, Pencil } from '../../Components/Icons/icons';
 import CreateSchemaDialog from '../../Components/Schemas/createSchemaDialog/CreateSchemaDialog';
+import ClassificationsTable from './classificationsTable';
+
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
 import {
@@ -15,13 +18,15 @@ import {
   setClassificationsLoadingStatusPending,
 } from '../../Store/reducers/schemas';
 import { useAppDispatch } from '../../Store/store';
+
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
-import ClassificationsTable from './classificationsTable';
+
 import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
+import CreateSchemaJsonDialog from '../../Components/Schemas/createShemaJsonDialog/CreateSchemaJsonDialog';
 
 function Schemas() {
   const { user } = useAuthenticatedState();
@@ -47,6 +52,7 @@ function Schemas() {
   } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isJSONDialogOpen, setIsJSONDialogOpen] = useState(false);
   const [newSchemaType, setNewSchemaType] = useState<'site' | 'classification'>(
     'site'
   );
@@ -231,6 +237,17 @@ function Schemas() {
           {!isReadOnlyUser && (
             <ButtonPrimaryGradient
               onClick={() => {
+                setIsJSONDialogOpen(true);
+                setNewSchemaType('classification');
+              }}
+              className="h-10"
+            >
+              + New JSON Classification Schema
+            </ButtonPrimaryGradient>
+          )}
+          {!isReadOnlyUser && (
+            <ButtonPrimaryGradient
+              onClick={() => {
                 setIsCreateDialogOpen(true);
                 setNewSchemaType('classification');
               }}
@@ -267,6 +284,13 @@ function Schemas() {
           setIsOpen={setIsCreateDialogOpen}
           siteId={currentSiteId}
           schemaType={newSchemaType}
+        />
+      )}
+      {!isReadOnlyUser && (
+        <CreateSchemaJsonDialog
+          isOpen={isJSONDialogOpen}
+          setIsOpen={setIsJSONDialogOpen}
+          siteId={currentSiteId}
         />
       )}
     </>
