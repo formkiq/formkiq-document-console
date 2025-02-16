@@ -102,7 +102,11 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static deleteDocument(id: string, siteId = '', softDelete: null|string = null): Promise<any> {
+  public static deleteDocument(
+    id: string,
+    siteId = '',
+    softDelete: null | string = null
+  ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
@@ -637,7 +641,7 @@ export class DocumentsService {
     allTags = [] as any[],
     allAttributes = [] as any[],
     searchAttributes: any = null,
-    limit=20
+    limit = 20
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -660,44 +664,44 @@ export class DocumentsService {
     });
     const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
     if (formkiqVersion.modules.indexOf('opensearch') === -1) {
-      const searchBody:any = {
+      const searchBody: any = {
         query: {},
         responseFields: {
           tags: customIncludeTags,
           attributes: attributesKeys,
         },
       };
-      if (searchText&&searchText!=='') {
-        searchBody.query["text"] = searchText + '*';
+      if (searchText && searchText !== '') {
+        searchBody.query['text'] = searchText + '*';
       }
       if (searchAttributes) {
-        searchBody.query["attributes"] = searchAttributes;
+        searchBody.query['attributes'] = searchAttributes;
       }
       return this.getFormkiqClient().searchApi.search({
         searchParameters: searchBody,
         siteId,
-        limit
+        limit,
       });
     } else {
-      const searchBody:any = {
+      const searchBody: any = {
         query: {
           page: page,
         },
         responseFields: {
           tags: customIncludeTags,
-          attributes:  attributesKeys,
+          attributes: attributesKeys,
         },
       };
-      if (searchText&&searchText!=='') {
-        searchBody.query["text"] = searchText + '*';
+      if (searchText && searchText !== '') {
+        searchBody.query['text'] = searchText + '*';
       }
       if (searchAttributes) {
-        searchBody.query["attributes"] = searchAttributes;
+        searchBody.query['attributes'] = searchAttributes;
       }
       return this.getFormkiqClient().searchApi.searchFulltext({
         documentFulltextSearchBody: searchBody,
         siteId,
-        limit
+        limit,
       });
     }
   }
@@ -801,7 +805,7 @@ export class DocumentsService {
       }
     }
     const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
-    const searchBody:any = {
+    const searchBody: any = {
       query: {
         text: searchText + '*',
         meta: {
@@ -816,7 +820,7 @@ export class DocumentsService {
       },
     };
     if (searchAttributes) {
-      searchBody.query["attributes"] = searchAttributes;
+      searchBody.query['attributes'] = searchAttributes;
     }
     return this.getFormkiqClient().searchApi.searchFulltext({
       documentFulltextSearchBody: searchBody,
@@ -835,7 +839,7 @@ export class DocumentsService {
       siteId = this.determineSiteId();
     }
     let body = {};
-    if ( typeof newValue === 'string'){
+    if (typeof newValue === 'string') {
       body = {
         value: newValue,
       };
@@ -1134,36 +1138,6 @@ export class DocumentsService {
       documentId,
       versionKey,
       inline,
-      siteId,
-    });
-  }
-
-  @formkiqAPIHandler
-  public static async editDocumentWithOnlyoffice(
-    documentId: string,
-    siteId = ''
-  ): Promise<any> {
-    if (!siteId || !siteId.length) {
-      siteId = this.determineSiteId();
-    }
-    return this.getFormkiqClient().documentsApi.editDocumentWithOnlyoffice({
-      documentId,
-      siteId,
-    });
-  }
-
-  @formkiqAPIHandler
-  public static async createDocumentWithOnlyoffice(
-    extension: string,
-    path: string,
-    siteId = ''
-  ): Promise<any> {
-    if (!siteId || !siteId.length) {
-      siteId = this.determineSiteId();
-    }
-    return this.getFormkiqClient().documentsApi.createDocumentWithOnlyoffice({
-      extension,
-      path,
       siteId,
     });
   }
@@ -1534,10 +1508,7 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getGroups(
-    next = null,
-    limit = 20
-  ): Promise<any> {
+  public static async getGroups(next = null, limit = 20): Promise<any> {
     return this.getFormkiqClient().userManagementApi.getGroups({
       next,
       limit,
@@ -2008,18 +1979,14 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async addGroup(
-    groupBody: any,
-  ): Promise<any> {
+  public static async addGroup(groupBody: any): Promise<any> {
     return this.getFormkiqClient().userManagementApi.addGroup({
       groupBody,
     });
   }
 
   @formkiqAPIHandler
-  public static async deleteGroup(
-    groupName: string,
-  ): Promise<any> {
+  public static async deleteGroup(groupName: string): Promise<any> {
     return this.getFormkiqClient().userManagementApi.deleteGroup({
       groupName,
     });
@@ -2027,9 +1994,9 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async getGroupUsers(
-      groupName: string,
-      limit = 20,
-      next = null,
+    groupName: string,
+    limit = 20,
+    next = null
   ): Promise<any> {
     return this.getFormkiqClient().userManagementApi.getGroupUsers({
       groupName,
@@ -2040,8 +2007,8 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async addUserToGroup(
-      groupName: string,
-      userBody: string,
+    groupName: string,
+    userBody: string
   ): Promise<any> {
     return this.getFormkiqClient().userManagementApi.addUserToGroup({
       groupName,
@@ -2050,10 +2017,10 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-    public static async deleteUserFromGroup(
-        groupName: string,
-        username: string,
-    ): Promise<any> {
+  public static async deleteUserFromGroup(
+    groupName: string,
+    username: string
+  ): Promise<any> {
     return this.getFormkiqClient().userManagementApi.deleteUserFromGroup({
       groupName,
       username,
@@ -2061,10 +2028,7 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getUsers(
-      limit = 20,
-      next = null,
-  ): Promise<any> {
+  public static async getUsers(limit = 20, next = null): Promise<any> {
     return this.getFormkiqClient().userManagementApi.getUsers({
       limit,
       next,
@@ -2072,36 +2036,28 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async addUser(
-      userBody: any,
-  ): Promise<any> {
+  public static async addUser(userBody: any): Promise<any> {
     return this.getFormkiqClient().userManagementApi.addUser({
       userBody,
     });
   }
 
   @formkiqAPIHandler
-  public static async getUser(
-      username: string,
-  ): Promise<any> {
+  public static async getUser(username: string): Promise<any> {
     return this.getFormkiqClient().userManagementApi.getUser({
       username,
     });
   }
 
   @formkiqAPIHandler
-  public static async deleteUser(
-      username: string,
-  ): Promise<any> {
+  public static async deleteUser(username: string): Promise<any> {
     return this.getFormkiqClient().userManagementApi.deleteUser({
       username,
     });
   }
 
   @formkiqAPIHandler
-  public static async getUserGroups(
-      username: string,
-  ): Promise<any> {
+  public static async getUserGroups(username: string): Promise<any> {
     return this.getFormkiqClient().userManagementApi.getUserGroups({
       username,
     });
@@ -2109,8 +2065,8 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async setUserOperation(
-      username: string,
-      userOperation: any,
+    username: string,
+    userOperation: any
   ): Promise<any> {
     return this.getFormkiqClient().userManagementApi.setUserOperation({
       username,
@@ -2119,38 +2075,31 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-    public static async getGroup(
-      groupName: string,
-  ): Promise<any> {
-      return this.getFormkiqClient().userManagementApi.getGroup({
-          groupName,
-      });
+  public static async getGroup(groupName: string): Promise<any> {
+    return this.getFormkiqClient().userManagementApi.getGroup({
+      groupName,
+    });
   }
 
   @formkiqAPIHandler
-    public static async getSiteSchema(
-      siteId: string,
-  ): Promise<any> {
+  public static async getSiteSchema(siteId: string): Promise<any> {
     return this.getFormkiqClient().schemasApi.getSiteSchema({
       siteId,
     });
   }
   @formkiqAPIHandler
-    public static async setSiteSchema(
-      siteId: string,
-      schema: any,
-  ): Promise<any> {
+  public static async setSiteSchema(siteId: string, schema: any): Promise<any> {
     return this.getFormkiqClient().schemasApi.setSiteSchema({
       siteId,
       schema,
-    })
+    });
   }
 
   @formkiqAPIHandler
-    public static async getSiteClassifications(
-      siteId: string,
-      limit = 20,
-      next = null,
+  public static async getSiteClassifications(
+    siteId: string,
+    limit = 20,
+    next = null
   ): Promise<any> {
     return this.getFormkiqClient().schemasApi.getSiteClassifications({
       siteId,
@@ -2162,7 +2111,7 @@ export class DocumentsService {
   @formkiqAPIHandler
   public static async addSiteClassification(
     siteId: string,
-    classification: any,
+    classification: any
   ): Promise<any> {
     return this.getFormkiqClient().schemasApi.addSiteClassification({
       siteId,
@@ -2172,8 +2121,8 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async getClassification(
-      siteId: string,
-      classificationId: string,
+    siteId: string,
+    classificationId: string
   ): Promise<any> {
     return this.getFormkiqClient().schemasApi.getClassification({
       siteId,
@@ -2183,8 +2132,8 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async deleteClassification(
-      siteId: string,
-      classificationId: string,
+    siteId: string,
+    classificationId: string
   ): Promise<any> {
     return this.getFormkiqClient().schemasApi.deleteClassification({
       siteId,
@@ -2194,9 +2143,9 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async setClassification(
-      siteId: string,
-      classificationId: string,
-      classification: any,
+    siteId: string,
+    classificationId: string,
+    classification: any
   ): Promise<any> {
     return this.getFormkiqClient().schemasApi.setClassification({
       siteId,
@@ -2204,8 +2153,6 @@ export class DocumentsService {
       classification,
     });
   }
-
-
 
   @formkiqAPIHandler
   public static async addDocument(
@@ -2220,10 +2167,10 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async getUserActivities(
-      siteId: string,
-      userId = null,
-      limit = 20,
-      next = null,
+    siteId: string,
+    userId = null,
+    limit = 20,
+    next = null
   ): Promise<any> {
     return this.getFormkiqClient().documentsApi.getUserActivities({
       siteId,
@@ -2238,7 +2185,7 @@ export class DocumentsService {
     siteId: string,
     limit = 20,
     next = null,
-    documentId: string,
+    documentId: string
   ): Promise<any> {
     return this.getFormkiqClient().documentsApi.getDocumentUserActivities({
       siteId,
@@ -2253,7 +2200,7 @@ export class DocumentsService {
     siteId: string,
     documentId: string,
     versionKey: any,
-    inline = false,
+    inline = false
   ): Promise<any> {
     return this.getFormkiqClient().documentsApi.getDocumentContent({
       siteId,
@@ -2265,9 +2212,9 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async getMappings(
-      siteId: string,
-      limit = 20,
-      next = null,
+    siteId: string,
+    limit = 20,
+    next = null
   ): Promise<any> {
     return this.getFormkiqClient().documentsApi.getMappings({
       siteId,
@@ -2278,8 +2225,8 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async restoreDocument(
-      siteId: string,
-      documentId: string,
+    siteId: string,
+    documentId: string
   ): Promise<any> {
     return this.getFormkiqClient().documentsApi.restoreDocument({
       siteId,
@@ -2288,10 +2235,10 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-    public static async addMapping(
-        siteId: string,
-        addMappingParameters: any,
-    ): Promise<any> {
+  public static async addMapping(
+    siteId: string,
+    addMappingParameters: any
+  ): Promise<any> {
     return this.getFormkiqClient().documentsApi.addMapping({
       siteId,
       addMappingParameters,
@@ -2300,8 +2247,8 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async getMapping(
-      siteId: string,
-      mappingId: string,
+    siteId: string,
+    mappingId: string
   ): Promise<any> {
     return this.getFormkiqClient().documentsApi.getMapping({
       siteId,
@@ -2311,9 +2258,9 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async setMapping(
-      siteId: string,
-      mappingId: string,
-      setMappingParameters: any,
+    siteId: string,
+    mappingId: string,
+    setMappingParameters: any
   ): Promise<any> {
     return this.getFormkiqClient().documentsApi.setMapping({
       siteId,
@@ -2323,10 +2270,10 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-    public static async deleteMapping(
-        siteId: string,
-        mappingId: string,
-    ): Promise<any> {
+  public static async deleteMapping(
+    siteId: string,
+    mappingId: string
+  ): Promise<any> {
     return this.getFormkiqClient().documentsApi.deleteMapping({
       siteId,
       mappingId,
@@ -2335,9 +2282,9 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async addDocumentGenerate(
-      siteId: string,
-      documentId: string,
-      addDocumentGenerateParameters: any
+    siteId: string,
+    documentId: string,
+    addDocumentGenerateParameters: any
   ): Promise<any> {
     return this.getFormkiqClient().documentsApi.addDocumentGenerate({
       siteId,
@@ -2347,9 +2294,7 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async addSite(
-    addSiteParameters: any
-  ):  Promise<any> {
+  public static async addSite(addSiteParameters: any): Promise<any> {
     return this.getFormkiqClient().sitesApi.addSite({
       addSiteParameters,
     });
@@ -2357,9 +2302,9 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async updateSite(
-      siteId: string,
-      updateSiteParameters: any
-  ):  Promise<any> {
+    siteId: string,
+    updateSiteParameters: any
+  ): Promise<any> {
     return this.getFormkiqClient().sitesApi.updateSite({
       siteId,
       updateSiteParameters,
@@ -2367,18 +2312,16 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getSiteGroups(
-      siteId: string,
-  ): Promise<any> {
+  public static async getSiteGroups(siteId: string): Promise<any> {
     return this.getFormkiqClient().sitesApi.getSiteGroups({
-      siteId
+      siteId,
     });
   }
 
   @formkiqAPIHandler
   public static async getSiteGroupPermissions(
-      siteId: string,
-      groupName: string,
+    siteId: string,
+    groupName: string
   ): Promise<any> {
     return this.getFormkiqClient().sitesApi.getSiteGroupPermissions({
       siteId,
@@ -2388,9 +2331,9 @@ export class DocumentsService {
 
   @formkiqAPIHandler
   public static async setSiteGroupPermissions(
-      siteId: string,
-      groupName: string,
-      updateSiteGroupPermissions: any,
+    siteId: string,
+    groupName: string,
+    updateSiteGroupPermissions: any
   ): Promise<any> {
     return this.getFormkiqClient().sitesApi.setSiteGroupPermissions({
       siteId,
@@ -2401,12 +2344,11 @@ export class DocumentsService {
   @formkiqAPIHandler
   public static async deleteSiteGroupPermissions(
     siteId: string,
-    groupName: string,
-  ):  Promise<any> {
+    groupName: string
+  ): Promise<any> {
     return this.getFormkiqClient().sitesApi.deleteSiteGroupPermissions({
       siteId,
       groupName,
     });
   }
-
 }
