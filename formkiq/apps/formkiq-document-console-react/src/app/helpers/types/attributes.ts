@@ -13,12 +13,22 @@ export type AttributeDataType =
   | 'WATERMARK';
 export type AttributeType = 'STANDARD' | 'OPA';
 
-export type Attribute = {
-  key: string;
-  dataType: AttributeDataType;
+export interface AdditionalFields {
+  text?: string;
+  imageDocumentId?: string;
+}
+
+interface BaseAttribute {
   type: AttributeType;
-  inUse?: boolean;
-};
+  key: string;
+  dataType: AttributeDataType; // Allowing flexibility for multiple data types.
+  [key: string]: AdditionalFields | AttributeType | AttributeDataType | string;
+}
+
+/**
+ * Attribute type that covers all cases, ensuring the field name matches `dataType`.
+ */
+export type Attribute = BaseAttribute; // For attributes that do not have extra fields.
 
 export type DocumentAttribute = {
   key: string;
