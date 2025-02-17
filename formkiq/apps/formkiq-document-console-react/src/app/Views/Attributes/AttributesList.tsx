@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { View, Trash } from '../../Components/Icons/icons';
+import { Trash, View } from '../../Components/Icons/icons';
+import { ReservedAttributeKeys } from '../../helpers/constants/attributes';
 import { Attribute } from '../../helpers/types/attributes';
 
 type Props = {
@@ -90,6 +91,11 @@ export function AttributesList({
                     </td>
                     <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
                       {attribute.type}
+                      {ReservedAttributeKeys.indexOf(attribute?.key) > -1 && (
+                        <span className="block text-xs">
+                          (reserved attribute key)
+                        </span>
+                      )}
                     </td>
                     <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
                       {isAttributesInUse[attribute.key]
@@ -107,13 +113,15 @@ export function AttributesList({
                           >
                             <View />
                           </button>
-
-                          <button
-                            onClick={() => onDelete(attribute.key)}
-                            className="hover:text-red-500 w-5 h-5"
-                          >
-                            <Trash />
-                          </button>
+                          {ReservedAttributeKeys.indexOf(attribute?.key) ===
+                            -1 && (
+                            <button
+                              onClick={() => onDelete(attribute.key)}
+                              className="hover:text-red-500 w-5 h-5"
+                            >
+                              <Trash />
+                            </button>
+                          )}
                         </div>
                       )}
                     </td>

@@ -8,6 +8,7 @@ import RadioListbox from '../Generic/Listboxes/RadioListbox';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
 
+import { ReservedAttributeKeys } from '../../helpers/constants/attributes';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { AdditionalFields, Attribute } from '../../helpers/types/attributes';
 
@@ -201,27 +202,44 @@ function EditAttributeForm({
               </div>
             )}
 
-          <div className="flex items-center mt-2">
-            {isViewAttributeDialogOpen ? (
-              <div>
-                <ButtonPrimary
-                  type="button"
-                  onClick={() => setIsViewAttributeDialogOpen(false)}
-                  title="Edit Attribute"
-                  className="mr-2"
-                >
-                  Edit Attribute
-                </ButtonPrimary>
-              </div>
-            ) : (
-              <ButtonPrimary type="submit" title="Update" className="mr-2">
-                Update
-              </ButtonPrimary>
-            )}
-            <ButtonGhost type="button" onClick={onClose}>
-              Cancel
-            </ButtonGhost>
-          </div>
+          {attribute ? (
+            <div className="flex items-center mt-2">
+              {ReservedAttributeKeys.indexOf(attribute?.key) === -1 && (
+                <>
+                  {isViewAttributeDialogOpen ? (
+                    <div>
+                      <ButtonPrimary
+                        type="button"
+                        onClick={() => setIsViewAttributeDialogOpen(false)}
+                        title="Edit Attribute"
+                        className="mr-2"
+                      >
+                        Edit Attribute {attribute.key}
+                      </ButtonPrimary>
+                    </div>
+                  ) : (
+                    <ButtonPrimary
+                      type="submit"
+                      title="Update"
+                      className="mr-2"
+                    >
+                      Update
+                    </ButtonPrimary>
+                  )}
+                </>
+              )}
+
+              <ButtonGhost type="button" onClick={onClose}>
+                {isViewAttributeDialogOpen ? (
+                  <span>Close</span>
+                ) : (
+                  <span>Cancel</span>
+                )}
+              </ButtonGhost>
+            </div>
+          ) : (
+            <div className="h-8"></div>
+          )}
         </div>
       </form>
     </div>
