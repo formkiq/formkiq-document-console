@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
-import { NavLink, useLocation, useSearchParams } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Mode } from 'vanilla-jsoneditor';
+
 import { Close, Save, Spinner } from '../../Components/Icons/icons';
 import SchemaMenu from '../../Components/Schemas/SchemaMenu';
 import SchemaPage from '../../Components/Schemas/SchemaPage';
 import { JSONEditorReact } from '../../Components/TextEditors/JsonEditor';
+
 import { useAuthenticatedState } from '../../Store/reducers/auth';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import {
@@ -15,18 +17,21 @@ import {
   setSiteSchema,
 } from '../../Store/reducers/schemas';
 import { useAppDispatch } from '../../Store/store';
+
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
 import { Schema as SchemaType } from '../../helpers/types/schemas';
+import { useJsonEditor } from '../../hooks/json-editor.hook';
 
 function SiteSchema() {
+  const pathname = decodeURI(useLocation().pathname);
+
   const { user } = useAuthenticatedState();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
-  const pathname = decodeURI(useLocation().pathname);
   const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
@@ -35,13 +40,18 @@ function SiteSchema() {
     hasWorkspaces,
     workspaceSites
   );
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const editor = searchParams.get('jsonEditor');
-  const editing = searchParams.get('editing');
   const { siteSchema } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
-  const [isEditing, setIsEditing] = useState(editing === 'true');
+
+  const {
+    setContent,
+    content,
+    handleChange,
+    editor,
+    closeEditor,
+    isEditing,
+    schemaMenuEditClick,
+  } = useJsonEditor({ schema: siteSchema });
 
   useEffect(() => {
     if (!siteId) {
@@ -49,12 +59,6 @@ function SiteSchema() {
     }
     dispatch(fetchSiteSchema({ siteId }));
   }, []);
-
-  // JSON editor
-  const [content, setContent] = useState({
-    text: undefined,
-    json: siteSchema,
-  });
 
   useEffect(() => {
     setContent({
@@ -126,23 +130,6 @@ function SiteSchema() {
     }
   };
 
-  const handleChange = (value: any) => {
-    if (value.json) {
-      setContent(value);
-    } else if (value.text) {
-      setContent(value);
-    }
-  };
-  const closeEditor = () => {
-    searchParams.delete('jsonEditor');
-    searchParams.delete('editing');
-    setSearchParams(searchParams);
-  };
-
-  useEffect(() => {
-    setIsEditing(editing === 'true');
-  }, [editing]);
-
   return (
     <>
       <Helmet>
@@ -199,10 +186,7 @@ function SiteSchema() {
         ) : (
           <div className="p-4">
             <SchemaMenu
-              onEditClick={() => {
-                searchParams.set('editing', 'true');
-                setSearchParams(searchParams);
-              }}
+              onEditClick={schemaMenuEditClick}
               isEditing={isEditing}
             />
             <SchemaPage
