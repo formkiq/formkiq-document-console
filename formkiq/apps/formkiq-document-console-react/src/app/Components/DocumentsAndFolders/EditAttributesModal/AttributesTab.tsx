@@ -129,9 +129,13 @@ function AttributesTab({ onDocumentDataChange, siteId, value, getValue }: any) {
       newAttributeValue
     ).then((res) => {
       if (res.status !== 200) {
+        const errorMessage =
+          res.errors && res.errors.length > 0
+            ? res.errors[0].error
+            : 'Error updating attribute';
         dispatch(
           openNotificationDialog({
-            dialogTitle: 'Error updating attribute',
+            dialogTitle: errorMessage,
           })
         );
         return;

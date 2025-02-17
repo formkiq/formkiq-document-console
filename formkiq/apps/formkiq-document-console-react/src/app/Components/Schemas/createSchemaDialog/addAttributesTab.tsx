@@ -1,7 +1,7 @@
-import { Close } from '../../Icons/icons';
-import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
+import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
+import { Close } from '../../Icons/icons';
 
 type AddTagsTabProps = {
   attributeKeys: { key: string; title: string }[];
@@ -15,12 +15,20 @@ type AddTagsTabProps = {
   addAllowedValue: () => void;
   allowedValues: string[];
   setAllowedValues: (keys: string[]) => void;
-  addAttributesToSchema: () => void;
+  addAttributesToSchema: (config?: {
+    minNumberOfValues: number;
+    maxNumberOfValues: number;
+  }) => void;
   deleteTagsFromSchema: (index: number) => void;
   attributes: any;
   allAttributes: any[];
   attributeType: 'required' | 'optional';
 };
+
+type ValidationMessage = {
+  text: string;
+  type: 'error' | 'warning';
+} | null;
 
 function AddAttributesTab({
   attributeKeys,
@@ -40,9 +48,67 @@ function AddAttributesTab({
   allAttributes,
   attributeType,
 }: AddTagsTabProps) {
+  // State for numeric steppers
+  const [minNumberOfValues, setMinNumberOfValues] = useState<number>(0);
+  // Set default max to -1, which now means "no maximum"
+  const [maxNumberOfValues, setMaxNumberOfValues] = useState<number>(-1);
+  const [validationMsg, setValidationMsg] = useState<ValidationMessage>(null);
+
+  // Validation function updated for max=-1 meaning no maximum.
+  const validateNumberOfValues = () => {
+    // Case 1: min=0, max=-1 (no maximum): no validation needed
+    if (minNumberOfValues === 0 && maxNumberOfValues === -1) {
+      setValidationMsg(null);
+      return true;
+    }
+
+    // Case 2: min=1 and max=-1 should be rejected, as required/optional check already covers this
+    if (minNumberOfValues === 1 && maxNumberOfValues === -1) {
+      setValidationMsg({
+        text: 'Setting rejected: Use required/optional check when minimum is 1.',
+        type: 'error',
+      });
+      return false;
+    }
+
+    // Case 3: min=0 and max=1 - only singular values allowed (warn the user)
+    if (minNumberOfValues === 0 && maxNumberOfValues === 1) {
+      setValidationMsg({
+        text: 'Note: With a max of 1, only single values (not arrays) will be allowed.',
+        type: 'warning',
+      });
+      return true;
+    }
+
+    // Case 4: if a maximum is provided (max !== -1) and min > max, then reject.
+    if (maxNumberOfValues !== -1 && minNumberOfValues > maxNumberOfValues) {
+      setValidationMsg({
+        text: 'Invalid: Minimum cannot be greater than Maximum.',
+        type: 'error',
+      });
+      return false;
+    }
+
+    // Clear any previous message if valid.
+    setValidationMsg(null);
+    return true;
+  };
+
+  // Validate on change
+  useEffect(() => {
+    validateNumberOfValues();
+  }, [minNumberOfValues, maxNumberOfValues]);
+
+  // Adjusted addAttributesToSchema to include the numeric settings if valid.
+  const handleAddAttributes = () => {
+    if (!validateNumberOfValues()) {
+      return; // Prevent saving if validation fails.
+    }
+    addAttributesToSchema({ minNumberOfValues, maxNumberOfValues });
+  };
+
   const toggleAddToDefault = (event: any, key: string) => {
-    if (!defaultValues) return;
-    if (!setDefaultValues) return;
+    if (!defaultValues || !setDefaultValues) return;
     event.stopPropagation();
     if (defaultValues.includes(key)) {
       setDefaultValues(defaultValues.filter((k: string) => k !== key));
@@ -54,32 +120,27 @@ function AddAttributesTab({
   const deleteAllowedValue = (event: any, key: string) => {
     event.stopPropagation();
     setAllowedValues(allowedValues.filter((k: string) => k !== key));
-    if (!defaultValues) return;
-    if (!setDefaultValues) return;
+    if (!defaultValues || !setDefaultValues) return;
     setDefaultValues(defaultValues.filter((k: string) => k !== key));
   };
 
   useEffect(() => {
     if (allowedValue) return;
+    const currentAttr = allAttributes.find((a: any) => a.key === tagsKey);
+    if (!currentAttr) return;
     // if boolean value, set allowedValue to false
-    if (
-      allAttributes.find((a: any) => a.key === tagsKey)?.dataType === 'BOOLEAN'
-    ) {
+    if (currentAttr.dataType === 'BOOLEAN') {
       setAllowedValue('false');
     }
     // if number value, set allowedValue to 0
-    if (
-      allAttributes.find((a: any) => a.key === tagsKey)?.dataType === 'NUMBER'
-    ) {
+    if (currentAttr.dataType === 'NUMBER') {
       setAllowedValue('0');
     }
     // if string value, set allowedValue to empty string
-    if (
-      allAttributes.find((a: any) => a.key === tagsKey)?.dataType === 'STRING'
-    ) {
+    if (currentAttr.dataType === 'STRING') {
       setAllowedValue('');
     }
-  }, [tagsKey, allowedValue]);
+  }, [tagsKey, allowedValue, allAttributes, setAllowedValue]);
 
   return (
     <>
@@ -97,10 +158,80 @@ function AddAttributesTab({
         )}
       </div>
 
+      {/* Show numeric steppers for data types that support multiple values */}
       {tagsKey &&
         allAttributes.find((a: any) => a.key === tagsKey)?.dataType !==
-          'KEY_ONLY' && (
+          'KEY_ONLY' &&
+        allAttributes.find((a: any) => a.key === tagsKey)?.dataType !==
+          'BOOLEAN' &&
+        allAttributes.find((a: any) => a.key === tagsKey)?.dataType !==
+          'WATERMARK' && (
+          <div className="flex flex-col gap-4 my-4">
+            <div>
+              <label className="font-bold text-sm block">
+                Min Number of Values
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  className="h-10 px-4 border border-neutral-300 text-sm rounded-md w-24"
+                  min="0"
+                  value={minNumberOfValues}
+                  onChange={(e) =>
+                    setMinNumberOfValues(parseInt(e.target.value) || 0)
+                  }
+                />
+                {minNumberOfValues === 0 && (
+                  <span className="text-xs text-gray-500">No Minimum</span>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="font-bold text-sm block">
+                Max Number of Values
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  className="h-10 px-4 border border-neutral-300 text-sm rounded-md w-24"
+                  min="-1"
+                  value={maxNumberOfValues}
+                  onChange={(e) =>
+                    setMaxNumberOfValues(parseInt(e.target.value))
+                  }
+                />
+                {maxNumberOfValues === -1 && (
+                  <span className="text-xs text-gray-500">No Maximum</span>
+                )}
+              </div>
+            </div>
+            {validationMsg && (
+              <p
+                className={`text-xs ${
+                  validationMsg.type === 'error' ? 'text-red-500' : 'text-black'
+                }`}
+              >
+                {validationMsg.text}
+              </p>
+            )}
+          </div>
+        )}
+
+      {tagsKey &&
+        allAttributes.find((a: any) => a.key === tagsKey)?.dataType !==
+          'KEY_ONLY' &&
+        allAttributes.find((a: any) => a.key === tagsKey)?.dataType !==
+          'WATERMARK' && (
           <>
+            <div className="font-bold text-sm">
+              Allowed Values
+              <span className="text-xs block">
+                (adding allowed values limits options to those values; to allow
+                any value according to this data type, leave this attribute
+                without allowed values)
+              </span>
+            </div>
             <div className="flex flex-row justify-between items-center gap-4 text-base">
               {allAttributes.find((a: any) => a.key === tagsKey)?.dataType ===
                 'STRING' && (
@@ -155,7 +286,7 @@ function AddAttributesTab({
               <div className="flex flex-col gap-2">
                 <div>
                   <p className="text-sm text-neutral-900 font-medium">
-                    Allowed Values{' '}
+                    Allowed Values
                   </p>
                   {defaultValues && (
                     <p className="text-xs text-neutral-500 font-medium">
@@ -164,7 +295,7 @@ function AddAttributesTab({
                   )}
                 </div>
                 <div className="flex flex-row justify-start flex-wrap gap-2 items-end">
-                  {allowedValues.map((key: string, i) => (
+                  {allowedValues.map((key: string, i: number) => (
                     <div
                       key={'allowed_' + i}
                       onClick={(e) => {
@@ -214,10 +345,10 @@ function AddAttributesTab({
                       No default value selected
                     </p>
                   ) : (
-                    defaultValues.map((key: string, i) => (
+                    defaultValues.map((key: string, i: number) => (
                       <div
                         key={'default_' + i}
-                        className="border border-neutral-500 text-neutral-900 py-1.5 px-3 text-xs font-bold uppercase text-neutral-900 rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2"
+                        className="border border-neutral-500 text-neutral-900 py-1.5 px-3 text-xs font-bold uppercase rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2"
                       >
                         <span className="text-ellipsis overflow-hidden">
                           {key}
@@ -245,11 +376,12 @@ function AddAttributesTab({
 
       {tagsKey.length > 0 && (
         <div className="h-8 flex">
-          <ButtonSecondary type="button" onClick={addAttributesToSchema}>
+          <ButtonSecondary type="button" onClick={handleAddAttributes}>
             ADD ATTRIBUTE
           </ButtonSecondary>
         </div>
       )}
+
       {attributes && attributes.length > 0 && (
         <>
           <h4 className="text-[10px] font-bold">ADDED</h4>
@@ -260,6 +392,8 @@ function AddAttributesTab({
                   <th className="w-4 px-4"> #</th>
                   <th> Key</th>
                   {attributeType === 'required' && <th> Default Values</th>}
+                  <th> Min Num Values</th>
+                  <th> Max Num Values</th>
                   <th> Allowed Values</th>
                   <th className="w-4 px-4"></th>
                 </tr>
@@ -269,6 +403,8 @@ function AddAttributesTab({
                   (
                     value: {
                       attributeKey: string;
+                      minNumberOfValues?: number;
+                      maxNumberOfValues?: number;
                       defaultValue?: string;
                       defaultValues?: string[];
                       allowedValues?: string[];
@@ -287,6 +423,12 @@ function AddAttributesTab({
                       <td className="text-sm text-ellipsis overflow-hidden">
                         {value.attributeKey}
                       </td>
+                      <td className="text-sm text-ellipsis overflow-hidden">
+                        {value.minNumberOfValues}
+                      </td>
+                      <td className="text-sm text-ellipsis overflow-hidden">
+                        {value.maxNumberOfValues}
+                      </td>
                       {attributeType === 'required' && (
                         <td className="text-sm text-ellipsis overflow-hidden">
                           {value.defaultValues &&
@@ -294,8 +436,10 @@ function AddAttributesTab({
                           {value.defaultValue}
                         </td>
                       )}
-                      <td className="text-sm  text-ellipsis overflow-hidden">
-                        {value.allowedValues && value.allowedValues.join(', ')}
+                      <td className="text-sm text-ellipsis overflow-hidden">
+                        {value.allowedValues
+                          ? value.allowedValues.join(', ')
+                          : '(any)'}
                       </td>
                       <td className="w-[30px]">
                         <button

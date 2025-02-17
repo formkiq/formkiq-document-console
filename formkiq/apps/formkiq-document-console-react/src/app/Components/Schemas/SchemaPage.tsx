@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
+// Update these import paths to match your project structure
+import { DocumentsService } from '../../helpers/services/documentsService';
+import { Schema } from '../../helpers/types/schemas';
 import {
   AttributesDataState,
   fetchAttributesData,
@@ -10,16 +14,14 @@ import {
   fetchSiteSchema,
 } from '../../Store/reducers/schemas';
 import { useAppDispatch } from '../../Store/store';
-import { DocumentsService } from '../../helpers/services/documentsService';
-import { Schema } from '../../helpers/types/schemas';
+
 import ButtonGhost from '../Generic/Buttons/ButtonGhost';
 import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonSecondary from '../Generic/Buttons/ButtonSecondary';
+import { CopyButton } from '../Generic/Buttons/CopyButton';
 import RadioCombobox from '../Generic/Listboxes/RadioCombobox';
 import { Close } from '../Icons/icons';
 import AddAttributesTab from './createSchemaDialog/addAttributesTab';
-import { useSearchParams } from 'react-router-dom';
-import { CopyButton } from '../Generic/Buttons/CopyButton';
 
 type SchemaPagePropsType = {
   isEditing: boolean;
@@ -39,7 +41,7 @@ function SchemaPage({
   const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [schema, setSchema] = useState(initialSchemaValue);
+  const [schema, setSchema] = useState<Schema>(initialSchemaValue);
   const { allAttributes } = useSelector(AttributesDataState);
 
   const [compositeKey, setCompositeKey] = useState<string>('');
@@ -55,7 +57,6 @@ function SchemaPage({
   );
 
   const [optionalKey, setOptionalKey] = useState<string>('');
-
   const [optionalAllowedValue, setOptionalAllowedValue] = useState<string>('');
   const [optionalAllowedValues, setOptionalAllowedValues] = useState<string[]>(
     []
@@ -66,7 +67,7 @@ function SchemaPage({
   >([]);
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
-    const keys = allAttributes.map((item) => ({
+    const keys = allAttributes.map((item: any) => ({
       key: item.key,
       title: item.key,
     }));
@@ -105,10 +106,9 @@ function SchemaPage({
     ) {
       delete newSchema.attributes.optional;
     }
-    // if defaultValues has single item set defaultValue
-    // delete empty default values
+    // if defaultValues has a single item, set defaultValue
     if (newSchema.attributes.required) {
-      const newRequired = newSchema.attributes.required.map((item) => {
+      const newRequired = newSchema.attributes.required.map((item: any) => {
         const newItem = { ...item };
         if (item.defaultValues && item.defaultValues.length === 1) {
           newItem.defaultValue = item.defaultValues[0];
@@ -127,12 +127,14 @@ function SchemaPage({
     }
     // delete empty optional attributes
     if (newSchema.attributes.optional) {
-      const newOptional: any = newSchema.attributes.optional.map((item) => {
-        if (item.allowedValues && item.allowedValues.length === 0) {
-          item.allowedValues = undefined;
+      const newOptional: any = newSchema.attributes.optional.map(
+        (item: any) => {
+          if (item.allowedValues && item.allowedValues.length === 0) {
+            item.allowedValues = undefined;
+          }
+          return item;
         }
-        return item;
-      });
+      );
       newSchema.attributes = { ...newSchema.attributes, optional: newOptional };
     }
 
@@ -140,7 +142,7 @@ function SchemaPage({
       if (!classificationId) return;
       DocumentsService.setClassification(siteId, classificationId, {
         classification: newSchema,
-      }).then((response) => {
+      }).then((response: any) => {
         if (response.status === 200) {
           dispatch(fetchClassificationSchema({ siteId, classificationId }));
           searchParams.delete('editing');
@@ -155,20 +157,24 @@ function SchemaPage({
         }
       });
     } else if (schemaType === 'site') {
-      DocumentsService.setSiteSchema(siteId, newSchema).then((response) => {
-        if (response.status === 200) {
-          dispatch(fetchSiteSchema({ siteId }));
-          searchParams.delete('editing');
-          setSearchParams(searchParams);
-          resetValues();
-        } else {
-          if (response.errors) {
-            dispatch(
-              openNotificationDialog({ dialogTitle: response.errors[0].error })
-            );
+      DocumentsService.setSiteSchema(siteId, newSchema).then(
+        (response: any) => {
+          if (response.status === 200) {
+            dispatch(fetchSiteSchema({ siteId }));
+            searchParams.delete('editing');
+            setSearchParams(searchParams);
+            resetValues();
+          } else {
+            if (response.errors) {
+              dispatch(
+                openNotificationDialog({
+                  dialogTitle: response.errors[0].error,
+                })
+              );
+            }
           }
         }
-      });
+      );
     }
   };
 
@@ -183,6 +189,7 @@ function SchemaPage({
     setCompositeKey('');
     setCompositeKeys([]);
   };
+
   const cancelEditing = () => {
     resetValues();
     setSchema(initialSchemaValue);
@@ -224,7 +231,6 @@ function SchemaPage({
     } else {
       newSchema.attributes.compositeKeys = [{ attributeKeys: compositeKeys }];
     }
-
     setSchema(newSchema);
     setCompositeKeys([]);
     setCompositeKey('');
@@ -242,11 +248,10 @@ function SchemaPage({
     });
   };
 
-  // methods for required values
+  // Methods for required values
+
   const addRequiredAllowedValue = () => {
-    if (requiredAllowedValue.length === 0) {
-      return;
-    }
+    if (requiredAllowedValue.length === 0) return;
     if (requiredAllowedValues.includes(requiredAllowedValue)) {
       dispatch(openNotificationDialog({ dialogTitle: 'Value already exists' }));
       return;
@@ -255,7 +260,11 @@ function SchemaPage({
     setRequiredAllowedValue('');
   };
 
-  const addRequiredToSchema = () => {
+  // Updated to accept an optional config with minNumberOfValues & maxNumberOfValues.
+  const addRequiredToSchema = (config?: {
+    minNumberOfValues: number;
+    maxNumberOfValues: number;
+  }) => {
     if (requiredKey.length === 0) {
       return;
     }
@@ -268,6 +277,7 @@ function SchemaPage({
       defaultValue: requiredDefaultValues[0] || '',
       defaultValues: requiredDefaultValues,
       allowedValues: requiredAllowedValues,
+      ...config,
     };
     if (newSchema.attributes.required !== undefined) {
       newSchema.attributes.required = [
@@ -299,9 +309,7 @@ function SchemaPage({
   // Methods for optional values
 
   const addOptionalAllowedValue = () => {
-    if (optionalAllowedValue.length === 0) {
-      return;
-    }
+    if (optionalAllowedValue.length === 0) return;
     if (optionalAllowedValues.includes(optionalAllowedValue)) {
       dispatch(openNotificationDialog({ dialogTitle: 'Value already exists' }));
       return;
@@ -309,7 +317,11 @@ function SchemaPage({
     setOptionalAllowedValues([...optionalAllowedValues, optionalAllowedValue]);
     setOptionalAllowedValue('');
   };
-  const addOptionalToSchema = () => {
+
+  const addOptionalToSchema = (config?: {
+    minNumberOfValues: number;
+    maxNumberOfValues: number;
+  }) => {
     if (optionalKey.length === 0) {
       return;
     }
@@ -317,18 +329,18 @@ function SchemaPage({
       name: schema.name,
       attributes: { ...schema.attributes },
     };
+    const newOptionalAttribute = {
+      attributeKey: optionalKey,
+      allowedValues: optionalAllowedValues,
+      ...config,
+    };
     if (newSchema.attributes.optional) {
       newSchema.attributes.optional = [
         ...newSchema.attributes.optional,
-        {
-          attributeKey: optionalKey,
-          allowedValues: optionalAllowedValues,
-        },
+        newOptionalAttribute,
       ];
     } else {
-      newSchema.attributes.optional = [
-        { attributeKey: optionalKey, allowedValues: optionalAllowedValues },
-      ];
+      newSchema.attributes.optional = [newOptionalAttribute];
     }
     setSchema(newSchema);
     setOptionalKey('');
@@ -489,35 +501,30 @@ function SchemaPage({
           <tbody>
             {schema.attributes.compositeKeys &&
             schema.attributes.compositeKeys.length > 0 ? (
-              schema.attributes.compositeKeys.map(
-                (item: { attributeKeys: string[] }, i: number) => (
-                  <tr
-                    key={'compositeKey_' + i}
-                    className="border border-neutral-300 px-4 h-12 text-neutral-900"
-                  >
-                    <td className="text-sm text-slate-500 px-4">
-                      <span className="text-gray-900 font-medium">{i + 1}</span>
+              schema.attributes.compositeKeys.map((item: any, i: number) => (
+                <tr
+                  key={'compositeKey_' + i}
+                  className="border border-neutral-300 px-4 h-12 text-neutral-900"
+                >
+                  <td className="text-sm text-slate-500 px-4">
+                    <span className="text-gray-900 font-medium">{i + 1}</span>
+                  </td>
+                  <td className="text-sm text-ellipsis overflow-hidden">
+                    {item?.attributeKeys.join(', ')}
+                  </td>
+                  {isEditing && (
+                    <td className="w-[30px]">
+                      <button
+                        type="button"
+                        className="w-4 h-4"
+                        onClick={() => deleteCompositeKeyFromSchema(i)}
+                      >
+                        <Close />
+                      </button>
                     </td>
-                    <td className="text-sm text-ellipsis overflow-hidden">
-                      {schema.attributes.compositeKeys &&
-                        schema.attributes.compositeKeys[i].attributeKeys.join(
-                          ', '
-                        )}
-                    </td>
-                    {isEditing && (
-                      <td className="w-[30px]">
-                        <button
-                          type="button"
-                          className="w-4 h-4"
-                          onClick={() => deleteCompositeKeyFromSchema(i)}
-                        >
-                          <Close />
-                        </button>
-                      </td>
-                    )}
-                  </tr>
-                )
-              )
+                  )}
+                </tr>
+              ))
             ) : (
               <tr className="border border-neutral-300 px-4 h-12 text-neutral-900">
                 <td
@@ -560,44 +567,42 @@ function SchemaPage({
                 <th className="w-4 px-4"> #</th>
                 <th> Key</th>
                 <th> Default Values</th>
+                <th> Min Num Values</th>
+                <th> Max Num Values</th>
                 <th> Allowed Values</th>
                 <th className="w-4 px-4"></th>
               </tr>
             </thead>
             <tbody>
               {schema.attributes.required ? (
-                schema.attributes.required.map(
-                  (
-                    value: {
-                      attributeKey: string;
-                      defaultValue?: string;
-                      defaultValues?: string[];
-                      allowedValues?: string[];
-                    },
-                    i: number
-                  ) => (
-                    <tr
-                      key={'tag_' + i}
-                      className="border border-neutral-300 px-4 h-12 text-neutral-900"
-                    >
-                      <td className="text-sm text-slate-500 px-4">
-                        <span className="text-gray-900 font-medium">
-                          {i + 1}
-                        </span>
-                      </td>
-                      <td className="text-sm text-ellipsis overflow-hidden">
-                        {value.attributeKey}
-                      </td>
-                      <td className="text-sm text-ellipsis overflow-hidden">
-                        {value.defaultValues && value.defaultValues.join(', ')}
-                        {value.defaultValue}
-                      </td>
-                      <td className="text-sm  text-ellipsis overflow-hidden">
-                        {value.allowedValues && value.allowedValues.join(', ')}
-                      </td>
-                    </tr>
-                  )
-                )
+                schema.attributes.required.map((value: any, i: number) => (
+                  <tr
+                    key={'tag_' + i}
+                    className="border border-neutral-300 px-4 h-12 text-neutral-900"
+                  >
+                    <td className="text-sm text-slate-500 px-4">
+                      <span className="text-gray-900 font-medium">{i + 1}</span>
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.attributeKey}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.minNumberOfValues}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.maxNumberOfValues}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.defaultValues && value.defaultValues.join(', ')}
+                      {value.defaultValue}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.allowedValues
+                        ? value.allowedValues.join(', ')
+                        : '(any)'}
+                    </td>
+                  </tr>
+                ))
               ) : (
                 <tr className="border border-neutral-300 px-4 h-12 text-neutral-900">
                   <td
@@ -637,41 +642,39 @@ function SchemaPage({
               <tr className="border border-neutral-300 px-4 text-neutral-900">
                 <th className="w-4 px-4"> #</th>
                 <th> Key</th>
+                <th> Min Num Values</th>
+                <th> Max Num Values</th>
                 <th> Allowed Values</th>
                 <th className="w-4 px-4"></th>
               </tr>
             </thead>
             <tbody>
               {schema.attributes.optional ? (
-                schema.attributes.optional.map(
-                  (
-                    value: {
-                      attributeKey: string;
-                      defaultValue?: string;
-                      defaultValues?: string[];
-                      allowedValues?: string[];
-                    },
-                    i: number
-                  ) => (
-                    <tr
-                      key={'tag_' + i}
-                      className="border border-neutral-300 px-4 h-12 text-neutral-900"
-                    >
-                      <td className="text-sm text-slate-500 px-4">
-                        <span className="text-gray-900 font-medium">
-                          {i + 1}
-                        </span>
-                      </td>
-                      <td className="text-sm text-ellipsis overflow-hidden">
-                        {value.attributeKey}
-                      </td>
-                      <td className="text-sm text-ellipsis overflow-hidden">
-                        {value.allowedValues && value.allowedValues.join(', ')}
-                      </td>
-                      <td></td>
-                    </tr>
-                  )
-                )
+                schema.attributes.optional.map((value: any, i: number) => (
+                  <tr
+                    key={'tag_' + i}
+                    className="border border-neutral-300 px-4 h-12 text-neutral-900"
+                  >
+                    <td className="text-sm text-slate-500 px-4">
+                      <span className="text-gray-900 font-medium">{i + 1}</span>
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.attributeKey}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.minNumberOfValues}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.maxNumberOfValues}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.allowedValues
+                        ? value.allowedValues.join(', ')
+                        : '(any)'}
+                    </td>
+                    <td></td>
+                  </tr>
+                ))
               ) : (
                 <tr className="border border-neutral-300 px-4 h-12 text-neutral-900">
                   <td
