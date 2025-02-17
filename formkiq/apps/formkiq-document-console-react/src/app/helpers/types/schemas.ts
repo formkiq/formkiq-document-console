@@ -10,10 +10,14 @@ export interface SchemaAttributes {
     defaultValue?: string;
     defaultValues?: string[];
     allowedValues?: string[];
+    minNumberOfValues?: number;
+    maxNumberOfValues?: number;
   }[];
   optional?: {
     attributeKey: string;
     allowedValues?: string[];
+    minNumberOfValues?: number;
+    maxNumberOfValues?: number;
   }[];
   allowAdditionalAttributes: boolean;
 }
