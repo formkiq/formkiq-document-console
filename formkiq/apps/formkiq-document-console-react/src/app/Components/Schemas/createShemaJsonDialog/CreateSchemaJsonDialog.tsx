@@ -1,6 +1,6 @@
 import { Dialog } from '@headlessui/react';
-import { Mode } from 'vanilla-jsoneditor';
 import { useSelector } from 'react-redux';
+import { Mode } from 'vanilla-jsoneditor';
 
 import { JSONEditorReact } from '../../TextEditors/JsonEditor';
 
@@ -10,15 +10,15 @@ import {
 } from '../../../Store/reducers/schemas';
 import { useAppDispatch } from '../../../Store/store';
 
-import { useJsonEditor } from '../../../hooks/json-editor.hook';
+import { useEffect } from 'react';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { Schema as SchemaType } from '../../../helpers/types/schemas';
 import {
   isValidJSON,
   isValidString,
 } from '../../../helpers/utils/json-editor-validators';
+import { useJsonEditor } from '../../../hooks/json-editor.hook';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
-import { DocumentsService } from '../../../helpers/services/documentsService';
-import { Schema as SchemaType } from '../../../helpers/types/schemas';
-import { useEffect } from 'react';
 
 type CreateSchemaJsonDialogPropsType = {
   isOpen: boolean;
@@ -31,7 +31,7 @@ const CreateSchemaJsonDialog = ({
   setIsOpen,
   siteId,
 }: CreateSchemaJsonDialogPropsType) => {
-  const { classificationSchema } = useSelector(SchemasState);
+  let { classificationSchema } = useSelector(SchemasState);
   const dispatch = useAppDispatch();
 
   const { content, setContent, handleChange } = useJsonEditor({
@@ -88,7 +88,7 @@ const CreateSchemaJsonDialog = ({
           <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
             <div className="w-full max-w-3xl min-h-32 bg-white p-6 rounded-md flex flex-col">
               <Dialog.Title className="text-2xl font-bold mb-4 text-center">
-                Create New Schema by JSON
+                Create New Schema with JSON
               </Dialog.Title>
 
               <div className="inline-block h-full w-full flex-grow">
