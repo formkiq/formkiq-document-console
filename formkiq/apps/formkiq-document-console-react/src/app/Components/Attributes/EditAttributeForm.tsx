@@ -7,6 +7,7 @@ import { Attribute, AttributeDataType } from '../../helpers/types/attributes';
 import ButtonGhost from '../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../Generic/Buttons/ButtonPrimary';
 import RadioListbox from '../Generic/Listboxes/RadioListbox';
+import { isUUIDv4orV5 } from '../../helpers/services/toolService';
 
 function EditAttributeForm({
   updateAllAttributes,
@@ -44,6 +45,29 @@ function EditAttributeForm({
           openNotificationDialog({
             dialogTitle:
               'Either watermark text or image document ID must be provided.',
+          })
+        );
+        return;
+      }
+      // Validate imageDocumentId format if provided
+      if (data.imageDocumentId && !isUUIDv4orV5(data.imageDocumentId)) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle: 'Invalid image document ID.',
+          })
+        );
+        return;
+      }
+      // Check if document exists
+      const documentResponse = await DocumentsService.getDocumentById(
+        data.imageDocumentId,
+        siteId
+      );
+      if (documentResponse.status !== 200) {
+        dispatch(
+          openNotificationDialog({
+            dialogTitle:
+              'Image document not found. Please provide a valid document ID.',
           })
         );
         return;
