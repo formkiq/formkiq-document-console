@@ -432,7 +432,7 @@ function Navbar() {
       if (documentPath !== undefined) {
         const folderPath = documentPath
           .replace(/^\/|\/$/g, '')
-          .substring(0, documentPath.lastIndexOf('/') - 1);
+          .substring(0, documentPath.lastIndexOf('/'));
         navigate(
           currentDocumentsRootUri +
             (folderPath ? '/folders/' + folderPath : '/') +
