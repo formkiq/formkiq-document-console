@@ -242,6 +242,7 @@ export function Attributes() {
       />
       <EditAttributeModal
         attribute={attributeToEdit}
+        isAttributesInUse={isAttributesInUse}
         isOpened={isEditAttributeDialogOpen}
         onClose={onEditAttributeModalClose}
         siteId={currentSiteId}

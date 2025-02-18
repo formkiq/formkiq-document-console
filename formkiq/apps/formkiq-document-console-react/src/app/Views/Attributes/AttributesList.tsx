@@ -105,15 +105,18 @@ export function AttributesList({
                         : 'Loading...'}
                     </td>
                     <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pr-8 text-neutral-900 nodark:text-slate-400">
-                      {!isReadOnlyUser && !isAttributesInUse[attribute.key] && (
-                        <div className="flex gap-2 items-center">
+                      <div className="flex gap-2 items-center">
+                        {!isReadOnlyUser && (
                           <button
                             onClick={() => onEdit(attribute.key)}
                             className="hover:text-primary-500 w-6 h-6"
                           >
                             <View />
                           </button>
-                          {ReservedAttributeKeys.indexOf(attribute?.key) ===
+                        )}
+                        {!isReadOnlyUser &&
+                          !isAttributesInUse[attribute.key] &&
+                          ReservedAttributeKeys.indexOf(attribute?.key) ===
                             -1 && (
                             <button
                               onClick={() => onDelete(attribute.key)}
@@ -122,8 +125,7 @@ export function AttributesList({
                               <Trash />
                             </button>
                           )}
-                        </div>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 );

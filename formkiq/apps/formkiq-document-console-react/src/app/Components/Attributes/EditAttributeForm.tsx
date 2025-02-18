@@ -19,6 +19,7 @@ interface EditAttributeFormProps {
   attribute: Attribute;
   isViewAttributeDialogOpen: boolean;
   setIsViewAttributeDialogOpen: (isOpen: boolean) => void;
+  allowEdit: boolean;
 }
 
 function EditAttributeForm({
@@ -28,6 +29,7 @@ function EditAttributeForm({
   onClose,
   isViewAttributeDialogOpen,
   setIsViewAttributeDialogOpen,
+  allowEdit,
 }: EditAttributeFormProps) {
   const [selectedAttributeDataType, setSelectedAttributeDataType] = useState(
     attribute?.dataType
@@ -49,7 +51,7 @@ function EditAttributeForm({
 
     // Validate WATERMARK: ensure at least one watermark field is provided.
     if (selectedAttributeDataType === 'WATERMARK') {
-      if (!data.watermarkText && !data.imageDocumentId) {
+      if (!data.text && !data.imageDocumentId) {
         dispatch(
           openNotificationDialog({
             dialogTitle:
@@ -68,7 +70,7 @@ function EditAttributeForm({
         type: 'STANDARD',
         ...(selectedAttributeDataType === 'WATERMARK' && {
           watermark: {
-            text: data.watermarkText || '',
+            text: data.text || '',
             imageDocumentId: data.imageDocumentId || '',
           },
         }),
@@ -143,7 +145,7 @@ function EditAttributeForm({
 
   const attributeAdditionalFieldsValues = (
     attribute as Record<string, AdditionalFields>
-  )?.[attribute.key.toLowerCase()];
+  )?.[attribute.dataType.toLowerCase()];
 
   return (
     <div className="mt-2 ml-2 pt-1 flex flex-col justify-center items-center w-full bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 rounded-md">
@@ -180,18 +182,26 @@ function EditAttributeForm({
             </div>
           </div>
 
-          {attributeAdditionalFieldsValues?.text &&
-            attributeAdditionalFieldsValues?.imageDocumentId && (
-              <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-col gap-2 mt-2">
+            {attributeAdditionalFieldsValues?.text && (
+              <div className="flex flex-col gap-1">
+                <label>Text</label>
                 <input
                   type="text"
+                  disabled={isViewAttributeDialogOpen}
                   className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
                   {...register('text')}
                   defaultValue={attributeAdditionalFieldsValues?.text}
-                  placeholder="Watermark Text"
+                  placeholder="Text"
                 />
+              </div>
+            )}
+            {attributeAdditionalFieldsValues?.imageDocumentId && (
+              <div className="flex flex-col gap-1">
+                <label>Image Document ID</label>
                 <input
                   type="text"
+                  disabled={isViewAttributeDialogOpen}
                   className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
                   {...register('imageDocumentId')}
                   defaultValue={
@@ -201,33 +211,35 @@ function EditAttributeForm({
                 />
               </div>
             )}
+          </div>
 
           {attribute ? (
             <div className="flex items-center mt-2">
-              {ReservedAttributeKeys.indexOf(attribute?.key) === -1 && (
-                <>
-                  {isViewAttributeDialogOpen ? (
-                    <div>
+              {ReservedAttributeKeys.indexOf(attribute?.key) === -1 &&
+                allowEdit && (
+                  <>
+                    {isViewAttributeDialogOpen ? (
+                      <div>
+                        <ButtonPrimary
+                          type="button"
+                          onClick={() => setIsViewAttributeDialogOpen(false)}
+                          title="Edit Attribute"
+                          className="mr-2"
+                        >
+                          Edit Attribute {attribute.key}
+                        </ButtonPrimary>
+                      </div>
+                    ) : (
                       <ButtonPrimary
-                        type="button"
-                        onClick={() => setIsViewAttributeDialogOpen(false)}
-                        title="Edit Attribute"
+                        type="submit"
+                        title="Update"
                         className="mr-2"
                       >
-                        Edit Attribute {attribute.key}
+                        Update
                       </ButtonPrimary>
-                    </div>
-                  ) : (
-                    <ButtonPrimary
-                      type="submit"
-                      title="Update"
-                      className="mr-2"
-                    >
-                      Update
-                    </ButtonPrimary>
-                  )}
-                </>
-              )}
+                    )}
+                  </>
+                )}
 
               <ButtonGhost type="button" onClick={onClose}>
                 {isViewAttributeDialogOpen ? (

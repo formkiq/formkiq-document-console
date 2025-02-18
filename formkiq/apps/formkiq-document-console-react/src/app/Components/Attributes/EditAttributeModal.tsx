@@ -14,10 +14,12 @@ interface EditAttributeModalProps {
   attribute: Attribute;
   isViewAttributeDialogOpen: boolean;
   setIsViewAttributeDialogOpen: (isOpen: boolean) => void;
+  isAttributesInUse: Record<string, boolean>;
 }
 
 export default function EditAttributeModal({
   attribute,
+  isAttributesInUse,
   isOpened,
   onClose,
   siteId,
@@ -26,6 +28,8 @@ export default function EditAttributeModal({
   setIsViewAttributeDialogOpen,
 }: EditAttributeModalProps) {
   const doneButtonRef = useRef(null);
+
+  const allowEdit = !isAttributesInUse[attribute?.key];
 
   const closeDialog = () => {
     onClose();
@@ -87,6 +91,7 @@ export default function EditAttributeModal({
                       setIsViewAttributeDialogOpen={
                         setIsViewAttributeDialogOpen
                       }
+                      allowEdit={allowEdit}
                     />
                   </div>
                 </div>
