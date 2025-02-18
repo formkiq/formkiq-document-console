@@ -1313,6 +1313,57 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async getLocales(
+    siteId: string,
+    limit = 20,
+    next = null
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().sitesApi.getLocales({ siteId, limit, next });
+  }
+
+  @formkiqAPIHandler
+  public static addLocale(locale: string, siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().sitesApi.addLocale({
+      addApiLocaleParameters: { locale },
+      siteId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static setLocale(
+    locale: string,
+    siteId: string,
+    localeBody: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    console.error('not implemented');
+    return this.getFormkiqClient().sitesApi.set({
+      locale,
+      siteId,
+      localeBody,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static deleteLocale(locale: string, siteId: string): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().sitesApi.deleteLocale({
+      locale,
+      siteId,
+    });
+  }
+
+  @formkiqAPIHandler
   public static async getWebhooks(
     siteId: string,
     limit = 20,

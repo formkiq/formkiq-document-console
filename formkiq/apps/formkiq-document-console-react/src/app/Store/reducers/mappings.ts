@@ -101,7 +101,6 @@ export const updateMapping = createAsyncThunk(
     const { siteId, mappingId, mapping } = data;
     await DocumentsService.setMapping(siteId, mappingId, mapping).then(
       (response) => {
-        console.log(response);
         if (response.status !== 200) {
           let dialogTitle = 'Error updating mapping';
           if (response.errors) {

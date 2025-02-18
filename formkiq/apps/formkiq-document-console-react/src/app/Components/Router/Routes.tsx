@@ -75,6 +75,7 @@ const Attributes = React.lazy(
   () => import('../../Views/Attributes/attributes')
 );
 
+const Locales = React.lazy(() => import('../../Views/Locales/locales'));
 const Mappings = React.lazy(() => import('../../Views/Mappings/mappings'));
 const Mapping = React.lazy(() => import('../../Views/Mappings/mapping'));
 const SitesManagement = React.lazy(
@@ -205,6 +206,7 @@ const RoutesMapper = () => {
         element={<Classification />}
       ></Route>
 
+      <Route path="/locales" element={<Locales />}></Route>
       <Route
         path="/workspaces/:siteId/workflows/designer"
         element={<WorkflowDesigner />}
@@ -261,7 +263,10 @@ const RoutesMapper = () => {
         path="/admin/user-activities/workspaces/:siteId/:id"
         element={<UserActivities />}
       ></Route>
-      <Route path="/admin/user-activities/:id" element={<UserActivities />}></Route>
+      <Route
+        path="/admin/user-activities/:id"
+        element={<UserActivities />}
+      ></Route>
       <Route
         path="/admin/sites-management"
         element={<SitesManagement />}
