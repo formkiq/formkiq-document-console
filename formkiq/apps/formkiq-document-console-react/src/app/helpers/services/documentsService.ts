@@ -1265,8 +1265,12 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getSites(): Promise<any> {
-    return this.getFormkiqClient().sitesApi.getSites();
+  public static async getSites(
+    status: 'ACTIVE' | 'INACTIVE' | null = null
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.getSites({
+      status,
+    });
   }
 
   @formkiqAPIHandler
