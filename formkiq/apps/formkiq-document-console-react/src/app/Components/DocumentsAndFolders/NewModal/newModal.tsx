@@ -35,14 +35,37 @@ export default function NewModal({
   value: ILine | null;
   onDocumentDataChange: any;
 }) {
-  const { register, reset, setFocus } = useForm();
+  const { register, reset, setFocus, watch, setValue } = useForm();
   const newFormRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const pathname = decodeURI(useLocation().pathname);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formActive, setFormActive] = useState(true);
   const [itemToCreate, setItemToCreate] = useState('');
-  const [searchParams, setSearchParams] = useSearchParams();
+
+  const filenameRegex = /^(.*)\.([a-z0-9]+)$/i;
+
+  // mapping of file extensions to content types
+  const extensionToContentType: { [key: string]: string } = {
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xls: 'application/vnd.ms-excel',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ppt: 'application/vnd.ms-powerpoint',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    bmp: 'image/bmp',
+    svg: 'image/svg+xml',
+    txt: 'text/plain',
+    csv: 'text/csv',
+    md: 'text/markdown',
+    json: 'application/json',
+  };
 
   const itemsRequiringNameField = [
     'folder',
@@ -53,6 +76,28 @@ export default function NewModal({
     'deeplink',
   ];
   const itemsRequiringDeeplinkPathField = ['deeplink'];
+
+  // Watch the deeplinkPath and name fields so that we can auto-populate name if needed.
+  const deeplinkPathValue = watch('deeplinkPath');
+  const nameFieldValue = watch('name');
+
+  // When the deeplinkPath changes, if we're creating a deeplink and the name is blank,
+  // derive a default name from the deeplink (the string after the last '/')
+  useEffect(() => {
+    if (itemToCreate === 'deeplink' && !nameFieldValue && deeplinkPathValue) {
+      const defaultName = deeplinkPathValue.split('/').pop();
+      if (defaultName) {
+        const match = defaultName.match(filenameRegex);
+        if (match) {
+          const ext = match[2].toLowerCase();
+          // Only set the name if the extension is recognized in our mapping.
+          if (extensionToContentType[ext]) {
+            setValue('name', defaultName);
+          }
+        }
+      }
+    }
+  }, [deeplinkPathValue, nameFieldValue, itemToCreate, setValue]);
 
   useEffect(() => {
     if (isOpened) {
@@ -107,41 +152,55 @@ export default function NewModal({
       setFocus('name');
     }, 50);
   };
+
+  const getContentTypeFromName = (fileName: string): string => {
+    const parts = fileName.split('.');
+    if (parts.length > 1) {
+      const ext = parts.pop()!.toLowerCase();
+      return extensionToContentType[ext] || 'text/html';
+    }
+    return 'text/html';
+  };
+
   const onNewFormSubmit = (event: any, value: ILine | null) => {
+    event.preventDefault();
     if (formActive && value && newFormRef.current) {
       if (itemToCreate.length) {
         const formData = new FormData(newFormRef.current);
-        let nameValue: string | File | null = formData.get('name');
-        const deeplinkPath: string | File | null = formData.get('deeplinkPath');
-        if (!nameValue || typeof nameValue === 'object' || !nameValue.length) {
+        // Get the "name" field. The auto-population above should have set it if needed.
+        let nameValue: string =
+          typeof formData.get('name') === 'string'
+            ? formData.get('name')!.toString().trim()
+            : '';
+        const deeplinkField = formData.get('deeplinkPath');
+        const deeplinkPath =
+          typeof deeplinkField === 'string' ? deeplinkField.trim() : '';
+
+        if (!nameValue || nameValue.length === 0) {
           dispatch(
             openDialog({ dialogTitle: 'You must provide a name for the item' })
           );
-          event.preventDefault();
           return;
         }
-        // TODO: add file regex check
+
+        // Remove '#' if present.
         if (nameValue.indexOf('#') !== -1) {
           nameValue = nameValue.replace(/#/g, '');
         }
 
-        // check if adding deeplink document
+        // Check if adding a deeplink document
         if (itemToCreate === 'deeplink') {
-          if (
-            !deeplinkPath ||
-            typeof deeplinkPath === 'object' ||
-            !deeplinkPath.length
-          ) {
+          if (!deeplinkPath || deeplinkPath.length === 0) {
             dispatch(
               openDialog({
                 dialogTitle: 'You must provide a deeplink path for the item',
               })
             );
-            event.preventDefault();
             return;
           }
         }
-        // TODO: check if name exists in folder
+
+        // Create a folder.
         if (itemToCreate === 'folder') {
           DocumentsService.createFolder(value.folder, nameValue, siteId).then(
             () => {
@@ -149,15 +208,17 @@ export default function NewModal({
             }
           );
         } else if (itemToCreate === 'deeplink') {
-          const documentParamaters = {
+          // Derive content type from file name.
+          const contentType = getContentTypeFromName(nameValue);
+          const documentParameters = {
             path: value.folder
               ? `${value.folder}/${nameValue}`
               : `${nameValue}`,
-            contentType: 'text/html',
+            contentType: contentType,
             deepLinkPath: deeplinkPath,
           };
-          DocumentsService.addDocument(siteId, documentParamaters).then(
-            (res) => {
+          DocumentsService.addDocument(siteId, documentParameters).then(
+            (res: any) => {
               if (res.status === 201) {
                 closeDialog();
               } else {
@@ -165,7 +226,47 @@ export default function NewModal({
                   dispatch(
                     openDialog({
                       dialogTitle:
-                        'Error.' +
+                        'Error. ' +
+                        res.errors.map((err: any) => err.error).join(', \n'),
+                    })
+                  );
+                } else {
+                  dispatch(
+                    openDialog({
+                      dialogTitle: 'An error has occurred.',
+                    })
+                  );
+                }
+              }
+            }
+          );
+        } else if (itemToCreate === 'md') {
+          // For markdown, ensure proper extension and content type.
+          if (nameValue.indexOf('.' + itemToCreate) === -1) {
+            nameValue += '.' + itemToCreate;
+          }
+          const documentParameters = {
+            path: value.folder
+              ? `${value.folder}/${nameValue}`
+              : `${nameValue}`,
+            contentType: extensionToContentType['md'],
+            content: ' ',
+          };
+          DocumentsService.addDocument(siteId, documentParameters).then(
+            (res: any) => {
+              if (res.status === 201) {
+                navigate(pathname + '/' + res.documentId + '/edit');
+                setItemToCreate('');
+                setFormActive(false);
+                reset();
+                onDocumentDataChange();
+                onClose();
+              } else {
+                if (res.errors) {
+                  dispatch(
+                    openDialog({
+                      dialogTitle:
+                        'Error. ' +
                         res.errors.map((err: any) => err.error).join(', \n'),
                     })
                   );
@@ -180,56 +281,48 @@ export default function NewModal({
             }
           );
         } else {
+          // For all other file types, check and append the extension if needed.
           if (nameValue.indexOf('.' + itemToCreate) === -1) {
             nameValue += '.' + itemToCreate;
           }
-          if (itemToCreate === 'md') {
-            const documentParameters = {
-              path: value.folder
-                ? `${value.folder}/${nameValue}`
-                : `${nameValue}`,
-              contentType: 'text/markdown',
-              content: ' ',
-            };
-            DocumentsService.addDocument(siteId, documentParameters).then(
-              (res) => {
-                if (res.status === 201) {
-                  navigate(pathname + '/' + res.documentId + '/edit');
-                  setItemToCreate('');
-                  setFormActive(false);
-                  reset();
-                  onDocumentDataChange();
-                  onClose();
+          // Determine the content type from the mapping.
+          const contentType =
+            extensionToContentType[itemToCreate] || 'text/html';
+          const documentParameters = {
+            path: value.folder
+              ? `${value.folder}/${nameValue}`
+              : `${nameValue}`,
+            contentType: contentType,
+            content: '',
+          };
+          DocumentsService.addDocument(siteId, documentParameters).then(
+            (res: any) => {
+              if (res.status === 201) {
+                navigate(pathname + '/' + res.documentId + '/edit');
+                setItemToCreate('');
+                setFormActive(false);
+                reset();
+                onDocumentDataChange();
+                onClose();
+              } else {
+                if (res.errors) {
+                  dispatch(
+                    openDialog({
+                      dialogTitle:
+                        'Error. ' +
+                        res.errors.map((err: any) => err.error).join(', \n'),
+                    })
+                  );
                 } else {
-                  if (res.errors) {
-                    dispatch(
-                      openDialog({
-                        dialogTitle:
-                          'Error.' +
-                          res.errors.map((err: any) => err.error).join(', \n'),
-                      })
-                    );
-                  } else {
-                    dispatch(
-                      openDialog({
-                        dialogTitle: 'An error has occurred.',
-                      })
-                    );
-                  }
+                  dispatch(
+                    openDialog({
+                      dialogTitle: 'An error has occurred.',
+                    })
+                  );
                 }
               }
-            );
-          } else {
-            navigate(
-              '/documents/new/' +
-                itemToCreate +
-                '?path=' +
-                value.folder +
-                '/' +
-                nameValue
-            );
-            closeDialog();
-          }
+            }
+          );
         }
       } else {
         dispatch(
@@ -239,7 +332,6 @@ export default function NewModal({
         );
       }
     }
-    event.preventDefault();
   };
 
   return (
@@ -286,6 +378,7 @@ export default function NewModal({
                     </div>
                   </div>
                   <div className="flex flex-wrap mt-4">
+                    {/* Render buttons for folder, upload, deeplink, markdown, etc. */}
                     <div
                       data-test-id="new-document-folder"
                       className={`${
@@ -355,7 +448,6 @@ export default function NewModal({
                         Add a Deeplink Document
                       </div>
                     </div>
-
                     <div
                       className={`${
                         itemToCreate === 'md'
@@ -375,7 +467,6 @@ export default function NewModal({
                         Markdown Document
                       </div>
                     </div>
-
                     {formkiqVersion.type !== 'core' && (
                       <div
                         className={`${
@@ -434,6 +525,27 @@ export default function NewModal({
                       ref={newFormRef}
                       onSubmit={(event) => onNewFormSubmit(event, value)}
                     >
+                      <div className="flex flex-wrap items-start mb-4 relative w-full">
+                        <div
+                          className={
+                            (itemsRequiringDeeplinkPathField.indexOf(
+                              itemToCreate
+                            ) > -1
+                              ? ''
+                              : 'hidden ') + ' w-full mr-12'
+                          }
+                        >
+                          <input
+                            aria-label="DeepLink Path"
+                            type="url"
+                            data-test-id="new-deeplink-path-input"
+                            className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600 text-sm invalid:bg-red-200 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
+                            placeholder="DeepLink Path"
+                            pattern="^(https?:\/\/|s3:\/\/).*$"
+                            {...register('deeplinkPath', { required: true })}
+                          />
+                        </div>
+                      </div>
                       <div className="flex flex-wrap items-start relative w-full">
                         {value && (
                           <h4 className="w-full text-lg font-bold mb-2 px-2 py-1 bg-gray-100">
@@ -454,41 +566,10 @@ export default function NewModal({
                             aria-label="Name"
                             type="text"
                             data-test-id="new-document-location-input"
-                            className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600
-                                                    text-sm invalid:bg-red-200
-                                                    placeholder-gray-500 text-gray-900 rounded-t-md
-                                                    focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
+                            className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600 text-sm invalid:bg-red-200 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
                             placeholder="Name"
                             pattern="[^#]*"
-                            {...register('name', {
-                              required: true,
-                            })}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap items-start mx-4 mb-4 relative w-full">
-                        <div
-                          className={
-                            (itemsRequiringDeeplinkPathField.indexOf(
-                              itemToCreate
-                            ) > -1
-                              ? ''
-                              : 'hidden ') + ' w-full mr-12'
-                          }
-                        >
-                          <input
-                            aria-label="DeepLink Path"
-                            type="url"
-                            data-test-id="new-deeplink-path-input"
-                            className="appearance-none rounded-md relative block w-full px-2 py-2 border border-gray-600
-             text-sm invalid:bg-red-200
-             placeholder-gray-500 text-gray-900 rounded-t-md
-             focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-20"
-                            placeholder="DeepLink Path"
-                            pattern="^(https?:\/\/|s3:\/\/).*$"
-                            {...register('deeplinkPath', {
-                              required: true,
-                            })}
+                            {...register('name', { required: true })}
                           />
                         </div>
                       </div>
