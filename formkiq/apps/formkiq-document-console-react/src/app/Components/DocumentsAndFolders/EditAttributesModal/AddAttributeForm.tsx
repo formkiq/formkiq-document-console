@@ -26,12 +26,7 @@ function AddAttributeForm({
     AttributeDataType | ''
   >('');
 
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-    reset,
-  } = useForm();
+  const { register, handleSubmit, reset } = useForm();
   const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
 
