@@ -173,14 +173,15 @@ export function Attributes() {
     setIsNewAttributeDialogOpen(false);
   };
 
-  const onEditAttribute = (attributeKey: string) => {
+  const onEditAttribute = (attributeKey: string, isViewMode = true) => {
+    console.log(isViewMode);
     const attribute = allAttributes.find(
       (attribute) => attribute.key === attributeKey
     );
     if (!attribute) return;
     setAttributeToEdit(attribute);
     setIsEditAttributeDialogOpen(true);
-    setIsViewAttributeDialogOpen(true);
+    setIsViewAttributeDialogOpen(isViewMode);
   };
   const onEditAttributeModalClose = () => {
     setIsEditAttributeDialogOpen(false);

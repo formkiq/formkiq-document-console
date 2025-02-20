@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { Trash, View } from '../../Components/Icons/icons';
+import { Pencil, Trash, View } from '../../Components/Icons/icons';
 import { ReservedAttributeKeys } from '../../helpers/constants/attributes';
 import { Attribute } from '../../helpers/types/attributes';
 
 type Props = {
   attributes: any[];
   onDelete: (key: string) => void;
-  onEdit: (key: string) => void;
+  onEdit: (key: string, isViewMode?: boolean) => void;
   onAttributeInView: (key: string) => void;
   isAttributesInUse: Record<string, boolean>;
   isReadOnlyUser: boolean;
@@ -106,14 +106,36 @@ export function AttributesList({
                     </td>
                     <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pr-8 text-neutral-900 nodark:text-slate-400">
                       <div className="flex gap-2 items-center">
-                        {!isReadOnlyUser && (
-                          <button
-                            onClick={() => onEdit(attribute.key)}
-                            className="hover:text-primary-500 w-6 h-6"
-                          >
-                            <View />
-                          </button>
+                        {ReservedAttributeKeys.indexOf(attribute?.key) ===
+                          -1 && (
+                          <>
+                            {isReadOnlyUser ||
+                            isAttributesInUse[attribute.key] ? (
+                              <button
+                                onClick={() => onEdit(attribute.key)}
+                                className="hover:text-primary-500 w-6 h-6 mr-2"
+                              >
+                                <View />
+                              </button>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => onEdit(attribute.key)}
+                                  className="hover:text-primary-500 w-6 h-6 mr-2"
+                                >
+                                  <View />
+                                </button>
+                                <button
+                                  onClick={() => onEdit(attribute.key, false)}
+                                  className="hover:text-primary-500 w-6 h-6 mr-2"
+                                >
+                                  <Pencil />
+                                </button>
+                              </>
+                            )}
+                          </>
                         )}
+
                         {!isReadOnlyUser &&
                           !isAttributesInUse[attribute.key] &&
                           ReservedAttributeKeys.indexOf(attribute?.key) ===
