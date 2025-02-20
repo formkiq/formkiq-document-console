@@ -8,7 +8,13 @@ import { useAppDispatch } from '../../Store/store';
 
 type SiteStatusType = 'ACTIVE' | 'INACTIVE' | '';
 
-export const SiteStatus = ({ siteId }:{siteId: string}) => {
+export const SiteStatus = ({
+  siteId,
+  onSitesChange,
+}: {
+  siteId: string;
+  onSitesChange: () => void;
+}) => {
   const dispatch = useAppDispatch();
   const [selectedStatus, setSelectedStatus] = useState<SiteStatusType>('');
   const [isEditing, setIsEditing] = useState(false);
@@ -21,6 +27,7 @@ export const SiteStatus = ({ siteId }:{siteId: string}) => {
     }).then((res) => {
       if (res.status === 200) {
         setIsEditing(false);
+        onSitesChange();
         dispatch(
           openNotificationDialog({
             dialogTitle: 'Site status has been saved.',

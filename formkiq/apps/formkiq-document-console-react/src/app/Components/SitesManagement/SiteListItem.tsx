@@ -79,7 +79,7 @@ export function SiteListItem({
         formkiqVersion.modules.includes('site_permissions_defined') && (
           <>
             <hr className="my-4" />
-            <SiteStatus siteId={site.siteId} />
+            <SiteStatus siteId={site.siteId} onSitesChange={onSitesChange} />
             <hr className="my-4" />
             <SiteGroupPermissions
               siteId={site.siteId}
