@@ -17,8 +17,8 @@ function GeneralInfoTab({
         className="h-12 px-4 border border-neutral-300 text-sm rounded-md"
         placeholder="Add locale"
         required
-        value={locale.name}
-        onChange={(e) => setLocale({ ...locale, name: e.target.value })}
+        value={locale.locale}
+        onChange={(e) => setLocale({ ...locale, locale: e.target.value })}
         ref={localeNameRef}
         onKeyDown={preventDialogClose}
       />

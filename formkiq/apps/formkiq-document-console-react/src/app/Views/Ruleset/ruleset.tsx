@@ -25,8 +25,8 @@ import {
 } from '../../helpers/services/toolService';
 import { RequestStatus } from '../../helpers/types/document';
 import { Rule } from '../../helpers/types/rulesets';
-import RulesTable from './rulesTable';
 import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
+import RulesTable from './rulesTable';
 
 function Ruleset() {
   const { user } = useAuthenticatedState();
@@ -147,7 +147,6 @@ function Ruleset() {
 
   const saveRule = () => {
     if (newRuleValue.rule.ruleId) {
-      // Check if editing existing rule
       DocumentsService.updateRule(
         rulesetId,
         newRuleValue.rule.ruleId,

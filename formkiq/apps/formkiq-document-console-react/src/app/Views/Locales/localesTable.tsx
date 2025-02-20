@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Edit, Trash } from '../../Components/Icons/icons';
+import { LocaleResourceItem, Trash } from '../../Components/Icons/icons';
 import { User } from '../../Store/reducers/auth';
 import { Locale } from '../../helpers/types/locales';
 import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
@@ -56,13 +56,12 @@ function LocalesTable({
                   <td className="border-b p-4 pr-8">
                     {!isReadOnlyUser && (
                       <div className="flex items-center justify-end gap-2 mr-3">
-                        <button
-                          title="Edit"
-                          className="w-4 h-auto text-neutral-900 cursor-pointer hover:text-primary-500 my-[3px]"
-                          onClick={() => showLocaleEditTab(locale)}
+                        <Link
+                          to={`${pathname}/${locale.locale}`}
+                          className="cursor-pointer w-6 h-auto"
                         >
-                          <Edit />
-                        </button>
+                          <LocaleResourceItem />
+                        </Link>
 
                         <button
                           title="Delete"

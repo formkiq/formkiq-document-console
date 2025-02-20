@@ -1,15 +1,15 @@
 import { useLocation } from 'react-router-dom';
 import { Edit, Json, Trash } from '../../Components/Icons/icons';
 import { Rule } from '../../helpers/types/rulesets';
-import { User } from '../../Store/reducers/auth';
 import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
+import { User } from '../../Store/reducers/auth';
 
 type RulesTableProps = {
   rules: Rule[];
   user: User | null;
   siteId: string;
   onRuleDelete: (ruleId: string) => void;
-  showRuleEditTab: (rulesetId: string) => void;
+  showRuleEditTab: (ruleId: string) => void;
   setNewRuleValue: (newValue: { rule: Rule }) => void;
 };
 

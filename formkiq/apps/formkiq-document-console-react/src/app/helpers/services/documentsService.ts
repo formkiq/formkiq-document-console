@@ -1318,47 +1318,120 @@ export class DocumentsService {
     limit = 20,
     next = null
   ): Promise<any> {
-    if (!siteId) {
-      siteId = this.determineSiteId();
-    }
-    return this.getFormkiqClient().sitesApi.getLocales({ siteId, limit, next });
-  }
-
-  @formkiqAPIHandler
-  public static addLocale(locale: string, siteId: string): Promise<any> {
-    if (!siteId) {
-      siteId = this.determineSiteId();
-    }
-    return this.getFormkiqClient().sitesApi.addLocale({
-      addApiLocaleParameters: { locale },
+    return this.getFormkiqClient().sitesApi.getLocales({
       siteId,
+      limit,
+      next,
     });
   }
 
   @formkiqAPIHandler
-  public static setLocale(
+  public static async addLocale(
+    siteId: string,
+    addLocaleParameters: any
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.addLocale({
+      siteId,
+      addLocaleParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getLocale(siteId: string, locale: string): Promise<any> {
+    return this.getFormkiqClient().sitesApi.getLocale({
+      siteId,
+      locale,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async setLocale(
+    siteId: string,
+    locale: string,
+    setLocaleParameters: any
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.setLocale({
+      siteId,
+      locale,
+      setLocaleParameters,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteLocale(
+    siteId: string,
+    locale: string
+  ): Promise<any> {
+    return this.getFormkiqClient().sitesApi.deleteLocale({
+      siteId,
+      locale,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async getLocaleResourceItems(
     locale: string,
     siteId: string,
-    localeBody: string
+    next = null,
+    limit = 20
   ): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    console.error('not implemented');
-    return this.getFormkiqClient().sitesApi.set({
+    return this.getFormkiqClient().sitesApi.getLocaleResourceItems({
       locale,
       siteId,
-      localeBody,
+      next,
+      limit,
     });
   }
 
   @formkiqAPIHandler
-  public static deleteLocale(locale: string, siteId: string): Promise<any> {
+  public static async addLocaleResourceItem(
+    locale: string,
+    addLocaleResourceItemParameters: any,
+    siteId: string
+  ): Promise<any> {
     if (!siteId) {
       siteId = this.determineSiteId();
     }
-    return this.getFormkiqClient().sitesApi.deleteLocale({
+    return this.getFormkiqClient().sitesApi.addLocaleResourceItem({
       locale,
+      addLocaleResourceItemParameters,
+      siteId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async updateLocaleResourceItem(
+    locale: string,
+    itemKey: string,
+    addLocaleResourceItemParameters: any,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().sitesApi.putLocaleResourceItem({
+      locale,
+      itemKey,
+      addLocaleResourceItemParameters,
+      siteId,
+    });
+  }
+
+  @formkiqAPIHandler
+  public static async deleteLocaleResourceItem(
+    locale: string,
+    itemKey: string,
+    siteId: string
+  ): Promise<any> {
+    if (!siteId) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().sitesApi.deleteLocaleResourceItem({
+      locale,
+      itemKey,
       siteId,
     });
   }
@@ -2262,6 +2335,17 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
+  public static async restoreDocument(
+    siteId: string,
+    documentId: string
+  ): Promise<any> {
+    return this.getFormkiqClient().documentsApi.restoreDocument({
+      siteId,
+      documentId,
+    });
+  }
+
+  @formkiqAPIHandler
   public static async getMappings(
     siteId: string,
     limit = 20,
@@ -2271,17 +2355,6 @@ export class DocumentsService {
       siteId,
       limit,
       next,
-    });
-  }
-
-  @formkiqAPIHandler
-  public static async restoreDocument(
-    siteId: string,
-    documentId: string
-  ): Promise<any> {
-    return this.getFormkiqClient().documentsApi.restoreDocument({
-      siteId,
-      documentId,
     });
   }
 

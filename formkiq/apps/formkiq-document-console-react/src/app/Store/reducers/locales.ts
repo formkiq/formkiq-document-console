@@ -1,11 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { DocumentsService } from '../../helpers/services/documentsService';
-import { Locale, RequestStatus } from '../../helpers/types/locales';
+import {
+  Locale,
+  LocaleResourceItem,
+  RequestStatus,
+} from '../../helpers/types/locales';
 import { RootState } from '../store';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
 interface LocalesState {
   locales: Locale[];
+  resourceItems: LocaleResourceItem[]; // renamed here
   localesLoadingStatus: keyof typeof RequestStatus;
   nextLocalesToken: string | null;
   currentLocalesSearchPage: number;
@@ -15,6 +20,7 @@ interface LocalesState {
 
 const defaultState: LocalesState = {
   locales: [],
+  resourceItems: [], // renamed here
   localesLoadingStatus: RequestStatus.fulfilled,
   nextLocalesToken: null,
   currentLocalesSearchPage: 1,
@@ -31,17 +37,11 @@ export const fetchLocales = createAsyncThunk(
         if (response.status === 200) {
           const data = {
             locales: response.locales,
-            isLoadingMore: false,
-            isLastSearchPageLoaded: false,
+            isLoadingMore: page > 1,
+            isLastSearchPageLoaded: response.locales?.length === 0,
             next: response.next,
             page,
           };
-          if (page > 1) {
-            data.isLoadingMore = true;
-          }
-          if (response.locales?.length === 0) {
-            data.isLastSearchPageLoaded = true;
-          }
           thunkAPI.dispatch(setLocales(data));
         } else {
           let dialogTitle = 'Error fetching locales';
@@ -52,6 +52,30 @@ export const fetchLocales = createAsyncThunk(
         }
       }
     );
+  }
+);
+
+export const fetchLocaleResourceItems = createAsyncThunk(
+  'locales/fetchLocaleResourceItems',
+  async (data: any, thunkAPI) => {
+    const { siteId, locale, nextToken, limit, page } = data;
+    await DocumentsService.getLocaleResourceItems(
+      locale,
+      siteId,
+      nextToken,
+      limit
+    ).then((response) => {
+      if (response) {
+        const payload = {
+          resourceItems: response.resourceItems, // use resourceItems from response
+          isLoadingMore: page > 1,
+          isLastSearchPageLoaded: response.resourceItems?.length === 0,
+          next: response.next,
+          page,
+        };
+        thunkAPI.dispatch(setLocaleResourceItems(payload));
+      }
+    });
   }
 );
 
@@ -84,7 +108,7 @@ export const deleteLocale = createAsyncThunk(
           const filteredLocales = localesState.locales.filter(
             (localeObject: Locale) => localeObject.locale !== locale
           );
-          thunkAPI.dispatch(setLocale({ locales: filteredLocales }));
+          thunkAPI.dispatch(setLocales({ locales: filteredLocales }));
         } else {
           let dialogTitle = 'Error deleting locale';
           if (response.errors) {
@@ -97,8 +121,8 @@ export const deleteLocale = createAsyncThunk(
   }
 );
 
-export const setLocale = createAsyncThunk(
-  'locale/setLocale',
+export const updateLocale = createAsyncThunk(
+  'locale/updateLocale',
   async (data: any) => {
     const { siteId, locale, localeBody } = data;
     await DocumentsService.setLocale(siteId, locale, localeBody).then(
@@ -117,6 +141,35 @@ export const setLocale = createAsyncThunk(
   }
 );
 
+export const deleteLocaleResourceItem = createAsyncThunk(
+  'rulesets/deleteLocaleResourceItem',
+  async (data: any, thunkAPI) => {
+    const { siteId, itemKey, locale, resourceItems } = data;
+    await DocumentsService.deleteLocaleResourceItem(
+      locale,
+      itemKey,
+      siteId
+    ).then((response) => {
+      if (response.status === 200) {
+        thunkAPI.dispatch(
+          setLocaleResourceItems({
+            resourceItems: resourceItems.filter(
+              (resourceItem: LocaleResourceItem) =>
+                resourceItem.itemKey !== itemKey
+            ),
+            next: null,
+            page: 1,
+          })
+        );
+      } else {
+        thunkAPI.dispatch(
+          openNotificationDialog({ dialogTitle: response.message })
+        );
+      }
+    });
+  }
+);
+
 export const localesSlice = createSlice({
   name: 'locales',
   initialState: defaultState,
@@ -130,27 +183,39 @@ export const localesSlice = createSlice({
         } else {
           state.locales = locales;
         }
-        if (next) {
-          state.nextLocalesToken = next;
-        }
-        if (isLastSearchPageLoaded !== undefined) {
-          state.isLastLocalesSearchPageLoaded = isLastSearchPageLoaded;
-        }
-        state.localesLoadingStatus = RequestStatus.fulfilled;
+        state.nextLocalesToken = next;
+        state.isLastLocalesSearchPageLoaded = isLastSearchPageLoaded;
       }
+      state.localesLoadingStatus = RequestStatus.fulfilled;
     },
-
+    setLocaleResourceItems: (state, action) => {
+      const { resourceItems, isLoadingMore, next } = action.payload;
+      const isLastSearchPageLoaded = !next;
+      if (resourceItems) {
+        if (isLoadingMore) {
+          state.resourceItems = state.resourceItems.concat(resourceItems);
+        } else {
+          state.resourceItems = resourceItems;
+        }
+        state.nextLocalesToken = next;
+        state.isLastLocalesSearchPageLoaded = isLastSearchPageLoaded;
+      }
+      state.localesLoadingStatus = RequestStatus.fulfilled;
+    },
     setLocalesLoadingStatusPending: (state) => {
       return {
         ...state,
-        localeLoadingStatus: RequestStatus.pending,
+        localesLoadingStatus: RequestStatus.pending,
       };
     },
   },
 });
 
-export const { setLocales, setLocalesLoadingStatusPending } =
-  localesSlice.actions;
+export const {
+  setLocales,
+  setLocaleResourceItems,
+  setLocalesLoadingStatusPending,
+} = localesSlice.actions;
 
 export const LocalesState = (state: RootState) => state.localesState;
 

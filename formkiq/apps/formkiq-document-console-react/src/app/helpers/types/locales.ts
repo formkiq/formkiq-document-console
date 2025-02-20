@@ -9,13 +9,14 @@ export type LocaleResourceItemType = 'INTERFACE' | 'SCHEMA' | 'CLASSIFICATION';
 export interface LocaleResourceItem {
   itemKey: string;
   itemType: LocaleResourceItemType;
+  localizedValue: string;
   interfaceKey?: string;
   classificationId?: string;
   attributeKey?: string;
-  localizedValue: string;
+  allowedValue?: string;
 }
 
 export interface Locale {
-  locale?: string;
+  locale: string;
   resourceItems: LocaleResourceItem[];
 }

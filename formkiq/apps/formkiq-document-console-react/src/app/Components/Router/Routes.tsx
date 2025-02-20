@@ -42,10 +42,10 @@ const Webhooks = React.lazy(
 const AccountSettings = React.lazy(
   () => import('../../Views/Account/accountSettings')
 );
+const Locales = React.lazy(() => import('../../Views/Locales/locales'));
+const Locale = React.lazy(() => import('../../Views/Locales/locale'));
 const Rulesets = React.lazy(() => import('../../Views/Ruleset/rulesets'));
-
 const Ruleset = React.lazy(() => import('../../Views/Ruleset/ruleset'));
-
 const Rule = React.lazy(() => import('../../Views/Ruleset/rule'));
 const AccessControl = React.lazy(
   () => import('../../Views/Account/accessControl')
@@ -75,7 +75,6 @@ const Attributes = React.lazy(
   () => import('../../Views/Attributes/attributes')
 );
 
-const Locales = React.lazy(() => import('../../Views/Locales/locales'));
 const Mappings = React.lazy(() => import('../../Views/Mappings/mappings'));
 const Mapping = React.lazy(() => import('../../Views/Mappings/mapping'));
 const SitesManagement = React.lazy(
@@ -177,6 +176,14 @@ const RoutesMapper = () => {
         element={<DocumentView />}
       ></Route>
 
+      <Route path="/locales" element={<Locales />}></Route>
+      <Route path="/locales/workspaces/:siteId" element={<Locales />}></Route>
+      <Route
+        path="/locales/workspaces/:siteId/:locale"
+        element={<Locale />}
+      ></Route>
+      <Route path="/locales/:locale" element={<Locale />}></Route>
+
       <Route path="/rulesets" element={<Rulesets />}></Route>
       <Route path="/rulesets/workspaces/:siteId" element={<Rulesets />}></Route>
       <Route
@@ -206,7 +213,6 @@ const RoutesMapper = () => {
         element={<Classification />}
       ></Route>
 
-      <Route path="/locales" element={<Locales />}></Route>
       <Route
         path="/workspaces/:siteId/workflows/designer"
         element={<WorkflowDesigner />}

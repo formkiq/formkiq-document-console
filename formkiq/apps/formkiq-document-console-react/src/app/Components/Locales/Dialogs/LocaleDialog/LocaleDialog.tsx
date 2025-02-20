@@ -2,7 +2,11 @@ import { Dialog } from '@headlessui/react';
 import { useEffect, useRef, useState } from 'react';
 
 import { Locale } from 'apps/formkiq-document-console-react/src/app/helpers/types/locales';
-import { fetchLocales } from 'apps/formkiq-document-console-react/src/app/Store/reducers/locales';
+import {
+  addLocale,
+  fetchLocales,
+  updateLocale,
+} from 'apps/formkiq-document-console-react/src/app/Store/reducers/locales';
 import { openDialog as openNotificationDialog } from '../../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../../Store/store';
 import GeneralInfoTab from './GeneralInfoTab';
@@ -24,7 +28,7 @@ function LocaleDialog({
 }: LocaleDialogPropsType) {
   const [selectedTab, setSelectedTab] = useState<'generalInfo'>('generalInfo');
   const [locale, setLocale] = useState(initialLocaleValue);
-  const mappingNameRef = useRef<HTMLInputElement>(null);
+  const localeNameRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -44,10 +48,10 @@ function LocaleDialog({
     }
     try {
       if (type === 'create') {
-        await dispatch(addLocale({ locale: { locale }, siteId })).unwrap();
+        await dispatch(addLocale({ locale, siteId })).unwrap();
       } else if (type === 'edit' && locale.locale) {
         await dispatch(
-          setLocale({
+          updateLocale({
             localeBody: { locale },
             siteId,
             locale: locale.locale,
@@ -62,7 +66,7 @@ function LocaleDialog({
   };
 
   const closeModal = () => {
-    resetMapping();
+    resetLocale();
     setSelectedTab('generalInfo');
     setIsOpen(false);
   };
