@@ -48,7 +48,6 @@ import {
   Settings,
   ShareHand,
   SitesManagement,
-  Star,
   Trash,
   Upload,
   Users,
@@ -282,12 +281,7 @@ export function Sidebar() {
     if (currentDocumentsRootUri.indexOf('workspaces') > 0) {
       initialPaddingLeft = 10;
     }
-    if (
-      subfolderUri !== 'deleted' &&
-      subfolderUri !== 'shared' &&
-      subfolderUri !== 'recent' &&
-      subfolderUri !== 'favorites'
-    ) {
+    if (subfolderUri !== 'deleted') {
       return (
         <>
           <span className="hidden pl-6 pl-8 pl-10 pl-12 pl-14 pl-16 pl-18 pl-20 pl-22 pl-24 pl-26"></span>
@@ -691,14 +685,6 @@ export function Sidebar() {
               )}
               {!isReadOnlyUser && (
                 <>
-                  <NavigationItem
-                    to={`${specialFoldersRootUri}/folders/favorites`}
-                    icon={<Star />}
-                    title="Favorites"
-                    testId="nav-favorites"
-                    level={0}
-                  />
-
                   {useSoftDelete && (
                     <NavigationItem
                       to={`${specialFoldersRootUri}/folders/deleted`}

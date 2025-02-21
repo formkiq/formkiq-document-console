@@ -20,7 +20,6 @@ const documentsData = [
     key: 'folder',
     contentType: 'image/png',
     userId: 'regan@formkiq.com',
-    favoritedBy: 'regan@formkiq.com',
     matchedTag: {
       type: 'USERDEFINED',
       value: 'regan@formkiq.com',
@@ -28,9 +27,7 @@ const documentsData = [
       contentType: 'image/png',
       userId: 'regan@formkiq.com',
     },
-    tags: {
-      favoritedBy: 'regan@formkiq.com',
-    },
+    tags: {},
   },
   {
     path: 'Screenshot from 2022-09-25 23-57-22.png',
@@ -47,7 +44,6 @@ const documentsData = [
       key: 'folder',
       contentType: 'image/png',
       userId: 'regan@formkiq.com',
-      favoritedBy: 'regan@formkiq.com',
     },
   },
 ];
@@ -71,7 +67,6 @@ test('should remove and add value from the document tag and update it in list', 
     })
   );
   expect(data.documents[0].tags).toEqual({
-    favoritedBy: 'regan@formkiq.com',
     myTestTag: 'myTestValue',
   });
 
@@ -85,7 +80,6 @@ test('should remove and add value from the document tag and update it in list', 
     })
   );
   expect(data.documents[0].tags).toEqual({
-    favoritedBy: 'regan@formkiq.com',
     myTestTag: ['myTestValue', 'myTestValue2'],
   });
 
@@ -99,7 +93,6 @@ test('should remove and add value from the document tag and update it in list', 
     })
   );
   expect(data.documents[0].tags).toEqual({
-    favoritedBy: 'regan@formkiq.com',
     myTestTag: 'myTestValue',
   });
 
@@ -112,5 +105,7 @@ test('should remove and add value from the document tag and update it in list', 
       valueToRemove: 'myTestValue',
     })
   );
-  expect(data.documents[0].tags).toEqual({ favoritedBy: 'regan@formkiq.com' });
+  expect(data.documents[0].tags).toEqual({
+    myTestTag: 'myTestValue',
+  });
 });

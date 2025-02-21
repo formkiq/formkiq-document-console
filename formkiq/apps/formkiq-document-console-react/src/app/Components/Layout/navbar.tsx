@@ -53,14 +53,11 @@ import {
   HistoryIcon,
   Mapping,
   Queue,
-  Recent,
   Rules,
   Schema,
   Settings,
-  Share,
   ShareHand,
   SitesManagement,
-  Star,
   Trash,
   Users,
   Webhook,
@@ -73,12 +70,6 @@ const documentSubpaths: string[] = ['folders', 'settings', 'help', 'new'];
 
 const getTopLevelFolderName = (folder: string) => {
   switch (folder) {
-    case 'shared':
-      return 'Shared with me';
-    case 'favorites':
-      return 'Favorites';
-    case 'recent':
-      return 'Recent';
     case 'deleted':
       return 'Trash';
     default:
@@ -100,7 +91,6 @@ function Navbar() {
   const { user } = useSelector(AuthState);
   const {
     formkiqVersion,
-    useIndividualSharing,
     useCollections,
     useSoftDelete,
     useNotifications,
@@ -518,21 +508,6 @@ function Navbar() {
                   TopLevelFolders.indexOf(subfolderUri) > -1 ? (
                     <>
                       <div className="w-6 mr-1 text-primary-600">
-                        {subfolderUri === 'shared' && (
-                          <div className="w-6">
-                            <Share />
-                          </div>
-                        )}
-                        {subfolderUri === 'favorites' && (
-                          <div className="w-5">
-                            <Star />
-                          </div>
-                        )}
-                        {subfolderUri === 'recent' && (
-                          <div className="w-6">
-                            <Recent />
-                          </div>
-                        )}
                         {subfolderUri === 'deleted' && (
                           <div className="w-4">
                             <Trash />
@@ -1001,9 +976,6 @@ function Navbar() {
                                         }}
                                         siteId={currentSiteId}
                                         formkiqVersion={formkiqVersion}
-                                        useIndividualSharing={
-                                          useIndividualSharing
-                                        }
                                         useCollections={useCollections}
                                         useSoftDelete={useSoftDelete}
                                         isDeeplinkPath={

@@ -13,7 +13,7 @@ import { IDocument, RequestStatus } from '../../../helpers/types/document';
 import { IFolder } from '../../../helpers/types/folder';
 import { ILine } from '../../../helpers/types/line';
 import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
-import { ArrowBottom, ArrowRight, Share, Star, Trash } from '../../Icons/icons';
+import { ArrowBottom, ArrowRight, Trash } from '../../Icons/icons';
 import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
 import DocumentActionsPopover from '../DocumentActionsPopover/documentActionsPopover';
 import DocumentListLine from '../DocumentListLine/documentListLine';
@@ -67,12 +67,8 @@ function FolderListLine({
   }
 
   const { user } = useAuthenticatedState();
-  const {
-    formkiqVersion,
-    useIndividualSharing,
-    useCollections,
-    useSoftDelete,
-  } = useSelector(ConfigState);
+  const { formkiqVersion, useCollections, useSoftDelete } =
+    useSelector(ConfigState);
   const { onShareClick } = useDocumentActions();
 
   const folderName = folderPath.substring(folderPath.lastIndexOf('/') + 1);
@@ -261,9 +257,6 @@ function FolderListLine({
                   >
                     {folderName}
                   </Link>
-                  <div className="hidden w-5 text-neutral-900 mr-4 cursor-pointer px-2 box-content">
-                    <Star />
-                  </div>
                 </div>
               </div>
             </td>
@@ -271,29 +264,8 @@ function FolderListLine({
               {formatDate(folderInstance.lastModifiedDate)}
             </td>
             <td className="w-24 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static"></td>
-            {useIndividualSharing && (
-              <td className="w-24 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static">
-                Shared
-              </td>
-            )}
             <td className="w-28 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static">
               <div className="flex w-full">
-                {useIndividualSharing && (
-                  <div
-                    className="w-6 h-auto text-neutral-900 mr-2 cursor-pointer hover:text-primary-500"
-                    onClick={(event) =>
-                      onShareClick(event, {
-                        lineType: 'folder',
-                        folder: folderPath,
-                        documentId: folderInstance.documentId,
-                        documentInstance: null,
-                        folderInstance: folderInstance,
-                      })
-                    }
-                  >
-                    <Share />
-                  </div>
-                )}
                 {!isReadOnlyUser && (
                   <>
                     <div
@@ -309,7 +281,6 @@ function FolderListLine({
                         formkiqVersion={formkiqVersion}
                         onDeleteClick={onDeleteClick(folderInstance)}
                         user={user}
-                        useIndividualSharing={useIndividualSharing}
                         useCollections={useCollections}
                         useSoftDelete={useSoftDelete}
                       />

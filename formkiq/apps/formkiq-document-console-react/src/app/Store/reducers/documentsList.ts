@@ -1,4 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   addOrCreateTagValue,
   findFolderAndParent,
@@ -16,7 +17,6 @@ import {
 import { IDocument, RequestStatus } from '../../helpers/types/document';
 import { IFolder } from '../../helpers/types/folder';
 import { RootState } from '../store';
-import { DocumentsService } from '../../helpers/services/documentsService';
 import { setAllAttributesData, setAllTagsData } from './attributesData';
 import { User } from './auth';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
@@ -273,71 +273,7 @@ export const fetchDocuments = createAsyncThunk(
           }
         });
       } else if (subfolderUri) {
-        if (subfolderUri === 'shared') {
-          DocumentsService.getDocumentsSharedWithMe(
-            siteId,
-            tagParam,
-            null,
-            nextToken,
-            attributeParam,
-            allAttributes
-          ).then((response: any) => {
-            if (response && response.status === 200) {
-              if (currentCallId !== callCounter) return;
-              const data = {
-                siteId,
-                documents: response.documents,
-                user: user,
-                tag: filterTag,
-                folder: subfolderUri,
-                next: response.next,
-                isLoadingMore: false,
-                isLastSearchPageLoaded: false,
-              };
-              if (nextToken) {
-                data.isLoadingMore = true;
-              }
-              if (response.documents?.length === 0) {
-                data.isLastSearchPageLoaded = true;
-              }
-              thunkAPI.dispatch(setDocuments(data));
-            } else {
-              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
-            }
-          });
-        } else if (subfolderUri === 'favorites') {
-          DocumentsService.getDocumentsFavoritedByMe(
-            siteId,
-            tagParam,
-            null,
-            nextToken,
-            attributeParam,
-            allAttributes
-          ).then((response: any) => {
-            if (response && response.status === 200) {
-              if (currentCallId !== callCounter) return;
-              const data = {
-                siteId,
-                documents: response.documents,
-                user: user,
-                tag: filterTag,
-                folder: subfolderUri,
-                next: response.next,
-                isLoadingMore: false,
-                isLastSearchPageLoaded: false,
-              };
-              if (nextToken) {
-                data.isLoadingMore = true;
-              }
-              if (response.documents?.length === 0) {
-                data.isLastSearchPageLoaded = true;
-              }
-              thunkAPI.dispatch(setDocuments(data));
-            } else {
-              thunkAPI.dispatch(setDocumentLoadingStatusRejected());
-            }
-          });
-        } else if (subfolderUri === 'deleted') {
+        if (subfolderUri === 'deleted') {
           DocumentsService.getDeletedDocuments(
             siteId,
             null,

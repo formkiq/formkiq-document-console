@@ -5,21 +5,15 @@ import { useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
 import { ConfigState } from '../../../Store/reducers/config';
-import {
-  addDocumentTag,
-  removeDocumentTag,
-} from '../../../Store/reducers/documentsList';
 import { useAppDispatch } from '../../../Store/store';
 import {
   InlineEditableContentTypes,
   TextFileEditorEditableContentTypes,
 } from '../../../helpers/constants/contentTypes';
-import { DocumentsService } from '../../../helpers/services/documentsService';
 import {
   formatBytes,
   formatDate,
   getFileIcon,
-  isTagValueIncludes,
 } from '../../../helpers/services/toolService';
 import { IDocument } from '../../../helpers/types/document';
 import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
@@ -31,9 +25,6 @@ import {
   Minus,
   Pencil,
   Plus,
-  Share,
-  Star,
-  StarFilled,
   Trash,
 } from '../../Icons/icons';
 import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
@@ -77,7 +68,6 @@ function DocumentListLine({
   archiveTabStatus?: 'open' | 'closed' | 'minimized';
   downloadDocument: (documentId: string) => void;
 }) {
-  const [isFavorited, setFavorited] = useState(false);
   const [timeoutId, setTimeOutId] = useState(null);
   const dispatch = useAppDispatch();
   const location = useLocation();
@@ -92,7 +82,6 @@ function DocumentListLine({
     tagColors,
     useCollections,
     useSoftDelete,
-    useIndividualSharing,
     pendingArchive,
   } = useSelector(ConfigState);
 
@@ -138,67 +127,6 @@ function DocumentListLine({
   useEffect(() => {
     preview(getEmptyImage());
   }, []);
-
-  useEffect(() => {
-    if (file.tags) {
-      if (isTagValueIncludes(file?.tags?.sysFavoritedBy, user.email)) {
-        setFavorited(true);
-      } else {
-        setFavorited(false);
-      }
-    }
-  }, [file]);
-
-  const toggleFavorite = () => {
-    let fav = isFavorited;
-    if (timeoutId) {
-      // wait before make request, take latest value
-      clearInterval(timeoutId);
-    }
-    fav = !fav;
-    setFavorited(fav);
-    setTimeOutId(
-      setTimeout(() => {
-        if (fav) {
-          if (!isTagValueIncludes(file?.tags?.sysFavoritedBy, user.email)) {
-            // if user not added to favoritedBy
-            dispatch(
-              addDocumentTag({
-                doc: file,
-                tagKey: 'sysFavoritedBy',
-                valueToAdd: user.email,
-              })
-            );
-            DocumentsService.addValueOrCreateTag(
-              file.documentId,
-              siteId,
-              'sysFavoritedBy',
-              file?.tags?.sysFavoritedBy,
-              user.email
-            ).then(() => {});
-          }
-        } else {
-          if (isTagValueIncludes(file?.tags?.sysFavoritedBy, user.email)) {
-            // if user added to favoritedBy
-            dispatch(
-              removeDocumentTag({
-                doc: file,
-                tagKey: 'sysFavoritedBy',
-                valueToRemove: user.email,
-              })
-            );
-            DocumentsService.deleteTagOrValueFromTag(
-              file.documentId,
-              siteId,
-              'sysFavoritedBy',
-              file?.tags?.sysFavoritedBy,
-              user.email
-            ).then(() => {});
-          }
-        }
-      }, 1000) as any
-    );
-  };
 
   let pageSubfolderLevel = 0;
   if (folder.length) {
@@ -462,13 +390,7 @@ function DocumentListLine({
                         .sort() // This will sort the property names alphabetically
                         .map((propertyName, i) => {
                           let showTag = false;
-                          const tagsToIgnore = [
-                            'sysFavoritedBy',
-                            'sysSharedWith',
-                            'sysDeletedBy',
-                            'untagged',
-                            'path',
-                          ];
+                          const tagsToIgnore = ['path'];
                           let tagColor = 'gray';
                           if (tagColors) {
                             tagColors.forEach((color) => {
@@ -564,14 +486,6 @@ function DocumentListLine({
                 <Info />
               </Link>
             )}
-            {folder !== 'deleted' && !isReadOnlyUser && (
-              <div
-                onClick={toggleFavorite}
-                className="w-5 text-neutral-900  mr-4 cursor-pointer px-2 box-content hover:text-primary-500"
-              >
-                {isFavorited ? StarFilled() : Star()}
-              </div>
-            )}
           </div>
         </td>
         <td className="w-38 p-2 pt-3 text-neutral-900 block tracking-normal lg:table-cell relative lg:static">
@@ -580,11 +494,6 @@ function DocumentListLine({
         <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-normal lg:table-cell relative lg:static">
           {formatBytes(file.contentLength)}
         </td>
-        {useIndividualSharing && (
-          <td className="w-24 p-2 pt-3 text-neutral-900 block tracking-normal lg:table-cell relative lg:static">
-            Private
-          </td>
-        )}
         <td className="w-28 p-2 pt-3 text-neutral-900 block lg:table-cell relative lg:static">
           <div className="flex">
             {folder === 'deleted' ? (
@@ -619,19 +528,6 @@ function DocumentListLine({
               </>
             ) : (
               <>
-                {useIndividualSharing && (
-                  <div
-                    className="w-6 h-auto text-neutral-900 mr-2 cursor-pointer"
-                    onClick={(event) =>
-                      onShareClick(event, {
-                        lineType: 'document',
-                        documentId: file.documentId,
-                      })
-                    }
-                  >
-                    <Share />
-                  </div>
-                )}
                 {!file?.deepLinkPath || file.deepLinkPath.length === 0 ? (
                   <button
                     title="Download"
@@ -672,7 +568,6 @@ function DocumentListLine({
                     }}
                     siteId={siteId}
                     formkiqVersion={formkiqVersion}
-                    useIndividualSharing={useIndividualSharing}
                     useCollections={useCollections}
                     useSoftDelete={useSoftDelete}
                     isDeeplinkPath={

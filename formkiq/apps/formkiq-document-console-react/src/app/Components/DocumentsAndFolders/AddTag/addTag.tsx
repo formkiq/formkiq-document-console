@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import { AttributesDataState, setAllAttributesData, } from "../../../Store/reducers/attributesData";
+import {
+  AttributesDataState,
+  setAllAttributesData,
+} from '../../../Store/reducers/attributesData';
 import { openDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
-import { TagsForFilterAndDisplay } from '../../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { Attribute } from '../../../helpers/types/attributes';
 
@@ -107,34 +109,10 @@ export default function AddTag({
   };
 
   useEffect(() => {
-    const systemTags = [
-      'sysDeletedBy',
-      'sysSharedWith',
-      'sysFavoritedBy',
-      'untagged',
-      'path',
-    ];
+    const systemTags: string[] = [];
     setAllKeyOnlyAttributeKeys(null);
     DocumentsService.getAllTagKeys(siteId).then((data) => {
-      const tagKeys = data?.values.filter((value: any) => {
-        return systemTags.indexOf(value.value) === -1;
-      });
-      const checkTagKeys = [...tagKeys];
-
-      TagsForFilterAndDisplay.forEach((filterTagKey) => {
-        let matchFound = false;
-        checkTagKeys.forEach((checkTagKey) => {
-          if (checkTagKey.value === filterTagKey) {
-            matchFound = true;
-            return;
-          }
-        });
-        if (!matchFound) {
-          tagKeys.push({
-            value: filterTagKey,
-          });
-        }
-      });
+      const tagKeys = data?.values;
 
       updateAllAttributes();
       setTimeout(() => {

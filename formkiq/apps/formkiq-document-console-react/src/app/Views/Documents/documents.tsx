@@ -65,7 +65,6 @@ import {
   TextFileEditorEditableContentTypes,
   TextFileEditorViewableContentTypes,
 } from '../../helpers/constants/contentTypes';
-import { TagsForFilterAndDisplay } from '../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   formatDate,
@@ -101,7 +100,6 @@ function Documents() {
     currentActionEvent,
     formkiqVersion,
     tagColors,
-    useIndividualSharing,
     useFileFilter,
     useCollections,
     useSoftDelete,
@@ -620,13 +618,9 @@ function Documents() {
                 el.insertedDate = moment(el.insertedDate).format(
                   'YYYY-MM-DD HH:mm'
                 );
-                if (el.key === 'sysDeletedBy') {
-                  isDeleted = true;
-                }
                 return el;
               })
             );
-            setIsCurrentDocumentSoftDeleted(isDeleted);
           }
         }
       );
@@ -1177,7 +1171,6 @@ function Documents() {
     let tagsToCheck: string[] = [];
     let showAllTagsPopover = true;
     const minTagsToShowForFilter = 3;
-    tagsToCheck = tagsToCheck.concat(TagsForFilterAndDisplay);
 
     const keyOnlyAttributes = allAttributes.filter(
       (attribute: Attribute) => attribute.dataType === 'KEY_ONLY'
@@ -2765,7 +2758,6 @@ function Documents() {
                             formkiqVersion={formkiqVersion}
                             onInfoPage={true}
                             user={user}
-                            useIndividualSharing={useIndividualSharing}
                             useCollections={useCollections}
                             useSoftDelete={useSoftDelete}
                           />

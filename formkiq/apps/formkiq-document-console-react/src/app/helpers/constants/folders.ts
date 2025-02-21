@@ -1,6 +1,1 @@
-export const TopLevelFolders: string[] = [
-  'shared',
-  'favorites',
-  'recent',
-  'deleted'
-]
+export const TopLevelFolders: string[] = ['deleted'];

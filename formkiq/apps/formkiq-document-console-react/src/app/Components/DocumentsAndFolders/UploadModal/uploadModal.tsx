@@ -17,7 +17,7 @@ import {
 import { formatDate } from '../../../helpers/services/toolService';
 import { Close } from '../../Icons/icons';
 
-const foldersWithNoUpload = ['favorites', 'shared', 'deleted'];
+const foldersWithNoUpload = ['deleted'];
 const fileTypesMap = {
   // add here more filetypes if syncfusion does not recognize them
   md: 'text/markdown',
