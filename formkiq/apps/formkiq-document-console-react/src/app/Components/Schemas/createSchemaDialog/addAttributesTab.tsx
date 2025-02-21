@@ -311,7 +311,7 @@ function AddAttributesTab({
                           : ''
                       }
                       className={
-                        'cursor-pointer py-1.5 px-3 text-xs font-bold uppercase rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border' +
+                        'cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border' +
                         (defaultValues && defaultValues.includes(key)
                           ? ' text-primary-500 border-primary-500 bg-neutral-100'
                           : ' border-neutral-500 text-neutral-900')
@@ -348,7 +348,7 @@ function AddAttributesTab({
                     defaultValues.map((key: string, i: number) => (
                       <div
                         key={'default_' + i}
-                        className="border border-neutral-500 text-neutral-900 py-1.5 px-3 text-xs font-bold uppercase rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2"
+                        className="border border-neutral-500 text-neutral-900 py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2"
                       >
                         <span className="text-ellipsis overflow-hidden">
                           {key}

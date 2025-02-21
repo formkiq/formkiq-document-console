@@ -8,6 +8,7 @@ export const DocumentsAndFoldersPrefixes: string[] = [
 export const WorkflowsAndIntegrationsPrefixes: string[] = [
   '/workflows',
   '/queues',
+  '/locales',
   '/orchestrations',
   '/rulesets',
   '/schemas',

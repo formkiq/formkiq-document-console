@@ -161,7 +161,7 @@ export const fetchRule = createAsyncThunk(
 );
 
 export const deleteRule = createAsyncThunk(
-  'rulesets/deleteRuleset',
+  'rulesets/deleteRule',
   async (data: any, thunkAPI) => {
     const { siteId, ruleId, rulesetId, rules } = data;
     await DocumentsService.deleteRule(rulesetId, ruleId, siteId).then(

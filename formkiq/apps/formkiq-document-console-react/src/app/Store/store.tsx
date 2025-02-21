@@ -4,6 +4,7 @@ import thunkMiddleware from 'redux-thunk';
 import FormkiqClient from '../lib/formkiq-client-sdk-es6';
 import authMiddleware from './middleware/auth';
 import configMiddleware from './middleware/config';
+import apiKeysState from './reducers/apiKeys';
 import attributesState from './reducers/attributes';
 import attributesDataState from './reducers/attributesData';
 import authState from './reducers/auth';
@@ -13,15 +14,15 @@ import documentListState from './reducers/documentsList';
 import globalConfirmControls from './reducers/globalConfirmControls';
 import globalNotificationControls from './reducers/globalNotificationControls';
 import globalProgressControls from './reducers/globalProgressControls';
+import localesState from './reducers/locales';
+import mappingsState from './reducers/mappings';
 import queuesState from './reducers/queues';
 import rulesetsState from './reducers/rulesets';
 import schemasState from './reducers/schemas';
-import userManagementState from './reducers/userManagement';
-import workflowsState from './reducers/workflows';
 import userActivitiesState from './reducers/userActivities';
-import mappingsState from './reducers/mappings';
+import userManagementState from './reducers/userManagement';
 import webhooksState from './reducers/webhooks';
-import apiKeysState from './reducers/apiKeys';
+import workflowsState from './reducers/workflows';
 
 export const store = configureStore({
   reducer: {
@@ -40,6 +41,7 @@ export const store = configureStore({
     userManagementState,
     attributesDataState,
     userActivitiesState,
+    localesState,
     mappingsState,
     webhooksState,
     apiKeysState,

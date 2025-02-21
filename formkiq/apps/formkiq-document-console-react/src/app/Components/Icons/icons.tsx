@@ -674,6 +674,80 @@ export function Tag() {
   );
 }
 
+export function Locale() {
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clipPath="url(#clip0_localization)">
+        <path
+          d="M9 16.5C13.1421 16.5 16.5 13.1421 16.5 9C16.5 4.85786 13.1421 1.5 9 1.5C4.85786 1.5 1.5 4.85786 1.5 9C1.5 13.1421 4.85786 16.5 9 16.5Z"
+          stroke="currentColor"
+          strokeWidth="1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M9 1.5V16.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M1.5 9H16.5"
+          stroke="currentColor"
+          strokeWidth="1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M4.5 4.5C6.5 6.5 11.5 6.5 13.5 4.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_localization">
+          <rect width="18" height="18" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+}
+
+export function LocaleResourceItem() {
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 80 80"
+      xmlns="http://www.w3.org/2000/svg"
+      className="fill-current"
+    >
+      <g transform="translate(-3.2764 -6.5962)" strokeWidth="0">
+        <g transform="matrix(1 0 0 1.394 1.0356e-7 -18.617)" aria-label="A">
+          <path d="m27.182 58.086h-6.1547l-1.5968-4.6664h-8.5576l-1.5968 4.6664h-5.9996l8.5266-23.084h6.8523zm-9.1932-8.8987-2.837-8.2786-2.837 8.2786z" />
+        </g>
+        <g transform="matrix(1 0 0 1.394 1.0356e-7 -18.617)" aria-label="ア">
+          <path d="m81.017 36.492q-5.5811 7.3949-9.6428 10.79l-2.1704-2.2169q3.8447-2.7905 7.3329-7.4414h-21.735v-2.8525h24.247zm-12.185 2.0929q0 5.1935-0.26355 7.5499-0.24805 2.3409-1.2402 5.147-0.99219 2.7905-2.806 5.1935-1.7983 2.403-4.4648 4.0773l-2.0929-2.4495q8.0305-5.054 8.0305-17.146 0-1.6433-0.03101-2.3719z" />
+        </g>
+        <g transform="matrix(1 0 0 1.394 1.0356e-7 -18.617)" aria-label="ß">
+          <path d="m52.615 51.224q0 3.6897-2.3564 5.5811-2.3409 1.8914-6.3097 1.8914-0.5426 0-1.4263-0.07752-0.86816-0.07751-1.2557-0.13953v-4.2168h0.62012q0.26355 0.07751 0.75964 0.18604 0.5116 0.09302 1.0232 0.09302 1.3798 0 2.3099-0.96118 0.93018-0.96118 0.93018-2.682 0-1.7518-1.2092-2.4805-1.2092-0.74414-3.7362-0.74414v-4.1393q1.6278 0 2.4495-0.75964 0.83716-0.75964 0.83716-2.3409 0-1.2092-0.68213-1.8604-0.66663-0.65112-2.0464-0.65112-1.6123 0-2.3564 0.99219-0.72864 0.99219-0.72864 2.7285v16.836h-5.5811v-16.371q0-3.7827 2.3409-5.8446 2.3409-2.0619 6.4182-2.0619 2.1859 0 3.6742 0.43408 1.5038 0.43408 2.5425 1.2092 0.99219 0.75964 1.4883 1.7518 0.49609 0.99219 0.49609 2.1239 0 2.1084-1.2867 3.5812-1.2867 1.4573-3.2246 1.7208v0.13953q2.8835 0.40308 4.5889 2.0154 1.7208 1.6123 1.7208 4.0463z" />
+        </g>
+        <path d="m4.5841 13.857h60.264v6.0727h-60.264z" />
+        <path d="m22.871 72.011h60.264v6.0727h-60.264z" />
+      </g>
+    </svg>
+  );
+}
+
 export function History() {
   return (
     <svg

@@ -40,6 +40,7 @@ import {
   FolderOutline,
   Group,
   HistoryIcon,
+  Locale,
   Mapping,
   Plus,
   Queue,
@@ -247,6 +248,7 @@ export function Sidebar() {
   const handleAction = (action: string) => {
     const nonDocumentPaths = [
       '/workflows',
+      '/locales',
       '/orchestrations',
       '/queues',
       '/rulesets',
@@ -730,6 +732,17 @@ export function Sidebar() {
                 icon={<Schema />}
                 title="Schemas / Classifications"
                 testId="nav-schemas"
+              />
+              <NavigationItem
+                to={
+                  '/locales' +
+                  (pathname.indexOf('locales') > 0
+                    ? '/locales/' + currentSiteId
+                    : '')
+                }
+                icon={<Locale />}
+                title="Locales"
+                testId="nav-locales"
               />
               {formkiqVersion.type !== 'core' && (
                 <NavigationItem

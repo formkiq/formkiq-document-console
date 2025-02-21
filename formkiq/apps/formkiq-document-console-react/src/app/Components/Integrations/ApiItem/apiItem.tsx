@@ -120,6 +120,21 @@ function updateRequestsFromForm(
     }
   }
 
+  if (apiItem.requiresLocale) {
+    if (getFormInput(formRef, 'locale')?.validity?.valid) {
+      path = path.replace(' LOCALE ', getFormInput(formRef, 'locale')?.value);
+    }
+  }
+
+  if (apiItem.requiresItemKey) {
+    if (getFormInput(formRef, 'itemKey')?.validity?.valid) {
+      path = path.replace(
+        ' ITEM_KEY ',
+        getFormInput(formRef, 'itemKey')?.value
+      );
+    }
+  }
+
   if (apiItem.requiresWorkflowID) {
     if (getFormInput(formRef, 'workflowID')?.validity?.valid) {
       path = path.replace(
@@ -131,28 +146,19 @@ function updateRequestsFromForm(
 
   if (apiItem.requiresCaseID) {
     if (getFormInput(formRef, 'caseID')?.validity?.valid) {
-      path = path.replace(
-        ' CASE_ID ',
-        getFormInput(formRef, 'caseID')?.value
-      );
+      path = path.replace(' CASE_ID ', getFormInput(formRef, 'caseID')?.value);
     }
   }
 
   if (apiItem.requiresTaskID) {
     if (getFormInput(formRef, 'taskID')?.validity?.valid) {
-      path = path.replace(
-        ' TASK_ID ',
-        getFormInput(formRef, 'taskID')?.value
-      );
+      path = path.replace(' TASK_ID ', getFormInput(formRef, 'taskID')?.value);
     }
   }
 
   if (apiItem.requiresNigoID) {
     if (getFormInput(formRef, 'nigoID')?.validity?.valid) {
-      path = path.replace(
-        ' NIGO_ID ',
-        getFormInput(formRef, 'nigoID')?.value
-      );
+      path = path.replace(' NIGO_ID ', getFormInput(formRef, 'nigoID')?.value);
     }
   }
 
@@ -208,7 +214,7 @@ function updateRequestsFromForm(
       );
     }
   }
-  if(apiItem.requiresUserOperation) {
+  if (apiItem.requiresUserOperation) {
     if (getFormInput(formRef, 'userOperation')?.validity?.valid) {
       path = path.replace(
         ' USER_OPERATION ',
@@ -216,7 +222,7 @@ function updateRequestsFromForm(
       );
     }
   }
-  if(apiItem.requiresClassificationID) {
+  if (apiItem.requiresClassificationID) {
     if (getFormInput(formRef, 'classificationID')?.validity?.valid) {
       path = path.replace(
         ' CLASSIFICATION_ID ',
@@ -224,7 +230,7 @@ function updateRequestsFromForm(
       );
     }
   }
-  if(apiItem.requiresMappingID) {
+  if (apiItem.requiresMappingID) {
     if (getFormInput(formRef, 'mappingID')?.validity?.valid) {
       path = path.replace(
         ' MAPPING_ID ',
@@ -232,7 +238,7 @@ function updateRequestsFromForm(
       );
     }
   }
-  if(apiItem.requiresEnvelopeID) {
+  if (apiItem.requiresEnvelopeID) {
     if (getFormInput(formRef, 'envelopeID')?.validity?.valid) {
       path = path.replace(
         ' ENVELOPE_ID ',
@@ -240,7 +246,6 @@ function updateRequestsFromForm(
       );
     }
   }
-
 
   let httpRequest = apiItem.method + ' ' + path;
   let curlRequest = '';
@@ -1240,32 +1245,6 @@ function getApiItem(
               </div>
             )}
 
-            {apiItem.requiresPostJson && (
-              <div className="flex flex-wrap items-center justify-start ml-4 mb-4 relative">
-                <div className="w-full">
-                  <label className="block w-full mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
-                    JSON to POST/PATCH
-                  </label>
-                </div>
-                <div className="w-full">
-                  <JSONEditorReact
-                    content={requestJsonContent}
-                    mode={requestEditorMode}
-                    onChange={handleJsonChange}
-                    onChangeMode={handleRequestEditorModeChange}
-                  />
-                  <textarea
-                    aria-label="JSON to POST/PATCH"
-                    name="postJson"
-                    defaultValue={apiItem.defaultPostJsonValue}
-                    className="hidden appearance-none font-mono rounded-md relative block w-full h-72 px-3 py-3 border border-gray-600
-                        placeholder-gray-500 text-gray-900 rounded-t-md
-                        focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
-                  ></textarea>
-                </div>
-              </div>
-            )}
-
             {apiItem.allowsVersionKey && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
@@ -1658,26 +1637,6 @@ function getApiItem(
               </div>
             )}
 
-            {apiItem.allowsTagJson && (
-              <div className="md:flex md:items-center mx-4 mb-4 relative">
-                <div className="w-full md:w-1/4">
-                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    JSON for Tags
-                  </label>
-                </div>
-                <div className="w-full md:w-3/4">
-                  <textarea
-                    aria-label="JSON for Tags"
-                    name="tagJson"
-                    defaultValue={apiItem.defaultTagJsonValue}
-                    className="appearance-none font-mono rounded-md relative block w-full h-72 px-3 py-3 border border-gray-600
-                        placeholder-gray-500 text-gray-900 rounded-t-md
-                        focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
-                  ></textarea>
-                </div>
-              </div>
-            )}
-
             {apiItem.allowsLimit && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
@@ -1830,6 +1789,46 @@ function getApiItem(
                 </div>
               </div>
             )}
+            {apiItem.requiresLocale && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Locale
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Locale"
+                    name="locale"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+            placeholder-gray-500 text-gray-900 rounded-t-md
+            focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
+            {apiItem.requiresItemKey && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    Item Key
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="Item Key"
+                    name="itemKey"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+            placeholder-gray-500 text-gray-900 rounded-t-md
+            focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
+              </div>
+            )}
             {apiItem.requiresAttributeKey && (
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
@@ -1928,6 +1927,52 @@ function getApiItem(
                       placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
                   />
+                </div>
+              </div>
+            )}
+
+            {apiItem.requiresPostJson && (
+              <div className="flex flex-wrap items-center justify-start ml-4 mb-4 relative">
+                <div className="w-full">
+                  <label className="block w-full mt-4 mb-2 text-base tracking-normal leading-10 font-bold text-gray-900 sm:leading-none">
+                    JSON to POST/PATCH
+                  </label>
+                </div>
+                <div className="w-full">
+                  <JSONEditorReact
+                    content={requestJsonContent}
+                    mode={requestEditorMode}
+                    onChange={handleJsonChange}
+                    onChangeMode={handleRequestEditorModeChange}
+                  />
+                  <textarea
+                    aria-label="JSON to POST/PATCH"
+                    name="postJson"
+                    defaultValue={apiItem.defaultPostJsonValue}
+                    className="hidden appearance-none font-mono rounded-md relative block w-full h-72 px-3 py-3 border border-gray-600
+                        placeholder-gray-500 text-gray-900 rounded-t-md
+                        focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  ></textarea>
+                </div>
+              </div>
+            )}
+
+            {apiItem.allowsTagJson && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    JSON for Tags
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <textarea
+                    aria-label="JSON for Tags"
+                    name="tagJson"
+                    defaultValue={apiItem.defaultTagJsonValue}
+                    className="appearance-none font-mono rounded-md relative block w-full h-72 px-3 py-3 border border-gray-600
+                        placeholder-gray-500 text-gray-900 rounded-t-md
+                        focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  ></textarea>
                 </div>
               </div>
             )}
