@@ -5,21 +5,33 @@ import { AttributesDataState } from '../../../Store/reducers/attributesData';
 import { fetchDocuments } from '../../../Store/reducers/documentsList';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
+import { isUUIDv4orV5 } from '../../../helpers/services/toolService';
 import { Attribute } from '../../../helpers/types/attributes';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import CheckboxListbox from '../../Generic/Listboxes/CheckboxListbox';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
-import { Close, Plus } from '../../Icons/icons';
-import SearchLine from "./searchLine";
+import { ChevronDown, Close, Plus } from '../../Icons/icons';
+import SearchLine from './searchLine';
+
+interface DefaultSearchByAttributesProps {
+  siteId: string;
+  formkiqVersion: any;
+  subfolderUri: any;
+  minimizeAdvancedSearch: () => void;
+  closeAdvancedSearch: () => void;
+  searchType: 'simplified' | 'enhanced';
+}
 
 export default function DefaultSearchByAttributes({
   siteId,
   formkiqVersion,
   subfolderUri,
+  minimizeAdvancedSearch,
   closeAdvancedSearch,
-}: any) {
+  searchType,
+}: DefaultSearchByAttributesProps): JSX.Element {
   const stringAttributeCriteria = [
     { key: 'eq', title: 'Equal to' },
     { key: 'eqOr', title: 'One of' },
@@ -112,10 +124,14 @@ export default function DefaultSearchByAttributes({
 
   const onSearch = () => {
     const selectedAttributeQuery = getAttributeQuery();
-    if (!selectedAttributeQuery) {
+    const uuidTokens = searchInput
+      .split(/\s+/)
+      .filter((token) => isUUIDv4orV5(token));
+    if (!selectedAttributeQuery && uuidTokens.length === 0) {
       dispatch(
         openNotificationDialog({
-          dialogTitle: 'Please select at least one attribute to search',
+          dialogTitle:
+            'Please select at least one attribute to search or provide one or more valid document IDs',
         })
       );
       return;
@@ -125,8 +141,11 @@ export default function DefaultSearchByAttributes({
         siteId,
         formkiqVersion,
         page: 1,
-        searchAttributes: [selectedAttributeQuery],
-        searchWord,
+        searchAttributes:
+          !uuidTokens.length && selectedAttributeQuery
+            ? [selectedAttributeQuery]
+            : null,
+        searchWord: uuidTokens.length > 0 ? uuidTokens.join(' ') : null,
         searchFolder,
         filterTag,
         filterAttribute,
@@ -171,7 +190,10 @@ export default function DefaultSearchByAttributes({
     };
 
     // Handle KEY_ONLY data type
-    if (selectedAttribute.dataType === 'KEY_ONLY') {
+    if (
+      selectedAttribute.dataType === 'KEY_ONLY' ||
+      selectedAttribute.dataType === 'WATERMARK'
+    ) {
       return searchAttribute;
     }
     if (attributeValue === undefined) return;
@@ -267,11 +289,12 @@ export default function DefaultSearchByAttributes({
       <div className="h-full border-gray-400 border p-2">
         <SearchLine
           siteId={siteId}
-          searchWord={searchWord}
           onSearch={onSearch}
           updateInputValue={updateInputValue}
           inputValue={searchInput}
+          searchType={searchType}
         />
+        <div className="pb-4 font-bold">OR</div>
         {attributeKeys.length ? (
           <div className="h-8 gap-2 flex items-center">
             <div className="h-8 flex items-center gap-2 w-full max-w-[350px]">
@@ -494,6 +517,16 @@ export default function DefaultSearchByAttributes({
         </div>
       </div>
       <div className="flex justify-end gap-2 mt-2">
+        <button
+          type="button"
+          onClick={minimizeAdvancedSearch}
+          className="text-sm flex gap-2 items-center font-bold text-gray-500 hover:text-primary-500 cursor-pointer whitespace-nowrap"
+        >
+          Minimize Search Tab
+          <div className="w-4 h-4 -mt-1 rotate-180">
+            <ChevronDown />
+          </div>
+        </button>
         <ButtonGhost type="button" onClick={onCloseTab}>
           Cancel
         </ButtonGhost>

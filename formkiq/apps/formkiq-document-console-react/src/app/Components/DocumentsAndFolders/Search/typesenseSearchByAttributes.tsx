@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useSearchParams } from 'react-router-dom';
+import { AttributesDataState } from '../../../Store/reducers/attributesData';
 import { fetchDocuments } from '../../../Store/reducers/documentsList';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
@@ -13,7 +14,6 @@ import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
 import { ChevronDown, Close, Plus } from '../../Icons/icons';
 import SearchLine from './searchLine';
-import { AttributesDataState } from '../../../Store/reducers/attributesData';
 
 export default function TypesenseSearchByAttributes({
   siteId,
@@ -300,7 +300,6 @@ export default function TypesenseSearchByAttributes({
       <div className="h-full border-gray-400 border overflow-y-auto p-2">
         <SearchLine
           siteId={siteId}
-          searchWord={searchWord}
           onSearch={onSearch}
           updateInputValue={updateInputValue}
           inputValue={searchInput}

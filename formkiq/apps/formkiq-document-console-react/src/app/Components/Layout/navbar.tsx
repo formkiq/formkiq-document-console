@@ -1015,6 +1015,7 @@ function Navbar() {
                       documentsRootUri={currentDocumentsRootUri}
                       value={inputValue}
                       expandAdvancedSearch={expandAdvancedSearch}
+                      searchType="enhanced"
                     />
                   </div>
                 )}

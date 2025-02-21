@@ -30,14 +30,25 @@ function useOutsideAlerter(ref: any, setExpanded: any) {
   }, [ref]);
 }
 
-export default function SearchInput({
+interface SearchInputProps {
+  onChange: (e: any) => void;
+  onKeyDown: (e: any) => void;
+  siteId: string;
+  documentsRootUri: string;
+  value: string;
+  expandAdvancedSearch: any;
+  searchType: 'simplified' | 'enhanced';
+}
+
+function SearchInput({
   onChange,
   onKeyDown,
   siteId,
   documentsRootUri,
   value,
   expandAdvancedSearch,
-}: any) {
+  searchType,
+}: SearchInputProps) {
   const search = useLocation().search;
   const advancedSearch = new URLSearchParams(search).get('advancedSearch');
   const [expanded, setExpanded] = useState(false);
@@ -45,6 +56,8 @@ export default function SearchInput({
   const [isAdvancedSearchModalOpened, setAdvancedSearchModalOpened] =
     useState(false);
   const [isSearchAvailable, setIsSearchAvailable] = useState<boolean>(true);
+  const [isOnlyEnabledForDocumentIds, setIsOnlyEnabledForDocumentIds] =
+    useState<boolean>(false);
   const navigate = useNavigate();
 
   const { formkiqVersion, useAdvancedSearch } = useSelector(ConfigState);
@@ -66,7 +79,8 @@ export default function SearchInput({
       });
       setDocuments(temp);
       setIsSearchAvailable(true);
-    } else if (response.status === 200) { // if search is available but no documents found
+    } else if (response.status === 200) {
+      // if search is available but no documents found
       setIsSearchAvailable(true);
       setDocuments([] as any);
     } else {
@@ -76,8 +90,6 @@ export default function SearchInput({
 
   useEffect(() => {
     if (value) {
-      // TODO: allow search across all sites and/or specify site
-      // TODO: verify version modules and determine search function to use (DynamoDB, Typesense, OpenSearch)
       const cleanedValue = value.replace(/\s+/g, ' ').trim();
       if (isUUIDv4orV5(cleanedValue)) {
         DocumentsService.searchById(
@@ -103,7 +115,8 @@ export default function SearchInput({
       } else {
         if (
           formkiqVersion.modules.includes('typesense') ||
-          formkiqVersion.modules.includes('opensearch')
+          (formkiqVersion.modules.includes('opensearch') &&
+            searchType === 'enhanced')
         ) {
           DocumentsService.searchDocuments(
             siteId,
@@ -112,10 +125,15 @@ export default function SearchInput({
             value,
             1,
             allTags,
-            allAttributes
+            allAttributes,
+            null,
+            20,
+            'enhanced'
           ).then((response: any) => {
             handleSearchResponse(response);
           });
+        } else {
+          setIsOnlyEnabledForDocumentIds(true);
         }
       }
     }
@@ -152,6 +170,12 @@ export default function SearchInput({
       return (
         <div className="text-center text-gray-500">
           Search Currently Unavailable
+        </div>
+      );
+    } else if (isOnlyEnabledForDocumentIds) {
+      return (
+        <div className="text-center text-gray-500">
+          Must be one or more valid document IDs
         </div>
       );
     } else {
@@ -244,7 +268,8 @@ export default function SearchInput({
             type="text"
             placeholder={
               formkiqVersion.modules.includes('typesense') ||
-              formkiqVersion.modules.includes('opensearch')
+              (formkiqVersion.modules.includes('opensearch') &&
+                searchType === 'enhanced')
                 ? 'Search'
                 : 'Document ID'
             }
@@ -331,3 +356,5 @@ export default function SearchInput({
     </div>
   );
 }
+
+export default SearchInput;
