@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { AttributesDataState } from '../../../Store/reducers/attributesData';
 import { fetchDocuments } from '../../../Store/reducers/documentsList';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
+import { ReservedAttributeKeys } from '../../../helpers/constants/attributes';
 import { Attribute } from '../../../helpers/types/attributes';
-import { useLocation, useSearchParams } from 'react-router-dom';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
@@ -13,7 +15,15 @@ import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import RadioListbox from '../../Generic/Listboxes/RadioListbox';
 import { ChevronDown, Close, Plus } from '../../Icons/icons';
 import SearchLine from './searchLine';
-import { AttributesDataState } from '../../../Store/reducers/attributesData';
+
+interface OpenSearchByAttributesProps {
+  siteId: string;
+  formkiqVersion: any;
+  subfolderUri: any;
+  minimizeAdvancedSearch: () => void;
+  closeAdvancedSearch: () => void;
+  searchType: 'simplified' | 'enhanced';
+}
 
 export default function OpenSearchByAttributes({
   siteId,
@@ -21,7 +31,8 @@ export default function OpenSearchByAttributes({
   subfolderUri,
   minimizeAdvancedSearch,
   closeAdvancedSearch,
-}: any) {
+  searchType,
+}: OpenSearchByAttributesProps): JSX.Element {
   const opensearchAttributeCriteria = [
     { key: 'eq', title: 'Equal to' },
     { key: 'eqOr', title: 'One of' },
@@ -75,10 +86,14 @@ export default function OpenSearchByAttributes({
 
   useEffect(() => {
     if (!allAttributes || allAttributes.length === 0) return;
-    const keys = allAttributes.map((item) => ({
-      key: item.key,
-      title: item.key,
-    }));
+    // Filter out reserved attribute keys.
+    const keys = allAttributes
+      .filter((item) => !ReservedAttributeKeys.includes(item.key))
+      .filter((item) => item.dataType !== 'WATERMARK')
+      .map((item) => ({
+        key: item.key,
+        title: item.key,
+      }));
     setAttributeKeys(keys);
   }, [allAttributes]);
 
@@ -122,10 +137,8 @@ export default function OpenSearchByAttributes({
   };
 
   const onSearch = () => {
-    let searchAttributes: any = null;
-    if (selectedAttributesQuery.length > 0) {
-      searchAttributes = selectedAttributesQuery;
-    }
+    let searchAttributes: any =
+      selectedAttributesQuery.length > 0 ? selectedAttributesQuery : null;
     dispatch(
       fetchDocuments({
         siteId,
@@ -137,6 +150,7 @@ export default function OpenSearchByAttributes({
         filterTag,
         filterAttribute,
         subfolderUri,
+        searchType,
       })
     );
   };
@@ -279,13 +293,17 @@ export default function OpenSearchByAttributes({
 
   return (
     <div className="w-full h-full">
+      <p className="p-2 text-sm">
+        NOTE: Reserved Attributes (e.g., Classification) and WATERMARK-type
+        attributes are only searchable using "Simplified Search"
+      </p>
       <div className="h-full border-gray-400 border p-2">
         <SearchLine
           siteId={siteId}
-          searchWord={searchWord}
           onSearch={onSearch}
           updateInputValue={updateInputValue}
           inputValue={searchInput}
+          searchType="enhanced"
         />
         {attributeKeys.length ? (
           <div className="h-8 gap-2 flex items-center">
@@ -336,7 +354,7 @@ export default function OpenSearchByAttributes({
                   <input
                     type="text"
                     className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                    required={attributeValues.length === 0} // check if added at least one attribute
+                    required={attributeValues.length === 0}
                     value={attributeValue as string}
                     onChange={(e: any) => setAttributeValue(e.target.value)}
                   />
@@ -370,7 +388,7 @@ export default function OpenSearchByAttributes({
                   <input
                     type="number"
                     className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
-                    required={attributeValues.length === 0} // check if added at least one attribute
+                    required={attributeValues.length === 0}
                     value={attributeValue as number}
                     onChange={(e: any) => setAttributeValue(e.target.value)}
                   />
@@ -398,7 +416,6 @@ export default function OpenSearchByAttributes({
                   />
                 </div>
               )}
-
             {selectedAttribute &&
               selectedAttribute.dataType === 'BOOLEAN' &&
               selectedAttributeCriteria === 'eqOr' && (
@@ -454,72 +471,78 @@ export default function OpenSearchByAttributes({
 
         {selectedAttributesQuery.length > 0 && (
           <div className="max-h-[35vh] overflow-y-auto w-fit">
-          <table
-            className=" border-separate border-spacing-0 border-x border-b border-neutral-300 table-fixed text-sm text-left mt-2 bg-white">
-            <thead className="sticky top-0 bg-white z-10">
-              <tr>
-                <th className="w-52 px-2 border-b border-t border-neutral-300">Key</th>
-                <th className="w-32 px-2 border-b border-t border-neutral-300">Criteria</th>
-                <th className="w-96 px-2 border-b border-t border-t border-neutral-300">Values</th>
-                <th className="w-8 border-b border-t border-neutral-300"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedAttributesQuery.map((item: any, i: number) => (
-                <tr key={i} className="border-t border-neutral-300">
-                  <td className="px-2">{item.key}</td>
-                  <td className="px-2">
-                    {item.eq && 'Equal to'}
-                    {item.eqOr && 'One of'}
-                  </td>
-                  <td className="px-2">
-                    {item.eq &&
-                      item.eq.stringValue !== undefined &&
-                      '"' + item.eq.stringValue + '"'}
-                    {item.eqOr &&
-                      item.eqOr
-                        .filter((val: any) => val.stringValue)
-                        .map((val: any) => '"' + val.stringValue + '"')
-                        .join(', ')}
-                    {item.eq &&
-                      item.eq.numberValue !== undefined &&
-                      '"' + item.eq.numberValue + '"'}
-                    {item.eqOr &&
-                      item.eqOr
-                        .filter((val: any) => val.numberValue)
-                        .map((val: any) => '"' + val.numberValue + '"')
-                        .join(', ')}
-                    {item.eq &&
-                      item.eq.booleanValue !== undefined &&
-                      '"' + item.eq.booleanValue.toString() + '"'}
-                    {item.eqOr &&
-                      item.eqOr
-                        .filter((val: any) => val.booleanValue !== undefined)
-                        .map(
-                          (val: any) => '"' + val.booleanValue.toString() + '"'
-                        )
-                        .join(', ')}
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="p-1 text-neutral-500 h-6 w-6 hover:text-red-500"
-                      onClick={() => {
-                        setSelectedAttributesQuery(
-                          selectedAttributesQuery.filter(
-                            (_: any, j: number) => j !== i
-                          )
-                        );
-                      }}
-                      title="Remove"
-                    >
-                      <Close />
-                    </button>
-                  </td>
+            <table className=" border-separate border-spacing-0 border-x border-b border-neutral-300 table-fixed text-sm text-left mt-2 bg-white">
+              <thead className="sticky top-0 bg-white z-10">
+                <tr>
+                  <th className="w-52 px-2 border-b border-t border-neutral-300">
+                    Key
+                  </th>
+                  <th className="w-32 px-2 border-b border-t border-neutral-300">
+                    Criteria
+                  </th>
+                  <th className="w-96 px-2 border-b border-t border-t border-neutral-300">
+                    Values
+                  </th>
+                  <th className="w-8 border-b border-t border-neutral-300"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {selectedAttributesQuery.map((item: any, i: number) => (
+                  <tr key={i} className="border-t border-neutral-300">
+                    <td className="px-2">{item.key}</td>
+                    <td className="px-2">
+                      {item.eq && 'Equal to'}
+                      {item.eqOr && 'One of'}
+                    </td>
+                    <td className="px-2">
+                      {item.eq &&
+                        item.eq.stringValue !== undefined &&
+                        '"' + item.eq.stringValue + '"'}
+                      {item.eqOr &&
+                        item.eqOr
+                          .filter((val: any) => val.stringValue)
+                          .map((val: any) => '"' + val.stringValue + '"')
+                          .join(', ')}
+                      {item.eq &&
+                        item.eq.numberValue !== undefined &&
+                        '"' + item.eq.numberValue + '"'}
+                      {item.eqOr &&
+                        item.eqOr
+                          .filter((val: any) => val.numberValue)
+                          .map((val: any) => '"' + val.numberValue + '"')
+                          .join(', ')}
+                      {item.eq &&
+                        item.eq.booleanValue !== undefined &&
+                        '"' + item.eq.booleanValue.toString() + '"'}
+                      {item.eqOr &&
+                        item.eqOr
+                          .filter((val: any) => val.booleanValue !== undefined)
+                          .map(
+                            (val: any) =>
+                              '"' + val.booleanValue.toString() + '"'
+                          )
+                          .join(', ')}
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="p-1 text-neutral-500 h-6 w-6 hover:text-red-500"
+                        onClick={() => {
+                          setSelectedAttributesQuery(
+                            selectedAttributesQuery.filter(
+                              (_: any, j: number) => j !== i
+                            )
+                          );
+                        }}
+                        title="Remove"
+                      >
+                        <Close />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

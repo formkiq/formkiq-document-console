@@ -527,7 +527,8 @@ export class DocumentsService {
     allTags = [] as any[],
     allAttributes = [] as any[],
     searchAttributes: any = null,
-    limit = 20
+    limit = 20,
+    searchType: string = 'simplified'
   ): Promise<any> {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
@@ -544,7 +545,10 @@ export class DocumentsService {
       }
     });
     const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
-    if (formkiqVersion.modules.indexOf('opensearch') === -1) {
+    if (
+      formkiqVersion.modules.indexOf('opensearch') === -1 ||
+      searchType === 'simplified'
+    ) {
       const searchBody: any = {
         query: {},
         responseFields: {

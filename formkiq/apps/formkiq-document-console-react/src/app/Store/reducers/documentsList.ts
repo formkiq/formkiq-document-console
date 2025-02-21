@@ -38,6 +38,7 @@ export const fetchDocuments = createAsyncThunk(
       nextToken,
       page,
       searchAttributes,
+      searchType,
     } = data;
     const user = (thunkAPI.getState() as any)?.authState.user;
     const tagParam = filterTag ? filterTag.split(':')[0] : null;
@@ -109,6 +110,7 @@ export const fetchDocuments = createAsyncThunk(
       const cleanedSearchWord = searchWord
         ? searchWord.replace(/\s+/g, ' ').trim()
         : '';
+
       if (isUUIDv4orV5(cleanedSearchWord)) {
         // UUID detected, use document ID search
         DocumentsService.searchById(
@@ -202,7 +204,9 @@ export const fetchDocuments = createAsyncThunk(
           page,
           allTags,
           allAttributes,
-          searchAttributes
+          searchAttributes,
+          20,
+          searchType
         ).then((response: any) => {
           if (response && response.status === 200) {
             if (currentCallId !== callCounter) return;
