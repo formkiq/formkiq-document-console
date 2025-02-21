@@ -1,10 +1,6 @@
 import { useDragLayer } from 'react-dnd';
 import { useAuthenticatedState } from '../../../Store/reducers/auth';
-import {
-  getFileIcon,
-  isTagValueIncludes,
-} from '../../../helpers/services/toolService';
-import { Star, StarFilled } from '../../Icons/icons';
+import { getFileIcon } from '../../../helpers/services/toolService';
 
 function CustomDragLayer() {
   const { itemType, isDragging, item, currentOffset, clientOffset } =
@@ -19,10 +15,6 @@ function CustomDragLayer() {
 
   const { user } = useAuthenticatedState();
 
-  const isFavorited = isTagValueIncludes(
-    item?.tags?.sysFavoritedBy,
-    user.email
-  );
   const renderItem = () => {
     switch (itemType) {
       case 'file':
@@ -53,13 +45,6 @@ function CustomDragLayer() {
               />
             </span>
             <span>{item.path}</span>
-            {item?.path && (
-              <span>
-                <div className="w-5 text-gray-400 mx-4">
-                  {isFavorited ? StarFilled() : Star()}
-                </div>
-              </span>
-            )}
           </div>
         );
       default:

@@ -1,9 +1,5 @@
 import { store } from '../../Store/store';
 import FormkiqClient from '../../lib/formkiq-client-sdk-es6';
-import {
-  TagsForFilterAndDisplay,
-  TagsForSharedFavoriteAndDeletedDocuments,
-} from '../constants/primaryTags';
 import { formkiqAPIHandler } from '../decorators/formkiqAPIHandler';
 import { Attribute } from '../types/attributes';
 
@@ -307,12 +303,7 @@ export class DocumentsService {
     } else {
       folderValue = '';
     }
-    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
-    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
-      if (customIncludeTags.indexOf(primaryTag) === -1) {
-        customIncludeTags.push(primaryTag);
-      }
-    });
+    const customIncludeTags: string[] = [];
     if (tag) {
       if (customIncludeTags.indexOf(tag) === -1) {
         customIncludeTags.push(tag);
@@ -369,106 +360,6 @@ export class DocumentsService {
   }
 
   @formkiqAPIHandler
-  public static async getDocumentsSharedWithMe(
-    siteId = '',
-    tag: string | null = null,
-    previous = null,
-    next = null,
-    attribute: string | null = null,
-    allAttributes = [] as any[]
-  ): Promise<any> {
-    if (!siteId || !siteId.length) {
-      siteId = this.determineSiteId();
-    }
-    const { user } = store.getState().authState;
-    let folderValue;
-    if (user) {
-      folderValue = user.email;
-    }
-    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
-    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
-      if (customIncludeTags.indexOf(primaryTag) === -1) {
-        customIncludeTags.push(primaryTag);
-      }
-    });
-    if (tag) {
-      if (customIncludeTags.indexOf(tag) === -1) {
-        customIncludeTags.push(tag);
-      }
-    }
-    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
-    const searchBody = {
-      query: {
-        tag: {
-          key: 'sysSharedWith',
-          eq: (user as any).email,
-        },
-        attribute: attribute ? { key: attribute } : null,
-      },
-      responseFields: {
-        tags: customIncludeTags,
-        attributes: attributesKeys,
-      },
-    };
-    return this.getFormkiqClient().searchApi.search({
-      searchParameters: searchBody,
-      siteId,
-      previous,
-      next,
-    });
-  }
-
-  @formkiqAPIHandler
-  public static async getDocumentsFavoritedByMe(
-    siteId = '',
-    tag: string | null = null,
-    previous = null,
-    next = null,
-    attribute: string | null = null,
-    allAttributes = [] as any[]
-  ): Promise<any> {
-    if (!siteId || !siteId.length) {
-      siteId = this.determineSiteId();
-    }
-    const { user } = store.getState().authState;
-    let folderValue;
-    if (user) {
-      folderValue = user.email;
-    }
-    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
-    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
-      if (customIncludeTags.indexOf(primaryTag) === -1) {
-        customIncludeTags.push(primaryTag);
-      }
-    });
-    if (tag) {
-      if (customIncludeTags.indexOf(tag) === -1) {
-        customIncludeTags.push(tag);
-      }
-    }
-    const attributesKeys = allAttributes.map((attribute: any) => attribute.key);
-    const searchBody = {
-      query: {
-        tag: {
-          key: 'sysFavoritedBy',
-          eq: folderValue,
-        },
-        attribute: attribute ? { key: attribute } : null,
-      },
-      responseFields: {
-        tags: customIncludeTags,
-        attributes: attributesKeys,
-      },
-    };
-    return this.getFormkiqClient().searchApi.search({
-      searchParameters: searchBody,
-      siteId,
-      previous,
-      next,
-    });
-  }
-
-  @formkiqAPIHandler
   public static async getDeletedDocuments(
     siteId = '',
     previous = null,
@@ -499,12 +390,7 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
-    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
-      if (customIncludeTags.indexOf(primaryTag) === -1) {
-        customIncludeTags.push(primaryTag);
-      }
-    });
+    const customIncludeTags: string[] = [];
     if (tag) {
       if (customIncludeTags.indexOf(tag) === -1) {
         customIncludeTags.push(tag);
@@ -646,12 +532,7 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
-    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
-      if (customIncludeTags.indexOf(primaryTag) === -1) {
-        customIncludeTags.push(primaryTag);
-      }
-    });
+    const customIncludeTags: string[] = [];
     if (tag) {
       if (customIncludeTags.indexOf(tag) === -1) {
         customIncludeTags.push(tag);
@@ -716,12 +597,7 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
-    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
-      if (customIncludeTags.indexOf(primaryTag) === -1) {
-        customIncludeTags.push(primaryTag);
-      }
-    });
+    const customIncludeTags: string[] = [];
     allTags.forEach((allTag: any) => {
       if (customIncludeTags.indexOf(allTag.value) === -1) {
         customIncludeTags.push(allTag.value);
@@ -753,12 +629,7 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
-    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
-      if (customIncludeTags.indexOf(primaryTag) === -1) {
-        customIncludeTags.push(primaryTag);
-      }
-    });
+    const customIncludeTags: string[] = [];
     allTags.forEach((allTag: any) => {
       if (customIncludeTags.indexOf(allTag.value) === -1) {
         customIncludeTags.push(allTag.value);
@@ -793,12 +664,7 @@ export class DocumentsService {
     if (!siteId || !siteId.length) {
       siteId = this.determineSiteId();
     }
-    const customIncludeTags = TagsForSharedFavoriteAndDeletedDocuments;
-    (TagsForFilterAndDisplay as string[]).forEach((primaryTag: string) => {
-      if (customIncludeTags.indexOf(primaryTag) === -1) {
-        customIncludeTags.push(primaryTag);
-      }
-    });
+    const customIncludeTags: string[] = [];
     if (tag) {
       if (customIncludeTags.indexOf(tag) === -1) {
         customIncludeTags.push(tag);

@@ -49,13 +49,7 @@ export default function DocumentTagsPopover({
   const [popperRef, setPopperRef] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isTagColorEditMode, setIsTagColorEditMode] = useState(false);
-  const systemTags = [
-    'sysDeletedBy',
-    'sysSharedWith',
-    'sysFavoritedBy',
-    'untagged',
-    'path',
-  ];
+  const systemTags = ['path'];
 
   const toggleTagColorEdit = () => {
     setIsTagColorEditMode(!isTagColorEditMode);

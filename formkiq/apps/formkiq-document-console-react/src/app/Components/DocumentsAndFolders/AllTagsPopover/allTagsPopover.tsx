@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePopper } from 'react-popper';
-import { TagsForFilterAndDisplay } from '../../../helpers/constants/primaryTags';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { Attribute } from '../../../helpers/types/attributes';
 import { Close } from '../../Icons/icons';
@@ -58,22 +57,11 @@ export default function AllTagsPopover({
     setVisibility(!visible);
   }
 
-  const systemTags = [
-    'sysDeletedBy',
-    'sysSharedWith',
-    'sysFavoritedBy',
-    'untagged',
-    'path',
-  ];
+  const systemTags = ['path'];
   const updateTags = () => {
     setAllTagKeys(null);
     DocumentsService.getAllTagKeys(siteId).then((data) => {
-      const tagKeys = data?.values.filter((value: any) => {
-        return (
-          TagsForFilterAndDisplay.indexOf(value.value) === -1 &&
-          systemTags.indexOf(value.value) === -1
-        );
-      });
+      const tagKeys = data?.values;
       setAllTagKeys(tagKeys);
     });
   };

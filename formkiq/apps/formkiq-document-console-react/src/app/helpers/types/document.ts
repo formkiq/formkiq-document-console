@@ -19,23 +19,9 @@ export enum RequestStatus {
 }
 
 export const specialFolders = {
-  favorites: {
-    name: 'favorites',
-    diaplayName: 'Favorites',
-    key: 'sysFavoritedBy',
-  },
-  recent: {
-    diaplayName: 'Recent files',
-    key: '',
-  },
   deleted: {
     name: 'deleted',
     diaplayName: 'Trash',
     key: 'sysDeletedBy',
-  },
-  shared: {
-    name: 'shared',
-    diaplayName: 'Shared with me',
-    key: 'sysSharedWith',
   },
 };

@@ -80,8 +80,7 @@ export const DocumentsTable = (props: DocumentTableProps) => {
     onMoveSelectedDocuments,
   } = props;
 
-  const { formkiqVersion, useIndividualSharing, useSoftDelete } =
-    useSelector(ConfigState);
+  const { formkiqVersion, useSoftDelete } = useSelector(ConfigState);
   const { documents, folders, loadingStatus, isLastSearchPageLoaded } =
     useSelector(DocumentListState);
 
@@ -319,15 +318,6 @@ export const DocumentsTable = (props: DocumentTableProps) => {
               >
                 Filesize
               </th>
-              {useIndividualSharing && (
-                <th
-                  scope="col"
-                  className="w-24 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"
-                >
-                  {subfolderUri === 'shared' && <span>Shared by</span>}
-                  {subfolderUri !== 'shared' && <span>Access</span>}
-                </th>
-              )}
               <th
                 scope="col"
                 className="w-28 px-4 py-2 text-left font-semibold text-sm text-transparent bg-clip-text bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 border-t border-b border-neutral-300"

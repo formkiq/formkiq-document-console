@@ -117,7 +117,6 @@ export interface Config {
   isSidebarExpanded: boolean;
   currentActionEvent: string;
   isWorkspacesExpanded: boolean;
-  useIndividualSharing: boolean;
   useNotifications: boolean;
   useFileFilter: boolean;
   useCollections: boolean;
@@ -196,7 +195,6 @@ export const configInitialState = {
   isSidebarExpanded: true,
   currentActionEvent: '',
   isWorkspacesExpanded: false,
-  useIndividualSharing: false,
   useNotifications: false,
   useFileFilter: false,
   useCollections: false,
@@ -204,7 +202,7 @@ export const configInitialState = {
   useSoftDelete: true,
   showIntegrations: true,
   pendingArchive: [] as IDocument[],
-  workflowFilterPreference: "active",
+  workflowFilterPreference: 'active',
 } as Config;
 
 const getInitialState = (): Config => {
@@ -277,9 +275,12 @@ export const configSlice = createSlice({
     builder.addCase(setPendingArchive.fulfilled, (state: any, action) => {
       state.pendingArchive = action.payload;
     });
-    builder.addCase(setWorkflowFilterPreference.fulfilled, (state: any, action) => {
-      state.workflowFilterPreference = action.payload;
-    });
+    builder.addCase(
+      setWorkflowFilterPreference.fulfilled,
+      (state: any, action) => {
+        state.workflowFilterPreference = action.payload;
+      }
+    );
   },
 });
 

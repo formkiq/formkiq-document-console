@@ -19,9 +19,7 @@ import {
   Rename,
   Schema,
   Settings,
-  Share,
   Signature,
-  Star,
   Tag,
   Trash,
   Workflow,
@@ -51,7 +49,6 @@ export default function DocumentActionsPopover({
   siteId,
   formkiqVersion,
   onInfoPage,
-  useIndividualSharing,
   useCollections,
   useSoftDelete,
   isDeeplinkPath,
@@ -147,28 +144,6 @@ export default function DocumentActionsPopover({
           className={`bg-white border-gray-100 border shadow-xl z-10 rounded-xl w-64 text-sm p-2`}
         >
           <ul className="text-neutral-900">
-            {useIndividualSharing && (
-              <li
-                className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
-                onClick={(event) =>
-                  onShareClick(event, {
-                    lineType: line.lineType,
-                    documentId: line.documentId,
-                    folder: line.folder,
-                  })
-                }
-              >
-                <span className={'flex items-baseline'}>
-                  <span
-                    className="mr-2"
-                    style={{ width: '15px', height: '13px' }}
-                  >
-                    {Share()}
-                  </span>
-                  <span>Share</span>
-                </span>
-              </li>
-            )}
             {line.lineType === 'document' && (
               <>
                 {line.documentId === infoDocumentId && (
@@ -201,14 +176,6 @@ export default function DocumentActionsPopover({
                   </li>
                 </Link>
               </>
-            )}
-            {line.lineType === 'document' && !isReadOnlyUser && (
-              <li className="py-1 px-2 hover:bg-gray-100 cursor-pointer">
-                <span className={'flex items-baseline'}>
-                  <span className="mr-2 w-4 text-neutral-900">{Star()}</span>
-                  <span>Mark as favorite</span>
-                </span>
-              </li>
             )}
             {line.lineType === 'document' && !onInfoPage && !isDeeplinkPath && (
               <li
