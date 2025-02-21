@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { isUUIDv4orV5 } from '../../helpers/services/toolService';
 import ButtonGhost from '../Generic/Buttons/ButtonGhost';
 import ButtonPrimary from '../Generic/Buttons/ButtonPrimary';
 import RadioListbox from '../Generic/Listboxes/RadioListbox';
-import { isUUIDv4orV5 } from '../../helpers/services/toolService';
 
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
@@ -70,19 +70,21 @@ function EditAttributeForm({
         );
         return;
       }
-      // Check if document exists
-      const documentResponse = await DocumentsService.getDocumentById(
-        data.imageDocumentId,
-        siteId
-      );
-      if (documentResponse.status !== 200) {
-        dispatch(
-          openNotificationDialog({
-            dialogTitle:
-              'Image document not found. Please provide a valid document ID.',
-          })
+      // If imageDocumentId exists (vs text), check if document exists
+      if (data.imageDocumentId) {
+        const documentResponse = await DocumentsService.getDocumentById(
+          data.imageDocumentId,
+          siteId
         );
-        return;
+        if (documentResponse.status !== 200) {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle:
+                'Image document not found. Please provide a valid document ID.',
+            })
+          );
+          return;
+        }
       }
     }
 
@@ -210,13 +212,13 @@ function EditAttributeForm({
             {attributeAdditionalFieldsValues?.text && (
               <div className="flex flex-col gap-1">
                 <label>Text</label>
-                <input
-                  type="text"
+                <textarea
                   disabled={isViewAttributeDialogOpen}
-                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                  className="px-4 py-2 border border-neutral-300 text-sm rounded-md"
                   {...register('text')}
                   defaultValue={attributeAdditionalFieldsValues?.text}
                   placeholder="Text"
+                  rows={3}
                 />
               </div>
             )}
