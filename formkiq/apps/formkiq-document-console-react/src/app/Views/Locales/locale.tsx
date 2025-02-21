@@ -23,7 +23,7 @@ import { LocaleResourceItem } from '../../helpers/types/locales';
 import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import ResourceItemsTable from './resourceItemsTable';
 
-// Declare shared interfaces
+// Shared interfaces
 export interface AttributeOption {
   attributeKey: string;
   required: boolean;
@@ -211,9 +211,14 @@ const LocaleResourceItemEditingTab = ({
               className="w-64 p-2 border border-neutral-300 rounded"
               value={resourceItem.classificationId || ''}
               onChange={(e) => {
-                handleFieldChange('classificationId', e.target.value);
-                // Reset attribute key when classification changes.
-                handleFieldChange('attributeKey', '');
+                const newClassificationId = e.target.value;
+                const updated = {
+                  ...resourceItem,
+                  classificationId: newClassificationId,
+                  attributeKey: '', // reset attribute key
+                };
+                updated.itemKey = computeItemKey(updated);
+                setLocaleResourceItemValue({ resourceItem: updated });
               }}
             >
               <option value="">Select classification</option>

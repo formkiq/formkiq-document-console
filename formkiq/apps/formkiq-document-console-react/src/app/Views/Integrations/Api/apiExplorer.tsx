@@ -22,6 +22,8 @@ import {
   deleteFolderDeprecatedApiItem,
   deleteGroupApiItem,
   deleteGroupUserApiItem,
+  deleteLocaleApiItem,
+  deleteLocaleResourceItemApiItem,
   deleteMappingApiItem,
   deleteNigoApiItem,
   deleteNigoDocumentApiItem,
@@ -76,6 +78,9 @@ import {
   getGroupApiItem,
   getGroupUsersApiItem,
   getGroupsApiItem,
+  getLocaleResourceItemApiItem,
+  getLocaleResourceItemsApiItem,
+  getLocalesApiItem,
   getMappingApiItem,
   getMappingsApiItem,
   getNewDocumentUploadApiItem,
@@ -142,6 +147,8 @@ import {
   postGoogleDocumentExport,
   postGroupApiItem,
   postGroupUserApiItem,
+  postLocaleResourceItemsApiItem,
+  postLocalesApiItem,
   postMappingApiItem,
   postNigoApiItem,
   postPrivateWebhooksApiItem,
@@ -169,6 +176,7 @@ import {
   putDocumentOcrApiItem,
   putDocumentTagApiItem,
   putDocumentVersionApiItem,
+  putLocaleResourceItemApiItem,
   putMappingApiItem,
   putOpensearchIndexApiItem,
   putSiteClassificationApiItem,
@@ -620,6 +628,30 @@ export function ApiExplorer() {
               <div className="w-4 border-l"></div>
               <div className="grow">
                 <ApiItem apiItem={postGoogleDocumentExport} sites={sites} />
+              </div>
+            </div>
+          </ApiSegment>
+          <ApiSegment title="Locales">
+            <div className="ml-2 mb-4 flex flex-cols">
+              <div className="w-4 border-l"></div>
+              <div className="grow">
+                <ApiItem apiItem={getLocalesApiItem} sites={sites} />
+                <ApiItem apiItem={postLocalesApiItem} sites={sites} />
+                <ApiItem apiItem={deleteLocaleApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={getLocaleResourceItemsApiItem}
+                  sites={sites}
+                />
+                <ApiItem
+                  apiItem={postLocaleResourceItemsApiItem}
+                  sites={sites}
+                />
+                <ApiItem apiItem={getLocaleResourceItemApiItem} sites={sites} />
+                <ApiItem apiItem={putLocaleResourceItemApiItem} sites={sites} />
+                <ApiItem
+                  apiItem={deleteLocaleResourceItemApiItem}
+                  sites={sites}
+                />
               </div>
             </div>
           </ApiSegment>

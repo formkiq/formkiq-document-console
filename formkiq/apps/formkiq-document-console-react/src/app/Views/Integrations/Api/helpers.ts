@@ -15,6 +15,8 @@ export interface ApiItem {
   requiresNigoID: boolean;
   requiresRulesetID: boolean;
   requiresRuleID: boolean;
+  requiresLocale: boolean;
+  requiresItemKey: boolean;
   requiresObjectId: boolean;
   requiresTagKey: boolean;
   allowsIndexKey: boolean;
@@ -1621,6 +1623,116 @@ export const deleteRuleApiItem = {
   requiresRulesetID: true,
   requiresRuleID: true,
   license: 'Pro|Enterprise',
+};
+
+export const getLocalesApiItem = {
+  method: 'GET',
+  path: '/sites/ SITE_ID /locales',
+  description: 'Returns a list of locales',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  allowsLimit: true,
+  hasPagingTokens: true,
+  license: 'Core',
+};
+
+export const postLocalesApiItem = {
+  method: 'POST',
+  path: '/sites/ SITE_ID /locales',
+  description: 'Create a new locale',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue: '{"locale":"es-419","resourceItems":[]}',
+  license: 'Core',
+};
+
+export const getLocaleApiItem = {
+  method: 'GET',
+  path: '/sites/ SITE_ID /locales/ LOCALE ',
+  description: 'Returns a locale',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresLocale: true,
+  license: 'Core',
+};
+
+export const deleteLocaleApiItem = {
+  method: 'DELETE',
+  path: '/sites/ SITE_ID /locales/ LOCALE ',
+  description: 'Deletes a locale',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresLocale: true,
+  license: 'Core',
+};
+
+export const getLocaleResourceItemsApiItem = {
+  method: 'GET',
+  path: '/sites/ SITE_ID /locales/ LOCALE /resourceItems',
+  description: 'Returns a list of resource items in a locale',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresLocale: true,
+  license: 'Core',
+};
+
+export const postLocaleResourceItemsApiItem = {
+  method: 'POST',
+  path: '/sites/ SITE_ID /locales/ LOCALE /resourceItems',
+  description: 'Create a new locale resource item',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresLocale: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"resourceItem":{"itemKey":"CLASSIFICATION##{classificationId}##{attributeKey}##{allowedValue}","itemType":"CLASSIFICATION","localizedValue":"Test Value","classificationId":"{classificationId}","attributeKey":"{attributeKey}","allowedValue":"{allowedValue}"}}',
+  license: 'Core',
+};
+
+export const getLocaleResourceItemApiItem = {
+  method: 'GET',
+  path: '/sites/ SITE_ID /locales/ LOCALE /resourceItems/ ITEM_KEY ',
+  description: 'Returns a resource item in a locale',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresLocale: true,
+  requiresItemKey: true,
+  license: 'Core',
+};
+
+export const putLocaleResourceItemApiItem = {
+  method: 'PUT',
+  path: '/sites/ SITE_ID /locales/ LOCALE /resourceItems/ ITEM_KEY ',
+  description: 'Puts a resource item in a locale',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresLocale: true,
+  requiresItemKey: true,
+  requiresAuthentication: true,
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{ "rule": { "priority": 0, "description": "Test Rule", "workflowId": "Test Workflow Id", "status": "ACTIVE", "conditions": { "must": [{ "attribute": "TEXT", "fieldName": "Test Field Name", "value": "Test Value", "operation": "EQ" }]}}}',
+  license: 'Core',
+};
+
+export const deleteLocaleResourceItemApiItem = {
+  method: 'DELETE',
+  path: '/sites/ SITE_ID /locales/ LOCALE /resourceItems/ ITEM_KEY ',
+  description: 'Deletes a locale resource item',
+  username: 'Cognito User',
+  requiresSite: true,
+  requiresAuthentication: true,
+  requiresLocale: true,
+  requiresItemKey: true,
+  license: 'Core',
 };
 
 export const getExaminePdfUploadUrlApiItem = {
