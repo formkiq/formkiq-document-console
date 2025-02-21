@@ -5,6 +5,7 @@ import { setAllAttributesData } from '../../../Store/reducers/attributesData';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
+import { isUUIDv4orV5 } from '../../../helpers/services/toolService';
 import {
   Attribute,
   AttributeDataType,
@@ -25,12 +26,7 @@ function AddAttributeForm({
     AttributeDataType | ''
   >('');
 
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-    reset,
-  } = useForm();
+  const { register, handleSubmit, reset } = useForm();
   const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
 
@@ -54,6 +50,31 @@ function AddAttributeForm({
           })
         );
         return;
+      }
+      // Validate imageDocumentId format and existence if provided
+      if (data.imageDocumentId) {
+        if (!isUUIDv4orV5(data.imageDocumentId)) {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle: 'Invalid image document ID format.',
+            })
+          );
+          return;
+        }
+        // Check if document exists
+        const documentResponse = await DocumentsService.getDocumentById(
+          data.imageDocumentId,
+          siteId
+        );
+        if (documentResponse.status !== 200) {
+          dispatch(
+            openNotificationDialog({
+              dialogTitle:
+                'Image document not found. Please provide a valid document ID.',
+            })
+          );
+          return;
+        }
       }
     }
 

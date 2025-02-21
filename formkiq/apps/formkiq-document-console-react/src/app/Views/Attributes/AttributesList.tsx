@@ -1,10 +1,13 @@
-import { useEffect, useRef } from 'react';
-import { Pencil, Trash } from '../../Components/Icons/icons';
+import { useCallback, useEffect, useRef } from 'react';
+
+import { Pencil, Trash, View } from '../../Components/Icons/icons';
+import { ReservedAttributeKeys } from '../../helpers/constants/attributes';
+import { Attribute } from '../../helpers/types/attributes';
 
 type Props = {
   attributes: any[];
   onDelete: (key: string) => void;
-  onEdit: (key: string) => void;
+  onEdit: (key: string, isViewMode?: boolean) => void;
   onAttributeInView: (key: string) => void;
   isAttributesInUse: Record<string, boolean>;
   isReadOnlyUser: boolean;
@@ -19,16 +22,19 @@ export function AttributesList({
   isReadOnlyUser,
 }: Props) {
   const tableRef = useRef(null);
-  const handleIntersection = (entries: any[]) => {
-    entries.forEach((entry: any) => {
-      if (entry.isIntersecting) {
-        // check if in view
-        if (!entry.target.id || entry.target.id === '') return;
-        onAttributeInView(entry.target.id);
-      }
-    });
-  };
 
+  const handleIntersection = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          // check if in view
+          if (!entry.target.id) return;
+          onAttributeInView(entry.target.id);
+        }
+      });
+    },
+    [onAttributeInView] // Dependencies
+  );
   useEffect(() => {
     const observer = new IntersectionObserver(handleIntersection, {
       root: null,
@@ -43,7 +49,7 @@ export function AttributesList({
     return () => {
       observer.disconnect();
     };
-  }, [attributes]);
+  }, [attributes, handleIntersection]);
 
   return (
     <>
@@ -74,7 +80,7 @@ export function AttributesList({
           </thead>
           <tbody className="bg-white nodark:bg-slate-800">
             {attributes && attributes.length ? (
-              attributes.map((attribute: any, i: number) => {
+              attributes.map((attribute: Attribute) => {
                 return (
                   <tr id={attribute.key} key={`attribute-${attribute.key}`}>
                     <td className="font-bold border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
@@ -85,33 +91,63 @@ export function AttributesList({
                     </td>
                     <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
                       {attribute.type}
+                      {ReservedAttributeKeys.indexOf(attribute?.key) > -1 && (
+                        <span className="block text-xs">
+                          (reserved attribute key)
+                        </span>
+                      )}
                     </td>
                     <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
-                      {isAttributesInUse[attribute.key] === true
+                      {isAttributesInUse[attribute.key]
                         ? 'Yes'
-                        : isAttributesInUse[attribute.key] === false
+                        : !isAttributesInUse[attribute.key]
                         ? 'No'
                         : 'Loading...'}
                     </td>
                     <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pr-8 text-neutral-900 nodark:text-slate-400">
-                      {!isReadOnlyUser &&
-                        isAttributesInUse[attribute.key] === false && (
-                          <div className="flex gap-2 items-center">
-                            <button
-                              onClick={() => onEdit(attribute.key)}
-                              className="hover:text-primary-500 w-6 h-6"
-                            >
-                              <Pencil />
-                            </button>
+                      <div className="flex gap-2 items-center">
+                        {ReservedAttributeKeys.indexOf(attribute?.key) ===
+                          -1 && (
+                          <>
+                            {isReadOnlyUser ||
+                            isAttributesInUse[attribute.key] ? (
+                              <button
+                                onClick={() => onEdit(attribute.key)}
+                                className="hover:text-primary-500 w-6 h-6 mr-2"
+                              >
+                                <View />
+                              </button>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => onEdit(attribute.key)}
+                                  className="hover:text-primary-500 w-6 h-6 mr-2"
+                                >
+                                  <View />
+                                </button>
+                                <button
+                                  onClick={() => onEdit(attribute.key, false)}
+                                  className="hover:text-primary-500 w-6 h-6 mr-2"
+                                >
+                                  <Pencil />
+                                </button>
+                              </>
+                            )}
+                          </>
+                        )}
 
+                        {!isReadOnlyUser &&
+                          !isAttributesInUse[attribute.key] &&
+                          ReservedAttributeKeys.indexOf(attribute?.key) ===
+                            -1 && (
                             <button
                               onClick={() => onDelete(attribute.key)}
                               className="hover:text-red-500 w-5 h-5"
                             >
                               <Trash />
                             </button>
-                          </div>
-                        )}
+                          )}
+                      </div>
                     </td>
                   </tr>
                 );

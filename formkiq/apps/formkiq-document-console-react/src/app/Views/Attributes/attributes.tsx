@@ -2,15 +2,19 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
+
 import CreateNewAttributeModal from '../../Components/Attributes/CreateNewAttributeModal';
 import EditAttributeModal from '../../Components/Attributes/EditAttributeModal';
 import ButtonPrimaryGradient from '../../Components/Generic/Buttons/ButtonPrimaryGradient';
+import AttributesList from './AttributesList';
+
 import { DocumentsService } from '../../helpers/services/documentsService';
 import {
   getCurrentSiteInfo,
   getUserSites,
 } from '../../helpers/services/toolService';
 import { getAllAttributes } from '../../helpers/tools/useCacheStorage';
+
 import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import {
   AttributesDataState,
@@ -21,15 +25,19 @@ import { AuthState } from '../../Store/reducers/auth';
 import { openDialog as openConfirmationDialog } from '../../Store/reducers/globalConfirmControls';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../Store/store';
-import AttributesList from './AttributesList';
 
 export function Attributes() {
+  const pathname = decodeURI(useLocation().pathname);
+
+  const navigate = useNavigate();
+
   const dispatch = useAppDispatch();
+
   const { user } = useSelector(AuthState);
+  const { allAttributes } = useSelector(AttributesDataState);
 
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
-  const pathname = decodeURI(useLocation().pathname);
   const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
@@ -38,14 +46,14 @@ export function Attributes() {
     hasWorkspaces,
     workspaceSites
   );
-  const navigate = useNavigate();
-  const { allAttributes } = useSelector(AttributesDataState);
 
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [isAttributesInUse, setIsAttributesInUse] = useState<
     Record<string, boolean>
   >({});
   const [isNewAttributeDialogOpen, setIsNewAttributeDialogOpen] =
+    useState(false);
+  const [isViewAttributeDialogOpen, setIsViewAttributeDialogOpen] =
     useState(false);
   const [isEditAttributeDialogOpen, setIsEditAttributeDialogOpen] =
     useState(false);
@@ -165,16 +173,19 @@ export function Attributes() {
     setIsNewAttributeDialogOpen(false);
   };
 
-  const onEditAttribute = (attributeKey: string) => {
+  const onEditAttribute = (attributeKey: string, isViewMode = true) => {
+    console.log(isViewMode);
     const attribute = allAttributes.find(
       (attribute) => attribute.key === attributeKey
     );
     if (!attribute) return;
     setAttributeToEdit(attribute);
     setIsEditAttributeDialogOpen(true);
+    setIsViewAttributeDialogOpen(isViewMode);
   };
   const onEditAttributeModalClose = () => {
     setIsEditAttributeDialogOpen(false);
+    setIsViewAttributeDialogOpen(false);
     setAttributeToEdit(null);
   };
   return (
@@ -232,10 +243,13 @@ export function Attributes() {
       />
       <EditAttributeModal
         attribute={attributeToEdit}
+        isAttributesInUse={isAttributesInUse}
         isOpened={isEditAttributeDialogOpen}
         onClose={onEditAttributeModalClose}
         siteId={currentSiteId}
         updateAllAttributes={updateAttributes}
+        isViewAttributeDialogOpen={isViewAttributeDialogOpen}
+        setIsViewAttributeDialogOpen={setIsViewAttributeDialogOpen}
       />
     </>
   );

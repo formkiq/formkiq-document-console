@@ -14,16 +14,16 @@
   }
 
   .use-markdown a[href]:after {
-    content: " (" attr(href) ")";
+    content: ' (' attr(href) ')';
   }
 
   .use-markdown abbr[title]:after {
-    content: " (" attr(title) ")";
+    content: ' (' attr(title) ')';
   }
 
-  .use-markdown a[href^="#"]:after,
-  .use-markdown a[href^="javascript:"]:after {
-    content: "";
+  .use-markdown a[href^='#']:after,
+  .use-markdown a[href^='javascript:']:after {
+    content: '';
   }
 
   .use-markdown pre,
@@ -92,7 +92,7 @@
 .use-markdown .splendor-h3,
 .use-markdown h4,
 .use-markdown .splendor-h4 {
-  margin: 1.414rem 0 .5rem;
+  margin: 1.414rem 0 0.5rem;
   font-weight: inherit;
   line-height: 1.42;
 }
@@ -125,12 +125,12 @@
 
 .use-markdown h6,
 .use-markdown .splendor-h6 {
-  font-size: .88rem;
+  font-size: 0.88rem;
 }
 
 .use-markdown small,
 .use-markdown .splendor-small {
-  font-size: .707em;
+  font-size: 0.707em;
 }
 
 /* https://github.com/mrmrs/fluidity */
@@ -162,10 +162,11 @@
 /* === A bit of a gross hack so we can have bleeding divs/blockquotes. */
 
 .use-markdown p,
-.use-markdown *:not(div):not(img):not(body):not(html):not(li):not(blockquote):not(p) {
+.use-markdown
+  *:not(div):not(img):not(body):not(html):not(li):not(blockquote):not(p) {
   margin: 1rem auto 1rem;
   max-width: 36rem;
-  padding: .25rem;
+  padding: 0.25rem;
 }
 
 .use-markdown div {
@@ -185,6 +186,17 @@
 
 .use-markdown li {
   margin-left: 2rem;
+  list-style: inherit;
+}
+
+.use-markdown ul {
+  list-style: disc;
+  padding-left: 1rem;
+}
+
+.use-markdown ol {
+  list-style: decimal;
+  padding-left: 1rem;
 }
 
 /* Counteract the specificity of the gross *:not() chain. */
@@ -203,12 +215,12 @@
 
 .use-markdown pre,
 .use-markdown code {
-  font-family: Menlo, Monaco, "Courier New", monospace;
+  font-family: Menlo, Monaco, 'Courier New', monospace;
 }
 
 .use-markdown pre {
   background-color: #fafafa;
-  font-size: .8rem;
+  font-size: 0.8rem;
   overflow-x: scroll;
   padding: 1.125em;
 }
