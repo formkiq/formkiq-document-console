@@ -204,11 +204,11 @@ function AddAttributeForm({
             {/* Conditionally render watermark fields */}
             {selectedAttributeDataType === 'WATERMARK' && (
               <div className="flex flex-col gap-2 mt-2">
-                <input
-                  type="text"
-                  className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
+                <textarea
+                  className="px-4 py-2 border border-neutral-300 text-sm rounded-md"
                   {...register('watermarkText')}
                   placeholder="Watermark Text"
+                  rows={3}
                 />
                 <input
                   type="text"
