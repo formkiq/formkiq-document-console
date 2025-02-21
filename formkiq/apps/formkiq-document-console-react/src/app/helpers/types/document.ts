@@ -17,11 +17,3 @@ export enum RequestStatus {
   fulfilled = 'fulfilled',
   rejected = 'rejected',
 }
-
-export const specialFolders = {
-  deleted: {
-    name: 'deleted',
-    diaplayName: 'Trash',
-    key: 'sysDeletedBy',
-  },
-};

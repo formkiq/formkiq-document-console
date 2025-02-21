@@ -63,7 +63,6 @@ interface DocumentActionsContextType {
   onDocumentReviewModalClick: (event: any, value: any) => void;
   onDocumentReviewModalClose: () => void;
   currentDocumentTags: IDocumentTag[];
-  isCurrentDocumentSoftDeleted: boolean;
   currentDocumentVersions: any[];
   updateTags: (
     infoDocumentId: string,
@@ -169,8 +168,6 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
   const [currentDocumentTags, setCurrentDocumentTags] = useState<
     IDocumentTag[]
   >([]);
-  const [isCurrentDocumentSoftDeleted, setIsCurrentDocumentSoftDeleted] =
-    useState(false);
   const [currentDocumentVersions, setCurrentDocumentVersions] = useState<any[]>(
     []
   );
@@ -376,13 +373,9 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
                 el.insertedDate = moment(el.insertedDate).format(
                   'YYYY-MM-DD HH:mm'
                 );
-                if (el.key === 'sysDeletedBy') {
-                  isDeleted = true;
-                }
                 return el;
               })
             );
-            setIsCurrentDocumentSoftDeleted(isDeleted);
           }
         }
       );
@@ -599,7 +592,6 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     updateTags,
     onDeleteClick,
     currentDocumentTags,
-    isCurrentDocumentSoftDeleted,
     currentDocumentVersions,
     onRenameModalClick,
     onMoveModalClick,

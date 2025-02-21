@@ -618,13 +618,9 @@ function Documents() {
                 el.insertedDate = moment(el.insertedDate).format(
                   'YYYY-MM-DD HH:mm'
                 );
-                if (el.key === 'sysDeletedBy') {
-                  isDeleted = true;
-                }
                 return el;
               })
             );
-            setIsCurrentDocumentSoftDeleted(isDeleted);
           }
         }
       );
