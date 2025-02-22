@@ -34,6 +34,7 @@ export interface ApiItem {
   requiresClassificationID: boolean;
   requiresMappingID: boolean;
   requiresEnvelopeID: boolean;
+  requiresApiKey: boolean;
   allowsVersionKey: boolean;
   allowsDate: boolean;
   allowsLimit: boolean;
@@ -1217,6 +1218,9 @@ export const postApiKeysApiItem = {
   requiresAuthentication: true,
   requiresSite: true,
   license: 'Core',
+  requiresPostJson: true,
+  defaultPostJsonValue:
+    '{"name": "key name", "permissions": ["READ", "WRITE", "DELETE", "GOVERN"]}',
 };
 export const deleteApiKeyApiItem = {
   method: 'DELETE',
@@ -1226,6 +1230,7 @@ export const deleteApiKeyApiItem = {
   requiresAuthentication: true,
   requiresSite: true,
   license: 'Core',
+  requiresApiKey: true,
 };
 
 export const getCasesApiItem = {

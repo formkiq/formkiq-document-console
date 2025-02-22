@@ -246,6 +246,11 @@ function updateRequestsFromForm(
       );
     }
   }
+  if (apiItem.requiresApiKey) {
+    if (getFormInput(formRef, 'apiKey')?.validity?.valid) {
+      path = path.replace(' API_KEY ', getFormInput(formRef, 'apiKey')?.value);
+    }
+  }
 
   let httpRequest = apiItem.method + ' ' + path;
   let curlRequest = '';
@@ -1992,6 +1997,27 @@ function getApiItem(
                       placeholder-gray-500 text-gray-900 rounded-t-md
                       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
                 />
+              </div>
+            )}
+
+            {apiItem.requiresApiKey && (
+              <div className="md:flex md:items-center mx-4 mb-4 relative">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                    API Key
+                  </label>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <input
+                    aria-label="API Key"
+                    name="apiKey"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-600
+            placeholder-gray-500 text-gray-900 rounded-t-md
+            focus:outline-none focus:shadow-outline-blue focus:border-blue-300 focus:z-10"
+                  />
+                </div>
               </div>
             )}
           </form>
