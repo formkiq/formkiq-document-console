@@ -1736,12 +1736,12 @@ function getApiItem(
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    OBJECT ID
+                    Object Id
                   </label>
                 </div>
                 <div className="w-full md:w-3/4">
                   <input
-                    aria-label="OBJECT ID"
+                    aria-label="Object Id"
                     name="objectID"
                     type="text"
                     required
@@ -1838,12 +1838,12 @@ function getApiItem(
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    ATTRIBUTE KEY
+                    Attribute Key
                   </label>
                 </div>
                 <div className="w-full md:w-3/4">
                   <input
-                    aria-label="ATTRIBUTE KEY"
+                    aria-label="Attribute Key"
                     name="attributeKey"
                     type="text"
                     required
@@ -1858,12 +1858,12 @@ function getApiItem(
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    ATTRIBUTE VALUE
+                    Attribute Value
                   </label>
                 </div>
                 <div className="w-full md:w-3/4">
                   <input
-                    aria-label="ATTRIBUTE VALUE"
+                    aria-label="Attribute Value"
                     name="attributeValue"
                     type="text"
                     required
@@ -1878,12 +1878,12 @@ function getApiItem(
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    GROUP NAME
+                    Group Name
                   </label>
                 </div>
                 <div className="w-full md:w-3/4">
                   <input
-                    aria-label="GROUP NAME"
+                    aria-label="Group Name"
                     name="groupName"
                     type="text"
                     required
@@ -1898,12 +1898,12 @@ function getApiItem(
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    USERNAME
+                    Username
                   </label>
                 </div>
                 <div className="w-full md:w-3/4">
                   <input
-                    aria-label="USERNAME"
+                    aria-label="Username"
                     name="username"
                     type="text"
                     required
@@ -1919,12 +1919,12 @@ function getApiItem(
               <div className="md:flex md:items-center mx-4 mb-4 relative">
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
-                    USER OPERATION
+                    User Operation
                   </label>
                 </div>
                 <div className="w-full md:w-3/4">
                   <input
-                    aria-label="USER OPERATION"
+                    aria-label="User Operation"
                     name="userOperation"
                     type="text"
                     required
@@ -2005,6 +2005,7 @@ function getApiItem(
                 <div className="w-full md:w-1/4">
                   <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
                     API Key
+                    <small className="block">(obfuscated key)</small>
                   </label>
                 </div>
                 <div className="w-full md:w-3/4">
