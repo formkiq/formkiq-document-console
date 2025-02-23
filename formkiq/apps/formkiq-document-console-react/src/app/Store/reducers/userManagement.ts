@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { DocumentsService } from '../../helpers/services/documentsService';
-import { RequestStatus, Group, User } from '../../helpers/types/userManagement';
+import { Group, RequestStatus, User } from '../../helpers/types/userManagement';
 import { RootState } from '../store';
 import { openDialog as openNotificationDialog } from './globalNotificationControls';
 
@@ -123,7 +123,7 @@ export const fetchUsers = createAsyncThunk(
   'userManagement/fetchUsers',
   async (data: any, thunkAPI) => {
     const { nextToken, limit, page } = data;
-    await DocumentsService.getUsers(nextToken, limit).then((response) => {
+    await DocumentsService.getUsers(limit, nextToken).then((response) => {
       if (response.status === 200) {
         const data = {
           users: response.users,
