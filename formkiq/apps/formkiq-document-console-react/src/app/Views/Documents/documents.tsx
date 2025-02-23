@@ -52,10 +52,6 @@ import {
 } from '../../Store/reducers/documentsList';
 import { openDialog } from '../../Store/reducers/globalConfirmControls';
 import { QueuesState } from '../../Store/reducers/queues';
-import {
-  fetchUsers,
-  UserManagementState,
-} from '../../Store/reducers/userManagement';
 import { WorkflowsState } from '../../Store/reducers/workflows';
 import { useAppDispatch } from '../../Store/store';
 import {
@@ -107,7 +103,6 @@ function Documents() {
   } = useSelector(ConfigState);
   const { workflows } = useSelector(WorkflowsState);
   const { queues } = useSelector(QueuesState);
-  const { users } = useSelector(UserManagementState);
   const { allTags, allAttributes } = useSelector(AttributesDataState);
   const { documentAttributes } = useSelector(AttributesState);
   const subfolderUri = useSubfolderUri();
@@ -512,12 +507,6 @@ function Documents() {
   useEffect(() => {
     onDocumentInfoClick();
   }, [infoDocumentId]);
-
-  useEffect(() => {
-    if (user.isAdmin) {
-      dispatch(fetchUsers({ limit: 100, page: 1 }));
-    }
-  }, []);
 
   useEffect(() => {
     if (documentAttributes.length === 0 && currentDocumentTags) {
