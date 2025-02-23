@@ -503,7 +503,6 @@ export function DocumentView() {
 
     return (
       <>
-        {console.log(viewDocument?.contentType)}
         <div className="w-full h-full">
           {viewDocument &&
             (InlineViewableContentTypes.indexOf(viewDocument.contentType) >
