@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 // Update these import paths to match your project structure
@@ -22,6 +22,7 @@ import { CopyButton } from '../Generic/Buttons/CopyButton';
 import RadioCombobox from '../Generic/Listboxes/RadioCombobox';
 import { Close } from '../Icons/icons';
 import AddAttributesTab from './createSchemaDialog/addAttributesTab';
+import { useEditSchemaAttribute } from '../../hooks/edit-schema-attribute';
 
 type SchemaPagePropsType = {
   isEditing: boolean;
@@ -249,7 +250,6 @@ function SchemaPage({
   };
 
   // Methods for required values
-
   const addRequiredAllowedValue = () => {
     if (requiredAllowedValue.length === 0) return;
     if (requiredAllowedValues.includes(requiredAllowedValue)) {
@@ -307,7 +307,6 @@ function SchemaPage({
   };
 
   // Methods for optional values
-
   const addOptionalAllowedValue = () => {
     if (optionalAllowedValue.length === 0) return;
     if (optionalAllowedValues.includes(optionalAllowedValue)) {
@@ -359,6 +358,27 @@ function SchemaPage({
       attributes: { ...schema.attributes, optional: newOptional },
     });
   };
+
+  const {
+    editRequiredAttribute,
+    editOptionalAttribute,
+    requiredMinValues,
+    setRequiredMinValues,
+    requiredMaxValues,
+    setRequiredMaxValues,
+    optionalMinValues,
+    setOptionalMinValues,
+    optionalMaxValues,
+    setOptionalMaxValues,
+  } = useEditSchemaAttribute({
+    schema,
+    requiredKey,
+    requiredDefaultValues,
+    requiredAllowedValues,
+    setSchema,
+    optionalKey,
+    optionalAllowedValues,
+  });
 
   return (
     <>
@@ -430,7 +450,7 @@ function SchemaPage({
             />
             <label
               htmlFor="allowAdditionalAttributes"
-              className="ml-2 text-sm font-medium text-neutral-900 text-neutral-500"
+              className="ml-2 text-sm font-medium text-neutral-500"
             >
               Allow Additional Attributes
             </label>
@@ -559,6 +579,11 @@ function SchemaPage({
             }
             allAttributes={allAttributes}
             attributeType="required"
+            minNumberOfValues={requiredMinValues}
+            setMinNumberOfValues={setRequiredMinValues}
+            maxNumberOfValues={requiredMaxValues}
+            setMaxNumberOfValues={setRequiredMaxValues}
+            editAttribute={editRequiredAttribute}
           />
         ) : (
           <table className="border border-neutral-300 w-full max-w-full table-fixed text-left">
@@ -635,6 +660,11 @@ function SchemaPage({
             attributes={schema.attributes.optional}
             allAttributes={allAttributes}
             attributeType="optional"
+            minNumberOfValues={optionalMinValues}
+            setMinNumberOfValues={setOptionalMinValues}
+            maxNumberOfValues={optionalMaxValues}
+            setMaxNumberOfValues={setOptionalMaxValues}
+            editAttribute={editOptionalAttribute}
           />
         ) : (
           <table className="border border-neutral-300 w-full max-w-full table-fixed text-left">
