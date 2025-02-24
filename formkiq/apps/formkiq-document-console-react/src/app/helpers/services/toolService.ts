@@ -94,6 +94,24 @@ export function getFileIcon(path: string, deepLinkPath: string) {
         case 'mp3':
           fileIcon = '/assets/img/svg/icon-mp3.svg';
           break;
+        case 'mp4':
+          fileIcon = '/assets/img/svg/icon-mp4.svg';
+          break;
+        case 'm4a':
+          fileIcon = '/assets/img/svg/icon-m4a.svg';
+          break;
+        case 'm4b':
+          fileIcon = '/assets/img/svg/icon-m4b.svg';
+          break;
+        case 'm4p':
+          fileIcon = '/assets/img/svg/icon-m4p.svg';
+          break;
+        case 'm4r':
+          fileIcon = '/assets/img/svg/icon-m4r.svg';
+          break;
+        case 'm4v':
+          fileIcon = '/assets/img/svg/icon-m4v.svg';
+          break;
         case 'ogg':
           fileIcon = '/assets/img/svg/icon-ogg.svg';
           break;
