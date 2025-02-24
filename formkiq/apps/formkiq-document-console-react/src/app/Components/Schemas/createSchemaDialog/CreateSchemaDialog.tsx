@@ -1,6 +1,11 @@
+import React, { useEffect, useRef, useState } from 'react';
 import { Dialog } from '@headlessui/react';
-import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+
+import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
+import { Close, Save } from '../../Icons/icons';
+import AddAttributesTab from './addAttributesTab';
+
 import {
   AttributesDataState,
   fetchAttributesData,
@@ -11,11 +16,11 @@ import {
   fetchSiteSchema,
 } from '../../../Store/reducers/schemas';
 import { useAppDispatch } from '../../../Store/store';
+
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { Schema } from '../../../helpers/types/schemas';
-import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
-import { Close, Save } from '../../Icons/icons';
-import AddAttributesTab from './addAttributesTab';
+
+import { useEditSchemaAttribute } from '../../../hooks/edit-schema-attribute';
 
 type CreateSchemaModalPropsType = {
   isOpen: boolean;
@@ -285,7 +290,6 @@ function CreateSchemaDialog({
   };
 
   // Methods for optional values
-
   const addOptionalAllowedValue = () => {
     if (optionalAllowedValue.length === 0) {
       return;
@@ -297,6 +301,7 @@ function CreateSchemaDialog({
     setOptionalAllowedValues([...optionalAllowedValues, optionalAllowedValue]);
     setOptionalAllowedValue('');
   };
+
   const addOptionalToSchema = () => {
     if (optionalKey.length === 0) {
       return;
@@ -332,6 +337,27 @@ function CreateSchemaDialog({
       attributes: { ...schema.attributes, optional: newOptional },
     });
   };
+
+  const {
+    editRequiredAttribute,
+    editOptionalAttribute,
+    requiredMinValues,
+    setRequiredMinValues,
+    requiredMaxValues,
+    setRequiredMaxValues,
+    optionalMinValues,
+    setOptionalMinValues,
+    optionalMaxValues,
+    setOptionalMaxValues,
+  } = useEditSchemaAttribute({
+    schema,
+    requiredKey,
+    requiredDefaultValues,
+    requiredAllowedValues,
+    setSchema,
+    optionalKey,
+    optionalAllowedValues,
+  });
 
   return (
     <>
@@ -591,6 +617,11 @@ function CreateSchemaDialog({
                     attributes={schema.attributes.required}
                     allAttributes={allAttributes}
                     attributeType={selectedTab}
+                    minNumberOfValues={requiredMinValues}
+                    setMinNumberOfValues={setRequiredMinValues}
+                    maxNumberOfValues={requiredMaxValues}
+                    setMaxNumberOfValues={setRequiredMaxValues}
+                    editAttribute={editRequiredAttribute}
                   />
                 )}
                 {selectedTab === 'optional' && (
@@ -609,6 +640,11 @@ function CreateSchemaDialog({
                     attributes={schema.attributes.optional}
                     allAttributes={allAttributes}
                     attributeType={selectedTab}
+                    minNumberOfValues={optionalMinValues}
+                    setMinNumberOfValues={setOptionalMinValues}
+                    maxNumberOfValues={optionalMaxValues}
+                    setMaxNumberOfValues={setOptionalMaxValues}
+                    editAttribute={editOptionalAttribute}
                   />
                 )}
                 <div className="flex flex-row justify-end gap-4 text-base font-bold mt-4">

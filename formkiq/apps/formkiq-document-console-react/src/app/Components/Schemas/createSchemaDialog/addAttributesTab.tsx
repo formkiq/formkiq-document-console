@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
-import { Close } from '../../Icons/icons';
+
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
+import { Close, Pencil } from '../../Icons/icons';
 
 type AddTagsTabProps = {
   attributeKeys: { key: string; title: string }[];
@@ -23,6 +26,11 @@ type AddTagsTabProps = {
   attributes: any;
   allAttributes: any[];
   attributeType: 'required' | 'optional';
+  minNumberOfValues: number;
+  setMinNumberOfValues: (value: number) => void;
+  maxNumberOfValues: number;
+  setMaxNumberOfValues: (value: number) => void;
+  editAttribute: (index: number) => void;
 };
 
 type ValidationMessage = {
@@ -47,15 +55,30 @@ function AddAttributesTab({
   attributes,
   allAttributes,
   attributeType,
+  minNumberOfValues,
+  setMinNumberOfValues,
+  maxNumberOfValues,
+  setMaxNumberOfValues,
+  editAttribute,
 }: AddTagsTabProps) {
-  // State for numeric steppers
-  const [minNumberOfValues, setMinNumberOfValues] = useState<number>(0);
-  // Set default max to -1, which now means "no maximum"
-  const [maxNumberOfValues, setMaxNumberOfValues] = useState<number>(-1);
   const [validationMsg, setValidationMsg] = useState<ValidationMessage>(null);
 
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const handleCancel = () => {
+    // Clear form fields
+    setTagsKey('');
+    setMinNumberOfValues(0);
+    setMaxNumberOfValues(-1);
+    setAllowedValue('');
+    setAllowedValues([]);
+    if (setDefaultValues) setDefaultValues([]);
+    // Reset editing state if applicable
+    setEditingIndex(null);
+  };
+
   // Validation function updated for max=-1 meaning no maximum.
-  const validateNumberOfValues = () => {
+  const validateNumberOfValues = useCallback(() => {
     // Case 1: min=0, max=-1 (no maximum): no validation needed
     if (minNumberOfValues === 0 && maxNumberOfValues === -1) {
       setValidationMsg(null);
@@ -92,19 +115,50 @@ function AddAttributesTab({
     // Clear any previous message if valid.
     setValidationMsg(null);
     return true;
-  };
+  }, [maxNumberOfValues, minNumberOfValues]);
 
   // Validate on change
   useEffect(() => {
     validateNumberOfValues();
-  }, [minNumberOfValues, maxNumberOfValues]);
+  }, [minNumberOfValues, maxNumberOfValues, validateNumberOfValues]);
 
   // Adjusted addAttributesToSchema to include the numeric settings if valid.
   const handleAddAttributes = () => {
-    if (!validateNumberOfValues()) {
-      return; // Prevent saving if validation fails.
+    if (!validateNumberOfValues()) return;
+
+    if (editingIndex !== null) {
+      editAttribute(editingIndex); // Now uses parent's state
+      setEditingIndex(null);
+    } else {
+      addAttributesToSchema({
+        minNumberOfValues,
+        maxNumberOfValues,
+      });
     }
-    addAttributesToSchema({ minNumberOfValues, maxNumberOfValues });
+
+    // Clear form fields
+    setTagsKey('');
+    setMinNumberOfValues(0);
+    setMaxNumberOfValues(-1);
+    setAllowedValue('');
+    setAllowedValues([]);
+    if (setDefaultValues) setDefaultValues([]);
+  };
+
+  const handleEditClick = (index: number) => {
+    const attribute = attributes[index];
+
+    // Set form fields from selected attribute
+    setTagsKey(attribute.attributeKey);
+    setMinNumberOfValues(attribute.minNumberOfValues || 0);
+    setMaxNumberOfValues(attribute.maxNumberOfValues ?? -1);
+    setAllowedValues(attribute.allowedValues || []);
+
+    if (setDefaultValues) {
+      setDefaultValues(attribute.defaultValues || []);
+    }
+
+    setEditingIndex(index);
   };
 
   const toggleAddToDefault = (event: any, key: string) => {
@@ -375,10 +429,17 @@ function AddAttributesTab({
         )}
 
       {tagsKey.length > 0 && (
-        <div className="h-8 flex">
-          <ButtonSecondary type="button" onClick={handleAddAttributes}>
-            ADD ATTRIBUTE
+        <div className="flex w-full">
+          <ButtonSecondary
+            className="w-1/2"
+            type="button"
+            onClick={handleAddAttributes}
+          >
+            {editingIndex !== null ? 'SAVE CHANGES' : 'ADD ATTRIBUTE'}
           </ButtonSecondary>
+          <ButtonGhost className="w-1/2" type="button" onClick={handleCancel}>
+            Cancel
+          </ButtonGhost>
         </div>
       )}
 
@@ -413,7 +474,7 @@ function AddAttributesTab({
                   ) => (
                     <tr
                       key={'tag_' + i}
-                      className="border border-neutral-300 px-4 h-12 text-neutral-900"
+                      className="border border-neutral-300 px-4 h-12 text-neutral-900 relative"
                     >
                       <td className="text-sm text-slate-500 px-4">
                         <span className="text-gray-900 font-medium">
@@ -436,19 +497,34 @@ function AddAttributesTab({
                           {value.defaultValue}
                         </td>
                       )}
-                      <td className="text-sm text-ellipsis overflow-hidden">
+                      <td className="text-sm text-ellipsis overflow-hidden w-40">
                         {value.allowedValues
                           ? value.allowedValues.join(', ')
                           : '(any)'}
                       </td>
-                      <td className="w-[30px]">
-                        <button
-                          type="button"
-                          className="w-4 h-4"
-                          onClick={() => deleteTagsFromSchema(i)}
-                        >
-                          <Close />
-                        </button>
+                      <td className="flex items-center gap-2 h-12 absolute right-2">
+                        {editingIndex === i ? (
+                          <div className="p-1 bg-primary-100 text-primary-900 rounded-md text-xs font-bold whitespace-nowrap">
+                            <p>EDITING NOW</p>
+                          </div>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              className="w-4 h-4 min-w-4 text-neutral-900 hover:text-primary-500"
+                              onClick={() => handleEditClick(i)}
+                            >
+                              <Pencil />
+                            </button>
+                            <button
+                              type="button"
+                              className="w-4 h-4 min-w-4 text-neutral-900 hover:text-primary-500"
+                              onClick={() => deleteTagsFromSchema(i)}
+                            >
+                              <Close />
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   )
