@@ -4,6 +4,7 @@ import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
 import { useAppDispatch } from '../../../Store/store';
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import { Close } from '../../Icons/icons';
 import AttributesTab from './AttributesTab';
 import MetadataTab from './MetadataTab';
@@ -204,6 +205,15 @@ export default function EditAttributesModal({
                         updateTags={updateTags}
                       />
                     )}
+                  <div className="w-full pt-2 flex justify-end h-8 gap-2">
+                    <ButtonGhost
+                      className="uppercase"
+                      type="button"
+                      onClick={closeDialog}
+                    >
+                      Close
+                    </ButtonGhost>
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

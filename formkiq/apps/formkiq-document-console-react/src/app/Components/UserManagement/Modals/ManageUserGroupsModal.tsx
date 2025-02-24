@@ -236,8 +236,12 @@ function ManageUserGroupsModal({
               </div>
 
               <div className="flex flex-row justify-end gap-4 text-base font-bold h-10">
-                <ButtonGhost type="button" onClick={closeModal} className="">
-                  CLOSE
+                <ButtonGhost
+                  type="button"
+                  onClick={closeModal}
+                  className="uppercase"
+                >
+                  Close
                 </ButtonGhost>
               </div>
             </div>
