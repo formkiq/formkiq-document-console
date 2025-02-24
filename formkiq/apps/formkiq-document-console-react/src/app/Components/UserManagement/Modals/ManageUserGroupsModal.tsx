@@ -1,6 +1,11 @@
 import { Dialog } from '@headlessui/react';
 import { useCallback, useEffect, useState } from 'react';
-import { useAppDispatch } from '../../../Store/store';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { RequestStatus } from '../../../helpers/types/document';
+import { Group } from '../../../helpers/types/userManagement';
+import { openDialog as openConfirmationDialog } from '../../../Store/reducers/globalConfirmControls';
 import {
   addUserToGroup,
   deleteUserFromGroup,
@@ -8,15 +13,10 @@ import {
   setGroupsLoadingStatusPending,
   UserManagementState,
 } from '../../../Store/reducers/userManagement';
-import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import { useAppDispatch } from '../../../Store/store';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
-import { useSelector } from 'react-redux';
-import { RequestStatus } from '../../../helpers/types/document';
-import { Group } from '../../../helpers/types/userManagement';
-import { Link } from 'react-router-dom';
-import { DocumentsService } from '../../../helpers/services/documentsService';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
-import { openDialog as openConfirmationDialog } from '../../../Store/reducers/globalConfirmControls';
 
 type ManageUserGroupsModalPropsType = {
   isOpen: boolean;
@@ -50,6 +50,8 @@ function ManageUserGroupsModal({
       if (response.groups && response.groups.length > 0) {
         const groupNames = response.groups.map((group: Group) => group.name);
         setUserGroupNames(groupNames);
+      } else {
+        setUserGroupNames([]);
       }
     });
   }
