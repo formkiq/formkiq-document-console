@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import { Close, Pencil } from '../../Icons/icons';
 
 type AddTagsTabProps = {
@@ -63,6 +64,18 @@ function AddAttributesTab({
   const [validationMsg, setValidationMsg] = useState<ValidationMessage>(null);
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const handleCancel = () => {
+    // Clear form fields
+    setTagsKey('');
+    setMinNumberOfValues(0);
+    setMaxNumberOfValues(-1);
+    setAllowedValue('');
+    setAllowedValues([]);
+    if (setDefaultValues) setDefaultValues([]);
+    // Reset editing state if applicable
+    setEditingIndex(null);
+  };
 
   // Validation function updated for max=-1 meaning no maximum.
   const validateNumberOfValues = useCallback(() => {
@@ -352,7 +365,7 @@ function AddAttributesTab({
                           : ''
                       }
                       className={
-                        'cursor-pointer py-1.5 px-3 text-xs font-bold uppercase rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border' +
+                        'cursor-pointer py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border' +
                         (defaultValues && defaultValues.includes(key)
                           ? ' text-primary-500 border-primary-500 bg-neutral-100'
                           : ' border-neutral-500 text-neutral-900')
@@ -389,7 +402,7 @@ function AddAttributesTab({
                     defaultValues.map((key: string, i: number) => (
                       <div
                         key={'default_' + i}
-                        className="border border-neutral-500 text-neutral-900 py-1.5 px-3 text-xs font-bold uppercase rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2"
+                        className="border border-neutral-500 text-neutral-900 py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2"
                       >
                         <span className="text-ellipsis overflow-hidden">
                           {key}
@@ -416,9 +429,18 @@ function AddAttributesTab({
         )}
 
       {tagsKey.length > 0 && (
-        <ButtonSecondary type="button" onClick={handleAddAttributes}>
-          {editingIndex !== null ? 'SAVE CHANGES' : 'ADD ATTRIBUTE'}
-        </ButtonSecondary>
+        <div className="flex w-full">
+          <ButtonSecondary
+            className="w-1/2"
+            type="button"
+            onClick={handleAddAttributes}
+          >
+            {editingIndex !== null ? 'SAVE CHANGES' : 'ADD ATTRIBUTE'}
+          </ButtonSecondary>
+          <ButtonGhost className="w-1/2" type="button" onClick={handleCancel}>
+            Cancel
+          </ButtonGhost>
+        </div>
       )}
 
       {attributes && attributes.length > 0 && (

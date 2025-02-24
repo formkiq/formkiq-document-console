@@ -268,7 +268,7 @@ function AttributeForm({
             {attribute?.defaultValues.map((value, i) => (
               <div
                 key={`default_value_${i}`}
-                className="py-1.5 px-3 text-xs font-bold uppercase rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border border-neutral-500 text-neutral-900"
+                className="py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border border-neutral-500 text-neutral-900"
               >
                 <span className="text-ellipsis overflow-hidden">{value}</span>
                 <button
@@ -397,7 +397,7 @@ function AttributeForm({
                 {attribute.labelTexts.map((text, i) => (
                   <div
                     key={`label_text_${i}`}
-                    className="py-1.5 px-3 text-xs font-bold uppercase rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border border-neutral-500 text-neutral-900"
+                    className="py-1.5 px-3 text-xs font-bold rounded-md text-ellipsis overflow-hidden whitespace-nowrap flex items-center gap-2 border border-neutral-500 text-neutral-900"
                   >
                     <span className="text-ellipsis overflow-hidden">
                       {text}
