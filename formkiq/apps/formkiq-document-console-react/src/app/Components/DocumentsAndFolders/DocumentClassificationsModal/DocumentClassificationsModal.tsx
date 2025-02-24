@@ -538,8 +538,12 @@ export default function DocumentClassificationsModal({
                   )}
 
                   <div className="w-full flex justify-end h-8 gap-2">
-                    <ButtonGhost type="button" onClick={closeDialog}>
-                      CLOSE
+                    <ButtonGhost
+                      className="uppercase"
+                      type="button"
+                      onClick={closeDialog}
+                    >
+                      Close
                     </ButtonGhost>
                   </div>
                 </div>
