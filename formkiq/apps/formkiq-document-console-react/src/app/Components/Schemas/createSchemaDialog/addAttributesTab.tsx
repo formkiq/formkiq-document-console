@@ -410,7 +410,7 @@ function AddAttributesTab({
             type="button"
             onClick={handleAddAttributes}
           >
-            {editingIndex !== null ? 'SAVE CHANGES' : 'ADD ATTRIBUTE'}
+            {editingIndex !== null ? 'Save Changes' : 'Add Attribute'}
           </ButtonSecondary>
           <ButtonGhost className="w-1/2" type="button" onClick={handleCancel}>
             Cancel
@@ -474,18 +474,16 @@ function AddAttributesTab({
                       )}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden w-40">
-                      {value.allowedValues && value.allowedValues.length > 0 ? (
-                        value.allowedValues.join(', ')
-                      ) : attributeMap[value.attributeKey]?.dataType ===
-                          'STRING' ||
-                        attributeMap[value.attributeKey]?.dataType ===
-                          'NUMBER' ||
-                        attributeMap[value.attributeKey]?.dataType ===
-                          'BOOLEAN' ? (
-                        <>{value.allowedValues.join(', ')}</>
-                      ) : (
-                        'n/a'
-                      )}
+                      {value.allowedValues && value.allowedValues.length > 0
+                        ? value.allowedValues.join(', ')
+                        : attributeMap[value.attributeKey]?.dataType ===
+                            'STRING' ||
+                          attributeMap[value.attributeKey]?.dataType ===
+                            'NUMBER' ||
+                          attributeMap[value.attributeKey]?.dataType ===
+                            'BOOLEAN'
+                        ? '(any)'
+                        : 'n/a'}
                     </td>
 
                     <td className="flex items-center gap-2 h-12 absolute right-2">

@@ -5,9 +5,9 @@ import { useAppDispatch } from '../../../Store/store';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
 import ButtonPrimary from '../../Generic/Buttons/ButtonPrimary';
+import ButtonTertiary from '../../Generic/Buttons/ButtonTertiary';
 import { CopyButton } from '../../Generic/Buttons/CopyButton';
 import { Checkmark, Close } from '../../Icons/icons';
-import ButtonTertiary from "../../Generic/Buttons/ButtonTertiary";
 
 interface Workflow {
   workflowId: string;
@@ -270,7 +270,7 @@ export default function DocumentReviewModal({
                         <div className="w-5 h-5">
                           <Checkmark />
                         </div>
-                        APPROVE
+                        Approve
                       </ButtonPrimary>
                       <ButtonPrimary
                         className="flex justify-center items-center gap-2"
@@ -280,10 +280,10 @@ export default function DocumentReviewModal({
                         <div className="w-5 h-5">
                           <Close />
                         </div>
-                        REJECT
+                        Reject
                       </ButtonPrimary>
                       <ButtonTertiary type="button" onClick={closeDialog}>
-                        CANCEL REVIEW
+                        Cancel Review
                       </ButtonTertiary>
                     </div>
                   )}

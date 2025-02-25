@@ -271,7 +271,7 @@ function MappingDialog({
                 onClick={closeModal}
                 className="h-10 border border-neutral-900 px-4 rounded-md"
               >
-                CANCEL
+                Cancel
               </button>
               <button
                 type="submit"
