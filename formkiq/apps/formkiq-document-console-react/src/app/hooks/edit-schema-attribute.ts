@@ -9,6 +9,7 @@ type useEditSchemaAttributeParams = {
   requiredDefaultValues: string[];
   requiredAllowedValues: string[];
   optionalAllowedValues: string[];
+  optionalDefaultValues: string[];
   optionalKey: string;
 };
 
@@ -19,6 +20,7 @@ export const useEditSchemaAttribute = ({
   requiredAllowedValues,
   setSchema,
   optionalKey,
+  optionalDefaultValues,
   optionalAllowedValues,
 }: useEditSchemaAttributeParams) => {
   const [requiredMinValues, setRequiredMinValues] = useState(0);
@@ -60,6 +62,12 @@ export const useEditSchemaAttribute = ({
     if (updatedOptional) {
       updatedOptional[index] = {
         attributeKey: optionalKey,
+        defaultValue:
+          optionalDefaultValues.length === 1
+            ? optionalDefaultValues[0]
+            : undefined,
+        defaultValues:
+          optionalDefaultValues.length > 1 ? optionalDefaultValues : undefined,
         allowedValues: optionalAllowedValues,
         minNumberOfValues: optionalMinValues,
         maxNumberOfValues: optionalMaxValues,

@@ -15,6 +15,8 @@ export interface SchemaAttributes {
   }[];
   optional?: {
     attributeKey: string;
+    defaultValue?: string;
+    defaultValues?: string[];
     allowedValues?: string[];
     minNumberOfValues?: number;
     maxNumberOfValues?: number;

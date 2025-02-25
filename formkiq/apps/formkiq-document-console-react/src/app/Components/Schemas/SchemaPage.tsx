@@ -15,6 +15,7 @@ import {
 } from '../../Store/reducers/schemas';
 import { useAppDispatch } from '../../Store/store';
 
+import { useEditSchemaAttribute } from '../../hooks/edit-schema-attribute';
 import ButtonGhost from '../Generic/Buttons/ButtonGhost';
 import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonSecondary from '../Generic/Buttons/ButtonSecondary';
@@ -22,7 +23,7 @@ import { CopyButton } from '../Generic/Buttons/CopyButton';
 import RadioCombobox from '../Generic/Listboxes/RadioCombobox';
 import { Close } from '../Icons/icons';
 import AddAttributesTab from './createSchemaDialog/addAttributesTab';
-import { useEditSchemaAttribute } from '../../hooks/edit-schema-attribute';
+import LocaleLinkBuilder from './createSchemaDialog/LocaleLinkBuilder';
 
 type SchemaPagePropsType = {
   isEditing: boolean;
@@ -58,6 +59,9 @@ function SchemaPage({
   );
 
   const [optionalKey, setOptionalKey] = useState<string>('');
+  const [optionalDefaultValues, setOptionalDefaultValues] = useState<string[]>(
+    []
+  );
   const [optionalAllowedValue, setOptionalAllowedValue] = useState<string>('');
   const [optionalAllowedValues, setOptionalAllowedValues] = useState<string[]>(
     []
@@ -377,6 +381,7 @@ function SchemaPage({
     requiredAllowedValues,
     setSchema,
     optionalKey,
+    optionalDefaultValues,
     optionalAllowedValues,
   });
 
@@ -591,10 +596,10 @@ function SchemaPage({
               <tr className="border border-neutral-300 px-4 text-neutral-900">
                 <th className="w-4 px-4"> #</th>
                 <th> Key</th>
-                <th> Default Values</th>
-                <th> Min Num Values</th>
-                <th> Max Num Values</th>
+                <th> Default Value(s)</th>
+                <th> Min / Max Num Values</th>
                 <th> Allowed Values</th>
+                <th> Localization </th>
                 <th className="w-4 px-4"></th>
               </tr>
             </thead>
@@ -612,19 +617,32 @@ function SchemaPage({
                       {value.attributeKey}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.minNumberOfValues}
-                    </td>
-                    <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.maxNumberOfValues}
-                    </td>
-                    <td className="text-sm text-ellipsis overflow-hidden">
                       {value.defaultValues && value.defaultValues.join(', ')}
                       {value.defaultValue}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.minNumberOfValues}/{value.maxNumberOfValues}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
                       {value.allowedValues
                         ? value.allowedValues.join(', ')
                         : '(any)'}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {schemaType === 'classification' ? (
+                        <LocaleLinkBuilder
+                          siteId={siteId}
+                          itemType="CLASSIFICATION"
+                          attributeKey={value.attributeKey}
+                          classificationId={classificationId}
+                        />
+                      ) : (
+                        <LocaleLinkBuilder
+                          siteId={siteId}
+                          itemType="SCHEMA"
+                          attributeKey={value.attributeKey}
+                        />
+                      )}
                     </td>
                   </tr>
                 ))
@@ -650,6 +668,8 @@ function SchemaPage({
             tagsKey={optionalKey}
             setTagsKey={setOptionalKey}
             preventDialogClose={preventDialogClose}
+            defaultValues={optionalDefaultValues}
+            setDefaultValues={setOptionalDefaultValues}
             allowedValue={optionalAllowedValue}
             setAllowedValue={setOptionalAllowedValue}
             addAllowedValue={addOptionalAllowedValue}
@@ -672,9 +692,10 @@ function SchemaPage({
               <tr className="border border-neutral-300 px-4 text-neutral-900">
                 <th className="w-4 px-4"> #</th>
                 <th> Key</th>
-                <th> Min Num Values</th>
-                <th> Max Num Values</th>
+                <th> Default Value(s)</th>
+                <th> Min / Max Num Values</th>
                 <th> Allowed Values</th>
+                <th> Localization</th>
                 <th className="w-4 px-4"></th>
               </tr>
             </thead>
@@ -692,15 +713,32 @@ function SchemaPage({
                       {value.attributeKey}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.minNumberOfValues}
+                      {value.defaultValues && value.defaultValues.join(', ')}
+                      {value.defaultValue}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.maxNumberOfValues}
+                      {value.minNumberOfValues}/{value.maxNumberOfValues}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
                       {value.allowedValues
                         ? value.allowedValues.join(', ')
                         : '(any)'}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {schemaType === 'classification' ? (
+                        <LocaleLinkBuilder
+                          siteId={siteId}
+                          itemType="CLASSIFICATION"
+                          attributeKey={value.attributeKey}
+                          classificationId={classificationId}
+                        />
+                      ) : (
+                        <LocaleLinkBuilder
+                          siteId={siteId}
+                          itemType="SCHEMA"
+                          attributeKey={value.attributeKey}
+                        />
+                      )}
                     </td>
                     <td></td>
                   </tr>

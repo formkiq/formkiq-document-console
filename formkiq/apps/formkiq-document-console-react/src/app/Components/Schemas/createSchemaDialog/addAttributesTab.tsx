@@ -452,9 +452,8 @@ function AddAttributesTab({
                 <tr className="border border-neutral-300 px-4 text-neutral-900">
                   <th className="w-4 px-4"> #</th>
                   <th> Key</th>
-                  {attributeType === 'required' && <th> Default Values</th>}
-                  <th> Min Num Values</th>
-                  <th> Max Num Values</th>
+                  <th> Default Value(s)</th>
+                  <th> Min / Max Num Values</th>
                   <th> Allowed Values</th>
                   <th className="w-4 px-4"></th>
                 </tr>
@@ -485,18 +484,12 @@ function AddAttributesTab({
                         {value.attributeKey}
                       </td>
                       <td className="text-sm text-ellipsis overflow-hidden">
-                        {value.minNumberOfValues}
+                        {value.defaultValues && value.defaultValues.join(', ')}
+                        {value.defaultValue}
                       </td>
                       <td className="text-sm text-ellipsis overflow-hidden">
-                        {value.maxNumberOfValues}
+                        {value.minNumberOfValues} / {value.maxNumberOfValues}
                       </td>
-                      {attributeType === 'required' && (
-                        <td className="text-sm text-ellipsis overflow-hidden">
-                          {value.defaultValues &&
-                            value.defaultValues.join(', ')}
-                          {value.defaultValue}
-                        </td>
-                      )}
                       <td className="text-sm text-ellipsis overflow-hidden w-40">
                         {value.allowedValues
                           ? value.allowedValues.join(', ')
