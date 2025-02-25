@@ -15,6 +15,7 @@ import {
 } from '../../Store/reducers/schemas';
 import { useAppDispatch } from '../../Store/store';
 
+import { useEditSchemaAttribute } from '../../hooks/edit-schema-attribute';
 import ButtonGhost from '../Generic/Buttons/ButtonGhost';
 import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
 import ButtonSecondary from '../Generic/Buttons/ButtonSecondary';
@@ -22,7 +23,7 @@ import { CopyButton } from '../Generic/Buttons/CopyButton';
 import RadioCombobox from '../Generic/Listboxes/RadioCombobox';
 import { Close } from '../Icons/icons';
 import AddAttributesTab from './createSchemaDialog/addAttributesTab';
-import { useEditSchemaAttribute } from '../../hooks/edit-schema-attribute';
+import LocaleLinkBuilder from './createSchemaDialog/LocaleLinkBuilder';
 
 type SchemaPagePropsType = {
   isEditing: boolean;
@@ -58,6 +59,9 @@ function SchemaPage({
   );
 
   const [optionalKey, setOptionalKey] = useState<string>('');
+  const [optionalDefaultValues, setOptionalDefaultValues] = useState<string[]>(
+    []
+  );
   const [optionalAllowedValue, setOptionalAllowedValue] = useState<string>('');
   const [optionalAllowedValues, setOptionalAllowedValues] = useState<string[]>(
     []
@@ -71,6 +75,7 @@ function SchemaPage({
     const keys = allAttributes.map((item: any) => ({
       key: item.key,
       title: item.key,
+      dataType: item.dataType,
     }));
     setAttributeKeys(keys);
   }, [allAttributes]);
@@ -377,8 +382,46 @@ function SchemaPage({
     requiredAllowedValues,
     setSchema,
     optionalKey,
+    optionalDefaultValues,
     optionalAllowedValues,
   });
+
+  useEffect(() => {
+    if (allAttributes && schema.attributes) {
+      // Create a lookup keyed by attribute key
+      const attributeMap = allAttributes.reduce(
+        (acc: Record<string, any>, attr: any) => {
+          acc[attr.key] = attr;
+          return acc;
+        },
+        {} as Record<string, any>
+      );
+
+      // If you have required attributes, add dataType to each
+      if (schema.attributes.required) {
+        const updatedRequired = schema.attributes.required.map((req: any) => ({
+          ...req,
+          dataType: attributeMap[req.attributeKey]?.dataType || '',
+        }));
+        setSchema((prev) => ({
+          ...prev,
+          attributes: { ...prev.attributes, required: updatedRequired },
+        }));
+      }
+
+      // Do the same for optional attributes
+      if (schema.attributes.optional) {
+        const updatedOptional = schema.attributes.optional.map((opt: any) => ({
+          ...opt,
+          dataType: attributeMap[opt.attributeKey]?.dataType || '',
+        }));
+        setSchema((prev) => ({
+          ...prev,
+          attributes: { ...prev.attributes, optional: updatedOptional },
+        }));
+      }
+    }
+  }, [allAttributes, schema.attributes]);
 
   return (
     <>
@@ -591,10 +634,10 @@ function SchemaPage({
               <tr className="border border-neutral-300 px-4 text-neutral-900">
                 <th className="w-4 px-4"> #</th>
                 <th> Key</th>
-                <th> Default Values</th>
-                <th> Min Num Values</th>
-                <th> Max Num Values</th>
+                <th> Default Value(s)</th>
+                <th> Min / Max Num Values</th>
                 <th> Allowed Values</th>
+                <th> Localization </th>
                 <th className="w-4 px-4"></th>
               </tr>
             </thead>
@@ -612,19 +655,56 @@ function SchemaPage({
                       {value.attributeKey}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.minNumberOfValues}
+                      {value.dataType === 'STRING' ||
+                      value.dataType === 'NUMBER' ||
+                      value.dataType === 'BOOLEAN' ? (
+                        <>
+                          {value.defaultValues &&
+                            value.defaultValues.join(', ')}
+                          {value.defaultValue}
+                        </>
+                      ) : (
+                        'n/a'
+                      )}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.maxNumberOfValues}
+                      {value.dataType === 'STRING' ||
+                      value.dataType === 'NUMBER' ? (
+                        <>
+                          MIN: {value.minNumberOfValues} / MAX:{' '}
+                          {value.maxNumberOfValues}
+                        </>
+                      ) : (
+                        'n/a'
+                      )}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.defaultValues && value.defaultValues.join(', ')}
-                      {value.defaultValue}
-                    </td>
-                    <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.allowedValues
+                      {value.allowedValues && value.allowedValues.length > 0
                         ? value.allowedValues.join(', ')
-                        : '(any)'}
+                        : value.dataType === 'STRING' ||
+                          value.dataType === 'NUMBER'
+                        ? '(any)'
+                        : 'n/a'}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.dataType === 'STRING' && (
+                        <>
+                          {schemaType === 'classification' ? (
+                            <LocaleLinkBuilder
+                              siteId={siteId}
+                              itemType="CLASSIFICATION"
+                              attributeKey={value.attributeKey}
+                              classificationId={classificationId}
+                            />
+                          ) : (
+                            <LocaleLinkBuilder
+                              siteId={siteId}
+                              itemType="SCHEMA"
+                              attributeKey={value.attributeKey}
+                            />
+                          )}
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -650,6 +730,8 @@ function SchemaPage({
             tagsKey={optionalKey}
             setTagsKey={setOptionalKey}
             preventDialogClose={preventDialogClose}
+            defaultValues={optionalDefaultValues}
+            setDefaultValues={setOptionalDefaultValues}
             allowedValue={optionalAllowedValue}
             setAllowedValue={setOptionalAllowedValue}
             addAllowedValue={addOptionalAllowedValue}
@@ -672,9 +754,10 @@ function SchemaPage({
               <tr className="border border-neutral-300 px-4 text-neutral-900">
                 <th className="w-4 px-4"> #</th>
                 <th> Key</th>
-                <th> Min Num Values</th>
-                <th> Max Num Values</th>
+                <th> Default Value(s)</th>
+                <th> Min / Max Num Values</th>
                 <th> Allowed Values</th>
+                <th> Localization</th>
                 <th className="w-4 px-4"></th>
               </tr>
             </thead>
@@ -692,15 +775,56 @@ function SchemaPage({
                       {value.attributeKey}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.minNumberOfValues}
+                      {value.dataType === 'STRING' ||
+                      value.dataType === 'NUMBER' ||
+                      value.dataType === 'BOOLEAN' ? (
+                        <>
+                          {value.defaultValues &&
+                            value.defaultValues.join(', ')}
+                          {value.defaultValue}
+                        </>
+                      ) : (
+                        'n/a'
+                      )}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.maxNumberOfValues}
+                      {value.dataType === 'STRING' ||
+                      value.dataType === 'NUMBER' ? (
+                        <>
+                          MIN: {value.minNumberOfValues} / MAX:{' '}
+                          {value.maxNumberOfValues}
+                        </>
+                      ) : (
+                        'n/a'
+                      )}
                     </td>
                     <td className="text-sm text-ellipsis overflow-hidden">
-                      {value.allowedValues
+                      {value.allowedValues && value.allowedValues.length > 0
                         ? value.allowedValues.join(', ')
-                        : '(any)'}
+                        : value.dataType === 'STRING' ||
+                          value.dataType === 'NUMBER'
+                        ? '(any)'
+                        : 'n/a'}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.dataType === 'STRING' && (
+                        <>
+                          {schemaType === 'classification' ? (
+                            <LocaleLinkBuilder
+                              siteId={siteId}
+                              itemType="CLASSIFICATION"
+                              attributeKey={value.attributeKey}
+                              classificationId={classificationId}
+                            />
+                          ) : (
+                            <LocaleLinkBuilder
+                              siteId={siteId}
+                              itemType="SCHEMA"
+                              attributeKey={value.attributeKey}
+                            />
+                          )}
+                        </>
+                      )}
                     </td>
                     <td></td>
                   </tr>

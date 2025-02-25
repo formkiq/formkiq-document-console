@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
 import { Dialog } from '@headlessui/react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
@@ -62,7 +62,9 @@ function CreateSchemaDialog({
   );
 
   const [optionalKey, setOptionalKey] = useState<string>('');
-
+  const [optionalDefaultValues, setOptionalDefaultValues] = useState<string[]>(
+    []
+  );
   const [optionalAllowedValue, setOptionalAllowedValue] = useState<string>('');
   const [optionalAllowedValues, setOptionalAllowedValues] = useState<string[]>(
     []
@@ -175,6 +177,7 @@ function CreateSchemaDialog({
     setRequiredAllowedValue('');
     setRequiredAllowedValues([]);
     setOptionalKey('');
+    setOptionalDefaultValues([]);
     setOptionalAllowedValue('');
     setOptionalAllowedValues([]);
     setCompositeKey('');
@@ -322,6 +325,7 @@ function CreateSchemaDialog({
     }
     setSchema(newSchema);
     setOptionalKey('');
+    setOptionalDefaultValues([]);
     setOptionalAllowedValues([]);
     setOptionalAllowedValue('');
   };
@@ -356,6 +360,7 @@ function CreateSchemaDialog({
     requiredAllowedValues,
     setSchema,
     optionalKey,
+    optionalDefaultValues,
     optionalAllowedValues,
   });
 

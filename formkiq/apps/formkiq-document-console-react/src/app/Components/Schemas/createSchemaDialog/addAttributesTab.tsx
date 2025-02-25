@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
-
-import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
-import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
+import ButtonSecondary from '../../Generic/Buttons/ButtonSecondary';
+import RadioCombobox from '../../Generic/Listboxes/RadioCombobox';
 import { Close, Pencil } from '../../Icons/icons';
 
 type AddTagsTabProps = {
@@ -61,8 +60,15 @@ function AddAttributesTab({
   setMaxNumberOfValues,
   editAttribute,
 }: AddTagsTabProps) {
-  const [validationMsg, setValidationMsg] = useState<ValidationMessage>(null);
+  // Create a lookup map for attributes using their key.
+  const attributeMap = useMemo(() => {
+    return allAttributes.reduce((acc: Record<string, any>, attr: any) => {
+      acc[attr.key] = attr;
+      return acc;
+    }, {} as Record<string, any>);
+  }, [allAttributes]);
 
+  const [validationMsg, setValidationMsg] = useState<ValidationMessage>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const handleCancel = () => {
@@ -73,19 +79,14 @@ function AddAttributesTab({
     setAllowedValue('');
     setAllowedValues([]);
     if (setDefaultValues) setDefaultValues([]);
-    // Reset editing state if applicable
     setEditingIndex(null);
   };
 
-  // Validation function updated for max=-1 meaning no maximum.
   const validateNumberOfValues = useCallback(() => {
-    // Case 1: min=0, max=-1 (no maximum): no validation needed
     if (minNumberOfValues === 0 && maxNumberOfValues === -1) {
       setValidationMsg(null);
       return true;
     }
-
-    // Case 2: min=1 and max=-1 should be rejected, as required/optional check already covers this
     if (minNumberOfValues === 1 && maxNumberOfValues === -1) {
       setValidationMsg({
         text: 'Setting rejected: Use required/optional check when minimum is 1.',
@@ -93,8 +94,6 @@ function AddAttributesTab({
       });
       return false;
     }
-
-    // Case 3: min=0 and max=1 - only singular values allowed (warn the user)
     if (minNumberOfValues === 0 && maxNumberOfValues === 1) {
       setValidationMsg({
         text: 'Note: With a max of 1, only single values (not arrays) will be allowed.',
@@ -102,8 +101,6 @@ function AddAttributesTab({
       });
       return true;
     }
-
-    // Case 4: if a maximum is provided (max !== -1) and min > max, then reject.
     if (maxNumberOfValues !== -1 && minNumberOfValues > maxNumberOfValues) {
       setValidationMsg({
         text: 'Invalid: Minimum cannot be greater than Maximum.',
@@ -111,23 +108,18 @@ function AddAttributesTab({
       });
       return false;
     }
-
-    // Clear any previous message if valid.
     setValidationMsg(null);
     return true;
   }, [maxNumberOfValues, minNumberOfValues]);
 
-  // Validate on change
   useEffect(() => {
     validateNumberOfValues();
   }, [minNumberOfValues, maxNumberOfValues, validateNumberOfValues]);
 
-  // Adjusted addAttributesToSchema to include the numeric settings if valid.
   const handleAddAttributes = () => {
     if (!validateNumberOfValues()) return;
-
     if (editingIndex !== null) {
-      editAttribute(editingIndex); // Now uses parent's state
+      editAttribute(editingIndex);
       setEditingIndex(null);
     } else {
       addAttributesToSchema({
@@ -135,7 +127,6 @@ function AddAttributesTab({
         maxNumberOfValues,
       });
     }
-
     // Clear form fields
     setTagsKey('');
     setMinNumberOfValues(0);
@@ -147,17 +138,13 @@ function AddAttributesTab({
 
   const handleEditClick = (index: number) => {
     const attribute = attributes[index];
-
-    // Set form fields from selected attribute
     setTagsKey(attribute.attributeKey);
     setMinNumberOfValues(attribute.minNumberOfValues || 0);
     setMaxNumberOfValues(attribute.maxNumberOfValues ?? -1);
     setAllowedValues(attribute.allowedValues || []);
-
     if (setDefaultValues) {
       setDefaultValues(attribute.defaultValues || []);
     }
-
     setEditingIndex(index);
   };
 
@@ -180,21 +167,18 @@ function AddAttributesTab({
 
   useEffect(() => {
     if (allowedValue) return;
-    const currentAttr = allAttributes.find((a: any) => a.key === tagsKey);
+    const currentAttr = attributeMap[tagsKey];
     if (!currentAttr) return;
-    // if boolean value, set allowedValue to false
     if (currentAttr.dataType === 'BOOLEAN') {
       setAllowedValue('false');
     }
-    // if number value, set allowedValue to 0
     if (currentAttr.dataType === 'NUMBER') {
       setAllowedValue('0');
     }
-    // if string value, set allowedValue to empty string
     if (currentAttr.dataType === 'STRING') {
       setAllowedValue('');
     }
-  }, [tagsKey, allowedValue, allAttributes, setAllowedValue]);
+  }, [tagsKey, allowedValue, attributeMap, setAllowedValue]);
 
   return (
     <>
@@ -207,19 +191,16 @@ function AddAttributesTab({
         />
         {tagsKey && (
           <div className="text-xs bg-neutral-100 rounded-md font-bold h-10 p-3 text-center whitespace-nowrap">
-            {allAttributes.find((a: any) => a.key === tagsKey)?.dataType}
+            {attributeMap[tagsKey]?.dataType || ''}
           </div>
         )}
       </div>
 
       {/* Show numeric steppers for data types that support multiple values */}
       {tagsKey &&
-        allAttributes.find((a: any) => a.key === tagsKey)?.dataType !==
-          'KEY_ONLY' &&
-        allAttributes.find((a: any) => a.key === tagsKey)?.dataType !==
-          'BOOLEAN' &&
-        allAttributes.find((a: any) => a.key === tagsKey)?.dataType !==
-          'WATERMARK' && (
+        attributeMap[tagsKey]?.dataType !== 'KEY_ONLY' &&
+        attributeMap[tagsKey]?.dataType !== 'BOOLEAN' &&
+        attributeMap[tagsKey]?.dataType !== 'WATERMARK' && (
           <div className="flex flex-col gap-4 my-4">
             <div>
               <label className="font-bold text-sm block">
@@ -273,22 +254,18 @@ function AddAttributesTab({
         )}
 
       {tagsKey &&
-        allAttributes.find((a: any) => a.key === tagsKey)?.dataType !==
-          'KEY_ONLY' &&
-        allAttributes.find((a: any) => a.key === tagsKey)?.dataType !==
-          'WATERMARK' && (
+        attributeMap[tagsKey]?.dataType !== 'KEY_ONLY' &&
+        attributeMap[tagsKey]?.dataType !== 'WATERMARK' && (
           <>
             <div className="font-bold text-sm">
               Allowed Values
               <span className="text-xs block">
-                (adding allowed values limits options to those values; to allow
-                any value according to this data type, leave this attribute
-                without allowed values)
+                (adding allowed values limits options; to allow any value, leave
+                empty)
               </span>
             </div>
             <div className="flex flex-row justify-between items-center gap-4 text-base">
-              {allAttributes.find((a: any) => a.key === tagsKey)?.dataType ===
-                'STRING' && (
+              {attributeMap[tagsKey]?.dataType === 'STRING' && (
                 <input
                   type="text"
                   className="h-10 px-4 border border-neutral-300 text-sm rounded-md w-full"
@@ -298,8 +275,7 @@ function AddAttributesTab({
                   onKeyDown={(e) => preventDialogClose(e)}
                 />
               )}
-              {allAttributes.find((a: any) => a.key === tagsKey)?.dataType ===
-                'NUMBER' && (
+              {attributeMap[tagsKey]?.dataType === 'NUMBER' && (
                 <input
                   type="number"
                   className="h-10 px-4 border border-neutral-300 text-sm rounded-md w-full"
@@ -310,8 +286,7 @@ function AddAttributesTab({
                   onKeyDown={(e) => preventDialogClose(e)}
                 />
               )}
-              {allAttributes.find((a: any) => a.key === tagsKey)?.dataType ===
-                'BOOLEAN' && (
+              {attributeMap[tagsKey]?.dataType === 'BOOLEAN' && (
                 <div className="mt-2 flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -344,7 +319,7 @@ function AddAttributesTab({
                   </p>
                   {defaultValues && (
                     <p className="text-xs text-neutral-500 font-medium">
-                      (click to add select default value)
+                      (click to toggle default)
                     </p>
                   )}
                 </div>
@@ -452,83 +427,93 @@ function AddAttributesTab({
                 <tr className="border border-neutral-300 px-4 text-neutral-900">
                   <th className="w-4 px-4"> #</th>
                   <th> Key</th>
-                  {attributeType === 'required' && <th> Default Values</th>}
-                  <th> Min Num Values</th>
-                  <th> Max Num Values</th>
+                  <th> Default Value(s)</th>
+                  <th> Min / Max Num Values</th>
                   <th> Allowed Values</th>
                   <th className="w-4 px-4"></th>
                 </tr>
               </thead>
               <tbody>
-                {attributes.map(
-                  (
-                    value: {
-                      attributeKey: string;
-                      minNumberOfValues?: number;
-                      maxNumberOfValues?: number;
-                      defaultValue?: string;
-                      defaultValues?: string[];
-                      allowedValues?: string[];
-                    },
-                    i: number
-                  ) => (
-                    <tr
-                      key={'tag_' + i}
-                      className="border border-neutral-300 px-4 h-12 text-neutral-900 relative"
-                    >
-                      <td className="text-sm text-slate-500 px-4">
-                        <span className="text-gray-900 font-medium">
-                          {i + 1}
-                        </span>
-                      </td>
-                      <td className="text-sm text-ellipsis overflow-hidden">
-                        {value.attributeKey}
-                      </td>
-                      <td className="text-sm text-ellipsis overflow-hidden">
-                        {value.minNumberOfValues}
-                      </td>
-                      <td className="text-sm text-ellipsis overflow-hidden">
-                        {value.maxNumberOfValues}
-                      </td>
-                      {attributeType === 'required' && (
-                        <td className="text-sm text-ellipsis overflow-hidden">
+                {attributes.map((value: any, i: number) => (
+                  <tr
+                    key={'tag_' + i}
+                    className="border border-neutral-300 px-4 h-12 text-neutral-900 relative"
+                  >
+                    <td className="text-sm text-slate-500 px-4">
+                      <span className="text-gray-900 font-medium">{i + 1}</span>
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {value.attributeKey}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {attributeMap[value.attributeKey]?.dataType ===
+                        'STRING' ||
+                      attributeMap[value.attributeKey]?.dataType === 'NUMBER' ||
+                      attributeMap[value.attributeKey]?.dataType ===
+                        'BOOLEAN' ? (
+                        <>
                           {value.defaultValues &&
                             value.defaultValues.join(', ')}
                           {value.defaultValue}
-                        </td>
+                        </>
+                      ) : (
+                        'n/a'
                       )}
-                      <td className="text-sm text-ellipsis overflow-hidden w-40">
-                        {value.allowedValues
-                          ? value.allowedValues.join(', ')
-                          : '(any)'}
-                      </td>
-                      <td className="flex items-center gap-2 h-12 absolute right-2">
-                        {editingIndex === i ? (
-                          <div className="p-1 bg-primary-100 text-primary-900 rounded-md text-xs font-bold whitespace-nowrap">
-                            <p>EDITING NOW</p>
-                          </div>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              className="w-4 h-4 min-w-4 text-neutral-900 hover:text-primary-500"
-                              onClick={() => handleEditClick(i)}
-                            >
-                              <Pencil />
-                            </button>
-                            <button
-                              type="button"
-                              className="w-4 h-4 min-w-4 text-neutral-900 hover:text-primary-500"
-                              onClick={() => deleteTagsFromSchema(i)}
-                            >
-                              <Close />
-                            </button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                )}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden">
+                      {attributeMap[value.attributeKey]?.dataType ===
+                        'STRING' ||
+                      attributeMap[value.attributeKey]?.dataType ===
+                        'NUMBER' ? (
+                        <>
+                          MIN: {value.minNumberOfValues} / MAX:{' '}
+                          {value.maxNumberOfValues}
+                        </>
+                      ) : (
+                        'n/a'
+                      )}
+                    </td>
+                    <td className="text-sm text-ellipsis overflow-hidden w-40">
+                      {value.allowedValues && value.allowedValues.length > 0 ? (
+                        value.allowedValues.join(', ')
+                      ) : attributeMap[value.attributeKey]?.dataType ===
+                          'STRING' ||
+                        attributeMap[value.attributeKey]?.dataType ===
+                          'NUMBER' ||
+                        attributeMap[value.attributeKey]?.dataType ===
+                          'BOOLEAN' ? (
+                        <>{value.allowedValues.join(', ')}</>
+                      ) : (
+                        'n/a'
+                      )}
+                    </td>
+
+                    <td className="flex items-center gap-2 h-12 absolute right-2">
+                      {editingIndex === i ? (
+                        <div className="p-1 bg-primary-100 text-primary-900 rounded-md text-xs font-bold whitespace-nowrap">
+                          <p>EDITING NOW</p>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="w-4 h-4 min-w-4 text-neutral-900 hover:text-primary-500"
+                            onClick={() => handleEditClick(i)}
+                          >
+                            <Pencil />
+                          </button>
+                          <button
+                            type="button"
+                            className="w-4 h-4 min-w-4 text-neutral-900 hover:text-primary-500"
+                            onClick={() => deleteTagsFromSchema(i)}
+                          >
+                            <Close />
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

@@ -66,6 +66,27 @@ function ResourceItemsTable({
                   </td>
                   <td className="border-b border-neutral-300 p-4">
                     {resourceItem.itemType}
+                    {resourceItem.itemType === 'CLASSIFICATION' && (
+                      <span className="block text-xs">
+                        ({resourceItem.classificationId})
+                      </span>
+                    )}
+                    {resourceItem.attributeKey && (
+                      <span className="block pt-2 text-sm">
+                        <strong className="font-semibold pr-1">
+                          Attribute:
+                        </strong>
+                        {resourceItem.attributeKey}
+                      </span>
+                    )}
+                    {resourceItem.allowedValue && (
+                      <span className="block pt-2 text-sm">
+                        <strong className="font-semibold pr-1">
+                          Allowed Value:
+                        </strong>
+                        {resourceItem.allowedValue}
+                      </span>
+                    )}
                   </td>
                   <td className="border-b border-neutral-300 p-4 pr-8">
                     {resourceItem.localizedValue}
