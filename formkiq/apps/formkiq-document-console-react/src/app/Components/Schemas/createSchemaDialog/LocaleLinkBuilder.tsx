@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DocumentsService } from '../../../helpers/services/documentsService';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 
 interface LocaleOption {
   locale: string;
@@ -22,6 +23,7 @@ const LocaleLinkBuilder: React.FC<LocaleLinkBuilderProps> = ({
   interfaceKey,
 }) => {
   const [locales, setLocales] = useState<LocaleOption[]>([]);
+  const [selectedLocale, setSelectedLocale] = useState<string>('');
 
   // Fetch locales on mount.
   useEffect(() => {
@@ -34,9 +36,11 @@ const LocaleLinkBuilder: React.FC<LocaleLinkBuilderProps> = ({
       .catch((err) => console.error('Error fetching locales', err));
   }, [siteId]);
 
-  // When the user selects a locale, immediately open the corresponding link.
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedLocale = e.target.value;
+    setSelectedLocale(e.target.value);
+  };
+
+  const handleGoClick = () => {
     if (!selectedLocale) return;
     const params = new URLSearchParams();
     params.set('itemType', itemType);
@@ -58,18 +62,28 @@ const LocaleLinkBuilder: React.FC<LocaleLinkBuilderProps> = ({
       <label className="block text-sm font-bold mb-1">
         View/Edit Values for Locale:
       </label>
-      <select
-        className="w-64 p-2 border border-neutral-300 rounded"
-        defaultValue=""
-        onChange={handleSelectChange}
-      >
-        <option value="">-- Choose Locale --</option>
-        {locales.map((loc) => (
-          <option key={loc.locale} value={loc.locale}>
-            {loc.locale}
-          </option>
-        ))}
-      </select>
+      <div className="flex gap-2">
+        <select
+          className="w-64 p-2 border border-neutral-300 rounded"
+          value={selectedLocale}
+          onChange={handleSelectChange}
+        >
+          <option value="">-- Choose Locale --</option>
+          {locales.map((loc) => (
+            <option key={loc.locale} value={loc.locale}>
+              {loc.locale}
+            </option>
+          ))}
+        </select>
+
+        <ButtonPrimaryGradient
+          type="button"
+          className="py-2"
+          onClick={handleGoClick}
+        >
+          Go
+        </ButtonPrimaryGradient>
+      </div>
     </div>
   );
 };

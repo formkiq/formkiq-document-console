@@ -23,18 +23,18 @@ import { LocaleResourceItem } from '../../helpers/types/locales';
 import { useIsReadOnlyUser } from '../../hooks/is-read-only-user.hook';
 import ResourceItemsTable from './resourceItemsTable';
 
+// TODO: retrieve all attributes and filter out non-string attributes
+
 // Shared interfaces
 export interface AttributeOption {
   attributeKey: string;
   required: boolean;
   allowedValues?: string[];
 }
-
 export interface ClassificationSummary {
   classificationId: string;
   name: string;
 }
-
 export interface LocaleResourceItemState {
   resourceItem: LocaleResourceItem;
 }
@@ -64,20 +64,17 @@ const LocaleResourceItemEditingTab = ({
   selectedClassificationAttributes,
 }: LocaleResourceItemEditingTabProps) => {
   const { resourceItem } = localeResourceItemValue;
-
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createNewLocaleResourceItem();
   };
 
-  // Update a field and recalc itemKey.
   const handleFieldChange = (field: string, value: string) => {
     const updated = { ...resourceItem, [field]: value };
     updated.itemKey = computeItemKey(updated);
     setLocaleResourceItemValue({ resourceItem: updated });
   };
 
-  // Helper to render allowed value select or a message if none.
   const renderAllowedValueField = () => {
     let selectedAttr: AttributeOption | undefined;
     if (resourceItem.itemType === 'SCHEMA') {
@@ -112,9 +109,15 @@ const LocaleResourceItemEditingTab = ({
       );
     } else {
       return (
-        <p className="text-sm text-gray-500">
-          No allowed values for this attribute.
-        </p>
+        <>
+          {selectedAttr ? (
+            <p className="text-sm text-gray-500">
+              No allowed values for this attribute.
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500">Please select an attribute</p>
+          )}
+        </>
       );
     }
   };
@@ -189,8 +192,7 @@ const LocaleResourceItemEditingTab = ({
               <option value="">Select attribute key</option>
               {attributeOptions.map((option: AttributeOption) => (
                 <option key={option.attributeKey} value={option.attributeKey}>
-                  {option.attributeKey}
-                  {option.required ? ' (required)' : ''}
+                  {option.attributeKey} {option.required ? '(required)' : ''}
                 </option>
               ))}
             </select>
@@ -209,14 +211,14 @@ const LocaleResourceItemEditingTab = ({
             <select
               name="classificationId"
               id="classificationId"
-              className="w-64 p-2 border border-neutral-300 rounded"
+              className="w-1/2 p-2 border border-neutral-300 rounded"
               value={resourceItem.classificationId || ''}
               onChange={(e) => {
                 const newClassificationId = e.target.value;
                 const updated = {
                   ...resourceItem,
                   classificationId: newClassificationId,
-                  attributeKey: '', // reset attribute key on classification change
+                  attributeKey: '',
                 };
                 updated.itemKey = computeItemKey(updated);
                 setLocaleResourceItemValue({ resourceItem: updated });
@@ -225,34 +227,41 @@ const LocaleResourceItemEditingTab = ({
               <option value="">Select classification</option>
               {classificationOptions.map((cls: ClassificationSummary) => (
                 <option key={cls.classificationId} value={cls.classificationId}>
-                  {cls.name}
+                  {cls.name} ({cls.classificationId})
                 </option>
               ))}
             </select>
-            <label className="block text-sm font-bold text-neutral-900">
-              Attribute Key
-            </label>
-            <select
-              name="attributeKey"
-              id="classificationAttributeKey"
-              className="w-64 p-2 border border-neutral-300 rounded"
-              value={resourceItem.attributeKey || ''}
-              onChange={(e) =>
-                handleFieldChange('attributeKey', e.target.value)
-              }
-            >
-              <option value="">Select attribute key</option>
-              {selectedClassificationAttributes.map((attr: AttributeOption) => (
-                <option key={attr.attributeKey} value={attr.attributeKey}>
-                  {attr.attributeKey}
-                  {attr.required ? ' (required)' : ''}
-                </option>
-              ))}
-            </select>
-            <label className="block text-sm font-bold text-neutral-900">
-              Allowed Value
-            </label>
-            {renderAllowedValueField()}
+            <div className="flex">
+              <div>
+                <label className="block text-sm font-bold text-neutral-900">
+                  Attribute Key
+                </label>
+                <select
+                  name="attributeKey"
+                  id="classificationAttributeKey"
+                  className="w-64 p-2 border border-neutral-300 rounded"
+                  value={resourceItem.attributeKey || ''}
+                  onChange={(e) =>
+                    handleFieldChange('attributeKey', e.target.value)
+                  }
+                >
+                  <option value="">Select attribute key</option>
+                  {selectedClassificationAttributes.map(
+                    (attr: AttributeOption) => (
+                      <option key={attr.attributeKey} value={attr.attributeKey}>
+                        {attr.attributeKey} {attr.required ? '(required)' : ''}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+              <div className="ml-4">
+                <label className="block text-sm font-bold text-neutral-900">
+                  Allowed Value
+                </label>
+                {renderAllowedValueField()}
+              </div>
+            </div>
           </div>
         )}
         {/* Localized Value */}
@@ -260,14 +269,14 @@ const LocaleResourceItemEditingTab = ({
           <label className="block text-sm font-bold text-neutral-900">
             Localized Value
           </label>
-          <input
-            type="text"
+          <textarea
             value={resourceItem.localizedValue}
             onChange={(e) =>
               handleFieldChange('localizedValue', e.target.value)
             }
             placeholder="Localized Value"
-            className="w-64 p-2 border border-neutral-300 rounded"
+            className="w-1/2 p-2 border border-neutral-300 rounded"
+            rows={4}
           />
         </div>
       </div>
@@ -294,17 +303,10 @@ const buildResourceItemFromParams = (
   const explicitClassificationId = params.get('classificationId');
   const explicitAllowedValue = params.get('allowedValue');
 
-  // Determine itemType: explicit value or parsed from itemKey
   const itemType =
     explicitItemType ||
-    (itemKeyParam
-      ? (itemKeyParam.split('##')[0] as
-          | 'INTERFACE'
-          | 'SCHEMA'
-          | 'CLASSIFICATION')
-      : 'INTERFACE');
+    (itemKeyParam ? itemKeyParam.split('##')[0] : 'INTERFACE');
 
-  // Build resourceItem conditionally.
   if (itemType === 'INTERFACE') {
     const interfaceKeyFromItemKey = itemKeyParam
       ? itemKeyParam.split('##')[1]
@@ -335,7 +337,6 @@ const buildResourceItemFromParams = (
       allowedValue: explicitAllowedValue || parts[3] || '',
     };
   }
-  // Fallback
   return {
     itemKey: '',
     itemType: 'INTERFACE',
@@ -345,23 +346,26 @@ const buildResourceItemFromParams = (
 };
 
 // ==============================
-// Main Locale Component
+// Main Locale Component with Filter Functionality
 // ==============================
 function Locale() {
   const location = useLocation();
-  const params = new URLSearchParams(location.search);
   const navigate = useNavigate();
-  const resourceItemFromParams = buildResourceItemFromParams(params);
+  const params = new URLSearchParams(location.search);
 
-  // Define the initial resource item value.
+  // Build a new resource item from URL params.
+  const resourceItemFromParams = buildResourceItemFromParams(params);
   const initialLocaleResourceItemValue: LocaleResourceItemState = {
     resourceItem: resourceItemFromParams,
   };
-
   const [newLocaleResourceItemValue, setNewLocaleResourceItemValue] =
     useState<LocaleResourceItemState>(initialLocaleResourceItemValue);
 
-  // When URL params change, rebuild the resource item.
+  // Read filter parameters.
+  const filterItemType = params.get('itemType');
+  const filterAttributeKey = params.get('attributeKey');
+  const filterClassificationId = params.get('classificationId');
+
   useEffect(() => {
     const updatedResourceItem = buildResourceItemFromParams(
       new URLSearchParams(location.search)
@@ -369,6 +373,11 @@ function Locale() {
     setNewLocaleResourceItemValue({ resourceItem: updatedResourceItem });
   }, [location.search]);
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [
+    isLocaleResourceItemEditTabVisible,
+    setIsLocaleResourceItemEditTabVisible,
+  ] = useState(false);
   useEffect(() => {
     if (params.get('itemKey')) {
       setIsEditing(true);
@@ -376,11 +385,22 @@ function Locale() {
     }
   }, [params]);
 
-  // --- Other Locale component code ---
+  // Load attribute options from site schema.
+  const [attributeOptions, setAttributeOptions] = useState<AttributeOption[]>(
+    []
+  );
+  const [classificationOptions, setClassificationOptions] = useState<
+    ClassificationSummary[]
+  >([]);
+  const [
+    selectedClassificationAttributes,
+    setSelectedClassificationAttributes,
+  ] = useState<AttributeOption[]>([]);
+
   const { user } = useAuthenticatedState();
   const { hasUserSite, hasDefaultSite, hasWorkspaces, workspaceSites } =
     getUserSites(user);
-  const pathname = decodeURI(useLocation().pathname);
+  const pathname = decodeURI(location.pathname);
   const { siteId } = getCurrentSiteInfo(
     pathname,
     user,
@@ -393,12 +413,8 @@ function Locale() {
   const { locale: localeValueParam } = useParams();
   const [localeValue, setLocaleValue] = useState(localeValueParam || '');
 
-  const {
-    resourceItems,
-    nextLocalesToken,
-    localesLoadingStatus,
-    currentLocalesSearchPage,
-  } = useSelector(LocalesState);
+  // Fetch resource items.
+  const { resourceItems } = useSelector(LocalesState);
   const dispatch = useAppDispatch();
   const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
@@ -406,28 +422,13 @@ function Locale() {
     dispatch(
       fetchLocaleResourceItems({ locale: localeValue, siteId: currentSiteId })
     );
-  }, []);
+  }, [localeValue, currentSiteId, dispatch]);
 
   useEffect(() => {
-    if (localeValueParam) {
-      setLocaleValue(localeValueParam);
-    }
+    if (localeValueParam) setLocaleValue(localeValueParam);
   }, [localeValueParam]);
 
-  const [isEditing, setIsEditing] = useState(false);
-
-  // Dropdown options
-  const [attributeOptions, setAttributeOptions] = useState<AttributeOption[]>(
-    []
-  );
-  const [classificationOptions, setClassificationOptions] = useState<
-    ClassificationSummary[]
-  >([]);
-  const [
-    selectedClassificationAttributes,
-    setSelectedClassificationAttributes,
-  ] = useState<AttributeOption[]>([]);
-
+  // Load schema attribute options.
   useEffect(() => {
     DocumentsService.getSiteSchema(currentSiteId)
       .then((response) => {
@@ -440,11 +441,13 @@ function Locale() {
               attributeKey: attr.attributeKey,
               required: true,
               allowedValues: attr.allowedValues,
+              dataType: attr.dataType,
             })),
             ...optionalAttrs.map((attr: any) => ({
               attributeKey: attr.attributeKey,
               required: false,
               allowedValues: attr.allowedValues,
+              dataType: attr.dataType,
             })),
           ];
           setAttributeOptions(options);
@@ -453,6 +456,7 @@ function Locale() {
       .catch((err) => console.error('Error loading schema', err));
   }, [currentSiteId]);
 
+  // Load classification options.
   useEffect(() => {
     DocumentsService.getSiteClassifications(currentSiteId)
       .then((response) => {
@@ -463,6 +467,7 @@ function Locale() {
       .catch((err) => console.error('Error loading classifications', err));
   }, [currentSiteId]);
 
+  // If a classification is selected, load its attributes.
   useEffect(() => {
     if (newLocaleResourceItemValue.resourceItem.classificationId) {
       DocumentsService.getClassification(
@@ -483,11 +488,13 @@ function Locale() {
                 attributeKey: attr.attributeKey,
                 required: true,
                 allowedValues: attr.allowedValues,
+                dataType: attr.dataType,
               })),
               ...optionalAttrs.map((attr: any) => ({
                 attributeKey: attr.attributeKey,
                 required: false,
                 allowedValues: attr.allowedValues,
+                dataType: attr.dataType,
               })),
             ];
             setSelectedClassificationAttributes(options);
@@ -499,22 +506,34 @@ function Locale() {
     }
   }, [newLocaleResourceItemValue.resourceItem.classificationId, currentSiteId]);
 
-  const onLocaleResourceItemDelete = (itemKey: string) => {
-    dispatch(
-      openConfirmationDialog({
-        dialogTitle: 'Are you sure you want to delete this resource item?',
-        callback: () => {
-          dispatch(
-            deleteLocaleResourceItem({
-              locale: localeValue,
-              itemKey,
-              siteId: currentSiteId,
-              resourceItems,
-            })
-          );
-        },
-      })
-    );
+  // Client-side filtering.
+  const filteredResourceItems = resourceItems.filter(
+    (item: LocaleResourceItem) => {
+      if (!filterItemType && !filterAttributeKey && !filterClassificationId)
+        return true;
+      if (filterItemType && item.itemType !== filterItemType) return false;
+      if (
+        filterItemType === 'SCHEMA' &&
+        filterAttributeKey &&
+        item.attributeKey !== filterAttributeKey
+      )
+        return false;
+      if (filterItemType === 'CLASSIFICATION') {
+        if (
+          filterClassificationId &&
+          item.classificationId !== filterClassificationId
+        )
+          return false;
+        if (filterAttributeKey && item.attributeKey !== filterAttributeKey)
+          return false;
+      }
+      return true;
+    }
+  );
+  const isFilterActive =
+    filterItemType || filterAttributeKey || filterClassificationId;
+  const clearFilter = () => {
+    navigate(location.pathname);
   };
 
   const computeItemKey = (item: any) => {
@@ -525,19 +544,16 @@ function Locale() {
       attributeKey,
       allowedValue,
     } = item;
-    if (itemType === 'INTERFACE') {
-      return `INTERFACE##${interfaceKey || ''}`;
-    } else if (itemType === 'SCHEMA') {
+    if (itemType === 'INTERFACE') return `INTERFACE##${interfaceKey || ''}`;
+    if (itemType === 'SCHEMA')
       return `SCHEMA##${attributeKey || ''}##${allowedValue || ''}`;
-    } else if (itemType === 'CLASSIFICATION') {
+    if (itemType === 'CLASSIFICATION')
       return `CLASSIFICATION##${classificationId || ''}##${
         attributeKey || ''
       }##${allowedValue || ''}`;
-    }
     return '';
   };
 
-  // Save handler uses initialLocaleResourceItemValue to reset the form.
   const saveLocaleResourceItem = () => {
     const resourceItem = newLocaleResourceItemValue.resourceItem;
     if (isEditing) {
@@ -590,11 +606,6 @@ function Locale() {
     setIsLocaleResourceItemEditTabVisible(false);
   };
 
-  const [
-    isLocaleResourceItemEditTabVisible,
-    setIsLocaleResourceItemEditTabVisible,
-  ] = useState(false);
-
   const showLocaleResourceItemEditTab = (itemKey: string) => {
     const existingItem = resourceItems.find((item) => item.itemKey === itemKey);
     if (!existingItem) return;
@@ -603,8 +614,12 @@ function Locale() {
     setIsLocaleResourceItemEditTabVisible(true);
   };
 
+  // When "+ Create New Resource Item" is clicked, rebuild the new resource item state using current URL filters.
   const openNewResourceItemForm = () => {
-    setNewLocaleResourceItemValue(initialLocaleResourceItemValue);
+    const newResource = buildResourceItemFromParams(
+      new URLSearchParams(location.search)
+    );
+    setNewLocaleResourceItemValue({ resourceItem: newResource });
     setIsEditing(false);
     setIsLocaleResourceItemEditTabVisible(true);
   };
@@ -634,6 +649,28 @@ function Locale() {
             back to locales
           </a>
         </div>
+
+        {isFilterActive && (
+          <div className="w-full p-2 bg-neutral-200 text-sm flex items-center justify-between">
+            <div>
+              Filtering by: <br />
+              {filterItemType && <span>{filterItemType} </span>}
+              {filterClassificationId && (
+                <span>(ID: {filterClassificationId}) </span>
+              )}
+              <br />
+              Attribute Key:{' '}
+              {filterAttributeKey && <span>{filterAttributeKey}</span>}
+            </div>
+            <button
+              className="text-primary-500 underline"
+              onClick={clearFilter}
+            >
+              View All
+            </button>
+          </div>
+        )}
+
         <div className="w-full p-2 flex">
           {!isReadOnlyUser && !isEditing && (
             <ButtonPrimaryGradient
@@ -644,6 +681,7 @@ function Locale() {
             </ButtonPrimaryGradient>
           )}
         </div>
+
         {isLocaleResourceItemEditTabVisible && (
           <LocaleResourceItemEditingTab
             onCancelEdit={onCancelEdit}
@@ -656,15 +694,33 @@ function Locale() {
             selectedClassificationAttributes={selectedClassificationAttributes}
           />
         )}
+
         <div
           className="flex-1 overflow-y-scroll overflow-x-auto h-full"
           id="localeResourceItemsScrollPane"
         >
           <ResourceItemsTable
-            resourceItems={resourceItems}
+            resourceItems={filteredResourceItems}
             user={user}
             siteId={siteId}
-            onLocaleResourceItemDelete={onLocaleResourceItemDelete}
+            onLocaleResourceItemDelete={(itemKey: string) => {
+              dispatch(
+                openConfirmationDialog({
+                  dialogTitle:
+                    'Are you sure you want to delete this resource item?',
+                  callback: () => {
+                    dispatch(
+                      deleteLocaleResourceItem({
+                        locale: localeValue,
+                        itemKey,
+                        siteId: currentSiteId,
+                        resourceItems,
+                      })
+                    );
+                  },
+                })
+              );
+            }}
             showLocaleResourceItemEditTab={showLocaleResourceItemEditTab}
             setNewLocaleResourceItemValue={setNewLocaleResourceItemValue}
           />
