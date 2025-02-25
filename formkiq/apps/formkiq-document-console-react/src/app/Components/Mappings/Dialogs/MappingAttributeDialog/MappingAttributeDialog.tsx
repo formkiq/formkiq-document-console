@@ -1,13 +1,13 @@
 import { Dialog } from '@headlessui/react';
 import { useEffect, useState } from 'react';
-import { useAppDispatch } from '../../../../Store/store';
 import { openDialog as openNotificationDialog } from '../../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../../Store/store';
+import AttributeForm from '../AttributeForm';
 import {
   createNewAttribute,
   getAttributeErrorMessages,
   isAttributeValid,
 } from '../helpers';
-import AttributeForm from "../AttributeForm";
 
 type MappingAttributeDialogPropsType = {
   isOpen: boolean;
@@ -124,7 +124,7 @@ function MappingAttributeDialog({
                 onClick={closeModal}
                 className="h-10 border border-neutral-900 px-4 rounded-md"
               >
-                CANCEL
+                Cancel
               </button>
               <button
                 type="submit"

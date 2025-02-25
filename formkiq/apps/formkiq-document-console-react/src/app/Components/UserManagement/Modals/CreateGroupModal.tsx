@@ -1,9 +1,9 @@
 import { Dialog } from '@headlessui/react';
 import { useRef, useState } from 'react';
-import { useAppDispatch } from '../../../Store/store';
 import { addGroup } from '../../../Store/reducers/userManagement';
-import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import { useAppDispatch } from '../../../Store/store';
 import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
 
 type CreateGroupModalPropsType = {
   isOpen: boolean;
@@ -90,10 +90,10 @@ function CreateGroupModal({ isOpen, setIsOpen }: CreateGroupModalPropsType) {
                 <div className="flex flex-row justify-end gap-4 text-base font-bold h-10">
                   <ButtonGhost type="button" onClick={closeModal} className="">
                     {' '}
-                    CANCEL
+                    Cancel
                   </ButtonGhost>
                   <ButtonPrimaryGradient type="submit" className="">
-                    + CREATE GROUP
+                    + Create Group
                   </ButtonPrimaryGradient>
                 </div>
               </form>

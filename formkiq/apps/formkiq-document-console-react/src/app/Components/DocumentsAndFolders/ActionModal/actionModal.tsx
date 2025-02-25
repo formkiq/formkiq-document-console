@@ -1,23 +1,23 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
-import { useAppDispatch } from '../../../Store/store';
-import { ILine } from '../../../helpers/types/line';
-import { Close } from '../../Icons/icons';
 import { openDialog as openNotificationDialog } from '../../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../../Store/store';
+import { DocumentsService } from '../../../helpers/services/documentsService';
+import { ILine } from '../../../helpers/types/line';
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
+import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
+import { Close } from '../../Icons/icons';
 import { AntivirusContent } from '../../Workflows/WorkflowStep/Steps/Antivirus';
 import { DocumentTaggingContent } from '../../Workflows/WorkflowStep/Steps/DocumentTagging';
 import { EventBridgeContent } from '../../Workflows/WorkflowStep/Steps/EventBridge';
 import { FulltextSearchContent } from '../../Workflows/WorkflowStep/Steps/FulltextSearch';
-import { WebhookContent } from '../../Workflows/WorkflowStep/Steps/Webhook';
 import { IntelligentDocumentProcessingContent } from '../../Workflows/WorkflowStep/Steps/IntelligentDocumentProcessing';
 import { NotificationContent } from '../../Workflows/WorkflowStep/Steps/Notification';
 import { OcrContent } from '../../Workflows/WorkflowStep/Steps/Ocr';
 import { PublishContent } from '../../Workflows/WorkflowStep/Steps/Publish';
-import { DocumentsService } from '../../../helpers/services/documentsService';
-import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
-import ButtonPrimaryGradient from '../../Generic/Buttons/ButtonPrimaryGradient';
-import { ActionSelector } from './ActionSelector';
+import { WebhookContent } from '../../Workflows/WorkflowStep/Steps/Webhook';
 import { useDocumentActions } from '../DocumentActionsPopover/DocumentActionsContext';
+import { ActionSelector } from './ActionSelector';
 
 export default function ActionModal({
   isOpened,
@@ -208,10 +208,10 @@ export default function ActionModal({
                         onClose();
                       }}
                     >
-                      CANCEL
+                      Cancel
                     </ButtonGhost>
                     <ButtonPrimaryGradient onClick={onAddAction}>
-                      ADD
+                      Add
                     </ButtonPrimaryGradient>
                   </div>
                 </div>

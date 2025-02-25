@@ -1,11 +1,11 @@
 import { Dialog } from '@headlessui/react';
 import { useState } from 'react';
-import { useAppDispatch } from '../../Store/store';
-import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
-import ButtonGhost from '../Generic/Buttons/ButtonGhost';
-import RadioListbox from '../Generic/Listboxes/RadioListbox';
 import { DocumentsService } from '../../helpers/services/documentsService';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
+import { useAppDispatch } from '../../Store/store';
+import ButtonGhost from '../Generic/Buttons/ButtonGhost';
+import ButtonPrimaryGradient from '../Generic/Buttons/ButtonPrimaryGradient';
+import RadioListbox from '../Generic/Listboxes/RadioListbox';
 
 type CreateSiteModalPropsType = {
   isOpen: boolean;
@@ -136,10 +136,10 @@ function CreateSiteModal({
 
                 <div className="flex flex-row justify-end gap-4 text-base font-bold h-10 mt-4">
                   <ButtonGhost type="button" onClick={closeModal} className="">
-                    CANCEL
+                    Cancel
                   </ButtonGhost>
                   <ButtonPrimaryGradient type="submit" className="">
-                    + CREATE SITE
+                    + Create Site
                   </ButtonPrimaryGradient>
                 </div>
               </form>

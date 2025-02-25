@@ -849,7 +849,7 @@ function SchemaPage({
               onClick={cancelEditing}
               className="h-10 border border-neutral-900 px-4 rounded-md"
             >
-              CANCEL
+              Cancel
             </ButtonGhost>
             <ButtonPrimaryGradient
               type="submit"
