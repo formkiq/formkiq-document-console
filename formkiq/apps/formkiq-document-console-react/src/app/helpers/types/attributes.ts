@@ -13,16 +13,37 @@ export type AttributeDataType =
   | 'WATERMARK';
 export type AttributeType = 'STANDARD' | 'OPA';
 
+export type WatermarkScale = 'BEST_FIT' | 'ORIGINAL';
+export type WatermarkPositionXAnchor = 'LEFT' | 'RIGHT' | 'CENTER';
+export type WatermarkPositionYAnchor = 'TOP' | 'BOTTOM' | 'CENTER';
+
+export interface WatermarkPosition {
+  xAnchor: WatermarkPositionXAnchor;
+  yAnchor: WatermarkPositionYAnchor;
+  xOffset?: number;
+  yOffset?: number;
+}
+
 export interface AdditionalFields {
   text?: string;
+  rotation?: number;
   imageDocumentId?: string;
+  scale?: WatermarkScale;
+  position?: WatermarkPosition;
 }
 
 interface BaseAttribute {
   type: AttributeType;
   key: string;
   dataType: AttributeDataType; // Allowing flexibility for multiple data types.
-  [key: string]: AdditionalFields | AttributeType | AttributeDataType | string;
+  [key: string]:
+    | AdditionalFields
+    | AttributeType
+    | AttributeDataType
+    | string
+    | number
+    | boolean
+    | undefined;
 }
 
 /**
