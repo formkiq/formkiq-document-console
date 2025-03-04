@@ -26,9 +26,25 @@ function AddAttributeForm({
     AttributeDataType | ''
   >('');
 
-  const { register, handleSubmit, reset } = useForm();
+  // For adding a new attribute, set static default values.
+  const defaultValues = {
+    key: '',
+    watermarkText: '',
+    imageDocumentId: '',
+    rotation: 0,
+    scale: 'BEST_FIT',
+    'position.xAnchor': 'CENTER',
+    'position.yAnchor': 'CENTER',
+    'position.xOffset': 0,
+    'position.yOffset': 0,
+  };
+
+  const { register, handleSubmit, reset, watch } = useForm({ defaultValues });
   const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
+
+  const imageDocId = watch('imageDocumentId');
+  const isValidImageDocId = isUUIDv4orV5(imageDocId);
 
   const onAddAttributeSubmit = async (data: any) => {
     if (!selectedAttributeDataType) {
@@ -40,7 +56,6 @@ function AddAttributeForm({
       return;
     }
 
-    // For WATERMARK, ensure that at least one field is provided.
     if (selectedAttributeDataType === 'WATERMARK') {
       if (!data.watermarkText && !data.imageDocumentId) {
         dispatch(
@@ -51,7 +66,6 @@ function AddAttributeForm({
         );
         return;
       }
-      // Validate imageDocumentId format and existence if provided
       if (data.imageDocumentId) {
         if (!isUUIDv4orV5(data.imageDocumentId)) {
           dispatch(
@@ -61,7 +75,6 @@ function AddAttributeForm({
           );
           return;
         }
-        // Check if document exists
         const documentResponse = await DocumentsService.getDocumentById(
           data.imageDocumentId,
           siteId
@@ -78,7 +91,6 @@ function AddAttributeForm({
       }
     }
 
-    // Build the new attribute, conditionally including the watermark object.
     const newAttribute: { attribute: Attribute } = {
       attribute: {
         key: data.key,
@@ -88,6 +100,20 @@ function AddAttributeForm({
           watermark: {
             text: data.watermarkText || '',
             imageDocumentId: data.imageDocumentId || '',
+            rotation: Number(data.rotation) || 0,
+            scale: data.scale || 'BEST_FIT',
+            position: {
+              xAnchor: data.position?.xAnchor || 'CENTER',
+              yAnchor: data.position?.yAnchor || 'CENTER',
+              xOffset:
+                data['position.xOffset'] !== undefined
+                  ? Number(data.position?.xOffset)
+                  : 0,
+              yOffset:
+                data['position.yOffset'] !== undefined
+                  ? Number(data.position?.yOffset)
+                  : 0,
+            },
           },
         }),
       },
@@ -103,7 +129,6 @@ function AddAttributeForm({
         return;
       }
 
-      // update allAttributes
       DocumentsService.getAttributes(siteId).then((response) => {
         if (response.status === 200) {
           const allAttributeData = {
@@ -189,7 +214,6 @@ function AddAttributeForm({
                   placeholder="Key"
                 />
               </div>
-
               <div className="mr-2 h-8 w-52">
                 <RadioListbox
                   values={attributeTypes}
@@ -200,8 +224,6 @@ function AddAttributeForm({
                 />
               </div>
             </div>
-
-            {/* Conditionally render watermark fields */}
             {selectedAttributeDataType === 'WATERMARK' && (
               <div className="flex flex-col gap-2 mt-2">
                 <textarea
@@ -216,9 +238,95 @@ function AddAttributeForm({
                   {...register('imageDocumentId')}
                   placeholder="Image Document ID"
                 />
+                <div className="flex flex-row gap-2">
+                  <div className="flex flex-col gap-1 w-1/2">
+                    <label className={isValidImageDocId ? `italic` : ``}>
+                      Rotation
+                    </label>
+                    <input
+                      type="number"
+                      className={`h-8 px-4 border border-neutral-300 text-sm rounded-md ${
+                        isValidImageDocId ? `bg-gray-100` : ''
+                      }`}
+                      {...register('rotation')}
+                      placeholder="Rotation"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1 w-1/2">
+                    <label>Scale</label>
+                    <select
+                      className="h-8 px-4 border border-neutral-300 text-xs rounded-md"
+                      {...register('scale')}
+                    >
+                      <option value="BEST_FIT">BEST_FIT</option>
+                      <option value="ORIGINAL" disabled={!isValidImageDocId}>
+                        ORIGINAL
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex flex-row gap-2">
+                  <div className="flex flex-col gap-1 w-1/2">
+                    <label className={!isValidImageDocId ? `italic` : ``}>
+                      X Anchor
+                    </label>
+                    <select
+                      className="h-8 px-4 border border-neutral-300 text-xs rounded-md"
+                      {...register('position.xAnchor')}
+                      disabled={!isValidImageDocId}
+                    >
+                      <option value="LEFT">LEFT</option>
+                      <option value="CENTER">CENTER</option>
+                      <option value="RIGHT">RIGHT</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1 w-1/2">
+                    <label className={!isValidImageDocId ? `italic` : ``}>
+                      Y Anchor
+                    </label>
+                    <select
+                      className="h-8 px-4 border border-neutral-300 text-xs rounded-md"
+                      {...register('position.yAnchor')}
+                      disabled={!isValidImageDocId}
+                    >
+                      <option value="TOP">TOP</option>
+                      <option value="CENTER">CENTER</option>
+                      <option value="BOTTOM">BOTTOM</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex flex-row gap-2">
+                  <div className="flex flex-col gap-1 w-1/2">
+                    <label className={!isValidImageDocId ? `italic` : ``}>
+                      X Offset
+                    </label>
+                    <input
+                      type="number"
+                      className={`h-8 px-4 border border-neutral-300 text-sm rounded-md ${
+                        !isValidImageDocId ? `bg-gray-100` : ''
+                      }`}
+                      {...register('position.xOffset')}
+                      placeholder="X Offset"
+                      disabled={!isValidImageDocId}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1 w-1/2">
+                    <label className={!isValidImageDocId ? `italic` : ``}>
+                      Y Offset
+                    </label>
+                    <input
+                      type="number"
+                      className={`h-8 px-4 border border-neutral-300 text-sm rounded-md ${
+                        !isValidImageDocId ? `bg-gray-100` : ''
+                      }`}
+                      {...register('position.yOffset')}
+                      placeholder="Y Offset"
+                      disabled={!isValidImageDocId}
+                    />
+                  </div>
+                </div>
               </div>
             )}
-
             <div className="flex items-center mt-2">
               <ButtonPrimary type="submit" title="Create" className="mr-2">
                 Create

@@ -36,9 +36,30 @@ function EditAttributeForm({
     attribute?.dataType
   );
 
-  const { register, handleSubmit, reset } = useForm();
+  // Build default values using any existing watermark data
+  const watermarkFields =
+    (attribute as Record<string, AdditionalFields>)?.[
+      attribute.dataType.toLowerCase()
+    ] || {};
+  const defaultValues = {
+    key: attribute?.key || '',
+    text: watermarkFields?.text || '',
+    imageDocumentId: watermarkFields?.imageDocumentId || '',
+    rotation: watermarkFields?.rotation ?? 0,
+    scale: watermarkFields?.scale || 'BEST_FIT',
+    'position.xAnchor': watermarkFields?.position?.xAnchor || 'CENTER',
+    'position.yAnchor': watermarkFields?.position?.yAnchor || 'CENTER',
+    'position.xOffset': watermarkFields?.position?.xOffset ?? 0,
+    'position.yOffset': watermarkFields?.position?.yOffset ?? 0,
+  };
+
+  const { register, handleSubmit, reset, watch } = useForm({ defaultValues });
   const dispatch = useAppDispatch();
   const addTagFormRef = useRef<HTMLFormElement>(null);
+
+  // Watch imageDocumentId for scale option
+  const imageDocId = watch('imageDocumentId');
+  const isValidImageDocId = isUUIDv4orV5(imageDocId);
 
   const onUpdateAttributeSubmit = async (data: any) => {
     if (!selectedAttributeDataType) {
@@ -61,7 +82,6 @@ function EditAttributeForm({
         );
         return;
       }
-      // Validate imageDocumentId format if provided
       if (data.imageDocumentId && !isUUIDv4orV5(data.imageDocumentId)) {
         dispatch(
           openNotificationDialog({
@@ -70,7 +90,6 @@ function EditAttributeForm({
         );
         return;
       }
-      // If imageDocumentId exists (vs text), check if document exists
       if (data.imageDocumentId) {
         const documentResponse = await DocumentsService.getDocumentById(
           data.imageDocumentId,
@@ -88,7 +107,6 @@ function EditAttributeForm({
       }
     }
 
-    // Build the updated attribute object, including watermark values if applicable.
     const newAttribute: { attribute: Attribute } = {
       attribute: {
         key: data?.key,
@@ -98,12 +116,25 @@ function EditAttributeForm({
           watermark: {
             text: data.text || '',
             imageDocumentId: data.imageDocumentId || '',
+            rotation: Number(data.rotation) || 0,
+            scale: data.scale || 'BEST_FIT',
+            position: {
+              xAnchor: data.position?.xAnchor || 'CENTER',
+              yAnchor: data.position?.yAnchor || 'CENTER',
+              xOffset:
+                data['position.xOffset'] !== undefined
+                  ? Number(data.position?.xOffset)
+                  : 0,
+              yOffset:
+                data['position.yOffset'] !== undefined
+                  ? Number(data.position?.yOffset)
+                  : 0,
+            },
           },
         }),
       },
     };
 
-    // If the key is unchanged, delete the old attribute then add the updated version.
     if (attribute?.key === data?.key) {
       DocumentsService.deleteAttribute(siteId, attribute.key).then(
         (response) => {
@@ -131,7 +162,6 @@ function EditAttributeForm({
         }
       );
     } else {
-      // If the key has been updated, add the new attribute then delete the old one.
       DocumentsService.addAttribute(siteId, newAttribute).then((response) => {
         if (response.status !== 200) {
           dispatch(
@@ -169,10 +199,6 @@ function EditAttributeForm({
     'WATERMARK',
   ];
 
-  const attributeAdditionalFieldsValues = (
-    attribute as Record<string, AdditionalFields>
-  )?.[attribute.dataType.toLowerCase()];
-
   return (
     <div className="mt-2 ml-2 pt-1 flex flex-col justify-center items-center w-full bg-gradient-to-l from-gray-200 via-stone-200 to-gray-300 rounded-md">
       <div className="flex w-full p-2 pl-4 font-semibold">
@@ -190,12 +216,10 @@ function EditAttributeForm({
                 disabled={isViewAttributeDialogOpen}
                 type="text"
                 className="h-8 px-4 border border-neutral-300 w-full text-sm rounded-md"
-                defaultValue={attribute?.key}
                 {...register('key', { required: true })}
                 placeholder="Key"
               />
             </div>
-
             <div className="mr-2 h-8 w-52">
               <RadioListbox
                 values={attributeTypes}
@@ -207,22 +231,18 @@ function EditAttributeForm({
               />
             </div>
           </div>
-
-          <div className="flex flex-col gap-2 mt-2">
-            {attributeAdditionalFieldsValues?.text && (
+          {selectedAttributeDataType === 'WATERMARK' && (
+            <div className="flex flex-col gap-2 mt-2">
               <div className="flex flex-col gap-1">
-                <label>Text</label>
+                <label>Watermark Text</label>
                 <textarea
                   disabled={isViewAttributeDialogOpen}
                   className="px-4 py-2 border border-neutral-300 text-sm rounded-md"
                   {...register('text')}
-                  defaultValue={attributeAdditionalFieldsValues?.text}
-                  placeholder="Text"
+                  placeholder="Watermark Text"
                   rows={3}
                 />
               </div>
-            )}
-            {attributeAdditionalFieldsValues?.imageDocumentId && (
               <div className="flex flex-col gap-1">
                 <label>Image Document ID</label>
                 <input
@@ -230,54 +250,140 @@ function EditAttributeForm({
                   disabled={isViewAttributeDialogOpen}
                   className="h-8 px-4 border border-neutral-300 text-sm rounded-md"
                   {...register('imageDocumentId')}
-                  defaultValue={
-                    attributeAdditionalFieldsValues?.imageDocumentId
-                  }
                   placeholder="Image Document ID"
                 />
               </div>
-            )}
-          </div>
-
-          {attribute ? (
-            <div className="flex items-center mt-2">
-              {ReservedAttributeKeys.indexOf(attribute?.key) === -1 &&
-                allowEdit && (
-                  <>
-                    {isViewAttributeDialogOpen ? (
-                      <div>
-                        <ButtonPrimary
-                          type="button"
-                          onClick={() => setIsViewAttributeDialogOpen(false)}
-                          title="Edit Attribute"
-                          className="mr-2"
-                        >
-                          Edit Attribute {attribute.key}
-                        </ButtonPrimary>
-                      </div>
-                    ) : (
+              <div className="flex flex-row gap-2">
+                <div className="flex flex-col gap-1 w-1/2">
+                  <label className={isValidImageDocId ? `italic` : ``}>
+                    Rotation
+                  </label>
+                  <input
+                    type="number"
+                    disabled={isViewAttributeDialogOpen || isValidImageDocId}
+                    className={`h-8 px-4 border border-neutral-300 text-sm rounded-md ${
+                      isViewAttributeDialogOpen || isValidImageDocId
+                        ? `bg-gray-100`
+                        : ''
+                    }`}
+                    {...register('rotation')}
+                    placeholder="Rotation"
+                  />
+                </div>
+                <div className="flex flex-col gap-1 w-1/2">
+                  <label>Scale</label>
+                  <select
+                    disabled={isViewAttributeDialogOpen || !isValidImageDocId}
+                    className="h-8 px-4 border border-neutral-300 text-xs rounded-md"
+                    {...register('scale')}
+                  >
+                    <option value="BEST_FIT">BEST_FIT</option>
+                    <option value="ORIGINAL" disabled={!isValidImageDocId}>
+                      ORIGINAL
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="flex flex-col gap-1 w-1/2">
+                  <label className={!isValidImageDocId ? `italic` : ``}>
+                    X Anchor
+                  </label>
+                  <select
+                    disabled={isViewAttributeDialogOpen || !isValidImageDocId}
+                    className="h-8 px-4 border border-neutral-300 text-xs rounded-md"
+                    {...register('position.xAnchor')}
+                  >
+                    <option value="LEFT">LEFT</option>
+                    <option value="CENTER">CENTER</option>
+                    <option value="RIGHT">RIGHT</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1 w-1/2">
+                  <label className={!isValidImageDocId ? `italic` : ``}>
+                    Y Anchor
+                  </label>
+                  <select
+                    disabled={isViewAttributeDialogOpen || !isValidImageDocId}
+                    className="h-8 px-4 border border-neutral-300 text-xs rounded-md"
+                    {...register('position.yAnchor')}
+                  >
+                    <option value="TOP">TOP</option>
+                    <option value="CENTER">CENTER</option>
+                    <option value="BOTTOM">BOTTOM</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="flex flex-col gap-1 w-1/2">
+                  <label className={!isValidImageDocId ? `italic` : ``}>
+                    X Offset
+                  </label>
+                  <input
+                    type="number"
+                    disabled={isViewAttributeDialogOpen || !isValidImageDocId}
+                    className={`h-8 px-4 border border-neutral-300 text-sm rounded-md ${
+                      isViewAttributeDialogOpen || !isValidImageDocId
+                        ? `bg-gray-100`
+                        : ''
+                    }`}
+                    {...register('position.xOffset')}
+                    placeholder="X Offset"
+                  />
+                </div>
+                <div className="flex flex-col gap-1 w-1/2">
+                  <label className={!isValidImageDocId ? `italic` : ``}>
+                    Y Offset
+                  </label>
+                  <input
+                    type="number"
+                    disabled={isViewAttributeDialogOpen || !isValidImageDocId}
+                    className={`h-8 px-4 border border-neutral-300 text-sm rounded-md ${
+                      isViewAttributeDialogOpen || !isValidImageDocId
+                        ? `bg-gray-100`
+                        : ''
+                    }`}
+                    {...register('position.yOffset')}
+                    placeholder="Y Offset"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center mt-2">
+            {ReservedAttributeKeys.indexOf(attribute?.key) === -1 &&
+              allowEdit && (
+                <>
+                  {isViewAttributeDialogOpen ? (
+                    <div>
                       <ButtonPrimary
-                        type="submit"
-                        title="Update"
+                        type="button"
+                        onClick={() => setIsViewAttributeDialogOpen(false)}
+                        title="Edit Attribute"
                         className="mr-2"
                       >
-                        Update
+                        Edit Attribute {attribute.key}
                       </ButtonPrimary>
-                    )}
-                  </>
-                )}
-
-              <ButtonGhost type="button" onClick={onClose}>
-                {isViewAttributeDialogOpen ? (
-                  <span>Close</span>
-                ) : (
-                  <span>Cancel</span>
-                )}
-              </ButtonGhost>
-            </div>
-          ) : (
-            <div className="h-8"></div>
-          )}
+                    </div>
+                  ) : (
+                    <ButtonPrimary
+                      type="submit"
+                      title="Update"
+                      className="mr-2"
+                    >
+                      Update
+                    </ButtonPrimary>
+                  )}
+                </>
+              )}
+            <ButtonGhost type="button" onClick={onClose}>
+              {isViewAttributeDialogOpen ? (
+                <span>Close</span>
+              ) : (
+                <span>Cancel</span>
+              )}
+            </ButtonGhost>
+          </div>
         </div>
       </form>
     </div>
