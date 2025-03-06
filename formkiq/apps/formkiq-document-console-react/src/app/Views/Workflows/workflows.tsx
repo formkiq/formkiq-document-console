@@ -48,13 +48,8 @@ export function Workflows() {
   const navigate = useNavigate();
   const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
-  const {
-    workflows,
-    workflowsLoadingStatus,
-    nextToken,
-    currentSearchPage,
-    isLastSearchPageLoaded,
-  } = useSelector(WorkflowsState);
+  const { workflows, workflowsLoadingStatus, nextToken, currentSearchPage } =
+    useSelector(WorkflowsState);
   const { workflowFilterPreference } = useSelector(ConfigState);
   const [currentSiteId, setCurrentSiteId] = useState(siteId);
   const [currentDocumentsRootUri, setCurrentDocumentsRootUri] =
@@ -92,21 +87,10 @@ export function Workflows() {
     setCurrentDocumentsRootUri(recheckSiteInfo.siteDocumentsRootUri);
   }, [pathname]);
 
+  // Since the API now returns workflows based on status, simply mirror the server response.
   useEffect(() => {
-    if (workflowFilterPreference === 'active') {
-      const newWorkflows = [...workflows].filter(
-        (workflow) => workflow.status === 'ACTIVE'
-      );
-      setFilteredWorkflows(newWorkflows);
-    } else if (workflowFilterPreference === 'inactive') {
-      const newWorkflows = [...workflows].filter(
-        (workflow) => workflow.status === 'INACTIVE'
-      );
-      setFilteredWorkflows(newWorkflows);
-    } else {
-      setFilteredWorkflows(workflows);
-    }
-  }, [workflows, workflowFilterPreference]);
+    setFilteredWorkflows(workflows);
+  }, [workflows]);
 
   const onNewClick = (event: any, siteId: string) => {
     setNewModalSiteId(siteId);
@@ -115,18 +99,40 @@ export function Workflows() {
   const onNewClose = () => {
     setNewModalOpened(false);
   };
+
   useEffect(() => {
     if (isNewModalOpened === false) {
-      // TODO send update instead of hacky updateWorkflowExpansion
+      // TODO: Update workflow expansion if necessary.
     }
   }, [isNewModalOpened]);
 
+  // Re-fetch workflows whenever user, site, or filter changes.
   useEffect(() => {
     updateWorkflows();
-  }, [user, currentSiteId]);
+  }, [user, currentSiteId, workflowFilterPreference]);
+
+  // Helper to build a query string that always includes status.
+  const buildQueryString = (extraParams: Record<string, string> = {}) => {
+    const params = new URLSearchParams();
+    params.append('siteId', currentSiteId);
+    // Always include status (ACTIVE or INACTIVE)
+    params.append('status', workflowFilterPreference.toUpperCase());
+    Object.keys(extraParams).forEach((key) => {
+      params.append(key, extraParams[key]);
+    });
+    return params.toString();
+  };
 
   const updateWorkflows = async () => {
-    dispatch(fetchWorkflows({ siteId: currentSiteId }));
+    dispatch(
+      fetchWorkflows({
+        siteId: currentSiteId,
+        status: workflowFilterPreference.toUpperCase(), // 'ACTIVE' or 'INACTIVE'
+        nextToken: null,
+        limit: 20,
+        page: 1,
+      })
+    );
   };
 
   const trackScrolling = useCallback(async () => {
@@ -138,32 +144,39 @@ export function Workflows() {
     };
 
     const scrollpane = document.getElementById('workflowsScrollPane');
-
     if (
       isBottom(scrollpane as HTMLElement) &&
       nextToken &&
       workflowsLoadingStatus === RequestStatus.fulfilled
     ) {
       dispatch(setWorkflowsLoadingStatusPending());
-      if (nextToken) {
-        await dispatch(
-          fetchWorkflows({
-            siteId: currentSiteId,
-            nextToken,
-            page: currentSearchPage + 1,
-          })
-        );
-      }
+      const queryString = buildQueryString({
+        nextToken,
+        page: (currentSearchPage + 1).toString(),
+      });
+      await dispatch(
+        fetchWorkflows({
+          siteId: currentSiteId,
+          status: workflowFilterPreference.toUpperCase(),
+          nextToken,
+          limit: 20,
+          page: currentSearchPage + 1,
+        })
+      );
     }
-  }, [nextToken, workflowsLoadingStatus, isLastSearchPageLoaded]);
+  }, [
+    nextToken,
+    workflowsLoadingStatus,
+    currentSiteId,
+    currentSearchPage,
+    workflowFilterPreference,
+  ]);
 
   useEffect(() => {
-    // Trigger scrolling in cases when table smaller than page after filtering and next page loading can't be triggered by scroll.
+    // Trigger scrolling if the table is smaller than the page.
     const scrollpane = document.getElementById('workflowsScrollPane');
     const wrapper = document.getElementById('workflowsWrapper');
-    if (!scrollpane || !wrapper) {
-      return;
-    }
+    if (!scrollpane || !wrapper) return;
     if (scrollpane.offsetHeight < wrapper.offsetHeight) {
       trackScrolling();
     }
@@ -171,11 +184,11 @@ export function Workflows() {
 
   const handleScroll = (event: any) => {
     const el = event.target;
-    // Track scroll when table reaches bottom
-    if (el.offsetHeight + el.scrollTop + 10 > el.scrollHeight) {
-      if (el.scrollTop > 0) {
-        trackScrolling();
-      }
+    if (
+      el.offsetHeight + el.scrollTop + 10 > el.scrollHeight &&
+      el.scrollTop > 0
+    ) {
+      trackScrolling();
     }
   };
 
@@ -207,7 +220,6 @@ export function Workflows() {
           })
         );
       }
-
       window.location.href =
         siteId === 'default'
           ? `/workflows/designer?workflowId=${response.workflowId}`
@@ -263,20 +275,13 @@ export function Workflows() {
     });
   };
 
-  const isValidString = (text: string) => {
-    try {
-      JSON.parse(text);
-    } catch (e) {
-      return false;
-    }
-    return true;
-  };
-
   const importWorkflow = (event: any) => {
     const reader = new FileReader();
     reader.readAsText(event.target.files[0], 'UTF-8');
     reader.onload = (e) => {
-      if (!isValidString(e.target?.result as string)) {
+      try {
+        JSON.parse(e.target?.result as string);
+      } catch (e) {
         dispatch(
           openNotificationDialog({
             dialogTitle: 'Invalid JSON',
@@ -296,7 +301,6 @@ export function Workflows() {
           event.target.value = '';
           return;
         }
-
         window.location.href =
           siteId === 'default'
             ? `/workflows/designer?workflowId=${response.workflowId}`
@@ -311,7 +315,6 @@ export function Workflows() {
       <Helmet>
         <title>Workflows</title>
       </Helmet>
-
       <div
         className="flex"
         style={{
@@ -344,7 +347,6 @@ export function Workflows() {
                 <span>Create new</span>
                 <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
               </ButtonPrimaryGradient>
-
               <input
                 type="file"
                 id={'import-workflow' + siteId}
@@ -358,27 +360,11 @@ export function Workflows() {
               >
                 <span>Import (JSON)</span>
               </label>
-
-              <button
-                className="flex hidden bg-gradient-to-l from-primary-400 via-secondary-400 to-primary-500 hover:from-primary-500 hover:via-secondary-500 hover:to-primary-600 text-white text-sm font-semibold rounded-2xl flex cursor-pointer focus:outline-none py-2 px-4"
-                data-test-id="create-workflow"
-                onClick={(event) => onNewClick(event, siteId)}
-              >
-                <span>Create new (OLD)</span>
-                <div className="w-3 h-3 ml-1.5 mt-1">{Plus()}</div>
-              </button>
-
               <RadioListbox
-                values={['active', 'inactive', 'all']}
-                titles={[
-                  'Active Workflows',
-                  'Inactive Workflows',
-                  'All Workflows',
-                ]}
-                selectedValue={
-                  workflowFilterPreference ? workflowFilterPreference : 'active'
-                }
-                setSelectedValue={(val: 'active' | 'inactive' | 'all') => {
+                values={['active', 'inactive']}
+                titles={['Active Workflows', 'Inactive Workflows']}
+                selectedValue={workflowFilterPreference || 'active'}
+                setSelectedValue={(val: 'active' | 'inactive') => {
                   dispatch(setWorkflowFilterPreference(val));
                 }}
               />
@@ -398,7 +384,7 @@ export function Workflows() {
               showTooltipId={showTooltipId}
               handleDownloadClick={handleDownloadClick}
               user={user}
-            ></WorkflowList>
+            />
           </div>
         </div>
       </div>
@@ -410,9 +396,9 @@ export function Workflows() {
       />
       <DuplicateDialog
         isOpen={isDuplicateDialogOpen}
-        onClose={() => setIsDuplicateDialogOpen(false)} // Can also use a separate function for clarity
+        onClose={() => setIsDuplicateDialogOpen(false)}
         onDuplicate={handleDuplicate}
-        initialName={originalName} // Optionally provide the original name
+        initialName={originalName}
       />
     </>
   );
