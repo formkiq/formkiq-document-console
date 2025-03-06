@@ -11,7 +11,10 @@ import { User } from '../../../helpers/types/userManagement';
 import { WorkflowSummary } from '../../../helpers/types/workflows';
 import { AuthState } from '../../../Store/reducers/auth';
 import { setCurrentActionEvent } from '../../../Store/reducers/config';
-import { deleteDocument } from '../../../Store/reducers/documentsList';
+import {
+  deleteDocument,
+  purgeDocument,
+} from '../../../Store/reducers/documentsList';
 import { openDialog } from '../../../Store/reducers/globalConfirmControls';
 import { fetchQueues, QueuesState } from '../../../Store/reducers/queues';
 import { UserManagementState } from '../../../Store/reducers/userManagement';
@@ -72,6 +75,12 @@ interface DocumentActionsContextType {
   onDeleteClick: (
     id: string,
     softDelete: boolean,
+    currentSiteId: string,
+    user: any,
+    setSelectedDocuments?: (docs: (docs: any) => any) => void
+  ) => void;
+  onPurgeClick: (
+    id: string,
     currentSiteId: string,
     user: any,
     setSelectedDocuments?: (docs: (docs: any) => any) => void
@@ -440,6 +449,51 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
       })
     );
   };
+
+  const purgeFunc = async (
+    id: string,
+    currentSiteId: string,
+    setSelectedDocuments?: (docs: (docs: any) => any) => void
+  ) => {
+    const res: any = await dispatch(
+      purgeDocument({
+        siteId: currentSiteId,
+        user,
+        documentId: id,
+      })
+    );
+    if (res.error) {
+      dispatch(
+        openDialog({
+          dialogTitle: res.error.message,
+        })
+      );
+      return;
+    }
+    if (setSelectedDocuments) {
+      setSelectedDocuments((docs) =>
+        docs.filter((doc: any) => doc.documentId !== id)
+      );
+    } else {
+      const folderLocation = pathname.split('/').slice(0, -1).join('/');
+      navigate(folderLocation);
+    }
+  };
+  const onPurgeClick = (
+    id: string,
+    currentSiteId: string,
+    setSelectedDocuments?: (docs: (docs: any) => any) => void
+  ) => {
+    const dialogTitle =
+      'Are you sure you want to purge this document? There will be no way to retrieve outside of external backups, if available.';
+    dispatch(
+      openDialog({
+        callback: () => purgeFunc(id, currentSiteId, setSelectedDocuments),
+        dialogTitle,
+      })
+    );
+  };
+
   const getShareModalValue = () => {
     return shareModalValue;
   };
@@ -591,6 +645,7 @@ export const DocumentActionsProvider: React.FC<{ children: ReactNode }> = ({
     onDocumentReviewModalClose,
     updateTags,
     onDeleteClick,
+    onPurgeClick,
     currentDocumentTags,
     currentDocumentVersions,
     onRenameModalClick,

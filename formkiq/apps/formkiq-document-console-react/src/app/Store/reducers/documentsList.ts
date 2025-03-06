@@ -644,6 +644,61 @@ export const deleteDocument = createAsyncThunk(
     });
   }
 );
+export const purgeDocument = createAsyncThunk(
+  'documentsList/purgeDocument',
+  async (data: any, thunkAPI) => {
+    const {
+      siteId,
+      user,
+      documentId,
+      softDelete,
+    }: {
+      siteId: string;
+      user: User;
+      documentId: string;
+      softDelete: boolean;
+    } = data;
+    await DocumentsService.purgeDocument(documentId, siteId).then((res) => {
+      if (res.status !== 200) {
+        const errors = res?.errors;
+        throw new Error(errors ? errors[0].error : 'Error purging document.');
+      }
+      const infoDocumentId = window.location.hash.match(/id=(.*)/);
+      if (
+        infoDocumentId &&
+        infoDocumentId.length > 0 &&
+        documentId === infoDocumentId[1]
+      ) {
+        // close info tab if viewing purged document
+        window.location.hash = '';
+      }
+      // remove file from document list
+      const state = thunkAPI.getState() as any;
+      const { documents, folders } = state?.documentListState || {};
+      const newDocs = documents.filter((doc: any) => {
+        return doc.documentId !== documentId;
+      });
+      const newFolders = [...folders].map((folder: any) => {
+        return {
+          ...folder,
+          documents: folder.documents
+            ? folder.documents.filter(
+                (doc: any) => doc.documentId !== documentId
+              )
+            : [],
+        };
+      });
+      thunkAPI.dispatch(
+        updateDocumentsList({
+          documents: newDocs,
+          folders: newFolders,
+          user: user,
+          isSystemDeletedByKey: false,
+        })
+      );
+    });
+  }
+);
 const defaultState = {
   documents: [] as any[],
   folders: [] as any[],

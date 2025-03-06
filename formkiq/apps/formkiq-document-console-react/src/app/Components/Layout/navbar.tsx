@@ -354,16 +354,11 @@ function Navbar() {
           currentDocumentPath.substring(
             0,
             currentDocumentPath.lastIndexOf('/')
-          ) +
-          '?scrollToDocumentLine=true' +
-          '#id=' +
-          documentId +
-          '&action=' +
-          action,
+          ),
+        search: '?scrollToDocumentLine=true',
+        hash: `#id=${documentId}&action=${action}`,
       },
-      {
-        replace: true,
-      }
+      { replace: true }
     );
   };
 
@@ -866,7 +861,7 @@ function Navbar() {
                                       }
                                       onClick={(e: any) => viewFolder(e, '')}
                                     >
-                                      View in Folder
+                                      View Details in Folder
                                     </ButtonTertiary>
                                   </>
                                 ) : (
@@ -877,7 +872,7 @@ function Navbar() {
                                       }
                                       onClick={(e: any) => viewFolder(e, '')}
                                     >
-                                      View in Folder
+                                      View Details in Folder
                                     </ButtonTertiary>
                                     <ButtonTertiary
                                       className={
@@ -974,6 +969,7 @@ function Navbar() {
                                           ).documentId,
                                           documentInstance: currentDocument,
                                         }}
+                                        onViewPage={true}
                                         siteId={currentSiteId}
                                         formkiqVersion={formkiqVersion}
                                         useCollections={useCollections}
