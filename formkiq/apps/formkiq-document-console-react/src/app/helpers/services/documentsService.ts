@@ -113,6 +113,17 @@ export class DocumentsService {
     });
   }
 
+  @formkiqAPIHandler
+  public static purgeDocument(id: string, siteId = ''): Promise<any> {
+    if (!siteId || !siteId.length) {
+      siteId = this.determineSiteId();
+    }
+    return this.getFormkiqClient().documentsApi.purgeDocument({
+      documentId: id,
+      siteId,
+    });
+  }
+
   public static uploadDocuments(
     folder: string,
     siteId = '',

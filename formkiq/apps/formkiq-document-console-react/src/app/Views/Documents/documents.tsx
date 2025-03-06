@@ -29,8 +29,6 @@ import {
   Retry,
   Spinner,
   Tag,
-  Trash,
-  Undo,
   View,
 } from '../../Components/Icons/icons';
 import {
@@ -1366,12 +1364,6 @@ function Documents() {
   };
   const [archiveStatus, setArchiveStatus] = useState(ARCHIVE_STATUSES.INITIAL);
 
-  // const clearPendingArchive = () => {
-  //   setArchiveStatus(ARCHIVE_STATUSES.INITIAL);
-  //   dispatch(setPendingArchive([]));
-  //   setIsArchiveTabExpanded(!isArchiveTabExpanded);
-  // };
-
   const viewDocumentVersion = (versionKey: string) => {
     if (infoDocumentId) {
       if (versionKey !== undefined) {
@@ -1611,7 +1603,7 @@ function Documents() {
                     <div className="flex items-center">
                       <h1
                         title={(currentDocument as IDocument).path}
-                        className="pl-2 w-40 text-base break-all leading-5 font-bold bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 bg-clip-text text-transparent"
+                        className="pl-1.5 w-40 text-base break-all leading-5 font-bold bg-gradient-to-l from-primary-500 via-secondary-500 to-primary-600 bg-clip-text text-transparent"
                       >
                         {(currentDocument as IDocument).path.substring(0, 30)}
                         {(currentDocument as IDocument).path.length > 30 && (
@@ -1623,7 +1615,7 @@ function Documents() {
                           </small>
                         )}
                         {(currentDocument as IDocument).contentType && (
-                          <small className="block text-gray-500 text-xs">
+                          <small className="block pt-0.5 text-gray-500 text-xs">
                             {(currentDocument as IDocument).contentType}
                           </small>
                         )}
@@ -1642,7 +1634,7 @@ function Documents() {
                       </div>
                     </div>
                   </div>
-                  <div className="w-64 flex mt-4 mr-2 mb-2 border-b">
+                  <div className="w-full flex mt-4 mr-2 mb-2 border-b">
                     <div
                       className="w-1/3 text-sm font-semibold cursor-pointer"
                       onClick={(event) => {
@@ -1742,7 +1734,7 @@ function Documents() {
                   <div
                     className={
                       (infoDocumentView === 'info' ? 'block ' : 'hidden ') +
-                      ' w-64 mr-2'
+                      ' w-62 overflow-x-hidden'
                     }
                   >
                     {currentDocument && (currentDocument as IDocument).path && (
@@ -1867,243 +1859,178 @@ function Documents() {
                             </dd>
                           </div>
                         )}
-                        <div className="w-64 flex mr-3 border-b"></div>
-                        <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
-                          Relationships
-                          {!isReadOnlyUser && (
-                            <div
-                              className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
-                              onClick={(event) =>
-                                onDocumentRelationshipsModalClick(event, {
-                                  lineType: 'document',
-                                  folder: subfolderUri,
-                                  documentId: (currentDocument as IDocument)
-                                    .documentId,
-                                  documentInstance:
-                                    currentDocument as IDocument,
-                                  folderInstance: null,
-                                })
-                              }
-                            >
-                              <>
-                                <span className="pt-0.5 whitespace-nowrap">
-                                  add/edit relationships
-                                </span>
-                                <div className="w-4">
-                                  <ChevronRight />
-                                </div>
-                              </>
-                            </div>
-                          )}
-                        </div>
-                        {relationships.length > 0 ? (
-                          <div>
-                            {relationships.map((relationship) => (
-                              <div>
-                                <h3 className="text-sm font-semibold text-neutral-900">
-                                  {relationship.relationship}:{' '}
-                                  {relationshipDocumentsMap[
-                                    relationship.documentId
-                                  ] &&
-                                  relationshipDocumentsMap[
-                                    relationship.documentId
-                                  ] !== 'NOT_FOUND' ? (
-                                    <Link
-                                      to={`${siteDocumentsRootUri}/${relationship.documentId}/view`}
-                                      className="underline hover:text-primary-500 break-words font-normal"
-                                    >
-                                      {
-                                        relationshipDocumentsMap[
-                                          relationship.documentId
-                                        ]
-                                      }
-                                    </Link>
-                                  ) : (
-                                    <span className="text-neutral-500">
-                                      {relationship.documentId}
-                                    </span>
-                                  )}
-                                </h3>
+                        <div className="relative w-62 -mx-1">
+                          <div className="w-full flex pr-3 border-b"></div>
+                          <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
+                            Relationships
+                            {!isReadOnlyUser && (
+                              <div
+                                className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                                onClick={(event) =>
+                                  onDocumentRelationshipsModalClick(event, {
+                                    lineType: 'document',
+                                    folder: subfolderUri,
+                                    documentId: (currentDocument as IDocument)
+                                      .documentId,
+                                    documentInstance:
+                                      currentDocument as IDocument,
+                                    folderInstance: null,
+                                  })
+                                }
+                              >
+                                <>
+                                  <span className="pt-0.5 whitespace-nowrap">
+                                    add/edit relationships
+                                  </span>
+                                  <div className="w-4">
+                                    <ChevronRight />
+                                  </div>
+                                </>
                               </div>
-                            ))}
+                            )}
                           </div>
-                        ) : (
-                          <span className="text-xs">
-                            (no relationships have been added)
-                          </span>
-                        )}
-
-                        <div className="w-64 flex mr-3 border-b"></div>
-                        <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
-                          Classifications
-                          {!isReadOnlyUser && (
-                            <div
-                              className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
-                              onClick={(event) =>
-                                onDocumentClassificationsModalClick(event, {
-                                  lineType: 'document',
-                                  folder: subfolderUri,
-                                  documentId: (currentDocument as IDocument)
-                                    .documentId,
-                                  documentInstance:
-                                    currentDocument as IDocument,
-                                  folderInstance: null,
-                                })
-                              }
-                            >
-                              <>
-                                <span className="pt-0.5 whitespace-nowrap">
-                                  add/edit classifications
-                                </span>
-                                <div className="w-4">
-                                  <ChevronRight />
+                          {relationships.length > 0 ? (
+                            <div>
+                              {relationships.map((relationship) => (
+                                <div>
+                                  <h3 className="text-sm font-semibold text-neutral-900">
+                                    {relationship.relationship}:{' '}
+                                    {relationshipDocumentsMap[
+                                      relationship.documentId
+                                    ] &&
+                                    relationshipDocumentsMap[
+                                      relationship.documentId
+                                    ] !== 'NOT_FOUND' ? (
+                                      <Link
+                                        to={`${siteDocumentsRootUri}/${relationship.documentId}/view`}
+                                        className="underline hover:text-primary-500 break-words font-normal"
+                                      >
+                                        {
+                                          relationshipDocumentsMap[
+                                            relationship.documentId
+                                          ]
+                                        }
+                                      </Link>
+                                    ) : (
+                                      <span className="text-neutral-500">
+                                        {relationship.documentId}
+                                      </span>
+                                    )}
+                                  </h3>
                                 </div>
-                              </>
+                              ))}
                             </div>
+                          ) : (
+                            <span className="text-xs">
+                              (no relationships have been added)
+                            </span>
                           )}
-                        </div>
-                        {classifications.length > 0 ? (
-                          <div>
-                            {classifications.map((classification) => (
-                              <div>
-                                <h3 className="text-sm font-semibold text-neutral-900">
-                                  {classificationsMap[classification] &&
-                                  classificationsMap[classification] !==
-                                    'NOT_FOUND' ? (
-                                    <Link
-                                      to={`${
-                                        siteDocumentsRootUri.includes(
-                                          'workspaces'
-                                        )
-                                          ? siteDocumentsRootUri
-                                          : ''
-                                      }/schemas/${classification}`}
-                                      className="underline hover:text-primary-500 break-words font-normal"
-                                    >
-                                      {classificationsMap[classification]}
-                                    </Link>
-                                  ) : (
-                                    <span className="text-neutral-500">
-                                      {classification}
-                                    </span>
-                                  )}
-                                </h3>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-xs">
-                            (no classifications have been added)
-                          </span>
-                        )}
 
-                        <div className="w-64 flex mr-3 border-b"></div>
-                        <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
-                          Attributes
-                          <div
-                            className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
-                            onClick={(event) =>
-                              onEditAttributesModalClick(event, {
-                                lineType: 'document',
-                                folder: subfolderUri,
-                                documentId: (currentDocument as IDocument)
-                                  .documentId,
-                                documentInstance: currentDocument as IDocument,
-                                folderInstance: null,
-                              })
-                            }
-                          >
-                            <>
-                              <span className="pt-0.5 whitespace-nowrap">
-                                {isReadOnlyUser ? (
-                                  <span>all attributes and metadata</span>
-                                ) : (
-                                  <span>add/edit attributes</span>
-                                )}
+                          <div className="w-full flex pr-3 border-b"></div>
+                          <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
+                            Classifications
+                            {!isReadOnlyUser && (
+                              <div
+                                className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                                onClick={(event) =>
+                                  onDocumentClassificationsModalClick(event, {
+                                    lineType: 'document',
+                                    folder: subfolderUri,
+                                    documentId: (currentDocument as IDocument)
+                                      .documentId,
+                                    documentInstance:
+                                      currentDocument as IDocument,
+                                    folderInstance: null,
+                                  })
+                                }
+                              >
+                                <>
+                                  <span className="pt-0.5 whitespace-nowrap">
+                                    add/edit classifications
+                                  </span>
+                                  <div className="w-4">
+                                    <ChevronRight />
+                                  </div>
+                                </>
+                              </div>
+                            )}
+                          </div>
+                          {classifications.length > 0 ? (
+                            <div>
+                              {classifications.map((classification) => (
+                                <div>
+                                  <h3 className="text-sm font-semibold text-neutral-900">
+                                    {classificationsMap[classification] &&
+                                    classificationsMap[classification] !==
+                                      'NOT_FOUND' ? (
+                                      <Link
+                                        to={`${
+                                          siteDocumentsRootUri.includes(
+                                            'workspaces'
+                                          )
+                                            ? siteDocumentsRootUri
+                                            : ''
+                                        }/schemas/${classification}`}
+                                        className="underline hover:text-primary-500 break-words font-normal"
+                                      >
+                                        {classificationsMap[classification]}
+                                      </Link>
+                                    ) : (
+                                      <span className="text-neutral-500">
+                                        {classification}
+                                      </span>
+                                    )}
+                                  </h3>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-xs">
+                              (no classifications have been added)
+                            </span>
+                          )}
+
+                          <div className="w-full flex pr-3 border-b"></div>
+                          <div className="">
+                            <div className="pt-3 flex flex-col items-start text-sm font-semibold text-primary-500">
+                              Attributes
+                              <div
+                                className="self-end flex text-medsmall font-semibold text-primary-500 cursor-pointer"
+                                onClick={(event) =>
+                                  onEditAttributesModalClick(event, {
+                                    lineType: 'document',
+                                    folder: subfolderUri,
+                                    documentId: (currentDocument as IDocument)
+                                      .documentId,
+                                    documentInstance:
+                                      currentDocument as IDocument,
+                                    folderInstance: null,
+                                  })
+                                }
+                              >
+                                <>
+                                  <span className="pt-0.5 whitespace-nowrap">
+                                    {isReadOnlyUser ? (
+                                      <span>all attributes and metadata</span>
+                                    ) : (
+                                      <span>add/edit attributes</span>
+                                    )}
+                                  </span>
+                                  <div className="w-4">
+                                    <ChevronRight />
+                                  </div>
+                                </>
+                              </div>
+                            </div>
+                            {sortedAttributesAndTags.length === 0 && (
+                              <span className="text-xs">
+                                (no attributes have been added)
                               </span>
-                              <div className="w-4">
-                                <ChevronRight />
-                              </div>
-                            </>
-                          </div>
-                        </div>
-                        {sortedAttributesAndTags.length === 0 && (
-                          <span className="text-xs">
-                            (no attributes have been added)
-                          </span>
-                        )}
-                        {sortedAttributesAndTags.length > 0 &&
-                        sortedAttributesAndTags.filter((item: any, i) => {
-                          if (
-                            !item.stringValue &&
-                            !item.numberValue &&
-                            !item.booleanValue &&
-                            item.valueType !== 'WATERMARK' &&
-                            item.valueType !== 'BOOLEAN' &&
-                            !item.value &&
-                            !item.values &&
-                            !item.stringValues &&
-                            !item.numberValues
-                          ) {
-                            return true;
-                          }
-                          return false;
-                        }).length ? (
-                          <>
-                            <div className="text-smaller font-semibold uppercase italic">
-                              Key-Only Attributes
-                            </div>
-                            <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 mb-3 flex flex-wrap">
-                              {sortedAttributesAndTags.length > 0 &&
-                                sortedAttributesAndTags.map((item: any, i) => {
-                                  let tagColor = 'gray';
-                                  if (tagColors) {
-                                    tagColors.forEach((color: any) => {
-                                      if (
-                                        color.tagKeys.indexOf(item.key) > -1
-                                      ) {
-                                        tagColor = color.colorUri;
-                                        return;
-                                      }
-                                    });
-                                  }
-                                  return (
-                                    <div
-                                      key={`keyonly_attribute_${item.key}_${i}`}
-                                    >
-                                      {!item.stringValue &&
-                                        !item.numberValue &&
-                                        !item.booleanValue &&
-                                        item.valueType !== 'WATERMARK' &&
-                                        item.valueType !== 'BOOLEAN' &&
-                                        !item.value &&
-                                        !item.values &&
-                                        !item.stringValues &&
-                                        !item.numberValues && (
-                                          <div className="pt-0.5 pr-1 flex">
-                                            <div
-                                              className={`h-5.5 pl-2 text-smaller rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
-                                            >
-                                              {item.key}
-                                            </div>
-                                            <div
-                                              className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
-                                            ></div>
-                                          </div>
-                                        )}
-                                    </div>
-                                  );
-                                })}
-                            </div>
-                          </>
-                        ) : (
-                          <></>
-                        )}
-                        <div>
-                          {sortedAttributesAndTags.length > 0 &&
-                            sortedAttributesAndTags.map((item: any, i) => (
-                              <span key={`attr_${item.key}_${i}`}>
-                                {!item.stringValue &&
+                            )}
+                            {sortedAttributesAndTags.length > 0 &&
+                            sortedAttributesAndTags.filter((item: any, i) => {
+                              if (
+                                !item.stringValue &&
                                 !item.numberValue &&
                                 !item.booleanValue &&
                                 item.valueType !== 'WATERMARK' &&
@@ -2111,195 +2038,274 @@ function Documents() {
                                 !item.value &&
                                 !item.values &&
                                 !item.stringValues &&
-                                !item.numberValues ? (
-                                  <></>
-                                ) : (
-                                  <div
-                                    key={`attribute_${item.key}_${i}`}
-                                    className="flex flex-col"
-                                  >
-                                    <dt className="mb-1 text-smaller font-semibold">
-                                      {item.key}
-                                      {item.values !== undefined && (
-                                        <QuantityButton
-                                          type="button"
-                                          onClick={() => {
-                                            onAttributeQuantityClick(item);
-                                          }}
-                                        >
-                                          {item.values.length}
-                                        </QuantityButton>
-                                      )}
-                                      {item.stringValues !== undefined && (
-                                        <QuantityButton
-                                          type="button"
-                                          onClick={() => {
-                                            onAttributeQuantityClick(item);
-                                          }}
-                                        >
-                                          {item.stringValues.length}
-                                        </QuantityButton>
-                                      )}
-                                      {item.numberValues !== undefined && (
-                                        <QuantityButton
-                                          type="button"
-                                          onClick={() => {
-                                            onAttributeQuantityClick(item);
-                                          }}
-                                        >
-                                          {item.numberValues.length}
-                                        </QuantityButton>
-                                      )}
-                                    </dt>
-                                    <dd className="text-sm">
-                                      {/*Attributes*/}
-                                      {item?.key === 'Publication' ||
-                                      item?.key === 'Relationships' ||
-                                      item?.key === 'Classification' ? (
-                                        <>
-                                          {item?.stringValue && (
-                                            <div>
-                                              <span className="text-xs pr-2">
-                                                {item.stringValue}
-                                                <span className="mx-1"></span>
-                                                <CopyButton
-                                                  value={item.stringValue}
-                                                />
-                                              </span>
-                                              {item?.key === 'Publication' && (
-                                                <span className="block mt-1 text-xs">
-                                                  <Tooltip
-                                                    id={
-                                                      'publication-link-copy-tooltip'
-                                                    }
-                                                  />
-                                                  <ButtonTertiary
-                                                    className="px-2 py-0.5"
-                                                    data-tooltip-id={
-                                                      'publication-link-copy-tooltip'
-                                                    }
-                                                    data-tooltip-content={
-                                                      publicationLinkCopyTooltipText
-                                                    }
-                                                    onClick={() => {
-                                                      CopyPublicationLink(
-                                                        (
-                                                          currentDocument as IDocument
-                                                        ).documentId
-                                                      );
-                                                    }}
-                                                    type="button"
+                                !item.numberValues
+                              ) {
+                                return true;
+                              }
+                              return false;
+                            }).length ? (
+                              <>
+                                <div className="text-smaller font-semibold uppercase italic">
+                                  Key-Only Attributes
+                                </div>
+                                <div className="rounded-lg border border-neutral-200 mt-1 -ml-1 p-1 mb-3 flex flex-wrap">
+                                  {sortedAttributesAndTags.length > 0 &&
+                                    sortedAttributesAndTags.map(
+                                      (item: any, i) => {
+                                        let tagColor = 'gray';
+                                        if (tagColors) {
+                                          tagColors.forEach((color: any) => {
+                                            if (
+                                              color.tagKeys.indexOf(item.key) >
+                                              -1
+                                            ) {
+                                              tagColor = color.colorUri;
+                                              return;
+                                            }
+                                          });
+                                        }
+                                        return (
+                                          <div
+                                            key={`keyonly_attribute_${item.key}_${i}`}
+                                          >
+                                            {!item.stringValue &&
+                                              !item.numberValue &&
+                                              !item.booleanValue &&
+                                              item.valueType !== 'WATERMARK' &&
+                                              item.valueType !== 'BOOLEAN' &&
+                                              !item.value &&
+                                              !item.values &&
+                                              !item.stringValues &&
+                                              !item.numberValues && (
+                                                <div className="pt-0.5 pr-1 flex">
+                                                  <div
+                                                    className={`h-5.5 pl-2 text-smaller rounded-l-md pr-1 bg-${tagColor}-200 whitespace-nowrap`}
                                                   >
-                                                    Copy Publication Link
-                                                  </ButtonTertiary>
-                                                </span>
+                                                    {item.key}
+                                                  </div>
+                                                  <div
+                                                    className={`h-5.5 w-0 border-y-8 border-y-transparent border-l-[8px] border-l-${tagColor}-200`}
+                                                  ></div>
+                                                </div>
+                                              )}
+                                          </div>
+                                        );
+                                      }
+                                    )}
+                                </div>
+                              </>
+                            ) : (
+                              <></>
+                            )}
+                            <div className="">
+                              {sortedAttributesAndTags.length > 0 &&
+                                sortedAttributesAndTags.map((item: any, i) => (
+                                  <span key={`attr_${item.key}_${i}`}>
+                                    {!item.stringValue &&
+                                    !item.numberValue &&
+                                    !item.booleanValue &&
+                                    item.valueType !== 'WATERMARK' &&
+                                    item.valueType !== 'BOOLEAN' &&
+                                    !item.value &&
+                                    !item.values &&
+                                    !item.stringValues &&
+                                    !item.numberValues ? (
+                                      <></>
+                                    ) : (
+                                      <div
+                                        key={`attribute_${item.key}_${i}`}
+                                        className="flex flex-col"
+                                      >
+                                        <dt className="mb-1 text-smaller font-semibold">
+                                          {item.key}
+                                          {item.values !== undefined && (
+                                            <QuantityButton
+                                              type="button"
+                                              onClick={() => {
+                                                onAttributeQuantityClick(item);
+                                              }}
+                                            >
+                                              {item.values.length}
+                                            </QuantityButton>
+                                          )}
+                                          {item.stringValues !== undefined && (
+                                            <QuantityButton
+                                              type="button"
+                                              onClick={() => {
+                                                onAttributeQuantityClick(item);
+                                              }}
+                                            >
+                                              {item.stringValues.length}
+                                            </QuantityButton>
+                                          )}
+                                          {item.numberValues !== undefined && (
+                                            <QuantityButton
+                                              type="button"
+                                              onClick={() => {
+                                                onAttributeQuantityClick(item);
+                                              }}
+                                            >
+                                              {item.numberValues.length}
+                                            </QuantityButton>
+                                          )}
+                                        </dt>
+                                        <dd className="text-sm">
+                                          {/*Attributes*/}
+                                          {item?.key === 'Publication' ||
+                                          item?.key === 'Relationships' ||
+                                          item?.key === 'Classification' ? (
+                                            <>
+                                              {item?.stringValue && (
+                                                <div>
+                                                  <span className="text-xs pr-2">
+                                                    {item.stringValue}
+                                                    <span className="mx-1"></span>
+                                                    <CopyButton
+                                                      value={item.stringValue}
+                                                    />
+                                                  </span>
+                                                  {item?.key ===
+                                                    'Publication' && (
+                                                    <span className="block mt-1 text-xs">
+                                                      <Tooltip
+                                                        id={
+                                                          'publication-link-copy-tooltip'
+                                                        }
+                                                      />
+                                                      <ButtonTertiary
+                                                        className="px-2 py-0.5"
+                                                        data-tooltip-id={
+                                                          'publication-link-copy-tooltip'
+                                                        }
+                                                        data-tooltip-content={
+                                                          publicationLinkCopyTooltipText
+                                                        }
+                                                        onClick={() => {
+                                                          CopyPublicationLink(
+                                                            (
+                                                              currentDocument as IDocument
+                                                            ).documentId
+                                                          );
+                                                        }}
+                                                        type="button"
+                                                      >
+                                                        Copy Publication Link
+                                                      </ButtonTertiary>
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
+                                            </>
+                                          ) : (
+                                            <>
+                                              {item?.stringValue && (
+                                                <span>{item.stringValue}</span>
+                                              )}
+                                            </>
+                                          )}
+                                          {item?.numberValue !== undefined && (
+                                            <span>{item.numberValue}</span>
+                                          )}
+                                          {item?.booleanValue !== undefined ? (
+                                            <>
+                                              {item.booleanValue ? (
+                                                <span>TRUE</span>
+                                              ) : (
+                                                <span>FALSE</span>
+                                              )}
+                                            </>
+                                          ) : (
+                                            <></>
+                                          )}
+                                          {item?.stringValues !== undefined && (
+                                            <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
+                                              {item.stringValues.map(
+                                                (val: any, index: number) => (
+                                                  <>
+                                                    {item?.key ===
+                                                    'Relationships' ? (
+                                                      <span
+                                                        className="text-xs"
+                                                        key={`attr_string_${item.key}_${index}`}
+                                                      >
+                                                        {val}
+                                                        <span className="mx-1"></span>
+                                                        <CopyButton
+                                                          value={val}
+                                                        />
+                                                        {index <
+                                                          item.stringValues
+                                                            .length -
+                                                            1 && <hr />}
+                                                      </span>
+                                                    ) : (
+                                                      <span
+                                                        key={`attr_string_${item.key}_${index}`}
+                                                      >
+                                                        {val}
+                                                        {index <
+                                                          item.stringValues
+                                                            .length -
+                                                            1 && <hr />}
+                                                      </span>
+                                                    )}
+                                                  </>
+                                                )
                                               )}
                                             </div>
                                           )}
-                                        </>
-                                      ) : (
-                                        <>
-                                          {item?.stringValue && (
-                                            <span>{item.stringValue}</span>
-                                          )}
-                                        </>
-                                      )}
-                                      {item?.numberValue !== undefined && (
-                                        <span>{item.numberValue}</span>
-                                      )}
-                                      {item?.booleanValue !== undefined ? (
-                                        <>
-                                          {item.booleanValue ? (
-                                            <span>TRUE</span>
-                                          ) : (
-                                            <span>FALSE</span>
-                                          )}
-                                        </>
-                                      ) : (
-                                        <></>
-                                      )}
-                                      {item?.stringValues !== undefined && (
-                                        <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
-                                          {item.stringValues.map(
-                                            (val: any, index: number) => (
-                                              <>
-                                                {item?.key ===
-                                                'Relationships' ? (
+                                          {item?.numberValues !== undefined && (
+                                            <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
+                                              {item.numberValues.map(
+                                                (val: any, index: number) => (
                                                   <span
-                                                    className="text-xs"
-                                                    key={`attr_string_${item.key}_${index}`}
-                                                  >
-                                                    {val}
-                                                    <span className="mx-1"></span>
-                                                    <CopyButton value={val} />
-                                                    {index <
-                                                      item.stringValues.length -
-                                                        1 && <hr />}
-                                                  </span>
-                                                ) : (
-                                                  <span
-                                                    key={`attr_string_${item.key}_${index}`}
+                                                    key={`attr_number_${item.key}_${index}`}
                                                   >
                                                     {val}
                                                     {index <
-                                                      item.stringValues.length -
+                                                      item.numberValues.length -
                                                         1 && <hr />}
                                                   </span>
-                                                )}
-                                              </>
-                                            )
+                                                )
+                                              )}
+                                            </div>
                                           )}
-                                        </div>
-                                      )}
-                                      {item?.numberValues !== undefined && (
-                                        <div className="-mr-2 px-1 text-smaller font-normal max-h-24 overflow-auto">
-                                          {item.numberValues.map(
-                                            (val: any, index: number) => (
-                                              <span
-                                                key={`attr_number_${item.key}_${index}`}
-                                              >
-                                                {val}
-                                                {index <
-                                                  item.numberValues.length -
-                                                    1 && <hr />}
-                                              </span>
-                                            )
+                                          {/*Tags*/}
+                                          {item?.value !== undefined && (
+                                            <div className="-mr-2 p-1 text-sm font-normal max-h-24 overflow-auto">
+                                              {item.value}
+                                            </div>
                                           )}
-                                        </div>
-                                      )}
-                                      {/*Tags*/}
-                                      {item?.value !== undefined && (
-                                        <div className="-mr-2 p-1 text-sm font-normal max-h-24 overflow-auto">
-                                          {item.value}
-                                        </div>
-                                      )}
-                                      {item?.values !== undefined && (
-                                        <div className="-mr-2 rounded-lg border border-neutral-200 p-1 text-smaller font-normal max-h-24 overflow-auto">
-                                          {item.values.map(
-                                            (val: any, index: number) => (
-                                              <span
-                                                key={`tag_value_${item.key}_${index}`}
-                                              >
-                                                {val}
-                                                {index <
-                                                  item.values.length - 1 && (
-                                                  <hr className="my-0.5" />
-                                                )}
-                                              </span>
-                                            )
+                                          {item?.values !== undefined && (
+                                            <div className="-mr-2 rounded-lg border border-neutral-200 p-1 text-smaller font-normal max-h-24 overflow-auto">
+                                              {item.values.map(
+                                                (val: any, index: number) => (
+                                                  <span
+                                                    key={`tag_value_${item.key}_${index}`}
+                                                  >
+                                                    {val}
+                                                    {index <
+                                                      item.values.length -
+                                                        1 && (
+                                                      <hr className="my-0.5" />
+                                                    )}
+                                                  </span>
+                                                )
+                                              )}
+                                            </div>
                                           )}
-                                        </div>
-                                      )}
-                                    </dd>
-                                  </div>
-                                )}
-                              </span>
-                            ))}
+                                        </dd>
+                                      </div>
+                                    )}
+                                  </span>
+                                ))}
+                            </div>
+                          </div>
                         </div>
                       </dl>
                     )}
 
-                    <div className="w-64 flex mr-3 border-b"></div>
+                    <div className="w-62 flex -mx-1 pr-3 border-b"></div>
                     <Link
                       to={
                         `/admin/user-activities` +
@@ -2316,7 +2322,7 @@ function Documents() {
                       </div>
                       User Activities
                     </Link>
-                    <div className="w-64 flex mr-3 border-b"></div>
+                    <div className="w-62 flex mr-3 border-b"></div>
                     {currentDocument &&
                       (InlineViewableContentTypes.indexOf(
                         (currentDocument as IDocument).contentType
@@ -2395,47 +2401,25 @@ function Documents() {
                         </ButtonPrimaryGradient>
                       </div>
                     )}
-                    {formkiqVersion.type !== 'core' &&
-                      !isReadOnlyUser &&
-                      (!(currentDocument as IDocument).deepLinkPath ||
-                        ((currentDocument as IDocument).deepLinkPath?.length ??
-                          0) === 0) && (
-                        <div className="mt-2 flex justify-center">
-                          <ButtonSecondary
-                            style={{
-                              height: '36px',
-                              width: '100%',
-                              margin: '0 16px',
-                            }}
-                            onClick={(event: any) => {
-                              const documentLine: ILine = {
-                                lineType: 'document',
-                                folder: '',
-                                documentId: infoDocumentId,
-                                documentInstance: currentDocument,
-                                folderInstance: null,
-                              };
-                              onDocumentWorkflowsModalClick(
-                                event,
-                                documentLine
-                              );
-                            }}
-                          >
-                            View
-                            {!isReadOnlyUser ? (
-                              <span>&nbsp;</span>
-                            ) : (
-                              <span>&nbsp;/ Assign&nbsp;</span>
-                            )}
-                            Workflows
-                          </ButtonSecondary>
-                        </div>
-                      )}
+                    <DocumentActionsPopover
+                      value={{
+                        lineType: 'document',
+                        folder: subfolderUri,
+                        documentId: (currentDocument as IDocument).documentId,
+                        documentInstance: currentDocument as IDocument,
+                      }}
+                      siteId={currentSiteId}
+                      formkiqVersion={formkiqVersion}
+                      onInfoPage={true}
+                      user={user}
+                      useCollections={useCollections}
+                      useSoftDelete={useSoftDelete}
+                    />
                   </div>
                   <div
                     className={
                       (infoDocumentView === 'history' ? 'block ' : 'hidden ') +
-                      ' w-64 mr-12'
+                      ' w-62'
                     }
                   >
                     <span className="p-4 text-sm">
@@ -2527,7 +2511,7 @@ function Documents() {
                   <div
                     className={
                       (infoDocumentView === 'actions' ? 'block ' : 'hidden ') +
-                      ' w-64 mr-12'
+                      ' w-62'
                     }
                   >
                     <dl className="p-4 pr-6 pt-2 text-md text-neutral-900">
@@ -2674,85 +2658,6 @@ function Documents() {
                         </div>
                       ))}
                     </dl>
-                  </div>
-
-                  <div className="hidden overflow-x-auto relative">
-                    <div className="-mr-[4.625rem] p-4 text-[0.8125rem] leading-6 text-slate-900">
-                      <div className="flex gap-4 pb-10 border-t border-slate-400/20 justify-center items-center py-6">
-                        {document &&
-                          InlineViewableContentTypes.indexOf(
-                            (currentDocument as IDocument).contentType
-                          ) > -1 && (
-                            <button
-                              className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                              onClick={viewDocument}
-                            >
-                              <span className="">View</span>
-                              <span className="pl-4 pt-0.5 w-9">{View()}</span>
-                            </button>
-                          )}
-                        <ButtonPrimaryGradient
-                          onClick={() => downloadDocument(infoDocumentId)}
-                          style={{ height: '36px', width: '100%' }}
-                        >
-                          <div className="w-full flex justify-center px-4 py-1">
-                            <span className="">Download</span>
-                            <span className="w-7 pl-1">{Download()}</span>
-                          </div>
-                        </ButtonPrimaryGradient>
-                        {isCurrentDocumentSoftDeleted ? (
-                          <button
-                            className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                            onClick={() =>
-                              restoreDocument(
-                                (currentDocument as IDocument).documentId
-                              )
-                            }
-                          >
-                            <span className="">Restore</span>
-                            <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
-                              <Undo />
-                            </div>
-                          </button>
-                        ) : (
-                          <>
-                            {useSoftDelete && (
-                              <button
-                                className="w-38 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
-                                onClick={() =>
-                                  onDeleteDocument(
-                                    (currentDocument as IDocument).documentId,
-                                    useSoftDelete
-                                  )
-                                }
-                              >
-                                <span className="">Delete</span>
-                                <div className="ml-2 mt-1 w-3.5 h-3.5 text-white flex justify-center">
-                                  <Trash />
-                                </div>
-                              </button>
-                            )}
-                          </>
-                        )}
-                        <div className="w-5 h-auto text-gray-400">
-                          <DocumentActionsPopover
-                            value={{
-                              lineType: 'document',
-                              folder: subfolderUri,
-                              documentId: (currentDocument as IDocument)
-                                .documentId,
-                              documentInstance: currentDocument as IDocument,
-                            }}
-                            siteId={currentSiteId}
-                            formkiqVersion={formkiqVersion}
-                            onInfoPage={true}
-                            user={user}
-                            useCollections={useCollections}
-                            useSoftDelete={useSoftDelete}
-                          />
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               ) : (

@@ -5,11 +5,11 @@ import { Tooltip } from 'react-tooltip';
 import { ESignatureContentTypes } from '../../../helpers/constants/contentTypes';
 import { DocumentsService } from '../../../helpers/services/documentsService';
 import { ILine } from '../../../helpers/types/line';
-import { useIsReadOnlyUser } from '../../../hooks/is-read-only-user.hook';
+import { usePermissions } from '../../../hooks/usePermissions';
+import ButtonGhost from '../../Generic/Buttons/ButtonGhost';
 import {
   ArrowRight,
   Checkmark,
-  Copy,
   Download,
   History,
   Info,
@@ -49,6 +49,7 @@ export default function DocumentActionsPopover({
   siteId,
   formkiqVersion,
   onInfoPage,
+  onViewPage,
   useCollections,
   useSoftDelete,
   isDeeplinkPath,
@@ -64,6 +65,7 @@ export default function DocumentActionsPopover({
     onSubmitForReviewModalClick,
     onDocumentReviewModalClick,
     onDeleteClick,
+    onPurgeClick,
     onEditAttributesModalClick,
     onRenameModalClick,
     onMoveModalClick,
@@ -92,11 +94,14 @@ export default function DocumentActionsPopover({
     ],
   });
 
-  const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
-
   const clickDelete = () => {
     setVisibility(false);
     onDeleteClick(line.documentId, useSoftDelete, siteId, setSelectedDocuments);
+  };
+
+  const clickPurge = () => {
+    setVisibility(false);
+    onPurgeClick(line.documentId, siteId, setSelectedDocuments);
   };
 
   function handleDropdownClick(event: any) {
@@ -104,9 +109,16 @@ export default function DocumentActionsPopover({
   }
 
   function handleInfoClick(event: any) {
-    onInfoClick(event);
-    setVisibility(!visible);
+    if (onInfoClick) {
+      onInfoClick(event);
+      setVisibility(!visible);
+    }
   }
+
+  const { canRead, canWrite, canDelete, canGovern } = usePermissions({
+    user,
+    siteId,
+  });
 
   const DownloadDocument = () => {
     DocumentsService.getDocumentUrl(line.documentId, siteId, '', false).then(
@@ -120,13 +132,19 @@ export default function DocumentActionsPopover({
   return (
     <div className="relative" ref={wrapperRef}>
       {onInfoPage ? (
-        <button
-          ref={setReferenceRef as any}
+        <ButtonGhost
           onClick={handleDropdownClick}
-          className="w-20 flex bg-primary-500 justify-center px-4 py-1 text-base text-white rounded-md"
+          style={{
+            height: '36px',
+            width: '88%',
+            margin: '8px 16px',
+          }}
         >
-          <span className="w-5 pt-1 ">{MoreActions()}</span>
-        </button>
+          <div className="w-full flex justify-center px-4 py-1">
+            <span className="">More... </span>
+            <span className="w-7 pl-1">{MoreActions()}</span>
+          </div>
+        </ButtonGhost>
       ) : (
         <button
           ref={setReferenceRef as any}
@@ -144,7 +162,7 @@ export default function DocumentActionsPopover({
           className={`bg-white border-gray-100 border shadow-xl z-10 rounded-xl w-64 text-sm p-2`}
         >
           <ul className="text-neutral-900">
-            {line.lineType === 'document' && (
+            {line.lineType === 'document' && !onInfoPage && !onViewPage && (
               <>
                 {line.documentId === infoDocumentId && (
                   <Tooltip id={line.documentId} />
@@ -193,7 +211,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {line.lineType === 'document' && !isReadOnlyUser && (
+            {line.lineType === 'document' && canWrite && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
@@ -224,7 +242,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {line.lineType === 'document' && !isReadOnlyUser && (
+            {line.lineType === 'document' && canWrite && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                 onClick={(event) =>
@@ -241,6 +259,39 @@ export default function DocumentActionsPopover({
                   <span>Rename</span>
                 </span>
               </li>
+            )}
+            {line.lineType === 'document' && (
+              <div className="w-4/5 my-2 mx-6 border-b"></div>
+            )}
+            {line.lineType === 'document' && (
+              <>
+                <li
+                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(event) =>
+                    onEditAttributesModalClick(event, {
+                      lineType: line.lineType,
+                      documentId: line.documentId,
+                      folder: line.folder,
+                    })
+                  }
+                >
+                  <span className={'flex items-baseline'}>
+                    <span
+                      className="mr-2 text-neutral-900"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {Tag()}
+                    </span>
+                    <span>Metadata...</span>
+                    <span
+                      className="ml-auto"
+                      style={{ width: '15px', height: '13px' }}
+                    >
+                      {ArrowRight()}
+                    </span>
+                  </span>
+                </li>
+              </>
             )}
             {formkiqVersion.type !== 'core' &&
               line.lineType === 'document' &&
@@ -300,7 +351,7 @@ export default function DocumentActionsPopover({
             {formkiqVersion.type !== 'core' &&
               line.lineType === 'document' &&
               !isDeeplinkPath &&
-              !isReadOnlyUser && (
+              canWrite && (
                 <li
                   className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(event) =>
@@ -328,7 +379,7 @@ export default function DocumentActionsPopover({
 
             {line.lineType === 'document' &&
               pathname.indexOf('/queues') === -1 &&
-              !isReadOnlyUser && (
+              canWrite && (
                 <li
                   className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(event) =>
@@ -357,7 +408,7 @@ export default function DocumentActionsPopover({
 
             {line.lineType === 'document' &&
               pathname.indexOf('/queues') > -1 &&
-              !isReadOnlyUser && (
+              canWrite && (
                 <li
                   className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
                   onClick={(event) =>
@@ -383,11 +434,8 @@ export default function DocumentActionsPopover({
                 </li>
               )}
 
-            {line.lineType === 'document' && !isReadOnlyUser && (
-              <div className="w-4/5 my-2 mx-6 border-b"></div>
-            )}
             {line.lineType === 'document' &&
-              !isReadOnlyUser &&
+              canWrite &&
               line.documentInstance &&
               formkiqVersion.modules?.indexOf('esignature') > -1 &&
               ESignatureContentTypes.indexOf(
@@ -422,55 +470,6 @@ export default function DocumentActionsPopover({
                   </li>
                 </>
               )}
-            {line.lineType === 'document' && !isReadOnlyUser && (
-              <>
-                {useCollections && (
-                  <li className="py-1 px-2 hover:bg-gray-100 cursor-pointer">
-                    <span className={'flex items-baseline'}>
-                      <span
-                        className="mr-2"
-                        style={{ width: '15px', height: '13px' }}
-                      >
-                        {Copy()}
-                      </span>
-                      <span>Add to collection</span>
-                      <span
-                        className="ml-auto"
-                        style={{ width: '15px', height: '13px' }}
-                      >
-                        {ArrowRight()}
-                      </span>
-                    </span>
-                  </li>
-                )}
-                <li
-                  className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={(event) =>
-                    onEditAttributesModalClick(event, {
-                      lineType: line.lineType,
-                      documentId: line.documentId,
-                      folder: line.folder,
-                    })
-                  }
-                >
-                  <span className={'flex items-baseline'}>
-                    <span
-                      className="mr-2 text-neutral-900"
-                      style={{ width: '15px', height: '13px' }}
-                    >
-                      {Tag()}
-                    </span>
-                    <span>Add/edit metadata</span>
-                    <span
-                      className="ml-auto"
-                      style={{ width: '15px', height: '13px' }}
-                    >
-                      {ArrowRight()}
-                    </span>
-                  </span>
-                </li>
-              </>
-            )}
             {line.lineType === 'document' && (
               <li
                 className="py-1 px-2 hover:bg-gray-100 cursor-pointer"
@@ -524,7 +523,7 @@ export default function DocumentActionsPopover({
                 </span>
               </li>
             )}
-            {!onInfoPage && !isReadOnlyUser && (
+            {!onInfoPage && canDelete && (
               <>
                 {line.lineType === 'document' && (
                   <div className="w-4/5 my-2 mx-6 border-b"></div>
@@ -550,6 +549,17 @@ export default function DocumentActionsPopover({
                     </span>
                   </li>
                 )}
+              </>
+            )}
+            {(user?.isAdmin || canGovern) && (
+              <>
+                <div className="w-4/5 my-2 mx-6 border-b"></div>
+                <li className="font-bold py-1 px-2 hover:bg-gray-100 cursor-pointer text-red-500">
+                  <span onClick={clickPurge} className={'flex items-baseline'}>
+                    <span className="mr-2 w-3 h-3">{Trash()}</span>
+                    <span>PURGE DOCUMENT</span>
+                  </span>
+                </li>
               </>
             )}
           </ul>
