@@ -31,7 +31,6 @@ export function WorkflowList({
   user,
 }: Props) {
   const dispatch = useAppDispatch();
-
   const isReadOnlyUser = useIsReadOnlyUser({ user, siteId });
 
   const onDeleteClick = (workflowId: string, siteId: string) => () => {
@@ -71,7 +70,6 @@ export function WorkflowList({
           event.target.value = '';
           return;
         }
-
         window.location.href =
           siteId === 'default'
             ? `/workflows/designer?workflowId=${response.workflowId}`
@@ -88,7 +86,7 @@ export function WorkflowList({
         onScroll={handleScroll}
       >
         <table
-          className="w-full border-collapse text-sm table-auto "
+          className="w-full border-collapse text-sm table-auto"
           id="workflowsScrollPane"
         >
           <thead className="sticky top-0 bg-neutral-100 z-10 text-left text-transparent">
@@ -110,77 +108,70 @@ export function WorkflowList({
           <tbody className="bg-white nodark:bg-slate-800">
             {workflows && (workflows as any).length ? (
               <>
-                {(workflows as any).map((workflow: any, i: number) => {
-                  return (
-                    <tr key={i} data-test-id={`workflow-${workflow.name}`}>
-                      <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
+                {(workflows as any).map((workflow: any, i: number) => (
+                  <tr key={i} data-test-id={`workflow-${workflow.name}`}>
+                    <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
+                      <a
+                        href={
+                          siteId === 'default'
+                            ? `/workflows/designer?workflowId=${workflow.workflowId}`
+                            : `/workspaces/${siteId}/workflows/designer?workflowId=${workflow.workflowId}`
+                        }
+                        className="w-full h-full px-4 py-1 block"
+                      >
+                        {workflow.name}
+                      </a>
+                      <span className="block pl-4 text-xs">
+                        {workflow.workflowId}
+                        <span className="pl-2">
+                          <CopyButton value={workflow.workflowId} />
+                        </span>
+                      </span>
+                    </td>
+                    <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
+                      {workflow.description}
+                    </td>
+                    <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
+                      {workflow.inUse ? <span>Yes</span> : <span>No</span>}
+                    </td>
+                    <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pr-8 text-neutral-900 nodark:text-slate-400">
+                      <div className="flex items-center relative">
                         <a
                           href={
                             siteId === 'default'
                               ? `/workflows/designer?workflowId=${workflow.workflowId}`
                               : `/workspaces/${siteId}/workflows/designer?workflowId=${workflow.workflowId}`
                           }
-                          className="w-full h-full px-4 py-1 block"
+                          className="ml-2"
                         >
-                          {workflow.name}
+                          <div className="h-5 hover:text-primary-500 transition duration-100">
+                            {workflow.inUse || isReadOnlyUser ? (
+                              <>
+                                <View />
+                                <span className="sr-only">View</span>
+                              </>
+                            ) : (
+                              <>
+                                <Edit />
+                                <span className="sr-only">Edit</span>
+                              </>
+                            )}
+                          </div>
                         </a>
-                        <span className="block pl-4 text-xs">
-                          {workflow.workflowId}
-                          <span className="pl-2">
-                            <CopyButton value={workflow.workflowId} />
-                          </span>
-                        </span>
-                      </td>
-                      <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
-                        {workflow.description}
-                      </td>
-                      <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pl-8 text-neutral-900 nodark:text-slate-400">
-                        {workflow.inUse ? <span>Yes</span> : <span>No</span>}
-                      </td>
-                      <td className="border-b border-neutral-300 nodark:border-slate-700 p-4 pr-8 text-neutral-900 nodark:text-slate-400">
-                        <div className="flex items-center relative">
-                          <a
-                            href={
-                              siteId === 'default'
-                                ? `/workflows/designer?workflowId=${workflow.workflowId}`
-                                : `/workspaces/${siteId}/workflows/designer?workflowId=${workflow.workflowId}`
-                            }
-                            className="ml-2"
-                          >
-                            <div className="h-5 hover:text-primary-500 transition duration-100">
-                              {workflow.inUse ? (
-                                <>
-                                  <View />
-                                  <span className="sr-only">View</span>
-                                </>
-                              ) : isReadOnlyUser ? (
-                                <>
-                                  <View />
-                                  <span className="sr-only">View</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Edit />
-                                  <span className="sr-only">Edit</span>
-                                </>
-                              )}
-                            </div>
-                          </a>
-                          <WorkflowsActionsPopover
-                            user={user}
-                            workflow={workflow}
-                            siteId={siteId}
-                            handleDuplicateClick={handleDuplicateClick}
-                            handleCopyToClipBoard={handleCopyToClipBoard}
-                            handleDownloadClick={handleDownloadClick}
-                            onDeleteClick={onDeleteClick}
-                            showTooltipId={showTooltipId}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        <WorkflowsActionsPopover
+                          user={user}
+                          workflow={workflow}
+                          siteId={siteId}
+                          handleDuplicateClick={handleDuplicateClick}
+                          handleCopyToClipBoard={handleCopyToClipBoard}
+                          handleDownloadClick={handleDownloadClick}
+                          onDeleteClick={onDeleteClick}
+                          showTooltipId={showTooltipId}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </>
             ) : (
               <tr>

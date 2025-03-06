@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
-  Edge,
-  MarkerType,
   applyEdgeChanges,
   applyNodeChanges,
+  Edge,
+  MarkerType,
   NodeChange,
 } from 'reactflow';
 import { openDialog as openNotificationDialog } from '../../Store/reducers/globalNotificationControls';
@@ -219,10 +219,11 @@ export const updateWorkflowSteps = createAsyncThunk(
 export const fetchWorkflows = createAsyncThunk(
   'workflows/fetchWorkflows',
   async (data: any, thunkAPI) => {
-    const { siteId, nextToken, limit, page } = data;
+    // Destructure siteId, status, nextToken, limit, and page from data.
+    const { siteId, status, nextToken, limit, page } = data;
     await DocumentsService.getWorkflows(
       siteId,
-      null,
+      status, // Pass the status parameter here.
       null,
       nextToken,
       limit
