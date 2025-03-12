@@ -885,7 +885,7 @@ function Documents() {
   };
 
   const downloadDocument = (documentId: string) => {
-    if (infoDocumentId.length) {
+    if (documentId.length) {
       DocumentsService.getDocumentUrl(
         documentId,
         currentSiteId,
