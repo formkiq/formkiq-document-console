@@ -50,4 +50,3 @@ core.*
 **/playwright/.cache
 
 .nx/workspace-data/*
-
